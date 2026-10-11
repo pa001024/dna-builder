@@ -76,12 +76,7 @@ type SkillNumberFieldKey =
     | "skillPowerMultiplier"
     | "fullnessPower"
 
-type WeaponToggleFieldKey =
-    | "weaponMasteryEnabled"
-    | "skillWeaponEnabled"
-    | "sameDamageType"
-    | "imbalanceEnabled"
-    | "fullnessFieldEnabled"
+type WeaponToggleFieldKey = "weaponMasteryEnabled" | "skillWeaponEnabled" | "sameDamageType" | "imbalanceEnabled" | "fullnessFieldEnabled"
 type SkillToggleFieldKey = "imbalanceEnabled" | "fullnessFieldEnabled"
 
 type DotNumberFieldKey =
@@ -599,9 +594,9 @@ function isResolvedFieldFullness(build: CharBuild): boolean {
 function resolveTimelineFromCurrentBuild(
     charName: string,
     baseName: string,
-    actions: (typeof charSettingsForImport.value)["actions"]
+    actions: (typeof charSettingsForImport.value)["actions"] | null | undefined
 ): CharBuildTimeline | undefined {
-    if (actions.enable) {
+    if (actions?.enable) {
         return CharBuildTimeline.fromRaw(inlineActionsToTimeline(actions, charName))
     }
     const raw = timelinesForImport.value.find(item => item.name === baseName)
@@ -1178,8 +1173,7 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
             title: "触发溢出率",
             formula: "触发溢出率 = max(0, 最终触发率 - 1)",
             compute: ({ get }) => Math.max(0, get("finalTriggerRate") - 1),
-            explain: ({ get }, value) =>
-                `max(0, ${formatNumber(get("finalTriggerRate"))} - 1) = ${formatNumber(value)}`,
+            explain: ({ get }, value) => `max(0, ${formatNumber(get("finalTriggerRate"))} - 1) = ${formatNumber(value)}`,
         },
         {
             id: "weaponFullnessPower",
@@ -1609,8 +1603,7 @@ function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
         {
             id: "dotDamage",
             title: "每秒DOT伤害",
-            formula:
-                "每秒DOT伤害 = 频率加权基础伤害 * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 抗性乘区",
+            formula: "每秒DOT伤害 = 频率加权基础伤害 * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 抗性乘区",
             compute: ({ get }) =>
                 get("weightedBaseDamage") *
                 get("fullnessMultiplier") *
@@ -1819,9 +1812,7 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
     },
     {
         title: "充盈",
-        fields: [
-            { key: "fullnessPower", label: "充盈威力", step: "0.01" },
-        ],
+        fields: [{ key: "fullnessPower", label: "充盈威力", step: "0.01" }],
         toggles: [{ key: "fullnessFieldEnabled", label: "视为充盈伤害" }],
         outputs: [
             { label: "充盈乘区", stepId: "fullnessMultiplier" },
@@ -2093,7 +2084,17 @@ const summaryItems = computed(() => {
             "fullnessMultiplier",
         ]
     } else if (mode.value === "dot") {
-        keys = ["dotDamage", "weightedBaseDamage", "dotBaseDamage", "weaponBaseDamage", "totalFrequency", "weaponFrequency", "fullnessMultiplier", "damageIncrease", "hpMore"]
+        keys = [
+            "dotDamage",
+            "weightedBaseDamage",
+            "dotBaseDamage",
+            "weaponBaseDamage",
+            "totalFrequency",
+            "weaponFrequency",
+            "fullnessMultiplier",
+            "damageIncrease",
+            "hpMore",
+        ]
     } else {
         keys = [
             "finalDamageAfterDefense",
@@ -2589,21 +2590,21 @@ onBeforeUnmount(() => {
             <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="text-lg font-semibold tracking-tight">{{ $t('db-damage.damage_formula') }}</h2>
-                        <p class="mt-0.5 text-xs text-base-content/55">{{ $t('db-damage.formula_desc') }}</p>
+                        <h2 class="text-lg font-semibold tracking-tight">{{ $t("db-damage.damage_formula") }}</h2>
+                        <p class="mt-0.5 text-xs text-base-content/55">{{ $t("db-damage.formula_desc") }}</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-2">
                         <button
                             class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-primary bg-primary px-3 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
                             @click="importFromCurrentCharBuild"
                         >
-                            {{ $t('db-damage.import_from_build') }}
+                            {{ $t("db-damage.import_from_build") }}
                         </button>
                         <button
                             class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
                             @click="resetCurrentMode"
                         >
-                            {{ $t('db-damage.reset_current_mode') }}
+                            {{ $t("db-damage.reset_current_mode") }}
                         </button>
                     </div>
                 </div>
@@ -2618,7 +2619,7 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'skill'"
                     >
-                        {{ $t('技能伤害') }}
+                        {{ $t("技能伤害") }}
                     </button>
                     <button
                         class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
@@ -2629,7 +2630,7 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'weapon'"
                     >
-                        {{ $t('武器伤害') }}
+                        {{ $t("武器伤害") }}
                     </button>
                     <button
                         class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
@@ -2640,7 +2641,7 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'dot'"
                     >
-                        {{ $t('db-damage.dot_damage') }}
+                        {{ $t("db-damage.dot_damage") }}
                     </button>
                 </div>
             </div>
@@ -2650,7 +2651,7 @@ onBeforeUnmount(() => {
                     <SectionHeader no-animate compact kicker="INPUT" :title="$t('db-damage.input_params')">
                         <template #trailing>
                             <label class="label cursor-pointer gap-2 p-0">
-                                <span class="text-xs text-base-content/55">{{ $t('db-damage.percentage_input') }}</span>
+                                <span class="text-xs text-base-content/55">{{ $t("db-damage.percentage_input") }}</span>
                                 <input v-model="usePercentInput" type="checkbox" class="toggle toggle-sm toggle-primary" />
                             </label>
                         </template>
@@ -3030,7 +3031,8 @@ onBeforeUnmount(() => {
                                     class="col-span-9 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 >
                                     <SelectItem v-for="option in stepOptions" :key="option.id" :value="option.id">
-                                        {{ option.label }} = {{ formatNumber(option.value) }}
+                                        {{ option.label }}
+                                        = {{ formatNumber(option.value) }}
                                     </SelectItem>
                                 </Select>
                                 <button

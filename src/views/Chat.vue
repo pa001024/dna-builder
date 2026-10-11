@@ -47,7 +47,7 @@ const toggleMenu = ref(true)
     <div v-if="!user.id" class="flex h-full w-full items-center justify-center p-6">
         <div class="w-full max-w-sm rounded-xs border border-base-content/10 bg-base-100/60 p-6 text-center backdrop-blur-sm">
             <Icon icon="ri:chat-3-line" class="mx-auto mb-3 size-10 text-base-content/35" />
-            <div class="text-sm text-base-content/70">{{ $t('chat.needLogin') }}</div>
+            <div class="text-sm text-base-content/70">{{ $t("chat.needLogin") }}</div>
             <LoginButton class="mt-4" size="md" />
         </div>
     </div>
@@ -62,7 +62,12 @@ const toggleMenu = ref(true)
                     <!-- 搜索 -->
                     <div class="relative flex-1">
                         <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input v-model="search" type="text" :placeholder="$t('chat.search')" class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary" />
+                        <input
+                            v-model="search"
+                            type="text"
+                            :placeholder="$t('chat.search')"
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
                     </div>
                     <Tooltip :tooltip="$t('chat.refresh')" side="bottom">
                         <div class="btn btn-square btn-sm" @click="reloadRooms">

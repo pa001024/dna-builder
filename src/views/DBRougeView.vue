@@ -490,295 +490,298 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedItem)"
-            @collapse="closeSelected"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedItem)" @collapse="closeSelected">
             <template #master>
-
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedItem }"
-            >
-                <div class="flex-none space-y-2 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <!-- 模式切换（分段方章） -->
-                    <div class="flex gap-2">
-                        <button
-                            v-for="tab in modeTabs"
-                            :key="tab.key"
-                            type="button"
-                            class="flex-1 cursor-pointer rounded-xs border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 active:scale-[0.99]"
-                            :class="
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedItem }"
+                >
+                    <div class="flex-none space-y-2 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <!-- 模式切换（分段方章） -->
+                        <div class="flex gap-2">
+                            <button
+                                v-for="tab in modeTabs"
+                                :key="tab.key"
+                                type="button"
+                                class="flex-1 cursor-pointer rounded-xs border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 active:scale-[0.99]"
+                                :class="
                                 mode === tab.key
                                     ? 'border-primary bg-primary text-primary-content'
                                     : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
-                            @click="switchMode(tab.key)"
-                        >
-                            {{ $t(tab.label) }}
-                        </button>
-                    </div>
-                    <!-- 子分类方章 -->
-                    <div class="flex flex-wrap gap-1.5">
-                        <button
-                            v-for="tab in activeTabs"
-                            :key="tab.key"
-                            type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
+                                @click="switchMode(tab.key)"
+                            >
+                                {{ $t(tab.label) }}
+                            </button>
+                        </div>
+                        <!-- 子分类方章 -->
+                        <div class="flex flex-wrap gap-1.5">
+                            <button
+                                v-for="tab in activeTabs"
+                                :key="tab.key"
+                                type="button"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
                                 kind === tab.key
                                     ? 'border-primary bg-primary font-semibold text-primary-content'
                                     : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
-                            @click="switchKind(tab.key)"
-                        >
-                            {{ $t(tab.label) }}
-                        </button>
-                    </div>
-                    <div
-                        v-if="
+                                @click="switchKind(tab.key)"
+                            >
+                                {{ $t(tab.label) }}
+                            </button>
+                        </div>
+                        <div
+                            v-if="
                             groupFilterOptions.length ||
                             branchFilterOptions.length ||
                             roomTypeFilterOptions.length ||
                             showRarityFilter ||
                             showUpgradableFilter
                         "
-                        class="space-y-1.5"
-                    >
-                        <div v-if="groupFilterOptions.length" class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                            class="space-y-1.5"
+                        >
+                            <div v-if="groupFilterOptions.length" class="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterGroup === 0
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterGroup = 0"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="option in groupFilterOptions"
-                                :key="option.id"
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterGroup = 0"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="option in groupFilterOptions"
+                                    :key="option.id"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterGroup === option.id
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterGroup = option.id"
-                            >
-                                {{ gt(option.name) }}
-                            </button>
-                        </div>
-                        <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterGroup = option.id"
+                                >
+                                    {{ gt(option.name) }}
+                                </button>
+                            </div>
+                            <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterBranch === 0
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterBranch = 0"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="branch in branchFilterOptions"
-                                :key="branch.id"
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterBranch = 0"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="branch in branchFilterOptions"
+                                    :key="branch.id"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterBranch === branch.id
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterBranch = branch.id"
-                            >
-                                {{ gt(branch.name) }}
-                            </button>
-                        </div>
-                        <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterBranch = branch.id"
+                                >
+                                    {{ gt(branch.name) }}
+                                </button>
+                            </div>
+                            <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterRoomType === ''
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterRoomType = ''"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="option in roomTypeFilterOptions"
-                                :key="option.name"
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterRoomType = ''"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="option in roomTypeFilterOptions"
+                                    :key="option.name"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterRoomType === option.name
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterRoomType = option.name"
-                            >
-                                {{ option.name }}
-                            </button>
-                        </div>
-                        <div v-if="showRarityFilter" class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterRoomType = option.name"
+                                >
+                                    {{ option.name }}
+                                </button>
+                            </div>
+                            <div v-if="showRarityFilter" class="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterRarity === 0
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterRarity = 0"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="rarity in [1, 2, 3]"
-                                :key="rarity"
-                                type="button"
-                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterRarity = 0"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="rarity in [1, 2, 3]"
+                                    :key="rarity"
+                                    type="button"
+                                    class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterRarity === rarity
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                :title="getRarityName(rarity + 2)"
-                                @click="filterRarity = rarity"
-                            >
-                                <span :class="getRaritySwatchClass(rarity + 2)" />
-                            </button>
-                        </div>
-                        <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    :title="getRarityName(rarity + 2)"
+                                    @click="filterRarity = rarity"
+                                >
+                                    <span :class="getRaritySwatchClass(rarity + 2)" />
+                                </button>
+                            </div>
+                            <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterUpgradable === 0
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterUpgradable = 0"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="filterUpgradable = 0"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     filterUpgradable === 1
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="filterUpgradable = 1"
+                                    @click="filterUpgradable = 1"
+                                >
+                                    {{ $t("db-rouge.upgradable") }}
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 下划线搜索 + 计数 -->
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-rouge.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
                             >
-                                {{ $t('db-rouge.upgradable') }}
-                            </button>
+                                {{ filteredItems.length }}
+                            </span>
                         </div>
                     </div>
-                    <!-- 下划线搜索 + 计数 -->
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-rouge.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredItems.length }}
-                        </span>
-                    </div>
-                </div>
 
-                <!-- 条目列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="grid gap-2 p-3">
-                        <article
-                            v-for="(item, index) in filteredItems"
-                            :key="`${mode}-${item.kind}-${item.id}`"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                    <!-- 条目列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="grid gap-2 p-3">
+                            <article
+                                v-for="(item, index) in filteredItems"
+                                :key="`${mode}-${item.kind}-${item.id}`"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
                                 selectedId === item.id
                                     ? 'dbrg-item-active border-primary/70 bg-primary/10'
                                     : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                             "
-                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                            @click="selectItem(item)"
-                        >
-                            <!-- 左侧主色强调条：选中时显现 -->
-                            <span
-                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                :class="selectedId === item.id ? 'opacity-100' : 'opacity-0'"
-                                aria-hidden="true"
-                            />
-                            <div class="flex items-start gap-2 p-2.5">
-                                <div
-                                    v-if="getItemIcon(item)"
-                                    class="h-11 min-w-11 w-fit shrink-0 overflow-hidden rounded-xs bg-linear-15"
-                                    :class="[getItemRarity(item) ? getRarityGradientClass(getItemRarity(item) + 2) : '']"
-                                >
-                                    <ImageFallback
-                                        :src="`/imgs/webp/${getItemIcon(item)}.webp`"
-                                        :alt="getItemTitle(item)"
-                                        class="h-11 w-auto object-contain"
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectItem(item)"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedId === item.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex items-start gap-2 p-2.5">
+                                    <div
+                                        v-if="getItemIcon(item)"
+                                        class="h-11 min-w-11 w-fit shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                        :class="[getItemRarity(item) ? getRarityGradientClass(getItemRarity(item) + 2) : '']"
                                     >
-                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="getItemTitle(item)" class="h-11 w-auto object-contain" />
-                                    </ImageFallback>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <div
-                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                            :class="{ 'text-primary': selectedId === item.id }"
+                                        <ImageFallback
+                                            :src="`/imgs/webp/${getItemIcon(item)}.webp`"
+                                            :alt="getItemTitle(item)"
+                                            class="h-11 w-auto object-contain"
                                         >
-                                            {{ getItemTitle(item) }}
-                                        </div>
-                                        <span v-if="getItemMeta(item)" class="shrink-0 truncate text-[11px] text-base-content/45">
-                                            {{ getItemMeta(item) }}
-                                        </span>
-                                        <div class="flex-1"></div>
-                                        <CopyID :id="item.id" />
+                                            <img
+                                                src="/imgs/webp/T_Head_Empty.webp"
+                                                :alt="getItemTitle(item)"
+                                                class="h-11 w-auto object-contain"
+                                            />
+                                        </ImageFallback>
                                     </div>
-                                    <div v-if="getItemDesc(item)" class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55">
-                                        {{ getItemDesc(item) }}
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedId === item.id }"
+                                            >
+                                                {{ getItemTitle(item) }}
+                                            </div>
+                                            <span v-if="getItemMeta(item)" class="shrink-0 truncate text-[11px] text-base-content/45">
+                                                {{ getItemMeta(item) }}
+                                            </span>
+                                            <div class="flex-1"></div>
+                                            <CopyID :id="item.id" />
+                                        </div>
+                                        <div
+                                            v-if="getItemDesc(item)"
+                                            class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55"
+                                        >
+                                            {{ getItemDesc(item) }}
+                                        </div>
                                     </div>
                                 </div>
+                            </article>
+                            <div v-if="!filteredItems.length" class="p-6 text-center text-sm text-base-content/50">
+                                {{ $t("db-rouge.no_match") }}
                             </div>
-                        </article>
-                        <div v-if="!filteredItems.length" class="p-6 text-center text-sm text-base-content/50">{{ $t('db-rouge.no_match') }}</div>
+                        </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredItems.length }}</b>
+                            {{ $t("db-rouge.item_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredItems.length }}</b> {{ $t('db-rouge.item_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedItem" class="min-h-0 min-w-0 flex-1">
-                <DBRougeLikeDetailItem :key="selectedId" v-if="selectedLikeItem" :item="selectedLikeItem" :kind="kind" />
-                <DBRougeProDetailItem :key="`${selectedId}-pro`" v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedItem" class="min-h-0 min-w-0 flex-1">
+                    <DBRougeLikeDetailItem :key="selectedId" v-if="selectedLikeItem" :item="selectedLikeItem" :kind="kind" />
+                    <DBRougeProDetailItem :key="`${selectedId}-pro`" v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

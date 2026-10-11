@@ -3950,10 +3950,18 @@ onUnmounted(async () => {
                 <div v-if="showStatusPanel" class="w-88 max-w-[45%] min-w-70 border-l border-base-300 bg-base-950/20 flex flex-col">
                     <div class="h-10 px-3 border-b border-base-300 flex items-center justify-between gap-2">
                         <div class="space-x-1 text-xs">
-                            <button class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent" :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'status' }" @click="sidePanelTab = 'status'">
+                            <button
+                                class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent"
+                                :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'status' }"
+                                @click="sidePanelTab = 'status'"
+                            >
                                 调试状态
                             </button>
-                            <button class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent" :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'config' }" @click="sidePanelTab = 'config'">
+                            <button
+                                class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent"
+                                :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'config' }"
+                                @click="sidePanelTab = 'config'"
+                            >
                                 脚本配置
                             </button>
                         </div>
@@ -4151,7 +4159,7 @@ onUnmounted(async () => {
                         <div class="text-sm text-base-content/70 mt-1">
                             {{
                                 activeScriptHelpRequest?.message ||
-                                (isScriptHelpPointMode ? "请直接点击目标点。" : "请在图片上拖拽框选目标区域。")
+                                    (isScriptHelpPointMode ? "请直接点击目标点。" : "请在图片上拖拽框选目标区域。")
                             }}
                         </div>
                     </div>

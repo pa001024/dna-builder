@@ -27,8 +27,21 @@ import { vkFromKeyboardEvent, vkLabel } from "@/utils/virtual-key"
 const { t } = useTranslation()
 const setting = useSettingStore()
 const overlay = useSkillCdOverlay()
-const { state, busy, error, gameFound, clientSize, overlaySize, setEnabled, scheduleApply, previewTrigger, addKey, removeKey, updateKey, assignKey } =
-    overlay
+const {
+    state,
+    busy,
+    error,
+    gameFound,
+    clientSize,
+    overlaySize,
+    setEnabled,
+    scheduleApply,
+    previewTrigger,
+    addKey,
+    removeKey,
+    updateKey,
+    assignKey,
+} = overlay
 
 /** 正在等待用户按键的绑定 id(为 null 表示未处于捕获状态)。 */
 const capturingId = ref<string | null>(null)
@@ -38,9 +51,7 @@ const captureHint = ref("")
 /** 按键绑定列表(归一化后的持久化数据)。 */
 const keys = computed(() => setting.skillCdOverlay.keys)
 /** 参与绘制的按键标签(用于位置预览里的小方块)。 */
-const markerLabels = computed(() =>
-    keys.value.filter(key => key.enabled).map(key => key.label || vkLabel(key.vk) || "?")
-)
+const markerLabels = computed(() => keys.value.filter(key => key.enabled).map(key => key.label || vkLabel(key.vk) || "?"))
 /** 浮窗运行状态(后端实际状态优先,未连接时回落到持久化开关)。 */
 const running = computed(() => setting.skillCdOverlayRunning)
 /** 客户区尺寸(未检测到游戏时按 1920×1080 估算,仅用于预览比例)。 */
@@ -194,7 +205,7 @@ onUnmounted(() => {
                 v-if="!env.isApp"
                 class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning"
             >
-                {{ $t('skill-cd-overlay.web_only_notice') }}
+                {{ $t("skill-cd-overlay.web_only_notice") }}
             </div>
 
             <!-- 总开关 -->
@@ -208,20 +219,17 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.entry_title') }}
+                                {{ $t("skill-cd-overlay.entry_title") }}
                                 <div class="text-xs text-base-content/50">
-                                    {{ $t('skill-cd-overlay.entry_desc') }}
+                                    {{ $t("skill-cd-overlay.entry_desc") }}
                                 </div>
                                 <div v-if="error" class="mt-0.5 text-xs text-error">{{ error }}</div>
                             </span>
                             <div class="flex shrink-0 items-center gap-2">
                                 <span v-if="busy" class="loading loading-spinner loading-xs" />
-                                <span
-                                    v-else
-                                    class="text-xs"
-                                    :class="running ? 'text-success' : 'text-base-content/40'"
-                                    >{{ running ? $t('skill-cd-overlay.running') : $t('skill-cd-overlay.not_running') }}</span
-                                >
+                                <span v-else class="text-xs" :class="running ? 'text-success' : 'text-base-content/40'">{{
+                                    running ? $t("skill-cd-overlay.running") : $t("skill-cd-overlay.not_running")
+                                }}</span>
                                 <input
                                     type="checkbox"
                                     class="toggle toggle-secondary"
@@ -235,29 +243,30 @@ onUnmounted(() => {
                             class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.game_window') }}
+                                {{ $t("skill-cd-overlay.game_window") }}
                                 <div class="text-xs text-base-content/50">
-                                    {{ $t('skill-cd-overlay.game_window_tip', { name: setting.skillCdOverlay.processName }) }}
+                                    {{ $t("skill-cd-overlay.game_window_tip", { name: setting.skillCdOverlay.processName }) }}
                                 </div>
                             </span>
                             <span
                                 class="font-orbitron text-[13px] font-semibold"
                                 :class="gameFound ? 'text-success' : 'text-base-content/40'"
                             >
-                                {{ gameFound ? `${clientSize.width} × ${clientSize.height}` : $t('skill-cd-overlay.not_detected') }}
+                                {{ gameFound ? `${clientSize.width} × ${clientSize.height}` : $t("skill-cd-overlay.not_detected") }}
                             </span>
                         </div>
                         <div
                             v-if="state?.timers?.length"
                             class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs text-base-content/60"
                         >
-                            {{ $t('skill-cd-overlay.current_timers') }}
+                            {{ $t("skill-cd-overlay.current_timers") }}
                             <span
                                 v-for="timer in state.timers"
                                 :key="timer.id"
                                 class="ml-2 inline-flex items-center gap-1 font-orbitron tabular-nums"
                                 :class="timer.remaining > 0 ? 'text-primary' : 'text-success'"
-                                >{{ timer.label }} {{ timer.remaining > 0 ? timer.remaining.toFixed(1) : $t('skill-cd-overlay.ready') }}</span
+                                >{{ timer.label }}
+                                {{ timer.remaining > 0 ? timer.remaining.toFixed(1) : $t("skill-cd-overlay.ready") }}</span
                             >
                         </div>
                     </div>
@@ -294,7 +303,7 @@ onUnmounted(() => {
                                 :class="capturingId === binding.id ? 'btn-primary' : 'btn-outline'"
                                 @click="beginCapture(binding)"
                             >
-                                {{ capturingId === binding.id ? $t('skill-cd-overlay.key_capturing') : displayLabel(binding) }}
+                                {{ capturingId === binding.id ? $t("skill-cd-overlay.key_capturing") : displayLabel(binding) }}
                             </button>
                             <DragNumberInput
                                 :model-value="binding.cdSeconds"
@@ -322,7 +331,7 @@ onUnmounted(() => {
                                     :checked="binding.noCooldown"
                                     @change="updateKey(binding.id, { noCooldown: ($event.target as HTMLInputElement).checked })"
                                 />
-                                {{ $t('skill-cd-overlay.no_cooldown') }}
+                                {{ $t("skill-cd-overlay.no_cooldown") }}
                             </label>
                             <div class="ml-auto flex items-center gap-1">
                                 <button
@@ -331,21 +340,19 @@ onUnmounted(() => {
                                     :title="setting.skillCdOverlay.enabled ? $t('skill-cd-overlay.trigger_tip_on') : $t('skill-cd-overlay.trigger_tip_off')"
                                     @click="handlePreview(binding)"
                                 >
-                                    {{ $t('skill-cd-overlay.test_trigger') }}
+                                    {{ $t("skill-cd-overlay.test_trigger") }}
                                 </button>
-                                <button class="btn btn-ghost btn-xs text-error" @click="removeKey(binding.id)">{{ $t('skill-cd-overlay.delete') }}</button>
+                                <button class="btn btn-ghost btn-xs text-error" @click="removeKey(binding.id)">
+                                    {{ $t("skill-cd-overlay.delete") }}
+                                </button>
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <button
-                                class="btn btn-sm"
-                                :disabled="keys.length >= SKILL_CD_MAX_KEYS"
-                                @click="handleAddKey"
-                            >
-                                {{ $t('skill-cd-overlay.add_key') }}
+                            <button class="btn btn-sm" :disabled="keys.length >= SKILL_CD_MAX_KEYS" @click="handleAddKey">
+                                {{ $t("skill-cd-overlay.add_key") }}
                             </button>
                             <span class="text-xs text-base-content/50">
-                                {{ $t('skill-cd-overlay.max_keys_tip', { count: SKILL_CD_MAX_KEYS }) }}
+                                {{ $t("skill-cd-overlay.max_keys_tip", { count: SKILL_CD_MAX_KEYS }) }}
                             </span>
                         </div>
                         <div v-if="captureHint" class="text-xs text-warning">{{ captureHint }}</div>
@@ -353,7 +360,7 @@ onUnmounted(() => {
                             v-if="setting.skillCdOverlay.enabled && !gameFound && setting.skillCdOverlay.hideWhenGameMissing"
                             class="text-xs text-warning"
                         >
-                            {{ $t('skill-cd-overlay.no_game_warning') }}
+                            {{ $t("skill-cd-overlay.no_game_warning") }}
                         </div>
                     </div>
                 </div>
@@ -380,9 +387,9 @@ onUnmounted(() => {
                         />
                         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.anchor_percent') }}
+                                {{ $t("skill-cd-overlay.anchor_percent") }}
                                 <div class="text-xs text-base-content/50">
-                                    {{ $t('skill-cd-overlay.anchor_percent_tip') }}
+                                    {{ $t("skill-cd-overlay.anchor_percent_tip") }}
                                 </div>
                             </span>
                             <div class="flex items-center gap-2">
@@ -414,14 +421,14 @@ onUnmounted(() => {
                         </div>
                         <div v-if="state" class="text-[11px] text-base-content/50">
                             {{
-                                $t('skill-cd-overlay.resolved_info', {
+                                $t("skill-cd-overlay.resolved_info", {
                                     x: state.resolvedX,
                                     y: state.resolvedY,
                                     w: state.windowWidth,
                                     h: state.windowHeight,
                                 })
                             }}
-                            <span v-if="!state.visible">{{ $t('skill-cd-overlay.not_shown') }}</span>
+                            <span v-if="!state.visible">{{ $t("skill-cd-overlay.not_shown") }}</span>
                         </div>
                     </div>
                 </div>
@@ -438,8 +445,8 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.scale') }}
-                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.scale_tip') }}</div>
+                                {{ $t("skill-cd-overlay.scale") }}
+                                <div class="text-xs text-base-content/50">{{ $t("skill-cd-overlay.scale_tip") }}</div>
                             </span>
                             <div class="flex min-w-52 items-center gap-2">
                                 <input
@@ -451,18 +458,17 @@ onUnmounted(() => {
                                     step="0.1"
                                     @input="setScale(+($event.target as HTMLInputElement).value)"
                                 />
-                                <span
-                                    class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
-                                    >{{ setting.skillCdOverlay.scale.toFixed(1) }}</span
-                                >
+                                <span class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary">{{
+                                    setting.skillCdOverlay.scale.toFixed(1)
+                                }}</span>
                             </div>
                         </div>
                         <div
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.disc_alpha') }}
-                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.disc_alpha_tip') }}</div>
+                                {{ $t("skill-cd-overlay.disc_alpha") }}
+                                <div class="text-xs text-base-content/50">{{ $t("skill-cd-overlay.disc_alpha_tip") }}</div>
                             </span>
                             <div class="flex min-w-52 items-center gap-2">
                                 <input
@@ -474,8 +480,7 @@ onUnmounted(() => {
                                     step="0.02"
                                     @input="setDiscAlpha(+($event.target as HTMLInputElement).value)"
                                 />
-                                <span
-                                    class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
+                                <span class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
                                     >{{ Math.round(setting.skillCdOverlay.discAlpha * 100) }}%</span
                                 >
                             </div>
@@ -484,8 +489,8 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.hide_when_ready') }}
-                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.hide_when_ready_tip') }}</div>
+                                {{ $t("skill-cd-overlay.hide_when_ready") }}
+                                <div class="text-xs text-base-content/50">{{ $t("skill-cd-overlay.hide_when_ready_tip") }}</div>
                             </span>
                             <input
                                 v-model="setting.skillCdOverlay.hideWhenReady"
@@ -509,9 +514,9 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.foreground_only') }}
+                                {{ $t("skill-cd-overlay.foreground_only") }}
                                 <div class="text-xs text-base-content/50">
-                                    {{ $t('skill-cd-overlay.foreground_only_tip') }}
+                                    {{ $t("skill-cd-overlay.foreground_only_tip") }}
                                 </div>
                             </span>
                             <input
@@ -525,9 +530,9 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.hide_without_game') }}
+                                {{ $t("skill-cd-overlay.hide_without_game") }}
                                 <div class="text-xs text-base-content/50">
-                                    {{ $t('skill-cd-overlay.hide_without_game_tip') }}
+                                    {{ $t("skill-cd-overlay.hide_without_game_tip") }}
                                 </div>
                             </span>
                             <input
@@ -541,8 +546,8 @@ onUnmounted(() => {
                             class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                {{ $t('skill-cd-overlay.process_name') }}
-                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.process_name_tip') }}</div>
+                                {{ $t("skill-cd-overlay.process_name") }}
+                                <div class="text-xs text-base-content/50">{{ $t("skill-cd-overlay.process_name_tip") }}</div>
                             </span>
                             <input
                                 v-model="setting.skillCdOverlay.processName"

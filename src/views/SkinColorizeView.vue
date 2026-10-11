@@ -15,7 +15,12 @@ import {
 import { useSearchParam } from "@/composables/useSearchParam"
 import { skinData } from "@/data/d/accessory.data"
 import charData from "@/data/d/char.data"
-import { skinColorizeMaxColorParts, skinColorizeMaxHairColorParts, skinColorizeParts, skinColorizeSwatches } from "@/data/d/skin-colorize.data"
+import {
+    skinColorizeMaxColorParts,
+    skinColorizeMaxHairColorParts,
+    skinColorizeParts,
+    skinColorizeSwatches,
+} from "@/data/d/skin-colorize.data"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
@@ -401,10 +406,7 @@ function applyHairFromCode(code?: string) {
         }
         includeHair.value = true
         hairTargetId.value = decoded.skinId
-        hairColorIds.value = Array.from(
-            { length: skinColorizeMaxHairColorParts },
-            (_, index) => decoded.colorIds[index] || 0
-        )
+        hairColorIds.value = Array.from({ length: skinColorizeMaxHairColorParts }, (_, index) => decoded.colorIds[index] || 0)
         activeHairPartId.value = 1
     } catch (error) {
         console.error("解析发型染色码失败:", error)
@@ -707,7 +709,7 @@ onBeforeUnmount(() => {
     <div class="flex h-full min-h-0 w-full flex-col">
         <div class="min-h-0 flex-1 overflow-auto p-4">
             <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm text-base-content/50">
-                {{ $t('skin-colorize.no_data') }}
+                {{ $t("skin-colorize.no_data") }}
             </div>
             <div v-else class="mx-auto grid max-w-7xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
                 <!-- 左列：方案信息 / 预览图 / 染色码 / 颜色预览 / 消耗 / 评论 -->
@@ -729,7 +731,7 @@ onBeforeUnmount(() => {
                             </template>
                         </SectionHeader>
 
-                        <div v-if="planLoading" class="py-6 text-center text-sm text-base-content/50">{{ $t('common.loading') }}</div>
+                        <div v-if="planLoading" class="py-6 text-center text-sm text-base-content/50">{{ $t("common.loading") }}</div>
                         <template v-else>
                             <!-- 新建模式：直接编辑标题与描述 -->
                             <template v-if="isCreateMode">
@@ -784,7 +786,10 @@ onBeforeUnmount(() => {
                                     maxlength="2000"
                                     placeholder="可选：染色思路、搭配说明等"
                                 />
-                                <div v-else-if="loadedPlan.desc" class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/70">
+                                <div
+                                    v-else-if="loadedPlan.desc"
+                                    class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/70"
+                                >
                                     {{ loadedPlan.desc }}
                                 </div>
                                 <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-base-content/50">
@@ -794,7 +799,8 @@ onBeforeUnmount(() => {
                                     </span>
                                     <span class="tabular-nums">{{ formatRelativeTime(loadedPlan.createdAt, i18next.language) }}</span>
                                     <span class="flex items-center gap-1">
-                                        <Icon icon="ri:eye-line" class="size-3.5 shrink-0" />{{ loadedPlan.views }} 浏览
+                                        <Icon icon="ri:eye-line" class="size-3.5 shrink-0" />{{ loadedPlan.views }}
+                                        浏览
                                     </span>
                                     <button
                                         class="flex cursor-pointer items-center gap-1 transition-colors duration-150 hover:text-primary"
@@ -806,7 +812,8 @@ onBeforeUnmount(() => {
                                         {{ loadedPlan.likes }} 点赞
                                     </button>
                                     <span class="flex items-center gap-1">
-                                        <Icon icon="ri:message-2-line" class="size-3.5 shrink-0" />{{ loadedPlan.commentsCount }} 评论
+                                        <Icon icon="ri:message-2-line" class="size-3.5 shrink-0" />{{ loadedPlan.commentsCount }}
+                                        评论
                                     </span>
                                 </div>
                                 <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-[11px] text-base-content/50">
@@ -1034,7 +1041,9 @@ onBeforeUnmount(() => {
 
                         <!-- 角色 / 皮肤选择（新建或可编辑时展示） -->
                         <template v-if="canEdit">
-                            <div class="mb-2 flex max-h-40 flex-wrap gap-1 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2">
+                            <div
+                                class="mb-2 flex max-h-40 flex-wrap gap-1 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2"
+                            >
                                 <button
                                     v-for="character in characters"
                                     :key="character.id"
@@ -1196,7 +1205,12 @@ onBeforeUnmount(() => {
                                     :key="group.resourceId"
                                     class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5 transition-colors duration-150 hover:border-primary/30"
                                 >
-                                    <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" mini class="w-9 shrink-0" />
+                                    <ResourceCostItem
+                                        :name="group.name"
+                                        :value="[1, group.resourceId, 'Resource']"
+                                        mini
+                                        class="w-9 shrink-0"
+                                    />
                                     <span class="h-6 w-px shrink-0 bg-base-content/10" aria-hidden="true" />
                                     <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
                                         <button
@@ -1281,7 +1295,11 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <DialogModel v-model="shareShow" @submit="confirmShare" class="rounded-xs border border-base-content/15 bg-base-100/85 backdrop-blur-md">
+        <DialogModel
+            v-model="shareShow"
+            @submit="confirmShare"
+            class="rounded-xs border border-base-content/15 bg-base-100/85 backdrop-blur-md"
+        >
             <h3 class="text-xl font-bold">发布染色方案</h3>
             <div class="mt-2 text-sm text-base-content/70">
                 标题「{{ editTitle.trim() || defaultPlanTitle }}」<span v-if="editDesc.trim()"> · 含描述</span>
@@ -1315,9 +1333,7 @@ onBeforeUnmount(() => {
                 <img :src="previewImage" alt="预览图" class="max-h-48 rounded-xs object-contain" />
             </div>
             <div v-else class="mt-2 text-xs text-base-content/50">未上传预览图，发布后将不包含图片。</div>
-            <div v-if="hairCode" class="mt-2 text-sm text-base-content/70">
-                发型染色码：<code class="font-mono">{{ hairCode }}</code>
-            </div>
+            <div v-if="hairCode" class="mt-2 text-sm text-base-content/70">发型染色码：<code class="font-mono">{{ hairCode }}</code></div>
             <div v-if="sharing" class="mt-2 text-sm text-base-content/50">正在发布...</div>
         </DialogModel>
 

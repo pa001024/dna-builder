@@ -13,6 +13,17 @@ import {
     RaidSeason,
 } from "@/data/d/raid.data"
 import { getDropModeText } from "@/utils/i18n-utils"
+import {
+    getHighestFloor,
+    getInitialUnlockFloor,
+    getJumpTiers,
+    getRaidFloorFullList,
+    getRaidFloorList,
+    getUnlockFloorCount,
+    isFloorSeason,
+    isKeyFloor,
+    shouldShowBubble,
+} from "@/utils/raid-floor-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { titleFrameIdToKey } from "@/utils/title-frame/title-frame.generated"
 
@@ -106,7 +117,15 @@ const selectedSeason = useSearchParam<number>("s", defaultSeason)
 const scoreInput = ref("")
 const remainingTime = ref(30)
 const selectedDungeon = useSearchParam<number>("d", defaultDungeon)
-const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank">("t", "rank")
+const activeInfoTab = useSearchParam<"score" | "dungeon" | "rank" | "floor">("t", "rank")
+
+// 爬塔制赛季（Floor 模式）状态：时期（false=巅峰排名）、选中层数、模拟用通关用时/已通过最高层
+const isFloorPreRaid = ref(false)
+const selectedFloor = ref(0)
+const floorPassTime = ref(30)
+const floorPassed = ref(0)
+/** 副本限时取自上游 Dungeon.BPOverrideVars.TimeLimit，2170x 系列全为 90 秒 */
+const FLOOR_TIME_LIMIT = 90
 const seasonTabs = computed(() => Object.values(RaidSeason))
 const dungeonTabs = computed(() => {
     const season = RaidSeason[selectedSeason.value]
@@ -149,6 +168,70 @@ const maxAllowedTime = computed(() => {
 })
 
 const currentDungeonData = computed(() => RaidDungeon[selectedDungeon.value])
+
+// 当前赛季是否为爬塔制（RaidSeasonType 2），决定页面走打分分支还是爬塔分支
+const currentSeasonIsFloor = computed(() => isFloorSeason(selectedSeason.value))
+const currentSeasonData = computed(() => RaidSeason[selectedSeason.value])
+/** 楼层类型：1 分组赛，2 巅峰排名（对应打分制的 RaidDungeonType 口径） */
+const floorType = computed(() => (isFloorPreRaid.value ? 1 : 2))
+/** 当前最高可打层：资料库无存档，取开赛初始开放层数 */
+const floorHighestUnlocked = computed(() => getInitialUnlockFloor(currentSeasonData.value, isFloorPreRaid.value))
+const floorHighest = computed(() => getHighestFloor(selectedSeason.value, floorType.value))
+/** 已解锁楼层（游戏内关卡列表口径，只含已解锁层） */
+const floorUnlockedList = computed(() => getRaidFloorList(selectedSeason.value, floorType.value, floorHighestUnlocked.value))
+/** 全部楼层（资料库完整展示口径，含未解锁层） */
+const floorList = computed(() => getRaidFloorFullList(selectedSeason.value, floorType.value))
+/** 选中楼层，未选中时默认最高可打层（贴合游戏默认选中最高层的行为） */
+const currentFloorData = computed(() => floorList.value.find(item => item.Floor === selectedFloor.value) ?? floorUnlockedList.value.at(-1))
+const floorJumpTiers = computed(() => getJumpTiers(currentSeasonData.value, FLOOR_TIME_LIMIT, floorPassTime.value))
+const floorJumpCount = computed(() => getUnlockFloorCount(currentSeasonData.value, FLOOR_TIME_LIMIT, floorPassTime.value))
+/** 模拟结算后的解锁层：已通过层 + 本次跳层数，不超过最大层 */
+const floorSimulatedUnlock = computed(() =>
+    Math.min(floorHighest.value, Math.max(floorHighestUnlocked.value, floorPassed.value + floorJumpCount.value))
+)
+const currentFloorDungeon = computed(() => (currentFloorData.value ? dungeonMap.get(currentFloorData.value.DungeonId) : undefined))
+const currentFloorFirstReward = computed(() => (currentFloorData.value ? getRewardDetails(currentFloorData.value.FirstReward) : undefined))
+const currentFloorNormalReward = computed(() =>
+    currentFloorData.value ? getRewardDetails(currentFloorData.value.NormalReward) : undefined
+)
+const infoTabs = computed(() =>
+    currentSeasonIsFloor.value
+        ? [
+              { label: t("db-raid-rank.floor"), value: "floor" },
+              { label: t("db-raid-rank.dungeon_info"), value: "dungeon" },
+              { label: t("db-raid-rank.rank_info"), value: "rank" },
+          ]
+        : [
+              { label: t("db-raid-rank.score_calc"), value: "score" },
+              { label: t("db-raid-rank.dungeon_info"), value: "dungeon" },
+              { label: t("db-raid-rank.rank_info"), value: "rank" },
+          ]
+)
+
+/**
+ * 赛季/时期切换时重置楼层选中，并在打分与爬塔页签之间自动纠偏。
+ */
+watch([selectedSeason, isFloorPreRaid], () => {
+    selectedFloor.value = 0
+    if (currentSeasonIsFloor.value && activeInfoTab.value === "score") activeInfoTab.value = "floor"
+    if (!currentSeasonIsFloor.value && activeInfoTab.value === "floor") activeInfoTab.value = "score"
+})
+
+/**
+ * 楼层是否为关键层（特殊样式标记）。
+ * @param floor 层数
+ */
+function isCurrentKeyFloor(floor: number): boolean {
+    return isKeyFloor(currentSeasonData.value, floor, isFloorPreRaid.value)
+}
+
+/**
+ * 楼层是否显示跳层引导气泡。
+ * @param floor 层数
+ */
+function isCurrentBubbleFloor(floor: number): boolean {
+    return shouldShowBubble(currentSeasonData.value, floor, floorHighestUnlocked.value)
+}
 
 const maxScore = computed(() => {
     const dungeon = currentDungeonData.value
@@ -269,8 +352,7 @@ const calculateRewardCount = (score: number, season: number | string): number =>
     if (!seasonData) return 0
 
     // 最大奖励次数优先取当前副本配置（新赛季），旧赛季回退到赛季配置
-    const maxTime =
-        currentDungeonData.value?.RaidPointToRewradMaxTime ?? seasonData.RaidPointToRewradMaxTime ?? 0
+    const maxTime = currentDungeonData.value?.RaidPointToRewradMaxTime ?? seasonData.RaidPointToRewradMaxTime ?? 0
 
     // 计算奖励次数 = 分数 / 1000（向下取整）
     let rewardCount = Math.floor(score / 1000)
@@ -363,6 +445,17 @@ function getSeasonName(str: number) {
 function isTopThreeRank(index: number): boolean {
     return index < 3
 }
+
+/** 加载失败的赛季 fallback 图（称号框未生成且无赛季截图时隐藏破图，只留文字）。 */
+const rankImgFailed = ref(new Set<string>())
+
+/**
+ * 赛季 fallback 图加载失败时记入集合，避免显示破图。
+ * @param key 赛季_名次键
+ */
+function onRankImgError(key: string): void {
+    rankImgFailed.value.add(key)
+}
 </script>
 <template>
     <ScrollArea class="h-full min-h-0">
@@ -388,8 +481,8 @@ function isTopThreeRank(index: number): boolean {
                             {{ getSeasonName(season.RaidSeason) }}
                         </button>
                     </div>
-                    <!-- 副本筛选 -->
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <!-- 副本筛选（打分制） -->
+                    <div v-if="!currentSeasonIsFloor" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                         <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">DUNGEON</span>
                         <button
                             v-for="dungeon in dungeonTabs"
@@ -403,42 +496,63 @@ function isTopThreeRank(index: number): boolean {
                             "
                             @click="selectedDungeon = dungeon.DungeonId"
                         >
-                            {{ $t(getDungeonName(dungeon.DungeonId)) }} ({{ t('db-raid-rank.difficulty_label', { level: dungeon.DifficultyLevel }) }})
+                            {{ $t(getDungeonName(dungeon.DungeonId)) }} ({{
+                                t("db-raid-rank.difficulty_label", { level: dungeon.DifficultyLevel })
+                            }})
                         </button>
+                    </div>
+                    <!-- 时期筛选（爬塔制）：分组赛 FloorType 1，巅峰排名 FloorType 2（官方文本） -->
+                    <div v-else class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">PERIOD</span>
+                        <button
+                            v-for="period in [{ value: true }, { value: false }]"
+                            :key="String(period.value)"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                isFloorPreRaid === period.value
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="isFloorPreRaid = period.value"
+                        >
+                            {{ period.value ? $t("分组赛") : $t("巅峰排名") }}
+                        </button>
+                        <span class="text-[11px] tabular-nums text-base-content/45">
+                            {{ t("db-raid-rank.unlocked_up_to", { value: floorHighestUnlocked }) }}
+                            / {{ t("db-raid-rank.highest_floor_x", { value: floorHighest }) }}
+                        </span>
                     </div>
                 </div>
             </section>
 
-            <!-- 词缀说明 -->
-            <p class="flex flex-wrap items-center gap-x-2 text-sm leading-relaxed text-base-content/70">
+            <!-- 词缀说明：打分制取选中副本，爬塔制取选中楼层 -->
+            <p v-if="!currentSeasonIsFloor" class="flex flex-wrap items-center gap-x-2 text-sm leading-relaxed text-base-content/70">
                 <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">BUFF</span>
                 {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => $t(RaidBuff[id].RaidBuffDes)).join("、") }}
             </p>
+            <p v-else class="flex flex-wrap items-center gap-x-2 text-sm leading-relaxed text-base-content/70">
+                <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">BUFF</span>
+                {{ currentFloorData?.RaidBuffID.map(id => $t(RaidBuff[id].RaidBuffDes)).join("、") }}
+            </p>
 
             <!-- 信息分页 -->
-            <AniTabs
-                v-model="activeInfoTab"
-                :tabs="[
-                    { label: t('db-raid-rank.score_calc'), value: 'score' },
-                    { label: t('db-raid-rank.dungeon_info'), value: 'dungeon' },
-                    { label: t('db-raid-rank.rank_info'), value: 'rank' },
-                ]"
-            />
+            <AniTabs v-model="activeInfoTab" :tabs="infoTabs" />
 
-            <!-- 计算说明 -->
-            <div v-if="activeInfoTab === 'score'" class="space-y-3">
+            <!-- 计算说明（打分制） -->
+            <div v-if="activeInfoTab === 'score' && !currentSeasonIsFloor" class="space-y-3">
                 <!-- 分数计算器 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="CALCULATOR" :title="$t('db-raid-rank.score_calc')" />
                     <!-- 当前分数 -->
                     <div class="flex items-baseline gap-2">
-                        <span class="text-sm text-base-content/60">{{ $t('common.score') }}</span>
+                        <span class="text-sm text-base-content/60">{{ $t("common.score") }}</span>
                         <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">{{ currentScore }}</span>
                     </div>
                     <!-- 分数 / 剩余时间输入 -->
                     <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
                         <label class="block">
-                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t('common.score') }}</span>
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t("common.score") }}</span>
                             <input
                                 :value="scoreInput"
                                 @input="handleScoreInput"
@@ -449,10 +563,12 @@ function isTopThreeRank(index: number): boolean {
                                 :placeholder="$t('db-raid-rank.input_score')"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
-                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">{{ t('db-raid-rank.max_score', { value: maxScore }) }}</span>
+                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">{{
+                                t("db-raid-rank.max_score", { value: maxScore })
+                            }}</span>
                         </label>
                         <label class="block">
-                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t('db-raid-rank.remaining_time') }}</span>
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.remaining_time") }}</span>
                             <input
                                 :value="remainingTime"
                                 @input="handleRemainingTimeInput"
@@ -464,8 +580,8 @@ function isTopThreeRank(index: number): boolean {
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
                             <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">
-                                {{ t('db-raid-rank.max_allowed_time', { value: maxAllowedTime }) }}
-                                {{ t('db-raid-rank.elapsed_time', { value: +(maxAllowedTime - remainingTime).toFixed(2) }) }}
+                                {{ t("db-raid-rank.max_allowed_time", { value: maxAllowedTime }) }}
+                                {{ t("db-raid-rank.elapsed_time", { value: +(maxAllowedTime - remainingTime).toFixed(2) }) }}
                             </span>
                         </label>
                         <div class="col-span-2">
@@ -485,14 +601,15 @@ function isTopThreeRank(index: number): boolean {
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="FORMULA" :title="$t('db-raid-rank.score_calc_desc')" />
                     <p class="text-sm leading-relaxed text-base-content/90">
-                        {{ $t('db-raid-rank.formula') }}
-                        <span class="ml-1 text-xs opacity-80">{{ $t('db-raid-rank.formula_note') }}</span>
+                        {{ $t("db-raid-rank.formula") }}
+                        <span class="ml-1 text-xs opacity-80">{{ $t("db-raid-rank.formula_note") }}</span>
                     </p>
                     <p class="mt-2 text-[11px] leading-relaxed tabular-nums text-base-content/55">
-                        {{ t('db-raid-rank.current_dungeon', { id: RaidDungeon[selectedDungeon]?.DungeonId }) }} |
-                        BaseRaidPoint: {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} |
-                        {{ t('db-raid-rank.formula_id', { id: RaidDungeon[selectedDungeon]?.FomulaId }) }} | {{ t('db-raid-rank.time_zone') }}:
-                        {{ currentFormula?.RaidTimeZone }} | {{ t('db-raid-rank.rate') }}:
+                        {{ t("db-raid-rank.current_dungeon", { id: RaidDungeon[selectedDungeon]?.DungeonId }) }} | BaseRaidPoint:
+                        {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} |
+                        {{ t("db-raid-rank.formula_id", { id: RaidDungeon[selectedDungeon]?.FomulaId }) }} |
+                        {{ t("db-raid-rank.time_zone") }}:
+                        {{ currentFormula?.RaidTimeZone }} | {{ t("db-raid-rank.rate") }}:
                         {{ currentFormula?.RaidTimeRate }}
                     </p>
                 </section>
@@ -501,21 +618,24 @@ function isTopThreeRank(index: number): boolean {
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-raid-rank.score_reward_calc')" />
                     <p class="text-sm leading-relaxed text-base-content/90">
-                        {{ $t('db-raid-rank.per_1000_points') }} <b class="font-orbitron tabular-nums text-primary">1</b> {{ $t('db-raid-rank.rewards_max') }}
+                        {{ $t("db-raid-rank.per_1000_points") }} <b class="font-orbitron tabular-nums text-primary">1</b>
+                        {{ $t("db-raid-rank.rewards_max") }}
                         <b class="font-orbitron tabular-nums text-primary">{{ rewardConfig.maxTime ?? 0 }}</b>
-                        {{ $t('common.times') }}
+                        {{ $t("common.times") }}
                     </p>
                     <div class="mt-3">
-                        <p class="text-sm font-medium text-base-content/80">{{ $t('db-raid-rank.current_rewards') }}</p>
+                        <p class="text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.current_rewards") }}</p>
                         <div class="mt-1 flex items-baseline gap-1">
                             <span class="font-orbitron text-lg font-bold text-primary">{{ currentRewardCount }}</span>
-                            <span class="text-sm text-base-content/55">{{ $t('common.times') }}</span>
+                            <span class="text-sm text-base-content/55">{{ $t("common.times") }}</span>
                         </div>
 
                         <!-- 奖励组（内层小卡） -->
                         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                             <div class="mb-1 flex items-center justify-between gap-2">
-                                <span class="text-sm font-medium text-base-content/85">{{ t('reward-item.reward_group_id', { id: rewardId }) }}</span>
+                                <span class="text-sm font-medium text-base-content/85">{{
+                                    t("reward-item.reward_group_id", { id: rewardId })
+                                }}</span>
                                 <span
                                     class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
                                     :class="
@@ -534,63 +654,246 @@ function isTopThreeRank(index: number): boolean {
                 <!-- 副本展示 -->
             </div>
 
-            <!-- 副本信息 -->
+            <!-- 爬塔制：楼层 / 跳层模拟 -->
+            <div v-if="activeInfoTab === 'floor' && currentSeasonIsFloor" class="space-y-3">
+                <!-- 跳层规则 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="JUMP" :title="$t('db-raid-rank.jump_rules')" />
+                    <p class="text-sm leading-relaxed text-base-content/90">{{ $t("db-raid-rank.jump_rules_desc") }}</p>
+                    <p class="mt-2 text-[11px] leading-relaxed tabular-nums text-base-content/55">
+                        {{ t("db-raid-rank.time_limit_x", { value: FLOOR_TIME_LIMIT }) }} |
+                        {{ t("db-raid-rank.unlocked_up_to", { value: floorHighestUnlocked }) }} |
+                        {{ t("db-raid-rank.highest_floor_x", { value: floorHighest }) }}
+                    </p>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span
+                            v-for="tier in floorJumpTiers"
+                            :key="tier.jumpTime"
+                            class="rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums"
+                            :class="
+                                tier.reached ? 'border-primary/50 bg-primary/10 text-primary' : 'border-base-content/15 text-base-content/45'
+                            "
+                        >
+                            ≥{{ tier.jumpTime }}s → +{{ tier.jumpFloor }}
+                        </span>
+                    </div>
+                </section>
+
+                <!-- 跳层模拟器 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-raid-rank.jump_simulator')" />
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                        <label class="block">
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.pass_time") }}</span>
+                            <input
+                                v-model.number="floorPassTime"
+                                type="number"
+                                min="0"
+                                :max="FLOOR_TIME_LIMIT"
+                                step="0.1"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
+                            />
+                        </label>
+                        <label class="block">
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.passed_floor") }}</span>
+                            <input
+                                v-model.number="floorPassed"
+                                type="number"
+                                min="0"
+                                :max="floorHighest"
+                                step="1"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
+                            />
+                        </label>
+                        <div class="col-span-2">
+                            <input
+                                v-model.number="floorPassTime"
+                                type="range"
+                                :max="FLOOR_TIME_LIMIT"
+                                step="0.1"
+                                class="range range-primary range-xs w-full"
+                            />
+                        </div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                        <span class="text-sm text-base-content/60">
+                            {{ t("db-raid-rank.time_remain_x", { value: Math.max(0, FLOOR_TIME_LIMIT - floorPassTime).toFixed(1) }) }}
+                        </span>
+                        <span class="text-sm text-base-content/60">
+                            {{ t("db-raid-rank.jump_count_x", { value: floorJumpCount }) }}
+                        </span>
+                        <span class="font-orbitron text-lg font-bold tabular-nums text-primary">
+                            {{ t("db-raid-rank.simulated_unlock_x", { value: floorSimulatedUnlock }) }}
+                        </span>
+                    </div>
+                </section>
+
+                <!-- 楼层列表 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="FLOORS" :title="$t('db-raid-rank.floor_list')" />
+                    <div class="grid max-h-96 grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3 lg:grid-cols-5">
+                        <button
+                            v-for="item in floorList"
+                            :key="item.FloorId"
+                            type="button"
+                            class="relative cursor-pointer rounded-xs border px-2 py-1.5 text-left transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                currentFloorData?.FloorId === item.FloorId
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : item.Floor > floorHighestUnlocked
+                                      ? 'border-base-content/10 text-base-content/40 hover:border-primary/60'
+                                      : 'border-base-content/20 text-base-content/70 hover:border-primary/60'
+                            "
+                            @click="selectedFloor = item.Floor"
+                        >
+                            <span class="font-orbitron text-sm font-bold tabular-nums">{{
+                                t("db-raid-rank.floor_name", { value: item.Floor })
+                            }}</span>
+                            <span class="mt-0.5 block text-[10px] tabular-nums opacity-70">Lv.{{ item.RecLevel }}</span>
+                            <span
+                                v-if="item.Floor > floorHighestUnlocked"
+                                class="mt-1 inline-block rounded-xs bg-base-content/10 px-1 text-[10px] leading-4"
+                            >
+                                {{ $t("db-raid-rank.locked") }}
+                            </span>
+                            <span class="mt-1 flex flex-wrap gap-1">
+                                <span
+                                    v-if="isCurrentKeyFloor(item.Floor)"
+                                    class="rounded-xs bg-warning px-1 text-[10px] leading-4 text-warning-content"
+                                >
+                                    {{ $t("db-raid-rank.key_floor") }}
+                                </span>
+                                <span
+                                    v-if="isCurrentBubbleFloor(item.Floor)"
+                                    class="rounded-xs bg-info px-1 text-[10px] leading-4 text-info-content"
+                                >
+                                    {{ $t("db-raid-rank.bubble_tip") }}
+                                </span>
+                            </span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 副本信息（打分制） -->
             <div
-                v-if="activeInfoTab === 'dungeon' && currentDungeon"
+                v-if="activeInfoTab === 'dungeon' && !currentSeasonIsFloor && currentDungeon"
                 class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm"
             >
                 <DBDungeonDetailItem :dungeon="currentDungeon" />
             </div>
 
-            <!-- 排名信息：榜单行（前三档主色强调） -->
-            <div v-if="activeInfoTab === 'rank'" class="grid grid-cols-1 gap-3 xl:grid-cols-2">
-                <article
-                    v-for="(item, index) in rankData"
-                    :key="item.rank"
-                    class="relative overflow-hidden rounded-xs border p-3 backdrop-blur-sm animate-ef-rise motion-reduce:animate-none"
-                    :class="isTopThreeRank(index) ? 'border-primary/40 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
-                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                >
-                    <!-- 左侧主色强调条：前三档显现 -->
-                    <span
-                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                        :class="isTopThreeRank(index) ? 'opacity-100' : 'opacity-0'"
-                        aria-hidden="true"
-                    />
-                    <div class="flex items-center gap-3">
-                        <img class="h-12 shrink-0" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
-                        <div class="min-w-0">
-                            <p class="font-orbitron text-lg font-bold tabular-nums" :class="isTopThreeRank(index) ? 'text-primary' : ''">
-                                {{ item.rank }}
-                            </p>
-                            <p class="mt-0.5 text-[11px] text-base-content/50">{{ t('db-raid-rank.rank_requirement', { percent: item.percent }) }}</p>
+            <!-- 副本信息（爬塔制）：选中楼层详情 -->
+            <div v-if="activeInfoTab === 'dungeon' && currentSeasonIsFloor && currentFloorData" class="space-y-3">
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="FLOOR" :title="$t('db-raid-rank.floor_detail')" />
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">
+                            {{ t("db-raid-rank.floor_name", { value: currentFloorData.Floor }) }}
+                        </span>
+                        <span
+                            v-if="isCurrentKeyFloor(currentFloorData.Floor)"
+                            class="rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 text-warning-content"
+                        >
+                            {{ $t("db-raid-rank.key_floor") }}
+                        </span>
+                    </div>
+                    <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm tabular-nums text-base-content/80 sm:grid-cols-4">
+                        <span>{{ t("db-raid-rank.monster_level_x", { value: currentFloorData.MonsterLevel }) }}</span>
+                        <span>{{ t("db-raid-rank.rec_level_x", { value: currentFloorData.RecLevel }) }}</span>
+                        <span class="col-span-2">{{ t("db-raid-rank.min_damage_x", { value: currentFloorData.MinCompleteDamage }) }}</span>
+                    </div>
+                    <div class="mt-3 space-y-3">
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.first_reward") }}</p>
+                            <RewardItem v-if="currentFloorFirstReward" :reward="currentFloorFirstReward" />
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.normal_reward") }}</p>
+                            <RewardItem v-if="currentFloorNormalReward" :reward="currentFloorNormalReward" />
                         </div>
                     </div>
-                    <!--
+                </section>
+                <div v-if="currentFloorDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm">
+                    <DBDungeonDetailItem
+                        :key="currentFloorData.FloorId"
+                        :dungeon="currentFloorDungeon"
+                        :initial-level="currentFloorData.MonsterLevel"
+                    />
+                </div>
+                <p v-else class="text-[11px] text-base-content/45">
+                    {{ t("db-raid-rank.dungeon_missing", { id: currentFloorData.DungeonId }) }}
+                </p>
+            </div>
+
+            <!-- 排名信息：榜单行（前三档主色强调） -->
+            <div v-if="activeInfoTab === 'rank'" class="space-y-3">
+                <p
+                    v-if="currentSeasonIsFloor"
+                    class="rounded-xs border border-info/30 bg-info/5 p-2.5 text-sm leading-relaxed text-base-content/80"
+                >
+                    {{ $t("db-raid-rank.rank_floor_note") }}
+                </p>
+                <div class="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                    <article
+                        v-for="(item, index) in rankData"
+                        :key="item.rank"
+                        class="relative overflow-hidden rounded-xs border p-3 backdrop-blur-sm animate-ef-rise motion-reduce:animate-none"
+                        :class="isTopThreeRank(index) ? 'border-primary/40 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
+                        :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                    >
+                        <!-- 左侧主色强调条：前三档显现 -->
+                        <span
+                            class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                            :class="isTopThreeRank(index) ? 'opacity-100' : 'opacity-0'"
+                            aria-hidden="true"
+                        />
+                        <div class="flex items-center gap-3">
+                            <img class="h-12 shrink-0" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
+                            <div class="min-w-0">
+                                <p
+                                    class="font-orbitron text-lg font-bold tabular-nums"
+                                    :class="isTopThreeRank(index) ? 'text-primary' : ''"
+                                >
+                                    {{ item.rank }}
+                                </p>
+                                <p class="mt-0.5 text-[11px] text-base-content/50">
+                                    {{ t("db-raid-rank.rank_requirement", { percent: item.percent }) }}
+                                </p>
+                            </div>
+                        </div>
+                        <!--
                         称号框给固定尺寸（210×64）。宽度按实机截图反推：截图里
                         「卑鄙的异乡人」六个字共 80px，中日韩字形的步进是 1.0em，
                         即字号 15 单位 → 每字 13.3px，实机缩放约 0.89 像素/设计单位，
                         对应设计画布 236 单位 → 210px。组件内部按设计画布定比例，
                         与各框贴图的实际大小无关，所以所有赛季的文字像素大小一致。
                     -->
-                    <div class="relative mt-3 inline-flex w-52.5 max-w-full">
-                        <TitleFrameRender
-                            v-if="getTitleFrameId(item.reward)"
-                            class="h-16 w-full shrink-0"
-                            :title-frame-id="getTitleFrameId(item.reward)"
-                            :title="$t(item.reward.child?.[0].n || '')"
-                        />
-                        <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
-                        <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
-                            <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
+                        <div class="relative mt-3 inline-flex w-52.5 max-w-full">
+                            <TitleFrameRender
+                                v-if="getTitleFrameId(item.reward)"
+                                class="h-16 w-full shrink-0"
+                                :title-frame-id="getTitleFrameId(item.reward)"
+                                :title="$t(item.reward.child?.[0].n || '')"
+                            />
+                            <img
+                                v-else-if="!rankImgFailed.has(`${selectedSeason}_${item.rank}`)"
+                                class="h-12"
+                                :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`"
+                                :alt="item.rank"
+                                @error="onRankImgError(`${selectedSeason}_${item.rank}`)"
+                            />
+                            <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
+                                <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
+                            </div>
                         </div>
-                    </div>
-                    <!-- 奖励明细（内层小卡） -->
-                    <div :key="item.reward.id" class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                        <!-- 使用 RewardItem 组件显示奖励 -->
-                        <RewardItem :reward="item.reward" header />
-                    </div>
-                </article>
+                        <!-- 奖励明细（内层小卡） -->
+                        <div :key="item.reward.id" class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                            <!-- 使用 RewardItem 组件显示奖励 -->
+                            <RewardItem :reward="item.reward" header />
+                        </div>
+                    </article>
+                </div>
             </div>
         </div>
     </ScrollArea>

@@ -130,7 +130,11 @@ function matchesWikiKeyword(entry: WikiListEntry, keyword: string): boolean {
         return true
     }
 
-    if (matchPinyin(wikiEntry.title, keyword).match || matchPinyin(subTypeName, keyword).match || matchPinyin(mainTypeName, keyword).match) {
+    if (
+        matchPinyin(wikiEntry.title, keyword).match ||
+        matchPinyin(subTypeName, keyword).match ||
+        matchPinyin(mainTypeName, keyword).match
+    ) {
         return true
     }
 
@@ -159,7 +163,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
         <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedEntry)" @collapse="selectEntry(null)">
             <template #master>
                 <!-- 左侧列表面板 -->
-                <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedEntry }"
+                >
                     <!-- 检索带：下划线搜索 + 计数 -->
                     <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                         <div class="relative">
@@ -181,7 +188,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                     <!-- 筛选带：大类方章（带页签图标） -->
                     <div class="flex-none border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">CATEGORY</span>
+                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40"
+                                >CATEGORY</span
+                            >
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -204,7 +213,12 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                 "
                                 @click="selectedMainTypeId = tab.id"
                             >
-                                <img v-if="tab.icon" :src="`/imgs/webp/${tab.icon}.webp`" :alt="gt(tab.name)" class="h-3.5 w-3.5 object-contain" />
+                                <img
+                                    v-if="tab.icon"
+                                    :src="`/imgs/webp/${tab.icon}.webp`"
+                                    :alt="gt(tab.name)"
+                                    class="h-3.5 w-3.5 object-contain"
+                                />
                                 {{ gt(tab.name) }}
                             </button>
                         </div>
@@ -217,7 +231,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                 <!-- 子类章节头 -->
                                 <div class="flex items-center gap-2 px-1">
                                     <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">SUBTYPE</span>
-                                    <span class="text-xs font-semibold tracking-wide text-base-content/70">{{ gt(group.subTypeName) }}</span>
+                                    <span class="text-xs font-semibold tracking-wide text-base-content/70">{{
+                                        gt(group.subTypeName)
+                                    }}</span>
                                     <span class="h-px flex-1 bg-base-content/15" aria-hidden="true" />
                                     <span class="font-mono text-[10px] tabular-nums text-base-content/40">{{ group.entries.length }}</span>
                                 </div>
@@ -250,7 +266,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                             <div class="mt-1 truncate text-[11px] text-base-content/50">{{ gt(entry.mainTypeName) }}</div>
                                         </div>
                                         <div class="flex shrink-0 flex-col items-end gap-1">
-                                            <span class="font-mono text-[10px] tabular-nums text-base-content/40">x{{ entry.entry.texts.length }}</span>
+                                            <span class="font-mono text-[10px] tabular-nums text-base-content/40"
+                                                >x{{ entry.entry.texts.length }}</span
+                                            >
                                             <span
                                                 v-if="entry.entry.related?.length"
                                                 class="rounded-xs border border-secondary/30 bg-secondary/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-secondary"

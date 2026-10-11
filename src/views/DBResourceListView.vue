@@ -123,9 +123,9 @@ function closeSelectedResource(): void {
                     <!-- 底部统计条 -->
                     <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                         <p class="text-[11px] tracking-wide text-base-content/50">
-                            {{ $t('common.total_count') }}
+                            {{ $t("common.total_count") }}
                             <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredResources.length }}</b>
-                            {{ $t('db-resource-list.resource_count') }}
+                            {{ $t("db-resource-list.resource_count") }}
                         </p>
                     </div>
                 </div>

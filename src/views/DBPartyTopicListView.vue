@@ -139,126 +139,124 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 3"
-            :detail-open="Boolean(selectedPartyTopic)"
-            @collapse="selectPartyTopic(null)"
-        >
+        <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedPartyTopic)" @collapse="selectPartyTopic(null)">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedPartyTopic }"
-            >
-                <!-- 检索带：下划线搜索 + 计数 + 角色筛选 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedPartyTopic }"
                 >
-                    <!-- 下划线搜索框 -->
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-party-topic-list.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredPartyTopics.length }}
-                        </span>
-                    </div>
-
-                    <!-- 角色筛选 -->
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('db-party-topic-list.filter_char') }}</span>
-                        <Select
-                            v-model="selectedCharacterId"
-                            class="w-full min-w-0 flex-1 rounded-none border-b border-base-content/25 bg-transparent px-2 py-1 text-xs outline-none transition-colors duration-150 focus:border-primary"
-                        >
-                            <SelectItem value="-">{{ $t('db-party-topic-list.all_chars') }}</SelectItem>
-                            <SelectItem
-                                v-for="characterOption in characterOptions"
-                                :key="characterOption.charId"
-                                :value="characterOption.charId"
+                    <!-- 检索带：下划线搜索 + 计数 + 角色筛选 -->
+                    <div class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <!-- 下划线搜索框 -->
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-party-topic-list.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
                             >
-                                {{ $t(characterOption.charName) }}
-                            </SelectItem>
-                        </Select>
-                    </div>
-                </div>
+                                {{ filteredPartyTopics.length }}
+                            </span>
+                        </div>
 
-                <ScrollArea class="flex-1">
-                    <div class="space-y-2 p-3">
-                        <article
-                            v-for="(partyTopic, index) in filteredPartyTopics"
-                            :key="partyTopic.id"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                        <!-- 角色筛选 -->
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t("db-party-topic-list.filter_char") }}</span>
+                            <Select
+                                v-model="selectedCharacterId"
+                                class="w-full min-w-0 flex-1 rounded-none border-b border-base-content/25 bg-transparent px-2 py-1 text-xs outline-none transition-colors duration-150 focus:border-primary"
+                            >
+                                <SelectItem value="-">{{ $t("db-party-topic-list.all_chars") }}</SelectItem>
+                                <SelectItem
+                                    v-for="characterOption in characterOptions"
+                                    :key="characterOption.charId"
+                                    :value="characterOption.charId"
+                                >
+                                    {{ $t(characterOption.charName) }}
+                                </SelectItem>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <ScrollArea class="flex-1">
+                        <div class="space-y-2 p-3">
+                            <article
+                                v-for="(partyTopic, index) in filteredPartyTopics"
+                                :key="partyTopic.id"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
                                 selectedPartyTopicId === partyTopic.id
                                     ? 'dbpt-item-active border-primary/70 bg-primary/10'
                                     : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                             "
-                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                            @click="selectPartyTopic(partyTopic)"
-                        >
-                            <!-- 左侧主色强调条：选中时显现 -->
-                            <span
-                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                :class="selectedPartyTopicId === partyTopic.id ? 'opacity-100' : 'opacity-0'"
-                                aria-hidden="true"
-                            />
-                            <div class="p-3">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div class="min-w-0 flex-1">
-                                        <div
-                                            class="line-clamp-1 text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                            :class="{ 'text-primary': selectedPartyTopicId === partyTopic.id }"
-                                        >
-                                            {{ partyTopic.name }}
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectPartyTopic(partyTopic)"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedPartyTopicId === partyTopic.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="p-3">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <div
+                                                class="line-clamp-1 text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedPartyTopicId === partyTopic.id }"
+                                            >
+                                                {{ partyTopic.name }}
+                                            </div>
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
+                                            >
+                                                <span>{{ $t(getCharacterName(partyTopic.charId)) }}</span>
+                                                <span
+                                                    >{{ $t("db-party-topic-list.resource") }}
+                                                    <span class="font-mono tabular-nums">{{ getConsumeCount(partyTopic) }}</span>
+                                                    {{ $t("common.items") }}</span
+                                                >
+                                            </div>
                                         </div>
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span>{{ $t(getCharacterName(partyTopic.charId)) }}</span>
-                                            <span>{{ $t('db-party-topic-list.resource') }} <span class="font-mono tabular-nums">{{ getConsumeCount(partyTopic) }}</span> {{ $t('common.items') }}</span>
-                                        </div>
+
+                                        <CopyID :id="partyTopic.id" class="ml-auto shrink-0" />
                                     </div>
 
-                                    <CopyID :id="partyTopic.id" class="ml-auto shrink-0" />
+                                    <div class="mt-2 flex items-center gap-2 text-[11px] text-base-content/45">
+                                        <span>
+                                            {{
+                                                $t("db-party-topic-list.prerequisite_value", {
+                                                    name: partyTopic.conditionId
+                                                        ? $t(getPrerequisiteName(partyTopic.conditionId))
+                                                        : $t("common.none"),
+                                                })
+                                            }}
+                                        </span>
+                                    </div>
                                 </div>
+                            </article>
+                        </div>
+                    </ScrollArea>
 
-                                <div class="mt-2 flex items-center gap-2 text-[11px] text-base-content/45">
-                                    <span>
-                                        {{
-                                            $t("db-party-topic-list.prerequisite_value", {
-                                                name: partyTopic.conditionId
-                                                    ? $t(getPrerequisiteName(partyTopic.conditionId))
-                                                    : $t("common.none"),
-                                            })
-                                        }}
-                                    </span>
-                                </div>
-                            </div>
-                        </article>
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredPartyTopics.length }}</b>
+                            {{ $t("db-party-topic-list.topic_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredPartyTopics.length }}</b> {{ $t('db-party-topic-list.topic_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <ScrollArea v-if="selectedPartyTopic" :key="selectedPartyTopic.id" class="min-h-0 flex-2">
-                <DBPartyTopicDetailItem :key="selectedPartyTopicId" :party-topic="selectedPartyTopic" />
-            </ScrollArea>
+                <ScrollArea v-if="selectedPartyTopic" :key="selectedPartyTopic.id" class="min-h-0 flex-2">
+                    <DBPartyTopicDetailItem :key="selectedPartyTopicId" :party-topic="selectedPartyTopic" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

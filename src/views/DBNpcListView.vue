@@ -436,7 +436,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                 "
                                 @click="showImprCheckOnly = !showImprCheckOnly"
                             >
-                                {{ $t('common.impression_check') }}
+                                {{ $t("common.impression_check") }}
                             </button>
 
                             <button
@@ -449,7 +449,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                 "
                                 @click="showImprIncreaseOnly = !showImprIncreaseOnly"
                             >
-                                {{ $t('common.impression_increase') }}
+                                {{ $t("common.impression_increase") }}
                             </button>
 
                             <button
@@ -462,7 +462,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                 "
                                 @click="showFullTextSearch = !showFullTextSearch"
                             >
-                                {{ $t('common.full_text_search') }}
+                                {{ $t("common.full_text_search") }}
                             </button>
 
                             <button
@@ -475,7 +475,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                 "
                                 @click="showDialogueOnly = !showDialogueOnly"
                             >
-                                {{ $t('db-npc-list.dialogue_only') }}
+                                {{ $t("db-npc-list.dialogue_only") }}
                             </button>
                         </div>
                     </div>
@@ -486,7 +486,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                         class="flex flex-1 flex-col items-center justify-center gap-4 text-base-content/45"
                     >
                         <Icon icon="ri:user-search-line" class="h-12 w-12 opacity-40" />
-                        <p class="text-sm">{{ $t('db-npc-list.no_match') }}</p>
+                        <p class="text-sm">{{ $t("db-npc-list.no_match") }}</p>
                     </div>
                     <VirtualList
                         v-else
@@ -541,13 +541,13 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                                     v-if="hasNpcImprCheck(npcResult.npc)"
                                                     class="rounded-xs border border-secondary/30 bg-secondary/10 px-1 py-0.5 text-[10px] leading-4 tracking-wide text-secondary"
                                                 >
-                                                    {{ $t('common.impression_check') }}
+                                                    {{ $t("common.impression_check") }}
                                                 </span>
                                                 <span
                                                     v-if="hasNpcImprIncrease(npcResult.npc)"
                                                     class="rounded-xs border border-success/30 bg-success/10 px-1 py-0.5 text-[10px] leading-4 tracking-wide text-success"
                                                 >
-                                                    {{ $t('common.impression_increase') }}
+                                                    {{ $t("common.impression_increase") }}
                                                 </span>
                                                 <span v-if="npcResult.npc.talks?.length">{{ npcResult.npc.talks.length }} 条对话</span>
                                             </div>
@@ -570,7 +570,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                         v-if="showsSnippet && npcResult.snippet"
                                         class="mt-2 line-clamp-2 text-xs leading-relaxed text-base-content/70"
                                     >
-                                        <span class="text-base-content/45">{{ $t('common.match') }}</span>
+                                        <span class="text-base-content/45">{{ $t("common.match") }}</span>
                                         <span v-if="npcResult.snippet.prefixEllipsis">...</span>
                                         <template
                                             v-for="(segment, index) in npcResult.snippet.segments"

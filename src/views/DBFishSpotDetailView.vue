@@ -16,12 +16,12 @@ const fishSpot = computed(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
+    <ScrollSpyLayout auto nav-kicker="DATABASE" class="h-full">
         <!-- 居中容器：与首页一致的纸面排版宽度 -->
         <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <div>
                 <DBFishSpotDetailItem :spot="fishSpot" />
             </div>
         </div>
-    </ScrollArea>
+    </ScrollSpyLayout>
 </template>

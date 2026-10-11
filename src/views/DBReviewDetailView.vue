@@ -16,13 +16,27 @@ const entry = computed<ReviewEntry | null>(() => {
             const main = chain.main.find(review => review.id === reviewId.value)
 
             if (main) {
-                return { pageId: page.id, episodeName: page.episodeName || "", chainId: chain.id, column: chain.column, isMain: true, review: main }
+                return {
+                    pageId: page.id,
+                    episodeName: page.episodeName || "",
+                    chainId: chain.id,
+                    column: chain.column,
+                    isMain: true,
+                    review: main,
+                }
             }
 
             const side = chain.side.find(review => review.id === reviewId.value)
 
             if (side) {
-                return { pageId: page.id, episodeName: page.episodeName || "", chainId: chain.id, column: chain.column, isMain: false, review: side }
+                return {
+                    pageId: page.id,
+                    episodeName: page.episodeName || "",
+                    chainId: chain.id,
+                    column: chain.column,
+                    isMain: false,
+                    review: side,
+                }
             }
         }
     }
@@ -32,7 +46,7 @@ const entry = computed<ReviewEntry | null>(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
+    <ScrollSpyLayout auto nav-kicker="DATABASE" class="h-full">
         <!-- 居中容器：与迷津 / NPC 详情页一致的纸面排版宽度 -->
         <div v-if="entry" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <DBReviewDetailItem :entry="entry" />
@@ -40,5 +54,5 @@ const entry = computed<ReviewEntry | null>(() => {
         <div v-else class="p-4">
             <div class="text-base-content/70">{{ $t("review-detail.notFound") }}</div>
         </div>
-    </ScrollArea>
+    </ScrollSpyLayout>
 </template>

@@ -152,14 +152,14 @@ onBeforeUnmount(() => {
         >
             <div class="flex items-center gap-2.5 text-warning">
                 <Icon icon="ri:error-warning-line" class="size-8" />
-                <span class="text-sm font-semibold tracking-wide">{{ $t('user-manager.web_unavailable') }}</span>
+                <span class="text-sm font-semibold tracking-wide">{{ $t("user-manager.web_unavailable") }}</span>
             </div>
             <a
                 href="https://api.dna-builder.cn/api/download"
                 class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-5 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
             >
                 <Icon icon="ri:download-2-line" class="size-4" />
-                {{ $t('user-manager.download_app') }}
+                {{ $t("user-manager.download_app") }}
             </a>
         </div>
 
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
                             @click="isAddIframeOpen = true"
                         >
                             <Icon icon="ri:add-line" class="size-3.5" />
-                            {{ $t('user-manager.add_account') }}
+                            {{ $t("user-manager.add_account") }}
                         </button>
                         <!-- 通过JSON添加账号 -->
                         <Tooltip :tooltip="$t('user-manager.add_account_tip')" side="bottom">
@@ -351,7 +351,7 @@ onBeforeUnmount(() => {
                             class="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary text-[13px] font-semibold text-primary-content transition-opacity duration-150 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
                             :disabled="!jsonInput.length"
                         >
-                            {{ $t('user-manager.add_account') }}
+                            {{ $t("user-manager.add_account") }}
                         </button>
 
                         <!-- 辅助信息 -->

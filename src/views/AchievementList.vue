@@ -5,7 +5,7 @@ import { computed, nextTick, ref, useTemplateRef, watch } from "vue"
 import VirtualList from "@/components/VirtualList.vue"
 import { achievementData } from "@/data"
 import { useUIStore } from "@/store/ui"
-import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
+import { matchPinyin } from "@/utils/pinyin-utils"
 
 /**
  * 成就卡片高度的估算下界（px）。
@@ -27,26 +27,14 @@ const LIST_GAP = 12
 const ui = useUIStore()
 
 /**
- * 文本 → 拼音检索索引的缓存。
- *
- * 数据集是静态的，而拼音转换是全页最重的一环：搜索框每敲一个字都要对全量条目重算一次拼音。
- * 这里按文本缓存首字母与全拼，让每条数据的拼音只算一次。
- */
-const pinyinIndexCache = new Map<string, { first: string; full: string }>()
-
-/**
- * 判断文本是否命中拼音检索（首字母或全拼）。
+ * 判断文本是否命中拼音检索（首字母或全拼，含多音字各读音）。
+ * 直接复用 pinyin-utils 的多音字匹配，避免本地单读音缓存漏掉「茜读xi」这类异读。
  * @param text 待匹配文本（成就名称或描述）
  * @param query 已转小写的查询串
  * @returns 是否命中
  */
 function matchesPinyin(text: string, query: string): boolean {
-    let index = pinyinIndexCache.get(text)
-    if (!index) {
-        index = { first: getPinyinFirst(text).toLowerCase(), full: getPinyin(text).toLowerCase() }
-        pinyinIndexCache.set(text, index)
-    }
-    return index.first.includes(query) || index.full.includes(query)
+    return matchPinyin(text, query).match
 }
 
 // 用户已完成的成就ID列表
@@ -304,7 +292,8 @@ function getAchievementIcon(category: string) {
                 <div class="flex items-baseline gap-3">
                     <h1 class="text-sm font-semibold tracking-wide">{{ $t("achievement.title") }}</h1>
                     <span class="font-mono text-[11px] tabular-nums text-base-content/45">
-                        {{ userFinishedIds.length }} / {{ achievementData.length }}
+                        {{ userFinishedIds.length }}
+                        / {{ achievementData.length }}
                     </span>
                 </div>
 
@@ -494,10 +483,7 @@ function getAchievementIcon(category: string) {
                                     class="checkbox checkbox-sm"
                                     @change="toggleAchievement(achievement.id)"
                                 />
-                                <h3
-                                    class="truncate text-sm font-medium"
-                                    :class="{ 'line-through opacity-50': isFinished(achievement.id) }"
-                                >
+                                <h3 class="truncate text-sm font-medium" :class="{ 'line-through opacity-50': isFinished(achievement.id) }">
                                     {{ $t(achievement.名称) }}
                                 </h3>
                             </div>
@@ -540,12 +526,9 @@ function getAchievementIcon(category: string) {
                 </VirtualList>
 
                 <!-- 空状态 -->
-                <div
-                    v-else
-                    class="flex flex-1 flex-col items-center justify-center text-base-content/45"
-                >
+                <div v-else class="flex flex-1 flex-col items-center justify-center text-base-content/45">
                     <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
-                    <p class="text-sm">{{ $t('achievement-list.no_match') }}</p>
+                    <p class="text-sm">{{ $t("achievement-list.no_match") }}</p>
                 </div>
             </div>
         </div>

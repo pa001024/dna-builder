@@ -425,7 +425,7 @@ const charBuild = computed(() => {
             enemyResistance: charSettings.value.enemyResistance,
             targetFunction: charSettings.value.targetFunction,
             customVariables: charSettings.value.customVariables,
-            timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
+            timeline: charSettings.value.actions?.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
             extraMastery: char.额外精通?.includes(charSettings.value.extraMastery) ? charSettings.value.extraMastery : "",
             dotSettings: charSettings.value.dotSettings,
@@ -462,9 +462,7 @@ const currentSkillLevel = computed({
     },
     set: value => {
         if (selectedSkillLevelIndex.value === -1) return
-        const current = Array.isArray(charSettings.value.charSkillLevel)
-            ? [...charSettings.value.charSkillLevel]
-            : [10, 10, 10]
+        const current = Array.isArray(charSettings.value.charSkillLevel) ? [...charSettings.value.charSkillLevel] : [10, 10, 10]
         current[selectedSkillLevelIndex.value] = Math.max(1, Math.min(12, Math.round(value)))
         charSettings.value.charSkillLevel = current as [number, number, number]
     },
@@ -2028,1034 +2026,1076 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         }}</span>
     </div>
     <template v-else>
-    <!-- Tour 组件 -->
-    <VTour
-        ref="tour"
-        :steps="steps"
-        :button-labels="buttonLabels"
-        backdrop
-        highlight
-        no-scroll
-        @on-tour-step="handleTourStep"
-        @on-tour-end="tourStore.markTourCompleted('char-build')"
-    />
-
-    <!-- 表达式字段拖拽 / 放置：浮动标签（内容 = 将要插入的字符串，跟随指针）+ 触控抓起的提示条（挂到 body，避免被滚动容器裁剪） -->
-    <Teleport to="body">
-        <div
-            v-if="exprFloatingPayload"
-            data-expr-float
-            class="pointer-events-none fixed z-10000 rounded-xs border border-primary/50 bg-base-100/95 px-2 py-1 text-xs font-semibold whitespace-nowrap text-primary shadow-lg"
-            :style="{ left: `${exprGhostPosition.x + 14}px`, top: `${exprGhostPosition.y + 16}px` }"
-        >
-            {{ exprFloatingPayload.expr }}
-        </div>
-        <div
-            v-if="exprDragPayload && !exprDragging"
-            data-expr-armed-hint
-            class="fixed bottom-4 left-1/2 z-10000 flex -translate-x-1/2 items-center gap-2 rounded-xs border border-primary/40 bg-base-100/95 px-3 py-1.5 text-xs text-base-content shadow-lg"
-        >
-            <Icon icon="ri:drag-move-line" class="size-3.5 shrink-0 text-primary" />
-            <span>{{ $t("char-build.drag_field_armed", { name: exprDragPayload.label }) }}</span>
-            <button type="button" class="cursor-pointer font-semibold text-primary hover:underline" @click="clearExprDrag">
-                {{ $t("取消") }}
-            </button>
-        </div>
-    </Teleport>
-
-    <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
-            <GameSimulator v-if="simulator_model_show" :char-build="charBuild" />
-        </div>
-        <div class="modal-backdrop" @click="simulator_model_show = false" />
-    </dialog>
-    <dialog class="modal" :class="{ 'modal-open': autobuild_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-            <AutoBuild :update="autobuild_model_show" :char-build="charBuild" @change="newBuild = $event" />
-            <div class="modal-action">
-                <form class="flex justify-end gap-2" method="dialog">
-                    <button class="btn btn-primary" @click="applyAutobuild">
-                        {{ $t("应用") }}
-                    </button>
-                    <button class="btn" @click="autobuild_model_show = false">
-                        {{ $t("取消") }}
-                    </button>
-                </form>
-            </div>
-        </div>
-        <div class="modal-backdrop" @click="autobuild_model_show = false" />
-    </dialog>
-    <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
-            <ASTHelp
-                v-if="ast_help_model_show"
-                v-model="ast_help_model_show"
-                :char-build="charBuild"
-                :skill="charBuild.selectedSkill"
-                @select="targetFunction = $event"
-            />
-        </div>
-        <div class="modal-backdrop" @click="ast_help_model_show = false" />
-    </dialog>
-    <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
-            <WeaponListView
-                v-if="weapon_select_model_show"
-                :char-build="charBuild"
-                :default-tab="weaponDefaultTab"
-                :melee="charSettings.meleeWeapon"
-                :ranged="charSettings.rangedWeapon"
-                :use-global="charSettings.useGlobal"
-                :char-settings="charSettings"
-                @change="handleWeaponSelection"
-            />
-            <div class="modal-action">
-                <form class="flex justify-end gap-2" method="dialog">
-                    <button class="btn btn-primary" @click="applyWeaponSelection">
-                        {{ $t("应用") }}
-                    </button>
-                    <button class="btn" @click="weapon_select_model_show = false">
-                        {{ $t("取消") }}
-                    </button>
-                </form>
-            </div>
-        </div>
-        <div class="modal-backdrop" @click="weapon_select_model_show = false" />
-    </dialog>
-    <dialog class="modal" :class="{ 'modal-open': monster_select_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
-            <MonsterListView
-                v-if="monster_select_model_show"
-                :selected-id="charSettings.enemyId"
-                :level="charSettings.enemyLevel"
-                @select="selectEnemy"
-            />
-            <div class="modal-action">
-                <button class="btn" @click="monster_select_model_show = false">{{ $t("common.close") }}</button>
-            </div>
-        </div>
-        <div class="modal-backdrop" @click="monster_select_model_show = false" />
-    </dialog>
-    <!-- DOT设置详情弹窗 -->
-    <dialog class="modal" :class="{ 'modal-open': dot_model_show }">
-        <DotConfigDialog
-            v-if="dot_model_show"
-            :char-build="charBuild"
-            :dot-settings="charSettings.dotSettings"
-            @close="dot_model_show = false"
+        <!-- Tour 组件 -->
+        <VTour
+            ref="tour"
+            :steps="steps"
+            :button-labels="buttonLabels"
+            backdrop
+            highlight
+            no-scroll
+            @on-tour-step="handleTourStep"
+            @on-tour-end="tourStore.markTourCompleted('char-build')"
         />
-        <div class="modal-backdrop" @click="dot_model_show = false" />
-    </dialog>
 
-    <!-- 额外精通武器选择弹窗 -->
-    <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
-        <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
-        <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
-        <!-- 卡片网格：auto-fit 让空轨道塌陷，条目少时整组居中；轨道上限 128px 避免卡片被拉伸 -->
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(96px,128px))] justify-center gap-2">
-            <button
-                v-for="item in extraMasteryOptions"
-                :key="item.id"
-                type="button"
-                class="flex flex-col items-center justify-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
-                :class="
+        <!-- 表达式字段拖拽 / 放置：浮动标签（内容 = 将要插入的字符串，跟随指针）+ 触控抓起的提示条（挂到 body，避免被滚动容器裁剪） -->
+        <Teleport to="body">
+            <div
+                v-if="exprFloatingPayload"
+                data-expr-float
+                class="pointer-events-none fixed z-10000 rounded-xs border border-primary/50 bg-base-100/95 px-2 py-1 text-xs font-semibold whitespace-nowrap text-primary shadow-lg"
+                :style="{ left: `${exprGhostPosition.x + 14}px`, top: `${exprGhostPosition.y + 16}px` }"
+            >
+                {{ exprFloatingPayload.expr }}
+            </div>
+            <div
+                v-if="exprDragPayload && !exprDragging"
+                data-expr-armed-hint
+                class="fixed bottom-4 left-1/2 z-10000 flex -translate-x-1/2 items-center gap-2 rounded-xs border border-primary/40 bg-base-100/95 px-3 py-1.5 text-xs text-base-content shadow-lg"
+            >
+                <Icon icon="ri:drag-move-line" class="size-3.5 shrink-0 text-primary" />
+                <span>{{ $t("char-build.drag_field_armed", { name: exprDragPayload.label }) }}</span>
+                <button type="button" class="cursor-pointer font-semibold text-primary hover:underline" @click="clearExprDrag">
+                    {{ $t("取消") }}
+                </button>
+            </div>
+        </Teleport>
+
+        <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
+                <GameSimulator v-if="simulator_model_show" :char-build="charBuild" />
+            </div>
+            <div class="modal-backdrop" @click="simulator_model_show = false" />
+        </dialog>
+        <dialog class="modal" :class="{ 'modal-open': autobuild_model_show }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+                <AutoBuild :update="autobuild_model_show" :char-build="charBuild" @change="newBuild = $event" />
+                <div class="modal-action">
+                    <form class="flex justify-end gap-2" method="dialog">
+                        <button class="btn btn-primary" @click="applyAutobuild">
+                            {{ $t("应用") }}
+                        </button>
+                        <button class="btn" @click="autobuild_model_show = false">
+                            {{ $t("取消") }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-backdrop" @click="autobuild_model_show = false" />
+        </dialog>
+        <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
+                <ASTHelp
+                    v-if="ast_help_model_show"
+                    v-model="ast_help_model_show"
+                    :char-build="charBuild"
+                    :skill="charBuild.selectedSkill"
+                    @select="targetFunction = $event"
+                />
+            </div>
+            <div class="modal-backdrop" @click="ast_help_model_show = false" />
+        </dialog>
+        <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
+                <WeaponListView
+                    v-if="weapon_select_model_show"
+                    :char-build="charBuild"
+                    :default-tab="weaponDefaultTab"
+                    :melee="charSettings.meleeWeapon"
+                    :ranged="charSettings.rangedWeapon"
+                    :use-global="charSettings.useGlobal"
+                    :char-settings="charSettings"
+                    @change="handleWeaponSelection"
+                />
+                <div class="modal-action">
+                    <form class="flex justify-end gap-2" method="dialog">
+                        <button class="btn btn-primary" @click="applyWeaponSelection">
+                            {{ $t("应用") }}
+                        </button>
+                        <button class="btn" @click="weapon_select_model_show = false">
+                            {{ $t("取消") }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-backdrop" @click="weapon_select_model_show = false" />
+        </dialog>
+        <dialog class="modal" :class="{ 'modal-open': monster_select_model_show }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
+                <MonsterListView
+                    v-if="monster_select_model_show"
+                    :selected-id="charSettings.enemyId"
+                    :level="charSettings.enemyLevel"
+                    @select="selectEnemy"
+                />
+                <div class="modal-action">
+                    <button class="btn" @click="monster_select_model_show = false">{{ $t("common.close") }}</button>
+                </div>
+            </div>
+            <div class="modal-backdrop" @click="monster_select_model_show = false" />
+        </dialog>
+        <!-- DOT设置详情弹窗 -->
+        <dialog class="modal" :class="{ 'modal-open': dot_model_show }">
+            <DotConfigDialog
+                v-if="dot_model_show"
+                :char-build="charBuild"
+                :dot-settings="charSettings.dotSettings"
+                @close="dot_model_show = false"
+            />
+            <div class="modal-backdrop" @click="dot_model_show = false" />
+        </dialog>
+
+        <!-- 额外精通武器选择弹窗 -->
+        <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
+            <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
+            <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
+            <!-- 卡片网格：auto-fit 让空轨道塌陷，条目少时整组居中；轨道上限 128px 避免卡片被拉伸 -->
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(96px,128px))] justify-center gap-2">
+                <button
+                    v-for="item in extraMasteryOptions"
+                    :key="item.id"
+                    type="button"
+                    class="flex flex-col items-center justify-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
+                    :class="
                     pendingExtraMastery === item.名称
                         ? 'border-primary bg-primary/10 text-primary shadow-sm'
                         : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
                 "
-                @click="selectExtraMastery(item.名称)"
-            >
-                <!-- 图标走 mask 上色：原图是白色字形，直接显示在浅色主题下不可见；mask 取 currentColor 随选中态变化 -->
-                <div
-                    :alt="$t('char-build.extra_mastery_weapon_icon')"
-                    class="size-9 shrink-0 bg-current"
-                    :style="{ mask: `url(${LeveledWeapon.typeUrl(item.名称)}) no-repeat center/contain` }"
-                />
-                <span class="text-xs">{{ $t(item.名称) }}</span>
-            </button>
-        </div>
-        <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-            <div class="flex items-center justify-between gap-2 mb-1">
-                <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
-                <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
-                    {{ pendingExtraMasteryItem.id }}
+                    @click="selectExtraMastery(item.名称)"
+                >
+                    <!-- 图标走 mask 上色：原图是白色字形，直接显示在浅色主题下不可见；mask 取 currentColor 随选中态变化 -->
+                    <div
+                        :alt="$t('char-build.extra_mastery_weapon_icon')"
+                        class="size-9 shrink-0 bg-current"
+                        :style="{ mask: `url(${LeveledWeapon.typeUrl(item.名称)}) no-repeat center/contain` }"
+                    />
+                    <span class="text-xs">{{ $t(item.名称) }}</span>
+                </button>
+            </div>
+            <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
+                    <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
+                        {{ pendingExtraMasteryItem.id }}
+                    </div>
+                </div>
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
+                <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+                    <ResourceCostItem
+                        v-for="[ resourceId, count ] in Object.entries(pendingExtraMasteryItem.消耗)"
+                        :key="resourceId"
+                        :name="getExtraMasteryResourceName(Number(resourceId))"
+                        :value="count"
+                    />
                 </div>
             </div>
-            <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
-            <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-                <ResourceCostItem
-                    v-for="[resourceId, count] in Object.entries(pendingExtraMasteryItem.消耗)"
-                    :key="resourceId"
-                    :name="getExtraMasteryResourceName(Number(resourceId))"
-                    :value="count"
-                />
-            </div>
-        </div>
-        <template #action>
-            <div class="flex w-full justify-between gap-2">
-                <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
-                    <Icon icon="ri:delete-bin-line" class="size-4" />
-                    {{ $t("char-build.extra_mastery_clear") }}
-                </button>
-                <div class="ml-auto" />
-                <button type="button" class="btn btn-sm" @click="closeExtraMasteryModal">
-                    {{ $t("取消") }}
-                </button>
-                <button type="button" class="btn btn-sm btn-primary" @click="confirmExtraMastery">
-                    {{ $t("确定") }}
-                </button>
-            </div>
-        </template>
-    </DialogModel>
+            <template #action>
+                <div class="flex w-full justify-between gap-2">
+                    <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
+                        <Icon icon="ri:delete-bin-line" class="size-4" />
+                        {{ $t("char-build.extra_mastery_clear") }}
+                    </button>
+                    <div class="ml-auto" />
+                    <button type="button" class="btn btn-sm" @click="closeExtraMasteryModal">
+                        {{ $t("取消") }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" @click="confirmExtraMastery">
+                        {{ $t("确定") }}
+                    </button>
+                </div>
+            </template>
+        </DialogModel>
 
-    <!-- 配装分享弹窗 -->
-    <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
-        <div class="space-y-4">
-            <h3 class="text-xl font-bold">{{ $t("char-build.share_build") }}</h3>
-            <div>
-                <label class="label" for="share-title">
-                    <span class="label-text">{{ $t("char-build.title") }}</span>
-                </label>
-                <input
-                    id="share-title"
-                    v-model="share_title"
-                    type="text"
-                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                    :placeholder="$t('char-build.enter_title')"
-                    maxlength="50"
-                />
+        <!-- 配装分享弹窗 -->
+        <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold">{{ $t("char-build.share_build") }}</h3>
+                <div>
+                    <label class="label" for="share-title">
+                        <span class="label-text">{{ $t("char-build.title") }}</span>
+                    </label>
+                    <input
+                        id="share-title"
+                        v-model="share_title"
+                        type="text"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        :placeholder="$t('char-build.enter_title')"
+                        maxlength="50"
+                    />
+                </div>
+                <div>
+                    <label class="label" for="share-desc">
+                        <span class="label-text">{{ $t("char-build.description") }}</span>
+                    </label>
+                    <textarea
+                        id="share-desc"
+                        v-model="share_desc"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
+                        :placeholder="$t('char-build.enter_description')"
+                        rows="3"
+                        maxlength="2000"
+                    ></textarea>
+                </div>
             </div>
-            <div>
-                <label class="label" for="share-desc">
-                    <span class="label-text">{{ $t("char-build.description") }}</span>
-                </label>
-                <textarea
-                    id="share-desc"
-                    v-model="share_desc"
-                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
-                    :placeholder="$t('char-build.enter_description')"
-                    rows="3"
-                    maxlength="2000"
-                ></textarea>
-            </div>
-        </div>
-    </DialogModel>
-    <!-- 简洁模式：独立的全屏 HUD 装配总览（默认），与专业模式互斥渲染 -->
-    <CharBuildSimpleView
-        v-if="buildViewMode === 'simple'"
-        :char-build="charBuild"
-        :attributes="attributes"
-        :char-settings="charSettings"
-        :char-name="selectedChar"
-        @switch-mode="buildViewMode = 'pro'"
-        @use-build="applyLoadedSettings"
-    />
-    <div v-else data-agent-scope="page" data-agent-page="char-build" class="h-full flex flex-col relative">
-        <!-- 背景图 -->
-        <div
-            class="inset-0 absolute opacity-40"
-            :style="{
+        </DialogModel>
+        <!-- 简洁模式：独立的全屏 HUD 装配总览（默认），与专业模式互斥渲染 -->
+        <CharBuildSimpleView
+            v-if="buildViewMode === 'simple'"
+            :char-build="charBuild"
+            :attributes="attributes"
+            :char-settings="charSettings"
+            :char-name="selectedChar"
+            @switch-mode="buildViewMode = 'pro'"
+            @use-build="applyLoadedSettings"
+        />
+        <div v-else data-agent-scope="page" data-agent-page="char-build" class="h-full flex flex-col relative">
+            <!-- 背景图 -->
+            <div
+                class="inset-0 absolute opacity-40"
+                :style="{
                 backgroundImage: `url(${charBuild.char.bustUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }"
-        />
-        <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级）
+            />
+            <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级）
              data-agent-exclude：整条顶栏不对配装助手开放——简洁模式会换掉整个视图、对比会离开本页，
              一旦点到 assistant 就失去操作面。自动配装按钮单独用 data-agent-allow 放行。 -->
-        <div
-            data-tour="top-actions"
-            data-agent-exclude="chrome"
-            class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-1.5 shadow-lg backdrop-blur-sm sm:p-3"
-        >
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
-                <div class="flex min-w-0 items-center gap-2.5 px-1">
-                    <h1 class="font-orbitron text-base font-bold leading-tight tracking-tight text-base-content truncate sm:text-lg">
-                        {{ $t(selectedChar) || $t("char-build.title") }}
-                        <span class="text-primary">Build</span>
-                    </h1>
-                    <span v-if="charBuild.char.属性" class="h-4 w-px shrink-0 bg-base-content/40" aria-hidden="true" />
-                    <span v-if="charBuild.char.属性" class="shrink-0 text-xs text-base-content/60 sm:text-sm">
-                        {{ $t(charBuild.char.属性 + "属性") }}
-                    </span>
-                    <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
-                </div>
-                <!-- 移动端：按钮等宽铺满整行（flex-1 平分整行宽度，不换行、超宽可横向滚动），避免保存/重置独占整行 -->
-                <div
-                    class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible"
-                >
-                    <button
-                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                        :title="$t('char-build.switch_to_simple')"
-                        @click="buildViewMode = 'simple'"
+            <div
+                data-tour="top-actions"
+                data-agent-exclude="chrome"
+                class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-1.5 shadow-lg backdrop-blur-sm sm:p-3"
+            >
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
+                    <div class="flex min-w-0 items-center gap-2.5 px-1">
+                        <h1 class="font-orbitron text-base font-bold leading-tight tracking-tight text-base-content truncate sm:text-lg">
+                            {{ $t(selectedChar) || $t("char-build.title") }}
+                            <span class="text-primary">Build</span>
+                        </h1>
+                        <span v-if="charBuild.char.属性" class="h-4 w-px shrink-0 bg-base-content/40" aria-hidden="true" />
+                        <span v-if="charBuild.char.属性" class="shrink-0 text-xs text-base-content/60 sm:text-sm">
+                            {{ $t(charBuild.char.属性 + "属性") }}
+                        </span>
+                        <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
+                    </div>
+                    <!-- 移动端：按钮等宽铺满整行（flex-1 平分整行宽度，不换行、超宽可横向滚动），避免保存/重置独占整行 -->
+                    <div
+                        class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible"
                     >
-                        <Icon icon="ri:focus-3-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.simple_mode") }}</span>
-                    </button>
-                    <button
-                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                        data-tour="tour-button"
-                        @click="tour?.startTour()"
-                    >
-                        <Icon icon="ri:question-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
-                    </button>
-                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="openShareModal">
-                        <Icon icon="ri:share-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
-                    </button>
-                    <button
-                        v-if="['黎瑟', '赛琪'].includes(selectedChar)"
-                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                        @click="simulator_model_show = true"
-                    >
-                        <Icon icon="ri:game-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
-                    </button>
-                    <button
-                        data-agent="open-auto-build"
-                        data-agent-allow
-                        class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                        @click="autobuild_model_show = true"
-                    >
-                        <Icon icon="ri:robot-2-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
-                    </button>
-                    <button
-                        class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                        @click="$router.push('/char-build-compare')"
-                    >
-                        <Icon icon="ri:bar-chart-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
-                    </button>
-                    <div class="dropdown dropdown-end flex-1 min-w-0 sm:flex-none">
-                        <div
-                            tabindex="0"
-                            role="button"
-                            class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3"
+                        <button
+                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            :title="$t('char-build.switch_to_simple')"
+                            @click="buildViewMode = 'simple'"
                         >
-                            <Icon icon="ri:save-fill" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
-                        </div>
-                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 sm:w-96 shadow-sm">
-                            <div class="card-body space-y-2">
-                                <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
-                                    <li
-                                        v-for="(project, index) in charProject.projects"
-                                        :key="project.name"
-                                        class="p-2 flex items-center gap-2 rounded-md"
-                                        :class="{ 'bg-base-300': project.name === charProject.selected }"
-                                    >
-                                        <input
-                                            v-if="editingProjectIndex === index"
-                                            :id="`char-project-name-input-${index}`"
-                                            v-model="editProjectName"
-                                            class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
-                                            @blur="finishEditProjectName"
-                                            @keyup.enter="finishEditProjectName"
-                                            @keyup.escape="editingProjectIndex = -1"
-                                        />
-                                        <span
-                                            v-else
-                                            class="font-medium text-sm link link-primary link-hover"
-                                            :title="$t('char-build.click_to_load')"
-                                            @click="loadConfigByIndex(index)"
+                            <Icon icon="ri:focus-3-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.simple_mode") }}</span>
+                        </button>
+                        <button
+                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            data-tour="tour-button"
+                            @click="tour?.startTour()"
+                        >
+                            <Icon icon="ri:question-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="openShareModal">
+                            <Icon icon="ri:share-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
+                        </button>
+                        <button
+                            v-if="['黎瑟', '赛琪'].includes(selectedChar)"
+                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            @click="simulator_model_show = true"
+                        >
+                            <Icon icon="ri:game-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
+                        </button>
+                        <button
+                            data-agent="open-auto-build"
+                            data-agent-allow
+                            class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            @click="autobuild_model_show = true"
+                        >
+                            <Icon icon="ri:robot-2-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
+                        </button>
+                        <button
+                            class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            @click="$router.push('/char-build-compare')"
+                        >
+                            <Icon icon="ri:bar-chart-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
+                        </button>
+                        <div class="dropdown dropdown-end flex-1 min-w-0 sm:flex-none">
+                            <div
+                                tabindex="0"
+                                role="button"
+                                class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3"
+                            >
+                                <Icon icon="ri:save-fill" class="size-5 sm:size-4" />
+                                <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
+                            </div>
+                            <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 sm:w-96 shadow-sm">
+                                <div class="card-body space-y-2">
+                                    <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
+                                        <li
+                                            v-for="(project, index) in charProject.projects"
+                                            :key="project.name"
+                                            class="p-2 flex items-center gap-2 rounded-md"
+                                            :class="{ 'bg-base-300': project.name === charProject.selected }"
                                         >
-                                            {{ project.name }}
-                                        </span>
-                                        <div
-                                            class="ml-auto btn btn-xs btn-ghost btn-square border-0"
-                                            :title="$t('char-build.rename')"
-                                            @click="renameProject(index)"
-                                        >
-                                            <Icon icon="ri:pencil-fill" class="h-4 w-4" />
-                                        </div>
-                                        <div
-                                            class="btn btn-xs btn-ghost btn-square border-0"
-                                            :title="$t('char-build.save')"
-                                            @click="saveConfig(index)"
-                                        >
-                                            <Icon icon="ri:save-fill" class="h-4 w-4" />
-                                        </div>
-                                        <div
-                                            class="btn btn-xs btn-ghost btn-square border-0"
-                                            :title="$t('common.delete')"
-                                            @click="deleteProject(index)"
-                                        >
-                                            <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
-                                        </div>
-                                    </li>
-                                </ul>
-                                <div v-else class="text-sm opacity-70">
-                                    {{ $t("char-build.no_saved_projects") }}
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <button class="btn btn-primary btn-sm flex-1 min-w-20" @click="addProject()">
-                                        {{ $t("char-build.new_project") }}
-                                    </button>
-                                    <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="copyBuildToClipboard()">
-                                        {{ $t("char-build.copy_to_clipboard") }}
-                                    </button>
-                                    <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="importBuildFromClipboard()">
-                                        {{ $t("char-build.import_from_clipboard") }}
-                                    </button>
+                                            <input
+                                                v-if="editingProjectIndex === index"
+                                                :id="`char-project-name-input-${index}`"
+                                                v-model="editProjectName"
+                                                class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
+                                                @blur="finishEditProjectName"
+                                                @keyup.enter="finishEditProjectName"
+                                                @keyup.escape="editingProjectIndex = -1"
+                                            />
+                                            <span
+                                                v-else
+                                                class="font-medium text-sm link link-primary link-hover"
+                                                :title="$t('char-build.click_to_load')"
+                                                @click="loadConfigByIndex(index)"
+                                            >
+                                                {{ project.name }}
+                                            </span>
+                                            <div
+                                                class="ml-auto btn btn-xs btn-ghost btn-square border-0"
+                                                :title="$t('char-build.rename')"
+                                                @click="renameProject(index)"
+                                            >
+                                                <Icon icon="ri:pencil-fill" class="h-4 w-4" />
+                                            </div>
+                                            <div
+                                                class="btn btn-xs btn-ghost btn-square border-0"
+                                                :title="$t('char-build.save')"
+                                                @click="saveConfig(index)"
+                                            >
+                                                <Icon icon="ri:save-fill" class="h-4 w-4" />
+                                            </div>
+                                            <div
+                                                class="btn btn-xs btn-ghost btn-square border-0"
+                                                :title="$t('common.delete')"
+                                                @click="deleteProject(index)"
+                                            >
+                                                <Icon icon="ri:delete-bin-2-fill" class="h-4 w-4" />
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div v-else class="text-sm opacity-70">
+                                        {{ $t("char-build.no_saved_projects") }}
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button class="btn btn-primary btn-sm flex-1 min-w-20" @click="addProject()">
+                                            {{ $t("char-build.new_project") }}
+                                        </button>
+                                        <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="copyBuildToClipboard()">
+                                            {{ $t("char-build.copy_to_clipboard") }}
+                                        </button>
+                                        <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="importBuildFromClipboard()">
+                                            {{ $t("char-build.import_from_clipboard") }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="resetConfig">
+                            <Icon icon="ri:refresh-line" class="size-5 sm:size-4" />
+                            <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
+                        </button>
                     </div>
-                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="resetConfig">
-                        <Icon icon="ri:refresh-line" class="size-5 sm:size-4" />
-                        <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
-                    </button>
                 </div>
             </div>
-        </div>
-        <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
-            <!-- 侧边栏 -->
-            <ScrollArea id="char-build-scroll1" data-agent-scope="sidebar" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
-                <div class="flex flex-col gap-4">
-                    <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
-                        <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
-                            <FullTooltip side="bottom">
-                                <template #tooltip>
-                                    <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                                        <div class="flex">
-                                            <div class="text-sm font-bold">
-                                                {{ charTabTooltipMap[tab.name].title }}
-                                            </div>
-                                            <div class="ml-auto text-sm text-primary">
-                                                {{ charTabTooltipMap[tab.name].type }}
-                                            </div>
-                                        </div>
-                                        <div
-                                            v-if="charTabTooltipMap[tab.name].isEmpty"
-                                            class="text-[11px] text-base-content/50 whitespace-nowrap"
-                                        >
-                                            {{ $t("char-build.weapon_slot_not_equipped") }}
-                                        </div>
-                                        <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
-                                            {{ gpt(charTabTooltipMap[tab.name].effdesc, charTabTooltipMap[tab.name].effindex ?? 0) }}
-                                        </div>
-                                        <div
-                                            v-if="charTabTooltipMap[tab.name].mastery?.length"
-                                            class="flex justify-between items-center gap-2 text-sm"
-                                        >
-                                            <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("武器精通") }}</div>
-                                            <div class="font-medium text-primary">
-                                                {{ charTabTooltipMap[tab.name].mastery?.map(m => $t(m)).join("、") }}
-                                            </div>
-                                        </div>
-                                        <div
-                                            v-for="[prop, val] in charTabTooltipMap[tab.name].propEntries"
-                                            :key="prop"
-                                            class="flex justify-between items-center gap-2 text-sm"
-                                        >
-                                            <div
-                                                class="text-xs text-neutral-500 whitespace-nowrap"
-                                                :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
-                                            >
-                                                {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
+            <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
+                <!-- 侧边栏 -->
+                <ScrollArea id="char-build-scroll1" data-agent-scope="sidebar" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
+                    <div class="flex flex-col gap-4">
+                        <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
+                            <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
+                                <FullTooltip side="bottom">
+                                    <template #tooltip>
+                                        <div class="flex flex-col gap-2 max-w-75 min-w-28">
+                                            <div class="flex">
+                                                <div class="text-sm font-bold">
+                                                    {{ charTabTooltipMap[tab.name].title }}
+                                                </div>
+                                                <div class="ml-auto text-sm text-primary">
+                                                    {{ charTabTooltipMap[tab.name].type }}
+                                                </div>
                                             </div>
                                             <div
-                                                class="font-medium text-primary"
-                                                :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
+                                                v-if="charTabTooltipMap[tab.name].isEmpty"
+                                                class="text-[11px] text-base-content/50 whitespace-nowrap"
                                             >
-                                                {{ formatProp(prop, val) }}
+                                                {{ $t("char-build.weapon_slot_not_equipped") }}
                                             </div>
-                                        </div>
-                                    </div>
-                                </template>
-                                <div
-                                    class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
-                                    :class="[
-                                        { 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name },
-                                        tab.isEmpty && charTab !== tab.name ? 'border-dashed opacity-80' : '',
-                                    ]"
-                                    @click="charTab = tab.name"
-                                >
-                                    <template v-if="!tab.skillMaskUrl">
-                                        <ImageFallback
-                                            v-if="!tab.isEmpty"
-                                            :src="tab.url"
-                                            alt="角色头像"
-                                            class="w-full h-full object-cover object-top"
-                                        >
-                                            <Icon icon="kezhou" class="w-full h-full" />
-                                        </ImageFallback>
-                                        <div
-                                            v-else
-                                            class="flex h-full w-full items-center justify-center bg-base-100/50 text-base-content/40"
-                                        >
-                                            <Icon
-                                                :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'"
-                                                class="size-4 sm:size-5"
-                                            />
+                                            <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
+                                                {{ gpt(charTabTooltipMap[tab.name].effdesc, charTabTooltipMap[tab.name].effindex ?? 0) }}
+                                            </div>
+                                            <div
+                                                v-if="charTabTooltipMap[tab.name].mastery?.length"
+                                                class="flex justify-between items-center gap-2 text-sm"
+                                            >
+                                                <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("武器精通") }}</div>
+                                                <div class="font-medium text-primary">
+                                                    {{ charTabTooltipMap[tab.name].mastery?.map(m => $t(m)).join("、") }}
+                                                </div>
+                                            </div>
+                                            <div
+                                                v-for="[ prop, val ] in charTabTooltipMap[tab.name].propEntries"
+                                                :key="prop"
+                                                class="flex justify-between items-center gap-2 text-sm"
+                                            >
+                                                <div
+                                                    class="text-xs text-neutral-500 whitespace-nowrap"
+                                                    :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
+                                                >
+                                                    {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
+                                                </div>
+                                                <div
+                                                    class="font-medium text-primary"
+                                                    :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
+                                                >
+                                                    {{ formatProp(prop, val) }}
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
                                     <div
-                                        v-else
-                                        alt="技能图标"
-                                        class="flex h-full w-full items-center justify-center bg-base-content"
-                                        :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
-                                    />
-                                    <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
-                                </div>
-                            </FullTooltip>
-                        </div>
-                        <!-- 额外精通武器：虚线加号框，点击选择额外精通的武器类型 -->
-                        <div v-if="extraMasteryOptions.length > 0 || selectedExtraMastery" class="flex items-center gap-2 shrink-0">
-                            <FullTooltip side="bottom">
-                                <template #tooltip>
-                                    <div class="flex flex-col gap-1 max-w-60">
-                                        <div class="text-sm font-bold">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</div>
-                                        <div class="text-xs text-base-content/70">
-                                            {{ selectedExtraMastery ? $t(selectedExtraMastery.名称) : $t("char-build.extra_mastery_hint") }}
-                                        </div>
+                                        class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
+                                        :class="[
+                                        { 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name },
+                                        tab.isEmpty && charTab !== tab.name ? 'border-dashed opacity-80' : '',
+                                    ]"
+                                        @click="charTab = tab.name"
+                                    >
+                                        <template v-if="!tab.skillMaskUrl">
+                                            <ImageFallback
+                                                v-if="!tab.isEmpty"
+                                                :src="tab.url"
+                                                alt="角色头像"
+                                                class="w-full h-full object-cover object-top"
+                                            >
+                                                <Icon icon="kezhou" class="w-full h-full" />
+                                            </ImageFallback>
+                                            <div
+                                                v-else
+                                                class="flex h-full w-full items-center justify-center bg-base-100/50 text-base-content/40"
+                                            >
+                                                <Icon
+                                                    :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'"
+                                                    class="size-4 sm:size-5"
+                                                />
+                                            </div>
+                                        </template>
+                                        <div
+                                            v-else
+                                            alt="技能图标"
+                                            class="flex h-full w-full items-center justify-center bg-base-content"
+                                            :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
+                                        />
+                                        <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                                     </div>
-                                </template>
-                                <button
-                                    type="button"
-                                    class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-dashed aspect-square flex items-center justify-center transition-colors duration-150"
-                                    :class="
+                                </FullTooltip>
+                            </div>
+                            <!-- 额外精通武器：虚线加号框，点击选择额外精通的武器类型 -->
+                            <div v-if="extraMasteryOptions.length > 0 || selectedExtraMastery" class="flex items-center gap-2 shrink-0">
+                                <FullTooltip side="bottom">
+                                    <template #tooltip>
+                                        <div class="flex flex-col gap-1 max-w-60">
+                                            <div class="text-sm font-bold">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</div>
+                                            <div class="text-xs text-base-content/70">
+                                                {{
+                                                    selectedExtraMastery
+                                                        ? $t(selectedExtraMastery.名称)
+                                                        : $t("char-build.extra_mastery_hint")
+                                                }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <button
+                                        type="button"
+                                        class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-dashed aspect-square flex items-center justify-center transition-colors duration-150"
+                                        :class="
                                         selectedExtraMastery
                                             ? 'border-primary/60 text-primary hover:border-primary hover:shadow-lg hover:shadow-primary/40'
                                             : 'border-base-100 text-base-content/50 hover:border-primary/60 hover:text-primary'
                                     "
-                                    @click="openExtraMasteryModal"
-                                >
-                                    <!-- 图标走 mask 上色，与同律页签的技能图标一致；居中自适应容器尺寸 -->
-                                    <div
-                                        v-if="selectedExtraMastery"
-                                        :alt="$t('char-build.extra_mastery_weapon_icon')"
-                                        class="flex h-full w-full items-center justify-center bg-current"
-                                        :style="{
+                                        @click="openExtraMasteryModal"
+                                    >
+                                        <!-- 图标走 mask 上色，与同律页签的技能图标一致；居中自适应容器尺寸 -->
+                                        <div
+                                            v-if="selectedExtraMastery"
+                                            :alt="$t('char-build.extra_mastery_weapon_icon')"
+                                            class="flex h-full w-full items-center justify-center bg-current"
+                                            :style="{
                                             mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain`,
                                         }"
-                                    />
-                                    <Icon v-else icon="ri:add-line" class="size-5" />
-                                    <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
-                                </button>
-                            </FullTooltip>
+                                        />
+                                        <Icon v-else icon="ri:add-line" class="size-5" />
+                                        <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
+                                    </button>
+                                </FullTooltip>
+                            </div>
                         </div>
-                    </div>
-                    <!-- 角色 -->
-                    <div
-                        v-if="charTab === '角色'"
-                        class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
-                    >
-                        <SectionHeader :title="$t(selectedChar) || $t('char-build.title')" no-animate compact>
-                            <template #trailing>
-                                <span class="font-orbitron text-sm font-semibold text-primary tabular-nums"
-                                    >Lv. {{ charSettings.charLevel }}</span
-                                >
-                            </template>
-                        </SectionHeader>
-                        <div class="flex items-center gap-2 text-sm p-1">
-                            <div class="flex-1">
-                                <input
-                                    v-model.number="charSettings.charLevel"
-                                    type="range"
-                                    class="range range-primary range-xs w-full"
-                                    min="1"
-                                    max="80"
-                                    step="1"
+                        <!-- 角色 -->
+                        <div
+                            v-if="charTab === '角色'"
+                            class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                        >
+                            <SectionHeader :title="$t(selectedChar) || $t('char-build.title')" no-animate compact>
+                                <template #trailing>
+                                    <span class="font-orbitron text-sm font-semibold text-primary tabular-nums"
+                                        >Lv. {{ charSettings.charLevel }}</span
+                                    >
+                                </template>
+                            </SectionHeader>
+                            <div class="flex items-center gap-2 text-sm p-1">
+                                <div class="flex-1">
+                                    <input
+                                        v-model.number="charSettings.charLevel"
+                                        type="range"
+                                        class="range range-primary range-xs w-full"
+                                        min="1"
+                                        max="80"
+                                        step="1"
+                                    />
+                                </div>
+                            </div>
+                            <!-- 词条：collapse-content 自带 overflow: clip，会裁掉高亮行的 outline/阴影；用 overflow-clip-margin 外扩裁剪边界（负 margin 会让透明盒压住上方滑条与下方箭头的点击区） -->
+                            <div class="collapse p-1" :class="{ 'collapse-open': charDetailExpend }">
+                                <div class="space-y-1 collapse-content p-0 [overflow-clip-margin:12px]">
+                                    <CharAttrShow :attributes="attributes" :char-build="charBuild" />
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
+                                @click="charDetailExpend = !charDetailExpend"
+                            >
+                                <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': charDetailExpend }" />
+                            </div>
+                            <!-- 技能选择 -->
+                            <div data-tour="skill-select">
+                                <SkillTabs
+                                    :skills="charBuild.charSkills"
+                                    :selected-skill-name="charSettings.baseName"
+                                    @select="charSettings.baseName = $event"
                                 />
                             </div>
-                        </div>
-                        <!-- 词条：collapse-content 自带 overflow: clip，会裁掉高亮行的 outline/阴影；用 overflow-clip-margin 外扩裁剪边界（负 margin 会让透明盒压住上方滑条与下方箭头的点击区） -->
-                        <div class="collapse p-1" :class="{ 'collapse-open': charDetailExpend }">
-                            <div class="space-y-1 collapse-content p-0 [overflow-clip-margin:12px]">
-                                <CharAttrShow :attributes="attributes" :char-build="charBuild" />
+                            <div v-if="selectedSkillLevelIndex !== -1" class="flex items-center gap-4 text-sm p-1">
+                                <div class="flex-1">
+                                    <input
+                                        v-model.number="currentSkillLevel"
+                                        type="range"
+                                        class="range range-primary range-xs w-full"
+                                        min="1"
+                                        max="12"
+                                        step="1"
+                                    />
+                                </div>
+                                <div class="flex-none">Lv. {{ currentSkillLevel }}</div>
                             </div>
-                        </div>
-                        <div
-                            class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
-                            @click="charDetailExpend = !charDetailExpend"
-                        >
-                            <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': charDetailExpend }" />
-                        </div>
-                        <!-- 技能选择 -->
-                        <div data-tour="skill-select">
-                            <SkillTabs
-                                :skills="charBuild.charSkills"
-                                :selected-skill-name="charSettings.baseName"
-                                @select="charSettings.baseName = $event"
+                            <SkillFields
+                                :skill="charBuild.selectedSkill"
+                                :selected-identifiers="charBuild.getIdentifierNames(charBuild.targetFunction)"
+                                :char-build="charBuild"
+                                :attributes="attributes"
                             />
                         </div>
-                        <div v-if="selectedSkillLevelIndex !== -1" class="flex items-center gap-4 text-sm p-1">
-                            <div class="flex-1">
-                                <input
-                                    v-model.number="currentSkillLevel"
-                                    type="range"
-                                    class="range range-primary range-xs w-full"
-                                    min="1"
-                                    max="12"
-                                    step="1"
-                                />
-                            </div>
-                            <div class="flex-none">Lv. {{ currentSkillLevel }}</div>
-                        </div>
-                        <SkillFields
-                            :skill="charBuild.selectedSkill"
-                            :selected-identifiers="charBuild.getIdentifierNames(charBuild.targetFunction)"
+
+                        <!-- 武器 -->
+                        <WeaponTab
+                            v-if="charTab === '近战' && !meleeWeaponEmpty"
+                            v-model:model-show="weapon_select_model_show"
+                            @open-weapon-select="weaponDefaultTab = '近战'"
+                            wkey="melee"
                             :char-build="charBuild"
                             :attributes="attributes"
                         />
-                    </div>
-
-                    <!-- 武器 -->
-                    <WeaponTab
-                        v-if="charTab === '近战' && !meleeWeaponEmpty"
-                        v-model:model-show="weapon_select_model_show"
-                        @open-weapon-select="weaponDefaultTab = '近战'"
-                        wkey="melee"
-                        :char-build="charBuild"
-                        :attributes="attributes"
-                    />
-                    <!-- 近战武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
-                    <div
-                        v-else-if="charTab === '近战'"
-                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
-                    >
-                        <SectionHeader no-animate compact>
-                            <template #title>
-                                <div
-                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
-                                    :title="$t('char-build.equip_weapon', { slot: $t('近战') })"
-                                    @click="openWeaponSelectForSlot('近战')"
-                                >
-                                    <span class="truncate">{{ $t("近战") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
-                                    <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
-                                </div>
-                            </template>
-                        </SectionHeader>
-                        <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
-                    </div>
-                    <WeaponTab
-                        v-if="charTab === '远程' && !rangedWeaponEmpty"
-                        v-model:model-show="weapon_select_model_show"
-                        @open-weapon-select="weaponDefaultTab = '远程'"
-                        wkey="ranged"
-                        :char-build="charBuild"
-                        :attributes="attributes"
-                    />
-                    <!-- 远程武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
-                    <div
-                        v-else-if="charTab === '远程'"
-                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
-                    >
-                        <SectionHeader no-animate compact>
-                            <template #title>
-                                <div
-                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
-                                    :title="$t('char-build.equip_weapon', { slot: $t('远程') })"
-                                    @click="openWeaponSelectForSlot('远程')"
-                                >
-                                    <span class="truncate">{{ $t("远程") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
-                                    <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
-                                </div>
-                            </template>
-                        </SectionHeader>
-                        <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
-                    </div>
-                    <WeaponTab
-                        v-if="charTab === '同律' && !skillWeaponInheritBaseEmpty"
-                        wkey="skill"
-                        :char-build="charBuild"
-                        :attributes="attributes"
-                    />
-                    <!-- 同律武器继承槽位为空：保持同卡片头部点击切换继承武器 -->
-                    <div
-                        v-else-if="charTab === '同律'"
-                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
-                    >
-                        <SectionHeader no-animate compact>
-                            <template #title>
-                                <div
-                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
-                                    :title="
+                        <!-- 近战武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
+                        <div
+                            v-else-if="charTab === '近战'"
+                            class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                        >
+                            <SectionHeader no-animate compact>
+                                <template #title>
+                                    <div
+                                        class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                        :title="$t('char-build.equip_weapon', { slot: $t('近战') })"
+                                        @click="openWeaponSelectForSlot('近战')"
+                                    >
+                                        <span class="truncate">{{ $t("近战") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                        <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                    </div>
+                                </template>
+                            </SectionHeader>
+                            <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
+                        </div>
+                        <WeaponTab
+                            v-if="charTab === '远程' && !rangedWeaponEmpty"
+                            v-model:model-show="weapon_select_model_show"
+                            @open-weapon-select="weaponDefaultTab = '远程'"
+                            wkey="ranged"
+                            :char-build="charBuild"
+                            :attributes="attributes"
+                        />
+                        <!-- 远程武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
+                        <div
+                            v-else-if="charTab === '远程'"
+                            class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                        >
+                            <SectionHeader no-animate compact>
+                                <template #title>
+                                    <div
+                                        class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                        :title="$t('char-build.equip_weapon', { slot: $t('远程') })"
+                                        @click="openWeaponSelectForSlot('远程')"
+                                    >
+                                        <span class="truncate">{{ $t("远程") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                        <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                    </div>
+                                </template>
+                            </SectionHeader>
+                            <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
+                        </div>
+                        <WeaponTab
+                            v-if="charTab === '同律' && !skillWeaponInheritBaseEmpty"
+                            wkey="skill"
+                            :char-build="charBuild"
+                            :attributes="attributes"
+                        />
+                        <!-- 同律武器继承槽位为空：保持同卡片头部点击切换继承武器 -->
+                        <div
+                            v-else-if="charTab === '同律'"
+                            class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                        >
+                            <SectionHeader no-animate compact>
+                                <template #title>
+                                    <div
+                                        class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                        :title="
                                         charBuild.skillWeapon?.inherit
                                             ? $t('char-build.equip_weapon', {
                                                   slot: $t(charBuild.skillWeapon.inherit === 'melee' ? '近战' : '远程'),
                                               })
                                             : undefined
                                     "
-                                    @click="
+                                        @click="
                                         charBuild.skillWeapon?.inherit
                                             ? openWeaponSelectForSlot(charBuild.skillWeapon.inherit === 'melee' ? '近战' : '远程')
                                             : undefined
                                     "
-                                >
-                                    <span class="truncate">{{ $t("同律") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
-                                    <Icon
-                                        v-if="charBuild.skillWeapon?.inherit"
-                                        icon="ri:exchange-line"
-                                        class="h-4 w-4 shrink-0 text-primary"
-                                    />
-                                </div>
-                            </template>
-                        </SectionHeader>
-                        <p class="text-xs text-base-content/50">{{ $t("char-build.skill_weapon_empty_desc") }}</p>
-                    </div>
-
-                    <!-- 目标函数 -->
-                    <div
-                        data-tour="target-function"
-                        class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
-                    >
-                        <SectionHeader :title="isTimeline ? $t('时间线') : $t('目标函数')" no-animate compact>
-                            <template #trailing>
-                                <div class="flex items-center gap-1">
-                                    <div class="btn btn-xs btn-ghost btn-circle" @click="ast_help_model_show = true">
-                                        <Icon icon="ri:question-line" />
+                                    >
+                                        <span class="truncate">{{ $t("同律") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                        <Icon
+                                            v-if="charBuild.skillWeapon?.inherit"
+                                            icon="ri:exchange-line"
+                                            class="h-4 w-4 shrink-0 text-primary"
+                                        />
                                     </div>
-                                    <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary toggle-sm" />
-                                </div>
-                            </template>
-                        </SectionHeader>
-                        <div class="space-y-2 p-1">
-                            <!-- 目标函数模式：自定义变量（折叠同词条 charattr）+ DOT 伤害 + 表达式输入 -->
-                            <div v-if="!isTimeline" class="space-y-2">
-                                <!-- 自定义变量：折叠交互同「词条」charattr -->
-                                <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
-                                    <div class="space-y-1.5 collapse-content px-0 py-1">
-                                        <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
-                                        <div v-for="(variable, index) in customVariableInputs" :key="index" class="flex items-center gap-2">
-                                            <input
-                                                v-model="variable[0]"
-                                                type="text"
-                                                class="w-20 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                                placeholder="变量名"
-                                                @focus="focusedVariableIndex = index"
-                                                @blur="focusedVariableIndex = -1"
-                                            />
-                                            <span class="flex-none select-none text-[11px] text-base-content/35">=</span>
-                                            <FullTooltip side="top">
-                                                <template #tooltip>
-                                                    <div class="space-y-1">
-                                                        <div class="max-w-60 break-all text-xs text-base-content/80">
-                                                            {{ variable[0] }} = {{ variable[1] }}
+                                </template>
+                            </SectionHeader>
+                            <p class="text-xs text-base-content/50">{{ $t("char-build.skill_weapon_empty_desc") }}</p>
+                        </div>
+
+                        <!-- 目标函数 -->
+                        <div
+                            data-tour="target-function"
+                            class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                        >
+                            <SectionHeader :title="isTimeline ? $t('时间线') : $t('目标函数')" no-animate compact>
+                                <template #trailing>
+                                    <div class="flex items-center gap-1">
+                                        <div class="btn btn-xs btn-ghost btn-circle" @click="ast_help_model_show = true">
+                                            <Icon icon="ri:question-line" />
+                                        </div>
+                                        <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary toggle-sm" />
+                                    </div>
+                                </template>
+                            </SectionHeader>
+                            <div class="space-y-2 p-1">
+                                <!-- 目标函数模式：自定义变量（折叠同词条 charattr）+ DOT 伤害 + 表达式输入 -->
+                                <div v-if="!isTimeline" class="space-y-2">
+                                    <!-- 自定义变量：折叠交互同「词条」charattr -->
+                                    <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
+                                        <div class="space-y-1.5 collapse-content px-0 py-1">
+                                            <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
+                                            <div
+                                                v-for="(variable, index) in customVariableInputs"
+                                                :key="index"
+                                                class="flex items-center gap-2"
+                                            >
+                                                <input
+                                                    v-model="variable[0]"
+                                                    type="text"
+                                                    class="w-20 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                                    placeholder="变量名"
+                                                    @focus="focusedVariableIndex = index"
+                                                    @blur="focusedVariableIndex = -1"
+                                                />
+                                                <span class="flex-none select-none text-[11px] text-base-content/35">=</span>
+                                                <FullTooltip side="top">
+                                                    <template #tooltip>
+                                                        <div class="space-y-1">
+                                                            <div class="max-w-60 break-all text-xs text-base-content/80">
+                                                                {{ variable[0] }} = {{ variable[1] }}
+                                                            </div>
+                                                            <div class="text-xs text-primary tabular-nums">
+                                                                {{ getCustomVariableResult(variable) }}
+                                                            </div>
                                                         </div>
-                                                        <div class="text-xs text-primary tabular-nums">
-                                                            {{ getCustomVariableResult(variable) }}
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <ExprInput
-                                                    :ref="el => setCustomVariableInputRef(index, el as ExprInputInstance | null)"
-                                                    v-model="variable[1]"
-                                                    class="min-w-0 flex-1"
-                                                    variant="underline"
-                                                    font-size="13px"
-                                                    line-height="19.5px"
-                                                    :macros="exprMacros"
-                                                    placeholder="表达式"
-                                                    :data-expr-drop="`custom-variable:${index}`"
-                                                    :class="[
+                                                    </template>
+                                                    <ExprInput
+                                                        :ref="el => setCustomVariableInputRef(index, el as ExprInputInstance | null)"
+                                                        v-model="variable[1]"
+                                                        class="min-w-0 flex-1"
+                                                        variant="underline"
+                                                        font-size="13px"
+                                                        line-height="19.5px"
+                                                        :macros="exprMacros"
+                                                        placeholder="表达式"
+                                                        :data-expr-drop="`custom-variable:${index}`"
+                                                        :class="[
                                                         dropTargetClass(`custom-variable:${index}`),
                                                         referenceHighlightClass(`custom-variable:${index}`),
                                                     ]"
-                                                    @click="handleExprDropClick(`custom-variable:${index}`)"
-                                                />
-                                            </FullTooltip>
-                                            <button
-                                                type="button"
-                                                class="grid size-6 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/40 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.95]"
-                                                :title="$t('common.delete')"
-                                                @click="removeCustomVariable(index)"
-                                            >
-                                                <Icon icon="codicon:chrome-close" class="size-3.5" />
-                                            </button>
-                                        </div>
-                                        <!-- 变量操作：添加 / 复制 / 粘贴（无边框 tint 芯片） -->
-                                        <div class="flex items-center gap-1.5 pt-0.5">
-                                            <button
-                                                type="button"
-                                                class="flex h-7 flex-1 cursor-pointer items-center justify-center gap-1 rounded-xs bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/15 active:scale-[0.97]"
-                                                @click="addCustomVariable"
-                                            >
-                                                <Icon icon="ri:add-line" class="size-3.5" />
-                                                变量
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
-                                                title="复制自定义变量"
-                                                @click="copyCustomVariables"
-                                            >
-                                                <Icon icon="ri:file-copy-line" class="size-3.5" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
-                                                title="粘贴自定义变量"
-                                                @click="pasteCustomVariables"
-                                            >
-                                                <Icon icon="ri:clipboard-line" class="size-3.5" />
-                                            </button>
-                                        </div>
-                                        <!-- 变量校验错误 -->
-                                        <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
-                                            <div
-                                                v-if="
+                                                        @click="handleExprDropClick(`custom-variable:${index}`)"
+                                                    />
+                                                </FullTooltip>
+                                                <button
+                                                    type="button"
+                                                    class="grid size-6 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/40 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.95]"
+                                                    :title="$t('common.delete')"
+                                                    @click="removeCustomVariable(index)"
+                                                >
+                                                    <Icon icon="codicon:chrome-close" class="size-3.5" />
+                                                </button>
+                                            </div>
+                                            <!-- 变量操作：添加 / 复制 / 粘贴（无边框 tint 芯片） -->
+                                            <div class="flex items-center gap-1.5 pt-0.5">
+                                                <button
+                                                    type="button"
+                                                    class="flex h-7 flex-1 cursor-pointer items-center justify-center gap-1 rounded-xs bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/15 active:scale-[0.97]"
+                                                    @click="addCustomVariable"
+                                                >
+                                                    <Icon icon="ri:add-line" class="size-3.5" />
+                                                    变量
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
+                                                    title="复制自定义变量"
+                                                    @click="copyCustomVariables"
+                                                >
+                                                    <Icon icon="ri:file-copy-line" class="size-3.5" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
+                                                    title="粘贴自定义变量"
+                                                    @click="pasteCustomVariables"
+                                                >
+                                                    <Icon icon="ri:clipboard-line" class="size-3.5" />
+                                                </button>
+                                            </div>
+                                            <!-- 变量校验错误 -->
+                                            <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
+                                                <div
+                                                    v-if="
                                                     variable[0] || variable[1]
                                                         ? charBuild.validateCustomVariable(variable[0], variable[1])
                                                         : false
                                                 "
-                                                class="flex text-xs items-center text-red-500"
-                                            >
-                                                {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
-                                            </div>
-                                        </template>
+                                                    class="flex text-xs items-center text-red-500"
+                                                >
+                                                    {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- 折叠开关（同「词条」charattr） -->
-                                <div
-                                    class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
-                                    @click="customVariableExpend = !customVariableExpend"
-                                >
-                                    <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': customVariableExpend }" />
-                                </div>
-                                <!-- DOT伤害：显示每秒DOT伤害（样式保持原样，仅移到表达式输入框之前），点击打开详情弹窗 -->
-                                <div
-                                    class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
-                                    title="DOT伤害计算设置"
-                                    @click="dot_model_show = true"
-                                >
-                                    <div class="flex items-center gap-1 text-sm text-base-content/80">
-                                        每秒DOT伤害
-                                        <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
-                                            {{ +dotFrequencies.totalFreq.toFixed(2) }} 次/秒
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <DamageShow :value="dotDamage" />
-                                        <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
-                                    :class="[dropTargetClass('target-function'), referenceHighlightClass('target-function')]"
-                                >
-                                    <ExprInput
-                                        ref="targetFunctionInputRef"
-                                        v-model="targetFunction"
-                                        class="grow"
-                                        font-size="14px"
-                                        line-height="20px"
-                                        :macros="exprMacros"
-                                        :placeholder="$t('char-build.damage')"
-                                        data-expr-drop="target-function"
-                                        data-agent="target-function"
-                                        @click="handleExprDropClick('target-function')"
-                                    />
+                                    <!-- 折叠开关（同「词条」charattr） -->
                                     <div
-                                        v-if="targetFunction"
-                                        class="flex items-center cursor-pointer hover:text-primary"
-                                        @click="targetFunction = ''"
+                                        class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
+                                        @click="customVariableExpend = !customVariableExpend"
                                     >
-                                        <Icon icon="codicon:chrome-close" />
+                                        <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': customVariableExpend }" />
+                                    </div>
+                                    <!-- DOT伤害：显示每秒DOT伤害（样式保持原样，仅移到表达式输入框之前），点击打开详情弹窗 -->
+                                    <div
+                                        class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
+                                        title="DOT伤害计算设置"
+                                        @click="dot_model_show = true"
+                                    >
+                                        <div class="flex items-center gap-1 text-sm text-base-content/80">
+                                            每秒DOT伤害
+                                            <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
+                                                {{ +dotFrequencies.totalFreq.toFixed(2) }}
+                                                次/秒
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <DamageShow :value="dotDamage" />
+                                            <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
+                                        :class="[dropTargetClass('target-function'), referenceHighlightClass('target-function')]"
+                                    >
+                                        <ExprInput
+                                            ref="targetFunctionInputRef"
+                                            v-model="targetFunction"
+                                            class="grow"
+                                            font-size="14px"
+                                            line-height="20px"
+                                            :macros="exprMacros"
+                                            :placeholder="$t('char-build.damage')"
+                                            data-expr-drop="target-function"
+                                            data-agent="target-function"
+                                            @click="handleExprDropClick('target-function')"
+                                        />
+                                        <div
+                                            v-if="targetFunction"
+                                            class="flex items-center cursor-pointer hover:text-primary"
+                                            @click="targetFunction = ''"
+                                        >
+                                            <Icon icon="codicon:chrome-close" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- 时间线 -->
-                            <template v-else>
-                                <Select
-                                    :value="charSettings.baseName"
-                                    class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="$t('char-build.select_timeline')"
-                                    @change="charSettings.baseName = $event"
-                                >
-                                    <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
-                                        {{ timeline.name }}
-                                    </SelectItem>
-                                </Select>
-                                <div class="flex justify-between items-center gap-8">
-                                    <button class="btn grow btn-sm btn-primary" @click="$router.push('/timeline')">
-                                        <Icon icon="ri:add-line" />
-                                        新建
-                                    </button>
-                                    <label class="label cursor-pointer">
-                                        <span class="text-sm text-base-content/80">DPS</span>
-                                        <input v-model="charSettings.timelineDPS" type="checkbox" class="toggle toggle-secondary" />
-                                    </label>
+                                <!-- 时间线 -->
+                                <template v-else>
+                                    <Select
+                                        :value="charSettings.baseName"
+                                        class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('char-build.select_timeline')"
+                                        @change="charSettings.baseName = $event"
+                                    >
+                                        <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
+                                            {{ timeline.name }}
+                                        </SelectItem>
+                                    </Select>
+                                    <div class="flex justify-between items-center gap-8">
+                                        <button class="btn grow btn-sm btn-primary" @click="$router.push('/timeline')">
+                                            <Icon icon="ri:add-line" />
+                                            新建
+                                        </button>
+                                        <label class="label cursor-pointer">
+                                            <span class="text-sm text-base-content/80">DPS</span>
+                                            <input v-model="charSettings.timelineDPS" type="checkbox" class="toggle toggle-secondary" />
+                                        </label>
+                                    </div>
+                                </template>
+                                <!-- 错误信息 -->
+                                <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
+                                    {{ charBuild.validateAST(targetFunction) }}
                                 </div>
-                            </template>
-                            <!-- 错误信息 -->
-                            <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
-                                {{ charBuild.validateAST(targetFunction) }}
-                            </div>
-                            <div v-else data-tour="damage-result" data-agent="damage-result" class="flex justify-between items-center p-1">
-                                <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
-                                <DamageShow :value="charBuild.calculate()" />
+                                <div
+                                    v-else
+                                    data-tour="damage-result"
+                                    data-agent="damage-result"
+                                    class="flex justify-between items-center p-1"
+                                >
+                                    <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
+                                    <DamageShow :value="charBuild.calculate()" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </ScrollArea>
-            <!-- 正文 -->
-            <ScrollArea id="char-build-scroll2" data-agent-scope="main" class="sm:flex-1 flex-none">
-                <div class="p-2 space-y-4">
-                    <!-- 配装分享 -->
-                    <CollapsibleSection
-                        number="01"
-                        kicker="SHARE"
-                        :title="$t('char-build.share_build')"
-                        :is-open="!collapsedSections.share"
-                        lazy
-                        @toggle="toggleSection('share')"
-                    >
-                        <DOBBuildShow
-                            :charId="charBuild.char.id"
-                            :charName="charBuild.char.名称"
-                            ref="buildShow"
-                            @use-build="applyLoadedSettings"
-                        />
-                    </CollapsibleSection>
-                    <!-- 角色详情 -->
-                    <CollapsibleSection
-                        number="02"
-                        kicker="PROFILE"
-                        :title="$t('dna-role-detail.title')"
-                        :is-open="!collapsedSections.detail"
-                        lazy
-                        @toggle="toggleSection('detail')"
-                    >
-                        <div class="space-y-2">
-                            <CharTraceShow :char="charBuild.char" />
-                            <CharSkillShow :char="charBuild.char" />
-                        </div>
-                    </CollapsibleSection>
-                    <!-- 基本设置卡片 -->
-                    <CollapsibleSection
-                        number="03"
-                        kicker="SETTINGS"
-                        :title="$t('char-build.basic_settings')"
-                        :is-open="!collapsedSections.basic"
-                        lazy
-                        @toggle="toggleSection('basic')"
-                    >
-                        <div class="flex flex-col gap-3 mt-2">
-                            <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-[13px] font-semibold text-base-content/80">
-                                        {{ $t("char-build.side_ally") }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.hp_percent") }}
-                                        </div>
-                                        <Select v-model="charSettings.hpPercent" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
-                                            <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100"> {{ hp }}% </SelectItem>
-                                        </Select>
+                </ScrollArea>
+                <!-- 正文 -->
+                <ScrollArea id="char-build-scroll2" data-agent-scope="main" class="sm:flex-1 flex-none">
+                    <div class="p-2 space-y-4">
+                        <!-- 配装分享 -->
+                        <CollapsibleSection
+                            number="01"
+                            kicker="SHARE"
+                            :title="$t('char-build.share_build')"
+                            :is-open="!collapsedSections.share"
+                            lazy
+                            @toggle="toggleSection('share')"
+                        >
+                            <DOBBuildShow
+                                :charId="charBuild.char.id"
+                                :charName="charBuild.char.名称"
+                                ref="buildShow"
+                                @use-build="applyLoadedSettings"
+                            />
+                        </CollapsibleSection>
+                        <!-- 角色详情 -->
+                        <CollapsibleSection
+                            number="02"
+                            kicker="PROFILE"
+                            :title="$t('dna-role-detail.title')"
+                            :is-open="!collapsedSections.detail"
+                            lazy
+                            @toggle="toggleSection('detail')"
+                        >
+                            <div class="space-y-2">
+                                <CharTraceShow :char="charBuild.char" />
+                                <CharSkillShow :char="charBuild.char" />
+                            </div>
+                        </CollapsibleSection>
+                        <!-- 基本设置卡片 -->
+                        <CollapsibleSection
+                            number="03"
+                            kicker="SETTINGS"
+                            :title="$t('char-build.basic_settings')"
+                            :is-open="!collapsedSections.basic"
+                            lazy
+                            @toggle="toggleSection('basic')"
+                        >
+                            <div class="flex flex-col gap-3 mt-2">
+                                <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-[13px] font-semibold text-base-content/80">
+                                            {{ $t("char-build.side_ally") }}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.resonance_gain") }}
+                                    <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("char-build.hp_percent") }}
+                                            </div>
+                                            <Select
+                                                v-model="charSettings.hpPercent"
+                                                variant="chip"
+                                                class="w-32 min-w-0"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100">
+                                                    {{ hp }}%
+                                                </SelectItem>
+                                            </Select>
                                         </div>
-                                        <Select v-model="charSettings.resonanceGain" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
-                                            <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
-                                                {{ rg * 100 }}%
-                                            </SelectItem>
-                                        </Select>
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("char-build.resonance_gain") }}
+                                            </div>
+                                            <Select
+                                                v-model="charSettings.resonanceGain"
+                                                variant="chip"
+                                                class="w-32 min-w-0"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
+                                                    {{ rg * 100 }}%
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-[13px] font-semibold text-base-content/80">
+                                            {{ $t("char-build.side_enemy") }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("char-build.enemy") }}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="inline-flex w-32 min-w-0 cursor-pointer items-center justify-between gap-1.5 appearance-none rounded-xs border border-base-content/5 bg-base-content/5 px-2 py-1.5 text-xs backdrop-blur-xs transition-colors duration-150 hover:bg-base-content/10"
+                                                @click="monster_select_model_show = true"
+                                            >
+                                                <span class="min-w-0 truncate text-left">{{ gt(enemyName) }}</span>
+                                                <Icon icon="radix-icons:chevron-down" class="size-3.5 shrink-0 opacity-40" />
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("char-build.enemy_resistance") }}
+                                            </div>
+                                            <Select
+                                                v-model="charSettings.enemyResistance"
+                                                variant="chip"
+                                                class="w-32 min-w-0"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">
+                                                    {{ res * 100 }}%
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("char-build.enemy_level") }}
+                                            </div>
+                                            <Select
+                                                v-model="charSettings.enemyLevel"
+                                                variant="chip"
+                                                class="w-32 min-w-0"
+                                                @change="updateCharBuild"
+                                            >
+                                                <SelectItem v-for="lv in enemyLevelOptions" :key="lv" :value="lv">{{ lv }}</SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            <div class="px-2 text-xs text-gray-400 mb-1">
+                                                {{ $t("失衡") }}
+                                            </div>
+                                            <div class="p-0.5">
+                                                <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-base-content/10 pt-2.5">
+                                        <span class="flex items-baseline gap-1.5">
+                                            <span class="text-[11px] font-semibold text-base-content/45">{{ $t("生命") }}</span>
+                                            <span
+                                                class="font-orbitron text-[11px] font-bold tabular-nums text-primary"
+                                                :title="`${charBuild.enemy.hp}`"
+                                            >
+                                                {{ formatBigNumber(charBuild.enemy.hp) }}
+                                            </span>
+                                        </span>
+                                        <span class="flex items-baseline gap-1.5">
+                                            <span class="text-[11px] font-semibold text-base-content/45">{{ $t("防御") }}</span>
+                                            <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary">
+                                                {{ charBuild.enemy.def }}
+                                            </span>
+                                        </span>
+                                        <span class="flex items-baseline gap-1.5">
+                                            <span class="text-[11px] font-semibold text-base-content/45">{{ $t("护盾") }}</span>
+                                            <span
+                                                class="font-orbitron text-[11px] font-bold tabular-nums text-primary"
+                                                :title="`${charBuild.enemy.es || 0}`"
+                                            >
+                                                {{ formatBigNumber(charBuild.enemy.es || 0) }}
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-[13px] font-semibold text-base-content/80">
-                                        {{ $t("char-build.side_enemy") }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.enemy") }}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            class="inline-flex w-32 min-w-0 cursor-pointer items-center justify-between gap-1.5 appearance-none rounded-xs border border-base-content/5 bg-base-content/5 px-2 py-1.5 text-xs backdrop-blur-xs transition-colors duration-150 hover:bg-base-content/10"
-                                            @click="monster_select_model_show = true"
-                                        >
-                                            <span class="min-w-0 truncate text-left">{{ gt(enemyName) }}</span>
-                                            <Icon icon="radix-icons:chevron-down" class="size-3.5 shrink-0 opacity-40" />
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.enemy_resistance") }}
-                                        </div>
-                                        <Select v-model="charSettings.enemyResistance" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
-                                            <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">
-                                                {{ res * 100 }}%
-                                            </SelectItem>
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.enemy_level") }}
-                                        </div>
-                                        <Select v-model="charSettings.enemyLevel" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
-                                            <SelectItem v-for="lv in enemyLevelOptions" :key="lv" :value="lv">{{ lv }}</SelectItem>
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("失衡") }}
-                                        </div>
-                                        <div class="p-0.5">
-                                            <input v-model="charSettings.imbalance" type="checkbox" class="toggle toggle-secondary" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-base-content/10 pt-2.5">
-                                    <span class="flex items-baseline gap-1.5">
-                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("生命") }}</span>
-                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary" :title="`${charBuild.enemy.hp}`">
-                                            {{ formatBigNumber(charBuild.enemy.hp) }}
-                                        </span>
-                                    </span>
-                                    <span class="flex items-baseline gap-1.5">
-                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("防御") }}</span>
-                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary">
-                                            {{ charBuild.enemy.def }}
-                                        </span>
-                                    </span>
-                                    <span class="flex items-baseline gap-1.5">
-                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("护盾") }}</span>
-                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary" :title="`${charBuild.enemy.es || 0}`">
-                                            {{ formatBigNumber(charBuild.enemy.es || 0) }}
-                                        </span>
-                                    </span>
-                                </div>
+                            <div class="mt-4">
+                                <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
+                                <CharHPCurveConv :desperate="attributes.背水" :boost="attributes.昂扬" />
                             </div>
-                        </div>
-                        <div class="mt-4">
-                            <CharHPCurve :desperate="attributes.背水" :boost="attributes.昂扬" />
-                            <CharHPCurveConv :desperate="attributes.背水" :boost="attributes.昂扬" />
-                        </div>
-                    </CollapsibleSection>
+                        </CollapsibleSection>
 
-                    <!-- MOD配置区域 -->
-                    <!-- 角色MOD -->
-                    <CollapsibleSection
-                        data-tour="char-mods"
-                        number="04"
-                        kicker="MODS"
-                        :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
-                        :badge="$t('char-build.mod_count', { count: charBuild.getModCostTransfer(charTab).length })"
-                        :is-open="!collapsedSections.mods"
-                        lazy
-                        @toggle="toggleSection('mods')"
-                    >
-                        <div class="mt-2">
-                            <ModEditer
-                                v-if="charTab === '角色'"
-                                :mods="selectedCharMods"
-                                :mod-options="
+                        <!-- MOD配置区域 -->
+                        <!-- 角色MOD -->
+                        <CollapsibleSection
+                            data-tour="char-mods"
+                            number="04"
+                            kicker="MODS"
+                            :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
+                            :badge="$t('char-build.mod_count', { count: charBuild.getModCostTransfer(charTab).length })"
+                            :is-open="!collapsedSections.mods"
+                            lazy
+                            @toggle="toggleSection('mods')"
+                        >
+                            <div class="mt-2">
+                                <ModEditer
+                                    v-if="charTab === '角色'"
+                                    :mods="selectedCharMods"
+                                    :mod-options="
                                     modOptions.filter(
                                         m =>
                                             m.type === '角色' &&
@@ -3065,31 +3105,31 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     : m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性))
                                     )
                                 "
-                                :char-build="charBuild"
-                                :aura-mod="activeAuraMod"
-                                type="角色"
-                                :polset="charBuild.getModCostTransfer(charTab)"
-                                :variant-index="activeModVariant"
-                                :variant-count="modVariantCount"
-                                @remove-mod="removeMod($event, '角色')"
-                                @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
-                                @level-change="setModLevel('角色', $event[0], $event[1])"
-                                @select-aura-mod="setActiveAuraMod($event)"
-                                @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
-                                @variant-select="selectModVariant"
-                                @variant-add="appendModVariant"
-                                @variant-remove="dropModVariant"
-                                @sync="syncModFromGame(charBuild.char.id, false)"
-                            />
+                                    :char-build="charBuild"
+                                    :aura-mod="activeAuraMod"
+                                    type="角色"
+                                    :polset="charBuild.getModCostTransfer(charTab)"
+                                    :variant-index="activeModVariant"
+                                    :variant-count="modVariantCount"
+                                    @remove-mod="removeMod($event, '角色')"
+                                    @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
+                                    @level-change="setModLevel('角色', $event[0], $event[1])"
+                                    @select-aura-mod="setActiveAuraMod($event)"
+                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
+                                    @variant-select="selectModVariant"
+                                    @variant-add="appendModVariant"
+                                    @variant-remove="dropModVariant"
+                                    @sync="syncModFromGame(charBuild.char.id, false)"
+                                />
 
-                            <!-- 近战武器MOD -->
-                            <ModEditer
-                                v-if="
+                                <!-- 近战武器MOD -->
+                                <ModEditer
+                                    v-if="
                                     (charTab === '近战' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'melee')) &&
                                     !meleeWeaponEmpty
                                 "
-                                :mods="selectedMeleeMods"
-                                :mod-options="
+                                    :mods="selectedMeleeMods"
+                                    :mod-options="
                                     modOptions.filter(
                                         m =>
                                             m.type === '近战' &&
@@ -3098,29 +3138,29 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)))
                                     )
                                 "
-                                :char-build="charBuild"
-                                type="近战"
-                                :polset="charBuild.getModCostTransfer(charTab)"
-                                :variant-index="activeModVariant"
-                                :variant-count="modVariantCount"
-                                @remove-mod="removeMod($event, '近战')"
-                                @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
-                                @level-change="setModLevel('近战', $event[0], $event[1])"
-                                @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
-                                @variant-select="selectModVariant"
-                                @variant-add="appendModVariant"
-                                @variant-remove="dropModVariant"
-                                @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
-                            />
+                                    :char-build="charBuild"
+                                    type="近战"
+                                    :polset="charBuild.getModCostTransfer(charTab)"
+                                    :variant-index="activeModVariant"
+                                    :variant-count="modVariantCount"
+                                    @remove-mod="removeMod($event, '近战')"
+                                    @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
+                                    @level-change="setModLevel('近战', $event[0], $event[1])"
+                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
+                                    @variant-select="selectModVariant"
+                                    @variant-add="appendModVariant"
+                                    @variant-remove="dropModVariant"
+                                    @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
+                                />
 
-                            <!-- 远程武器MOD -->
-                            <ModEditer
-                                v-if="
+                                <!-- 远程武器MOD -->
+                                <ModEditer
+                                    v-if="
                                     (charTab === '远程' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'ranged')) &&
                                     !rangedWeaponEmpty
                                 "
-                                :mods="selectedRangedMods"
-                                :mod-options="
+                                    :mods="selectedRangedMods"
+                                    :mod-options="
                                     modOptions.filter(
                                         m =>
                                             m.type === '远程' &&
@@ -3129,26 +3169,26 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)))
                                     )
                                 "
-                                :char-build="charBuild"
-                                type="远程"
-                                :polset="charBuild.getModCostTransfer(charTab)"
-                                :variant-index="activeModVariant"
-                                :variant-count="modVariantCount"
-                                @remove-mod="removeMod($event, '远程')"
-                                @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
-                                @level-change="setModLevel('远程', $event[0], $event[1])"
-                                @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
-                                @variant-select="selectModVariant"
-                                @variant-add="appendModVariant"
-                                @variant-remove="dropModVariant"
-                                @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
-                            />
+                                    :char-build="charBuild"
+                                    type="远程"
+                                    :polset="charBuild.getModCostTransfer(charTab)"
+                                    :variant-index="activeModVariant"
+                                    :variant-count="modVariantCount"
+                                    @remove-mod="removeMod($event, '远程')"
+                                    @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
+                                    @level-change="setModLevel('远程', $event[0], $event[1])"
+                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
+                                    @variant-select="selectModVariant"
+                                    @variant-add="appendModVariant"
+                                    @variant-remove="dropModVariant"
+                                    @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
+                                />
 
-                            <!-- 同律武器MOD -->
-                            <ModEditer
-                                v-if="charTab === '同律' && !charBuild.skillWeapon?.inherit"
-                                :mods="selectedSkillWeaponMods"
-                                :mod-options="
+                                <!-- 同律武器MOD -->
+                                <ModEditer
+                                    v-if="charTab === '同律' && !charBuild.skillWeapon?.inherit"
+                                    :mods="selectedSkillWeaponMods"
+                                    :mod-options="
                                     modOptions.filter(
                                         m =>
                                             m.type === charBuild.skillWeapon!.类型 &&
@@ -3157,180 +3197,180 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)))
                                     )
                                 "
-                                :char-build="charBuild"
-                                type="同律"
-                                :polset="charBuild.getModCostTransfer(charTab)"
-                                :variant-index="activeModVariant"
-                                :variant-count="modVariantCount"
-                                @remove-mod="removeMod($event, '同律')"
-                                @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
-                                @level-change="setModLevel('同律', $event[0], $event[1])"
-                                @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
-                                @variant-select="selectModVariant"
-                                @variant-add="appendModVariant"
-                                @variant-remove="dropModVariant"
-                                @sync="syncModFromGame(charBuild.char.id, false, true)"
-                            />
-                            <!-- 未装备武器时的MOD提示 -->
-                            <p
-                                v-if="charTab === '近战' && meleeWeaponEmpty"
-                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
-                            >
-                                {{ $t("char-build.mods_need_weapon", { slot: $t("近战") }) }}
-                            </p>
-                            <p
-                                v-if="charTab === '远程' && rangedWeaponEmpty"
-                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
-                            >
-                                {{ $t("char-build.mods_need_weapon", { slot: $t("远程") }) }}
-                            </p>
-                            <p
-                                v-if="charTab === '同律' && skillWeaponInheritBaseEmpty"
-                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
-                            >
-                                {{ $t("char-build.skill_weapon_mods_hint") }}
-                            </p>
-                        </div>
-                    </CollapsibleSection>
-
-                    <!-- MODBUFF列表 -->
-                    <CollapsibleSection
-                        v-if="charBuild.modsWithWeapons.some(v => v.buff)"
-                        number="05"
-                        kicker="EFFECTS"
-                        :title="$t('char-build.special_effect_config')"
-                        :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
-                        :is-open="!collapsedSections.effects"
-                        lazy
-                        @toggle="toggleSection('effects')"
-                    >
-                        <div class="mt-2">
-                            <EffectSettings
-                                :mods="charBuild.modsWithWeapons"
-                                :char-build="charBuild"
-                                :use-global="charSettings.useGlobal"
-                                :char-settings="charSettings"
-                                @update:use-global="charSettings.useGlobal = $event"
-                            />
-                        </div>
-                    </CollapsibleSection>
-
-                    <!-- BUFF列表 -->
-                    <CollapsibleSection
-                        number="06"
-                        kicker="BUFFS"
-                        :title="$t('char-build.buff_list')"
-                        :badge="selectedBuffs.length"
-                        :is-open="!collapsedSections.buffs"
-                        lazy
-                        @toggle="toggleSection('buffs')"
-                    >
-                        <!-- 协战选择：图标化展示队友/队友武器，并可关联该角色的服务器构筑（简洁模式据此弹窗查看其魔之楔） -->
-                        <div class="my-2">
-                            <TeamEditor
-                                :char-settings="charSettings"
-                                :team1-options="groupedTeam1Options"
-                                :team2-options="groupedTeam2Options"
-                                :weapon-options="groupedTeamWeaponOptions"
-                                @team-change="updateTeamBuff"
-                            />
-                        </div>
-                        <!-- 魔灵：选择活力魔灵，展示被动/主动收益与冷却，并按魔灵CD给出实际冷却 -->
-                        <div class="my-2">
-                            <PetEditor
-                                :char-settings="charSettings"
-                                :char-build="charBuild"
-                                :pet-cd="attributes.魔灵CD"
-                                :pet-cd-reduce="attributes.魔灵CD缩减"
-                                :pet-level="effectivePetLevel"
-                                :pet-level-bonus="petLevelBonus"
-                                @pet-change="handlePetChange"
-                            />
-                        </div>
-                        <!-- 魔灵潜质：4 个互不相同的潜质槽位，可更换/拖动互换/移除，并显示收益 -->
-                        <div class="my-2">
-                            <TraitEditer
-                                :traits="charSettings.traits"
-                                :char-build="charBuild"
-                                :pet-level="charSettings.petLevel"
-                                :pet-id="charSettings.petId"
-                                :pet-coverage="charSettings.petCoverage"
-                                :pet-auto-coverage="charSettings.petAutoCoverage"
-                                @select-trait="selectTrait"
-                                @remove-trait="removeTrait"
-                                @swap-traits="swapTraits"
-                            />
-                        </div>
-                        <BuffEditer
-                            :buff-options="buffOptions"
-                            :selected-buffs="selectedBuffs"
-                            :char-build="charBuild"
-                            @toggle-buff="toggleBuff"
-                            @set-buff-lv="setBuffLv"
-                            @set-buff-coverage="setBuffCoverage"
-                        />
-                        <!-- 自定义BUFF：选中该 BUFF 后才出现的编辑区，跟随 BUFF 章节一起折叠 -->
-                        <template v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')">
-                            <div class="mt-4 mb-2 flex items-center gap-3">
-                                <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
-                                    {{ $t("char-build.custom_buff") }}
-                                </span>
-                                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+                                    :char-build="charBuild"
+                                    type="同律"
+                                    :polset="charBuild.getModCostTransfer(charTab)"
+                                    :variant-index="activeModVariant"
+                                    :variant-count="modVariantCount"
+                                    @remove-mod="removeMod($event, '同律')"
+                                    @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
+                                    @level-change="setModLevel('同律', $event[0], $event[1])"
+                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                    @variant-select="selectModVariant"
+                                    @variant-add="appendModVariant"
+                                    @variant-remove="dropModVariant"
+                                    @sync="syncModFromGame(charBuild.char.id, false, true)"
+                                />
+                                <!-- 未装备武器时的MOD提示 -->
+                                <p
+                                    v-if="charTab === '近战' && meleeWeaponEmpty"
+                                    class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                                >
+                                    {{ $t("char-build.mods_need_weapon", { slot: $t("近战") }) }}
+                                </p>
+                                <p
+                                    v-if="charTab === '远程' && rangedWeaponEmpty"
+                                    class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                                >
+                                    {{ $t("char-build.mods_need_weapon", { slot: $t("远程") }) }}
+                                </p>
+                                <p
+                                    v-if="charTab === '同律' && skillWeaponInheritBaseEmpty"
+                                    class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                                >
+                                    {{ $t("char-build.skill_weapon_mods_hint") }}
+                                </p>
                             </div>
-                            <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
-                        </template>
-                    </CollapsibleSection>
+                        </CollapsibleSection>
 
-                    <!-- 动作序列 -->
-                    <CollapsibleSection
-                        number="07"
-                        kicker="ACTIONS"
-                        :title="$t('char-build.actions')"
-                        :is-open="!collapsedSections.actions"
-                        lazy
-                        @toggle="toggleSection('actions')"
-                    >
-                        <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
-                    </CollapsibleSection>
+                        <!-- MODBUFF列表 -->
+                        <CollapsibleSection
+                            v-if="charBuild.modsWithWeapons.some(v => v.buff)"
+                            number="05"
+                            kicker="EFFECTS"
+                            :title="$t('char-build.special_effect_config')"
+                            :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
+                            :is-open="!collapsedSections.effects"
+                            lazy
+                            @toggle="toggleSection('effects')"
+                        >
+                            <div class="mt-2">
+                                <EffectSettings
+                                    :mods="charBuild.modsWithWeapons"
+                                    :char-build="charBuild"
+                                    :use-global="charSettings.useGlobal"
+                                    :char-settings="charSettings"
+                                    @update:use-global="charSettings.useGlobal = $event"
+                                />
+                            </div>
+                        </CollapsibleSection>
 
-                    <!-- 装配预览 -->
-                    <CollapsibleSection
-                        number="08"
-                        kicker="LOADOUT"
-                        :title="$t('char-build.equipment_preview')"
-                        :is-open="!collapsedSections.preview"
-                        lazy
-                        @toggle="toggleSection('preview')"
-                    >
-                        <EquipmentPreview
-                            :char-build="charBuild"
-                            :attributes="attributes"
-                            :char-name="selectedChar"
-                            :char-settings="charSettings"
-                        />
-                    </CollapsibleSection>
+                        <!-- BUFF列表 -->
+                        <CollapsibleSection
+                            number="06"
+                            kicker="BUFFS"
+                            :title="$t('char-build.buff_list')"
+                            :badge="selectedBuffs.length"
+                            :is-open="!collapsedSections.buffs"
+                            lazy
+                            @toggle="toggleSection('buffs')"
+                        >
+                            <!-- 协战选择：图标化展示队友/队友武器，并可关联该角色的服务器构筑（简洁模式据此弹窗查看其魔之楔） -->
+                            <div class="my-2">
+                                <TeamEditor
+                                    :char-settings="charSettings"
+                                    :team1-options="groupedTeam1Options"
+                                    :team2-options="groupedTeam2Options"
+                                    :weapon-options="groupedTeamWeaponOptions"
+                                    @team-change="updateTeamBuff"
+                                />
+                            </div>
+                            <!-- 魔灵：选择活力魔灵，展示被动/主动收益与冷却，并按魔灵CD给出实际冷却 -->
+                            <div class="my-2">
+                                <PetEditor
+                                    :char-settings="charSettings"
+                                    :char-build="charBuild"
+                                    :pet-cd="attributes.魔灵CD"
+                                    :pet-cd-reduce="attributes.魔灵CD缩减"
+                                    :pet-level="effectivePetLevel"
+                                    :pet-level-bonus="petLevelBonus"
+                                    @pet-change="handlePetChange"
+                                />
+                            </div>
+                            <!-- 魔灵潜质：4 个互不相同的潜质槽位，可更换/拖动互换/移除，并显示收益 -->
+                            <div class="my-2">
+                                <TraitEditer
+                                    :traits="charSettings.traits"
+                                    :char-build="charBuild"
+                                    :pet-level="charSettings.petLevel"
+                                    :pet-id="charSettings.petId"
+                                    :pet-coverage="charSettings.petCoverage"
+                                    :pet-auto-coverage="charSettings.petAutoCoverage"
+                                    @select-trait="selectTrait"
+                                    @remove-trait="removeTrait"
+                                    @swap-traits="swapTraits"
+                                />
+                            </div>
+                            <BuffEditer
+                                :buff-options="buffOptions"
+                                :selected-buffs="selectedBuffs"
+                                :char-build="charBuild"
+                                @toggle-buff="toggleBuff"
+                                @set-buff-lv="setBuffLv"
+                                @set-buff-coverage="setBuffCoverage"
+                            />
+                            <!-- 自定义BUFF：选中该 BUFF 后才出现的编辑区，跟随 BUFF 章节一起折叠 -->
+                            <template v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')">
+                                <div class="mt-4 mb-2 flex items-center gap-3">
+                                    <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
+                                        {{ $t("char-build.custom_buff") }}
+                                    </span>
+                                    <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+                                </div>
+                                <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
+                            </template>
+                        </CollapsibleSection>
 
-                    <!-- 评论 -->
-                    <CollapsibleSection
-                        number="09"
-                        kicker="COMMENTS"
-                        :title="$t('comment-section.comment')"
-                        :badge="buildCommentCount"
-                        :is-open="!collapsedSections.comments"
-                        lazy
-                        @toggle="toggleSection('comments')"
-                    >
-                        <div class="mt-2">
-                            <CommentSection :target-id="buildCommentTargetId" @count="buildCommentCount = $event" />
-                        </div>
-                    </CollapsibleSection>
-                </div>
-            </ScrollArea>
+                        <!-- 动作序列 -->
+                        <CollapsibleSection
+                            number="07"
+                            kicker="ACTIONS"
+                            :title="$t('char-build.actions')"
+                            :is-open="!collapsedSections.actions"
+                            lazy
+                            @toggle="toggleSection('actions')"
+                        >
+                            <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
+                        </CollapsibleSection>
+
+                        <!-- 装配预览 -->
+                        <CollapsibleSection
+                            number="08"
+                            kicker="LOADOUT"
+                            :title="$t('char-build.equipment_preview')"
+                            :is-open="!collapsedSections.preview"
+                            lazy
+                            @toggle="toggleSection('preview')"
+                        >
+                            <EquipmentPreview
+                                :char-build="charBuild"
+                                :attributes="attributes"
+                                :char-name="selectedChar"
+                                :char-settings="charSettings"
+                            />
+                        </CollapsibleSection>
+
+                        <!-- 评论 -->
+                        <CollapsibleSection
+                            number="09"
+                            kicker="COMMENTS"
+                            :title="$t('comment-section.comment')"
+                            :badge="buildCommentCount"
+                            :is-open="!collapsedSections.comments"
+                            lazy
+                            @toggle="toggleSection('comments')"
+                        >
+                            <div class="mt-2">
+                                <CommentSection :target-id="buildCommentTargetId" @count="buildCommentCount = $event" />
+                            </div>
+                        </CollapsibleSection>
+                    </div>
+                </ScrollArea>
+            </div>
         </div>
-    </div>
 
-    <!-- AI对话助手 -->
-    <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" />
+        <!-- AI对话助手 -->
+        <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" />
     </template>
 </template>
 

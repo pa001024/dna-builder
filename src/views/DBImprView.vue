@@ -527,7 +527,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                             <button class="btn btn-sm btn-primary" :disabled="ocrRunning" @click="runOcrSearch">OCR</button>
                             <label class="flex cursor-pointer select-none items-center gap-1 whitespace-nowrap">
                                 <input v-model="realtimeOcrEnabled" type="checkbox" class="toggle toggle-xs" />
-                                <span class="text-xs text-base-content/60">{{ $t('db-impr.realtime') }}</span>
+                                <span class="text-xs text-base-content/60">{{ $t("db-impr.realtime") }}</span>
                             </label>
                         </div>
 
@@ -619,7 +619,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                         v-if="item.snippet && searchKeyword.trim() && showFullTextSearch"
                                         class="mt-2 line-clamp-2 text-xs leading-relaxed wrap-break-word text-base-content/55"
                                     >
-                                        <span>{{ $t('common.match') }}</span>
+                                        <span>{{ $t("common.match") }}</span>
                                         <span v-if="item.snippet.prefixEllipsis">...</span>
                                         <template
                                             v-for="(segment, segIndex) in item.snippet.segments"
@@ -660,7 +660,8 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                     <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                         <p class="text-center text-[11px] tracking-wide text-base-content/50">
                             共
-                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEntries.length }}</b> 条印象
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEntries.length }}</b>
+                            条印象
                         </p>
                     </div>
                 </div>

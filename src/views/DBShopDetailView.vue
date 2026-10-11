@@ -11,7 +11,7 @@ const shop = computed(() => shopData.find(s => s.id === shopId.value))
 
 <template>
     <div class="h-full flex flex-col">
-        <ScrollArea v-if="shop" class="flex-1">
+        <ScrollSpyLayout auto nav-kicker="DATABASE" v-if="shop" class="flex-1">
             <!-- 居中容器：与首页一致的纸面排版宽度 -->
             <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
                 <div>
@@ -19,10 +19,10 @@ const shop = computed(() => shopData.find(s => s.id === shopId.value))
                     <DBShopDetailItem :shop="shop" />
                 </div>
             </div>
-        </ScrollArea>
+        </ScrollSpyLayout>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">{{ $t('db-shop-detail-view.not_found') }}</div>
+            <div class="text-base-content/70">{{ $t("db-shop-detail-view.not_found") }}</div>
         </div>
     </div>
 </template>

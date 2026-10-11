@@ -156,147 +156,172 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedChar)"
-            @collapse="selectedCharId = 0"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedChar)" @collapse="selectedCharId = 0">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedChar }">
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
-                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-char-list.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredChars.length }}
-                        </span>
-                    </div>
-
-                    <!-- 筛选器：常驻可清除选择框 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <FilterSelect v-model="selectedElem" :options="elemOptions" :label="$t('char-build.elem')" :clear-title="$t('common.clear')" />
-                        <FilterSelect v-model="selectedVersion" :options="versionOptions" :label="$t('char-build.version')" :clear-title="$t('common.clear')" />
-                        <FilterSelect v-model="selectedTag" :options="tagOptions" :label="$t('char-build.tag')" :clear-title="$t('common.clear')" />
-                        <FilterSelect
-                            v-model="selectedProficiency"
-                            :options="proficiencyOptions"
-                            :label="$t('武器精通')"
-                            :clear-title="$t('common.clear')"
-                        />
-                        <FilterSelect v-model="selectedFaction" :options="factionOptions" :label="$t('char-build.faction')" :clear-title="$t('common.clear')" />
-                    </div>
-                </div>
-
-                <!-- 角色列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <!-- 空状态 -->
-                        <div v-if="filteredChars.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
-                            <Icon icon="ri:user-search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">{{ $t('db-char-list.no_match') }}</p>
+                <!-- 左侧列表面板 -->
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedChar }"
+                >
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-char-list.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredChars.length }}
+                            </span>
                         </div>
 
-                        <div v-else class="space-y-2">
-                            <article
-                                v-for="(char, index) in filteredChars"
-                                :key="char.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                        <!-- 筛选器：常驻可清除选择框 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <FilterSelect
+                                v-model="selectedElem"
+                                :options="elemOptions"
+                                :label="$t('char-build.elem')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedVersion"
+                                :options="versionOptions"
+                                :label="$t('char-build.version')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedTag"
+                                :options="tagOptions"
+                                :label="$t('char-build.tag')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedProficiency"
+                                :options="proficiencyOptions"
+                                :label="$t('武器精通')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedFaction"
+                                :options="factionOptions"
+                                :label="$t('char-build.faction')"
+                                :clear-title="$t('common.clear')"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- 角色列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <!-- 空状态 -->
+                            <div
+                                v-if="filteredChars.length === 0"
+                                class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                            >
+                                <Icon icon="ri:user-search-line" class="mb-4 h-12 w-12 opacity-40" />
+                                <p class="text-sm">{{ $t("db-char-list.no_match") }}</p>
+                            </div>
+
+                            <div v-else class="space-y-2">
+                                <article
+                                    v-for="(char, index) in filteredChars"
+                                    :key="char.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedCharId === char.id
                                         ? 'dbc-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectedCharId = char.id"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedCharId === char.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="flex items-start gap-3 p-3">
-                                    <!-- 角色头像（稀有度渐变底） -->
-                                    <div
-                                        class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15"
-                                        :class="getRarityGradientClass(5)"
-                                    >
-                                        <img
-                                            :src="LeveledChar.url(char.icon)"
-                                            :alt="$t(char.名称)"
-                                            class="h-full w-full object-cover object-top"
-                                        />
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <!-- 名称行：名称 + 别名 + 幽灵 ID -->
-                                        <div class="flex items-baseline gap-2">
-                                            <h3
-                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                :class="{ 'text-primary': selectedCharId === char.id }"
-                                            >
-                                                {{ $t(char.名称) }}
-                                            </h3>
-                                            <span v-if="char.别名" class="truncate text-[11px] text-base-content/45">
-                                                ({{ $t(char.别名) }})
-                                            </span>
-                                            <!-- 阵营 -->
-                                            <div v-if="char.阵营" class="shrink-0 text-right text-[11px] leading-5 text-base-content/45">
-                                                {{ $t(char.阵营) }}
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectedCharId = char.id"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedCharId === char.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="flex items-start gap-3 p-3">
+                                        <!-- 角色头像（稀有度渐变底） -->
+                                        <div
+                                            class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                            :class="getRarityGradientClass(5)"
+                                        >
+                                            <img
+                                                :src="LeveledChar.url(char.icon)"
+                                                :alt="$t(char.名称)"
+                                                class="h-full w-full object-cover object-top"
+                                            />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <!-- 名称行：名称 + 别名 + 幽灵 ID -->
+                                            <div class="flex items-baseline gap-2">
+                                                <h3
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': selectedCharId === char.id }"
+                                                >
+                                                    {{ $t(char.名称) }}
+                                                </h3>
+                                                <span v-if="char.别名" class="truncate text-[11px] text-base-content/45">
+                                                    ({{ $t(char.别名) }})
+                                                </span>
+                                                <!-- 阵营 -->
+                                                <div
+                                                    v-if="char.阵营"
+                                                    class="shrink-0 text-right text-[11px] leading-5 text-base-content/45"
+                                                >
+                                                    {{ $t(char.阵营) }}
+                                                </div>
+                                                <CopyID :id="char.id" class="ml-auto shrink-0" />
                                             </div>
-                                            <CopyID :id="char.id" class="ml-auto shrink-0" />
-                                        </div>
-                                        <!-- 元信息行：元素 / 版本 / 标签 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span class="inline-flex items-center gap-1">
-                                                <img
-                                                    :src="LeveledChar.elementUrl(char.属性)"
-                                                    :alt="$t(`${char.属性}属性`)"
-                                                    class="h-4 w-2 object-cover"
-                                                />
-                                                {{ $t(`${char.属性}属性`) }}
-                                            </span>
-                                            <span v-if="char.版本" class="font-mono tabular-nums">v{{ char.版本 }}</span>
-                                            <span
-                                                v-for="tag in char.标签"
-                                                :key="tag"
-                                                class="rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 tracking-wide text-base-content/55"
+                                            <!-- 元信息行：元素 / 版本 / 标签 -->
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
                                             >
-                                                {{ $t(`tag.${tag}`, $t(tag)) }}
-                                            </span>
+                                                <span class="inline-flex items-center gap-1">
+                                                    <img
+                                                        :src="LeveledChar.elementUrl(char.属性)"
+                                                        :alt="$t(`${char.属性}属性`)"
+                                                        class="h-4 w-2 object-cover"
+                                                    />
+                                                    {{ $t(`${char.属性}属性`) }}
+                                                </span>
+                                                <span v-if="char.版本" class="font-mono tabular-nums">v{{ char.版本 }}</span>
+                                                <span
+                                                    v-for="tag in char.标签"
+                                                    :key="tag"
+                                                    class="rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 tracking-wide text-base-content/55"
+                                                >
+                                                    {{ $t(`tag.${tag}`, $t(tag)) }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredChars.length }}</b>
+                            {{ $t("db-char-list.char_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredChars.length }}</b> {{ $t('db-char-list.char_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedChar" class="min-h-0 min-w-0 flex-1">
-                <DBCharDetailItem :key="selectedCharId" :char="selectedChar" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedChar" class="min-h-0 min-w-0 flex-1">
+                    <DBCharDetailItem :key="selectedCharId" :char="selectedChar" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

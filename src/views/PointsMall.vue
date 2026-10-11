@@ -427,9 +427,7 @@ watch(
                             <div class="flex items-center gap-2">
                                 <div class="text-sm font-bold">{{ $t("points-mall.productList") }}</div>
                                 <div class="ml-auto tabs tabs-box">
-                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{
-                                        $t("common.all")
-                                    }}</a>
+                                    <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{ $t("common.all") }}</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">{{
                                         $t("title-frame-label.title")
                                     }}</a>

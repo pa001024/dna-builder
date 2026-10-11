@@ -358,7 +358,10 @@ onMounted(async () => {
                                 <span class="label-text text-sm">{{ $t("game-launcher.modLoader") }}</span>
                             </label>
                             <div class="flex flex-1 items-center gap-2">
-                                <label class="label tooltip cursor-pointer gap-2 px-0 py-1" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
+                                <label
+                                    class="label tooltip cursor-pointer gap-2 px-0 py-1"
+                                    data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿"
+                                >
                                     <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary radio-sm" />
                                     <span class="label-text text-sm">{{ $t("game-launcher.legacy") }}</span>
                                 </label>

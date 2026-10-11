@@ -29,7 +29,14 @@ import {
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
-import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd, normalizeTraitSlots, resolvePetCoverage } from "@/data/petTrait"
+import {
+    collectPetBuffs,
+    collectTraitBuffs,
+    getEffectivePetLevel,
+    getPetBaseCd,
+    normalizeTraitSlots,
+    resolvePetCoverage,
+} from "@/data/petTrait"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
 import { roundBuffValue } from "@/util"
@@ -496,6 +503,7 @@ const allColumns: { key: ColumnKey; label: string }[] = [
     { key: "增伤", label: "增伤" },
     { key: "武器伤害", label: "武器伤害" },
     { key: "技能伤害", label: "技能伤害" },
+    { key: "技能追伤", label: "技能追伤" },
     { key: "独立增伤", label: "独立增伤" },
     { key: "属性穿透", label: "属性穿透" },
     { key: "无视防御", label: "无视防御" },
@@ -564,7 +572,11 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <!-- Character and Project Selection -->
                                 <div class="flex flex-wrap gap-4">
                                     <h3 class="text-lg font-semibold text-primary">
-                                        <input v-model="config.name" type="text" class="w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                                        <input
+                                            v-model="config.name"
+                                            type="text"
+                                            class="w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        />
                                     </h3>
                                     <!-- Character Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">

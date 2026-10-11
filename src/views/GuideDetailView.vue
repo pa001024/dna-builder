@@ -145,7 +145,9 @@ onMounted(async () => {
             <div v-if="loading" class="flex justify-center items-center h-full">
                 <span class="loading loading-spinner" />
             </div>
-            <div v-else-if="!guide" class="flex justify-center items-center h-full text-base-content/50">{{ $t('guide-detail.not_found') }}</div>
+            <div v-else-if="!guide" class="flex justify-center items-center h-full text-base-content/50">
+                {{ $t("guide-detail.not_found") }}
+            </div>
             <div v-else class="p-6 max-w-4xl mx-auto space-y-6">
                 <div class="flex items-center gap-4 text-sm text-base-content/70">
                     <div class="flex items-center gap-2">
@@ -174,7 +176,7 @@ onMounted(async () => {
                 </div>
 
                 <div v-if="guide.charId" class="flex items-center gap-2 text-sm">
-                    <span class="text-base-content/50">{{ $t('common.related_char') }}</span>
+                    <span class="text-base-content/50">{{ $t("common.related_char") }}</span>
                     <span class="badge badge-outline">{{ charName }}</span>
                 </div>
 
@@ -204,12 +206,12 @@ onMounted(async () => {
 
                 <div v-if="canShowBuild" class="card bg-base-200 border border-base-300">
                     <div class="card-body">
-                        <h3 class="card-title text-lg">{{ $t('guide-detail.build_info') }}</h3>
-                        <p class="text-sm text-base-content/70">{{ $t('guide-detail.build_info_hint') }}</p>
+                        <h3 class="card-title text-lg">{{ $t("guide-detail.build_info") }}</h3>
+                        <p class="text-sm text-base-content/70">{{ $t("guide-detail.build_info_hint") }}</p>
                         <div class="card-actions justify-end">
                             <button class="btn btn-primary" @click="goToBuild">
                                 <Icon icon="ri:hammer-line" class="w-4 h-4" />
-                                {{ $t('guide-detail.view_build') }}
+                                {{ $t("guide-detail.view_build") }}
                             </button>
                         </div>
                     </div>

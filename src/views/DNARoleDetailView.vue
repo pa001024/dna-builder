@@ -110,9 +110,14 @@ async function loadRoleDetail() {
                 <!-- 角色立绘 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm overflow-hidden">
                     <div class="relative h-64 md:h-80">
-                        <img v-if="charDetail.paint" :src="charDetail.paint" :alt="$t('dna-role-detail.char_splash')" class="w-full h-full object-cover" />
+                        <img
+                            v-if="charDetail.paint"
+                            :src="charDetail.paint"
+                            :alt="$t('dna-role-detail.char_splash')"
+                            class="w-full h-full object-cover"
+                        />
                         <div v-else class="w-full h-full flex items-center justify-center bg-base-200">
-                            <span class="text-base-400">{{ $t('dna-role-detail.no_splash') }}</span>
+                            <span class="text-base-400">{{ $t("dna-role-detail.no_splash") }}</span>
                         </div>
                         <!-- 半透明渐变遮罩 -->
                         <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-base-100/90 to-transparent p-4">
@@ -127,7 +132,7 @@ async function loadRoleDetail() {
                                     v-else
                                     class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md bg-base-200 flex items-center justify-center"
                                 >
-                                    <span class="text-base-400">{{ $t('dna-role-detail.no_avatar') }}</span>
+                                    <span class="text-base-400">{{ $t("dna-role-detail.no_avatar") }}</span>
                                 </div>
                                 <div>
                                     <h2 class="text-2xl font-bold flex items-center gap-2">
@@ -156,7 +161,7 @@ async function loadRoleDetail() {
                 <!-- 角色属性 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('dna-role-detail.char_attributes') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-role-detail.char_attributes") }}</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
                                 <div class="stat-title text-xs text-base-content/60">{{ $t(`${charDetail.elementName}属性攻击`) }}</div>
@@ -165,55 +170,55 @@ async function loadRoleDetail() {
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('dna-role-detail.hp') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-role-detail.hp") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.maxHp }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('防御') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("防御") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.def }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('护盾') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("护盾") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.maxES }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('dna-role-detail.max_sanity') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-role-detail.max_sanity") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.maxSp }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('技能威力') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能威力") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.skillIntensity }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('技能耐久') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能耐久") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.skillSustain }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('技能效益') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能效益") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.skillEfficiency }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('技能范围') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能范围") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.skillRange }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('武器精通') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("武器精通") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ charDetail.attribute.weaponTags.join("/") }}
                                 </div>
@@ -225,7 +230,7 @@ async function loadRoleDetail() {
                 <!-- 角色技能 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('技能') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("技能") }}</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div
                                 v-for="skill in charDetail.skills"
@@ -251,7 +256,7 @@ async function loadRoleDetail() {
                 <!-- 溯源 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('dna-role-detail.char_trace') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-role-detail.char_trace") }}</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div
                                 v-for="(trace, index) in charDetail.traces"
@@ -270,7 +275,9 @@ async function loadRoleDetail() {
                                                     'badge-warning': charDetail.gradeLevel > index,
                                                     'badge-neutral': charDetail.gradeLevel <= index,
                                                 }"
-                                                >{{ charDetail.gradeLevel > index ? "已解锁" : "未解锁" }}</span
+                                                >{{
+                                                    charDetail.gradeLevel > index ? "已解锁" : "未解锁"
+                                                }}</span
                                             >
                                         </div>
                                         <p class="text-xs opacity-60">
@@ -286,7 +293,7 @@ async function loadRoleDetail() {
                 <!-- 魔之楔 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <div class="flex text-lg font-semibold mb-4">{{ $t('魔之楔') }}</div>
+                        <div class="flex text-lg font-semibold mb-4">{{ $t("魔之楔") }}</div>
                         <div class="flex justify-center items-center gap-2">
                             <GameStyleModView
                                 :mods="roleMods"
@@ -302,8 +309,8 @@ async function loadRoleDetail() {
             <!-- 错误状态 -->
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4 text-base-content/80">{{ $t('dna-role-detail.load_failed') }}</p>
-                    <button class="btn btn-secondary" @click="loadRoleDetail">{{ $t('dna-role-detail.retry') }}</button>
+                    <p class="text-lg mb-4 text-base-content/80">{{ $t("dna-role-detail.load_failed") }}</p>
+                    <button class="btn btn-secondary" @click="loadRoleDetail">{{ $t("dna-role-detail.retry") }}</button>
                 </div>
             </div>
         </div>

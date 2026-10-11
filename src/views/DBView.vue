@@ -317,6 +317,7 @@ const databaseItems = [
     { name: "database.impr", path: "/db/impr", desc: "database.impr_desc", icon: "ri:image-2-line" },
     { name: "database.clue", path: "/db/clue", desc: "database.clue_desc", icon: "ri:node-tree" },
     { name: "database.review", path: "/db/review", desc: "database.review_desc", icon: "ri:history-line" },
+    { name: "database.trait", path: "/db/trait", desc: "database.trait_desc", icon: "ri:user-search-line" },
     { name: "database.wiki", path: "/db/wiki", desc: "database.wiki_desc", icon: "ri:book-line" },
 ] as const
 
@@ -349,11 +350,25 @@ const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/qu
 
 /** 分区静态结构：只有 id 与路径，文案由 databaseSectionConfigs 按当前语言实时翻译 */
 const databaseSectionMeta = [
-    { id: "build", paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"] },
+    {
+        id: "build",
+        paths: ["/db/char", "/db/trait", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
+    },
     { id: "explore", paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"] },
     {
         id: "world",
-        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest", "/db/clue", "/db/review", "/db/wiki"],
+        paths: [
+            "/db/questchain",
+            "/db/partytopic",
+            "/db/shop",
+            "/db/impr",
+            "/db/npc",
+            "/db/reputation",
+            "/db/dynquest",
+            "/db/clue",
+            "/db/review",
+            "/db/wiki",
+        ],
     },
     { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"] },
     { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"] },
@@ -770,10 +785,7 @@ function handleSelectConversation(conversation: Conversation) {
  * @param conversation 目标会话
  */
 async function handleRemoveConversation(conversation: Conversation) {
-    const confirmed = await ui.showDialog(
-        t("dbAgent.ui.dialogDeleteTitle"),
-        t("dbAgent.ui.dialogDeleteBody", { name: conversation.name })
-    )
+    const confirmed = await ui.showDialog(t("dbAgent.ui.dialogDeleteTitle"), t("dbAgent.ui.dialogDeleteBody", { name: conversation.name }))
 
     if (confirmed) {
         await removeConversation(conversation)
@@ -1076,7 +1088,9 @@ onBeforeUnmount(() => {
                                         <span class="mt-1.5 block text-xs text-base-content/40">{{ $t("dbAgent.ui.browseHint") }}</span>
                                     </p>
 
-                                    <p v-if="hiddenResultCount" class="db-ask-more">{{ $t("dbAgent.ui.browseMoreResults", { count: hiddenResultCount }) }}</p>
+                                    <p v-if="hiddenResultCount" class="db-ask-more">
+                                        {{ $t("dbAgent.ui.browseMoreResults", { count: hiddenResultCount }) }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

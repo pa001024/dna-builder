@@ -32,9 +32,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
             <!-- 顶部列表面板 -->
             <div class="flex-1 flex flex-col overflow-hidden min-w-0">
                 <!-- 检索带：下划线搜索 + 计数 -->
-                <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
-                >
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <div class="relative">
                         <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
                         <input
@@ -63,9 +61,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }}
+                        {{ $t("common.total_count") }}
                         <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredForgeLevels.length }}</b>
-                        {{ $t('db-forge-list.forge_level_count') }}
+                        {{ $t("db-forge-list.forge_level_count") }}
                     </p>
                 </div>
             </div>

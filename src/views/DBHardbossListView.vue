@@ -65,116 +65,117 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbh-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedBoss)"
-            @collapse="selectBoss(null)"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedBoss)" @collapse="selectBoss(null)">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedBoss }">
-                <!-- 检索带：下划线搜索 + 计数 -->
-                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-hardboss-list.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredBosses.length }}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 梦魇残声列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <!-- 空状态 -->
-                        <div
-                            v-if="filteredBosses.length === 0"
-                            class="flex flex-col items-center justify-center py-20 text-base-content/45"
-                        >
-                            <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">{{ $t('db-hardboss-list.no_match') }}</p>
+                <!-- 左侧列表面板 -->
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedBoss }"
+                >
+                    <!-- 检索带：下划线搜索 + 计数 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-hardboss-list.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredBosses.length }}
+                            </span>
                         </div>
+                    </div>
 
-                        <div v-else class="space-y-2">
-                            <article
-                                v-for="(boss, index) in filteredBosses"
-                                :key="boss.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                    <!-- 梦魇残声列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <!-- 空状态 -->
+                            <div
+                                v-if="filteredBosses.length === 0"
+                                class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                            >
+                                <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
+                                <p class="text-sm">{{ $t("db-hardboss-list.no_match") }}</p>
+                            </div>
+
+                            <div v-else class="space-y-2">
+                                <article
+                                    v-for="(boss, index) in filteredBosses"
+                                    :key="boss.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedBossId === boss.id
                                         ? 'dbh-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectBoss(boss)"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedBossId === boss.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="flex items-start gap-3 p-3">
-                                    <!-- Boss 图标 -->
-                                    <div
-                                        class="size-12 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3"
-                                    >
-                                        <img :src="getHardbossIcon(boss)" :alt="boss.name" class="h-full w-full object-cover object-top" />
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <!-- 名称行 -->
-                                        <h3
-                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                            :class="{ 'text-primary': selectedBossId === boss.id }"
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectBoss(boss)"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedBossId === boss.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="flex items-start gap-3 p-3">
+                                        <!-- Boss 图标 -->
+                                        <div
+                                            class="size-12 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3"
                                         >
-                                            {{ $t(boss.name) }}
-                                        </h3>
-                                        <!-- 描述 -->
-                                        <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55">
-                                            {{ $t(boss.desc) }}
-                                        </p>
+                                            <img
+                                                :src="getHardbossIcon(boss)"
+                                                :alt="boss.name"
+                                                class="h-full w-full object-cover object-top"
+                                            />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <!-- 名称行 -->
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedBossId === boss.id }"
+                                            >
+                                                {{ $t(boss.name) }}
+                                            </h3>
+                                            <!-- 描述 -->
+                                            <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55">
+                                                {{ $t(boss.desc) }}
+                                            </p>
+                                        </div>
+                                        <!-- 难度数 / 幽灵 ID -->
+                                        <div class="ml-2 flex shrink-0 flex-col items-end gap-1">
+                                            <span
+                                                class="rounded-xs bg-primary/10 px-2 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
+                                            >
+                                                {{ boss.diff.length }}
+                                                个难度
+                                            </span>
+                                            <CopyID :id="boss.id" />
+                                        </div>
                                     </div>
-                                    <!-- 难度数 / 幽灵 ID -->
-                                    <div class="ml-2 flex shrink-0 flex-col items-end gap-1">
-                                        <span
-                                            class="rounded-xs bg-primary/10 px-2 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
-                                        >
-                                            {{ boss.diff.length }} 个难度
-                                        </span>
-                                        <CopyID :id="boss.id" />
-                                    </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredBosses.length }}</b>
+                            {{ $t("db-hardboss-list.hardboss_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }}
-                        <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredBosses.length }}</b> {{ $t('db-hardboss-list.hardboss_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedBoss" class="min-h-0 min-w-0 flex-1">
-                <DBHardbossDetailItem :key="selectedBossId" :boss="selectedBoss" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedBoss" class="min-h-0 min-w-0 flex-1">
+                    <DBHardbossDetailItem :key="selectedBossId" :boss="selectedBoss" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

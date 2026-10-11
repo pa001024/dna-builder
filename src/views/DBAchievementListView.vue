@@ -102,205 +102,209 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedAchievement)"
-            @collapse="selectedAchievementId = 0"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedAchievement)" @collapse="selectedAchievementId = 0">
             <template #master>
-
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedAchievement }"
-            >
-                <!-- 检索带：下划线搜索 + 计数 -->
-                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-achievement-list.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredAchievements.length }}
-                        </span>
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedAchievement }"
+                >
+                    <!-- 检索带：下划线搜索 + 计数 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-achievement-list.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredAchievements.length }}
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 筛选条件：方章 chip -->
-                <div class="flex-none space-y-2.5 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
-                    <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.category') }}</div>
-                        <div class="flex flex-wrap gap-1.5">
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                    <!-- 筛选条件：方章 chip -->
+                    <div
+                        class="flex-none space-y-2.5 border-b border-base-content/15 px-4 py-3 stagger-rise"
+                        style="animation-delay: 0.05s"
+                    >
+                        <div>
+                            <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.category") }}</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedCategory === ''
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedCategory = ''"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="category in categoryOptions"
-                                :key="category"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="selectedCategory = ''"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="category in categoryOptions"
+                                    :key="category"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedCategory === category
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedCategory = category"
-                            >
-                                {{ $t(category) }}
-                            </button>
+                                    @click="selectedCategory = category"
+                                >
+                                    {{ $t(category) }}
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.version') }}</div>
-                        <div class="flex flex-wrap gap-1.5">
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                        <div>
+                            <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.version") }}</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedVersion === ''
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedVersion = ''"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="version in versionOptions"
-                                :key="version"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="selectedVersion = ''"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="version in versionOptions"
+                                    :key="version"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedVersion === version
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedVersion = version"
-                            >
-                                {{ version }}
-                            </button>
+                                    @click="selectedVersion = version"
+                                >
+                                    {{ version }}
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.quality') }}</div>
-                        <div class="flex flex-wrap gap-1.5">
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                        <div>
+                            <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.quality") }}</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedQuality === ''
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedQuality = ''"
-                            >
-                                {{ $t('common.all') }}
-                            </button>
-                            <button
-                                v-for="quality in qualityOptions"
-                                :key="quality"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
+                                    @click="selectedQuality = ''"
+                                >
+                                    {{ $t("common.all") }}
+                                </button>
+                                <button
+                                    v-for="quality in qualityOptions"
+                                    :key="quality"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
                                     selectedQuality === quality
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
-                                @click="selectedQuality = quality"
-                            >
-                                {{ gt(getQualityLabel(quality)) }}
-                            </button>
+                                    @click="selectedQuality = quality"
+                                >
+                                    {{ gt(getQualityLabel(quality)) }}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 成就列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <!-- 空状态 -->
-                        <div
-                            v-if="filteredAchievements.length === 0"
-                            class="flex flex-col items-center justify-center py-20 text-base-content/45"
-                        >
-                            <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">{{ $t('db-achievement-list.no_match') }}</p>
-                        </div>
+                    <!-- 成就列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <!-- 空状态 -->
+                            <div
+                                v-if="filteredAchievements.length === 0"
+                                class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                            >
+                                <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
+                                <p class="text-sm">{{ $t("db-achievement-list.no_match") }}</p>
+                            </div>
 
-                        <div v-else class="space-y-2">
-                            <article
-                                v-for="(achievement, index) in filteredAchievements"
-                                :key="achievement.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                            <div v-else class="space-y-2">
+                                <article
+                                    v-for="(achievement, index) in filteredAchievements"
+                                    :key="achievement.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedAchievementId === achievement.id
                                         ? 'dbac-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectAchievement(achievement.id)"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedAchievementId === achievement.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="flex items-start justify-between gap-2 p-3">
-                                    <div class="min-w-0 flex-1">
-                                        <h3
-                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                            :class="{ 'text-primary': selectedAchievementId === achievement.id }"
-                                        >
-                                            {{ $t(achievement.名称) }}
-                                        </h3>
-                                        <p class="mt-1 truncate text-xs text-base-content/55">{{ $t(achievement.描述) }}</p>
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span>{{ $t(achievement.分类) }}</span>
-                                            <span class="font-mono tabular-nums">v{{ achievement.版本 }}</span>
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectAchievement(achievement.id)"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedAchievementId === achievement.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="flex items-start justify-between gap-2 p-3">
+                                        <div class="min-w-0 flex-1">
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedAchievementId === achievement.id }"
+                                            >
+                                                {{ $t(achievement.名称) }}
+                                            </h3>
+                                            <p class="mt-1 truncate text-xs text-base-content/55">{{ $t(achievement.描述) }}</p>
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
+                                            >
+                                                <span>{{ $t(achievement.分类) }}</span>
+                                                <span class="font-mono tabular-nums">v{{ achievement.版本 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex shrink-0 flex-col items-end gap-1">
+                                            <img
+                                                v-if="achievement.品质"
+                                                :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
+                                                :alt="$t('common.quality')"
+                                                class="h-5 w-5"
+                                            />
+                                            <img
+                                                v-if="getAchievementIcon(achievement.分类)"
+                                                :src="getAchievementIcon(achievement.分类)"
+                                                :alt="$t('common.category')"
+                                                class="h-6 w-6"
+                                            />
+                                            <CopyID :id="achievement.id" />
                                         </div>
                                     </div>
-                                    <div class="flex shrink-0 flex-col items-end gap-1">
-                                        <img
-                                            v-if="achievement.品质"
-                                            :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
-                                            :alt="$t('common.quality')"
-                                            class="h-5 w-5"
-                                        />
-                                        <img v-if="getAchievementIcon(achievement.分类)" :src="getAchievementIcon(achievement.分类)" :alt="$t('common.category')" class="h-6 w-6" />
-                                        <CopyID :id="achievement.id" />
-                                    </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredAchievements.length }}</b>
+                            {{ $t("db-achievement-list.achievement_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredAchievements.length }}</b> {{ $t('db-achievement-list.achievement_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedAchievement" class="min-h-0 min-w-0 flex-1">
-                <DBAchievementDetailItem :key="selectedAchievementId" :achievement="selectedAchievement" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedAchievement" class="min-h-0 min-w-0 flex-1">
+                    <DBAchievementDetailItem :key="selectedAchievementId" :achievement="selectedAchievement" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

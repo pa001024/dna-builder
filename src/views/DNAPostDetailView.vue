@@ -165,7 +165,7 @@ async function uploadPostAbyssUsage() {
             >
                 <span v-if="abyssUploadLoading" class="loading loading-spinner loading-xs" />
                 <Icon v-else icon="ri:upload-cloud-line" />
-                {{ $t('dna-post-detail.upload_abyss_data') }}
+                {{ $t("dna-post-detail.upload_abyss_data") }}
             </button>
         </div>
 
@@ -259,10 +259,12 @@ async function uploadPostAbyssUsage() {
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium text-base-content">{{ comment.userName }}</span>
-                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">{{ $t('common.official') }}</span>
-                                            <span v-if="comment.isCreator === 1" class="badge badge-sm badge-secondary text-xs"
-                                                >{{ $t('dna-post-detail.creator') }}</span
-                                            >
+                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">{{
+                                                $t("common.official")
+                                            }}</span>
+                                            <span v-if="comment.isCreator === 1" class="badge badge-sm badge-secondary text-xs">{{
+                                                $t("dna-post-detail.creator")
+                                            }}</span>
                                         </div>
                                         <div class="text-xs text-base-content/60">
                                             {{ comment.commentTime }}
@@ -312,8 +314,8 @@ async function uploadPostAbyssUsage() {
 
                             <!-- 无评论提示 -->
                             <div v-if="comments.length === 0" class="text-center py-8">
-                                <p class="text-base-content/60 mb-2">{{ $t('dna-post-detail.no_comments') }}</p>
-                                <p class="text-xs text-base-content/40">{{ $t('dna-post-detail.be_first_commenter') }}</p>
+                                <p class="text-base-content/60 mb-2">{{ $t("dna-post-detail.no_comments") }}</p>
+                                <p class="text-xs text-base-content/40">{{ $t("dna-post-detail.be_first_commenter") }}</p>
                             </div>
                         </div>
 
@@ -321,13 +323,13 @@ async function uploadPostAbyssUsage() {
                         <div v-if="commentHasNext" class="flex justify-center mt-6">
                             <button class="btn btn-outline" :disabled="moreLoading" @click="loadMoreComments">
                                 <span v-if="moreLoading" class="loading loading-spinner loading-xs mr-2" />
-                                {{ $t('common.load_more') }}
+                                {{ $t("common.load_more") }}
                             </button>
                         </div>
 
                         <!-- 发表评论 -->
                         <div class="mt-6 pt-6 border-t border-base-200">
-                            <h3 class="text-lg font-semibold mb-4">{{ $t('dna-post-detail.post_comment') }}</h3>
+                            <h3 class="text-lg font-semibold mb-4">{{ $t("dna-post-detail.post_comment") }}</h3>
                             <div class="space-y-4">
                                 <textarea
                                     v-model="commentContent"
@@ -353,8 +355,8 @@ async function uploadPostAbyssUsage() {
 
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4">{{ $t('dna-post-detail.load_failed') }}</p>
-                    <button class="btn btn-secondary" @click="loadPostDetail()">{{ $t('common.retry') }}</button>
+                    <p class="text-lg mb-4">{{ $t("dna-post-detail.load_failed") }}</p>
+                    <button class="btn btn-secondary" @click="loadPostDetail()">{{ $t("common.retry") }}</button>
                 </div>
             </div>
         </div>

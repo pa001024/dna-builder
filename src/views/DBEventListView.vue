@@ -1205,245 +1205,255 @@ onUnmounted(() => {
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 3"
-            :detail-open="Boolean(selectedEvent)"
-            @collapse="closeSelectedEvent"
-        >
+        <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedEvent)" @collapse="closeSelectedEvent">
             <template #master>
-
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEvent }">
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedEvent }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="
                                 showFullTextSearch ? '全文搜索活动名称/描述/规则（不支持拼音）...' : '搜索活动ID/名称/描述（支持拼音）...'
                             "
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredEvents.length }}
-                        </span>
-                    </div>
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredEvents.length }}
+                            </span>
+                        </div>
 
-                    <!-- 过滤器开关方章 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                        <!-- 过滤器开关方章 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showTimeFilter
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showTimeFilter = !showTimeFilter"
-                        >
-                            {{ $t('db-event-list.time_point') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showFullTextSearch
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showFullTextSearch = !showFullTextSearch"
-                        >
-                            {{ $t('common.full_text_search') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showTimeLine
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showTimeLine = !showTimeLine"
-                        >
-                            {{ $t('db-event-list.timeline') }}
-                        </button>
-                        <FilterSelect
-                            v-model="selectedVersion"
-                            :options="versionFilterOptions"
-                            :label="$t('common.version')"
-                            :clear-title="$t('common.clear')"
-                        />
-                    </div>
-
-                    <!-- 时间点筛选面板（外层区块卡） -->
-                    <div
-                        v-if="hasTimePoints"
-                        v-show="showTimeFilter"
-                        class="mt-3 space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
-                    >
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <button
-                                type="button"
-                                class="cursor-pointer text-[11px] text-base-content/50 transition-colors duration-150 hover:text-primary"
-                                @click="resetToCurrentTimePoint"
+                                @click="showTimeFilter = !showTimeFilter"
                             >
-                                {{ $t('common.reset_to_current') }}
+                                {{ $t("db-event-list.time_point") }}
                             </button>
                             <button
                                 type="button"
                                 class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
                                 :class="
+                                showFullTextSearch
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                                @click="showFullTextSearch = !showFullTextSearch"
+                            >
+                                {{ $t("common.full_text_search") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                showTimeLine
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                                @click="showTimeLine = !showTimeLine"
+                            >
+                                {{ $t("db-event-list.timeline") }}
+                            </button>
+                            <FilterSelect
+                                v-model="selectedVersion"
+                                :options="versionFilterOptions"
+                                :label="$t('common.version')"
+                                :clear-title="$t('common.clear')"
+                            />
+                        </div>
+
+                        <!-- 时间点筛选面板（外层区块卡） -->
+                        <div
+                            v-if="hasTimePoints"
+                            v-show="showTimeFilter"
+                            class="mt-3 space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                        >
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <button
+                                    type="button"
+                                    class="cursor-pointer text-[11px] text-base-content/50 transition-colors duration-150 hover:text-primary"
+                                    @click="resetToCurrentTimePoint"
+                                >
+                                    {{ $t("common.reset_to_current") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                    :class="
                                     diffOnlyEnabled
                                         ? 'border-primary bg-primary/10 font-semibold text-primary'
                                         : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                                 "
-                                @click="diffOnlyEnabled = !diffOnlyEnabled"
-                            >
-                                {{ $t('common.show_diff_only') }}
-                            </button>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <span class="w-24 shrink-0 font-mono text-[11px] tabular-nums text-base-content/60">{{
-                                formatEventTimePoint(eventTimePoints[0] ?? null)
-                            }}</span>
-                            <input
-                                v-model.number="selectedTimePointIndex"
-                                type="range"
-                                class="range range-primary range-xs grow"
-                                :min="0"
-                                :max="Math.max(eventTimePoints.length - 1, 0)"
-                                step="1"
-                            />
-                            <span class="w-24 shrink-0 text-right font-mono text-[11px] tabular-nums text-base-content/60">{{
-                                formatEventTimePoint(eventTimePoints.at(-1) ?? null)
-                            }}</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] tabular-nums text-base-content/55">
-                            <span
-                                >{{ $t('db-event-list.current_time_point') }}<span class="font-mono">{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span></span
-                            >
-                            <span v-if="selectedTimePoint"
-                                >{{ $t('db-event-list.selected_time_point') }}<span class="font-mono">{{ formatEventTimePoint(selectedTimePoint) }}</span></span
-                            >
-                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
-                                >{{ $t('db-event-list.compare_prev_time_point') }}<span class="font-mono">{{ formatEventTimePoint(previousSelectedTimePoint) }}</span></span
-                            >
-                            <span
-                                class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
-                                >{{ eventTimePoints.length }} 个时间点</span
-                            >
-                            <span class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
-                                >{{ visibleEventCount }} 个活动</span
-                            >
-                        </div>
-                    </div>
-                </div>
-
-                <template v-if="showTimeLine">
-                    <div class="flex-1 min-h-0 p-2 overflow-hidden">
-                        <div v-if="hasEventTimeLinePoints" ref="eventTimeLineChartRef" class="h-full w-full" />
-                        <div v-else class="flex h-full items-center justify-center text-sm text-base-content/60">{{ $t('db-event-list.no_data') }}</div>
-                    </div>
-                </template>
-                <template v-else>
-                    <ScrollArea class="flex-1">
-                        <div class="space-y-2 p-3">
-                            <!-- 空状态 -->
-                            <div v-if="filteredEvents.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
-                                <Icon icon="ri:calendar-event-line" class="mb-4 h-12 w-12 opacity-40" />
-                                <p class="text-sm">{{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}</p>
+                                    @click="diffOnlyEnabled = !diffOnlyEnabled"
+                                >
+                                    {{ $t("common.show_diff_only") }}
+                                </button>
                             </div>
-                            <article
-                                v-for="(item, index) in filteredEvents"
-                                :key="item.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+
+                            <div class="flex items-center gap-3">
+                                <span class="w-24 shrink-0 font-mono text-[11px] tabular-nums text-base-content/60">{{
+                                    formatEventTimePoint(eventTimePoints[0] ?? null)
+                                }}</span>
+                                <input
+                                    v-model.number="selectedTimePointIndex"
+                                    type="range"
+                                    class="range range-primary range-xs grow"
+                                    :min="0"
+                                    :max="Math.max(eventTimePoints.length - 1, 0)"
+                                    step="1"
+                                />
+                                <span class="w-24 shrink-0 text-right font-mono text-[11px] tabular-nums text-base-content/60">{{
+                                    formatEventTimePoint(eventTimePoints.at(-1) ?? null)
+                                }}</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] tabular-nums text-base-content/55">
+                                <span
+                                    >{{ $t("db-event-list.current_time_point")
+                                    }}<span class="font-mono">{{
+                                        formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null)
+                                    }}</span></span
+                                >
+                                <span v-if="selectedTimePoint"
+                                    >{{ $t("db-event-list.selected_time_point")
+                                    }}<span class="font-mono">{{ formatEventTimePoint(selectedTimePoint) }}</span></span
+                                >
+                                <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
+                                    >{{ $t("db-event-list.compare_prev_time_point")
+                                    }}<span class="font-mono">{{ formatEventTimePoint(previousSelectedTimePoint) }}</span></span
+                                >
+                                <span
+                                    class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
+                                    >{{ eventTimePoints.length }}
+                                    个时间点</span
+                                >
+                                <span
+                                    class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                                    >{{ visibleEventCount }}
+                                    个活动</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <template v-if="showTimeLine">
+                        <div class="flex-1 min-h-0 p-2 overflow-hidden">
+                            <div v-if="hasEventTimeLinePoints" ref="eventTimeLineChartRef" class="h-full w-full" />
+                            <div v-else class="flex h-full items-center justify-center text-sm text-base-content/60">
+                                {{ $t("db-event-list.no_data") }}
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <ScrollArea class="flex-1">
+                            <div class="space-y-2 p-3">
+                                <!-- 空状态 -->
+                                <div
+                                    v-if="filteredEvents.length === 0"
+                                    class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                                >
+                                    <Icon icon="ri:calendar-event-line" class="mb-4 h-12 w-12 opacity-40" />
+                                    <p class="text-sm">
+                                        {{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}
+                                    </p>
+                                </div>
+                                <article
+                                    v-for="(item, index) in filteredEvents"
+                                    :key="item.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedEventId === item.id
                                         ? 'dbe-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectEvent(item.id)"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedEventId === item.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="p-3">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
-                                            <div
-                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                :class="{ 'text-primary': selectedEventId === item.id }"
-                                            >
-                                                {{ $t(item.name) }}
-                                            </div>
-                                            <div class="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-base-content/55">
-                                                {{ formatTimeRange(item.startTime, item.endTime) }}
-                                                <span v-if="getVersionByTime(item.startTime)" class="font-mono tabular-nums"
-                                                    >v{{ getVersionByTime(item.startTime) }}</span
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectEvent(item.id)"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedEventId === item.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="p-3">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <div
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': selectedEventId === item.id }"
                                                 >
+                                                    {{ $t(item.name) }}
+                                                </div>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-base-content/55">
+                                                    {{ formatTimeRange(item.startTime, item.endTime) }}
+                                                    <span v-if="getVersionByTime(item.startTime)" class="font-mono tabular-nums"
+                                                        >v{{ getVersionByTime(item.startTime) }}</span
+                                                    >
+                                                </div>
                                             </div>
+                                            <CopyID :id="item.id" />
                                         </div>
-                                        <CopyID :id="item.id" />
-                                    </div>
-                                    <div class="mt-2 line-clamp-2 whitespace-pre-wrap break-all text-xs leading-relaxed text-base-content/60">
-                                        {{ $t(item.desc) }}
-                                    </div>
-                                    <div
-                                        v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
-                                        class="mt-2 text-xs leading-relaxed text-base-content/70"
-                                    >
-                                        <span class="text-base-content/45">匹配：</span>
-                                        <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
-                                        <template
-                                            v-for="(segment, index) in getEventSnippet(item)?.segments || []"
-                                            :key="`${item.id}-${index}`"
+                                        <div
+                                            class="mt-2 line-clamp-2 whitespace-pre-wrap break-all text-xs leading-relaxed text-base-content/60"
                                         >
-                                            <span
-                                                :class="
+                                            {{ $t(item.desc) }}
+                                        </div>
+                                        <div
+                                            v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
+                                            class="mt-2 text-xs leading-relaxed text-base-content/70"
+                                        >
+                                            <span class="text-base-content/45">匹配：</span>
+                                            <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
+                                            <template
+                                                v-for="(segment, index) in getEventSnippet(item)?.segments || []"
+                                                :key="`${item.id}-${index}`"
+                                            >
+                                                <span
+                                                    :class="
                                                     segment.highlighted
                                                         ? selectedEventId === item.id
                                                             ? 'rounded-xs bg-base-100/45 px-0.5 font-semibold text-primary-content underline decoration-primary-content/80 decoration-2 underline-offset-2'
                                                             : 'rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2'
                                                         : ''
                                                 "
-                                            >
-                                                {{ segment.text }}
-                                            </span>
-                                        </template>
-                                        <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
+                                                >
+                                                    {{ segment.text }}
+                                                </span>
+                                            </template>
+                                            <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
+                        </ScrollArea>
+
+                        <!-- 底部统计条 -->
+                        <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                            <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                                共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEvents.length }}</b> 个活动
+                            </p>
                         </div>
-                    </ScrollArea>
-
-                    <!-- 底部统计条 -->
-                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEvents.length }}</b> 个活动
-                        </p>
-                    </div>
-                </template>
-            </div>
-
-                        </template>
+                    </template>
+                </div>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedEvent" class="min-h-0 min-w-0 flex-2">
-                <DBEventDetailItem :key="selectedEventId" :event="selectedEvent" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedEvent" class="min-h-0 min-w-0 flex-2">
+                    <DBEventDetailItem :key="selectedEventId" :event="selectedEvent" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

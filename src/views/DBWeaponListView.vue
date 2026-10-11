@@ -103,141 +103,149 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedWeapon)"
-            @collapse="selectedWeaponId = 0"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedWeapon)" @collapse="selectedWeaponId = 0">
             <template #master>
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedWeapon }">
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedWeapon }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('db-weapon-list.search_placeholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredWeapons.length }}
-                        </span>
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('db-weapon-list.search_placeholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredWeapons.length }}
+                            </span>
+                        </div>
+
+                        <!-- 筛选器：常驻可清除选择框 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <FilterSelect
+                                v-model="selectedCategory"
+                                :options="categoryFilterOptions"
+                                :label="$t('common.weapon_category')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedDamageType"
+                                :options="damageTypeFilterOptions"
+                                :label="$t('伤害类型')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedVersion"
+                                :options="versionFilterOptions"
+                                :label="$t('char-build.version')"
+                                :clear-title="$t('common.clear')"
+                            />
+                        </div>
                     </div>
 
-                    <!-- 筛选器：常驻可清除选择框 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <FilterSelect
-                            v-model="selectedCategory"
-                            :options="categoryFilterOptions"
-                            :label="$t('common.weapon_category')"
-                            :clear-title="$t('common.clear')"
-                        />
-                        <FilterSelect
-                            v-model="selectedDamageType"
-                            :options="damageTypeFilterOptions"
-                            :label="$t('伤害类型')"
-                            :clear-title="$t('common.clear')"
-                        />
-                        <FilterSelect
-                            v-model="selectedVersion"
-                            :options="versionFilterOptions"
-                            :label="$t('char-build.version')"
-                            :clear-title="$t('common.clear')"
-                        />
-                    </div>
-                </div>
-
-                <!-- 武器列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <div class="space-y-2">
-                            <article
-                                v-for="(weapon, index) in filteredWeapons"
-                                :key="weapon.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                    <!-- 武器列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <div class="space-y-2">
+                                <article
+                                    v-for="(weapon, index) in filteredWeapons"
+                                    :key="weapon.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedWeaponId === weapon.id
                                         ? 'dbw-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectedWeaponId = weapon.id"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedWeaponId === weapon.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="flex items-start gap-3 p-3">
-                                    <!-- 武器图标（稀有度渐变底） -->
-                                    <div class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15" :class="getRarityGradientClass(5)">
-                                        <img :src="LeveledWeapon.url(weapon.icon)" :alt="$t('db-weapon-list.weapon_icon')" class="h-full w-full object-cover" />
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <!-- 名称行：名称 + 幽灵 ID -->
-                                        <div class="flex items-baseline gap-2">
-                                            <h3
-                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                :class="{ 'text-primary': selectedWeaponId === weapon.id }"
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectedWeaponId = weapon.id"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedWeaponId === weapon.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="flex items-start gap-3 p-3">
+                                        <!-- 武器图标（稀有度渐变底） -->
+                                        <div
+                                            class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                            :class="getRarityGradientClass(5)"
+                                        >
+                                            <img
+                                                :src="LeveledWeapon.url(weapon.icon)"
+                                                :alt="$t('db-weapon-list.weapon_icon')"
+                                                class="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <!-- 名称行：名称 + 幽灵 ID -->
+                                            <div class="flex items-baseline gap-2">
+                                                <h3
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': selectedWeaponId === weapon.id }"
+                                                >
+                                                    {{ $t(weapon.名称) }}
+                                                </h3>
+                                                <span class="ml-auto shrink-0"><CopyID :id="weapon.id" /></span>
+                                            </div>
+                                            <!-- 元信息行：分类 / 伤害类型 -->
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
                                             >
-                                                {{ $t(weapon.名称) }}
-                                            </h3>
-                                            <span class="ml-auto shrink-0"><CopyID :id="weapon.id" /></span>
-                                        </div>
-                                        <!-- 元信息行：分类 / 伤害类型 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                                            <span>{{ $t(weapon.伤害类型) }}</span>
-                                            <span>v{{ weapon.版本 }}</span>
-                                        </div>
-                                        <!-- 数值行：攻击 / 暴击 / 暴伤 / 触发 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55">
-                                            <span class="inline-flex items-center gap-1">
-                                                {{ $t("攻击") }}
-                                                <span class="font-medium tabular-nums">{{ formatProp("基础攻击", weapon.攻击) }}</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1">
-                                                {{ $t("暴击") }}
-                                                <span class="font-medium tabular-nums">{{ formatProp("基础暴击", weapon.暴击) }}</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1">
-                                                {{ $t("暴伤") }}
-                                                <span class="font-medium tabular-nums">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1">
-                                                {{ $t("触发") }}
-                                                <span class="font-medium tabular-nums">{{ formatProp("基础触发", weapon.触发) }}</span>
-                                            </span>
+                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                                                <span>{{ $t(weapon.伤害类型) }}</span>
+                                                <span>v{{ weapon.版本 }}</span>
+                                            </div>
+                                            <!-- 数值行：攻击 / 暴击 / 暴伤 / 触发 -->
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55"
+                                            >
+                                                <span class="inline-flex items-center gap-1">
+                                                    {{ $t("攻击") }}
+                                                    <span class="font-medium tabular-nums">{{ formatProp("基础攻击", weapon.攻击) }}</span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1">
+                                                    {{ $t("暴击") }}
+                                                    <span class="font-medium tabular-nums">{{ formatProp("基础暴击", weapon.暴击) }}</span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1">
+                                                    {{ $t("暴伤") }}
+                                                    <span class="font-medium tabular-nums">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1">
+                                                    {{ $t("触发") }}
+                                                    <span class="font-medium tabular-nums">{{ formatProp("基础触发", weapon.触发) }}</span>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWeapons.length }}</b>
+                            {{ $t("db-weapon-list.weapon_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWeapons.length }}</b> {{ $t('db-weapon-list.weapon_count') }}
-                    </p>
                 </div>
-            </div>
-
             </template>
             <template #detail>
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedWeapon" class="min-h-0 min-w-0 flex-1">
-                <DBWeaponDetailItem :key="selectedWeaponId" :weapon="selectedWeapon" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedWeapon" class="min-h-0 min-w-0 flex-1">
+                    <DBWeaponDetailItem :key="selectedWeaponId" :weapon="selectedWeapon" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

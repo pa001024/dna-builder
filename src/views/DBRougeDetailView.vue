@@ -70,30 +70,19 @@ function findItem(): (LikeItem & { kind: string }) | (ProItem & { kind: string }
     if (mode.value === "like") {
         switch (kind.value) {
             case "blessing":
-                return (
-                    rougeLikeBlessings.map(item => ({ kind: "blessing", ...item })).find(item => item.id === id.value) || null
-                )
+                return rougeLikeBlessings.map(item => ({ kind: "blessing", ...item })).find(item => item.id === id.value) || null
             case "talent":
                 return rougeLikeTalents.map(item => ({ kind: "talent", ...item })).find(item => item.id === id.value) || null
             case "treasure":
-                return (
-                    rougeLikeTreasures.map(item => ({ kind: "treasure", ...item })).find(item => item.id === id.value) || null
-                )
+                return rougeLikeTreasures.map(item => ({ kind: "treasure", ...item })).find(item => item.id === id.value) || null
             case "treasureGroup":
-                return (
-                    rougeLikeTreasureGroups.map(item => ({ kind: "treasureGroup", ...item })).find(item => item.id === id.value) ||
-                    null
-                )
+                return rougeLikeTreasureGroups.map(item => ({ kind: "treasureGroup", ...item })).find(item => item.id === id.value) || null
             case "contract":
-                return (
-                    rougeLikeContracts.map(item => ({ kind: "contract", ...item })).find(item => item.id === id.value) || null
-                )
+                return rougeLikeContracts.map(item => ({ kind: "contract", ...item })).find(item => item.id === id.value) || null
             case "room":
                 return rougeLikeRooms.map(item => ({ kind: "room", ...item })).find(item => item.id === id.value) || null
             case "story":
-                return (
-                    rougeLikeStoryEvents.map(item => ({ kind: "story", ...item })).find(item => item.id === id.value) || null
-                )
+                return rougeLikeStoryEvents.map(item => ({ kind: "story", ...item })).find(item => item.id === id.value) || null
         }
     }
 
@@ -107,10 +96,7 @@ function findItem(): (LikeItem & { kind: string }) | (ProItem & { kind: string }
         case "class":
             return rougeProClasses.map(item => ({ kind: "class", ...item })).find(item => item.id === id.value) || null
         case "treasureGroup":
-            return (
-                rougeProTreasureGroups.map(item => ({ kind: "treasureGroup", ...item })).find(item => item.id === id.value) ||
-                null
-            )
+            return rougeProTreasureGroups.map(item => ({ kind: "treasureGroup", ...item })).find(item => item.id === id.value) || null
         case "room":
             return rougeProRooms.map(item => ({ kind: "room", ...item })).find(item => item.id === id.value) || null
         case "event":
@@ -118,9 +104,7 @@ function findItem(): (LikeItem & { kind: string }) | (ProItem & { kind: string }
         case "season":
             return rougeProSeasons.map(item => ({ kind: "season", ...item })).find(item => item.id === id.value) || null
         case "difficulty":
-            return (
-                rougeProDifficulties.map(item => ({ kind: "difficulty", ...item })).find(item => item.id === id.value) || null
-            )
+            return rougeProDifficulties.map(item => ({ kind: "difficulty", ...item })).find(item => item.id === id.value) || null
     }
 
     return null
@@ -133,7 +117,7 @@ const proItem = computed(() => (item.value && mode.value === "pro" ? (item.value
 </script>
 
 <template>
-    <ScrollArea class="h-full">
+    <ScrollSpyLayout auto nav-kicker="DATABASE" class="h-full">
         <!-- 居中容器：与首页一致的纸面排版宽度 -->
         <div v-if="item" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <div>
@@ -142,7 +126,7 @@ const proItem = computed(() => (item.value && mode.value === "pro" ? (item.value
             </div>
         </div>
         <div v-else class="p-4">
-            <div class="text-base-content/70">{{ $t('db-rouge-detail-view.not_found') }}</div>
+            <div class="text-base-content/70">{{ $t("db-rouge-detail-view.not_found") }}</div>
         </div>
-    </ScrollArea>
+    </ScrollSpyLayout>
 </template>

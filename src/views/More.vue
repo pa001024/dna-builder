@@ -272,7 +272,6 @@ function applyOrder(list: TileItem[]): TileItem[] {
     return ordered
 }
 
-
 /** 当前渲染的磁贴列表：可见项/自定义覆盖变化时重建并保留用户排序。 */
 const tileList = ref<TileItem[]>([])
 watch(

@@ -694,207 +694,216 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 3"
-            :detail-open="Boolean(selectedQuest)"
-            @collapse="selectQuest(null)"
-        >
+        <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedQuest)" @collapse="selectQuest(null)">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedQuest }"
-            >
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedQuest }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="showFullTextSearch ? '全文搜索委托/剧情内容（不支持拼音）...' : '搜索委托 ID/名称（支持拼音）...'"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredQuests.length }}
-                        </span>
-                    </div>
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="showFullTextSearch ? '全文搜索委托/剧情内容（不支持拼音）...' : '搜索委托 ID/名称（支持拼音）...'"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredQuests.length }}
+                            </span>
+                        </div>
 
-                    <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                        <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showFullTextSearch
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showFullTextSearch = !showFullTextSearch"
-                        >
-                            {{ $t('db-dynquest-list.story_full_text_search') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                                @click="showFullTextSearch = !showFullTextSearch"
+                            >
+                                {{ $t("db-dynquest-list.story_full_text_search") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showImprIncreaseOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showImprIncreaseOnly = !showImprIncreaseOnly"
-                        >
-                            {{ $t('印象') }}
-                        </button>
-                        <FilterSelect
-                            v-model="selectedRegion"
-                            :options="regionFilterOptions"
-                            :label="$t('db-dynquest-list.filter_region')"
-                            :clear-title="$t('common.clear')"
-                        />
-                        <FilterSelect
-                            v-model="selectedLevel"
-                            :options="levelFilterOptions"
-                            :label="$t('db-dynquest-list.filter_level')"
-                            :clear-title="$t('common.clear')"
-                        />
+                                @click="showImprIncreaseOnly = !showImprIncreaseOnly"
+                            >
+                                {{ $t("印象") }}
+                            </button>
+                            <FilterSelect
+                                v-model="selectedRegion"
+                                :options="regionFilterOptions"
+                                :label="$t('db-dynquest-list.filter_region')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedLevel"
+                                :options="levelFilterOptions"
+                                :label="$t('db-dynquest-list.filter_level')"
+                                :clear-title="$t('common.clear')"
+                            />
+                        </div>
                     </div>
-                </div>
 
-
-                <!-- 委托列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <div class="space-y-2">
-                            <article
-                                v-for="(questResult, index) in filteredQuests"
-                                :key="questResult.quest.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                    <!-- 委托列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <div class="space-y-2">
+                                <article
+                                    v-for="(questResult, index) in filteredQuests"
+                                    :key="questResult.quest.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedQuestId === questResult.quest.id
                                         ? 'dbdq-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectQuest(questResult.quest)"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedQuestId === questResult.quest.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="p-3">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-start gap-3 flex-wrap">
-                                                <ImageFallback
-                                                    :src="getDynQuestIconUrl(questResult.quest)"
-                                                    :alt="questResult.quest.name"
-                                                    class="size-14 shrink-0 rounded-xs object-cover"
-                                                    :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
-                                                >
-                                                    <img
-                                                        src="/imgs/webp/T_Head_Empty.webp"
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectQuest(questResult.quest)"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedQuestId === questResult.quest.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="p-3">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-start gap-3 flex-wrap">
+                                                    <ImageFallback
+                                                        :src="getDynQuestIconUrl(questResult.quest)"
                                                         :alt="questResult.quest.name"
-                                                        class="size-14 shrink-0 rounded-xs"
-                                                    />
-                                                </ImageFallback>
-                                                <div class="min-w-0 flex-1 ">
-                                                    <!-- 名称行：名称 + 幽灵 ID -->
-                                                    <div class="flex items-baseline gap-2">
-                                                        <h3
-                                                            class="wrap-break-word text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                            :class="{ 'text-primary': selectedQuestId === questResult.quest.id }"
+                                                        class="size-14 shrink-0 rounded-xs object-cover"
+                                                        :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
+                                                    >
+                                                        <img
+                                                            src="/imgs/webp/T_Head_Empty.webp"
+                                                            :alt="questResult.quest.name"
+                                                            class="size-14 shrink-0 rounded-xs"
+                                                        />
+                                                    </ImageFallback>
+                                                    <div class="min-w-0 flex-1 ">
+                                                        <!-- 名称行：名称 + 幽灵 ID -->
+                                                        <div class="flex items-baseline gap-2">
+                                                            <h3
+                                                                class="wrap-break-word text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                                :class="{ 'text-primary': selectedQuestId === questResult.quest.id }"
+                                                            >
+                                                                {{ gt(questResult.quest.name) }}
+                                                            </h3>
+                                                            <CopyID :id="questResult.quest.id" class="ml-auto shrink-0" />
+                                                        </div>
+                                                        <!-- 元信息行：类型 / 印象 / 冷却 / 人数 / 权重 -->
+                                                        <div
+                                                            class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
                                                         >
-                                                            {{ gt(questResult.quest.name) }}
-                                                        </h3>
-                                                        <CopyID :id="questResult.quest.id" class="ml-auto shrink-0" />
-                                                    </div>
-                                                    <!-- 元信息行：类型 / 印象 / 冷却 / 人数 / 权重 -->
-                                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                                        <span>{{ gt(getDynQuestTypeLabel(questResult.quest.type)) }}</span>
-                                                        <span
-                                                            v-if="hasDynQuestImprIncrease(questResult.quest.id)"
-                                                            class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
-                                                        >
-                                                            {{ $t('common.impression_increase') }}
-                                                        </span>
-                                                        <span>{{ $t('common.cooldown') }} <span class="font-mono tabular-nums">{{ questResult.quest.cd }}</span>m</span>
-                                                        <span>{{ $t('common.player_count') }} <span class="font-mono tabular-nums">{{ questResult.quest.person }}</span></span>
-                                                        <span>{{ $t('common.weight') }} <span class="font-mono tabular-nums">{{ questResult.quest.weight }}</span></span>
+                                                            <span>{{ gt(getDynQuestTypeLabel(questResult.quest.type)) }}</span>
+                                                            <span
+                                                                v-if="hasDynQuestImprIncrease(questResult.quest.id)"
+                                                                class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
+                                                            >
+                                                                {{ $t("common.impression_increase") }}
+                                                            </span>
+                                                            <span
+                                                                >{{ $t("common.cooldown") }}
+                                                                <span class="font-mono tabular-nums">{{ questResult.quest.cd }}</span
+                                                                >m</span
+                                                            >
+                                                            <span
+                                                                >{{ $t("common.player_count") }}
+                                                                <span class="font-mono tabular-nums">{{
+                                                                    questResult.quest.person
+                                                                }}</span></span
+                                                            >
+                                                            <span
+                                                                >{{ $t("common.weight") }}
+                                                                <span class="font-mono tabular-nums">{{
+                                                                    questResult.quest.weight
+                                                                }}</span></span
+                                                            >
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <!-- 等级档位小签 -->
-                                            <div class="mt-2 flex flex-wrap gap-1">
-                                                <span
-                                                    v-for="level in questResult.levelGroups"
-                                                    :key="`${questResult.quest.id}-${level.key}`"
-                                                    class="rounded-xs border border-base-content/15 px-1.5 py-0.5 font-mono text-[11px] text-base-content/55 tabular-nums"
-                                                >
-                                                    {{ level.label }}
-                                                </span>
-                                                <span class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
-                                                    {{ $t(getRegionName(questResult.quest.regionId)) }}·
-                                                    <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
-                                                </span>
+                                                <!-- 等级档位小签 -->
+                                                <div class="mt-2 flex flex-wrap gap-1">
+                                                    <span
+                                                        v-for="level in questResult.levelGroups"
+                                                        :key="`${questResult.quest.id}-${level.key}`"
+                                                        class="rounded-xs border border-base-content/15 px-1.5 py-0.5 font-mono text-[11px] text-base-content/55 tabular-nums"
+                                                    >
+                                                        {{ level.label }}
+                                                    </span>
+                                                    <span
+                                                        class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary"
+                                                    >
+                                                        {{ $t(getRegionName(questResult.quest.regionId)) }}·
+                                                        <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- 全文搜索命中摘要 -->
-                                    <div
-                                        v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
-                                        class="mt-2 text-xs leading-relaxed text-base-content/70"
-                                    >
-                                        <span class="text-base-content/45">{{ $t('common.match') }}</span>
-                                        <span v-if="questResult.snippet.prefixEllipsis">...</span>
-                                        <template
-                                            v-for="(segment, index) in questResult.snippet.segments"
-                                            :key="`${questResult.quest.id}-${index}`"
+                                        <!-- 全文搜索命中摘要 -->
+                                        <div
+                                            v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
+                                            class="mt-2 text-xs leading-relaxed text-base-content/70"
                                         >
-                                            <span
-                                                :class="
+                                            <span class="text-base-content/45">{{ $t("common.match") }}</span>
+                                            <span v-if="questResult.snippet.prefixEllipsis">...</span>
+                                            <template
+                                                v-for="(segment, index) in questResult.snippet.segments"
+                                                :key="`${questResult.quest.id}-${index}`"
+                                            >
+                                                <span
+                                                    :class="
                                                     segment.highlighted
                                                         ? selectedQuestId === questResult.quest.id
                                                             ? 'rounded-xs bg-base-100/45 px-0.5 font-semibold text-primary-content underline decoration-primary-content/80 decoration-2 underline-offset-2'
                                                             : 'rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2'
                                                         : ''
                                                 "
-                                            >
-                                                {{ segment.text }}
-                                            </span>
-                                        </template>
-                                        <span v-if="questResult.snippet.suffixEllipsis">...</span>
+                                                >
+                                                    {{ segment.text }}
+                                                </span>
+                                            </template>
+                                            <span v-if="questResult.snippet.suffixEllipsis">...</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            共
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuests.length }}</b>
+                            个委托
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuests.length }}</b> 个委托
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedQuest" class="min-h-0 min-w-0 flex-2">
-                <DBDynQuestDetailItem :key="selectedQuestId" :quest="selectedQuest" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedQuest" class="min-h-0 min-w-0 flex-2">
+                    <DBDynQuestDetailItem :key="selectedQuestId" :quest="selectedQuest" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

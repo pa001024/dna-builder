@@ -105,7 +105,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
         <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedEntry)" @collapse="selectClue(null)">
             <template #master>
                 <!-- 左侧列表面板 -->
-                <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedEntry }"
+                >
                     <!-- 检索带：下划线搜索 + 计数 -->
                     <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                         <div class="relative">
@@ -127,7 +130,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                     <!-- 筛选带：页类型方章 -->
                     <div class="flex-none border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">CATEGORY</span>
+                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40"
+                                >CATEGORY</span
+                            >
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -186,10 +191,14 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                                         <div class="mt-1 truncate text-[11px] text-base-content/50">{{ gt(entry.pageName) }}</div>
                                     </div>
                                     <div class="flex shrink-0 flex-col items-end gap-1">
-                                        <span class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/50">
+                                        <span
+                                            class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/50"
+                                        >
                                             {{ gt(entry.tabName) }}
                                         </span>
-                                        <span class="font-mono text-[10px] tabular-nums text-base-content/40">x{{ entry.clue.contents.length }}</span>
+                                        <span class="font-mono text-[10px] tabular-nums text-base-content/40"
+                                            >x{{ entry.clue.contents.length }}</span
+                                        >
                                     </div>
                                 </div>
                             </article>

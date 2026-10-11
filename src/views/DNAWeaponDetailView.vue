@@ -84,7 +84,7 @@ async function loadWeaponDetail() {
                                     v-else
                                     class="w-24 h-24 flex items-center justify-center rounded-lg border border-base-200 bg-base-200"
                                 >
-                                    <span class="text-base-400">{{ $t('dna-weapon-detail.no_icon') }}</span>
+                                    <span class="text-base-400">{{ $t("dna-weapon-detail.no_icon") }}</span>
                                 </div>
                             </div>
 
@@ -110,12 +110,13 @@ async function loadWeaponDetail() {
 
                                 <!-- 精炼等级 -->
                                 <div class="mt-2 text-base-content/80">
-                                    {{ $t('dna-weapon-detail.refine_level') }} <span class="font-semibold">{{ weaponDetail.skillLevel }}</span>
+                                    {{ $t("dna-weapon-detail.refine_level") }}
+                                    <span class="font-semibold">{{ weaponDetail.skillLevel }}</span>
                                 </div>
 
                                 <!-- 魔之楔 -->
                                 <div class="mt-1 text-base-content/80">
-                                    {{ $t('dna-weapon-detail.mods') }}
+                                    {{ $t("dna-weapon-detail.mods") }}
                                     <span class="font-semibold">{{ weaponDetail.currentVolume }}/{{ weaponDetail.sumVolume }}</span>
                                 </div>
                             </div>
@@ -126,30 +127,30 @@ async function loadWeaponDetail() {
                 <!-- 武器属性 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('dna-weapon-detail.weapon_attrs') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.weapon_attrs") }}</h3>
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('dna-weapon-detail.atk') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-weapon-detail.atk") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ weaponDetail.attribute.atk }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('dna-weapon-detail.crit_rate') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-weapon-detail.crit_rate") }}</div>
                                 <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.cri * 100).toFixed(2) }}%</div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('暴击伤害') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("暴击伤害") }}</div>
                                 <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.crd * 100).toFixed(2) }}%</div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('攻速') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("攻速") }}</div>
                                 <div class="stat-value text-xl font-bold">
                                     {{ weaponDetail.attribute.speed }}
                                 </div>
                             </div>
                             <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t('触发') }}</div>
+                                <div class="stat-title text-xs text-base-content/60">{{ $t("触发") }}</div>
                                 <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.trigger * 100).toFixed(2) }}%</div>
                             </div>
                         </div>
@@ -159,7 +160,7 @@ async function loadWeaponDetail() {
                 <!-- 武器描述 -->
                 <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('dna-weapon-detail.weapon_desc') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.weapon_desc") }}</h3>
                         <p class="text-base-content/80 whitespace-pre-line">
                             {{ weaponDetail.description || "暂无描述" }}
                         </p>
@@ -172,7 +173,7 @@ async function loadWeaponDetail() {
                     class="card bg-base-100 border border-base-200 rounded-lg shadow-sm"
                 >
                     <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t('dna-weapon-detail.mode') }}</h3>
+                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.mode") }}</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <ModItem v-for="(mode, index) in weaponDetail.modes" :key="index" :mod="LeveledModHelper.fromDNA(mode)" />
                         </div>
@@ -183,8 +184,8 @@ async function loadWeaponDetail() {
             <!-- 错误状态 -->
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4 text-base-content/80">{{ $t('dna-weapon-detail.load_failed') }}</p>
-                    <button class="btn btn-secondary" @click="loadWeaponDetail">{{ $t('dna-weapon-detail.retry') }}</button>
+                    <p class="text-lg mb-4 text-base-content/80">{{ $t("dna-weapon-detail.load_failed") }}</p>
+                    <button class="btn btn-secondary" @click="loadWeaponDetail">{{ $t("dna-weapon-detail.retry") }}</button>
                 </div>
             </div>
         </div>

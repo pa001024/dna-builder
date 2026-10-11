@@ -702,17 +702,19 @@ onMounted(async () => {
                 >
                     <div class="min-w-0">
                         <div class="flex items-baseline gap-3">
-                            <h1 class="truncate text-xl font-bold sm:text-2xl">{{ $t('race-lottery.title') }}</h1>
+                            <h1 class="truncate text-xl font-bold sm:text-2xl">{{ $t("race-lottery.title") }}</h1>
                         </div>
                         <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/60">
-                            <span>{{ $t('race-lottery.player_count', { count: raceLotteryData.players.length }) }}</span>
-                            <span>{{ $t('race-lottery.covered_count', { covered: coveredPlayerCount, total: raceLotteryData.players.length }) }}</span>
-                            <span>{{ $t('race-lottery.community_count', { count: communitySubmissionCount }) }}</span>
+                            <span>{{ $t("race-lottery.player_count", { count: raceLotteryData.players.length }) }}</span>
+                            <span>{{
+                                $t("race-lottery.covered_count", { covered: coveredPlayerCount, total: raceLotteryData.players.length })
+                            }}</span>
+                            <span>{{ $t("race-lottery.community_count", { count: communitySubmissionCount }) }}</span>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-end gap-3">
                         <label class="form-control w-full sm:w-auto sm:min-w-40">
-                            <span class="label-text mb-1 text-xs">{{ $t('race-lottery.server') }}</span>
+                            <span class="label-text mb-1 text-xs">{{ $t("race-lottery.server") }}</span>
                             <Select
                                 v-model="selectedServer"
                                 class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -721,8 +723,12 @@ onMounted(async () => {
                             </Select>
                         </label>
                         <label class="form-control w-full sm:w-auto sm:min-w-44">
-                            <span class="label-text mb-1 text-xs">{{ $t('race-lottery.race_date') }}</span>
-                            <input v-model="selectedDate" type="date" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                            <span class="label-text mb-1 text-xs">{{ $t("race-lottery.race_date") }}</span>
+                            <input
+                                v-model="selectedDate"
+                                type="date"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            />
                         </label>
                         <button
                             class="btn btn-primary btn-sm"
@@ -731,7 +737,7 @@ onMounted(async () => {
                             @click="openSimulator"
                         >
                             <Icon icon="ri:play-fill" />
-                            {{ $t('race-lottery.simulate') }}
+                            {{ $t("race-lottery.simulate") }}
                         </button>
                     </div>
                 </header>
@@ -739,8 +745,8 @@ onMounted(async () => {
                 <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
                     <div class="mb-2 flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-sm font-bold sm:text-base">{{ $t('race-lottery.expected_win_rank') }}</h2>
-                            <p class="text-xs text-base-content/55 py-1">{{ $t('race-lottery.top6_probability_desc') }}</p>
+                            <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.expected_win_rank") }}</h2>
+                            <p class="text-xs text-base-content/55 py-1">{{ $t("race-lottery.top6_probability_desc") }}</p>
                         </div>
                         <div>
                             <p class="text-xs text-right font-bold uppercase tracking-[0.16em] text-warning">Top 6</p>
@@ -782,7 +788,9 @@ onMounted(async () => {
                                 <span class="mt-0.5 block text-sm font-bold tabular-nums text-primary">{{
                                     formatWinRate(item.winRate)
                                 }}</span>
-                                <span class="block text-[0.55rem] tabular-nums text-base-content/50">{{ $t('race-lottery.speed_short', { value: item.speed.toFixed(2) }) }}</span>
+                                <span class="block text-[0.55rem] tabular-nums text-base-content/50">{{
+                                    $t("race-lottery.speed_short", { value: item.speed.toFixed(2) })
+                                }}</span>
                             </span>
                         </button>
                     </div>
@@ -797,8 +805,8 @@ onMounted(async () => {
                         <section class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
                             <div class="mb-2 flex items-center justify-between gap-3 px-1">
                                 <div>
-                                    <h2 class="text-sm font-bold sm:text-base">{{ $t('race-lottery.roster') }}</h2>
-                                    <p class="text-xs text-base-content/55">{{ $t('race-lottery.click_card_hint') }}</p>
+                                    <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.roster") }}</h2>
+                                    <p class="text-xs text-base-content/55">{{ $t("race-lottery.click_card_hint") }}</p>
                                 </div>
                                 <div class="flex shrink-0 flex-wrap justify-end gap-x-2 gap-y-1 text-[0.65rem] text-base-content/60">
                                     <button
@@ -811,7 +819,7 @@ onMounted(async () => {
                                         @click="showTopWinRateHighlight = !showTopWinRateHighlight"
                                     >
                                         <span class="size-2 rounded-full bg-success" />
-                                        {{ $t('race-lottery.top6') }}
+                                        {{ $t("race-lottery.top6") }}
                                     </button>
                                     <button
                                         class="inline-flex cursor-pointer items-center gap-1 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-info"
@@ -823,7 +831,7 @@ onMounted(async () => {
                                         @click="showOtherWinRateHighlight = !showOtherWinRateHighlight"
                                     >
                                         <span class="size-2 rounded-full bg-info" />
-                                        {{ $t('race-lottery.other_possible_winners') }}
+                                        {{ $t("race-lottery.other_possible_winners") }}
                                     </button>
                                 </div>
                                 <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
@@ -910,8 +918,8 @@ onMounted(async () => {
                         <section v-if="hasComputedWinRates" class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
                             <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <h2 class="text-sm font-bold sm:text-base">{{ $t('race-lottery.expected_return') }}</h2>
-                                    <p class="text-xs text-base-content/55">{{ $t('race-lottery.avg_odds_top6') }}</p>
+                                    <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.expected_return") }}</h2>
+                                    <p class="text-xs text-base-content/55">{{ $t("race-lottery.avg_odds_top6") }}</p>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-2xl font-black tabular-nums text-primary">
@@ -925,7 +933,9 @@ onMounted(async () => {
                                     :key="stat.hitCount"
                                     class="rounded-md border border-base-300 bg-base-100/70 px-1.5 py-2 text-center"
                                 >
-                                    <div class="text-xs font-semibold text-base-content/70">{{ $t('race-lottery.hit_count', { count: stat.hitCount }) }}</div>
+                                    <div class="text-xs font-semibold text-base-content/70">
+                                        {{ $t("race-lottery.hit_count", { count: stat.hitCount }) }}
+                                    </div>
                                     <div class="mt-1 text-sm font-bold tabular-nums text-primary">
                                         {{ formatWinRate(stat.probability) }}
                                     </div>
@@ -960,13 +970,13 @@ onMounted(async () => {
                                         <h2 class="truncate text-2xl font-bold sm:text-3xl">{{ selectedPlayer.name }}</h2>
                                         <div class="mt-1 flex items-center justify-center gap-3 text-sm text-base-content/60">
                                             <span class="inline-flex items-center gap-1">
-                                                <span>{{ $t('race-lottery.base_speed') }}</span>
+                                                <span>{{ $t("race-lottery.base_speed") }}</span>
                                                 <span class="text-xl font-bold tabular-nums text-base-content">{{
                                                     getPlayerBaseSpeed(selectedPlayer.playerId).toFixed(2)
                                                 }}</span>
                                             </span>
                                             <span class="inline-flex items-center gap-1">
-                                                <span>{{ $t('race-lottery.expected_win_rate') }}</span>
+                                                <span>{{ $t("race-lottery.expected_win_rate") }}</span>
                                                 <span class="text-xl font-bold tabular-nums text-warning">{{
                                                     formatWinRate(getPlayerWinRate(selectedPlayer.playerId))
                                                 }}</span>
@@ -1069,24 +1079,25 @@ onMounted(async () => {
                                 <div class="space-y-2">
                                     <div class="text-xs text-base-content/70">状态词条（3 个位置，可不选）</div>
                                     <label v-for="slot in 3" :key="slot" class="form-control">
-                                        <span class="label-text mb-1 text-xs">{{ $t('race-lottery.status_slot', { slot }) }}</span>
+                                        <span class="label-text mb-1 text-xs">{{ $t("race-lottery.status_slot", { slot }) }}</span>
                                         <Select
                                             v-model="selectedBuffIds[slot - 1]"
                                             class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             :aria-label="`状态${slot}`"
                                         >
                                             <SelectItem :value="0">不选择</SelectItem>
-                                            <SelectItem v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" :value="buff.rumorId">
-                                                {{ buff.name }} ({{ buff.buffMap }})
+                                            <SelectItem
+                                                v-for="buff in raceLotteryData.outsideBuffs"
+                                                :key="buff.rumorId"
+                                                :value="buff.rumorId"
+                                            >
+                                                {{ buff.name }}
+                                                ({{ buff.buffMap }})
                                             </SelectItem>
                                         </Select>
                                     </label>
                                 </div>
-                                <button
-                                    class="btn btn-primary btn-sm w-full"
-                                    type="submit"
-                                    :disabled="submitting || !hasSelectedBuff"
-                                >
+                                <button class="btn btn-primary btn-sm w-full" type="submit" :disabled="submitting || !hasSelectedBuff">
                                     <span v-if="submitting" class="loading loading-spinner loading-sm" />
                                     {{ user.jwtToken ? "提交词条" : "登录后提交" }}
                                 </button>
@@ -1100,7 +1111,9 @@ onMounted(async () => {
                                     <p class="mt-1 text-xs text-base-content/60">
                                         {{ selectedDate }} 的比赛结果，将作为次日基础速度
                                         <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
-                                        <template v-else-if="finalSpeedsUpdatedBy"> · {{ $t('race-lottery.updated_by', { name: finalSpeedsUpdatedBy }) }}</template>
+                                        <template v-else-if="finalSpeedsUpdatedBy">
+                                            · {{ $t("race-lottery.updated_by", { name: finalSpeedsUpdatedBy }) }}</template
+                                        >
                                     </p>
                                 </div>
                                 <button
@@ -1161,7 +1174,7 @@ onMounted(async () => {
                             <h2 class="text-sm font-bold">每日最高投注</h2>
                             <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                                 <div v-for="item in raceLotteryData.maxStakes" :key="item.EventDay" class="flex justify-between gap-2">
-                                    <span class="text-base-content/60">{{ $t('common.count_days', { day: item.EventDay }) }}</span>
+                                    <span class="text-base-content/60">{{ $t("common.count_days", { day: item.EventDay }) }}</span>
                                     <span class="font-medium">{{ item.MaxStake.toLocaleString() }}</span>
                                 </div>
                             </div>
@@ -1181,7 +1194,8 @@ onMounted(async () => {
                                         </span>
                                     </span>
                                     <span class="whitespace-nowrap text-base-content/60"
-                                        >{{ buff.buffMap }} · ×{{ buff.pValueEffect }}</span
+                                        >{{ buff.buffMap }}
+                                        · ×{{ buff.pValueEffect }}</span
                                     >
                                 </div>
                                 <div class="divider my-1" />
@@ -1193,7 +1207,8 @@ onMounted(async () => {
                                 >
                                     <span>{{ buff.name }}</span>
                                     <span class="whitespace-nowrap text-base-content/60"
-                                        >第 {{ buff.unlockDay }} 天 · 权重{{ buff.randomWeight }} · ×{{ buff.effect }}</span
+                                        >第 {{ buff.unlockDay }} 天 · 权重{{ buff.randomWeight }}
+                                        · ×{{ buff.effect }}</span
                                     >
                                 </div>
                             </div>

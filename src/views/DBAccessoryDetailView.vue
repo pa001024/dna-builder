@@ -76,14 +76,14 @@ const accessory = computed(() => {
 
 <template>
     <div class="h-full flex flex-col">
-        <ScrollArea v-if="accessory" class="flex-1">
+        <ScrollSpyLayout auto nav-kicker="DATABASE" v-if="accessory" class="flex-1">
             <!-- 居中容器：与首页一致的纸面排版宽度 -->
             <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
                 <div>
                     <DBAccessoryDetailItem :accessory="accessory" />
                 </div>
             </div>
-        </ScrollArea>
+        </ScrollSpyLayout>
 
         <div v-else class="flex-1 flex items-center justify-center">
             <div class="text-base-content/70">{{ $t("accessory.notFound") }}</div>

@@ -26,7 +26,7 @@ const entry = computed<ClueEntry | null>(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
+    <ScrollSpyLayout auto nav-kicker="DATABASE" class="h-full">
         <!-- 居中容器：与迷津 / NPC 详情页一致的纸面排版宽度 -->
         <div v-if="entry" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <DBClueDetailItem :entry="entry" />
@@ -34,5 +34,5 @@ const entry = computed<ClueEntry | null>(() => {
         <div v-else class="p-4">
             <div class="text-base-content/70">{{ $t("clue-detail.notFound") }}</div>
         </div>
-    </ScrollArea>
+    </ScrollSpyLayout>
 </template>

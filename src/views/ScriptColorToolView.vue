@@ -343,13 +343,13 @@ async function readFileAsDataUrl(file: File): Promise<string> {
         reader.onload = () => {
             const result = typeof reader.result === "string" ? reader.result : ""
             if (!result) {
-                reject(new Error(t('script-color-tool.err_read_file')))
+                reject(new Error(t("script-color-tool.err_read_file")))
                 return
             }
             resolve(result)
         }
         reader.onerror = () => {
-            reject(new Error(t('script-color-tool.err_read_file')))
+            reject(new Error(t("script-color-tool.err_read_file")))
         }
         reader.readAsDataURL(file)
     })
@@ -369,14 +369,14 @@ async function readImageDataFromUrl(url: string): Promise<ImageData> {
             canvas.height = img.naturalHeight
             const ctx = canvas.getContext("2d")
             if (!ctx) {
-                reject(new Error(t('script-color-tool.err_canvas_context')))
+                reject(new Error(t("script-color-tool.err_canvas_context")))
                 return
             }
             ctx.drawImage(img, 0, 0)
             resolve(ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight))
         }
         img.onerror = () => {
-            reject(new Error(t('script-color-tool.err_read_image', { url })))
+            reject(new Error(t("script-color-tool.err_read_image", { url })))
         }
         img.src = url
     })
@@ -447,7 +447,7 @@ async function loadImages(files: File[]) {
         }
         schedulePersistScriptColorToolState()
     } catch (error) {
-        ui.showErrorMessage(t('script-color-tool.err_image_load', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_image_load", { error: String(error) }))
     } finally {
         loading.value = false
     }
@@ -581,7 +581,7 @@ async function restoreScriptColorToolState() {
         }
         await applyScriptColorToolStateSnapshot(state)
     } catch (error) {
-        console.error(t('script-color-tool.log_restore_failed'), error)
+        console.error(t("script-color-tool.log_restore_failed"), error)
     } finally {
         restoringPersistedState.value = false
     }
@@ -600,7 +600,7 @@ function readProjectExportFile(file: File): Promise<ScriptColorToolProjectExport
                 const text = event.target?.result as string
                 const payload = JSON.parse(text) as Partial<ScriptColorToolProjectExport>
                 if (payload.type !== "script-color-tool-project" || payload.version !== 1 || !payload.state) {
-                    throw new Error(t('script-color-tool.err_bad_project'))
+                    throw new Error(t("script-color-tool.err_bad_project"))
                 }
                 resolve(payload as ScriptColorToolProjectExport)
             } catch (error) {
@@ -608,7 +608,7 @@ function readProjectExportFile(file: File): Promise<ScriptColorToolProjectExport
             }
         }
         reader.onerror = () => {
-            reject(new Error(t('script-color-tool.err_read_project')))
+            reject(new Error(t("script-color-tool.err_read_project")))
         }
         reader.readAsText(file)
     })
@@ -630,9 +630,9 @@ async function exportProject() {
 
         if (env.isApp) {
             const path = await dialog.save({
-                title: t('script-color-tool.export_project_title'),
+                title: t("script-color-tool.export_project_title"),
                 defaultPath: fileName,
-                filters: [{ name: t('script-color-tool.json_files'), extensions: ["json"] }],
+                filters: [{ name: t("script-color-tool.json_files"), extensions: ["json"] }],
             })
             if (!path) {
                 return
@@ -649,10 +649,10 @@ async function exportProject() {
             document.body.removeChild(link)
             URL.revokeObjectURL(url)
         }
-        ui.showSuccessMessage(t('script-color-tool.export_success'))
+        ui.showSuccessMessage(t("script-color-tool.export_success"))
     } catch (error) {
-        console.error(t('script-color-tool.log_export_failed'), error)
-        ui.showErrorMessage(error instanceof Error ? error.message : t('script-color-tool.export_failed'))
+        console.error(t("script-color-tool.log_export_failed"), error)
+        ui.showErrorMessage(error instanceof Error ? error.message : t("script-color-tool.export_failed"))
     }
 }
 
@@ -683,10 +683,10 @@ async function handleProjectImportSelection(event: Event) {
             ...createScriptColorToolStateSnapshot(),
             id: "default",
         })
-        ui.showSuccessMessage(t('script-color-tool.import_success'))
+        ui.showSuccessMessage(t("script-color-tool.import_success"))
     } catch (error) {
-        console.error(t('script-color-tool.log_import_failed'), error)
-        ui.showErrorMessage(error instanceof Error ? error.message : t('script-color-tool.import_failed'))
+        console.error(t("script-color-tool.log_import_failed"), error)
+        ui.showErrorMessage(error instanceof Error ? error.message : t("script-color-tool.import_failed"))
     } finally {
         restoringPersistedState.value = false
     }
@@ -914,7 +914,7 @@ function evaluateCcForImage(image: LoadedImageItem, x: number, y: number, color:
  */
 async function runClassificationTestFromClipboard() {
     if (loadedImages.value.length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_load_image_first'))
+        ui.showErrorMessage(t("script-color-tool.err_load_image_first"))
         return
     }
 
@@ -926,12 +926,12 @@ async function runClassificationTestFromClipboard() {
             code = await navigator.clipboard.readText()
         }
     } catch (error) {
-        ui.showErrorMessage(t('script-color-tool.err_read_clipboard', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_read_clipboard", { error: String(error) }))
         return
     }
 
     if (code.trim().length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_no_clipboard_code'))
+        ui.showErrorMessage(t("script-color-tool.err_no_clipboard_code"))
         return
     }
 
@@ -947,7 +947,7 @@ if (typeof checkState !== "function") {
 return checkState(frame)`
         ) as (cc: ScriptCcFunction, frame: unknown) => unknown
     } catch (error) {
-        ui.showErrorMessage(t('script-color-tool.err_compile', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_compile", { error: String(error) }))
         return
     }
 
@@ -971,7 +971,7 @@ return checkState(frame)`
         }
     }
     classificationTestResults.value = nextResults
-    ui.showSuccessMessage(t('script-color-tool.clipboard_test_done'))
+    ui.showSuccessMessage(t("script-color-tool.clipboard_test_done"))
 }
 
 /**
@@ -1866,17 +1866,17 @@ function renderClassificationTreeBranches(
  */
 function generateClassificationCode(): string | null {
     if (loadedImages.value.length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_load_image_first'))
+        ui.showErrorMessage(t("script-color-tool.err_load_image_first"))
         return null
     }
     if (points.value.length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_no_points'))
+        ui.showErrorMessage(t("script-color-tool.err_no_points"))
         return null
     }
 
     const pointItems = getClassificationPointItems()
     if (pointItems.length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_no_valid_points'))
+        ui.showErrorMessage(t("script-color-tool.err_no_valid_points"))
         return null
     }
 
@@ -1902,7 +1902,7 @@ function generateClassificationCode(): string | null {
         const message = Array.from(unavailableForcedPointMap.entries())
             .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
             .join("；")
-        ui.showErrorMessage(t('script-color-tool.err_forced_unusable', { message }))
+        ui.showErrorMessage(t("script-color-tool.err_forced_unusable", { message }))
         return null
     }
 
@@ -1940,7 +1940,7 @@ function generateClassificationCode(): string | null {
         const message = Array.from(missingForcedPointMap.entries())
             .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
             .join("；")
-        ui.showErrorMessage(t('script-color-tool.err_forced_conflict', { message }))
+        ui.showErrorMessage(t("script-color-tool.err_forced_conflict", { message }))
         return null
     }
 
@@ -1963,9 +1963,9 @@ async function copyClassificationCode() {
     }
     try {
         await copyText(code)
-        ui.showSuccessMessage(t('script-color-tool.copy_code_done'))
+        ui.showSuccessMessage(t("script-color-tool.copy_code_done"))
     } catch (error) {
-        ui.showErrorMessage(t('script-color-tool.err_copy', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_copy", { error: String(error) }))
     }
 }
 
@@ -2111,7 +2111,7 @@ async function createSingleScreenshotWatcher(scope: string, startTime: number): 
     }
 
     timeoutId = setTimeout(() => {
-        finish(() => rejectImage(new Error(t('script-color-tool.err_screenshot_timeout'))))
+        finish(() => rejectImage(new Error(t("script-color-tool.err_screenshot_timeout"))))
     }, 5000)
 
     return {
@@ -2170,9 +2170,9 @@ async function startRealtimeTest() {
             await new Promise(resolve => setTimeout(resolve, 30))
         }
     } catch (error) {
-        console.error(t('script-color-tool.log_start_realtime_failed'), error)
+        console.error(t("script-color-tool.log_start_realtime_failed"), error)
         realtimeTestScriptPath.value = ""
-        ui.showErrorMessage(t('script-color-tool.err_start_realtime', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_start_realtime", { error: String(error) }))
     }
 }
 
@@ -2187,8 +2187,8 @@ async function stopRealtimeTest() {
             scriptRuntime.clearScriptStatusesByScope(scriptScope)
         }
     } catch (error) {
-        console.error(t('script-color-tool.log_stop_realtime_failed'), error)
-        ui.showErrorMessage(t('script-color-tool.err_stop_realtime', { error: String(error) }))
+        console.error(t("script-color-tool.log_stop_realtime_failed"), error)
+        ui.showErrorMessage(t("script-color-tool.err_stop_realtime", { error: String(error) }))
     }
 }
 
@@ -2221,10 +2221,10 @@ async function addRealtimeTestScreenshot() {
             activeImageIndex.value = 0
         }
         schedulePersistScriptColorToolState()
-        ui.showSuccessMessage(t('script-color-tool.screenshot_added'))
+        ui.showSuccessMessage(t("script-color-tool.screenshot_added"))
     } catch (error) {
-        console.error(t('script-color-tool.log_add_screenshot_failed'), error)
-        ui.showErrorMessage(t('script-color-tool.err_add_screenshot', { error: String(error) }))
+        console.error(t("script-color-tool.log_add_screenshot_failed"), error)
+        ui.showErrorMessage(t("script-color-tool.err_add_screenshot", { error: String(error) }))
     } finally {
         loading.value = false
     }
@@ -2236,16 +2236,16 @@ async function addRealtimeTestScreenshot() {
  */
 async function copyCoordinateCommand(row: PointColorRow) {
     if (!row.checkColor) {
-        ui.showErrorMessage(t('script-color-tool.err_no_check_color', { index: row.pointIndex }))
+        ui.showErrorMessage(t("script-color-tool.err_no_check_color", { index: row.pointIndex }))
         return
     }
 
     const command = `cc(frame,${row.point.x},${row.point.y},${toScriptHex(row.checkColor)},${row.tolerance})`
     try {
         await copyText(command)
-        ui.showSuccessMessage(t('script-color-tool.copied_value', { value: command }))
+        ui.showSuccessMessage(t("script-color-tool.copied_value", { value: command }))
     } catch (error) {
-        ui.showErrorMessage(t('script-color-tool.err_copy', { error: String(error) }))
+        ui.showErrorMessage(t("script-color-tool.err_copy", { error: String(error) }))
     }
 }
 
@@ -2376,7 +2376,7 @@ async function handleNativeDrop(event: DragEvent) {
     isDragging.value = false
     const files = Array.from(event.dataTransfer?.files ?? []).filter(isSupportedImageFile)
     if (files.length === 0) {
-        ui.showErrorMessage(t('script-color-tool.err_unsupported_format'))
+        ui.showErrorMessage(t("script-color-tool.err_unsupported_format"))
         return
     }
     await loadImages(files)
@@ -2407,32 +2407,38 @@ onUnmounted(() => {
         @drop="handleNativeDrop"
     >
         <div class="flex flex-wrap items-center gap-2">
-            <button class="btn btn-sm btn-ghost" @click="backToScriptPage">{{ $t('script-color-tool.back_to_script') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="backToScriptPage">{{ $t("script-color-tool.back_to_script") }}</button>
             <button class="btn btn-sm btn-primary" @click="openFilePicker" :disabled="loading">
-                {{ loading ? $t('script-color-tool.loading') : $t('script-color-tool.load_image') }}
+                {{ loading ? $t("script-color-tool.loading") : $t("script-color-tool.load_image") }}
             </button>
-            <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">{{ $t('script-color-tool.clear_images') }}</button>
-            <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">{{ $t('script-color-tool.clear_points') }}</button>
-            <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">{{ $t('script-color-tool.import_project') }}</button>
-            <button class="btn btn-sm btn-ghost" @click="exportProject">{{ $t('script-color-tool.export_project') }}</button>
-            <button class="btn btn-sm btn-ghost" @click="addRealtimeTestScreenshot" :disabled="!env.isApp || loading">{{ $t('script-color-tool.screenshot') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">
+                {{ $t("script-color-tool.clear_images") }}
+            </button>
+            <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">
+                {{ $t("script-color-tool.clear_points") }}
+            </button>
+            <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">{{ $t("script-color-tool.import_project") }}</button>
+            <button class="btn btn-sm btn-ghost" @click="exportProject">{{ $t("script-color-tool.export_project") }}</button>
+            <button class="btn btn-sm btn-ghost" @click="addRealtimeTestScreenshot" :disabled="!env.isApp || loading">
+                {{ $t("script-color-tool.screenshot") }}
+            </button>
             <button
                 class="btn btn-sm"
                 :class="isRealtimeTesting ? 'btn-warning' : 'btn-success'"
                 @click="toggleRealtimeTest"
                 :disabled="!env.isApp"
             >
-                {{ isRealtimeTesting ? $t('script-color-tool.stop_realtime') : $t('script-color-tool.start_realtime') }}
+                {{ isRealtimeTesting ? $t("script-color-tool.stop_realtime") : $t("script-color-tool.start_realtime") }}
             </button>
             <button
                 class="btn btn-sm btn-secondary"
                 @click="copyClassificationCode"
                 :disabled="loadedImages.length === 0 || points.length === 0"
             >
-                {{ $t('script-color-tool.copy_category_code') }}
+                {{ $t("script-color-tool.copy_category_code") }}
             </button>
             <button class="btn btn-sm btn-accent" @click="runClassificationTestFromClipboard" :disabled="loadedImages.length === 0">
-                {{ $t('script-color-tool.clipboard_test_category') }}
+                {{ $t("script-color-tool.clipboard_test_category") }}
             </button>
             <div class="flex items-center gap-1">
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomOut" :disabled="zoomScale <= 1">-</button>
@@ -2446,10 +2452,10 @@ onUnmounted(() => {
                     @change="handleZoomInput"
                 />
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomIn" :disabled="zoomScale >= 32">+</button>
-                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.zoom_scale', { scale: zoomScale }) }}</span>
+                <span class="text-xs text-base-content/70">{{ $t("script-color-tool.zoom_scale", { scale: zoomScale }) }}</span>
             </div>
             <div class="flex items-center gap-1">
-                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.default_tolerance') }}</span>
+                <span class="text-xs text-base-content/70">{{ $t("script-color-tool.default_tolerance") }}</span>
                 <input
                     type="number"
                     class="w-20 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -2459,10 +2465,10 @@ onUnmounted(() => {
                     step="1"
                     @change="handleToleranceInput"
                 />
-                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.new_point_uses') }}</span>
+                <span class="text-xs text-base-content/70">{{ $t("script-color-tool.new_point_uses") }}</span>
             </div>
             <label v-if="env.isApp" class="flex items-center gap-2 text-xs text-base-content/70">
-                <span>{{ $t('script-color-tool.cloud_game') }}</span>
+                <span>{{ $t("script-color-tool.cloud_game") }}</span>
                 <input
                     v-model="realtimeTestCloudMode"
                     type="checkbox"
@@ -2479,7 +2485,7 @@ onUnmounted(() => {
                 @change="handleProjectImportSelection"
             />
             <div class="text-xs text-base-content/70">
-                {{ $t('script-color-tool.load_images_hint') }}
+                {{ $t("script-color-tool.load_images_hint") }}
             </div>
         </div>
 
@@ -2487,7 +2493,7 @@ onUnmounted(() => {
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
                     <div class="text-sm font-medium flex items-center">
-                        <div>{{ $t('script-color-tool.current_image') }}</div>
+                        <div>{{ $t("script-color-tool.current_image") }}</div>
 
                         <div v-if="loadedImages.length > 0" class="flex items-center gap-1">
                             <button
@@ -2513,12 +2519,14 @@ onUnmounted(() => {
                             >
                                 &gt;
                             </button>
-                            <span class="text-xs text-base-content/70">{{ $t('script-color-tool.current_image_index', { index: activeImageIndex + 1, total: loadedImages.length }) }}</span>
+                            <span class="text-xs text-base-content/70">{{
+                                $t("script-color-tool.current_image_index", { index: activeImageIndex + 1, total: loadedImages.length })
+                            }}</span>
                         </div>
                     </div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded bg-base-200/30 p-2">
                         <div v-if="!referenceImage" class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
-                            {{ $t('script-color-tool.no_images') }}
+                            {{ $t("script-color-tool.no_images") }}
                         </div>
                         <div v-else class="relative" :style="referenceLayerStyle">
                             <img
@@ -2559,8 +2567,10 @@ onUnmounted(() => {
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-base-content/60">
                         <div class="flex flex-wrap items-center gap-3">
-                            <span>{{ $t('script-color-tool.loaded_stats', { images: loadedImages.length, points: points.length }) }}</span>
-                            <span v-if="env.isApp">{{ $t('script-color-tool.realtime_result', { value: realtimeTestResultText || '-' }) }}</span>
+                            <span>{{ $t("script-color-tool.loaded_stats", { images: loadedImages.length, points: points.length }) }}</span>
+                            <span v-if="env.isApp">{{
+                                $t("script-color-tool.realtime_result", { value: realtimeTestResultText || "-" })
+                            }}</span>
                             <span v-if="env.isApp">FPS {{ realtimeTestFpsText || "-" }}</span>
                         </div>
                         <div class="flex items-center gap-2 font-mono">
@@ -2582,22 +2592,24 @@ onUnmounted(() => {
 
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
-                    <div class="text-sm font-medium">{{ $t('script-color-tool.same_coord_colors') }}</div>
+                    <div class="text-sm font-medium">{{ $t("script-color-tool.same_coord_colors") }}</div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded">
                         <div
                             v-if="points.length === 0 || loadedImages.length === 0"
                             class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm"
                         >
-                            {{ $t('script-color-tool.load_image_first') }}
+                            {{ $t("script-color-tool.load_image_first") }}
                         </div>
                         <table v-else class="table table-xs">
                             <thead>
                                 <tr>
-                                    <th class="min-w-42">{{ $t('script-color-tool.image_label') }}</th>
-                                    <th class="min-w-36">{{ $t('script-color-tool.classify_result') }}</th>
+                                    <th class="min-w-42">{{ $t("script-color-tool.image_label") }}</th>
+                                    <th class="min-w-36">{{ $t("script-color-tool.classify_result") }}</th>
                                     <th v-for="row in pointColorRows" :key="row.point.id" class="align-top">
                                         <div class="flex items-center justify-between gap-2">
-                                            <div class="font-semibold">{{ $t('script-color-tool.point_label', { index: row.pointIndex }) }}</div>
+                                            <div class="font-semibold">
+                                                {{ $t("script-color-tool.point_label", { index: row.pointIndex }) }}
+                                            </div>
                                             <button
                                                 class="btn btn-ghost btn-xs text-error h-5 min-h-0 px-1"
                                                 @click="removePoint(row.point.id)"
@@ -2632,10 +2644,14 @@ onUnmounted(() => {
                                                     class="inline-block w-3 h-3 rounded border border-base-300"
                                                     :style="{ backgroundColor: row.checkColor ? row.checkColor.hex : 'transparent' }"
                                                 />
-                                                <span class="font-mono">{{ row.checkColorDisplay || $t('script-color-tool.invalid') }}</span>
+                                                <span class="font-mono">{{
+                                                    row.checkColorDisplay || $t("script-color-tool.invalid")
+                                                }}</span>
                                             </button>
                                             <div class="flex items-center gap-1">
-                                                <span class="text-[10px] text-base-content/60">{{ $t('script-color-tool.tolerance') }}</span>
+                                                <span class="text-[10px] text-base-content/60">{{
+                                                    $t("script-color-tool.tolerance")
+                                                }}</span>
                                                 <input
                                                     type="number"
                                                     class="w-15 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -2718,7 +2734,7 @@ onUnmounted(() => {
                                         >
                                             {{ classificationTestResults[imageRow.image.id].result }}
                                         </div>
-                                        <div v-else class="text-xs text-base-content/50">{{ $t('script-color-tool.untested') }}</div>
+                                        <div v-else class="text-xs text-base-content/50">{{ $t("script-color-tool.untested") }}</div>
                                     </td>
                                     <td v-for="entry in imageRow.colors" :key="`${imageRow.image.id}-${entry.point.id}`">
                                         <div v-if="entry.color" class="flex items-center gap-2">
@@ -2731,7 +2747,7 @@ onUnmounted(() => {
                                             <div class="leading-tight">
                                                 <div>{{ entry.color.hex }}</div>
                                                 <div class="text-[10px]">
-                                                    <span class="text-base-content/60">{{ $t('script-color-tool.match') }}</span>
+                                                    <span class="text-base-content/60">{{ $t("script-color-tool.match") }}</span>
                                                     <span class="ml-1 font-semibold" :class="entry.match ? 'text-success' : 'text-error'">
                                                         {{ entry.match ? 1 : 0 }}
                                                     </span>
@@ -2768,7 +2784,7 @@ onUnmounted(() => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div v-else class="text-base-content/50">{{ $t('script-color-tool.out_of_range') }}</div>
+                                        <div v-else class="text-base-content/50">{{ $t("script-color-tool.out_of_range") }}</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -2783,8 +2799,8 @@ onUnmounted(() => {
             class="absolute inset-0 z-50 bg-base-100/70 backdrop-blur-sm border-2 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none"
         >
             <div class="text-center">
-                <div class="text-lg font-medium text-primary">{{ $t('script-color-tool.drop_image_hint') }}</div>
-                <div class="text-xs text-base-content/70 mt-1">{{ $t('script-color-tool.supported_formats') }}</div>
+                <div class="text-lg font-medium text-primary">{{ $t("script-color-tool.drop_image_hint") }}</div>
+                <div class="text-xs text-base-content/70 mt-1">{{ $t("script-color-tool.supported_formats") }}</div>
             </div>
         </div>
     </div>

@@ -710,215 +710,211 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 3"
-            :detail-open="Boolean(selectedQuestChain)"
-            @collapse="selectQuestChain(null)"
-        >
+        <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedQuestChain)" @collapse="selectQuestChain(null)">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedQuestChain }"
-            >
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedQuestChain }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="
                                 showFullTextSearch
                                     ? $t('questchain-list.full_text_search_placeholder')
                                     : $t('questchain-list.search_placeholder')
                             "
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredQuestChains.length }}
-                        </span>
-                    </div>
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredQuestChains.length }}
+                            </span>
+                        </div>
 
-                    <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                        <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showImprCheckOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showImprCheckOnly = !showImprCheckOnly"
-                        >
-                            {{ $t('common.impression_check') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                                @click="showImprCheckOnly = !showImprCheckOnly"
+                            >
+                                {{ $t("common.impression_check") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showImprIncreaseOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showImprIncreaseOnly = !showImprIncreaseOnly"
-                        >
-                            {{ $t('common.impression_increase') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
+                                @click="showImprIncreaseOnly = !showImprIncreaseOnly"
+                            >
+                                {{ $t("common.impression_increase") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
                                 showFullTextSearch
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
                             "
-                            @click="showFullTextSearch = !showFullTextSearch"
-                        >
-                            {{ $t('common.full_text_search') }}
-                        </button>
-                        <FilterSelect
-                            v-model="selectedTypeGroup"
-                            :options="typeFilterOptions"
-                            :label="$t('common.type')"
-                            :clear-title="$t('common.clear')"
-                            :clear-value="0"
-                        />
-                        <FilterSelect
-                            v-model="selectedVersion"
-                            :options="versionFilterOptions"
-                            :label="$t('char-build.version')"
-                            :clear-title="$t('common.clear')"
-                        />
+                                @click="showFullTextSearch = !showFullTextSearch"
+                            >
+                                {{ $t("common.full_text_search") }}
+                            </button>
+                            <FilterSelect
+                                v-model="selectedTypeGroup"
+                                :options="typeFilterOptions"
+                                :label="$t('common.type')"
+                                :clear-title="$t('common.clear')"
+                                :clear-value="0"
+                            />
+                            <FilterSelect
+                                v-model="selectedVersion"
+                                :options="versionFilterOptions"
+                                :label="$t('char-build.version')"
+                                :clear-title="$t('common.clear')"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <!-- 任务链列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <div class="space-y-2">
-                            <article
-                                v-for="(questChainResult, index) in filteredQuestChains"
-                                :key="questChainResult.questChain.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
+                    <!-- 任务链列表 -->
+                    <ScrollArea class="flex-1">
+                        <div class="p-3">
+                            <div class="space-y-2">
+                                <article
+                                    v-for="(questChainResult, index) in filteredQuestChains"
+                                    :key="questChainResult.questChain.id"
+                                    class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
                                     selectedQuestChainId === questChainResult.questChain.id
                                         ? 'dbq-item-active border-primary/70 bg-primary/10'
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectQuestChain(questChainResult.questChain)"
-                            >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedQuestChainId === questChainResult.questChain.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
-                                />
-                                <div class="flex items-start gap-3 p-3">
-                                    <img
-                                        :src="`/imgs/tp/${getQuestChainTypeDisplay(questChainResult.questChain).icon}.webp`"
-                                        :alt="$t(getQuestChainTypeDisplay(questChainResult.questChain).name)"
-                                        class="size-12 shrink-0 rounded-xs object-contain"
-                                        loading="lazy"
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    @click="selectQuestChain(questChainResult.questChain)"
+                                >
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedQuestChainId === questChainResult.questChain.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
                                     />
+                                    <div class="flex items-start gap-3 p-3">
+                                        <img
+                                            :src="`/imgs/tp/${getQuestChainTypeDisplay(questChainResult.questChain).icon}.webp`"
+                                            :alt="$t(getQuestChainTypeDisplay(questChainResult.questChain).name)"
+                                            class="size-12 shrink-0 rounded-xs object-contain"
+                                            loading="lazy"
+                                        />
 
-                                    <div class="min-w-0 flex-1">
-                                        <!-- 名称行：名称 + 幽灵 ID -->
-                                        <div class="flex items-baseline gap-2">
-                                            <h3
-                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                :class="{ 'text-primary': selectedQuestChainId === questChainResult.questChain.id }"
-                                            >
-                                                {{ $t(questChainResult.questChain.name) }}
-                                            </h3>
-                                            <CopyID :id="questChainResult.questChain.id" class="ml-auto shrink-0" />
-                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <!-- 名称行：名称 + 幽灵 ID -->
+                                            <div class="flex items-baseline gap-2">
+                                                <h3
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': selectedQuestChainId === questChainResult.questChain.id }"
+                                                >
+                                                    {{ $t(questChainResult.questChain.name) }}
+                                                </h3>
+                                                <CopyID :id="questChainResult.questChain.id" class="ml-auto shrink-0" />
+                                            </div>
 
-                                        <!-- 元信息行：章节 / 集数 / 类型 / 版本 / 印象标记 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span
-                                                >{{ $t(questChainResult.questChain.chapterName) }}
-                                                {{ $t(questChainResult.questChain.chapterNumber || "") }}</span
-                                            >
-                                            <span>{{ $t(questChainResult.questChain.episode) }}</span>
-                                            <span v-if="questChainResult.questChain.type" class="inline-flex items-center gap-1">
-                                                <span>{{ $t(getQuestChainTypeDisplay(questChainResult.questChain).name) }}</span>
-                                            </span>
-                                            <span v-if="questChainResult.questChain.版本" class="font-mono tabular-nums">v{{ questChainResult.questChain.版本 }}</span>
-                                            <span
-                                                v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
-                                                class="rounded-xs border border-secondary/40 bg-secondary/10 px-1 text-[10px] leading-4 tracking-wide text-secondary"
-                                            >
-                                                {{ $t('common.impression_check') }}
-                                            </span>
-                                            <span
-                                                v-if="hasQuestChainImprIncrease(questChainResult.questChain.id)"
-                                                class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
-                                            >
-                                                {{ $t('common.impression_increase') }}
-                                            </span>
-                                        </div>
-
-                                        <!-- 全文搜索命中摘要 -->
-                                        <div
-                                            v-if="showFullTextSearch && searchKeyword.trim() && questChainResult.snippet"
-                                            class="mt-2 text-xs leading-relaxed text-base-content/70"
-                                        >
-                                            <span class="text-base-content/45">{{ $t('common.match') }}</span>
-                                            <span v-if="questChainResult.snippet.prefixEllipsis">...</span>
-                                            <template
-                                                v-for="(segment, index) in questChainResult.snippet.segments"
-                                                :key="`${questChainResult.questChain.id}-${index}`"
+                                            <!-- 元信息行：章节 / 集数 / 类型 / 版本 / 印象标记 -->
+                                            <div
+                                                class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55"
                                             >
                                                 <span
-                                                    :class="
+                                                    >{{ $t(questChainResult.questChain.chapterName) }}
+                                                    {{ $t(questChainResult.questChain.chapterNumber || "") }}</span
+                                                >
+                                                <span>{{ $t(questChainResult.questChain.episode) }}</span>
+                                                <span v-if="questChainResult.questChain.type" class="inline-flex items-center gap-1">
+                                                    <span>{{ $t(getQuestChainTypeDisplay(questChainResult.questChain).name) }}</span>
+                                                </span>
+                                                <span v-if="questChainResult.questChain.版本" class="font-mono tabular-nums"
+                                                    >v{{ questChainResult.questChain.版本 }}</span
+                                                >
+                                                <span
+                                                    v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
+                                                    class="rounded-xs border border-secondary/40 bg-secondary/10 px-1 text-[10px] leading-4 tracking-wide text-secondary"
+                                                >
+                                                    {{ $t("common.impression_check") }}
+                                                </span>
+                                                <span
+                                                    v-if="hasQuestChainImprIncrease(questChainResult.questChain.id)"
+                                                    class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
+                                                >
+                                                    {{ $t("common.impression_increase") }}
+                                                </span>
+                                            </div>
+
+                                            <!-- 全文搜索命中摘要 -->
+                                            <div
+                                                v-if="showFullTextSearch && searchKeyword.trim() && questChainResult.snippet"
+                                                class="mt-2 text-xs leading-relaxed text-base-content/70"
+                                            >
+                                                <span class="text-base-content/45">{{ $t("common.match") }}</span>
+                                                <span v-if="questChainResult.snippet.prefixEllipsis">...</span>
+                                                <template
+                                                    v-for="(segment, index) in questChainResult.snippet.segments"
+                                                    :key="`${questChainResult.questChain.id}-${index}`"
+                                                >
+                                                    <span
+                                                        :class="
                                                         segment.highlighted
                                                             ? selectedQuestChainId === questChainResult.questChain.id
                                                                 ? 'rounded-xs bg-base-100/45 px-0.5 font-semibold text-primary-content underline decoration-primary-content/80 decoration-2 underline-offset-2'
                                                                 : 'rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2'
                                                             : ''
                                                     "
-                                                >
-                                                    {{ segment.text }}
-                                                </span>
-                                            </template>
-                                            <span v-if="questChainResult.snippet.suffixEllipsis">...</span>
+                                                    >
+                                                        {{ segment.text }}
+                                                    </span>
+                                                </template>
+                                                <span v-if="questChainResult.snippet.suffixEllipsis">...</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
+                            </div>
                         </div>
+                    </ScrollArea>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("common.total_count") }}
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuestChains.length }}</b>
+                            {{ $t("questchain-list.quest_count") }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuestChains.length }}</b> {{ $t('questchain-list.quest_count') }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedQuestChain" :key="selectedQuestChain.id" class="min-h-0 min-w-0 flex-2">
-                <DBQuestDetailItem
-                    :key="selectedQuestChainId"
-                    :quest-chain="selectedQuestChain"
-                    :search-keyword="showFullTextSearch ? searchKeyword.trim() : ''"
-                    :search-fuse-matches="selectedQuestChainResult?.fuseMatches ?? []"
-                />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedQuestChain" :key="selectedQuestChain.id" class="min-h-0 min-w-0 flex-2">
+                    <DBQuestDetailItem
+                        :key="selectedQuestChainId"
+                        :quest-chain="selectedQuestChain"
+                        :search-keyword="showFullTextSearch ? searchKeyword.trim() : ''"
+                        :search-fuse-matches="selectedQuestChainResult?.fuseMatches ?? []"
+                    />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

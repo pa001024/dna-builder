@@ -289,7 +289,7 @@ interface Captcha4Instance {
                             <span class="h-px w-6 bg-primary" aria-hidden="true" />
                             Account Login
                         </p>
-                        <h1 class="text-xl font-bold leading-none tracking-tight text-base-content">{{ $t('dna-login.title') }}</h1>
+                        <h1 class="text-xl font-bold leading-none tracking-tight text-base-content">{{ $t("dna-login.title") }}</h1>
                     </div>
                 </div>
             </header>
@@ -298,20 +298,24 @@ interface Captcha4Instance {
             <div class="flex-1 space-y-4 overflow-y-auto p-5">
                 <!-- 服务器选择 -->
                 <div>
-                    <label for="server" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{ $t('dna-login.server') }}</label>
+                    <label for="server" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{
+                        $t("dna-login.server")
+                    }}</label>
                     <Select
                         id="server"
                         v-model="server"
                         class="w-full cursor-pointer rounded-xs border border-base-content/15 bg-base-content/3 px-2.5 py-2 text-sm text-base-content/85 outline-none transition-colors duration-150 focus:border-primary"
                     >
-                        <SelectItem value="cn">{{ $t('dna-login.server_cn') }}</SelectItem>
-                        <SelectItem value="global">{{ $t('dna-login.server_intl') }}</SelectItem>
+                        <SelectItem value="cn">{{ $t("dna-login.server_cn") }}</SelectItem>
+                        <SelectItem value="global">{{ $t("dna-login.server_intl") }}</SelectItem>
                     </Select>
                 </div>
 
                 <!-- 邮箱输入 -->
                 <div v-if="server !== 'cn'">
-                    <label for="email" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{ $t('dna-login.email') }}</label>
+                    <label for="email" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{
+                        $t("dna-login.email")
+                    }}</label>
                     <input
                         id="email"
                         v-model="email"
@@ -325,7 +329,9 @@ interface Captcha4Instance {
 
                 <!-- 手机号输入 -->
                 <div v-if="server === 'cn'">
-                    <label for="phone" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{ $t('dna-login.phone') }}</label>
+                    <label for="phone" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{
+                        $t("dna-login.phone")
+                    }}</label>
                     <input
                         id="phone"
                         v-model="phone"
@@ -340,7 +346,7 @@ interface Captcha4Instance {
 
                 <!-- 验证码输入和获取按钮 -->
                 <div>
-                    <label for="code" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{ $t('dna-login.code') }}</label>
+                    <label for="code" class="mb-1.5 block text-[11px] tracking-wide text-base-content/55">{{ $t("dna-login.code") }}</label>
                     <div class="flex gap-2">
                         <input
                             id="code"
@@ -366,11 +372,11 @@ interface Captcha4Instance {
                     :disabled="!canLogin"
                     @click="login"
                 >
-                    {{ $t('dna-login.login') }}
+                    {{ $t("dna-login.login") }}
                 </button>
 
                 <!-- 辅助信息 -->
-                <p class="text-center text-xs text-base-content/50">{{ $t('dna-login.privacy_note') }}</p>
+                <p class="text-center text-xs text-base-content/50">{{ $t("dna-login.privacy_note") }}</p>
             </div>
         </div>
 

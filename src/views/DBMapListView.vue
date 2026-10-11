@@ -10,7 +10,7 @@ import {
     type DBMapMarker,
     loadMapCategorizeListWithCache,
     loadMapDetailWithCache,
-} from "@/data/d/map.data"
+} from "@/data/d/onlinemapcache.data"
 import { env } from "@/env"
 
 const dnaApi = getMapAPI()
@@ -186,7 +186,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbma-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMaps.length }}</b> {{ $t('db-map-list.map_count') }}
+                        {{ $t("common.total_count") }}
+                        <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMaps.length }}</b>
+                        {{ $t("db-map-list.map_count") }}
                     </p>
                 </div>
             </div>

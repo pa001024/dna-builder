@@ -254,7 +254,7 @@ onUnmounted(() => {
                 <div class="card bg-base-100 shadow-sm">
                     <div class="card-body p-6 space-y-6">
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium mb-2">{{ $t('guide-edit.guide_title') }}</label>
+                            <label class="block text-sm font-medium mb-2">{{ $t("guide-edit.guide_title") }}</label>
                             <input
                                 v-model="title"
                                 type="text"
@@ -265,7 +265,7 @@ onUnmounted(() => {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium mb-2">{{ $t('guide-edit.guide_type') }}</label>
+                                <label class="block text-sm font-medium mb-2">{{ $t("guide-edit.guide_type") }}</label>
                                 <Select v-model="type" class="input w-full">
                                     <SelectItem v-for="option in typeOptions" :key="option.value" :value="option.value">
                                         <div class="flex items-center gap-2">
@@ -277,7 +277,7 @@ onUnmounted(() => {
                             </div>
 
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium mb-2">{{ $t('guide-edit.related_char') }}</label>
+                                <label class="block text-sm font-medium mb-2">{{ $t("guide-edit.related_char") }}</label>
                                 <Select v-model="selectedCharId" class="input w-full">
                                     <SelectItem v-for="option in charOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
@@ -290,15 +290,17 @@ onUnmounted(() => {
                             <div class="card-body p-4">
                                 <label class="flex items-start gap-3 cursor-pointer">
                                     <div>
-                                        <span class="block text-sm font-medium">{{ $t('guide-edit.related_build') }}</span>
-                                        <span class="block text-xs text-base-content/60 mt-1">{{ $t('guide-edit.related_build_hint') }}</span>
+                                        <span class="block text-sm font-medium">{{ $t("guide-edit.related_build") }}</span>
+                                        <span class="block text-xs text-base-content/60 mt-1">{{
+                                            $t("guide-edit.related_build_hint")
+                                        }}</span>
                                     </div>
                                 </label>
 
                                 <GQQuery v-slot="{ data: builds }" :query="buildsQuery" :variables="variables">
                                     <label class="flex items-center gap-2">
                                         <input type="radio" v-model="buildId" value="" class="radio radio-sm" />
-                                        <span>{{ $t('guide-edit.no_relation') }}</span>
+                                        <span>{{ $t("guide-edit.no_relation") }}</span>
                                     </label>
                                     <label v-if="builds" v-for="build in builds" :key="build.id" class="flex items-center gap-2">
                                         <input type="radio" v-model="buildId" :value="build.id" class="radio radio-sm" />
@@ -313,7 +315,7 @@ onUnmounted(() => {
                 <div class="card bg-base-100 shadow-sm">
                     <div class="card-body p-6 space-y-6">
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium mb-2">{{ $t('guide-edit.guide_content') }}</label>
+                            <label class="block text-sm font-medium mb-2">{{ $t("guide-edit.guide_content") }}</label>
                             <div
                                 :class="['relative', isDragging ? 'ring-2 ring-primary ring-offset-2' : '']"
                                 @dragover="handleWebDragOver"
@@ -339,8 +341,8 @@ onUnmounted(() => {
                         <div v-if="type === 'image'" class="space-y-6">
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="block text-sm font-medium">{{ $t('guide-edit.upload_image') }}</label>
-                                    <span class="text-xs text-base-content/60">{{ $t('guide-edit.upload_hint') }}</span>
+                                    <label class="block text-sm font-medium">{{ $t("guide-edit.upload_image") }}</label>
+                                    <span class="text-xs text-base-content/60">{{ $t("guide-edit.upload_hint") }}</span>
                                 </div>
                                 <div
                                     :class="[
@@ -366,8 +368,8 @@ onUnmounted(() => {
                                             />
                                         </div>
                                         <div>
-                                            <p class="font-medium">{{ $t('guide-edit.click_or_drag_upload') }}</p>
-                                            <p class="text-sm text-base-content/50 mt-1">{{ $t('guide-edit.upload_format_hint') }}</p>
+                                            <p class="font-medium">{{ $t("guide-edit.click_or_drag_upload") }}</p>
+                                            <p class="text-sm text-base-content/50 mt-1">{{ $t("guide-edit.upload_format_hint") }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -403,7 +405,7 @@ onUnmounted(() => {
 
                 <div v-if="isDragging" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 pointer-events-none">
                     <div class="bg-base-200 p-8 rounded-lg text-2xl font-bold text-primary shadow-xl pointer-events-auto">
-                        {{ $t('guide-edit.release_to_insert') }}
+                        {{ $t("guide-edit.release_to_insert") }}
                     </div>
                 </div>
 

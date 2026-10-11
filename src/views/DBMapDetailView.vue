@@ -3,7 +3,7 @@ import type { DNAMapMatterCategorizeOption } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
 import { getMapAPI } from "@/api/app"
-import { buildDBMapMarkers, type DBMap, type DBMapMarker, loadMapDetailWithCache } from "@/data/d/map.data"
+import { buildDBMapMarkers, type DBMap, type DBMapMarker, loadMapDetailWithCache } from "@/data/d/onlinemapcache.data"
 import { env } from "@/env"
 
 const route = useRoute()

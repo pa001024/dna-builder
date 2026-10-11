@@ -33,7 +33,7 @@ const entry = computed<WikiListEntry | null>(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
+    <ScrollSpyLayout auto nav-kicker="DATABASE" class="h-full">
         <!-- 居中容器：与线索 / 剧情回顾详情页一致的纸面排版宽度 -->
         <div v-if="entry" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <DBWikiDetailItem :entry="entry" />
@@ -41,5 +41,5 @@ const entry = computed<WikiListEntry | null>(() => {
         <div v-else class="p-4">
             <div class="text-base-content/70">{{ $t("wiki-detail.notFound") }}</div>
         </div>
-    </ScrollArea>
+    </ScrollSpyLayout>
 </template>

@@ -149,8 +149,9 @@ const bgImage = computed(() => {
     if (!gacha || !tab) return ""
     if (!bgUseFallback.value) {
         const skin = getFeaturedSkin(gacha)
-        if (skin && skin.icon.startsWith("T_Head_")) {
-            return buildCdnUrl(`img/res/${skin.icon.replace("T_Head", "T_Bust")}.webp`)
+        // 仅有立绘资源（SkinItem.bust）的皮肤才取半身立绘大图；月石皮等无立绘，避免拼出 404 再回退
+        if (skin?.bust) {
+            return buildCdnUrl(`img/res/${skin.bust}.webp`)
         }
     }
     return `/imgs/webp/${tab.icon}.webp`
@@ -962,7 +963,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                         v-if="selectedTab?.tabId === tab.tabId"
                                         class="rounded-xs bg-white/20 px-1.5 py-px text-[10px] font-semibold text-white"
                                     >
-                                        {{ $t('skin-gacha.current_pool') }}
+                                        {{ $t("skin-gacha.current_pool") }}
                                     </span>
                                 </div>
                             </div>
@@ -980,7 +981,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                     @click="showGachaDrawer = true"
                 >
                     <Icon icon="ri:menu-unfold-line" class="size-4" />
-                    {{ $t('skin-gacha.pool') }}
+                    {{ $t("skin-gacha.pool") }}
                 </button>
                 <!-- 右上角：资源 / 累计消耗 / 描述小字 -->
                 <div class="absolute top-0 right-0 flex max-w-[70%] flex-col items-end gap-2 p-4">
@@ -1007,7 +1008,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                 v-if="resId === RES_LIMITED_TICKET"
                                 class="absolute -top-2 -left-1 rounded-xs bg-warning px-1 text-[9px] font-bold text-warning-content"
                             >
-                                {{ $t('common.limited_time') }}
+                                {{ $t("common.limited_time") }}
                             </span>
                             <img
                                 :src="resolveItem(resId, 'Resource').icon"
@@ -1033,7 +1034,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                         </button>
                     </div>
                     <div v-if="chargeEnabled" class="text-xs text-base-content/60">
-                        {{ $t('skin-gacha.total_spent') }} <span class="font-bold tabular-nums text-primary">¥{{ totalSpentCny }}</span>
+                        {{ $t("skin-gacha.total_spent") }} <span class="font-bold tabular-nums text-primary">¥{{ totalSpentCny }}</span>
                     </div>
                     <!-- 卡池描述小字 -->
                     <div v-if="selectedGacha" class="max-w-96 text-right text-[11px] leading-4 text-base-content/50">
@@ -1262,7 +1263,9 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                         'text-primary font-semibold': segment.tone === 'highlight',
                                         'text-base-content font-bold': segment.tone === 'title',
                                     }"
-                                    >{{ segment.text }}</span
+                                    >{{
+                                        segment.text
+                                    }}</span
                                 >
                             </template>
                         </div>
@@ -1341,7 +1344,9 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                 <span
                                     class="hidden w-28 shrink-0 truncate text-[11px] text-base-content/60 sm:block"
                                     :title="entry.gachaName"
-                                    >{{ entry.gachaName }}</span
+                                    >{{
+                                        entry.gachaName
+                                    }}</span
                                 >
                                 <span class="w-12 shrink-0 text-center text-xs font-bold" :class="getStarTextClass(entry.star)">{{
                                     "★".repeat(entry.star)
@@ -1383,7 +1388,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                     <b class="tabular-nums">{{ getResourceCount(RES_MOON_STONE) }}</b>
                                 </span>
                                 <span class="text-xs text-base-content/55">
-                                    {{ $t('skin-gacha.total_spent') }} <b class="tabular-nums text-primary">¥{{ totalSpentCny }}</b>
+                                    {{ $t("skin-gacha.total_spent") }} <b class="tabular-nums text-primary">¥{{ totalSpentCny }}</b>
                                 </span>
                             </div>
                         </div>
@@ -1434,7 +1439,8 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                                     :title="`${gi.name} ×${gi.count}`"
                                                 >
                                                     <img :src="gi.icon" alt="" class="size-3.5 object-contain" />
-                                                    {{ gi.name }} ×{{ gi.count }}
+                                                    {{ gi.name }}
+                                                    ×{{ gi.count }}
                                                 </span>
                                             </div>
                                             <button
@@ -1450,7 +1456,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                                 @click="buyShopItem(item)"
                                             >
                                                 <Icon v-if="item.pay?.CNY" icon="ri:bank-card-line" class="size-3.5" />
-                                                {{ getShopItemRemain(item) === 0 ? $t('skin-gacha.sold_out') : getShopPriceText(item) }}
+                                                {{ getShopItemRemain(item) === 0 ? $t("skin-gacha.sold_out") : getShopPriceText(item) }}
                                             </button>
                                         </div>
                                     </div>

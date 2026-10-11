@@ -293,7 +293,11 @@ async function packSelectedFolder() {
     if (!selected || Array.isArray(selected)) return
 
     const sourceDir = selected
-    const folderName = sourceDir.split(/[\\/]+/).filter(Boolean).pop() || "packed"
+    const folderName =
+        sourceDir
+            .split(/[\\/]+/)
+            .filter(Boolean)
+            .pop() || "packed"
 
     loading.value = true
     packProgress.value = 0
@@ -340,19 +344,19 @@ onMounted(async () => {
                     <div class="flex flex-wrap gap-2">
                         <button class="btn btn-outline rounded-xs" @click="showSettingsDialog = true">
                             <Icon icon="ri:settings-4-line" />
-                            {{ $t('unpack-view.settings') }}
+                            {{ $t("unpack-view.settings") }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="packSelectedFolder">
                             <Icon icon="ri:file-zip-line" />
-                            {{ $t('unpack-view.pack') }}
+                            {{ $t("unpack-view.pack") }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="loadPakFiles">
                             <Icon icon="ri:file-list-line" />
-                            {{ $t('unpack-view.read_file_list') }}
+                            {{ $t("unpack-view.read_file_list") }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="exportSelectedFiles">
                             <Icon icon="ri:download-2-line" />
-                            {{ $t('common.export') }}
+                            {{ $t("common.export") }}
                         </button>
                     </div>
                 </template>
@@ -486,7 +490,7 @@ onMounted(async () => {
     <dialog class="modal" :class="{ 'modal-open': showSettingsDialog }">
         <div class="modal-box max-w-3xl rounded-xs bg-base-100/85 backdrop-blur-md">
             <div class="mb-4 flex items-center justify-between gap-3 border-b border-base-content/10 pb-3">
-                <h3 class="text-lg font-medium">{{ $t('unpack-view.settings') }}</h3>
+                <h3 class="text-lg font-medium">{{ $t("unpack-view.settings") }}</h3>
                 <form method="dialog">
                     <button class="btn btn-ghost btn-sm rounded-xs" @click="showSettingsDialog = false">关闭</button>
                 </form>
@@ -494,21 +498,41 @@ onMounted(async () => {
             <div class="grid gap-3 md:grid-cols-2">
                 <div class="space-y-2">
                     <div class="text-sm text-base-content/60">pak 根目录</div>
-                    <input v-model="rootPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="pak 根目录" />
+                    <input
+                        v-model="rootPath"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="pak 根目录"
+                    />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('root')">选择目录</button>
                     <button class="btn btn-primary w-full rounded-xs" :disabled="loading" @click="scanPakFiles">扫描 pak</button>
                 </div>
                 <div class="space-y-2">
                     <div class="text-sm text-base-content/60">AES key</div>
-                    <input v-model="aesKey" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="AES key" />
+                    <input
+                        v-model="aesKey"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="AES key"
+                    />
                     <div class="text-sm text-base-content/60">导出目录</div>
-                    <input v-model="targetPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="导出目录" />
+                    <input
+                        v-model="targetPath"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="导出目录"
+                    />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('target')">选择目录</button>
                     <div class="text-sm text-base-content/60">unluac jar</div>
-                    <input v-model="unluacPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="unluac.jar" />
+                    <input
+                        v-model="unluacPath"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="unluac.jar"
+                    />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseUnluacFile">选择文件</button>
                     <div class="text-sm text-base-content/60">Lua 输出目录</div>
-                    <input v-model="luaOutputPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="Lua 输出目录" />
+                    <input
+                        v-model="luaOutputPath"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="Lua 输出目录"
+                    />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('luaOutput')">选择目录</button>
                 </div>
             </div>
