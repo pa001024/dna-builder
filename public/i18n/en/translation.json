@@ -611,6 +611,7 @@
     },
     "book-detail": {
         "countSuffix": "Entry count: {{count}}",
+        "entries": "Entries",
         "entryCount": "Entry count",
         "mechanismId": "Mechanism ID",
         "notFound": "Book not found",
@@ -1199,8 +1200,8 @@
         "impr_desc": "View impression increase information for quests, NPCs, and dispatch quests",
         "ironTicket": "Iron Ticket",
         "ironTicket_desc": "View Iron Ticket information and icons",
-        "map": "Map",
-        "map_desc": "View Map Markers",
+        "map": "Online Map",
+        "map_desc": "View Online Map Markers",
         "mapLocal": "Geniemon map",
         "mapLocal_desc": "Detailed Geniemon spawn points",
         "mod": "Mod",
@@ -1237,6 +1238,8 @@
         "title": "Database",
         "title_data": "Titles",
         "title_data_desc": "View title prefixes/suffixes and source info",
+        "trait": "Traits",
+        "trait_desc": "Browse character trait descriptions and their owners",
         "until_now": "Now",
         "walnut": "Walnut",
         "walnut_desc": "View walnut probability information and simulate draws",
@@ -1373,7 +1376,9 @@
         "timeline": "Timeline"
     },
     "db-fish-detail": {
+        "appearance_info": "Appearance",
         "appearance_time": "Appearance Time",
+        "appearing_spots": "Fishing Spots",
         "length": "Length",
         "mutation_rate": "Mutation Rate",
         "unknown_spot": "Unknown Fishing Spot ({{id}})"
@@ -1388,6 +1393,7 @@
         "always_s2b": "Always use Fish for Bigger Fish",
         "bait_type": "Bait Type",
         "clear_records": "Clear Records",
+        "expected": "Expected Value",
         "expected_hint": "Average expected value per 100 fish (adjust below. Current: {{lure}} | {{mode}})",
         "extra_reward": "Bonus (chance: {{prob}}) - 30 times per week",
         "fish_100": "Fish 100×",
@@ -1408,6 +1414,7 @@
         "pet_reward": "Geniemon drop (chance: {{prob}}) — when Bonus triggers",
         "s2b": "Fish for Bigger Fish",
         "skip_low_value": "Skip low-value catches",
+        "spot_info": "Spot Info",
         "total_value": "Total value:",
         "variant": "Variant",
         "weight": "Weight"
@@ -1456,9 +1463,9 @@
         "iron_ticket_count": "Deep Compasses"
     },
     "db-map-list": {
-        "map_count": "maps",
-        "search_placeholder": "Search map ID / name / description...",
-        "show_map_list": "Show map list"
+        "map_count": "online maps",
+        "search_placeholder": "Search online map ID / name / description...",
+        "show_map_list": "Show online map list"
     },
     "db-mod-list": {
         "convertible": "Convertible",
@@ -1534,30 +1541,55 @@
         "unnamed_media_node": "Unnamed Media Node"
     },
     "db-raid-rank": {
+        "bubble_tip": "Skip Guide",
         "current_dungeon": "Current dungeon: {{id}}",
         "current_rewards": "Rewards earned so far:",
         "difficulty_label": "Difficulty {{level}}",
         "dungeon_info": "Dungeon Info",
+        "dungeon_missing": "Dungeon {{id}} details unavailable; showing floor config and rewards only",
         "elapsed_time": "Elapsed: {{value}} s",
+        "first_reward": "First-Clear Reward",
+        "floor": "Floors",
+        "floor_detail": "Floor Details",
+        "floor_list": "Floor List",
+        "floor_name": "Floor {{value}}",
         "formula": "Final score = BaseRaidPoint + (1 + interval1×rate1 + interval2×rate2 + interval3×rate3)",
         "formula_id": "Formula ID: {{id}}",
         "formula_note": "Intervals are consumed in order until the remaining time runs out",
+        "highest_floor_x": "{{value}} floors total",
         "input_remaining_time": "Enter remaining time",
         "input_score": "Enter score",
+        "jump_count_x": "Skip {{value}} floors",
+        "jump_rules": "Floor Skip Rules",
+        "jump_rules_desc": "More remaining time skips more floors, with the last tier as the guaranteed minimum",
+        "jump_simulator": "Skip Simulator",
+        "key_floor": "Key Floor",
+        "locked": "Locked",
         "max_allowed_time": "Max allowed time: {{value}} s",
         "max_score": "Max score: {{value}}",
+        "min_damage_x": "Min. clear damage: {{value}}",
+        "monster_level_x": "Monster Lv. {{value}}",
+        "normal_reward": "Normal Reward",
+        "pass_time": "Clear time (s)",
+        "passed_floor": "Highest cleared floor",
         "per_1000_points": "Per 1000 points you can get",
         "prefix": "Prefix",
+        "rank_floor_note": "Floor Mode ranks by floor; ties are broken by faster clear time (format m:ss.cc)",
         "rank_info": "Rank Info",
         "rank_requirement": "Top {{percent}}% of players",
         "rate": "Rates",
+        "rec_level_x": "Recommended Lv. {{value}}",
         "remaining_time": "Remaining time (s):",
         "rewards_max": "reward(s) | Max rewards:",
         "score_calc": "Score Calculation",
         "score_calc_desc": "Score calculation explanation:",
         "score_reward_calc": "Score reward calculation:",
+        "simulated_unlock_x": "Expected unlock: Floor {{value}}",
         "suffix": "Suffix",
-        "time_zone": "Time intervals"
+        "time_limit_x": "Dungeon time limit: {{value}}s",
+        "time_remain_x": "{{value}}s remaining",
+        "time_zone": "Time intervals",
+        "unlocked_up_to": "Unlocked up to Floor {{value}}"
     },
     "db-reputation-list": {
         "no_match": "No matching regional renown"
@@ -1766,6 +1798,24 @@
         "search_placeholder": "Search title ID / name / source (pinyin supported)...",
         "suffix": "Suffix",
         "title_count": "titles"
+    },
+    "db-trait-detail": {
+        "description": "Description",
+        "owner_count": "{{count}} characters",
+        "owners": "Characters with this trait"
+    },
+    "db-trait-detail-view": {
+        "not_found": "Trait not found"
+    },
+    "db-trait-list": {
+        "group_blue": "Gathering",
+        "group_green": "Impression",
+        "group_other": "Other",
+        "group_red": "Combat",
+        "group_special": "Focus bonus",
+        "owner_count": "owners",
+        "search_placeholder": "Search trait name/description/tag (pinyin supported)...",
+        "trait_count": "traits"
     },
     "db-walnut-detail": {
         "col_at_least_once": "Chance of at Least One Gold",
@@ -2337,6 +2387,16 @@
     "event": {
         "box_coin": "Event Token",
         "box_drop_index": "Box {{index}}",
+        "hard_boss": "Eternal Nightmare",
+        "hard_boss_buff": "Power buff",
+        "hard_boss_challenge": "Challenge",
+        "hard_boss_enemies": "Enemies",
+        "hard_boss_eternal": "Eternal",
+        "hard_boss_first": "First clear",
+        "hard_boss_fixed": "Fixed drops",
+        "hard_boss_unlock": "Clear {{names}} first to unlock",
+        "hard_boss_weekly": "Weekly reward attempts: {{total}}",
+        "hard_boss_weekly_note": "Shared across all 5 bosses' Eternal modes. Resets every Monday at 05:00 (server time).",
         "online_time": "Online Time Rewards",
         "online_time_target": "{{target}} min online",
         "photo_task_index": "Task",
@@ -2346,11 +2406,15 @@
         "photo_task_reward": "Task Reward",
         "photo_task_unlock": "Unlock Time",
         "photo_tasks": "Photo Tasks",
+        "prize_extra": "Collection reward tier {{index}}",
+        "prize_pool": "Prize pool {{pool}} tier {{index}}",
+        "puzzle_level": "Backpack level {{name}}",
         "rule": "Rule",
         "sign_in": "Sign-In",
         "sign_in_big": "Big Reward",
         "sign_in_day": "Day {{day}}",
-        "top_up_score": "{{score}} pts"
+        "top_up_score": "{{score}} pts",
+        "verify_star": "{{stars}} stars total"
     },
     "event-detail": {
         "title": "Event details"
@@ -2910,17 +2974,17 @@
         "btn_unpin_window": "Unpin window"
     },
     "map-detail": {
-        "notFound": "Map not found",
-        "title": "Map"
+        "notFound": "Online map not found",
+        "title": "Online Map"
     },
     "map-list": {
-        "title": "Map List"
+        "title": "Online Map List"
     },
     "map-list-page": {
-        "searchPlaceholder": "Search map ID/name/description...",
-        "showList": "Show map list",
-        "title": "Map list",
-        "totalCount": "{{count}} maps total"
+        "searchPlaceholder": "Search online map ID/name/description...",
+        "showList": "Show online map list",
+        "title": "Online Map List",
+        "totalCount": "{{count}} online maps total"
     },
     "map-local": {
         "title": "Map"
@@ -4347,6 +4411,12 @@
         "top_actions": "Use top buttons to share configuration, auto-build, save project, etc.",
         "weapon_select": "Click here to change weapon/set refinement"
     },
+    "trait-detail": {
+        "title": "Trait Details"
+    },
+    "trait-list": {
+        "title": "Trait List"
+    },
     "UI_Armory_ExtraExcelResource": "Materials required to unlock",
     "UI_Armory_ExtraExcelWeponTitle": "Additional Weapon Proficiency",
     "UI_FORGING_BLUEPRINT": "Blueprint: ",
@@ -4440,8 +4510,11 @@
         "title": "Walnut List"
     },
     "weapon-detail": {
+        "applicable": "Applicable Characters",
         "ascension": "Ascension",
         "crafting": "Crafting",
+        "extraMastery": "Extra Mastery",
+        "mastery": "Mastery",
         "moveDemonWedges": "Move Demon Wedges",
         "noAscensionData": "No ascension data",
         "relatedCharacters": "Related Characters",

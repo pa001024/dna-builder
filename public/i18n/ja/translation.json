@@ -605,6 +605,7 @@
     },
     "book-detail": {
         "countSuffix": "項目数: {{count}}",
+        "entries": "項目閲覧",
         "entryCount": "項目数",
         "mechanismId": "メカニズム ID",
         "notFound": "読物が見つかりません",
@@ -1180,8 +1181,8 @@
         "impr_desc": "クエスト、NPC、派遣クエストの印象増加情報を確認",
         "ironTicket": "鉄チケット",
         "ironTicket_desc": "鉄チケットの情報とアイコンを確認",
-        "map": "マップ",
-        "map_desc": "マップのマーカーを表示",
+        "map": "オンラインマップ",
+        "map_desc": "オンラインマップのマーカーを表示",
         "mapLocal": "魔霊マップ",
         "mapLocal_desc": "魔霊の詳細な出現地点",
         "mod": "モッド",
@@ -1218,6 +1219,8 @@
         "title": "データベース",
         "title_data": "称号",
         "title_data_desc": "称号の前後接尾辞と入手元を表示",
+        "trait": "特性",
+        "trait_desc": "キャラ特性の説明と所持キャラを見る",
         "until_now": "現在まで",
         "walnut": "クルミ",
         "walnut_desc": "クルミの確率情報を表示し、模擬抽選",
@@ -1354,7 +1357,9 @@
         "timeline": "タイムライン"
     },
     "db-fish-detail": {
+        "appearance_info": "出現情報",
         "appearance_time": "出現時間",
+        "appearing_spots": "釣りスポット",
         "length": "大きさ",
         "mutation_rate": "変異率",
         "unknown_spot": "不明な釣り場({{id}})"
@@ -1369,6 +1374,7 @@
         "always_s2b": "常に大物チャンスを実行",
         "bait_type": "エサの種類",
         "clear_records": "記録をクリア",
+        "expected": "期待値",
         "expected_hint": "魚100匹あたりの平均期待値（下記で調整可。現在の設定：{{lure}} | {{mode}}）",
         "extra_reward": "追加報酬（確率：{{prob}}）週30回",
         "fish_100": "100 回釣る",
@@ -1389,6 +1395,7 @@
         "pet_reward": "魔霊報酬（確率：{{prob}}）追加報酬発生時",
         "s2b": "大物チャンス",
         "skip_low_value": "低価値の魚を手放す",
+        "spot_info": "スポット情報",
         "total_value": "合計価値：",
         "variant": "変異種",
         "weight": "重み"
@@ -1437,9 +1444,9 @@
         "iron_ticket_count": "件の深境羅針"
     },
     "db-map-list": {
-        "map_count": "件のマップ",
-        "search_placeholder": "マップ ID / 名前 / 説明を検索...",
-        "show_map_list": "マップ一覧を表示"
+        "map_count": "件のオンラインマップ",
+        "search_placeholder": "オンラインマップID / 名前 / 説明を検索...",
+        "show_map_list": "オンラインマップ一覧を表示"
     },
     "db-mod-list": {
         "convertible": "変換可能",
@@ -1515,30 +1522,55 @@
         "unnamed_media_node": "名称未設定のメディアノード"
     },
     "db-raid-rank": {
+        "bubble_tip": "スキップガイド",
         "current_dungeon": "現在のダンジョン：{{id}}",
         "current_rewards": "現在の獲得報酬回数：",
         "difficulty_label": "難易度{{level}}",
         "dungeon_info": "ダンジョン情報",
+        "dungeon_missing": "ダンジョン {{id}} の詳細データがなく、フロア設定と報酬のみ表示",
         "elapsed_time": "経過時間：{{value}} 秒",
+        "first_reward": "初回クリア報酬",
+        "floor": "フロア",
+        "floor_detail": "フロア詳細",
+        "floor_list": "フロア一覧",
+        "floor_name": "第{{value}}層",
         "formula": "最終スコア = BaseRaidPoint + (1 + 区間1×レート1 + 区間2×レート2 + 区間3×レート3)",
         "formula_id": "計算式ID：{{id}}",
         "formula_note": "残り時間がなくなるまで区間値を順に適用します",
+        "highest_floor_x": "全{{value}}層",
         "input_remaining_time": "残り時間を入力",
         "input_score": "スコアを入力",
+        "jump_count_x": "{{value}} 層スキップ",
+        "jump_rules": "スキップルール",
+        "jump_rules_desc": "残り時間が長いほど一度に進める層数が増え、最低でも最終段階分は進める",
+        "jump_simulator": "スキップシミュレーション",
+        "key_floor": "キーフロア",
+        "locked": "未解放",
         "max_allowed_time": "最大許容時間：{{value}} 秒",
         "max_score": "最高スコア：{{value}}",
+        "min_damage_x": "最低クリアダメージ {{value}}",
+        "monster_level_x": "敵レベル {{value}}",
+        "normal_reward": "通常報酬",
+        "pass_time": "クリアタイム（秒）",
+        "passed_floor": "最高クリア層",
         "per_1000_points": "1000 ポイントごとに獲得",
         "prefix": "接頭辞",
+        "rank_floor_note": "フロア制ランキングは層数順、同層はクリアタイムが短い方が上位（形式 分:秒.100分の1秒）",
         "rank_info": "ランキング情報",
         "rank_requirement": "上位{{percent}}%のプレイヤー",
         "rate": "レート",
+        "rec_level_x": "推奨レベル {{value}}",
         "remaining_time": "残り時間（秒）：",
         "rewards_max": "回の報酬 | 最大報酬回数：",
         "score_calc": "スコア計算",
         "score_calc_desc": "スコア計算の説明：",
         "score_reward_calc": "スコア報酬の計算：",
+        "simulated_unlock_x": "解放予測：第 {{value}} 層",
         "suffix": "接尾辞",
-        "time_zone": "時間区間"
+        "time_limit_x": "制限時間 {{value}} 秒",
+        "time_remain_x": "残り {{value}} 秒",
+        "time_zone": "時間区間",
+        "unlocked_up_to": "第{{value}}層まで解放済み"
     },
     "db-reputation-list": {
         "no_match": "一致する地域名声がありません"
@@ -1741,6 +1773,24 @@
         "search_placeholder": "称号 ID / 名前 / 入手先を検索（ピンイン対応）...",
         "suffix": "接尾辞",
         "title_count": "件の称号"
+    },
+    "db-trait-detail": {
+        "description": "説明",
+        "owner_count": "{{count}} 名のキャラ",
+        "owners": "この特性を持つキャラ"
+    },
+    "db-trait-detail-view": {
+        "not_found": "特性が見つかりません"
+    },
+    "db-trait-list": {
+        "group_blue": "採取",
+        "group_green": "印象",
+        "group_other": "その他",
+        "group_red": "戦闘",
+        "group_special": "集中ボーナス",
+        "owner_count": "名の所持キャラ",
+        "search_placeholder": "特性名・説明・タグを検索（ピンイン対応）...",
+        "trait_count": "件の特性"
     },
     "db-walnut-detail": {
         "col_at_least_once": "少なくとも1回金が出る確率",
@@ -2312,6 +2362,16 @@
     "event": {
         "box_coin": "イベント通貨",
         "box_drop_index": "ボックス {{index}}",
+        "hard_boss": "永遠の悪夢",
+        "hard_boss_buff": "強力バフ",
+        "hard_boss_challenge": "高難易度チャレンジ",
+        "hard_boss_enemies": "出現する敵",
+        "hard_boss_eternal": "永遠",
+        "hard_boss_first": "初回",
+        "hard_boss_fixed": "固定ドロップ",
+        "hard_boss_unlock": "{{names}}を先にクリアする必要があります",
+        "hard_boss_weekly": "今週の報酬回数：{{total}}回",
+        "hard_boss_weekly_note": "5体のボスの永遠モードで共有。毎週月曜5:00（サーバー時間）にリセット",
         "online_time": "オンライン時間報酬",
         "online_time_target": "累計 {{target}} 分オンライン",
         "photo_task_index": "任務",
@@ -2321,11 +2381,15 @@
         "photo_task_reward": "任務報酬",
         "photo_task_unlock": "解放時間",
         "photo_tasks": "撮影任務",
+        "prize_extra": "コンプリート報酬・第{{index}}档",
+        "prize_pool": "賞品プール{{pool}}・第{{index}}档",
+        "puzzle_level": "バックパックステージ{{name}}",
         "rule": "ルール",
         "sign_in": "ログイン",
         "sign_in_big": "大報酬",
         "sign_in_day": "第 {{day}} 日",
-        "top_up_score": "{{score}} ポイント"
+        "top_up_score": "{{score}} ポイント",
+        "verify_star": "合計星数 {{stars}}"
     },
     "event-detail": {
         "title": "イベント詳細"
@@ -2887,17 +2951,17 @@
         "btn_unpin_window": "固定を解除"
     },
     "map-detail": {
-        "notFound": "マップが見つかりません",
-        "title": "マップ"
+        "notFound": "オンラインマップが見つかりません",
+        "title": "オンラインマップ"
     },
     "map-list": {
-        "title": "マップ一覧"
+        "title": "オンラインマップ一覧"
     },
     "map-list-page": {
-        "searchPlaceholder": "マップID / 名前 / 説明を検索...",
-        "showList": "マップ一覧を表示",
-        "title": "マップ一覧",
-        "totalCount": "合計 {{count}} 件のマップ"
+        "searchPlaceholder": "オンラインマップID / 名前 / 説明を検索...",
+        "showList": "オンラインマップ一覧を表示",
+        "title": "オンラインマップ一覧",
+        "totalCount": "合計 {{count}} 件のオンラインマップ"
     },
     "map-local": {
         "title": "マップ"
@@ -3520,7 +3584,7 @@
         "searchPlaceholder": "資源ID/名称で検索（ピンイン対応）...",
         "selectReward": "選択式報酬",
         "selectRewardTag": "選択",
-        "source": "入手元",
+        "source": "入手方法",
         "title": "資源"
     },
     "resource-detail": {
@@ -4318,6 +4382,12 @@
         "top_actions": "上部のボタンで設定の共有、自動構築、プロジェクトの保存などを行います",
         "weapon_select": "ここをクリックして武器を変更/精錬を設定"
     },
+    "trait-detail": {
+        "title": "特性詳細"
+    },
+    "trait-list": {
+        "title": "特性一覧"
+    },
     "UI_Armory_ExtraExcelResource": "アンロック消費素材",
     "UI_Armory_ExtraExcelWeponTitle": "追加熟練武器",
     "UI_FORGING_BLUEPRINT": "設計図：",
@@ -4411,8 +4481,11 @@
         "title": "クルミリスト"
     },
     "weapon-detail": {
+        "applicable": "適用キャラクター",
         "ascension": "限界突破",
         "crafting": "製造",
+        "extraMastery": "追加精通",
+        "mastery": "精通",
         "moveDemonWedges": "招式魔の楔",
         "noAscensionData": "突破データなし",
         "relatedCharacters": "関連キャラクター",

@@ -607,6 +607,7 @@
     },
     "book-detail": {
         "countSuffix": "항목 수: {{count}}",
+        "entries": "항목 열람",
         "entryCount": "항목 수",
         "mechanismId": "기전 ID",
         "notFound": "읽을거리를 찾을 수 없습니다",
@@ -1182,8 +1183,8 @@
         "impr_desc": "퀘스트, NPC, 파견 퀘스트의 인상 증가 정보 확인",
         "ironTicket": "철 티켓",
         "ironTicket_desc": "철 티켓 정보와 아이콘 확인",
-        "map": "지도",
-        "map_desc": "지도 마커 보기",
+        "map": "온라인 지도",
+        "map_desc": "온라인 지도 마커 보기",
         "mapLocal": "마령 지도",
         "mapLocal_desc": "마령 상세 출현 지점",
         "mod": "모드",
@@ -1220,6 +1221,8 @@
         "title": "데이터 베이스",
         "title_data": "칭호",
         "title_data_desc": "칭호 접두/접미와 획득 출처 정보 보기",
+        "trait": "특성",
+        "trait_desc": "캐릭터 특성 설명과 보유 캐릭터 보기",
         "until_now": "현재까지",
         "walnut": "호두",
         "walnut_desc": "호두 확률 정보 보기 및 시뮬레이션 추첨",
@@ -1356,7 +1359,9 @@
         "timeline": "타임라인"
     },
     "db-fish-detail": {
+        "appearance_info": "출현 정보",
         "appearance_time": "출현 시간",
+        "appearing_spots": "출현 낚시터",
         "length": "길이",
         "mutation_rate": "변이 확률",
         "unknown_spot": "알 수 없는 낚시 포인트 ({{id}})"
@@ -1371,6 +1376,7 @@
         "always_s2b": "항상 물고기로 더 큰 물고기 잡기",
         "bait_type": "미끼 종류",
         "clear_records": "기록 비우기",
+        "expected": "기댓값",
         "expected_hint": "물고기 100마리 평균 기대값 (아래에서 조정 가능. 현재 설정: {{lure}} | {{mode}})",
         "extra_reward": "추가 보상 (확률: {{prob}}) 주 30회",
         "fish_100": "100회 낚시",
@@ -1391,6 +1397,7 @@
         "pet_reward": "마령 보상 (확률: {{prob}}) 추가 보상 발동 시",
         "s2b": "물고기로 더 큰 물고기 잡기",
         "skip_low_value": "저가치 어획물 버리기",
+        "spot_info": "낚시터 정보",
         "total_value": "총 가치:",
         "variant": "특이종",
         "weight": "가중치"
@@ -1439,9 +1446,9 @@
         "iron_ticket_count": "개 심경 나침반"
     },
     "db-map-list": {
-        "map_count": "개 지도",
-        "search_placeholder": "지도 ID / 이름 / 설명 검색...",
-        "show_map_list": "지도 목록 표시"
+        "map_count": "개 온라인 지도",
+        "search_placeholder": "온라인 지도 ID / 이름 / 설명 검색...",
+        "show_map_list": "온라인 지도 목록 표시"
     },
     "db-mod-list": {
         "convertible": "변환 가능",
@@ -1517,30 +1524,55 @@
         "unnamed_media_node": "이름 없는 미디어 노드"
     },
     "db-raid-rank": {
+        "bubble_tip": "점프 가이드",
         "current_dungeon": "현재 던전: {{id}}",
         "current_rewards": "현재 획득 보상 횟수:",
         "difficulty_label": "난이도 {{level}}",
         "dungeon_info": "던전 정보",
+        "dungeon_missing": "던전 {{id}} 상세 데이터가 없어 플로어 설정과 보상만 표시",
         "elapsed_time": "소요 시간: {{value}}초",
+        "first_reward": "첫 클리어 보상",
+        "floor": "플로어",
+        "floor_detail": "플로어 상세",
+        "floor_list": "플로어 목록",
+        "floor_name": "제{{value}}층",
         "formula": "최종 점수 = BaseRaidPoint + (1 + 구간1×속도1 + 구간2×속도2 + 구간3×속도3)",
         "formula_id": "계산식 ID: {{id}}",
         "formula_note": "남은 시간이 소진될 때까지 구간 값을 순서대로 적용합니다",
+        "highest_floor_x": "총 {{value}}층",
         "input_remaining_time": "남은 시간 입력",
         "input_score": "점수 입력",
+        "jump_count_x": "{{value}}층 점프",
+        "jump_rules": "점프 규칙",
+        "jump_rules_desc": "남은 시간이 많을수록 한 번에 건너뛰는 층이 늘어나며, 최소 마지막 단계는 보장됨",
+        "jump_simulator": "점프 시뮬레이터",
+        "key_floor": "핵심 층",
+        "locked": "미해금",
         "max_allowed_time": "최대 허용 시간: {{value}}초",
         "max_score": "최고 점수: {{value}}",
+        "min_damage_x": "최소 클리어 대미지 {{value}}",
+        "monster_level_x": "몬스터 레벨 {{value}}",
+        "normal_reward": "일반 보상",
+        "pass_time": "클리어 시간(초)",
+        "passed_floor": "최고 클리어 층",
         "per_1000_points": "1000점마다 획득",
         "prefix": "접두어",
+        "rank_floor_note": "플로어제 순위는 층수 순이며, 동층은 클리어 시간이 짧을수록 상위(형식 분:초.100분의 1초)",
         "rank_info": "순위 정보",
         "rank_requirement": "상위 {{percent}}% 플레이어",
         "rate": "속도",
+        "rec_level_x": "권장 레벨 {{value}}",
         "remaining_time": "남은 시간(초):",
         "rewards_max": "회 보상 | 최대 보상 횟수:",
         "score_calc": "점수 계산",
         "score_calc_desc": "점수 계산 설명:",
         "score_reward_calc": "점수 보상 계산:",
+        "simulated_unlock_x": "예상 해금: 제{{value}}층",
         "suffix": "접미어",
-        "time_zone": "시간 구간"
+        "time_limit_x": "제한 시간 {{value}}초",
+        "time_remain_x": "남은 시간 {{value}}초",
+        "time_zone": "시간 구간",
+        "unlocked_up_to": "{{value}}층까지 해금됨"
     },
     "db-reputation-list": {
         "no_match": "일치하는 지역 명성이 없습니다"
@@ -1743,6 +1775,24 @@
         "search_placeholder": "칭호 ID / 이름 / 출처 검색(병음 지원)...",
         "suffix": "접미어",
         "title_count": "개 칭호"
+    },
+    "db-trait-detail": {
+        "description": "설명",
+        "owner_count": "캐릭터 {{count}}명",
+        "owners": "이 특성을 보유한 캐릭터"
+    },
+    "db-trait-detail-view": {
+        "not_found": "특성을 찾을 수 없음"
+    },
+    "db-trait-list": {
+        "group_blue": "채집",
+        "group_green": "인상",
+        "group_other": "기타",
+        "group_red": "전투",
+        "group_special": "집중 보너스",
+        "owner_count": "명의 보유 캐릭터",
+        "search_placeholder": "특성 이름/설명/태그 검색(병음 지원)...",
+        "trait_count": "개의 특성"
     },
     "db-walnut-detail": {
         "col_at_least_once": "최소 1회 황금 확률",
@@ -2314,6 +2364,16 @@
     "event": {
         "box_coin": "이벤트 화폐",
         "box_drop_index": "상자 {{index}}",
+        "hard_boss": "영원한 악몽",
+        "hard_boss_buff": "강력 버프",
+        "hard_boss_challenge": "고난이도 도전",
+        "hard_boss_enemies": "등장 적",
+        "hard_boss_eternal": "영원",
+        "hard_boss_first": "최초",
+        "hard_boss_fixed": "고정 드롭",
+        "hard_boss_unlock": "{{names}}을(를) 먼저 클리어해야 합니다",
+        "hard_boss_weekly": "이번 주 보상 횟수: {{total}}회",
+        "hard_boss_weekly_note": "5명 보스의 영원 모드가 횟수를 공유하며, 매주 월요일 05:00(서버 시간)에 초기화됩니다",
         "online_time": "온라인 시간 보상",
         "online_time_target": "누적 {{target}}분 온라인",
         "photo_task_index": "임무",
@@ -2323,11 +2383,15 @@
         "photo_task_reward": "임무 보상",
         "photo_task_unlock": "해금 시간",
         "photo_tasks": "촬영 임무",
+        "prize_extra": "컬렉션 보상 {{index}}단계",
+        "prize_pool": "상금 풀 {{pool}} {{index}}단계",
+        "puzzle_level": "배낭 스테이지 {{name}}",
         "rule": "규칙",
         "sign_in": "출석",
         "sign_in_big": "큰 보상",
         "sign_in_day": "{{day}}일차",
-        "top_up_score": "{{score}}점"
+        "top_up_score": "{{score}}점",
+        "verify_star": "총 별 {{stars}}개"
     },
     "event-detail": {
         "title": "이벤트 상세"
@@ -2889,17 +2953,17 @@
         "btn_unpin_window": "고정 해제"
     },
     "map-detail": {
-        "notFound": "지도를 찾을 수 없습니다",
-        "title": "지도"
+        "notFound": "온라인 지도를 찾을 수 없습니다",
+        "title": "온라인 지도"
     },
     "map-list": {
-        "title": "지도 목록"
+        "title": "온라인 지도 목록"
     },
     "map-list-page": {
-        "searchPlaceholder": "지도 ID/이름/설명 검색...",
-        "showList": "지도 목록 표시",
-        "title": "지도 목록",
-        "totalCount": "총 {{count}}개 지도"
+        "searchPlaceholder": "온라인 지도 ID/이름/설명 검색...",
+        "showList": "온라인 지도 목록 표시",
+        "title": "온라인 지도 목록",
+        "totalCount": "총 {{count}}개 온라인 지도"
     },
     "map-local": {
         "title": "지도"
@@ -3522,7 +3586,7 @@
         "searchPlaceholder": "자원 ID/이름 검색(병음 지원)...",
         "selectReward": "선택 보상",
         "selectRewardTag": "선택형",
-        "source": "출처",
+        "source": "획득 경로",
         "title": "자원"
     },
     "resource-detail": {
@@ -4320,6 +4384,12 @@
         "top_actions": "상단 버튼으로 설정 공유, 자동 구축, 프로젝트 저장 등을 수행하세요",
         "weapon_select": "여기를 클릭하여 무기 변경/정련 설정"
     },
+    "trait-detail": {
+        "title": "특성 상세"
+    },
+    "trait-list": {
+        "title": "특성 목록"
+    },
     "UI_Armory_ExtraExcelResource": "해제 소모 재료",
     "UI_Armory_ExtraExcelWeponTitle": "추가 마스터리 무기",
     "UI_FORGING_BLUEPRINT": "설계도: ",
@@ -4413,8 +4483,11 @@
         "title": "호두 목록"
     },
     "weapon-detail": {
+        "applicable": "적용 캐릭터",
         "ascension": "돌파",
         "crafting": "제작",
+        "extraMastery": "추가 숙련",
+        "mastery": "숙련",
         "moveDemonWedges": "동작 악마의 쐐기",
         "noAscensionData": "각성 데이터 없음",
         "relatedCharacters": "관련 캐릭터",

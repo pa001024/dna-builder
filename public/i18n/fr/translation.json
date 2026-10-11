@@ -607,6 +607,7 @@
     },
     "book-detail": {
         "countSuffix": "Nombre d’entrées : {{count}}",
+        "entries": "Lecture des entrées",
         "entryCount": "Nombre d’entrées",
         "mechanismId": "ID du mécanisme",
         "notFound": "Livre introuvable",
@@ -1214,8 +1215,8 @@
         "impr_desc": "Afficher les informations d’augmentation d’Impression pour les quêtes, PNJ et quêtes d’envoi",
         "ironTicket": "Ticket de fer",
         "ironTicket_desc": "Voir les informations et icônes des tickets de fer",
-        "map": "Carte",
-        "map_desc": "Voir les marqueurs de carte",
+        "map": "Carte en ligne",
+        "map_desc": "Voir les marqueurs de carte en ligne",
         "mapLocal": "Carte des Moling",
         "mapLocal_desc": "Points d’apparition détaillés des Moling",
         "mod": "Mod",
@@ -1252,6 +1253,8 @@
         "title": "Base de données",
         "title_data": "Titres",
         "title_data_desc": "Voir les préfixes/suffixes de titre et la source",
+        "trait": "Traits",
+        "trait_desc": "Voir les descriptions des traits et leurs porteurs",
         "until_now": "Maintenant",
         "walnut": "Noix",
         "walnut_desc": "Voir les informations de probabilité de noix et simuler les tirages",
@@ -1388,7 +1391,9 @@
         "timeline": "Chronologie"
     },
     "db-fish-detail": {
+        "appearance_info": "Apparition",
         "appearance_time": "Heure d'apparition",
+        "appearing_spots": "Spots de pêche",
         "length": "Taille",
         "mutation_rate": "Taux de mutation",
         "unknown_spot": "Point de pêche inconnu ({{id}})"
@@ -1403,6 +1408,7 @@
         "always_s2b": "Toujours utiliser Chasse au gros",
         "bait_type": "Type d'appât",
         "clear_records": "Effacer l'historique",
+        "expected": "Valeur attendue",
         "expected_hint": "Valeur attendue moyenne pour 100 poissons (réglages ci-dessous. Actuel : {{lure}} | {{mode}})",
         "extra_reward": "Récompense supplémentaire (probabilité : {{prob}}) — 30 fois par semaine",
         "fish_100": "Pêcher 100×",
@@ -1423,6 +1429,7 @@
         "pet_reward": "Géniemon (probabilité : {{prob}}) — lorsque la récompense supplémentaire se déclenche",
         "s2b": "Chasse au gros",
         "skip_low_value": "Ignorer les prises de faible valeur",
+        "spot_info": "Infos du spot",
         "total_value": "Valeur totale :",
         "variant": "Variant",
         "weight": "Poids"
@@ -1471,9 +1478,9 @@
         "iron_ticket_count": "Boussoles des profondeurs"
     },
     "db-map-list": {
-        "map_count": "cartes",
-        "search_placeholder": "Rechercher ID / nom / description de carte...",
-        "show_map_list": "Afficher la liste des cartes"
+        "map_count": "cartes en ligne",
+        "search_placeholder": "Rechercher ID / nom / description de carte en ligne...",
+        "show_map_list": "Afficher la liste des cartes en ligne"
     },
     "db-mod-list": {
         "convertible": "Convertible",
@@ -1549,30 +1556,55 @@
         "unnamed_media_node": "Nœud multimédia sans nom"
     },
     "db-raid-rank": {
+        "bubble_tip": "Guide de saut",
         "current_dungeon": "Donjon actuel : {{id}}",
         "current_rewards": "Récompenses obtenues jusqu'ici :",
         "difficulty_label": "Difficulté {{level}}",
         "dungeon_info": "Infos du donjon",
+        "dungeon_missing": "Détails du donjon {{id}} indisponibles ; configuration et récompenses de l'étage uniquement",
         "elapsed_time": "Écoulé : {{value}} s",
+        "first_reward": "Récompense de première réussite",
+        "floor": "Étages",
+        "floor_detail": "Détails de l'étage",
+        "floor_list": "Liste des étages",
+        "floor_name": "Étage {{value}}",
         "formula": "Score final = BaseRaidPoint + (1 + intervalle1×taux1 + intervalle2×taux2 + intervalle3×taux3)",
         "formula_id": "ID de formule : {{id}}",
         "formula_note": "Les intervalles sont consommés dans l'ordre jusqu'à épuisement du temps restant",
+        "highest_floor_x": "{{value}} étages au total",
         "input_remaining_time": "Saisir le temps restant",
         "input_score": "Saisir le score",
+        "jump_count_x": "Sauter {{value}} étages",
+        "jump_rules": "Règles de saut d'étage",
+        "jump_rules_desc": "Plus il reste de temps, plus on saute d'étages, avec un minimum garanti au dernier palier",
+        "jump_simulator": "Simulateur de saut",
+        "key_floor": "Étage clé",
+        "locked": "Verrouillé",
         "max_allowed_time": "Temps max autorisé : {{value}} s",
         "max_score": "Score max : {{value}}",
+        "min_damage_x": "Dégâts min. requis : {{value}}",
+        "monster_level_x": "Niveau des monstres : {{value}}",
+        "normal_reward": "Récompense normale",
+        "pass_time": "Temps de réussite (s)",
+        "passed_floor": "Étage max réussi",
         "per_1000_points": "Tous les 1000 points, vous pouvez obtenir",
         "prefix": "Préfixe",
+        "rank_floor_note": "En mode Étages, le classement se fait par étage, puis par temps le plus court (format m:ss.cc)",
         "rank_info": "Infos du classement",
         "rank_requirement": "Top {{percent}}% des joueurs",
         "rate": "Taux",
+        "rec_level_x": "Niveau recommandé : {{value}}",
         "remaining_time": "Temps restant (s) :",
         "rewards_max": "récompense(s) | Récompenses max :",
         "score_calc": "Calcul du score",
         "score_calc_desc": "Explication du calcul du score :",
         "score_reward_calc": "Calcul des récompenses de score :",
+        "simulated_unlock_x": "Déblocage prévu : étage {{value}}",
         "suffix": "Suffixe",
-        "time_zone": "Intervalles de temps"
+        "time_limit_x": "Temps limite du donjon : {{value}} s",
+        "time_remain_x": "{{value}} s restantes",
+        "time_zone": "Intervalles de temps",
+        "unlocked_up_to": "Débloqué jusqu'à l'étage {{value}}"
     },
     "db-reputation-list": {
         "no_match": "Aucune renommée régionale correspondante"
@@ -1781,6 +1813,24 @@
         "search_placeholder": "Rechercher ID / nom / source du titre (pinyin pris en charge)...",
         "suffix": "Suffixe",
         "title_count": "titres"
+    },
+    "db-trait-detail": {
+        "description": "Description",
+        "owner_count": "{{count}} personnages",
+        "owners": "Personnages avec ce trait"
+    },
+    "db-trait-detail-view": {
+        "not_found": "Trait introuvable"
+    },
+    "db-trait-list": {
+        "group_blue": "Récolte",
+        "group_green": "Impression",
+        "group_other": "Autre",
+        "group_red": "Combat",
+        "group_special": "Bonus de focus",
+        "owner_count": "porteurs",
+        "search_placeholder": "Rechercher nom/description/tag (pinyin pris en charge)...",
+        "trait_count": "traits"
     },
     "db-walnut-detail": {
         "col_at_least_once": "Probabilité d'au moins un doré",
@@ -2352,6 +2402,16 @@
     "event": {
         "box_coin": "Jeton d'événement",
         "box_drop_index": "Boîte {{index}}",
+        "hard_boss": "Cauchemar éternel",
+        "hard_boss_buff": "Buff puissant",
+        "hard_boss_challenge": "Défi extrême",
+        "hard_boss_enemies": "Ennemis",
+        "hard_boss_eternal": "Éternel",
+        "hard_boss_first": "Première fois",
+        "hard_boss_fixed": "Butin fixe",
+        "hard_boss_unlock": "Terminez {{names}} pour débloquer",
+        "hard_boss_weekly": "Tentatives récompensées hebdomadaires : {{total}}",
+        "hard_boss_weekly_note": "Compteur partagé entre les modes Éternels des 5 boss. Réinitialisé chaque lundi à 05h00 (heure du serveur).",
         "online_time": "Récompenses de temps en ligne",
         "online_time_target": "{{target}} min en ligne",
         "photo_task_index": "Tâche",
@@ -2361,11 +2421,15 @@
         "photo_task_reward": "Récompense",
         "photo_task_unlock": "Déblocage",
         "photo_tasks": "Tâches photo",
+        "prize_extra": "Récompense de collection, palier {{index}}",
+        "prize_pool": "Palier {{index}} du bassin {{pool}}",
+        "puzzle_level": "Niveau sac {{name}}",
         "rule": "Règle",
         "sign_in": "Connexion quotidienne",
         "sign_in_big": "Grosse récompense",
         "sign_in_day": "Jour {{day}}",
-        "top_up_score": "{{score}} pts"
+        "top_up_score": "{{score}} pts",
+        "verify_star": "{{stars}} étoiles au total"
     },
     "event-detail": {
         "title": "Détails de l'événement"
@@ -2927,17 +2991,17 @@
         "btn_unpin_window": "Désépingler la fenêtre"
     },
     "map-detail": {
-        "notFound": "Carte introuvable",
-        "title": "Carte"
+        "notFound": "Carte en ligne introuvable",
+        "title": "Carte en ligne"
     },
     "map-list": {
-        "title": "Liste des cartes"
+        "title": "Liste des cartes en ligne"
     },
     "map-list-page": {
-        "searchPlaceholder": "Rechercher par ID/nom/description de carte...",
-        "showList": "Afficher la liste des cartes",
-        "title": "Liste des cartes",
-        "totalCount": "{{count}} cartes au total"
+        "searchPlaceholder": "Rechercher par ID/nom/description de carte en ligne...",
+        "showList": "Afficher la liste des cartes en ligne",
+        "title": "Liste des cartes en ligne",
+        "totalCount": "{{count}} cartes en ligne au total"
     },
     "map-local": {
         "title": "Carte"
@@ -3560,7 +3624,7 @@
         "searchPlaceholder": "Rechercher par ID ou nom de ressource (pinyin pris en charge)...",
         "selectReward": "Récompense au choix",
         "selectRewardTag": "Au choix",
-        "source": "Source",
+        "source": "Méthode d’obtention",
         "title": "Ressources"
     },
     "resource-detail": {
@@ -4364,6 +4428,12 @@
         "top_actions": "Utilisez les boutons en haut pour partager la configuration, construire automatiquement, sauvegarder le projet, etc.",
         "weapon_select": "Cliquez ici pour changer d'arme/définir le raffinement"
     },
+    "trait-detail": {
+        "title": "Détails du trait"
+    },
+    "trait-list": {
+        "title": "Liste des traits"
+    },
     "UI_Armory_ExtraExcelResource": "Matériaux requis",
     "UI_Armory_ExtraExcelWeponTitle": "Arme supplémentaire",
     "UI_FORGING_BLUEPRINT": "Plan de fabrication : ",
@@ -4457,8 +4527,11 @@
         "title": "Liste des noix"
     },
     "weapon-detail": {
+        "applicable": "Personnages compatibles",
         "ascension": "Ascension",
         "crafting": "Fabrication",
+        "extraMastery": "Maîtrise supplémentaire",
+        "mastery": "Maîtrise",
         "moveDemonWedges": "Sceaux démoniaques de mouvement",
         "noAscensionData": "Aucune donnée d'ascension",
         "relatedCharacters": "Personnages liés",

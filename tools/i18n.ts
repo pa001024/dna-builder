@@ -5,6 +5,8 @@
  * 用法（脚本别名 `bun i18n`，等价 `bun tools/i18n.ts`）:
  *   bun i18n add <key> [-cn 文案] [-en 文案] [-jp 文案] ...   # 插入或覆盖翻译（支持语言别名）
  *   bun i18n get <key> [--lang cn,en]                         # 读取某键各语言的值（默认全部）
+ *   bun i18n find <文本> [--lang cn] [--exact] [--limit N] [--json]
+ *                                                           # 按译文反查 key（默认全部语言、大小写不敏感的子串匹配）
  *   bun i18n rm  <key>                                        # 删除某键（所有语言）
  *   bun i18n langs                                            # 列出可用语言与别名
  *   bun i18n export                                           # 导出缺失翻译到 tools/i18n-diff.json
@@ -257,6 +259,11 @@ const HELP = `bun i18n <command> [options]
   get <key> [--lang cn,en] [--json]
                         读取某键各语言下的值（默认全部 6 种）；--lang 用逗号过滤部分语言，
                         别名可用（如 --lang cn,jp）。附加 --json 输出结构化结果。
+  find <文本> [--lang cn,en] [--exact] [--limit N] [--json]
+                        按译文反查 key：默认在全部 6 种语言里做大小写不敏感的子串匹配；
+                        --lang 限定只查某几门语言，--exact 改为全字相等匹配，
+                        --limit N 最多展示 N 个结果（默认 20），--json 输出结构化结果。
+                        find/search 同义。
   rm  <key>             删除某键（所有语言）
   langs                 列出可用语言与别名
   export                导出缺失翻译到 tools/i18n-diff.json
@@ -399,6 +406,69 @@ async function cmdGet(key: string, json: boolean, langFilter?: string): Promise<
     const missing = targets.filter(locale => !table[locale])
     if (missing.length > 0) {
         console.log(`\n  ${missing.length}/${targets.length} 种语言缺失：${missing.join(", ")}`)
+    }
+}
+
+async function cmdFind(query: string, opts: { exact: boolean; json: boolean; limit: number; langFilter?: string }): Promise<void> {
+    const needle = query.trim()
+    if (!needle) {
+        throw new Error("用法：bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]")
+    }
+    if (!Number.isInteger(opts.limit) || opts.limit <= 0) {
+        throw new Error("--limit 必须是正整数")
+    }
+    const { files } = await readAllLocales()
+    const targets = parseLangFilter(opts.langFilter)
+    const flat = new Map<string, Map<string, string>>()
+    for (const [locale, raw] of files) {
+        flat.set(locale, flattenKeys(raw))
+    }
+    const needleLower = needle.toLowerCase()
+    const matched = new Map<string, string[]>()
+    for (const locale of targets) {
+        const map = flat.get(locale)
+        if (!map) {
+            continue
+        }
+        for (const [key, value] of map) {
+            const hit = opts.exact ? value === needle : value.toLowerCase().includes(needleLower)
+            if (hit) {
+                const arr = matched.get(key) ?? []
+                arr.push(locale)
+                matched.set(key, arr)
+            }
+        }
+    }
+    const sortedKeys = [...matched.keys()].sort(compareKeys)
+    const total = sortedKeys.length
+    const shown = sortedKeys.slice(0, opts.limit)
+    if (opts.json) {
+        const results = shown.map(key => {
+            const values: Record<string, string> = {}
+            for (const locale of LOCALES) {
+                values[locale] = flat.get(locale)?.get(key) ?? ""
+            }
+            return { key, hits: matched.get(key) ?? [], values }
+        })
+        console.log(JSON.stringify({ query: needle, exact: opts.exact, locales: targets, total, limit: opts.limit, results }, null, 4))
+        return
+    }
+    const mode = opts.exact ? "全字相等" : "子串"
+    console.log(`反查「${needle}」（${mode}匹配，范围：${targets.join(", ")}），命中 ${total} 个键：`)
+    if (total === 0) {
+        console.log("  （无命中，可换 --lang 查其它语言，或去掉 --exact 试子串匹配）")
+        return
+    }
+    for (const key of shown) {
+        const hits = matched.get(key) ?? []
+        console.log(`  • ${key}  （命中：${hits.join(", ")}）`)
+        for (const locale of LOCALES) {
+            const value = flat.get(locale)?.get(key) ?? ""
+            console.log(`      ${locale.padEnd(6)} ${value || "（缺失）"}`)
+        }
+    }
+    if (total > shown.length) {
+        console.log(`\n  …还有 ${total - shown.length} 个未展示，用 --limit ${total} 查看全部`)
     }
 }
 
@@ -693,6 +763,41 @@ async function main(): Promise<void> {
                 throw new Error("用法：bun i18n get <key> [--lang cn,en] [--json]")
             }
             await cmdGet(key, rest.includes("--json"), langValue)
+            break
+        }
+        case "find":
+        case "search": {
+            const langIdx = rest.findIndex(a => a === "--lang" || a.startsWith("--lang="))
+            let langValue: string | undefined
+            const limitIdx = rest.findIndex(a => a === "--limit" || a.startsWith("--limit="))
+            let limitValue = "20"
+            const skip = new Set<number>()
+            if (langIdx >= 0) {
+                const arg = rest[langIdx]
+                if (arg.includes("=")) {
+                    langValue = arg.slice(arg.indexOf("=") + 1)
+                } else {
+                    langValue = rest[langIdx + 1]
+                    skip.add(langIdx + 1) // 排除 --lang 的取值，避免它被拼进查询文本
+                }
+            }
+            if (limitIdx >= 0) {
+                const arg = rest[limitIdx]
+                if (arg.includes("=")) {
+                    limitValue = arg.slice(arg.indexOf("=") + 1)
+                } else {
+                    limitValue = rest[limitIdx + 1] ?? limitValue
+                    skip.add(limitIdx + 1)
+                }
+            }
+            skip.add(langIdx)
+            skip.add(limitIdx)
+            const query = rest.filter((a, i) => !skip.has(i) && !a.startsWith("-")).join(" ")
+            if (!query) {
+                throw new Error("用法：bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]")
+            }
+            const limit = Number.parseInt(limitValue, 10)
+            await cmdFind(query, { exact: rest.includes("--exact"), json: rest.includes("--json"), limit, langFilter: langValue })
             break
         }
         case "rm":

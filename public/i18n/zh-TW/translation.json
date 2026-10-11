@@ -601,6 +601,7 @@
     },
     "book-detail": {
         "countSuffix": "條目數: {{count}}",
+        "entries": "條目閱讀",
         "entryCount": "條目數",
         "mechanismId": "機制 ID",
         "notFound": "未找到讀物",
@@ -1176,8 +1177,8 @@
         "impr_desc": "查看任務、NPC、派遣委託的印象增加資訊",
         "ironTicket": "深境羅盤",
         "ironTicket_desc": "查看深境羅盤資訊和圖標",
-        "map": "地圖",
-        "map_desc": "查看地圖標點",
+        "map": "線上地圖",
+        "map_desc": "查看線上地圖標點",
         "mapLocal": "魔靈地圖",
         "mapLocal_desc": "詳細魔靈刷新點位",
         "mod": "魔之楔",
@@ -1214,6 +1215,8 @@
         "title": "資料庫",
         "title_data": "稱號",
         "title_data_desc": "查看稱號前後綴與來源資訊",
+        "trait": "特質",
+        "trait_desc": "查看角色特質說明與擁有該特質的角色",
         "until_now": "至今",
         "walnut": "密函",
         "walnut_desc": "查看密函機率資訊和模擬抽取",
@@ -1350,7 +1353,9 @@
         "timeline": "時間表"
     },
     "db-fish-detail": {
+        "appearance_info": "出現資訊",
         "appearance_time": "出現時間",
+        "appearing_spots": "出現魚池",
         "length": "長度",
         "mutation_rate": "變異機率",
         "unknown_spot": "未知魚池({{id}})"
@@ -1365,6 +1370,7 @@
         "always_s2b": "無腦授漁以魚",
         "bait_type": "魚餌類型",
         "clear_records": "清空記錄",
+        "expected": "期望值",
         "expected_hint": "100條魚平均期望（下方可調選項 目前設定：{{lure}} | {{mode}}）",
         "extra_reward": "額外獎勵（機率：{{prob}}）每週30次",
         "fish_100": "釣 100 次",
@@ -1385,6 +1391,7 @@
         "pet_reward": "魔靈獎勵（機率：{{prob}}）觸發額外獎勵時",
         "s2b": "授漁以魚",
         "skip_low_value": "放棄低價值授漁以魚",
+        "spot_info": "池子資訊",
         "total_value": "總價值：",
         "variant": "異種",
         "weight": "權重"
@@ -1433,9 +1440,9 @@
         "iron_ticket_count": "個深境羅盤"
     },
     "db-map-list": {
-        "map_count": "個地圖",
-        "search_placeholder": "搜尋地圖 ID/名稱/描述...",
-        "show_map_list": "顯示地圖列表"
+        "map_count": "個線上地圖",
+        "search_placeholder": "搜尋線上地圖ID/名稱/描述...",
+        "show_map_list": "顯示線上地圖列表"
     },
     "db-mod-list": {
         "convertible": "可轉換",
@@ -1511,30 +1518,55 @@
         "unnamed_media_node": "未命名媒體節點"
     },
     "db-raid-rank": {
+        "bubble_tip": "跳層引導",
         "current_dungeon": "當前副本: {{id}}",
         "current_rewards": "目前已獲得獎勵次數：",
         "difficulty_label": "難度{{level}}",
         "dungeon_info": "副本資訊",
+        "dungeon_missing": "副本 {{id}} 詳情資料缺失，僅展示樓層配置與獎勵",
         "elapsed_time": "用時: {{value}}秒",
+        "first_reward": "首通獎勵",
+        "floor": "樓層",
+        "floor_detail": "樓層詳情",
+        "floor_list": "樓層列表",
+        "floor_name": "第{{value}}層",
         "formula": "最終分數 = BaseRaidPoint + (1 + 時間區間1×速率1 + 時間區間2×速率2 + 時間區間3×速率3)",
         "formula_id": "公式ID: {{id}}",
         "formula_note": "依次取區間值直到剩餘時間用完",
+        "highest_floor_x": "共{{value}}層",
         "input_remaining_time": "輸入剩餘時間",
         "input_score": "輸入分數",
+        "jump_count_x": "可跳 {{value}} 層",
+        "jump_rules": "跳層規則",
+        "jump_rules_desc": "剩餘時間越多，單次跳過層數越多，保底跳過最後一檔",
+        "jump_simulator": "跳層模擬",
+        "key_floor": "關鍵層",
+        "locked": "未解鎖",
         "max_allowed_time": "最大允許時間: {{value}}秒",
         "max_score": "最高分數: {{value}}",
+        "min_damage_x": "最低通關傷害 {{value}}",
+        "monster_level_x": "怪物等級 {{value}}",
+        "normal_reward": "普通獎勵",
+        "pass_time": "通關用時（秒）",
+        "passed_floor": "已通過最高層",
         "per_1000_points": "每 1000 分可獲得",
         "prefix": "前綴",
+        "rank_floor_note": "爬塔制排行按層數排序，層數相同則用時少者居前，用時格式為分:秒.百分秒",
         "rank_info": "排名資訊",
         "rank_requirement": "排名前{{percent}}%的玩家獲得",
         "rate": "速率",
+        "rec_level_x": "推薦等級 {{value}}",
         "remaining_time": "剩餘時間（秒）：",
         "rewards_max": "次獎勵 | 最大獎勵次數：",
         "score_calc": "分數計算",
         "score_calc_desc": "分數計算說明：",
         "score_reward_calc": "分數獎勵計算：",
+        "simulated_unlock_x": "預計解鎖至第 {{value}} 層",
         "suffix": "後綴",
-        "time_zone": "時間區間"
+        "time_limit_x": "副本限時 {{value}} 秒",
+        "time_remain_x": "剩餘 {{value}} 秒",
+        "time_zone": "時間區間",
+        "unlocked_up_to": "已解鎖至第{{value}}層"
     },
     "db-reputation-list": {
         "no_match": "找不到符合的區域聲名"
@@ -1737,6 +1769,24 @@
         "search_placeholder": "搜尋稱號 ID/名稱/來源（支援拼音）...",
         "suffix": "後綴",
         "title_count": "個稱號"
+    },
+    "db-trait-detail": {
+        "description": "特質說明",
+        "owner_count": "{{count}} 名角色",
+        "owners": "擁有該特質的角色"
+    },
+    "db-trait-detail-view": {
+        "not_found": "未找到該特質"
+    },
+    "db-trait-list": {
+        "group_blue": "採集",
+        "group_green": "印象",
+        "group_other": "其他",
+        "group_red": "戰鬥",
+        "group_special": "專注增益",
+        "owner_count": "名角色擁有",
+        "search_placeholder": "搜尋特質名稱/說明/標籤（支援拼音）...",
+        "trait_count": "個特質"
     },
     "db-walnut-detail": {
         "col_at_least_once": "至少一次出金機率",
@@ -2308,6 +2358,16 @@
     "event": {
         "box_coin": "活動代幣",
         "box_drop_index": "禮盒 {{index}}",
+        "hard_boss": "永恆夢魘",
+        "hard_boss_buff": "強力增益",
+        "hard_boss_challenge": "高難挑戰",
+        "hard_boss_enemies": "出現敵人",
+        "hard_boss_eternal": "永恆",
+        "hard_boss_first": "首次",
+        "hard_boss_fixed": "固定掉落",
+        "hard_boss_unlock": "需先通關 {{names}}",
+        "hard_boss_weekly": "本週獎勵次數：{{total}}次",
+        "hard_boss_weekly_note": "5 名首領的永恆模式共用次數，每週一 05:00（伺服器時間）重置",
         "online_time": "線上時長獎勵",
         "online_time_target": "累計線上 {{target}} 分鐘",
         "photo_task_index": "任務",
@@ -2317,11 +2377,15 @@
         "photo_task_reward": "任務獎勵",
         "photo_task_unlock": "解鎖時間",
         "photo_tasks": "拍照任務",
+        "prize_extra": "集齊獎勵·第{{index}}檔",
+        "prize_pool": "獎池{{pool}}·第{{index}}檔",
+        "puzzle_level": "背包關卡·{{name}}",
         "rule": "規則",
         "sign_in": "簽到",
         "sign_in_big": "大獎勵",
         "sign_in_day": "第 {{day}} 天",
-        "top_up_score": "積分 {{score}}"
+        "top_up_score": "積分 {{score}}",
+        "verify_star": "總星數 {{stars}}"
     },
     "event-detail": {
         "title": "活動詳情"
@@ -2882,17 +2946,17 @@
         "btn_unpin_window": "取消置頂"
     },
     "map-detail": {
-        "notFound": "未找到地圖",
-        "title": "地圖"
+        "notFound": "未找到線上地圖",
+        "title": "線上地圖"
     },
     "map-list": {
-        "title": "地圖列表"
+        "title": "線上地圖列表"
     },
     "map-list-page": {
-        "searchPlaceholder": "搜尋地圖ID/名稱/描述...",
-        "showList": "顯示地圖列表",
-        "title": "地圖列表",
-        "totalCount": "共 {{count}} 個地圖"
+        "searchPlaceholder": "搜尋線上地圖ID/名稱/描述...",
+        "showList": "顯示線上地圖列表",
+        "title": "線上地圖列表",
+        "totalCount": "共 {{count}} 個線上地圖"
     },
     "map-local": {
         "title": "地圖"
@@ -3515,7 +3579,7 @@
         "searchPlaceholder": "搜尋資源ID/名稱（支援拼音）...",
         "selectReward": "自選箱",
         "selectRewardTag": "自選",
-        "source": "來源",
+        "source": "獲取途徑",
         "title": "資源"
     },
     "resource-detail": {
@@ -4313,6 +4377,12 @@
         "top_actions": "使用頂部按鈕分享配置、自動構築、保存項目等",
         "weapon_select": "點擊這裡更換武器/設定精煉"
     },
+    "trait-detail": {
+        "title": "特質詳情"
+    },
+    "trait-list": {
+        "title": "特質列表"
+    },
     "UI_Armory_ExtraExcelResource": "解鎖消耗材料",
     "UI_Armory_ExtraExcelWeponTitle": "額外精通武器",
     "UI_FORGING_BLUEPRINT": "設計稿：",
@@ -4406,8 +4476,11 @@
         "title": "密函列表"
     },
     "weapon-detail": {
+        "applicable": "適用角色",
         "ascension": "突破",
         "crafting": "製造",
+        "extraMastery": "額外精通",
+        "mastery": "精通",
         "moveDemonWedges": "招式魔之楔",
         "noAscensionData": "暫無突破資料",
         "relatedCharacters": "關聯角色",

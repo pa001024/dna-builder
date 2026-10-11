@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { existsSync } from "node:fs"
+import { existsSync, readdirSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
@@ -139,6 +139,9 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     副本: "UI_Dungeon_Tab_WalnutDungeon",
     梦魇残声: "MAIN_UI_HARDBOSS",
     委托密函商店: "MAIN_UI_WALNUTBAG",
+    // 资源「获取途径」分区标题：详情页与搜索/ Agent 字段用的都是这个中文词，
+    // 上游各模块数据集里没有它，按官方文本表 ID 取权威译名。
+    获取途径: "UI_Tips_Obtining",
     // 迷津合作模式 Mod 装备部位：界面显示的是「近战武器 / 远程武器」单数形式，
     // 官方文本表只有整句里出现的这些词，故按装备部位条目的 ID 取权威译名
     近战武器: "UI_BAG_Meleeweapon",
@@ -158,6 +161,7 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     秽兽: "UI_Archive_Tab_InfectionEnemy",
     神弃者同盟: "UI_Archive_Tab_AllianceEnemy",
     最大耐受: "UI_Mod_CostIncrease",
+    放生获得: "UI_Pet_DecomposeResultResource",
 }
 
 /**
@@ -421,6 +425,99 @@ type GeneratedReplacement = {
     augment?: () => { start: number; end: number; text: string } | null
 }
 
+/** 限时奖池活动行裁剪后保留的前端有用字段。
+ *
+ * 上游 `LimitedPrizePool` 原始行还带一堆前端用不到的资源路径
+ * （`BigPrizeBPPath` / `ProcessBPPath` / `ResultBPPath` / `HistoryBPPath` / `RoundBPPath` 及其 Mobile 版、
+ * `BigPrizeVideoPath` / `BigPrizeSoundEffects` / `ProcessSoundEffects`），全部丢掉，
+ * 只保留模拟器与集齐奖励 UI 真正消费的三个字段。
+ */
+type TrimmedLimitedPrizePool = {
+    EventId: number
+    LimitedPrizePoolId: number[]
+    ExtraItem?: Record<string, [number, number, number]>
+}
+
+/**
+ * 归一化限时奖池的 ExtraItem（集齐奖励）。
+ *
+ * 上游 Lua 形状：以奖品档位索引（1-based，对应当轮 `LimitedPrizeItem.Type/Id/Count` 的下标，
+ * 允许稀疏，如玩偶池只有 2/3/4）为键、`[物品类型索引, 物品ID, 数量]` 三元组为值的表。
+ * 经 LuaDataManager 导出后，稠密表（1~N 连续）变成 JS 数组、稀疏表变成对象，两种形状都要收敛。
+ *
+ * 对齐游戏内 UI（`WBP_LimitedPrizePool_Dialog_CollectReward_C:BuildCategoryContents` /
+ * `WBP_LimitedPrizePool_CollectReward_Doll_C:HasValidCollectRewardData`）：
+ * 以 PrizeIndex 取 `ExtraInfo = ExtraItem[PrizeIndex]`，`ExtraInfo[1]` 经 `ItemUtils.GetItemType`
+ * （0=Char … 6=Resource 7=HeadFrame 8=HeadSculpture 9=Background）解析为奖励类型，
+ * `ExtraInfo[2]` 为奖励物品 ID、`ExtraInfo[3]` 为数量；同时用同一下标取当轮奖品的
+ * `Type/Id/Count` 作为集齐判定条件。
+ *
+ * @param extra 上游原始 ExtraItem（数组或对象）。
+ * @param eventId 所属活动 ID（仅用于报错定位）。
+ * @returns 归一化后的 `档位索引字符串 -> [类型索引, 物品ID, 数量]`，缺失/空表时返回 undefined。
+ */
+function normalizeLimitedPrizeExtraItem(extra: unknown, eventId: string | number): Record<string, [number, number, number]> | undefined {
+    if (extra === undefined || extra === null) {
+        return undefined
+    }
+    const entries: Array<[string, unknown]> = Array.isArray(extra)
+        ? extra.map((item, index) => [String(index + 1), item] as [string, unknown])
+        : isRecord(extra)
+          ? Object.entries(extra)
+          : []
+    if (!Array.isArray(extra) && !isRecord(extra)) {
+        throw new Error(`LimitedPrizePool[${eventId}].ExtraItem 形状异常：既不是数组也不是对象`)
+    }
+    const record: Record<string, [number, number, number]> = {}
+    for (const [key, item] of entries) {
+        const index = Number(key)
+        if (!Number.isInteger(index) || index <= 0) {
+            throw new Error(`LimitedPrizePool[${eventId}].ExtraItem 键异常：${key}`)
+        }
+        if (!Array.isArray(item) || item.length !== 3 || !item.every(part => typeof part === "number")) {
+            throw new Error(`LimitedPrizePool[${eventId}].ExtraItem[${key}] 形状异常：应为 [物品类型索引, 物品ID, 数量] 三元组`)
+        }
+        record[String(index)] = [item[0], item[1], item[2]]
+    }
+    // 按档位索引数值排序，保证同样输入产出同样的文件内容
+    const sorted: Record<string, [number, number, number]> = {}
+    for (const key of Object.keys(record).sort((left, right) => Number(left) - Number(right))) {
+        sorted[key] = record[key]
+    }
+    return Object.keys(sorted).length > 0 ? sorted : undefined
+}
+
+/**
+ * 裁剪限时奖池活动表，只保留前端有用的字段。
+ * @param pools 上游 `LimitedPrizePool` 原始表（以 EventId 为键）。
+ * @returns 以 EventId 为键的裁剪表。
+ */
+function trimLimitedPrizePools(pools: unknown): Record<string, TrimmedLimitedPrizePool> {
+    if (!isRecord(pools)) {
+        throw new Error("LimitedPrizePool 后处理只支持对象源")
+    }
+    const trimmed: Record<string, TrimmedLimitedPrizePool> = {}
+    for (const [key, row] of Object.entries(pools)) {
+        if (!isRecord(row)) {
+            throw new Error(`LimitedPrizePool[${key}] 不是对象`)
+        }
+        const { EventId, LimitedPrizePoolId, ExtraItem } = row as Record<string, unknown>
+        if (typeof EventId !== "number" || !Array.isArray(LimitedPrizePoolId)) {
+            throw new Error(`LimitedPrizePool[${key}] 缺少 EventId / LimitedPrizePoolId`)
+        }
+        const trimmedRow: TrimmedLimitedPrizePool = {
+            EventId,
+            LimitedPrizePoolId: LimitedPrizePoolId as number[],
+        }
+        const extra = normalizeLimitedPrizeExtraItem(ExtraItem, key)
+        if (extra) {
+            trimmedRow.ExtraItem = extra
+        }
+        trimmed[key] = trimmedRow
+    }
+    return trimmed
+}
+
 const MAPPINGS: Mapping[] = [
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
     { source: "AbyssDungeon", targetStem: "abyss", targetVar: "abyssDungeons", locales: ["cn"] },
@@ -432,28 +529,41 @@ const MAPPINGS: Mapping[] = [
     { source: "CharAccessory", targetStem: "accessory", targetVar: "charAccessoryData", locales: ["cn"] },
     { source: "Clue", targetStem: "clue", targetVar: "clueData", locales: ["cn"] },
     {
-        source: "CharDataTarget",
+        // 角色档案：正文走 Quest 模式（按 id 取文本），不分语言文件——
+        // 各语言共用一份中文结构（charExtData），名称 / 解锁条件 / 正文的译文按语言各压成一张
+        // id→文本大表（charExtTextTc/En/Fr/Jp/Kr），随同一文件下发，不进 translations 对照表。
+        // 转换在导入阶段完成（见 buildCharExtDataWithTextTables）。
+        source: async () => {
+            const { charExtData, textTables } = await buildCharExtDataWithTextTables()
+            return [
+                { targetVar: "charExtData", value: charExtData },
+                ...TRANSLATION_LOCALES.map(locale => ({
+                    targetVar: CHAR_EXT_TEXT_VARS[locale],
+                    value: textTables[locale],
+                })),
+            ]
+        },
         targetStem: "charext",
         targetVar: "charExtData",
-        targetVars: {
-            en: "charExtData_en",
-            fr: "charExtData_fr",
-            jp: "charExtData_jp",
-            kr: "charExtData_kr",
-            tc: "charExtData_tc",
-        },
-        locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
     {
-        source: "CharVoice",
+        // 角色语音：台词走 Quest 模式（按 id 取文本），不分语言文件——
+        // 各语言共用一份中文结构（charVoiceData），名称 / 台词的译文按语言各压成一张
+        // id→文本大表（charVoiceTextTc/En/Fr/Jp/Kr），随同一文件下发，不进 translations 对照表。
+        // 上游已有 tc / fr 语音文本，一并纳入（此前只导出了 en / jp / kr）。
+        // 转换在导入阶段完成（见 buildCharVoiceDataWithTextTables）。
+        source: async () => {
+            const { charVoiceData, textTables } = await buildCharVoiceDataWithTextTables()
+            return [
+                { targetVar: "charVoiceData", value: charVoiceData },
+                ...TRANSLATION_LOCALES.map(locale => ({
+                    targetVar: CHAR_VOICE_TEXT_VARS[locale],
+                    value: textTables[locale],
+                })),
+            ]
+        },
         targetStem: "charvoice",
         targetVar: "charVoiceData",
-        targetVars: {
-            en: "charVoiceData_en",
-            jp: "charVoiceData_jp",
-            kr: "charVoiceData_kr",
-        },
-        locales: ["cn", "en", "jp", "kr"],
     },
     { source: "Draft", targetStem: "draft", targetVar: "t", locales: ["cn"] },
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
@@ -528,20 +638,43 @@ const MAPPINGS: Mapping[] = [
     { source: "TreasureHuntRepeatDungeon", targetStem: "solotreasure", targetVar: "treasureHuntRepeatDungeonData", locales: ["cn"] },
     { source: "TreasureHuntStoryDungeon", targetStem: "solotreasure", targetVar: "treasureHuntStoryDungeonData", locales: ["cn"] },
     {
-        source: "PartyTopic",
+        // 光阴集：对话走 Quest 模式（按 id 取文本），不分语言文件——
+        // 各语言共用一份中文结构（partyTopicData），名称 / 描述 / 回忆名 / 回忆描述 / 对话的译文
+        // 按语言各压成一张 id→文本大表（partyTopicTextTc/En/Fr/Jp/Kr），随同一文件下发，
+        // 不进 translations 对照表。转换在导入阶段完成（见 buildPartyTopicDataWithTextTables）。
+        source: async () => {
+            const { partyTopicData, textTables } = await buildPartyTopicDataWithTextTables()
+            return [
+                { targetVar: "partyTopicData", value: partyTopicData },
+                ...TRANSLATION_LOCALES.map(locale => ({
+                    targetVar: PARTY_TOPIC_TEXT_VARS[locale],
+                    value: textTables[locale],
+                })),
+            ]
+        },
         targetStem: "partytopic",
         targetVar: "partyTopicData",
-        targetVars: {
-            en: "partyTopicData_en",
-            fr: "partyTopicData_fr",
-            jp: "partyTopicData_jp",
-            kr: "partyTopicData_kr",
-            tc: "partyTopicData_tc",
-        },
-        locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
     { source: "Pet", targetStem: "pet", targetVar: "t", locales: ["cn"] },
     { source: "PetEntry", targetStem: "pet", targetVar: "petEntrys", locales: ["cn"] },
+    {
+        // 魔灵潘神：对话走 Quest 模式（按 id 取文本），但不分语言文件——
+        // 各语言共用一份中文结构（panData），对话与名称的译文按语言各压成一张 id→文本大表
+        // （panDialoguesTc/En/Jp/Kr/Fr），随同一文件下发，不进 translations 对照表。
+        // 转换在导入阶段完成（见 buildPanDataWithDialogueTables）。
+        source: async () => {
+            const { panData, dialogueTables } = await buildPanDataWithDialogueTables()
+            return [
+                { targetVar: "panData", value: panData },
+                ...TRANSLATION_LOCALES.map(locale => ({
+                    targetVar: PAN_DIALOGUE_VARS[locale],
+                    value: dialogueTables[locale],
+                })),
+            ]
+        },
+        targetStem: "pan",
+        targetVar: "panData",
+    },
     {
         source: async () => {
             // 魔灵潜质抽取权重表（PetToEntry），直读上游 Lua 表
@@ -557,17 +690,22 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "QuestChain", targetStem: "questchain", targetVar: "questChainDataRaw", locales: ["cn"] },
     {
-        source: "QuestStory",
+        // 任务剧情：对话走 Quest 模式（按 id 取文本），不分语言文件——
+        // 各语言共用一份中文结构（questData），任务名 / 任务描述 / 节点名 / 对话 / 说话人 / 选项的译文
+        // 按语言各压成一张 id→文本大表（questTextTc/En/Fr/Jp/Kr），随同一文件下发，
+        // 不进 translations 对照表。转换在导入阶段完成（见 buildQuestDataWithTextTables）。
+        source: async () => {
+            const { questData, textTables } = await buildQuestDataWithTextTables()
+            return [
+                { targetVar: "questData", value: questData },
+                ...TRANSLATION_LOCALES.map(locale => ({
+                    targetVar: QUEST_TEXT_VARS[locale],
+                    value: textTables[locale],
+                })),
+            ]
+        },
         targetStem: "quest",
         targetVar: "questData",
-        targetVars: {
-            en: "questData_en",
-            fr: "questData_fr",
-            jp: "questData_jp",
-            kr: "questData_kr",
-            tc: "questData_tc",
-        },
-        locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
     {
         // 任务剧情 AI 总结：按任务链 ID 记录 AI 生成的整链剧情摘要（目前仅简体中文导出）
@@ -578,12 +716,14 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async context => {
-            const [raidCalculation, raidDungeon, raidSeason, preRaidRank, reward] = await Promise.all([
+            const [raidCalculation, raidDungeon, raidSeason, preRaidRank, reward, raidFloor, raidSeasonFloorMax] = await Promise.all([
                 readLuaTable("RaidCalculation"),
                 readLuaTable("RaidDungeon"),
                 readLuaTable("RaidSeason"),
                 readLuaTable("PreRaidRank"),
                 readLuaTable("Reward"),
+                readLuaTable("RaidFloor"),
+                readLuaTable("RaidSeasonFloorMax"),
             ])
 
             const preRaidRanks = preRaidRank as PreRaidRankRow[]
@@ -626,6 +766,14 @@ const MAPPINGS: Mapping[] = [
                 {
                     targetVar: "RaidSeason",
                     value: raidSeason,
+                },
+                {
+                    targetVar: "RaidFloor",
+                    value: raidFloor,
+                },
+                {
+                    targetVar: "RaidSeasonFloorMax",
+                    value: raidSeasonFloorMax,
                 },
                 {
                     targetVar: "PreRaidRank",
@@ -795,7 +943,27 @@ const MAPPINGS: Mapping[] = [
         locales: ["cn"],
     },
     { source: "ShopItem", targetStem: "shop", targetVar: "shopData_i", locales: ["cn"] },
-    { source: "Skin", targetStem: "accessory", targetVar: "skinData", locales: ["cn"] },
+    {
+        // Skin 改走函数源：上游 Skin.json 自带 bust（见上游 skinModule），此处仅做可 serving
+        // 过滤（resolveSkinBust），不做游戏逻辑推导。注意 -f 过滤名由 "Skin" 变为目标 stem
+        // "accessory"（函数源按目标文件匹配）。
+        source: async () => {
+            const skinText = await readFile(path.join(SOURCE_ROOT, "cn", "Skin.json"), "utf-8")
+            const skinRows = JSON.parse(skinText) as SkinImportRow[]
+            const bustDir = path.resolve("public", "imgs", "bust")
+            const bustFileNames = new Set(
+                existsSync(bustDir) ? readdirSync(bustDir).filter(name => name.toLowerCase().endsWith(".webp")) : []
+            )
+            return [
+                {
+                    targetVar: "skinData",
+                    value: skinRows.map(row => resolveSkinBust(row, bustFileNames)),
+                },
+            ]
+        },
+        targetStem: "accessory",
+        targetVar: "skinData",
+    },
     { source: "SkinGacha", targetStem: "skingacha", targetVar: "skinGachaData", locales: ["cn"] },
     { source: "SkinGachaItem", targetStem: "skingacha", targetVar: "skinGachaItems", locales: ["cn"] },
     { source: "SkinGachaTab", targetStem: "skingacha", targetVar: "skinGachaTabs", locales: ["cn"] },
@@ -890,7 +1058,7 @@ const MAPPINGS: Mapping[] = [
                 },
                 {
                     targetVar: "limitedPrizePools",
-                    value: pools,
+                    value: trimLimitedPrizePools(pools),
                 },
             ]
         },
@@ -1187,9 +1355,13 @@ const SKIPPED_SOURCES = ["ExtractionTreasureMechanism", "RegionPoint", "RewardVi
 
 /**
  * 判断属性名是否可以直接作为标识符输出。
+ *
+ * 注意：`・`（U+30FB 片假名中点）带 Unicode 属性 ID_Continue，正则会放行，
+ * 但 V8 等 JS 解析器不接受它做标识符（曾产出 `黎瑟・浴火的衣饰:` 这种整模块解析失败的坏键）。
+ * 因此显式排除，命中时走 JSON.stringify 加引号。
  */
 function isIdentifierKey(key: string): boolean {
-    return /^[$_\p{ID_Start}][$\u200C\p{ID_Continue}]*$/u.test(key)
+    return /^[$_\p{ID_Start}][$\u200C\p{ID_Continue}]*$/u.test(key) && !key.includes("・")
 }
 
 /**
@@ -1374,6 +1546,347 @@ function recordValues(value: unknown): Record<string, unknown>[] {
     return isRecord(value) ? Object.values(value).filter(isRecord) : []
 }
 
+/** 对话语言 → pan.data.ts 里的 id→文本大表变量名（与 TRANSLATION_VARS 同构） */
+const PAN_DIALOGUE_VARS: Record<TranslationLocale, string> = {
+    tc: "panDialoguesTc",
+    en: "panDialoguesEn",
+    jp: "panDialoguesJp",
+    kr: "panDialoguesKr",
+    fr: "panDialoguesFr",
+}
+
+/** 潘神某语言的 id→文本大表：键为对话 id（72xxxxxx）或潘神 id（1xxx，两区间不重叠），值为对应语言文本 */
+type PanDialogueTable = Record<number, string>
+
+/**
+ * 读取 6 个语言的 Pan.json，产出中文全量结构 + 各语言 id→文本大表。
+ *
+ * 配对一律按 id（行按潘神 id，行内对话按对话 id），不依赖数组顺序；
+ * 与原文相同的条目（如 `{空格}` 占位行）不进表，调用方查不到时回退中文原文。
+ * 潘神名称一并按潘神 id 进表（地图点位标签的多语言显示用），不再另建表。
+ * @returns 中文结构与各语言大表（键按数值升序，保证同样输入产出同样的文件内容）
+ */
+async function buildPanDataWithDialogueTables(): Promise<{
+    panData: unknown
+    dialogueTables: Record<TranslationLocale, PanDialogueTable>
+}> {
+    const rowsByLocale = new Map<string, any[]>()
+    for (const locale of ["cn", ...TRANSLATION_LOCALES]) {
+        const text = await readFile(path.join(SOURCE_ROOT, locale, "Pan.json"), "utf-8")
+        rowsByLocale.set(locale, JSON.parse(text))
+    }
+    const cnRows = rowsByLocale.get("cn") ?? []
+    const dialogueTables = {} as Record<TranslationLocale, PanDialogueTable>
+    for (const locale of TRANSLATION_LOCALES) {
+        const table: PanDialogueTable = {}
+        const rowsById = new Map<number, any>((rowsByLocale.get(locale) ?? []).map((row: any) => [row?.id, row]))
+        for (const cnRow of cnRows) {
+            const row = rowsById.get(cnRow?.id)
+            if (!row) {
+                continue
+            }
+            if (typeof row.name === "string" && row.name !== cnRow.name) {
+                table[cnRow.id] = row.name
+            }
+            const dialoguesById = new Map<number, any>((row.dialogues ?? []).map((dialogue: any) => [dialogue?.id, dialogue]))
+            for (const dialogue of cnRow.dialogues ?? []) {
+                const translated = dialoguesById.get(dialogue?.id)
+                if (translated && typeof translated.content === "string" && translated.content !== dialogue.content) {
+                    table[dialogue.id] = translated.content
+                }
+            }
+        }
+        const sorted: PanDialogueTable = {}
+        for (const key of Object.keys(table)
+            .map(Number)
+            .sort((left, right) => left - right)) {
+            sorted[key] = table[key]
+        }
+        dialogueTables[locale] = sorted
+    }
+    return { panData: cnRows, dialogueTables }
+}
+
+/** id→文本大表：键为裸 id（全局唯一的对话 id）或 `${id}#${字段}` 复合键，见各模块构建函数 */
+type IdTextTable = Record<string, string>
+
+/**
+ * 大表写入：译文非空且与中文不同才收录（与 translations 对照表、Pan 大表同口径）。
+ * 中文侧缺字段时只要译文非空就收（上游偶有某语言多出字段，丢了就对不上 locale 文件）。
+ * @param table 输出大表
+ * @param key 裸 id 或复合键
+ * @param cn 中文原文
+ * @param translated 目标语言文本
+ */
+function putIdText(table: IdTextTable, key: string | number, cn: unknown, translated: unknown): void {
+    if (typeof translated !== "string" || !translated.trim() || translated === cn) {
+        return
+    }
+    table[String(key)] = translated
+}
+
+/**
+ * 按字符串序排大表的键，保证同样输入产出同样的文件内容。
+ * @param table 未排序的大表
+ * @returns 键有序的新表
+ */
+function sortIdTextTable(table: IdTextTable): IdTextTable {
+    const sorted: IdTextTable = {}
+    for (const key of Object.keys(table).sort()) {
+        sorted[key] = table[key]
+    }
+    return sorted
+}
+
+/**
+ * 读某模块 6 个语言的上游数据集（数组或对象索引都行，统一收成行数组）。
+ * @param name 上游模块名（如 QuestStory）
+ * @returns 语言 → 行数组
+ */
+async function readI18nRows(name: string): Promise<Map<string, any[]>> {
+    const rowsByLocale = new Map<string, any[]>()
+    for (const locale of ["cn", ...TRANSLATION_LOCALES]) {
+        const text = await readFile(path.join(SOURCE_ROOT, locale, `${name}.json`), "utf-8")
+        const parsed = JSON.parse(text)
+        rowsByLocale.set(locale, Array.isArray(parsed) ? parsed : Object.values(parsed))
+    }
+    return rowsByLocale
+}
+
+/** 对话语言 → quest.data.ts 里的 id→文本大表变量名（与 TRANSLATION_VARS 同构） */
+const QUEST_TEXT_VARS: Record<TranslationLocale, string> = {
+    tc: "questTextTc",
+    en: "questTextEn",
+    jp: "questTextJp",
+    kr: "questTextKr",
+    fr: "questTextFr",
+}
+
+/** 对话语言 → partytopic.data.ts 里的 id→文本大表变量名 */
+const PARTY_TOPIC_TEXT_VARS: Record<TranslationLocale, string> = {
+    tc: "partyTopicTextTc",
+    en: "partyTopicTextEn",
+    jp: "partyTopicTextJp",
+    kr: "partyTopicTextKr",
+    fr: "partyTopicTextFr",
+}
+
+/** 对话语言 → charvoice.data.ts 里的 id→文本大表变量名 */
+const CHAR_VOICE_TEXT_VARS: Record<TranslationLocale, string> = {
+    tc: "charVoiceTextTc",
+    en: "charVoiceTextEn",
+    jp: "charVoiceTextJp",
+    kr: "charVoiceTextKr",
+    fr: "charVoiceTextFr",
+}
+
+/** 对话语言 → charext.data.ts 里的 id→文本大表变量名 */
+const CHAR_EXT_TEXT_VARS: Record<TranslationLocale, string> = {
+    tc: "charExtTextTc",
+    en: "charExtTextEn",
+    jp: "charExtTextJp",
+    kr: "charExtTextKr",
+    fr: "charExtTextFr",
+}
+
+/**
+ * 递归收集选项文本（选项可嵌套，统一用 `${选项id}#option` 复合键，不占用对话裸 id 空间）。
+ * @param table 输出大表
+ * @param cnOptions 中文选项数组
+ * @param options 目标语言选项数组
+ */
+function collectOptionTexts(table: IdTextTable, cnOptions: any, options: any): void {
+    const byId = new Map<any, any>((options ?? []).map((option: any) => [option?.id, option]))
+    for (const cnOption of cnOptions ?? []) {
+        const option = byId.get(cnOption?.id)
+        if (!option) {
+            continue
+        }
+        putIdText(table, `${cnOption.id}#option`, cnOption.content, option.content)
+        collectOptionTexts(table, cnOption.options, option.options)
+    }
+}
+
+/**
+ * 读 6 个语言的 QuestStory，产出中文全量结构 + 各语言 id→文本大表。
+ *
+ * 键口径：对话正文用裸对话 id（重复 id 在各语言下内容一致，已逐一验证）；
+ * 任务 id 与对话 id 有 274 处数值重叠，任务名 / 任务描述必须用复合键；
+ * 选项与说话人同样用复合键；节点名各语言与中文完全相同（2656 个全量比对零差异），
+ * 按规则自动跳过，计入以防上游将来翻译它们。
+ * @returns 中文结构与各语言大表
+ */
+async function buildQuestDataWithTextTables(): Promise<{
+    questData: unknown
+    textTables: Record<TranslationLocale, IdTextTable>
+}> {
+    const rowsByLocale = await readI18nRows("QuestStory")
+    const cnRows = rowsByLocale.get("cn") ?? []
+    const textTables = {} as Record<TranslationLocale, IdTextTable>
+    for (const locale of TRANSLATION_LOCALES) {
+        const table: IdTextTable = {}
+        const storiesById = new Map((rowsByLocale.get(locale) ?? []).map(row => [row?.id, row]))
+        for (const cnStory of cnRows) {
+            const story = storiesById.get(cnStory?.id)
+            if (!story) {
+                continue
+            }
+            const questsById = new Map<any, any>((story.quests ?? []).map((quest: any) => [quest?.id, quest]))
+            for (const cnQuest of cnStory.quests ?? []) {
+                const quest = questsById.get(cnQuest?.id)
+                if (!quest) {
+                    continue
+                }
+                putIdText(table, `${cnQuest.id}#name`, cnQuest.name, quest.name)
+                putIdText(table, `${cnQuest.id}#desc`, cnQuest.desc, quest.desc)
+                const nodesById = new Map<any, any>((quest.nodes ?? []).map((node: any) => [node?.id, node]))
+                for (const cnNode of cnQuest.nodes ?? []) {
+                    const node = nodesById.get(cnNode?.id)
+                    if (!node) {
+                        continue
+                    }
+                    putIdText(table, `${cnNode.id}#name`, cnNode.name, node.name)
+                    const questionsById = new Map<any, any>((node.questions ?? []).map((question: any) => [question?.id, question]))
+                    for (const cnQuestion of cnNode.questions ?? []) {
+                        const question = questionsById.get(cnQuestion?.id)
+                        if (!question) {
+                            continue
+                        }
+                        putIdText(table, `${cnQuestion.id}#name`, cnQuestion.name, question.name)
+                        putIdText(table, `${cnQuestion.id}#tips`, cnQuestion.tips, question.tips)
+                    }
+                    const answersById = new Map<any, any>((node.answers ?? []).map((answer: any) => [answer?.id, answer]))
+                    for (const cnAnswer of cnNode.answers ?? []) {
+                        const answer = answersById.get(cnAnswer?.id)
+                        if (!answer) {
+                            continue
+                        }
+                        putIdText(table, `${cnAnswer.id}#name`, cnAnswer.name, answer.name)
+                        putIdText(table, `${cnAnswer.id}#desc`, cnAnswer.desc, answer.desc)
+                    }
+                    const dialoguesById = new Map<any, any>((node.dialogues ?? []).map((dialogue: any) => [dialogue?.id, dialogue]))
+                    for (const cnDialogue of cnNode.dialogues ?? []) {
+                        const dialogue = dialoguesById.get(cnDialogue?.id)
+                        if (!dialogue) {
+                            continue
+                        }
+                        putIdText(table, cnDialogue.id, cnDialogue.content, dialogue.content)
+                        putIdText(table, `${cnDialogue.id}#speaker`, cnDialogue.speakerName, dialogue.speakerName)
+                        collectOptionTexts(table, cnDialogue.options, dialogue.options)
+                    }
+                }
+            }
+        }
+        textTables[locale] = sortIdTextTable(table)
+    }
+    return { questData: cnRows, textTables }
+}
+
+/**
+ * 读 6 个语言的 PartyTopic，产出中文全量结构 + 各语言 id→文本大表。
+ *
+ * 键口径：对话正文用裸对话 id（59 组重复 id 内容一致，已验证；另有 3 行对话序列不一致，
+ * 故不能按位置配对）；行级名称 / 描述 / 回忆名 / 回忆描述用 `${行id}#${字段}` 复合键。
+ * @returns 中文结构与各语言大表
+ */
+async function buildPartyTopicDataWithTextTables(): Promise<{
+    partyTopicData: unknown
+    textTables: Record<TranslationLocale, IdTextTable>
+}> {
+    const rowsByLocale = await readI18nRows("PartyTopic")
+    const cnRows = rowsByLocale.get("cn") ?? []
+    const textTables = {} as Record<TranslationLocale, IdTextTable>
+    for (const locale of TRANSLATION_LOCALES) {
+        const table: IdTextTable = {}
+        const rowsById = new Map((rowsByLocale.get(locale) ?? []).map(row => [row?.id, row]))
+        for (const cnRow of cnRows) {
+            const row = rowsById.get(cnRow?.id)
+            if (!row) {
+                continue
+            }
+            putIdText(table, `${cnRow.id}#name`, cnRow.name, row.name)
+            putIdText(table, `${cnRow.id}#desc`, cnRow.desc, row.desc)
+            putIdText(table, `${cnRow.id}#memoryName`, cnRow.memoryName, row.memoryName)
+            putIdText(table, `${cnRow.id}#memoryDesc`, cnRow.memoryDesc, row.memoryDesc)
+            const dialoguesById = new Map<any, any>((row.dialogues ?? []).map((dialogue: any) => [dialogue?.id, dialogue]))
+            for (const cnDialogue of cnRow.dialogues ?? []) {
+                const dialogue = dialoguesById.get(cnDialogue?.id)
+                if (!dialogue) {
+                    continue
+                }
+                putIdText(table, cnDialogue.id, cnDialogue.content, dialogue.content)
+                // 媒体标记（StoryMediaMarker）没有 content，只有 name，用复合键收录
+                if (typeof cnDialogue.content !== "string" && typeof cnDialogue.name === "string") {
+                    putIdText(table, `${cnDialogue.id}#name`, cnDialogue.name, dialogue.name)
+                }
+                collectOptionTexts(table, cnDialogue.options, dialogue.options)
+            }
+        }
+        textTables[locale] = sortIdTextTable(table)
+    }
+    return { partyTopicData: cnRows, textTables }
+}
+
+/**
+ * 读 6 个语言的 CharVoice，产出中文全量结构 + 各语言 id→文本大表。
+ *
+ * 键口径：名称与台词共享行 id，一律用 `${行id}#name` / `${行id}#text` 复合键；
+ * `res` 是音频资源路径、`hide` / `companioCharId` 是结构字段，不进表。
+ * @returns 中文结构与各语言大表
+ */
+async function buildCharVoiceDataWithTextTables(): Promise<{
+    charVoiceData: unknown
+    textTables: Record<TranslationLocale, IdTextTable>
+}> {
+    const rowsByLocale = await readI18nRows("CharVoice")
+    const cnRows = rowsByLocale.get("cn") ?? []
+    const textTables = {} as Record<TranslationLocale, IdTextTable>
+    for (const locale of TRANSLATION_LOCALES) {
+        const table: IdTextTable = {}
+        const rowsById = new Map((rowsByLocale.get(locale) ?? []).map(row => [row?.id, row]))
+        for (const cnRow of cnRows) {
+            const row = rowsById.get(cnRow?.id)
+            if (!row) {
+                continue
+            }
+            putIdText(table, `${cnRow.id}#name`, cnRow.name, row.name)
+            putIdText(table, `${cnRow.id}#text`, cnRow.text, row.text)
+        }
+        textTables[locale] = sortIdTextTable(table)
+    }
+    return { charVoiceData: cnRows, textTables }
+}
+
+/**
+ * 读 6 个语言的 CharDataTarget，产出中文全量结构 + 各语言 id→文本大表。
+ *
+ * 键口径：名称 / 解锁条件 / 正文共享行 id，一律用 `${行id}#name` / `#unlock` / `#text` 复合键。
+ * @returns 中文结构与各语言大表
+ */
+async function buildCharExtDataWithTextTables(): Promise<{
+    charExtData: unknown
+    textTables: Record<TranslationLocale, IdTextTable>
+}> {
+    const rowsByLocale = await readI18nRows("CharDataTarget")
+    const cnRows = rowsByLocale.get("cn") ?? []
+    const textTables = {} as Record<TranslationLocale, IdTextTable>
+    for (const locale of TRANSLATION_LOCALES) {
+        const table: IdTextTable = {}
+        const rowsById = new Map((rowsByLocale.get(locale) ?? []).map(row => [row?.id, row]))
+        for (const cnRow of cnRows) {
+            const row = rowsById.get(cnRow?.id)
+            if (!row) {
+                continue
+            }
+            putIdText(table, `${cnRow.id}#name`, cnRow.name, row.name)
+            putIdText(table, `${cnRow.id}#unlock`, cnRow.unlock, row.unlock)
+            putIdText(table, `${cnRow.id}#text`, cnRow.text, row.text)
+        }
+        textTables[locale] = sortIdTextTable(table)
+    }
+    return { charExtData: cnRows, textTables }
+}
+
 /**
  * 读取本地化文本，缺失时保留原始 key。
  * @param textMap 本地化文本表。
@@ -1382,6 +1895,44 @@ function recordValues(value: unknown): Record<string, unknown>[] {
  */
 function translateTextMap(textMap: Record<string, { TextMapContent?: string }>, key: string): string {
     return textMap[key]?.TextMapContent || key
+}
+
+/** 上游 Skin.lua 单行（立绘字段 bust 已由上游 skinModule 直接输出，此处不再解析 Lua）。 */
+type SkinImportRow = {
+    id: number
+    icon: string
+    bust?: string
+    [key: string]: unknown
+}
+
+/**
+ * 皮肤立绘的可 serving 判定：仅当上游给出的 bust 基名对应文件已落盘
+ * （`public/imgs/bust/<基名>.webp`，即皮肤立绘缩略图的实际来源）时保留。
+ *
+ * 上游 Skin.json 的 bust 表达游戏侧引用关系（BigIcon / 基础皮肤派生），不保证资源已打包：
+ * 月石皮等无 bust 的行天然没有立绘；个别 BigIcon 指向资源缺失（如妮弗尔夫人）与主角基础皮肤
+ * （无对应立绘文件）的行在此过滤，避免前端拼出 404。新增立绘 webp 后重跑本导入即可带出。
+ * 文件名按大小写精确匹配：Windows 开发机不区分大小写，`existsSync` 会把 `T_Bust_SpLise`
+ * 误判为存在，而 Linux 对象存储区分大小写，真实文件是 `T_Bust_SPLise`。因此先读目录构造
+ * 精确名集合；候选名大小写不一致但能唯一对应到真实文件时，纠正为真实文件名（如 4103）。
+ * @param row Skin.json 行
+ * @param bustFileNames public/imgs/bust 下精确文件名集合（含 .webp 后缀）
+ * @returns 保留落盘 bust 的行（无 bust 时原样返回）
+ */
+function resolveSkinBust(row: SkinImportRow, bustFileNames: Set<string>): SkinImportRow {
+    if (!row.bust) {
+        return row
+    }
+    const fileName = `${row.bust}.webp`
+    if (bustFileNames.has(fileName)) {
+        return row
+    }
+    const actual = [...bustFileNames].filter(name => name.toLowerCase() === fileName.toLowerCase())
+    if (actual.length === 1) {
+        return { ...row, bust: actual[0].slice(0, -".webp".length) }
+    }
+    const { bust: _dropped, ...rest } = row
+    return rest as SkinImportRow
 }
 
 /**
@@ -1698,7 +2249,7 @@ async function readOrCreateSkeleton(filePath: string, skeletonVars: string[]): P
  * 它们是纯机器生成的字面量，格式已由 formatTsValue 固定；体量也远超 Biome 的
  * maxSize，传进去只会让 biome 报「paths were provided but ignored」而非零退出。
  */
-const BIOME_SKIPPED_FILES = new Set(["src/data/d/translations.data.ts"])
+const BIOME_SKIPPED_FILES = new Set(["src/data/d/translations.data.ts", "src/data/d/quest.data.ts"])
 
 /**
  * 仅对本次实际写入的文件执行 Biome 格式化，避免全仓库扫描。
