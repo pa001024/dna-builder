@@ -1,12 +1,12 @@
 import type { CharExt } from "./charext.data"
-import { charExtData } from "./charext.data"
+import { charExtData, charExtTextEn, charExtTextFr, charExtTextJp, charExtTextKr, charExtTextTc } from "./charext.data"
 
 /**
  * 角色档案的按语言数据集。
  *
- * 档案正文与语音一样，各语言是各自一套数据（不是同一份数据换文本键），
- * 因此按语言分别加载；档案提供 zh / en / jp / kr / fr / tc 六套，
- * 与剧情数据语言（StoryLocale）完全一致。
+ * 不分语言文件：各语言共用一份中文结构，名称 / 解锁条件 / 正文的译文按语言各压成一张
+ * id→文本大表（见 tools/import-i18n-data.ts），此处按需同步拼出本地化行。
+ * 档案提供 zh / en / jp / kr / fr / tc 六套，与剧情数据语言（StoryLocale）完全一致。
  */
 
 /** 档案数据集支持的语言 */
@@ -14,16 +14,18 @@ export type CharExtLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
 
 type CharExtExtendedLocale = Exclude<CharExtLocale, "zh">
 
-const charExtDataCache: Partial<Record<CharExtLocale, CharExt[]>> = {
-    zh: charExtData,
-}
+const charExtDataCache = new Map<CharExtLocale, CharExt[]>([["zh", charExtData]])
 
-const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> = {
-    en: async () => (await import("./charext.en.data")).charExtData_en,
-    jp: async () => (await import("./charext.jp.data")).charExtData_jp,
-    kr: async () => (await import("./charext.kr.data")).charExtData_kr,
-    fr: async () => (await import("./charext.fr.data")).charExtData_fr,
-    tc: async () => (await import("./charext.tc.data")).charExtData_tc,
+/**
+ * 各语言档案 id→文本大表（名称 / 解锁条件 / 正文用 `${行id}#${字段}` 复合键）。
+ * 不分语言文件，译文在导入阶段已压成大表，此处同步直取。
+ */
+const charExtTextTables: Record<CharExtExtendedLocale, Record<string, string>> = {
+    en: charExtTextEn,
+    jp: charExtTextJp,
+    kr: charExtTextKr,
+    fr: charExtTextFr,
+    tc: charExtTextTc,
 }
 
 /**
@@ -57,29 +59,36 @@ export function resolveCharExtLocaleBySetting(language: string): CharExtLocale {
 }
 
 /**
- * 根据语言加载角色档案数据，并在模块内缓存结果。
+ * 根据语言取角色档案数据（同步）：中文直接返回原文，其余语言按 id→文本大表逐字段替换。
+ * 结果按语言缓存；调用方原有的 `await` 照写无妨（await 非 Promise 值直接透传）。
  * @param locale 档案语言
  * @returns 角色档案数据
  */
-export async function loadCharExtDataByLocale(locale: CharExtLocale): Promise<CharExt[]> {
-    const cached = charExtDataCache[locale]
+export function loadCharExtDataByLocale(locale: CharExtLocale): CharExt[] {
+    const cached = charExtDataCache.get(locale)
 
     if (cached) {
         return cached
     }
 
-    const data = await charExtLoaderMap[locale as CharExtExtendedLocale]()
-    charExtDataCache[locale] = data
+    const table = charExtTextTables[locale as CharExtExtendedLocale]
+    const data = charExtData.map(item => ({
+        ...item,
+        name: table[`${item.id}#name`] ?? item.name,
+        unlock: table[`${item.id}#unlock`] ?? item.unlock,
+        text: table[`${item.id}#text`] ?? item.text,
+    }))
+    charExtDataCache.set(locale, data)
 
     return data
 }
 
 /**
- * 按语言取角色档案数据（异步加载并缓存）。
+ * 按语言取角色档案数据（同步，调用方原有的 `await` 照写无妨）。
  * @param language 语言代码
  * @returns 角色档案数据
  */
-export function getLocalizedCharExtData(language: string): Promise<CharExt[]> {
+export function getLocalizedCharExtData(language: string): CharExt[] {
     return loadCharExtDataByLocale(resolveCharExtLocaleBySetting(language))
 }
 
@@ -87,10 +96,10 @@ export function getLocalizedCharExtData(language: string): Promise<CharExt[]> {
  * 同步读取已缓存的角色档案数据。
  *
  * 供需要在同步路径里取数据的调用方使用（如资料检索 Agent 的模块条目）；
- * 目标语言尚未加载时回退中文，保证返回结构始终可用。
+ * 大表随中文结构静态下发，任何语言都立即可用，不再有“尚未加载”的回退情形。
  * @param locale 档案语言
  * @returns 角色档案数据
  */
 export function getCachedCharExtData(locale: CharExtLocale): CharExt[] {
-    return charExtDataCache[locale] ?? charExtData
+    return loadCharExtDataByLocale(locale)
 }

@@ -1,27 +1,31 @@
 import type { CharVoice } from "./charvoice.data"
-import { charVoiceData } from "./charvoice.data"
+import { charVoiceData, charVoiceTextEn, charVoiceTextFr, charVoiceTextJp, charVoiceTextKr, charVoiceTextTc } from "./charvoice.data"
 
 /**
  * 角色语音的按语言数据集。
  *
- * 语音的每条台词在各语言里是独立数据集（不是同一份数据换文本键），
- * 因此这里按语言分别加载；语音只提供中文 / 英文 / 日文 / 韩文四套，
- * 其余语言（繁中、法文）回退中文。
+ * 不分语言文件：各语言共用一份中文结构，名称 / 台词的译文按语言各压成一张
+ * id→文本大表（见 tools/import-i18n-data.ts），此处按需同步拼出本地化行。
+ * 上游已有 tc / fr 语音文本，一并纳入（此前只有中文 / 英文 / 日文 / 韩文四套）。
  */
 
 /** 语音数据集支持的语言 */
-export type CharVoiceLocale = "zh" | "en" | "jp" | "kr"
+export type CharVoiceLocale = "zh" | "en" | "jp" | "kr" | "tc" | "fr"
 
 type CharVoiceExtendedLocale = Exclude<CharVoiceLocale, "zh">
 
-const charVoiceDataCache: Partial<Record<CharVoiceLocale, CharVoice[]>> = {
-    zh: charVoiceData,
-}
+const charVoiceDataCache = new Map<CharVoiceLocale, CharVoice[]>([["zh", charVoiceData]])
 
-const charVoiceLoaderMap: Record<CharVoiceExtendedLocale, () => Promise<CharVoice[]>> = {
-    en: async () => (await import("./charvoice.en.data")).charVoiceData_en,
-    jp: async () => (await import("./charvoice.jp.data")).charVoiceData_jp,
-    kr: async () => (await import("./charvoice.kr.data")).charVoiceData_kr,
+/**
+ * 各语言语音 id→文本大表（名称 / 台词用 `${行id}#${字段}` 复合键）。
+ * 不分语言文件，译文在导入阶段已压成大表，此处同步直取。
+ */
+const charVoiceTextTables: Record<CharVoiceExtendedLocale, Record<string, string>> = {
+    en: charVoiceTextEn,
+    jp: charVoiceTextJp,
+    kr: charVoiceTextKr,
+    tc: charVoiceTextTc,
+    fr: charVoiceTextFr,
 }
 
 /**
@@ -41,34 +45,46 @@ export function resolveCharVoiceLocaleBySetting(language: string): CharVoiceLoca
     if (text === "kr" || text === "ko" || text.startsWith("ko-")) {
         return "kr"
     }
+    if (text === "tc" || text === "zh-tw" || text === "zh-hk" || text.startsWith("zh-hant")) {
+        return "tc"
+    }
+    if (text === "fr" || text.startsWith("fr-")) {
+        return "fr"
+    }
 
     return "zh"
 }
 
 /**
- * 根据语言加载角色语音数据，并在模块内缓存结果。
+ * 根据语言取角色语音数据（同步）：中文直接返回原文，其余语言按 id→文本大表逐字段替换。
+ * 结果按语言缓存；调用方原有的 `await` 照写无妨（await 非 Promise 值直接透传）。
  * @param locale 语音语言
  * @returns 角色语音数据
  */
-export async function loadCharVoiceDataByLocale(locale: CharVoiceLocale): Promise<CharVoice[]> {
-    const cached = charVoiceDataCache[locale]
+export function loadCharVoiceDataByLocale(locale: CharVoiceLocale): CharVoice[] {
+    const cached = charVoiceDataCache.get(locale)
 
     if (cached) {
         return cached
     }
 
-    const data = await charVoiceLoaderMap[locale as CharVoiceExtendedLocale]()
-    charVoiceDataCache[locale] = data
+    const table = charVoiceTextTables[locale as CharVoiceExtendedLocale]
+    const data = charVoiceData.map(item => ({
+        ...item,
+        name: table[`${item.id}#name`] ?? item.name,
+        text: table[`${item.id}#text`] ?? item.text,
+    }))
+    charVoiceDataCache.set(locale, data)
 
     return data
 }
 
 /**
- * 按语言取角色语音数据（异步加载并缓存）。
+ * 按语言取角色语音数据（同步，调用方原有的 `await` 照写无妨）。
  * @param language 语言代码
  * @returns 角色语音数据
  */
-export function getLocalizedCharVoiceData(language: string): Promise<CharVoice[]> {
+export function getLocalizedCharVoiceData(language: string): CharVoice[] {
     return loadCharVoiceDataByLocale(resolveCharVoiceLocaleBySetting(language))
 }
 
@@ -76,10 +92,10 @@ export function getLocalizedCharVoiceData(language: string): Promise<CharVoice[]
  * 同步读取已缓存的角色语音数据。
  *
  * 供需要在同步路径里取数据的调用方使用（如资料检索 Agent 的模块条目）；
- * 目标语言尚未加载时回退中文，保证返回结构始终可用。
+ * 大表随中文结构静态下发，任何语言都立即可用，不再有“尚未加载”的回退情形。
  * @param locale 语音语言
  * @returns 角色语音数据
  */
 export function getCachedCharVoiceData(locale: CharVoiceLocale): CharVoice[] {
-    return charVoiceDataCache[locale] ?? charVoiceData
+    return loadCharVoiceDataByLocale(locale)
 }

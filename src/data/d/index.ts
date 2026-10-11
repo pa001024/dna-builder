@@ -123,7 +123,7 @@ function findModRewards(
 import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
 
-export type { DBMap, DBMapMarker } from "./map.data"
+export type { DBMap, DBMapMarker } from "./onlinemapcache.data"
 
 export type { Walnut, WalnutReward } from "./walnut.data"
 
