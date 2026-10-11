@@ -16,6 +16,7 @@ import {
     wrapTime,
 } from "../title-frame/title-frame"
 import { titleFrameIdToKey, titleFrames } from "../title-frame/title-frame.generated"
+import { programFor } from "../title-frame/title-frame-material"
 
 /**
  * 构造一个最小可用的图层，仅覆盖被测试字段。
@@ -218,15 +219,18 @@ describe("材质具名参数", () => {
         frame.layers.filter(layer => layer.material).map(layer => ({ key, layer }))
     )
 
-    it("材质图层都带参数表，纯贴图图层不带", () => {
+    it("材质图层都带参数表，纯贴图图层按纯贴图渲染（数据无关）", () => {
         expect(materialLayers.length).toBeGreaterThan(0)
         for (const { key, layer } of materialLayers) {
             expect(Object.keys(layer.params ?? {}).length, `${key}/${layer.key}`).toBeGreaterThan(0)
         }
         const plain = Object.values(titleFrames).flatMap(frame => frame.layers.filter(layer => !layer.material))
         expect(plain.length).toBeGreaterThan(0)
+        // 纯贴图图层的渲染契约只要求 material 缺省（走 plain 程序），params 即使因上游
+        // 数据透出（如 15_x 的 VX_Par8）也会被渲染端忽略，故不硬编码 params 为空。
         for (const layer of plain) {
-            expect(Object.keys(layer.params ?? {}).length, layer.key).toBe(0)
+            expect(layer.material, layer.key).toBeUndefined()
+            expect(programFor(layer.material), layer.key).toBe("plain")
         }
     })
 

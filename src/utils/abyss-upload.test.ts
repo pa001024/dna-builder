@@ -1,5 +1,6 @@
 import type { DNARoleEntity } from "dna-api"
 import { describe, expect, it } from "vitest"
+import { weaponMap } from "@/data/d"
 import {
     buildAbyssCalamityOverrides,
     buildAbyssUploadPayload,
@@ -127,9 +128,28 @@ describe("buildAbyssUploadPayload", () => {
         expect(payload?.rangedId).toBe(20599)
     })
 
-    it("灾厄武器候选应各按槽位返回 2 把", () => {
-        expect(getCalamityWeaponOptions("melee").map(item => item.weaponId)).toEqual([10299, 10399])
-        expect(getCalamityWeaponOptions("ranged").map(item => item.weaponId)).toEqual([20298, 20599])
+    it("灾厄武器候选应按槽位返回对应类型（数据无关，不硬编码 ID/数量）", () => {
+        const melee = getCalamityWeaponOptions("melee")
+        const ranged = getCalamityWeaponOptions("ranged")
+        expect(melee.length).toBeGreaterThan(0)
+        expect(ranged.length).toBeGreaterThan(0)
+        for (const item of melee) {
+            expect(item.weaponType).toBe("melee")
+            const weapon = weaponMap.get(item.weaponId)
+            expect(weapon?.伤害类型).toBe("灾厄")
+            expect(weapon?.类型?.some(type => type.includes("近战"))).toBe(true)
+        }
+        for (const item of ranged) {
+            expect(item.weaponType).toBe("ranged")
+            const weapon = weaponMap.get(item.weaponId)
+            expect(weapon?.伤害类型).toBe("灾厄")
+            expect(weapon?.类型?.some(type => type.includes("远程"))).toBe(true)
+        }
+        // 近战/远程候选不应重叠（新增灾厄武器时测试仍通过）
+        const meleeIds = new Set(melee.map(item => item.weaponId))
+        for (const item of ranged) {
+            expect(meleeIds.has(item.weaponId)).toBe(false)
+        }
     })
 
     it("langRangeWeaponIcon 缺失时应判定为远程灾厄武器槽位", () => {
@@ -147,7 +167,7 @@ describe("buildAbyssUploadPayload", () => {
 
         const missing = detectMissingAbyssWeaponSlots(role)
         expect(missing.map(item => item.slot)).toEqual(["ranged"])
-        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([20298, 20599])
+        expect(missing[0]?.options).toEqual(getCalamityWeaponOptions("ranged"))
     })
 
     it("closeWeaponIcon 缺失时应判定为近战灾厄武器槽位", () => {
@@ -165,14 +185,14 @@ describe("buildAbyssUploadPayload", () => {
 
         const missing = detectMissingAbyssWeaponSlots(role)
         expect(missing.map(item => item.slot)).toEqual(["melee"])
-        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([10299, 10399])
+        expect(missing[0]?.options).toEqual(getCalamityWeaponOptions("melee"))
     })
 
     it("图标齐全时不应判定出缺失槽位", () => {
         expect(detectMissingAbyssWeaponSlots(mockRoleInfo)).toEqual([])
     })
 
-    it("协战武器图标缺失时应判定为协战槽位且候选包含全部 4 把灾厄武器", () => {
+    it("协战武器图标缺失时应判定为协战槽位且候选为近战+远程并集（数据无关）", () => {
         const { phantomWeaponIcon1: _omit, ...rest } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
         const role = {
             ...mockRoleInfo,
@@ -187,8 +207,8 @@ describe("buildAbyssUploadPayload", () => {
 
         const missing = detectMissingAbyssWeaponSlots(role)
         expect(missing.map(item => item.slot)).toEqual(["support1"])
-        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([10299, 10399, 20298, 20599])
-        expect(missing[0]?.options.map(item => item.weaponType)).toEqual(["melee", "melee", "ranged", "ranged"])
+        expect(missing[0]?.options).toEqual([...getCalamityWeaponOptions("melee"), ...getCalamityWeaponOptions("ranged")])
+        expect(missing[0]?.options.length).toBe(getCalamityWeaponOptions("melee").length + getCalamityWeaponOptions("ranged").length)
     })
 
     it("主控与两把协战武器同时缺失时按主控→协战1→协战2 顺序列出", () => {

@@ -8,6 +8,7 @@ import {
     packDungeonMap,
     packResourceMap,
     resourceDraftMap,
+    walnutRewardMap,
     weaponDraftMap,
     weaponShopSourceMap,
 } from "@/data/d"
@@ -302,6 +303,9 @@ export class LevelUpCalculator {
     extractMinimalModData(mod: Mod): ModExt {
         const draft = modDraftMap.get(mod.id)
         const costDraft = modDraftMap.get(mod.消耗?.[0] || mod.id)
+        // 新版本密函金奖直接开成品：金奖（奖励[0]）为无 d 标记的成品 Mod 时，不再走图纸链
+        const goldPrize = walnutRewardMap.get(mod.id)?.奖励[0]
+        const walnutFinished = goldPrize?.type === "Mod" && goldPrize.id === mod.id && !goldPrize.d ? 1 : undefined
         let shop = undefined as { price: string; n: number } | undefined
         if (draft) {
             const item = draftShopSourceMap.get(draft.id)
@@ -317,6 +321,7 @@ export class LevelUpCalculator {
             draft,
             costDraft,
             walnut: modShopSourceMap.get(mod.id) && 1,
+            walnutFinished,
             shop,
             dropInfo: modDungeonMap.get(mod.id)?.map(d => ({
                 id: d.id,

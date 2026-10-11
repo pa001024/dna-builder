@@ -161,11 +161,45 @@ function exportTexture(pkg: string): { pngPath: string; width: number; height: n
     if (!FORCE && fs.existsSync(cacheFile)) {
         return JSON.parse(fs.readFileSync(cacheFile, "utf8"))
     }
-    const payload = runCli(["export-tex", pkg])
-    const info = { pngPath: String(payload.outputPath), width: Number(payload.width), height: Number(payload.height) }
-    fs.mkdirSync(CACHE_DIR, { recursive: true })
-    fs.writeFileSync(cacheFile, JSON.stringify(info), "utf8")
-    return info
+    try {
+        const payload = runCli(["export-tex", pkg])
+        const info = { pngPath: String(payload.outputPath), width: Number(payload.width), height: Number(payload.height) }
+        fs.mkdirSync(CACHE_DIR, { recursive: true })
+        fs.writeFileSync(cacheFile, JSON.stringify(info), "utf8")
+        return info
+    } catch (error) {
+        // 补充包场景：新客户端纹理缺 .uasset，只有 FModel 烘焙的 PNG（如 15_x 主贴图），用它代替
+        const fallback = bakedPngFallback(pkg)
+        if (!fallback) throw error
+        console.warn(`  ~ ${pkg} 无 pak 资源，改用烘焙 PNG ${path.relative(ROOT_DIR, fallback.pngPath)}`)
+        fs.mkdirSync(CACHE_DIR, { recursive: true })
+        fs.writeFileSync(cacheFile, JSON.stringify(fallback), "utf8")
+        return fallback
+    }
+}
+
+let cachedExportsRoot: string | null = null
+
+/**
+ * 在 FModel 导出目录里找同名烘焙 PNG（`status.outputDir` + 包路径 + `.png`）。
+ * @param pkg 贴图包路径，如 `EM/Content/UI/.../T_XXX`
+ * @returns PNG 路径与尺寸；找不到返回 null
+ */
+function bakedPngFallback(pkg: string): { pngPath: string; width: number; height: number } | null {
+    try {
+        if (!cachedExportsRoot) {
+            cachedExportsRoot = String(runCli(["status"]).outputDir ?? "")
+        }
+        if (!cachedExportsRoot) return null
+        const pngPath = path.join(cachedExportsRoot, `${pkg}.png`)
+        if (!fs.existsSync(pngPath)) return null
+        // 同步读取 PNG 文件头 IHDR 解析宽高（偏移 16/20，大端）。
+        const buf = fs.readFileSync(pngPath)
+        if (buf.length < 24 || buf.readUInt32BE(12) !== 0x49484452) return null
+        return { pngPath, width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) }
+    } catch {
+        return null
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -207,11 +241,18 @@ function refOuter(ref: string | undefined): string {
 
 /**
  * 把 `EM/Content/.../Name.0` 形式的 ObjectPath 归一成包路径。
+ *
+ * 新客户端导出的资产内部引用改用 `/Game/` 挂载前缀（如 15_x 称号框），而本地
+ * 1.6 客户端 pak 与补充包一律按 `EM/Content/` 挂载，故把 `/Game/` 前缀改写
+ * 回 `EM/Content/`；老资产本就是 `EM/` 开头，不受影响。
  * @param objectPath 对象路径
  * @returns 包路径
  */
 function objectPathToPackage(objectPath: string | undefined): string {
-    return (objectPath ?? "").replace(/\\/g, "/").replace(/\.\d+$/, "")
+    return (objectPath ?? "")
+        .replace(/\\/g, "/")
+        .replace(/\.\d+$/, "")
+        .replace(/^\/Game\//, "EM/Content/")
 }
 
 // ---------------------------------------------------------------------------

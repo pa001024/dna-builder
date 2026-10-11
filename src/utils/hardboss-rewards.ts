@@ -73,7 +73,7 @@ function getWalnutRewardInfo(walnut: Walnut): WeeklyHardbossRewardInfo | null {
     }
 
     if (walnut.类型 === 1) {
-        const charName = reward.name.replace(/^思绪片段·/, "")
+        const charName = (reward.name ?? "").replace(/^思绪片段·/, "")
         const char = charMap.get(charName)
         if (!char) {
             return null

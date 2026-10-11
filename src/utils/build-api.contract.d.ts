@@ -77,8 +77,8 @@ export interface CharSettings {
     effectConfig: Record<string, number>
     /** DOT 频率设置 */
     dotSettings: DotFrequencySettings
-    /** 时间线内联动作 */
-    actions: InlineActions
+    /** 时间线内联动作；未配置时序列化会直接省略，载入时自动补回默认值 */
+    actions?: InlineActions
 }
 
 /** MOD 槽位：`[魔之楔 id, 等级]`，null 表示空槽 */

@@ -1,17 +1,18 @@
 import type { RawTimelineData } from "@/store/timeline"
-import type { InlineActions } from "../composables/useCharSettings"
+import { createDefaultInlineActions, type InlineActions } from "../data/charSettings"
 
 /**
  * 将内联动作转换为标准时间线数据
- * @param inlineActions 内联动作数据
+ * @param inlineActions 内联动作数据（支持为空，为空时按默认空动作处理）
  * @param charName 角色名称，用于生成时间线名称
  * @returns 标准时间线数据数组
  */
-export function inlineActionsToTimeline(inlineActions: InlineActions, charName: string): RawTimelineData {
+export function inlineActionsToTimeline(inlineActions: InlineActions | null | undefined, charName: string): RawTimelineData {
+    const actions = inlineActions ?? createDefaultInlineActions()
     // 计算总时长
     const calculateTotalDuration = () => {
         let total = 0
-        inlineActions.i.forEach(action => {
+        actions.i.forEach(action => {
             const { d: duration, t: times = 1 } = action
             total += duration * times
         })
@@ -22,7 +23,7 @@ export function inlineActionsToTimeline(inlineActions: InlineActions, charName: 
 
     // 收集所有使用的buff组索引
     const usedBuffGroups = new Set<number>()
-    inlineActions.i.forEach(action => {
+    actions.i.forEach(action => {
         if (action.b !== undefined && action.b !== "-") {
             usedBuffGroups.add(action.b)
         }
@@ -30,9 +31,9 @@ export function inlineActionsToTimeline(inlineActions: InlineActions, charName: 
 
     // 收集所有动作的buff组信息，为每个动作创建对应的轨道
     const actionTracks: Array<{
-        action: (typeof inlineActions.i)[0]
+        action: (typeof actions.i)[0]
         buffGroupIndex: number | undefined
-    }> = inlineActions.i.map(action => ({
+    }> = actions.i.map(action => ({
         action,
         buffGroupIndex: action.b !== undefined && action.b !== "-" ? action.b : undefined,
     }))
@@ -56,7 +57,7 @@ export function inlineActionsToTimeline(inlineActions: InlineActions, charName: 
         name: `${charName}_inline`,
         tracks,
         items: [],
-        hp: inlineActions.hp, // 直接添加血量曲线数据
+        hp: actions.hp, // 直接添加血量曲线数据
     }
 
     // 处理时序动作和对应的buff轨道
@@ -84,8 +85,8 @@ export function inlineActionsToTimeline(inlineActions: InlineActions, charName: 
             })
 
             // 如果该动作使用了buff组，添加对应的buff轨道项目
-            if (buffGroupIndex !== undefined && buffGroupIndex >= 0 && buffGroupIndex < inlineActions.bgs.length) {
-                const buffGroup = inlineActions.bgs[buffGroupIndex]
+            if (buffGroupIndex !== undefined && buffGroupIndex >= 0 && buffGroupIndex < actions.bgs.length) {
+                const buffGroup = actions.bgs[buffGroupIndex]
                 // 为每个buff创建一个轨道项目
                 buffGroup.forEach(([buffName, buffLv]) => {
                     result.items.push({
@@ -104,7 +105,7 @@ export function inlineActionsToTimeline(inlineActions: InlineActions, charName: 
     })
 
     // 处理背景动作
-    inlineActions.b.forEach((action, actionIndex) => {
+    actions.b.forEach((action, actionIndex) => {
         const { s: skill, i: interval, t: times = 1, d: delay = 0 } = action
 
         let backgroundTime = 0

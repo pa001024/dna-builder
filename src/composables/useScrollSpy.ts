@@ -19,6 +19,8 @@ export interface UseScrollSpyResult {
     activeKey: Ref<string>
     /** 平滑滚动到指定区块，并把高亮锁定在该区块，直到用户自行滚动 */
     scrollToKey: (key: string) => void
+    /** 按当前 DOM 与滚动位置重算高亮（区块增删后调用） */
+    refresh: () => void
 }
 
 /**
@@ -214,5 +216,13 @@ export function useScrollSpy(container: Ref<HTMLElement | null>): UseScrollSpyRe
         }
     })
 
-    return { activeKey, scrollToKey }
+    /**
+     * 按当前 DOM 与滚动位置重算高亮：
+     * 锁定的区块已消失时交回位置判定，避免高亮停在不存在的区块上。
+     */
+    function refresh() {
+        update()
+    }
+
+    return { activeKey, scrollToKey, refresh }
 }

@@ -59,12 +59,15 @@ export function getSkillFieldMultiplier(field: SkillField) {
 
 /**
  * 计算单个技能的连段汇总（基于取消时间求和）。
- * 字段不足两段、无取消时间或总时长为 0 时返回 undefined，调用方不展示统计行。
+ * 仅普通攻击参与连段统计，其余技能（蓄力/下落/滑行/射击等）直接返回 undefined。
+ * 字段不足两段、无取消时间或总时长为 0 时同样返回 undefined，调用方不展示统计行。
  * @param skill 技能实例（武器技能或替换技能均可）
  * @returns 连段汇总，不可汇总时返回 undefined
  */
 export function getMeleeSkillComboSummary(skill: LeveledSkill | null | undefined): MeleeSkillComboSummary | undefined {
     if (!skill) return undefined
+    // 近战连段限时只对普通攻击生效：蓄力/射击等技能即使带取消时间也不统计
+    if (skill.名称 !== "普通攻击") return undefined
     const fields = skill.getFieldsWithAttr()
     if (fields.length <= 1) return undefined
 

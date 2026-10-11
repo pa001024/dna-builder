@@ -2682,27 +2682,6 @@ function readWeaponDetailFields(id: string, lang: DBAgentLang): DBEntryFields | 
     return fields
 }
 
-/** 魔之楔条目上的元信息键：其余键即词条属性（与 `LeveledMod._exclude_properties` 同口径） */
-const MOD_META_KEYS = new Set([
-    "id",
-    "icon",
-    "名称",
-    "版本",
-    "系列",
-    "品质",
-    "极性",
-    "属性",
-    "耐受",
-    "类型",
-    "限定",
-    "描述",
-    "效果",
-    "消耗",
-    "技能替换",
-    "buff",
-    "生效",
-])
-
 /**
  * 魔之楔详情字段：分类信息、满级词条属性、效果文案（1 级与满级）与技能替换。
  * @param id 魔之楔 id
@@ -2723,9 +2702,17 @@ function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
         fields.限定 = translateDBAgentText(limit, lang) ?? limit
     }
 
-    // 词条属性直接挂在条目上；数据里的取值是满级数值，小数即比例
+    // 词条属性只从 `加成` 读取；满级取值为数值本身或数组末项（各档绝对值，末档即满级）
+    const rawBonus = mod.加成 ?? {}
     const attributes = Object.fromEntries(
-        Object.entries(mod as Record<string, unknown>).filter(([key, value]) => !MOD_META_KEYS.has(key) && typeof value === "number")
+        Object.entries(rawBonus)
+            .map(([key, value]): [string, number | undefined] => {
+                if (typeof value === "number") return [key, value]
+                if (Array.isArray(value) && value.length > 0 && value.every(v => typeof v === "number"))
+                    return [key, value[value.length - 1] as number]
+                return [key, undefined]
+            })
+            .filter((entry): entry is [string, number] => typeof entry[1] === "number")
     ) as Record<string, number>
     const attrText = formatBonusRecord(attributes)
 
@@ -2763,20 +2750,17 @@ function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
     }
 
     // 条件属性（`生效`）只在条件成立时计入面板，它的数值不包含在上面的词条属性里
-    const condition = mod.生效?.条件 as Array<[string, string, number]> | undefined
-    if (condition?.length) {
-        const conditionSource = mod.生效 as Record<string, number | undefined>
-        const conditionalProps: Record<string, number | undefined> = {}
-
-        for (const [key, value] of Object.entries(conditionSource)) {
+    const effect = mod.生效
+    const condition = effect?.条件
+    if (effect && condition?.length) {
+        const conditionalProps: Record<string, number> = {}
+        for (const [key, value] of Object.entries(effect)) {
             if (key !== "条件" && typeof value === "number") {
                 conditionalProps[key] = value
             }
         }
-
         const conditionText = condition.map(([attribute, operator, value]) => `${attribute} ${operator} ${value}`).join(" 且 ")
         const propText = formatBonusRecord(conditionalProps)?.join("、")
-
         fields.条件属性 = propText ? `${conditionText} 时：${propText}` : conditionText
     }
 

@@ -1,10 +1,13 @@
 import { dungeonMap, ironSurvivalDungeonData, monsterLevelDropData, resourceMap, rewardMap } from "@/data"
 import { charMap, draftMap, hardBossMap, modMap, walnutMap } from "@/data/d"
+import { backpackPuzzleLevels } from "@/data/d/backpackpuzzle.data"
 import { eventData } from "@/data/d/event.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
+import { limitedPrizeItems, limitedPrizePools } from "@/data/d/limitedprize.data"
 import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
 import shopData from "@/data/d/shop.data"
+import { weaponVerifyData } from "@/data/d/weapon-verify.data"
 import type { Mod } from "@/data/data-types"
 import { findInRewardTree, getRewardDetails } from "@/utils/reward-utils"
 import type { ShopSourceInfo, WeaponHardbossSourceInfo } from "@/utils/weapon-source"
@@ -559,12 +562,31 @@ export interface ResourceEventSourceInfo {
     eventName: string
     startTime: number
     endTime: number | null
-    /** 奖励来源类型：拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位 */
-    kind: "photo-task" | "sign-in" | "online-time" | "box-drop" | "box-coin" | "top-up"
-    /** 序号（拍照任务第几个 / 签到第几天，从 1 开始；top-up 时为积分档位） */
+    /** 奖励来源类型：拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位 / 永恒梦魇 / 背包解谜 / 且试锋芒星数 / 奖池抽取 / 奖池集齐 */
+    kind:
+        | "photo-task"
+        | "sign-in"
+        | "online-time"
+        | "box-drop"
+        | "box-coin"
+        | "top-up"
+        | "hardboss"
+        | "puzzle"
+        | "verify"
+        | "prize"
+        | "prize-extra"
+    /** 序号（拍照任务第几个 / 签到第几天，从 1 开始；top-up 时为积分档位；hardboss 时为 Boss id；puzzle 时为关卡 id；verify 时为所需总星数；prize / prize-extra 时为奖品档位，从 1 开始） */
     index: number
     /** 在线时长档位的分钟数（仅 online-time） */
     target?: number
+    /** 展示用名称（仅 hardboss / puzzle）：Boss 短名 / 关卡名，渲染时经 $t 翻译 */
+    title?: string
+    /** 模式（仅 hardboss）：eternal 永恒 / challenge 高难 */
+    mode?: "eternal" | "challenge"
+    /** 是否首次通关奖励（仅 hardboss） */
+    first?: boolean
+    /** 奖池 id（仅 prize / prize-extra） */
+    poolId?: number
     rewardId: number
     pp?: number
     times?: number
@@ -572,7 +594,7 @@ export interface ResourceEventSourceInfo {
 }
 
 /**
- * 扫描活动表，反查资源对应的活动奖励来源（拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位）。
+ * 扫描活动表，反查资源对应的活动奖励来源（拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位 / 永恒梦魇 / 背包解谜 / 且试锋芒星数 / 奖池抽取 / 奖池集齐）。
  * @param resource 资源数据
  * @returns 活动来源列表
  */
@@ -587,20 +609,23 @@ export function collectResourceEventSources(resource: Resource): ResourceEventSo
      * @param kind 来源类型
      * @param index 序号
      * @param target 在线时长分钟数
+     * @param extra 附加展示字段与去重后缀（hardboss 的模式/首次标记、puzzle 的关卡名等）
      */
     const pushIfMatched = (
         event: (typeof eventData)[number],
         rewardId: number,
         kind: ResourceEventSourceInfo["kind"],
         index: number,
-        target?: number
+        target?: number,
+        extra?: Pick<ResourceEventSourceInfo, "title" | "mode" | "first" | "poolId"> & { keySuffix?: string }
     ) => {
         const matched = findInRewardTree(getRewardDetails(rewardId), resource.id, "Resource")
         if (!matched) {
             return
         }
 
-        const key = `event-${event.id}-${kind}-${index}-${resource.id}`
+        const { keySuffix, ...rest } = extra ?? {}
+        const key = `event-${event.id}-${kind}-${keySuffix ?? index}-${resource.id}`
         if (sourceKeySet.has(key)) {
             return
         }
@@ -615,6 +640,7 @@ export function collectResourceEventSources(resource: Resource): ResourceEventSo
             kind,
             index,
             target,
+            ...rest,
             rewardId,
             pp: matched.pp,
             times: matched.times,
@@ -623,12 +649,17 @@ export function collectResourceEventSources(resource: Resource): ResourceEventSo
     }
 
     /**
-     * 直接记录一条来源（不经过奖励树匹配，如活动代币本身）。
+     * 直接记录一条来源（不经过奖励树匹配，如活动代币本身、奖池直给道具）。
      * @param event 所属活动
      * @param kind 来源类型
+     * @param extra 序号 / 数量 / 奖池 id 与去重后缀
      */
-    const pushDirect = (event: (typeof eventData)[number], kind: ResourceEventSourceInfo["kind"]) => {
-        const key = `event-${event.id}-${kind}-${resource.id}`
+    const pushDirect = (
+        event: (typeof eventData)[number],
+        kind: ResourceEventSourceInfo["kind"],
+        extra?: Pick<ResourceEventSourceInfo, "index" | "num" | "poolId"> & { keySuffix?: string }
+    ) => {
+        const key = `event-${event.id}-${kind}-${extra?.keySuffix ?? extra?.index ?? 0}-${resource.id}`
         if (sourceKeySet.has(key)) {
             return
         }
@@ -641,7 +672,9 @@ export function collectResourceEventSources(resource: Resource): ResourceEventSo
             startTime: event.startTime,
             endTime: event.endTime,
             kind,
-            index: 0,
+            index: extra?.index ?? 0,
+            num: extra?.num,
+            poolId: extra?.poolId,
             rewardId: resource.id,
         })
     }
@@ -665,6 +698,71 @@ export function collectResourceEventSources(resource: Resource): ResourceEventSo
         Object.entries(event.topUpDetail?.scoreRankReward ?? {}).forEach(([score, rewardId]) => {
             pushIfMatched(event, rewardId, "top-up", Number(score))
         })
+        event.hardBossEvent?.bosses.forEach(boss => {
+            boss.modes.forEach(mode => {
+                pushIfMatched(event, mode.reward, "hardboss", boss.id, undefined, {
+                    title: boss.name,
+                    mode: mode.mode,
+                    first: false,
+                    keySuffix: `${boss.id}-${mode.mode}-reward`,
+                })
+                pushIfMatched(event, mode.firstReward, "hardboss", boss.id, undefined, {
+                    title: boss.name,
+                    mode: mode.mode,
+                    first: true,
+                    keySuffix: `${boss.id}-${mode.mode}-first`,
+                })
+            })
+        })
+        backpackPuzzleLevels
+            .filter(level => level.eventId === event.id)
+            .forEach(level => {
+                level.targetReward?.forEach(rewardId => {
+                    pushIfMatched(event, rewardId, "puzzle", level.id, undefined, {
+                        title: level.name,
+                        keySuffix: `${level.id}`,
+                    })
+                })
+            })
+        if (weaponVerifyData.event.id === event.id) {
+            weaponVerifyData.rewards.forEach(stage => {
+                pushIfMatched(event, stage.rewardId, "verify", stage.requiredStar, undefined, {
+                    keySuffix: `${stage.requiredStar}`,
+                })
+            })
+        }
+        const prizePool = limitedPrizePools[event.id]
+        if (prizePool) {
+            prizePool.LimitedPrizePoolId.forEach(poolId => {
+                const pool = limitedPrizeItems[poolId]
+                if (!pool) {
+                    return
+                }
+                pool.Type.forEach((typeIndex, tierIndex) => {
+                    if (typeIndex !== 6 || !(pool.Id[tierIndex] ?? []).includes(resource.id)) {
+                        return
+                    }
+                    pushDirect(event, "prize", {
+                        index: tierIndex + 1,
+                        poolId,
+                        num: pool.Count[tierIndex] ?? 1,
+                        keySuffix: `${poolId}-${tierIndex + 1}`,
+                    })
+                })
+            })
+            Object.entries(prizePool.ExtraItem ?? {}).forEach(([tier, extra]) => {
+                const [typeIndex, itemId, count] = extra
+                if (typeIndex !== 6 || itemId !== resource.id) {
+                    return
+                }
+                pushDirect(event, "prize-extra", {
+                    index: Number(tier),
+                    poolId: prizePool.LimitedPrizePoolId[0],
+                    num: count,
+                    keySuffix: `extra-${tier}`,
+                })
+            })
+        }
     }
 
     return sources

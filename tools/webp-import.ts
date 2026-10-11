@@ -18,8 +18,11 @@ import { pathToFileURL } from "node:url"
  * 注意：形如 `/imgs/music/${icon}.webp` 的“全通配”模板无法从文本推导 basename，
  * 必须在 evaluateDataUrls 中枚举对应数据源；遗漏时脚本会按目录告警，不会静默跳过。
  *
- * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库（有损编码，默认质量 90）。
+ * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库。
+ * 编码规则：输出分辨率宽高均 <=256（即 256x256 以内）时用无损压缩，
+ * 其余用有损编码（默认质量 90）；例外：bust/ 缩略图强制有损 q90（与现存一致）。
  * 缩放规则：
+ *   bust/ 目录固定缩成 128x128 缩略图（视图只做 thumb-url，全图走 CDN）；
  *   res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
  *   命中 SCALE_RULES（按目标贴图名匹配）的图片按规则里的 scale 等比缩小、不放大，
  *   如拍照活动大图 T_Activity_PhotoEvent_* 按 50% 缩放。
@@ -115,6 +118,22 @@ const DRY_RUN = args.includes("--dry-run")
 const QUALITY = Number(getArgValue("--quality") ?? process.env.WEBP_IMPORT_QUALITY ?? "90")
 /** res 目录图片的最大高度：超出时等比缩小，不放大（默认 128） */
 const RES_MAX_HEIGHT = Number(getArgValue("--res-max-height") ?? process.env.WEBP_IMPORT_RES_MAX_HEIGHT ?? "128")
+
+/**
+ * 无损压缩阈值：输出分辨率宽和高均 <= 该值时用无损 WebP（小图标经不起有损压缩的 ringing）。
+ * 例外：bust/ 缩略图强制有损 q90（与现存缩略图一致，大图无损版走 CDN，不管本地）。
+ */
+const LOSSLESS_MAX_DIM = 256
+
+/** bust/ 目录是 128x128 缩略图（视图里只做 thumb-url，全图走 CDN），一律缩到该尺寸 */
+const BUST_THUMB_SIZE = 128
+
+/**
+ * 是否 bust 缩略图目标（相对 public/imgs 的路径以 bust/ 开头）。
+ */
+function isBustThumb(targetRelPath: string): boolean {
+    return targetRelPath.startsWith("bust/")
+}
 
 /**
  * 按目标贴图名匹配的等比缩小规则：命中者按 scale 缩小、不放大。
@@ -232,9 +251,22 @@ function walkFiles(dirPath: string, suffixes: string[], relDir = ""): string[] {
 
     const files: string[] = []
     for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        // 第三方依赖里没有 /imgs/** 引用，跳过（还能避开 pnpm 那种名字以 .js 结尾的目录 symlink）
+        if (entry.name === "node_modules") {
+            continue
+        }
         const absPath = path.join(dirPath, entry.name)
         const relPath = relDir ? path.join(relDir, entry.name) : entry.name
-        if (entry.isDirectory()) {
+        // entry.isDirectory() 对 symlink 返回 false，补一次 stat 跟随链接判断
+        let isDir = entry.isDirectory()
+        if (!isDir && entry.isSymbolicLink()) {
+            try {
+                isDir = fs.statSync(absPath).isDirectory()
+            } catch {
+                continue
+            }
+        }
+        if (isDir) {
             files.push(...walkFiles(absPath, suffixes, relPath))
         } else if (suffixes.some(suffix => entry.name.toLowerCase().endsWith(suffix))) {
             files.push(absPath)
@@ -361,7 +393,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         weaponSkinData: IconItem[]
         hairData: IconItem[]
         headFrameData: IconItem[]
-        skinData: IconItem[]
+        skinData: (IconItem & { bust?: string })[]
     }>("d/accessory.data.ts")
     const { default: rewardList } = await loadModule<{ default: IconItem[] }>("d/reward.data.ts")
     const { default: reputationList } = await loadModule<{ default: IconItem[] }>("d/reputation.data.ts")
@@ -371,7 +403,9 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { extractionTreasureData } = await loadModule<{ extractionTreasureData: IconItem[] }>("d/solotreasure.data.ts")
     const { skinGachaTabs } = await loadModule<{ skinGachaTabs: IconItem[] }>("d/skingacha.data.ts")
     const { musicScoreData } = await loadModule<{ musicScoreData: IconItem[] }>("d/music.data.ts")
-    const { eventData } = await loadModule<{ eventData: { photoTasks?: { photoView?: string }[] }[] }>("d/event.data.ts")
+    const { eventData } = await loadModule<{
+        eventData: { photoTasks?: { photoView?: string }[]; hardBossEvent?: { bosses: IconItem[] } }[]
+    }>("d/event.data.ts")
 
     const { LeveledChar } = await loadModule<{ LeveledChar: LeveledCharLike }>("leveled/LeveledChar.ts")
     const { LeveledWeapon } = await loadModule<{ LeveledWeapon: LeveledWeaponLike }>("leveled/LeveledWeapon.ts")
@@ -536,6 +570,16 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         }
     }
 
+    // 皮肤立绘: 视图（DBCharDetailItem 经 ImagePreview）按 `/imgs/bust/${skin.bust}.webp` 直接引用
+    // （bust 已是完整 T_Bust_* 贴图名，仅确有立绘资源的皮肤才有该字段）。
+    // bust 在数据与视图里都不含 /imgs/ 前缀，文本扫描抓不到，必须在此枚举，
+    // 否则 bust/ 目录永远没有任务（只有全通配模板警告）。
+    for (const skin of skinData) {
+        if (skin.bust) {
+            urls.add(`/imgs/bust/${skin.bust}.webp`)
+        }
+    }
+
     // 奖励: 视图（ShopItem）按 `/imgs/res/${icon}.webp` 直接引用
     // 仅收录形如贴图名的值（含下划线），排除 "Resource" 等语义字段
     for (const reward of rewardList) {
@@ -601,6 +645,15 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         for (const task of event.photoTasks ?? []) {
             if (task.photoView) {
                 urls.add(`/imgs/webp/${task.photoView}.webp`)
+            }
+        }
+        // 永恒梦魇活动 Boss 头图: 视图（HardBossEventItem.getBossIcon）按 `/imgs/webp/${boss.icon}.webp` 直接引用
+        // （icon 已是完整 T_Permanent_HardBoss_* 贴图名）。
+        // 内联在 eventData.hardBossEvent.bosses 里，与 hardBossData 不是同一份表（如“神秘怪物”只存在于活动表），
+        // 文本扫描抓不到，必须在此枚举，否则活动 Boss 头图不会导入。
+        for (const boss of event.hardBossEvent?.bosses ?? []) {
+            if (boss.icon) {
+                urls.add(`/imgs/webp/${boss.icon}.webp`)
             }
         }
     }
@@ -816,7 +869,8 @@ function buildTasks(
 }
 
 /**
- * 计算图片的等比缩小目标尺寸（不放大）：
+ * 计算图片的等比缩小目标尺寸（不放大，bust 缩略图除外——固定缩到 128x128）：
+ *   0. bust/ 目录 → 固定缩略图尺寸（BUST_THUMB_SIZE）；
  *   1. 命中 SCALE_RULES（按贴图名匹配）→ 按规则 scale 缩小；
  *   2. res/ 目录 → maxHeight 限制（RES_MAX_HEIGHT）；
  *   3. 都不命中 → 不缩小。
@@ -826,6 +880,17 @@ function buildTasks(
  */
 async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Promise<ResizeInfo | null> {
     const name = path.posix.basename(targetRelPath, ".webp")
+    // bust/ 下是缩略图（全图走 CDN）：固定缩到 128x128，与现存缩略图一致
+    if (isBustThumb(targetRelPath)) {
+        const meta = await new Bun.Image(sourceAbsPath).metadata()
+        return {
+            originalWidth: meta.width,
+            originalHeight: meta.height,
+            width: BUST_THUMB_SIZE,
+            height: BUST_THUMB_SIZE,
+            reason: "bust缩略图",
+        }
+    }
     const scaleRule = SCALE_RULES.find(rule => rule.pattern.test(name))
     if (scaleRule) {
         const scale = Math.min(scaleRule.scale, 1)
@@ -871,29 +936,54 @@ function formatResizeNote(info: ResizeInfo | null): string {
 }
 
 /**
+ * 判断输出尺寸是否应使用无损压缩：宽高均 <=256。
+ * @param width 输出宽
+ * @param height 输出高
+ * @returns true 表示无损
+ */
+function shouldUseLossless(width: number, height: number): boolean {
+    return width <= LOSSLESS_MAX_DIM && height <= LOSSLESS_MAX_DIM
+}
+
+/**
  * 使用 Bun 内置的 Bun.Image 转换单张 PNG → WebP 并写入目标路径。
  * res 目录图片按传入的缩小信息先等比缩小再编码。
+ * 输出宽高均 <=256 时用无损压缩，其余用有损（quality）；bust 缩略图强制有损。
  * @param sourceAbsPath 源 PNG 路径
  * @param destAbsPath 目标 WebP 路径
  * @param resizeInfo res 目录缩小信息；null 表示不缩小
- * @param quality 质量
+ * @param quality 质量（仅有损时生效）
+ * @param forceLossy 强制有损（bust 缩略图与现存一致）
+ * @returns 是否使用了无损压缩
  */
 async function convertWithBunImage(
     sourceAbsPath: string,
     destAbsPath: string,
     resizeInfo: ResizeInfo | null,
-    quality: number
-): Promise<void> {
+    quality: number,
+    forceLossy = false
+): Promise<boolean> {
     if (typeof Bun.Image !== "function") {
         throw new Error("当前 Bun 版本不支持 Bun.Image，请升级 Bun 后再运行")
     }
 
+    // 已有缩小信息时输出尺寸已知；否则读一次元数据判断是否走无损
+    let outputWidth = resizeInfo?.width
+    let outputHeight = resizeInfo?.height
+    if (outputWidth === undefined || outputHeight === undefined) {
+        const meta = await new Bun.Image(sourceAbsPath).metadata()
+        outputWidth = meta.width
+        outputHeight = meta.height
+    }
+    const lossless = !forceLossy && shouldUseLossless(outputWidth, outputHeight)
+
     const image = new Bun.Image(sourceAbsPath)
     const webp = resizeInfo
-        ? image.resize(resizeInfo.width, resizeInfo.height).webp({ quality, lossless: false })
-        : image.webp({ quality, lossless: false })
+        ? image.resize(resizeInfo.width, resizeInfo.height).webp(lossless ? { lossless: true } : { quality, lossless: false })
+        : image.webp(lossless ? { lossless: true } : { quality, lossless: false })
     fs.mkdirSync(path.dirname(destAbsPath), { recursive: true })
     await webp.write(destAbsPath)
+    return lossless
 }
 
 /**
@@ -901,21 +991,39 @@ async function convertWithBunImage(
  * @param task 转换任务
  * @returns 转换状态与缩小信息
  */
-async function convertTask(task: ConvertTask): Promise<{ status: "converted" | "skipped" | "dry-run"; resizeInfo: ResizeInfo | null }> {
+async function convertTask(
+    task: ConvertTask
+): Promise<{ status: "converted" | "skipped" | "dry-run"; resizeInfo: ResizeInfo | null; lossless: boolean | null }> {
     const destAbsPath = path.join(publicImgsDir, task.targetRelPath)
     if (!FORCE && fs.existsSync(destAbsPath)) {
-        return { status: "skipped", resizeInfo: null }
+        return { status: "skipped", resizeInfo: null, lossless: null }
     }
 
     const resizeInfo = await getResizeInfo(task.sourceAbsPath, task.targetRelPath)
+    // bust 缩略图强制有损 q90，与现存 40 个缩略图一致（大图无损版走 CDN，不管本地）
+    const forceLossy = isBustThumb(task.targetRelPath)
 
     if (DRY_RUN) {
-        return { status: "dry-run", resizeInfo }
+        return { status: "dry-run", resizeInfo, lossless: await isLosslessOutput(task.sourceAbsPath, resizeInfo, forceLossy) }
     }
 
-    await convertWithBunImage(task.sourceAbsPath, destAbsPath, resizeInfo, QUALITY)
+    const lossless = await convertWithBunImage(task.sourceAbsPath, destAbsPath, resizeInfo, QUALITY, forceLossy)
 
-    return { status: "converted", resizeInfo }
+    return { status: "converted", resizeInfo, lossless }
+}
+
+/**
+ * 预判输出是否走无损（dry-run 日志用）：有缩小信息直接用输出尺寸，否则读源图元数据。
+ */
+async function isLosslessOutput(sourceAbsPath: string, resizeInfo: ResizeInfo | null, forceLossy = false): Promise<boolean> {
+    if (forceLossy) {
+        return false
+    }
+    if (resizeInfo) {
+        return shouldUseLossless(resizeInfo.width, resizeInfo.height)
+    }
+    const meta = await new Bun.Image(sourceAbsPath).metadata()
+    return shouldUseLossless(meta.width, meta.height)
 }
 
 /**
@@ -1011,8 +1119,8 @@ async function main(): Promise<void> {
     let skipped = 0
     let dryRun = 0
     for (const task of tasks) {
-        const { status, resizeInfo } = await convertTask(task)
-        const note = formatResizeNote(resizeInfo)
+        const { status, resizeInfo, lossless } = await convertTask(task)
+        const note = formatResizeNote(resizeInfo) + (lossless ? "  [无损]" : "")
         if (status === "converted") {
             converted += 1
             console.log(`  ✅ ${task.targetRelPath}  <- ${task.sourceRelPath}${note}`)

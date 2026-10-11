@@ -72,6 +72,15 @@ describe("Pinyin Utils", () => {
             expect(matchPinyin("北京", "Beijing").match).toBe(true)
             expect(matchPinyin("北京", "BJ").match).toBe(true)
         })
+
+        it("应该支持多音字的各个读音（法露茜的茜读xi）", () => {
+            expect(matchPinyin("法露茜", "flx").match).toBe(true)
+            expect(matchPinyin("法露茜", "FLX").match).toBe(true)
+            expect(matchPinyin("法露茜", "flq").match).toBe(true)
+            expect(matchPinyin("法露茜", "faluxi").match).toBe(true)
+            expect(matchPinyin("法露茜", "faluqian").match).toBe(true)
+            expect(matchPinyin("法露茜", "luxi").match).toBe(true)
+        })
     })
 
     describe("filterByPinyin", () => {

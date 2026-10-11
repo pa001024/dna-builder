@@ -4,9 +4,11 @@
  * 模型给出的参数是「类型 + id 或名称」这种最简形态，而地图跳转真正需要的是
  * 「区域 + 子区域 + 世界坐标」（见 `MapPosLink` 与 `MapTool` 的 query 约定），
  * 这一层负责把前者补齐成后者，让模型不必（也无法）拼出完整坐标：
- * - 类型写法容错：book / npc / resource，兼收「读物 / NPC / 资源 / 道具」这类中文写法；
+ * - 类型写法容错：book / npc / resource / pan，兼收「读物 / NPC / 资源 / 道具 / 潘神」这类中文写法；
  * - **读物按页面展开**：每一页的书页坐标与藏宝点坐标各算一个位置；
  * - **NPC 一个个体一行**：同名 NPC（如「鹿」）可能有多只，全部列出；
+ * - **潘神一个点位一行**：潘神（`Pan.json`，如「魔灵潘神」）在各子区域有固定点位（`groups[].srId/pos`），
+ *   与 NPC 同为单坐标点位展开，同名潘神的全部点位都会列出；
  * - **资源按子区域聚合**：同名资源可能有数百个采集点（见 `source[].pos`），
  *   聚合后一行对应一个子区域，跳转时用首个坐标定位、并把该资源作为地图筛选条件带上；
  * - 名称可能是译文：先用 `pickDBEntryByName` 反查回游戏原文再匹配。
@@ -19,19 +21,20 @@ import type { RouteLocationRaw } from "vue-router"
 import { regionMap, subRegionMap } from "@/data/d"
 import { type Book, type BookResource, booksData } from "@/data/d/book.data"
 import { type NPC, npcData } from "@/data/d/npc.data"
+import { type Pan, panData } from "@/data/d/pan.data"
 import { type Resource, resourceData } from "@/data/d/resource.data"
 import { expandDBAgentKeyword, resolveCurrentDBAgentLang } from "@/utils/db-locale"
 import { normalizeDBEntryName, pickDBEntryByName, toNumericEntryId } from "@/utils/db-name-match"
 import { getNpcDisplayText } from "@/utils/npc-utils"
 
 /** 支持地图跳转的条目类型 */
-export type DBMapKind = "book" | "npc" | "resource"
+export type DBMapKind = "book" | "npc" | "resource" | "pan"
 
-/** 位置类型：读物页 / 读物藏宝点 / NPC 所在点 / 资源采集点 */
-export type DBMapPointType = "page" | "treasure" | "npc" | "source"
+/** 位置类型：读物页 / 读物藏宝点 / NPC 所在点 / 资源采集点 / 潘神点位 */
+export type DBMapPointType = "page" | "treasure" | "npc" | "source" | "pan"
 
 /** 类型缺失时按这个顺序逐个尝试 */
-const MAP_KIND_ORDER: readonly DBMapKind[] = ["book", "npc", "resource"]
+const MAP_KIND_ORDER: readonly DBMapKind[] = ["book", "npc", "resource", "pan"]
 
 /** 类型参数的合法写法（小写后比对） */
 const MAP_KIND_ALIASES: Record<string, DBMapKind> = {
@@ -52,10 +55,18 @@ const MAP_KIND_ALIASES: Record<string, DBMapKind> = {
     资源: "resource",
     道具: "resource",
     材料: "resource",
+    pan: "pan",
+    pans: "pan",
+    潘神: "pan",
+    魔灵潘神: "pan",
+    潘神魔灵: "pan",
 }
 
 /** NPC 点位没有自带图标时的兜底图标（与资料库 NPC 详情页一致） */
 const NPC_FALLBACK_ICON = "T_Gp_MainMission"
+
+/** 潘神点位没有自带图标时的兜底图标（潘神表本身不带图标字段） */
+const PAN_FALLBACK_ICON = "T_Head_Empty"
 
 /** 位置类型的合法写法（小写后比对） */
 const MAP_PART_ALIASES: Record<string, DBMapPointType> = {
@@ -68,6 +79,8 @@ const MAP_PART_ALIASES: Record<string, DBMapPointType> = {
     treasurepos: "treasure",
     宝藏: "treasure",
     藏宝点: "treasure",
+    pan: "pan",
+    潘神点位: "pan",
 }
 
 /** 一个可跳转的地图位置分组 */
@@ -211,6 +224,82 @@ function resolveResource(params: { id?: number; name: string }): Resource | unde
     }
 
     return params.name ? pickDBEntryByName(resourceData, params.name, item => [item.name]) : undefined
+}
+
+/**
+ * 按「id 或名称」定位潘神。
+ *
+ * 与 NPC 类似，**同名潘神是常态**（10 个区域的潘神都叫「魔灵潘神」），因此给名称时
+ * 先收全部同名个体；一个都没有才退回模糊匹配取最像的那个。
+ * @param params 查询条件：id / 名称
+ * @returns 命中的潘神列表；查不到时返回空数组
+ */
+function resolvePans(params: { id?: number; name: string }): Pan[] {
+    if (params.id !== undefined) {
+        const pan = panData.find(item => item.id === params.id)
+
+        return pan ? [pan] : []
+    }
+
+    if (!params.name) {
+        return []
+    }
+
+    const queries = expandDBAgentKeyword(params.name, resolveCurrentDBAgentLang())
+    const normalized = new Set(queries.map(query => normalizeDBEntryName(query)).filter(Boolean))
+
+    if (normalized.size) {
+        const named = panData.filter(pan => normalized.has(normalizeDBEntryName(pan.name)))
+
+        if (named.length) {
+            return named
+        }
+    }
+
+    const best = pickDBEntryByName(panData, params.name, item => [item.name])
+
+    return best ? [best] : []
+}
+
+/**
+ * 把潘神的固定点位展开成跳转分组（一个点位一行）。
+ *
+ * 潘神点位是策划手摆的固定坐标（`groups[].srId/pos`），一个点位建一个分组。
+ * `part` 是严格筛选：指定且不是 "pan" 时返回空数组（与读物的书页 / 藏宝点筛选一致）。
+ * 跳转路由只带区域 / 子区域 / 坐标 / 图标，不污染资源筛选（见 `buildDBMapRoute`）。
+ * @param pans 潘神列表
+ * @param part 只看某类位置（为空或 "pan" 时返回全部点位）
+ * @returns 跳转分组列表
+ */
+function collectPanGroups(pans: Pan[], part: DBMapPointType | undefined): DBMapGroup[] {
+    if (part && part !== "pan") {
+        return []
+    }
+
+    const groups: DBMapGroup[] = []
+
+    for (const pan of pans) {
+        for (const group of pan.groups ?? []) {
+            const point = normalizePoint(group.pos)
+            const location = resolveLocation(group.srId)
+
+            if (!point || !location) {
+                continue
+            }
+
+            groups.push({
+                pointType: "pan",
+                label: pan.name,
+                entryId: pan.id,
+                entryName: pan.name,
+                icon: PAN_FALLBACK_ICON,
+                ...location,
+                points: [point],
+            })
+        }
+    }
+
+    return groups
 }
 
 /**
@@ -383,9 +472,9 @@ function collectResourceGroups(resource: Resource): DBMapGroup[] {
 /**
  * 解析条目的全部地图位置。
  *
- * 定位顺序是「先 id 后名称」，类型缺失时按 book → npc → resource 逐个试；
+ * 定位顺序是「先 id 后名称」，类型缺失时按 book → npc → resource → pan 逐个试；
  * id 命中即返回，避免同名条目影响 id 的精确性。
- * `part` 是**严格筛选**（只对读物的书页 / 藏宝点有意义）：指定的那类位置一条都没有就返回空数组，
+ * `part` 是**严格筛选**（读物的书页 / 藏宝点、潘神点位有意义）：指定的那类位置一条都没有就返回空数组，
  * 由调用方决定要不要退回不筛选（见 `DBMapLink.vue`）。
  * @param params 模型给的参数（kind / id / name / part）
  * @returns 跳转分组列表；参数不足或查不到时返回空数组
@@ -417,6 +506,16 @@ export function resolveDBMapGroups(params: { kind?: unknown; id?: unknown; name?
 
             if (npcs.length) {
                 return collectNpcGroups(npcs)
+            }
+
+            continue
+        }
+
+        if (candidate === "pan") {
+            const pans = resolvePans({ id, name })
+
+            if (pans.length) {
+                return collectPanGroups(pans, part)
             }
 
             continue

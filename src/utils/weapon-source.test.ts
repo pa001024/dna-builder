@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { weaponMap } from "../data/d"
+import { hardBossMap, walnutMap, weaponMap } from "../data/d"
 import type { Weapon } from "../data/data-types"
 import { collectWeaponSources, formatWeaponSourceTimeRange } from "./weapon-source"
 
@@ -29,17 +29,26 @@ describe("weapon-source", () => {
         expect(shopSources.find(source => source.key.includes("159101"))?.shopIcon).toContain("/imgs/")
     })
 
-    it("应该让实际10305武器输出hardboss来源", () => {
+    it("实际10305武器的hardboss来源应指向掉落其密函的强敌（数据无关，不硬编码Boss名/数量）", () => {
         const weapon = { id: 10305, 名称: "鸣金遥" } as Weapon
 
         const sources = collectWeaponSources(weapon)
         const hardbossSources = sources.filter(source => source.type === "hardboss")
 
         expect(hardbossSources.length).toBeGreaterThan(0)
-        expect(hardbossSources.every(source => source.walnutId === 2057)).toBe(true)
-        expect(hardbossSources.every(source => source.hardbossName === "羽化者")).toBe(true)
-        expect(hardbossSources.every(source => source.hardbossLv === 40)).toBe(true)
-        expect(hardbossSources.some(source => source.key.includes("2057"))).toBe(true)
+        // 该武器所属密函集合由数据推导：同一密函被新强敌复用时测试仍通过
+        const expectedWalnutIds = [...walnutMap.values()]
+            .filter(walnut => walnut.奖励.some(reward => reward.type === "Weapon" && reward.id === weapon.id))
+            .map(walnut => walnut.id)
+        expect(expectedWalnutIds.length).toBeGreaterThan(0)
+        const bossNames = new Set([...hardBossMap.values()].map(boss => boss.name))
+        for (const source of hardbossSources) {
+            expect(expectedWalnutIds).toContain(source.walnutId)
+            expect(typeof source.hardbossName).toBe("string")
+            expect(bossNames.has(source.hardbossName!)).toBe(true)
+            expect(source.hardbossLv).toBeGreaterThan(0)
+            expect(source.key).toContain(String(source.walnutId))
+        }
     })
 
     it("应该把链式商店商品归并到根节点", () => {

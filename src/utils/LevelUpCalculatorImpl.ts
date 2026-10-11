@@ -201,6 +201,25 @@ function generateResourceTree(
     // 处理设计稿和材料
     const draft = mod.draft
     const costDraft = mod.costDraft
+    // 密函金奖直接开成品（新版本）：本体与增幅全部按成品计，只展示线索消耗，跳过图纸链
+    if (mod.walnutFinished && mod.walnut) {
+        let finishedCopies = count
+        if (mod.品质 === "金" && targetLevel > 5) {
+            const ampStart = Math.max(5, currentLevel) - 5
+            const ampEnd = Math.min(10, targetLevel) - 5
+            const ampNeeds = [1, 1, 2, 2, 3]
+            for (let i = ampStart; i < ampEnd; i++) {
+                finishedCopies += ampNeeds[i] * count
+            }
+        }
+        root.children!.push({
+            id: `mod-${mod.id}-resource-委托密函线索`,
+            name: "委托密函线索",
+            type: "Resource",
+            amount: 100 * finishedCopies,
+        })
+        return root
+    }
     if (costDraft) {
         const processDraft = (d: Draft, multiplier: number, parent: ResourceTreeNode) => {
             // 添加设计稿信息
@@ -756,6 +775,11 @@ export interface ModExt {
     draft?: Draft
     costDraft?: Draft
     walnut?: 1
+    /**
+     * 密函金奖直接开成品（新版本）：对应密函的金奖（奖励[0]）为无 d 标记的成品 Mod，
+     * 本体与增幅全部按成品计（每份 100 线索），不再走图纸链。
+     */
+    walnutFinished?: 1
     shop?: { price: string; n: number }
     dropInfo?: DungeonExt[]
     draftInfo?: DungeonExt[]
@@ -820,6 +844,19 @@ function calculateModLevelUpCost(
     }
     const draft = mod.draft
     const costDraft = mod.costDraft
+    // 密函金奖直接开成品（新版本）：本体与增幅全部按成品计，每份 100 线索，跳过图纸链
+    if (mod.walnutFinished && mod.walnut) {
+        let finishedCopies = count
+        if (mod.品质 === "金" && targetLevel > 5) {
+            const ampStart = Math.max(5, currentLevel) - 5
+            const ampEnd = Math.min(10, targetLevel) - 5
+            for (let i = ampStart; i < ampEnd; i++) {
+                finishedCopies += gold[i] * count
+            }
+        }
+        cost.委托密函线索 = ((cost.委托密函线索 as number) || 0) + 100 * finishedCopies
+        return cost
+    }
     /**
      * 将图纸需求折算为道具箱开销（Pack 类型）。
      * 仅当本体图纸无法从副本直接获取（packInfo 存在 isDraft 条目）时触发。

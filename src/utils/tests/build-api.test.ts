@@ -39,7 +39,10 @@ describe("createBuildApi", () => {
 
     it("raw 给出可自由改写的完整设置", async () => {
         const raw = await api.raw()
-        expect(Object.keys(raw)).toEqual(Object.keys(createDefaultCharSettings()))
+        // 未配置的 actions 会在序列化时直接省略（简化配置文件大小），其余字段与默认值逐一对得上
+        const { actions: _defaultActions, ...defaultRest } = createDefaultCharSettings()
+        expect(Object.keys(raw)).toEqual(Object.keys(defaultRest))
+        expect("actions" in raw).toBe(false)
 
         raw.enemyResistance = -4
         expect((await api.raw()).enemyResistance).not.toBe(-4)

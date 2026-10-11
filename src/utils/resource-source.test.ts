@@ -6,6 +6,7 @@ import {
     collectModPackSources,
     collectModQuestSources,
     collectResourceDungeonSources,
+    collectResourceEventSources,
     collectResourceHardbossSources,
     collectResourcePackSources,
     collectResourceQuestSources,
@@ -129,5 +130,60 @@ describe("resource-source", () => {
         const thunderSources = collectResourceDungeonSources(thunder!)
         expect(thunderSources.some(source => source.dungeonId === 91603)).toBe(true)
         expect(thunderSources.some(source => source.dungeonId === 91703)).toBe(true)
+    })
+
+    it("应该从永恒梦魇固定掉落和首次奖励中反查资源来源", () => {
+        const resource = resourceMap.get(100)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceEventSources(resource!).filter(source => source.kind === "hardboss")
+        expect(sources.length).toBeGreaterThan(0)
+
+        const first = sources.find(source => source.eventId === 103036 && source.index === 2 && source.mode === "eternal")
+        expect(first?.first).toBe(true)
+        expect(first?.title).toBe("羽化者")
+        expect(first?.rewardId).toBe(2800302)
+    })
+
+    it("应该从永恒梦魇高难固定掉落中反查资源来源", () => {
+        const resource = resourceMap.get(101)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceEventSources(resource!).filter(source => source.kind === "hardboss")
+        const fixed = sources.find(source => source.eventId === 103036 && source.index === 1 && source.mode === "challenge")
+        expect(fixed?.first).toBe(false)
+        expect(fixed?.title).toBe("西比尔")
+        expect(fixed?.rewardId).toBe(2800202)
+    })
+
+    it("应该从背包解谜关卡奖励中反查资源来源", () => {
+        const resource = resourceMap.get(100)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceEventSources(resource!).filter(source => source.kind === "puzzle")
+        const matched = sources.find(source => source.eventId === 103015 && source.index === 10301501)
+        expect(matched?.title).toBe("披沙捡金Ⅰ")
+        expect(matched?.rewardId).toBe(113001)
+        expect(matched?.num).toBe(10)
+    })
+
+    it("应该从且试锋芒星数奖励中反查资源来源", () => {
+        const resource = resourceMap.get(100)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceEventSources(resource!).filter(source => source.kind === "verify")
+        const matched = sources.find(source => source.eventId === 103026 && source.index === 3)
+        expect(matched?.rewardId).toBe(10302601)
+        expect(matched?.num).toBe(60)
+    })
+
+    it("应该从忘川夜话奖池中反查资源来源", () => {
+        const resource = resourceMap.get(208)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourceEventSources(resource!).filter(source => source.kind === "prize")
+        const matched = sources.find(source => source.eventId === 103021 && source.poolId === 1001)
+        expect(matched?.index).toBe(8)
+        expect(matched?.num).toBe(6)
     })
 })

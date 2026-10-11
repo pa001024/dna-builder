@@ -42,6 +42,7 @@ import titleData from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { formatModName } from "@/data/leveled/LeveledMod"
+import { charTraitEntries } from "@/utils/char-trait"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
@@ -532,6 +533,21 @@ export class GlobalSearchService {
                         path: `/db/title/${title.id}`,
                     },
                     [title.id, title.name, title.src, title.suf ? "后缀" : "前缀"]
+                )
+            )
+        )
+
+        entries.push(
+            ...charTraitEntries.map(entry =>
+                this.buildSearchEntry(
+                    {
+                        id: `trait:${entry.name}`,
+                        title: entry.name,
+                        subtitle: `${entry.owners.length} 名角色拥有`,
+                        typeLabel: t("database.trait"),
+                        path: `/db/trait/${encodeURIComponent(entry.name)}`,
+                    },
+                    [entry.name, entry.desc, entry.tag, ...entry.owners.map(owner => owner.charName)]
                 )
             )
         )

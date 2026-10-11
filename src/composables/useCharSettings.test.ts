@@ -5,9 +5,11 @@ import {
     getModVariantAura,
     getModVariantCount,
     getModVariantSlots,
+    isEmptyInlineActions,
     MOD_SLOT_COUNTS,
     MOD_VARIANT_MAX_COUNT,
     normalizeCharSettings,
+    normalizeInlineActions,
     removeLastModVariant,
     resolveModVariantLetter,
     serializeCharSettings,
@@ -342,5 +344,31 @@ describe("useCharSettings helpers", () => {
         expect(serialized.charMods[0]).toEqual([31524, 10])
         expect(serialized.modVariants[0].角色[0]).toEqual([31525, 8])
         expect(serialized.team1BuildVariant).toBe("B")
+    })
+
+    it("actions 支持为空：缺失/null 回退为默认值", () => {
+        expect(normalizeCharSettings({}).actions).toEqual({ enable: false, i: [], b: [], hp: [], bgs: [] })
+        expect(normalizeCharSettings({ actions: null }).actions).toEqual({ enable: false, i: [], b: [], hp: [], bgs: [] })
+        expect(normalizeInlineActions(undefined)).toEqual({ enable: false, i: [], b: [], hp: [], bgs: [] })
+        expect(isEmptyInlineActions(undefined)).toBe(true)
+        expect(isEmptyInlineActions(null)).toBe(true)
+    })
+
+    it("序列化未配置的 actions 时直接省略，已配置时保留", () => {
+        expect("actions" in JSON.parse(serializeCharSettings({}))).toBe(false)
+        expect("actions" in JSON.parse(serializeCharSettings({ actions: null }))).toBe(false)
+        const configured = JSON.parse(
+            serializeCharSettings({ actions: { enable: true, i: [{ s: "普攻", d: 1 }], b: [], hp: [], bgs: [] } })
+        )
+        expect(configured.actions.enable).toBe(true)
+        expect(configured.actions.i).toEqual([{ s: "普攻", d: 1 }])
+        // 省略后回读仍能补齐，不影响运行时
+        expect(normalizeCharSettings(JSON.parse(serializeCharSettings({}))).actions).toEqual({
+            enable: false,
+            i: [],
+            b: [],
+            hp: [],
+            bgs: [],
+        })
     })
 })

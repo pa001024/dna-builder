@@ -131,14 +131,21 @@ function modEffectText(item: (typeof modData)[number]): string[] {
     return []
 }
 
+/** 取参数化文本的模板（首项）：特效展示文案走武器 `熔炼` / MOD `效果`，此处只取模板原文供检索/展示 */
+function paramTemplate(raw: unknown): string {
+    if (typeof raw === "string") return raw
+    if (Array.isArray(raw) && typeof raw[0] === "string") return raw[0]
+    return ""
+}
+
 /** 特效表条目 → 给模型看的纯数据（关键词匹配要用到的字段都在这里） */
-function toEffectEntry(source: "mod" | "weapon", id: number, item: Buff, owner: string): EffectEntry {
+function toEffectEntry(source: "mod" | "weapon", id: number, item: Buff, owner: string, 描述 = ""): EffectEntry {
     return {
         source,
         id,
         owner,
         名称: item.名称,
-        描述: item.描述 ?? "",
+        描述,
         maxLevel: item.mx || 1,
         ...(typeof item.限定 === "string" ? { 限定: item.限定 } : {}),
     }
@@ -1235,19 +1242,34 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             async effects(query = {}) {
                 const keyword = query.keyword?.trim()
                 const out: EffectEntry[] = []
-                const collect = (want: "mod" | "weapon", map: Map<number, Buff>, ownerOf: (id: number) => string | undefined) => {
+                const collect = (
+                    want: "mod" | "weapon",
+                    map: Map<number, Buff>,
+                    ownerOf: (id: number) => string | undefined,
+                    descOf: (id: number) => string
+                ) => {
                     if (query.source && query.source !== want) {
                         return
                     }
                     for (const [id, item] of map) {
-                        const entry = toEffectEntry(want, id, item, ownerOf(id) ?? `#${id}`)
+                        const entry = toEffectEntry(want, id, item, ownerOf(id) ?? `#${id}`, descOf(id))
                         if (!keyword || entry.名称.includes(keyword) || entry.描述.includes(keyword) || entry.owner.includes(keyword)) {
                             out.push(entry)
                         }
                     }
                 }
-                collect("mod", modEffectMap, id => modMap.get(id)?.名称)
-                collect("weapon", weaponEffectMap, id => weaponMap.get(id)?.名称)
+                collect(
+                    "mod",
+                    modEffectMap,
+                    id => modMap.get(id)?.名称,
+                    id => paramTemplate(modMap.get(id)?.效果)
+                )
+                collect(
+                    "weapon",
+                    weaponEffectMap,
+                    id => weaponMap.get(id)?.名称,
+                    id => paramTemplate(weaponMap.get(id)?.熔炼)
+                )
                 return out.slice(0, query.limit ?? 40)
             },
             async pets(query = {}) {

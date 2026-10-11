@@ -4,7 +4,7 @@ import modData from "@/data/d/mod.data"
 import resourceData from "@/data/d/resource.data"
 import weaponData from "@/data/d/weapon.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
-import { calculateCharLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { calculateCharLevelUp, calculateModLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 import { collectResourceQuestSources, collectResourceShopSources } from "../resource-source"
 
 describe("LevelUpCalculator", () => {
@@ -219,6 +219,76 @@ describe("LevelUpCalculator", () => {
             B: 3,
             C: 7,
         })
+    })
+
+    it("should charge only walnut clues for direct-finished walnut gold mods", () => {
+        // 新版本密函金奖直接开成品（以 51317 人面狮之充盈·巧力为例）
+        const mod = modData.find(item => item.id === 51317)
+        expect(mod).toBeDefined()
+        const minimal = calc.extractMinimalModData(mod!)
+        expect(minimal.walnutFinished).toBe(1)
+
+        const result = calculateModLevelUp([minimal], new Map(), new Map(), {
+            mods: [{ currentLevel: 1, targetLevel: 10, count: 1 }],
+        })
+
+        // 本体 1 + 增幅 9 = 10 份成品，每份 100 线索；不再需要图纸链
+        expect(result.totalCost).toEqual({
+            深红凝珠: 34200,
+            铜币: 171000,
+            委托密函线索: 1000,
+        })
+        // 依赖树只含基础材料与线索，不再含设计稿/狗粮节点
+        const tree = result.resourceTree?.children?.[0]
+        expect(tree?.children?.map(child => child.type)).toEqual(["Resource", "Resource", "Resource"])
+        expect(tree?.children?.find(child => child.name === "委托密函线索")?.amount).toBe(1000)
+    })
+
+    it("should charge walnut clues for本体 and partial amplification copies", () => {
+        const mod = modData.find(item => item.id === 51317)
+        const minimal = calc.extractMinimalModData(mod!)
+
+        const result = calculateModLevelUp([minimal], new Map(), new Map(), {
+            mods: [{ currentLevel: 5, targetLevel: 8, count: 2 }],
+        })
+
+        // 本体 2 + 增幅 (1+1+2)*2 = 10 份成品
+        expect(result.totalCost.委托密函线索).toBe(1000)
+        expect(result.totalCost["设计稿: 充盈·巧力-151317"]).toBeUndefined()
+    })
+
+    it("should keep draft chain for walnut mods that still grant drafts", () => {
+        const draft = {
+            id: 151317,
+            n: "充盈·巧力",
+            r: 5,
+            v: "1.0",
+            t: "Mod",
+            c: 1,
+            p: 51317,
+            d: 30,
+            b: 1,
+            s: 1,
+            x: [{ id: 41317, n: "充盈·巧力", c: 5, t: "Mod" }],
+            m: 50000,
+        }
+        const mod: ModExt = {
+            id: 51317,
+            名称: "充盈·巧力",
+            品质: "金",
+            消耗: [51317],
+            draft: draft as never,
+            costDraft: draft as never,
+            walnut: 1,
+        }
+        const result = calculateModLevelUp([mod], new Map([[draft.p, draft as never]]), new Map(), {
+            mods: [{ currentLevel: 1, targetLevel: 10, count: 1 }],
+        })
+
+        // 旧口径（密函开图纸）保留：线索 + 图纸 + 紫色狗粮 + 锻造铜币
+        expect(result.totalCost.委托密函线索).toBe(1000)
+        expect(result.totalCost["设计稿: 充盈·巧力-151317"]).toEqual([10, 51317, "Draft"])
+        expect(result.totalCost["充盈·巧力-41317"]).toEqual([50, 41317, "Mod"])
     })
 
     it("should calculate real calamity weapon forge materials and list smelting mould sources", () => {
