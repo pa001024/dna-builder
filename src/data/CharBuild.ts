@@ -2298,13 +2298,13 @@ export class CharBuild {
         return (1 - convert) * factor(r) + convert * factor(-4)
     }
 
-    // 统一伤害结算：合并原 calculateWeaponDamage / calculateSkillDamage。
-    // - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器面板走武器双爆，无武器（角色技能）不结算双爆；
-    // - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
-    //   tag 含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
-    //   无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
-    // 调用方按实际语义传参，禁止在外层重写 attrs / weaponAttr 的触发与增伤区（原 getDamage 的 hack 位，
-    // 把武器增伤/武器独立增伤乘进技能池、把武器追加伤害清零（丢了技能追伤）、把武器攻分量套在技能分量上，导致计算错误）。
+    /**
+     * 统一伤害结算
+     * - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器面板走武器双爆，无武器（角色技能）不结算双爆；
+     * - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
+     * - tag 含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
+     * - 无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
+     */
     public calculateDamage(
         attrs: ReturnType<typeof this.calculateWeaponAttributes>,
         weapon?: LeveledWeapon | LeveledSkillWeapon | null,
