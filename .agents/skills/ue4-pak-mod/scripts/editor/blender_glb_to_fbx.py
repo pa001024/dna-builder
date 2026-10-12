@@ -90,6 +90,14 @@ def main():
         log("已导入 %s" % GLB)
 
     drop_unskinned_junk()
+    # UE 只跳过名字正好叫 armature（忽略大小写）的 Blender 骨架 dummy 节点
+    # （FbxMainImport.cpp GetRootSkeleton 的硬编码 hack），否则它会被烘成一根多余的
+    # 骨骼，导致骨骼索引整体错位、游戏里模型散架。FModel 导出的 glb 骨架对象名形如
+    # <Mesh>_SM.ao，必须改掉。
+    for ob in bpy.data.objects:
+        if ob.type == "ARMATURE" and ob.name.lower() != "armature":
+            log("骨架对象改名 %s -> armature（防 UE 多烘一根 ao 骨）" % ob.name)
+            ob.name = "Armature"
     maxdim = report()
 
     # 角色/道具在游戏里都是厘米量级（人形 ~170）。若实测是米量级就 ×100 转厘米。

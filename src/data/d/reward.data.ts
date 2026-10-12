@@ -102474,6 +102474,18 @@ const t: Reward[] = [
         ],
     },
     {
+        id: 360015,
+        m: "Fixed",
+        child: [
+            {
+                id: 120007,
+                t: "Resource",
+                c: 1,
+                n: "行于破晓代金券",
+            },
+        ],
+    },
+    {
         id: 370001,
         m: "Fixed",
         child: [

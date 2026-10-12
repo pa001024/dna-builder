@@ -102,15 +102,37 @@ def main():
     skeleton_path = arg("MODKIT_SKELETON")
     materials_dir = arg("MODKIT_MATERIALS_DIR")
     slot_map = json.loads(os.environ.get("MODKIT_SLOT_MAP", "{}"))
+    # 是否使用已放在游戏真实路径上的完整骨架（要求该资产能在编辑器里加载；
+    # 烘焙态的游戏骨架编辑器拒载，此时必须用 0 走下面的改名流程——
+    # 骨骼顺序的正确性改由 Blender 侧保证（骨架按原版顺序重建 + 对象改名 armature）。
+    # 背景见 references/editor-cook-pipeline.md。
+    use_game_skel = os.environ.get("MODKIT_USE_GAME_SKELETON", "0") not in ("", "0")
 
     log("导入 %s -> %s/%s" % (fbx, dest_dir, dest_name))
+    log("USE_GAME_SKELETON=%s" % use_game_skel)
 
     # ---- 0. 清掉目标路径上上一轮留下的占位 ----
     # 骨架和材质都是靠"改名到游戏路径"实现的，目标已存在时改名会失败；而 skeleton /
     # material_interface 这类属性在 Python 侧要么只读、要么改了不落盘（见下面的注释）。
     # 所以每轮先把占位清掉，保证始终走改名这条已验证的路径。
     # 注意：materials_dir 在烘焙工程里只放我们造的占位材质，删干净是安全的。
-    if unreal.EditorAssetLibrary.does_asset_exist(skeleton_path):
+    # 但游戏完整骨架（USE_GAME_SKELETON=1 时）必须保留，不能删！
+    game_skel = None
+    if use_game_skel:
+        if not unreal.EditorAssetLibrary.does_asset_exist(skeleton_path):
+            raise RuntimeError(
+                "缺游戏完整骨架 %s：把游戏解包树里的骨架 uasset+uexp 拷到工程同名路径再跑 "
+                "（Falu: 解包树 Asset/Char/Player/Skeleton/Biped_Skeleton.* -> 工程 Content/Asset/Char/Player/Skeleton/）"
+                % skeleton_path)
+        game_skel = unreal.EditorAssetLibrary.load_asset(skeleton_path)
+        if game_skel is None:
+            raise RuntimeError("游戏骨架 %s 加载失败（编辑器可能拒载烘焙态资产）" % skeleton_path)
+        try:
+            n_bones = len(game_skel.get_editor_property("bone_tree"))
+        except Exception:
+            n_bones = "?"
+        log("游戏骨架 %s 已加载，bone_tree=%s" % (skeleton_path, n_bones))
+    elif unreal.EditorAssetLibrary.does_asset_exist(skeleton_path):
         unreal.EditorAssetLibrary.delete_asset(skeleton_path)
         log("清掉旧骨架占位 %s" % skeleton_path)
     # 目标网格也删掉：只靠 replace_existing 替换会残留上一轮的材质槽（实测槽数会累积），
@@ -148,6 +170,11 @@ def main():
     ui.set_editor_property("import_animations", False)
     ui.set_editor_property("create_physics_asset", False)
     ui.set_editor_property("automated_import_should_detect_type", False)
+    if use_game_skel:
+        # 预设游戏完整骨架：导入器按名匹配骨骼，BoneMap 直接是游戏索引。
+        # （留空会新建 134 根骨架，烘出 0..133 的 BoneMap，运行时全错位。）
+        ui.set_editor_property("skeleton", game_skel)
+        log("已预设导入骨架 = %s" % game_skel.get_path_name())
     sk = ui.get_editor_property("skeletal_mesh_import_data")
     sk.set_editor_property("convert_scene", True)
     sk.set_editor_property("convert_scene_unit", True)
@@ -159,6 +186,8 @@ def main():
     ui.set_editor_property("skeletal_mesh_import_data", sk)
     task.set_editor_property("options", ui)
     _KEEP_ALIVE = [task, ui, sk]
+    if use_game_skel:
+        _KEEP_ALIVE.append(game_skel)
 
     # 回读一遍，确认属性真的设进去了（设不上会静默按 StaticMesh 走）
     log("options 校验: mesh_type_to_import=%s import_as_skeletal=%s options=%s"
@@ -178,25 +207,35 @@ def main():
         raise RuntimeError("%s 不是 SkeletalMesh 而是 %s —— import_as_skeletal 没生效"
                            % (mesh_path, mesh.get_class().get_name()))
 
-    # ---- 2. 把自动生成的骨架挪到游戏的真实路径 ----
-    skeletons = [(p, c) for p, c in assets_in(dest_dir) if "Skeleton" in c]
-    log("目录内骨架: %s" % [p for p, _ in skeletons])
-    if not skeletons:
-        raise RuntimeError("导入没有产生 USkeleton；检查 FBX 是否带蒙皮")
-    auto_path = sorted(skeletons, key=lambda kv: 0 if os.path.basename(kv[0]).startswith(dest_name) else 1)[0][0]
+    # ---- 2. 确认网格指向游戏完整骨架 ----
+    # USE_GAME_SKELETON=1 时导入器直接用预设骨架，不会新建骨架，也不需要改名。
+    # （旧流程的改名只适用于骨架内容完全一致的自检场景；134 根改名到 4707 路径上
+    #  会烘出错误的 BoneMap，游戏里表现为腿消失/躯干撕裂，切勿回退。）
+    if use_game_skel:
+        skeletons = [(p, c) for p, c in assets_in(dest_dir) if "Skeleton" in c]
+        for p, _ in skeletons:
+            if not str(p).startswith(skeleton_path):
+                log("警告：导入产生了多余骨架 %s，删掉" % p)
+                unreal.EditorAssetLibrary.delete_asset(p)
+    else:
+        skeletons = [(p, c) for p, c in assets_in(dest_dir) if "Skeleton" in c]
+        log("目录内骨架: %s" % [p for p, _ in skeletons])
+        if not skeletons:
+            raise RuntimeError("导入没有产生 USkeleton；检查 FBX 是否带蒙皮")
+        auto_path = sorted(skeletons, key=lambda kv: 0 if os.path.basename(kv[0]).startswith(dest_name) else 1)[0][0]
 
-    if auto_path != skeleton_path:
-        if unreal.EditorAssetLibrary.does_asset_exist(skeleton_path):
-            # 重复烘焙时骨架占位已存在：直接指向它，把新造的那个删掉
-            log("骨架 %s 已存在，改指过去并删除新造的 %s" % (skeleton_path, auto_path))
-            mesh.set_editor_property("skeleton", unreal.EditorAssetLibrary.load_asset(skeleton_path))
-            unreal.EditorAssetLibrary.delete_asset(auto_path)
-        else:
-            unreal.EditorAssetLibrary.make_directory(skeleton_path.rsplit("/", 1)[0])
-            ok = unreal.EditorAssetLibrary.rename_asset(auto_path, skeleton_path)
-            log("骨架改名 %s -> %s : %s" % (auto_path, skeleton_path, ok))
-            if not ok:
-                raise RuntimeError("骨架改名失败")
+        if auto_path != skeleton_path:
+            if unreal.EditorAssetLibrary.does_asset_exist(skeleton_path):
+                # 重复烘焙时骨架占位已存在：直接指向它，把新造的那个删掉
+                log("骨架 %s 已存在，改指过去并删除新造的 %s" % (skeleton_path, auto_path))
+                mesh.set_editor_property("skeleton", unreal.EditorAssetLibrary.load_asset(skeleton_path))
+                unreal.EditorAssetLibrary.delete_asset(auto_path)
+            else:
+                unreal.EditorAssetLibrary.make_directory(skeleton_path.rsplit("/", 1)[0])
+                ok = unreal.EditorAssetLibrary.rename_asset(auto_path, skeleton_path)
+                log("骨架改名 %s -> %s : %s" % (auto_path, skeleton_path, ok))
+                if not ok:
+                    raise RuntimeError("骨架改名失败")
 
     skel = mesh.get_editor_property("skeleton")
     log("网格骨架 = %s" % (skel.get_path_name() if skel else "None"))

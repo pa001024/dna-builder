@@ -8666,17 +8666,17 @@ export const resourceData: Resource[] = [
     },
     {
         id: 49983,
-        name: "RESOURCE_NAME_49983",
-        icon: "T_Mounts_Gesture_0603",
+        name: "沉思王座·铅灰",
+        icon: "T_Mounts_Gesture_0602",
         rarity: 4,
-        desc: "RESOURCE_DESC_49983",
+        desc: "我听到了忠诚的呼喊，看到了群星的燃烧。",
     },
     {
         id: 49984,
-        name: "RESOURCE_NAME_49984",
-        icon: "T_Mounts_Gesture_0603",
+        name: "沉思王座·涅白",
+        icon: "T_Mounts_Gesture_0604",
         rarity: 4,
-        desc: "RESOURCE_DESC_49984",
+        desc: "我听到了忠诚的呼喊，看到了群星的燃烧。",
     },
     {
         id: 49985,
@@ -9942,7 +9942,7 @@ export const resourceData: Resource[] = [
     },
     {
         id: 1024102,
-        name: "RESOURCE_NAME_1024102",
+        name: "凝合思绪·止流",
         icon: "T_CharPiece_Zhiliu01",
         rarity: 5,
         desc: "由记忆的流沙中撷取的完整思绪，承载着过去或未来的，关于某个人的记忆。",
@@ -9950,7 +9950,7 @@ export const resourceData: Resource[] = [
     },
     {
         id: 1024201,
-        name: "RESOURCE_NAME_1024201",
+        name: "凝合思绪·煜明",
         icon: "T_CharPiece_Yuming01",
         rarity: 5,
         desc: "由记忆的流沙中撷取的完整思绪，承载着过去或未来的，关于某个人的记忆。",

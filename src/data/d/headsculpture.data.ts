@@ -1406,19 +1406,19 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 30186,
-        name: "\n\n百花公主的肖像·眺望\n\n",
+        name: "百花公主的肖像·眺望",
         desc: "适用于头像。",
         icon: "T_Head_Art_0040_01",
     },
     {
         id: 30187,
-        name: "\n\n炼金术师的肖像·守候\n\n",
+        name: "炼金术师的肖像·守候",
         desc: "适用于头像。",
         icon: "T_Head_Art_0040_02",
     },
     {
         id: 30188,
-        name: "\n\n回忆中的肖像·浅笑\n\n",
+        name: "回忆中的肖像·浅笑",
         desc: "适用于头像。",
         icon: "T_Head_Art_0040_03",
     },

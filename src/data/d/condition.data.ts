@@ -8990,6 +8990,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "获得80级卡米拉",
     },
+    "410280": {
+        id: 410280,
+        logic: "AND",
+        map: {
+            OwnCharIdAndLevel: [[4102, 80]],
+        },
+        remark: "获得80级止流",
+    },
+    "420180": {
+        id: 420180,
+        logic: "AND",
+        map: {
+            OwnCharIdAndLevel: [[4201, 80]],
+        },
+        remark: "获得80级煜明",
+    },
     "443000": {
         id: 443000,
         logic: "AND",
@@ -14512,6 +14528,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [110232],
         },
         remark: "第22只乐园的白兔",
+    },
+    "40901001": {
+        id: 40901001,
+        logic: "OR",
+        map: {
+            QuestChain: [120706],
+        },
+        remark: "行于破晓",
     },
     "51001601": {
         id: 51001601,

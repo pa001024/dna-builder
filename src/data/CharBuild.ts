@@ -485,7 +485,6 @@ export class CharBuild {
                     })
                 )
                 uweaponData.技能 = [uweaponSkillData]
-                // 同律技能等级取来源技能的最终等级（无来源时退回被动等级，与 Python SDK 口径一致）
                 const syncSourceIndex = skillIds.find(index => Number.isInteger(index) && (index as number) >= 0) ?? 2
                 this.skillWeapon = new LeveledSkillWeapon(
                     uweaponData,
@@ -599,7 +598,7 @@ export class CharBuild {
         return [...this.skills, ...this.weaponSkills]
     }
     /** 技能等级 `[E, Q, 被动]`：构造与 char setter 均经归一化，兼容老格式单个数字 */
-    public skillLevel: CharSkillLevels = [10, 10, 10]
+    public skillLevel: CharSkillLevels = [12, 12, 12]
 
     /**
      * 按角色技能索引取对应的技能等级（0→E，1→Q，2 及之后→被动）。
@@ -2398,6 +2397,10 @@ export class CharBuild {
             // 触发率数值允许溢出但触发效果按 100% 封顶；负值钳制为 0，避免触发期望溢出为负导致伤害归零；
             // 技能池的触发率即调用方传入的覆盖率（武器面板触发 + 技能触发后封顶），按 bonus 模型进入期望
             triggerRate = isSkillPool ? skillTriggerCoverage : Math.min(1, Math.max(0, critPanel.触发))
+        } else {
+            // 无武器归属：仅转灾厄转换分量结算触发（灾厄触发只需敌方存在抗性，不依赖武器面板），按技能触发率；
+            // 其余分量的 triggerAdd 均为 0，该值不影响它们
+            triggerRate = Math.min(1, Math.max(0, attrs.技能触发 || 0))
         }
 
         // 触发倍率：物理伤害类型按敌方当前血量类型结算，灾厄类型需敌方存在抗性才可触发
@@ -2476,8 +2479,8 @@ export class CharBuild {
         } else {
             // 技能分量：纯元素基座（技能伤害默认按纯元素结算，元素分量吃元素增伤）；
             // 经转物理转换出的分量按对应物理子类结算（吃物理增伤，不受敌人元素抗性影响）。
-            // 触发（归属）：有武器面板时按武器规则结算触发 bonus（如灾厄伤害抗性存在时全额触发），
-            // rate = 1 全额结算后再由 skillTriggerCoverage 显式折算；无武器归属（角色技能）不结算触发。
+            // 触发（归属）：有武器面板时按武器规则结算触发 bonus（如灾厄伤害抗性存在时触发），
+            // 覆盖率直接作为触发率进入期望（bonus 模型）；无武器归属（角色技能）不结算触发。
             const skillTriggerAdd = hasWeapon ? getTriggerMultiplier(damageType ?? "") : 0
             if (calamityPhysical) {
                 // 灾厄转化：纯物理基座，不吃抗性（原武器路径口径）；转属克/转属逆部分按翻转抗性计入元素
@@ -2503,10 +2506,12 @@ export class CharBuild {
             for (const key of physicalConvertKeywords) {
                 const ratio = Math.max(0, attrs[key] || 0) * convertScale
                 if (ratio <= 0) continue
+                // 转灾厄无武器归属时也结算灾厄触发（只需敌方存在抗性）；其余物理子类仍需武器归属
+                const triggerAdd = hasWeapon ? getTriggerMultiplier(key.slice(1)) : key === "转灾厄" ? getTriggerMultiplier("灾厄") : 0
                 parts.push({
                     ratio,
                     resistanceFactor: 1,
-                    triggerAdd: hasWeapon ? getTriggerMultiplier(key.slice(1)) : 0,
+                    triggerAdd,
                     settlesElement: false,
                 })
             }

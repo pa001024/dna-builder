@@ -306,6 +306,7 @@ const questChainDataRaw: QuestChain[] = [
             },
             {
                 id: 10010305,
+                sr: 100103,
                 next: {
                     Success: 10010306,
                 },

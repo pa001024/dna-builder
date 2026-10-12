@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
@@ -31,25 +31,19 @@ interface SkillReplaceCompareGroup {
 
 // 当前等级
 const currentLevel = ref(LeveledMod.modQualityMaxLevel[props.mod.品质] || 1)
-const buffLv = ref(0)
 const crimsonPearlCosts = [300, 600, 900, 1200, 1500, 3000, 4500, 6000, 7500, 9000] // 1→2, 2→3, 3→4, 4→5
 const goldCosts = [1500, 3000, 4500, 6000, 7500, 15000, 22500, 30000, 37500, 45000] // 1→2, 2→3, 3→4, 4→5
 const modCost = [1, 1, 2, 2, 3]
 
 // 创建LeveledMod实例
 const leveledMod = computed(() => {
-    return new LeveledMod(props.mod, currentLevel.value, buffLv.value)
+    return new LeveledMod(props.mod, currentLevel.value)
 })
 
 // 监听mod变化，重置等级为新mod的等级上限
-watch(
-    () => props.mod,
-    async newMod => {
-        currentLevel.value = LeveledMod.modQualityMaxLevel[newMod.品质] || 1
-        await nextTick()
-        buffLv.value = leveledMod.value.buff?.mx ?? 0
-    }
-)
+watch(() => props.mod, newMod => {
+    currentLevel.value = LeveledMod.modQualityMaxLevel[newMod.品质] || 1
+})
 
 // 处理效果描述中的极性
 /** 当前等级下已求值并翻译的效果文案 */
@@ -334,29 +328,6 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     </template>
                 </span>
                 <span v-else>{{ effectText }}</span>
-            </div>
-        </section>
-
-        <!-- Buff -->
-        <section v-if="leveledMod.buff" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="BUFF" title="Buff" />
-            <div class="space-y-2">
-                <!-- Buff 等级滑杆 / 启用开关 -->
-                <div v-if="leveledMod.buff.mx" class="flex items-center gap-4">
-                    <span class="min-w-12 shrink-0 font-mono text-[11px] tabular-nums text-base-content/55">Lv. {{ buffLv }}</span>
-                    <input
-                        v-model.number="buffLv"
-                        type="range"
-                        class="range range-primary range-xs grow"
-                        :min="leveledMod.buff.lx ?? 1"
-                        :max="leveledMod.buff.mx ?? 1"
-                        step="1"
-                    />
-                </div>
-                <label v-else class="flex items-center gap-2 text-sm text-base-content/70">
-                    <input v-model="buffLv" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                    启用
-                </label>
             </div>
         </section>
 

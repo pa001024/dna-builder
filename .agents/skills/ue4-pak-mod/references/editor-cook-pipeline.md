@@ -93,6 +93,20 @@ These are then assumed to be current version on load."*），否则烘出来是�
    烘焙包把引用按「导入类」写进 import 表，UE 运行时解析导入会拿类做过滤，类对不上 → 空材质 → 模型变默认灰。
 8. **重复烘焙会累积材质槽**：只靠 `replace_existing` 替换，槽数会一直涨（实测 1 → 2）。
    导入前先把目标网格资产删掉，从零导入，才能保证槽数与 FBX 一致。
+9. **Blender 骨架对象必须改名 `armature`**：UE 源码写死了，只有名字（忽略大小写）正好叫
+   `armature` 的 Blender dummy 节点才会被跳过（`FbxMainImport.cpp` 的 `GetRootSkeleton`，注释里
+   写着 "Hack to support armature dummy node from blender"）。FModel 导出的 glb 里骨架对象
+   叫 `<Mesh>_SM.ao`，不改名 UE 会把它烘成一根多余的骨骼（Falu 实测：134 根变 135 根，
+   多出 `Falu_Body_SM_ao`，游戏里腿消失/躯干撕裂）。
+10. **骨骼顺序必须与游戏原资产逐根一致**：UE 按 FBX 节点 DFS 建骨架，骨骼索引直通渲染，
+    运行时不改名——顺序错一位，全身错位（Falu 实测）。而 Blender 会**按字母序重排子骨骼**
+    （至少 glTF 导出这一步会；直接导 FBX 则保留内存顺序），glb 中转一次顺序就乱了。
+    正确姿势：先拿原版的骨骼顺序（`fmodel-cli dump-skelmesh` 看 `ReferenceSkeleton`，或对比
+    `export-mesh-gltf` 的 armature），在 Blender 里按原顺序重建骨架（脚本见
+    `D:\dev\ue-modkit\work\falu_barefoot\rebuild_armature.py`），再**直接导 FBX** 喂给 UE
+    （不要再经 glb 中转）。烘完离线验证：把 pak 临时丢进挂载目录用
+    `dump-skelmesh` 读回，RefSkeleton 必须与原版**根数相同、逐名同序、无 ao**；再
+    `export-mesh-gltf` 读回渲染一遍确认绑定姿态。两者都过才能装进游戏。
 
 ## 限制与未验证项
 

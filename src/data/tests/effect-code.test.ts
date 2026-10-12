@@ -176,6 +176,14 @@ describe("[求索]伤害的技能触发折算", () => {
         return build
     }
 
+    it("无武器归属的转灾厄依然结算灾厄触发（按技能触发率）", () => {
+        const lo = qiusuoBuild()
+        const hi = qiusuoBuild([new LeveledMod(41317, 5)])
+        const stHi = hi.calculateAttributes().技能触发
+        // 角色口径无武器面板：转震荡/转切割类不结算触发，转灾厄按技能触发率结算灾厄触发
+        expect(hi.evaluateAST("角色::[攻击]{转灾厄:1}") / lo.evaluateAST("角色::[攻击]{转灾厄:1}")).toBeCloseTo(1 + Math.min(1, stHi), 5)
+    })
+
     it("求索伤害触发概率 = 武器面板触发 + 技能触发后封顶", () => {
         const hi = qiusuoBuild([new LeveledMod(41317, 5)])
         const lo = qiusuoBuild([new LeveledMod(41317, 0)])
