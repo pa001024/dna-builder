@@ -42,6 +42,7 @@ import {
     LeveledModHelper,
     LeveledWeapon,
     LeveledWeaponHelper,
+    type ModTypeKey,
     modData,
     monsterMap,
     weaponData,
@@ -437,6 +438,22 @@ const charBuild = computed(() => {
         return createEmptyCharBuild()
     }
 })
+
+/**
+ * 按槽位过滤 MOD 选项：类型 / 属性 / 限定走 CharBuild.isModSlotCompatible 同一口径。
+ * @param key MOD 槽位类型
+ * @returns 该槽位可选的 MOD 选项
+ */
+function filterModOptionsBySlot(key: ModTypeKey) {
+    const rawById = new Map(modData.map(mod => [mod.id, mod]))
+    return modOptions.value.filter(option => {
+        const raw = rawById.get(option.value)
+        if (!raw) return false
+        // 中枢光环（羽蛇）随角色槽选项下发、由光环下拉使用，不占用普通槽位
+        if (key === "charMods" && raw.系列 === "羽蛇") return true
+        return charBuild.value.isModSlotCompatible(raw, key)
+    })
+}
 
 /**
  * 当前选中技能在技能等级三元组中的下标：0→E，1→Q，2 及之后→被动。
@@ -3095,16 +3112,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <ModEditer
                                     v-if="charTab === '角色'"
                                     :mods="selectedCharMods"
-                                    :mod-options="
-                                    modOptions.filter(
-                                        m =>
-                                            m.type === '角色' &&
-                                            (!m.limit ||
-                                                (typeof m.limit === 'number'
-                                                    ? m.limit === charBuild.char.id
-                                                    : m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性))
-                                    )
-                                "
+                                    :mod-options="filterModOptionsBySlot('charMods')"
                                     :char-build="charBuild"
                                     :aura-mod="activeAuraMod"
                                     type="角色"
@@ -3129,15 +3137,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     !meleeWeaponEmpty
                                 "
                                     :mods="selectedMeleeMods"
-                                    :mod-options="
-                                    modOptions.filter(
-                                        m =>
-                                            m.type === '近战' &&
-                                            (!m.limit ||
-                                                (typeof m.limit === 'string' &&
-                                                    [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)))
-                                    )
-                                "
+                                    :mod-options="filterModOptionsBySlot('meleeMods')"
                                     :char-build="charBuild"
                                     type="近战"
                                     :polset="charBuild.getModCostTransfer(charTab)"
@@ -3160,15 +3160,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     !rangedWeaponEmpty
                                 "
                                     :mods="selectedRangedMods"
-                                    :mod-options="
-                                    modOptions.filter(
-                                        m =>
-                                            m.type === '远程' &&
-                                            (!m.limit ||
-                                                (typeof m.limit === 'string' &&
-                                                    [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)))
-                                    )
-                                "
+                                    :mod-options="filterModOptionsBySlot('rangedMods')"
                                     :char-build="charBuild"
                                     type="远程"
                                     :polset="charBuild.getModCostTransfer(charTab)"
@@ -3188,15 +3180,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <ModEditer
                                     v-if="charTab === '同律' && !charBuild.skillWeapon?.inherit"
                                     :mods="selectedSkillWeaponMods"
-                                    :mod-options="
-                                    modOptions.filter(
-                                        m =>
-                                            m.type === charBuild.skillWeapon!.类型 &&
-                                            (!m.limit ||
-                                                (typeof m.limit === 'string' &&
-                                                    [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)))
-                                    )
-                                "
+                                    :mod-options="filterModOptionsBySlot('skillMods')"
                                     :char-build="charBuild"
                                     type="同律"
                                     :polset="charBuild.getModCostTransfer(charTab)"

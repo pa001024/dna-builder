@@ -2,7 +2,7 @@
 import { t } from "i18next"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
-import { formatModName, LeveledMod, LeveledModHelper } from "@/data"
+import { formatModName, LeveledMod, LeveledModHelper, RModTypeMap } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
@@ -24,6 +24,7 @@ interface ModOption {
 
 interface Props {
     mods: (LeveledMod | null)[]
+    /** 同一生效配置下另一部分已装槽位（如对比页“基础已装 + 追加”）：同时生效才参与互斥；变体 A/B/C 是替代关系，绝不能传其他变体 */
     otherMods?: (LeveledMod | null)[]
     modOptions: ModOption[]
     charBuild: CharBuild
@@ -75,66 +76,34 @@ const auraModOptions = computed(() => {
     return options
 })
 const filteredModOptions = computed(() => {
-    // 获取已装备的互斥系列名称集合和非契约者MOD名称集合
-    const equippedExclusiveSeries = new Set<string>()
-    const equippedExclusiveNames = new Set<string>()
-    const idCount = new Map<number, number>()
-    /**
-     * 收集MOD集合的互斥系列/名称互斥/数量占用。
-     * @param modList MOD列表
-     */
-    const collectExclusives = (modList: (LeveledMod | null)[] | undefined) => {
-        ;(modList || []).forEach(mod => {
-            if (!mod) return
-            // 记录互斥系列
-            if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
-                mod.excludeSeries.forEach(series => equippedExclusiveSeries.add(series))
-            }
-            // 记录非契约者MOD名称（用于名称互斥）
-            if (mod.系列 !== "契约者") {
-                equippedExclusiveNames.add(mod.名称)
-            }
-            // 记录MOD数量
-            idCount.set(mod.id, (idCount.get(mod.id) || 0) + 1)
-        })
-    }
-
-    // 收集当前编辑套别的互斥信息（A方案：第一套 + otherMods）
-    collectExclusives(props.mods)
-    collectExclusives(props.otherMods)
-
-    // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
-    return props.modOptions.filter(option => {
-        const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
-
-        if (mod.系列 === "羽蛇") return false
-        // 1. 过滤互斥系列的MOD
-        if (equippedExclusiveSeries.has(mod.系列 == "囚狼" && mod.id > 100000 ? "囚狼1" : mod.系列)) {
-            return false
-        }
-
-        // 2. 过滤同名的非契约者MOD（名称互斥）
-        if (mod.系列 !== "契约者" && equippedExclusiveNames.has(mod.名称)) {
-            return false
-        }
-
-        // 3. 过滤已装备的MOD数量超过最大允许数量的MOD
-        if ((idCount.get(mod.id) || 0) >= inv.getModCount(mod.id, mod.品质)) {
-            return false
-        }
-
-        // 4. 属性筛选
-        if (selectedProperty.value) {
+    // 可装备口径收敛到 CharBuild 原生能力：槽位兼容 + 系列/名称互斥 + 库存数量，同一规则供自动构筑共用
+    const key = RModTypeMap[props.type as keyof typeof RModTypeMap]
+    const paired = props.modOptions.map(option => ({
+        option,
+        mod: LeveledModHelper.fromId(option.value, option.lv, option.bufflv),
+    }))
+    const allowed = new Set(
+        props.charBuild
+            .filterEquipableMods(
+                paired.map(item => item.mod),
+                key,
+                {
+                    equipped: [props.mods, props.otherMods],
+                    getAvailableCount: mod => inv.getModCount(mod.id, mod.品质),
+                }
+            )
+    )
+    // 属性筛选（纯展示层文本过滤，不影响可装备口径）
+    return paired
+        .filter(item => allowed.has(item.mod))
+        .map(item => item.option)
+        .filter(option => {
+            if (!selectedProperty.value) return true
             // 获取mod的所有属性文本，包括描述、属性等
-            const modText = JSON.stringify(mod)
+            const modText = JSON.stringify(LeveledModHelper.fromId(option.value, option.lv, option.bufflv))
             // 判断选择的属性是否在mod文本中
-            if (!modText.includes(selectedProperty.value)) {
-                return false
-            }
-        }
-
-        return true
-    })
+            return modText.includes(selectedProperty.value)
+        })
 })
 
 /**

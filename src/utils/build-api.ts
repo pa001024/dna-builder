@@ -14,7 +14,7 @@ import {
     serializeCharSettings,
     setModVariantAura,
 } from "@/composables/useCharSettings"
-import type { CharBuild, ModTypeKey } from "@/data"
+import type { ModTypeKey } from "@/data"
 import {
     buffData,
     charData,
@@ -22,6 +22,7 @@ import {
     getWBuffLvFromSnapshot,
     LeveledBuffHelper,
     LeveledCharHelper,
+    LeveledMod,
     LeveledModHelper,
     LeveledMonsterHelper,
     LeveledPetHelper,
@@ -30,6 +31,7 @@ import {
     weaponData,
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
+import { CharBuild } from "@/data/CharBuild"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { charMap, modEffectMap, modMap, monsterData, monsterMap, petMap, weaponEffectMap, weaponMap, weaponNameMap } from "@/data/d"
 import petData, { petEntrys } from "@/data/d/pet.data"
@@ -422,6 +424,62 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
         return ok(`魔灵潜质已更新：${names.join("、") || "（全空）"}`, damage())
     }
 
+    /**
+     * 校验单个 MOD 能否装入指定槽位：失败返回给模型的中文原因，成功返回 null。
+     * 口径与选装弹窗 / 自动构筑共用 CharBuild 原生能力，杜绝「不该装的装上」。
+     * @param raw 候选 MOD 原始数据
+     * @param key CharBuild 槽位键
+     * @param typeLabel 展示用槽位名
+     * @param siblingRaws 同槽其余已装 MOD 原始数据（不含被替换的目标槽）
+     * @returns 失败原因；可装返回 null
+     */
+    function checkModEquipable(
+        raw: (typeof modData)[number],
+        key: ModTypeKey,
+        typeLabel: ModType,
+        siblingRaws: ((typeof modData)[number] | null)[]
+    ): string | null {
+        const build = host.charBuild.value
+        if (!build) return "构筑尚未就绪，请先选定角色"
+        if (raw.系列 === "羽蛇") return `「${raw.名称}」是中枢光环（羽蛇系列），不能装入普通槽位，请用 build.aura 设置`
+        if (!build.isModSlotCompatible(raw, key)) {
+            if (key === "skillMods" ? !raw.类型.startsWith("同律") : raw.类型 !== typeLabel) {
+                return `「${raw.名称}」是${raw.类型}魔之楔，装不上${typeLabel}槽`
+            }
+            if (raw.属性 && raw.属性 !== build.char.属性) {
+                return `「${raw.名称}」需要${raw.属性}属性角色，当前是${build.char.属性}属性${build.char.名称}`
+            }
+            return `「${raw.名称}」有装配限定（${String(raw.限定)}），当前构筑不满足`
+        }
+        // 同槽占用只看系列 / 名称 / 数量：实例化后走统一收集（等级不影响互斥判定）
+        const siblings: ReturnType<typeof LeveledModHelper.fromId>[] = []
+        for (const sibling of siblingRaws) {
+            if (!sibling) continue
+            try {
+                siblings.push(LeveledModHelper.fromId(sibling.id))
+            } catch {}
+        }
+        const occupancy = CharBuild.collectModOccupancy(siblings)
+        const group = LeveledMod.exclusionGroupOf(raw.系列, raw.id)
+        if (group.some(key => occupancy.series.has(key))) {
+            const rival = siblings.find(
+                installed =>
+                    (CharBuild.exclusiveSeries.includes(installed.系列) ||
+                        LeveledMod.normalizeExclusiveSeries(installed.系列, installed.id) !== installed.系列) &&
+                    installed.excludeSeries.some(key => group.includes(key))
+            )
+            return rival ? `「${raw.名称}」与已装的「${rival.名称}」系列互斥，不能同槽` : `「${raw.名称}」与已装 MOD 系列互斥，不能同槽`
+        }
+        if (raw.系列 !== "契约者" && occupancy.names.has(raw.名称)) {
+            return `「${raw.名称}」与已装的同名魔之楔冲突（非契约者同名只能装一张），请先卸下旧的`
+        }
+        const owned = host.inv?.getModCount?.(raw.id, raw.品质) ?? Number.POSITIVE_INFINITY
+        if ((occupancy.counts.get(raw.id) ?? 0) >= owned) {
+            return `「${raw.名称}」库存只有 ${owned} 张，同槽已装满，请先卸下旧的或换一张`
+        }
+        return null
+    }
+
     function writeMods(type: ModType, list: ({ name?: string; id?: number; level?: number } | null)[], variant?: string): ApiResult {
         const index = variant ? getModVariantIndex(variant) : host.charSettings.value.modVariantIndex
         const slots = getModVariantSlots(host.charSettings.value, type, index)
@@ -450,6 +508,18 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
 
         if (missing.length) {
             return fail(`找不到魔之楔：${missing.join("、")}，请用 build.data.mods({ keyword }) 查准确名称`)
+        }
+
+        // 整批写入同样逐项过可装备校验：后项能看到前项的占用，同批内的互斥也在口径内
+        const key = MOD_TYPE_KEY[type]
+        const accepted: (typeof modData)[number][] = []
+        for (const raw of next) {
+            if (!raw) continue
+            const resolved = modMap.get(raw[0])
+            if (!resolved) continue
+            const reason = checkModEquipable(resolved, key, type, accepted)
+            if (reason) return fail(reason)
+            accepted.push(resolved)
         }
 
         slots.splice(0, slots.length, ...(next as ModSlot[]))
@@ -699,6 +769,14 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             if (!remove && !mod) {
                 return fail(`找不到魔之楔「${input.name ?? input.id}」，请用 build.data.mods({ keyword }) 查准确名称`)
             }
+            if (mod) {
+                // 单槽写入先过可装备校验：目标槽自身除外，其余同槽已装参与互斥与数量判定
+                const siblings = slots.map((slot, position) =>
+                    position === input.slot ? null : (slot && (modMap.get(slot[0]) ?? null)) || null
+                )
+                const reason = checkModEquipable(mod, MOD_TYPE_KEY[input.type], input.type, siblings)
+                if (reason) return fail(reason)
+            }
             slots[input.slot] = mod ? [mod.id, clamp(Math.round(input.level ?? 10), 0, 10)] : null
             record(`${input.type}槽 ${input.slot + 1} ${mod ? `装上 ${mod.名称}` : "已卸下"}`)
             return ok(mod ? `${input.type}槽 ${input.slot + 1} 装上 ${mod.名称}` : `${input.type}槽 ${input.slot + 1} 已卸下`, damage())
@@ -717,6 +795,9 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
                     : (modByName.get(String(nameOrId).trim()) ?? modMap.get(Number(nameOrId)) ?? null)
             if (!mod) {
                 return fail(`找不到魔之楔「${nameOrId}」`)
+            }
+            if (mod.系列 !== "羽蛇") {
+                return fail(`「${mod.名称}」不是光环（羽蛇系列），中枢槽只能装羽蛇系列，请用 build.mod 装入普通槽位`)
             }
             setModVariantAura(host.charSettings.value, mod.id)
             record(`中枢魔之楔换为 ${mod.名称}`)

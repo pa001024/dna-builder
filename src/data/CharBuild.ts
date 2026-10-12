@@ -4892,6 +4892,109 @@ export class CharBuild {
     static elmSeries = ["狮鹫", "百首", "契约者", "换生灵"]
     static exclusiveSeries = [...CharBuild.indepSeries, "囚狼1", "换生灵", "海妖", "审判者", "巨鲸", "金乌", "焰灵", "黄衣", "夜使"]
 
+    static modExclusionGroup(mod: ModEquipCandidate): string[] {
+        return LeveledMod.exclusionGroupOf(mod.系列, mod.id)
+    }
+
+    /**
+     * 收集已装备 MOD 的互斥占用：互斥系列 / 非契约者名称 / 各 id 已装数量。
+     * @param lists 同时生效的已装 MOD 列表（同一激活配置内的槽位组，如对比页的“基础已装 + 追加”）。
+     * 变体 A/B/C 是同一时刻只生效一份的替代关系：绝不能把其他变体传进来，
+     * 变体之间只共享库存数量（调用方用 getAvailableCount 体现），不适用系列 / 名称互斥。
+     * 空槽会被跳过
+     * @returns 互斥占用快照
+     */
+    static collectModOccupancy(...lists: readonly (readonly (LeveledMod | null | undefined)[] | undefined)[]): ModEquipOccupancy {
+        const occupancy: ModEquipOccupancy = { series: new Set<string>(), names: new Set<string>(), counts: new Map<number, number>() }
+        for (const list of lists) {
+            for (const mod of list ?? []) {
+                if (!mod) continue
+                // 是否记录互斥系列：名录内系列，或归一后键发生变化的系列（新版囚狼），规则见 LeveledMod.normalizeExclusiveSeries
+                if (CharBuild.exclusiveSeries.includes(mod.系列) || LeveledMod.normalizeExclusiveSeries(mod.系列, mod.id) !== mod.系列) {
+                    mod.excludeSeries.forEach(series => occupancy.series.add(series))
+                }
+                if (mod.系列 !== "契约者") occupancy.names.add(mod.名称)
+                occupancy.counts.set(mod.id, (occupancy.counts.get(mod.id) ?? 0) + 1)
+            }
+        }
+        return occupancy
+    }
+
+    /**
+     * 判断 MOD 与槽位的静态兼容性：类型 / 光环排除 / 属性 / 限定。不含已装备互斥与库存数量。
+     * @param mod 待判定的 MOD（原始数据或实例均可）
+     * @param key MOD 槽位类型
+     * @returns 是否可装入该槽位
+     */
+    isModSlotCompatible(mod: ModEquipCandidate, key: ModTypeKey): boolean {
+        // 光环（羽蛇）系列走中枢槽，不占用普通槽位
+        if (mod.系列 === "羽蛇") return false
+        // 同律槽兼容「同律近战 / 同律远程」两种子类型；其余槽位精确匹配
+        if (key === "skillMods") {
+            if (!mod.类型.startsWith("同律")) return false
+        } else if (mod.类型 !== ModTypeMap[key]) return false
+        // 元素属性 MOD 仅限同属性角色
+        if (mod.属性 && mod.属性 !== this.char.属性) return false
+        const limit = mod.限定
+        if (limit === undefined || limit === null) return true
+        switch (key) {
+            case "charMods":
+                return typeof limit === "number" ? limit === this.char.id : limit === this.char.名称 || limit === this.char.属性
+            case "meleeMods":
+                return typeof limit === "string" && [this.meleeWeapon.类别, this.meleeWeapon.伤害类型].includes(limit)
+            case "rangedMods":
+                return typeof limit === "string" && [this.rangedWeapon.类别, this.rangedWeapon.伤害类型].includes(limit)
+            case "skillMods":
+                return !!this.skillWeapon && typeof limit === "string" && [this.skillWeapon.类别, this.skillWeapon.伤害类型].includes(limit)
+        }
+    }
+
+    /**
+     * 判断单个 MOD 在当前占用下是否可装备：槽位兼容 + 系列互斥 + 名称互斥（契约者豁免）+ 数量上限。
+     * @param mod 待判定的 MOD
+     * @param key MOD 槽位类型
+     * @param occupancy 已装备互斥占用；缺省取当前构筑该槽位的已装备
+     * @param availableCount 该 MOD 可用总数（含已装备）；缺省不限量
+     * @returns 是否可装备
+     */
+    isModEquipable(
+        mod: ModEquipCandidate,
+        key: ModTypeKey,
+        occupancy: ModEquipOccupancy = CharBuild.collectModOccupancy(this[key]),
+        availableCount = Number.POSITIVE_INFINITY
+    ): boolean {
+        if (!this.isModSlotCompatible(mod, key)) return false
+        if (CharBuild.modExclusionGroup(mod).some(key => occupancy.series.has(key))) return false
+        // 名称互斥仅约束非契约者：契约者允许同名共存
+        if (mod.系列 !== "契约者" && occupancy.names.has(mod.名称)) return false
+        return (occupancy.counts.get(mod.id) ?? 0) < availableCount
+    }
+
+    /**
+     * 批量过滤可装备 MOD：槽位兼容 + 互斥 + 数量 + 可选极性，同一口径供自动构筑与选装弹窗共用。
+     * @param candidates 候选 MOD
+     * @param key MOD 槽位类型
+     * @param options 极性过滤 / 已装备列表（仅同时生效的槽位组，变体 A/B/C 不得混入，见 collectModOccupancy）/ 预计算占用 / 可用数量回调
+     * @returns 可装备的候选子集（保持原顺序）
+     */
+    filterEquipableMods<T extends ModEquipCandidate>(
+        candidates: readonly T[],
+        key: ModTypeKey,
+        options: {
+            polarity?: "D" | "O" | "V" | "A"
+            occupancy?: ModEquipOccupancy
+            equipped?: readonly (readonly (LeveledMod | null | undefined)[] | undefined)[]
+            getAvailableCount?: (mod: T) => number
+        } = {}
+    ): T[] {
+        const occupancy = options.occupancy ?? CharBuild.collectModOccupancy(...(options.equipped ?? [this[key]]))
+        return candidates.filter(mod => {
+            if (options.polarity && mod.极性 !== options.polarity) return false
+            const availableCount = options.getAvailableCount?.(mod) ?? Number.POSITIVE_INFINITY
+            return this.isModEquipable(mod, key, occupancy, availableCount)
+        })
+    }
+
     /**
      * 自动构筑
      * @param buildOptions 构筑参数
@@ -4913,23 +5016,6 @@ export class CharBuild {
             preserveTypes.includes(key) ? (initBuild[key] = initBuild[key].filter(v => v !== null)) : (initBuild[key] = [])
         )
         const localBuild = initBuild.clone()
-        // 创建一个集合记录已选择的互斥系列
-        const selectedExclusiveSeries = {
-            charMods: new Set<string>(),
-            meleeMods: new Set<string>(),
-            rangedMods: new Set<string>(),
-            skillMods: new Set<string>(),
-        }
-        // 创建一个集合记录已选择的非契约者MOD名称（用于名称互斥）
-        const selectedExclusiveNames = {
-            charMods: new Set<string>(),
-            meleeMods: new Set<string>(),
-            rangedMods: new Set<string>(),
-            skillMods: new Set<string>(),
-        }
-        // 记录已选择的MOD数量
-        const selectedModCount = new Map<number, number>()
-
         includeTypes.forEach(key => {
             localBuild[key] = []
             initBuild[key].forEach(mod => addMod(key, mod!))
@@ -4952,33 +5038,10 @@ export class CharBuild {
         function addMod(key: ModTypeKey, mod: LeveledMod) {
             if (isTypeFull(key)) return false
             localBuild[key].push(mod)
-            // 记录互斥系列
-            if (CharBuild.exclusiveSeries.includes(mod.系列) || (mod.系列 === "囚狼" && mod.id > 100000)) {
-                mod.excludeSeries.forEach(series => selectedExclusiveSeries[key].add(series))
-            }
-            // 记录非契约者MOD名称（用于名称互斥）
-            if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].add(mod.名称)
-            } else {
-                selectedModCount.set(mod.id, (selectedModCount.get(mod.id) || 0) + 1)
-            }
             return true
         }
         function removeMod(key: ModTypeKey, index: number) {
-            const mod = localBuild[key][index]!
             localBuild[key].splice(index, 1)
-            // 从互斥系列集合中移除
-            if (CharBuild.exclusiveSeries.includes(mod.系列)) {
-                mod.excludeSeries.forEach(series => selectedExclusiveSeries[key].delete(series))
-            }
-            // 从非契约者MOD名称集合中移除
-            if (mod.系列 !== "契约者") {
-                selectedExclusiveNames[key].delete(mod.名称)
-            } else {
-                const count = (selectedModCount.get(mod.id) || 0) - 1
-                if (count > 0) selectedModCount.set(mod.id, count)
-                else selectedModCount.delete(mod.id)
-            }
         }
 
         /**
@@ -5018,33 +5081,12 @@ export class CharBuild {
          * @returns 候选MOD与收益列表
          */
         function getModCandidates(key: ModTypeKey, polarity?: "D" | "O" | "V" | "A") {
-            const type = ModTypeMap[key]
-            return modOptions
-                .filter(
-                    v =>
-                        v.系列 !== "羽蛇" &&
-                        v.类型.startsWith(type) &&
-                        (!polarity || v.极性 === polarity) &&
-                        (!v.属性 || v.属性 === localBuild.char.属性) &&
-                        (!v.限定 ||
-                            (key === "charMods" &&
-                                (typeof v.限定 === "number"
-                                    ? localBuild.char.id === v.限定
-                                    : [localBuild.char.名称, localBuild.char.属性].includes(v.限定))) ||
-                            (key === "meleeMods" &&
-                                typeof v.限定 === "string" &&
-                                [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
-                            (key === "rangedMods" &&
-                                typeof v.限定 === "string" &&
-                                [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定)) ||
-                            (key === "skillMods" &&
-                                localBuild.skillWeapon &&
-                                typeof v.限定 === "string" &&
-                                [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
-                        !selectedExclusiveNames[key].has(v.名称) &&
-                        !selectedExclusiveSeries[key].has(v.系列 === "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&
-                        (selectedModCount.get(v.id) || 0) < (v.count || Number.POSITIVE_INFINITY)
-                )
+            return localBuild
+                .filterEquipableMods(modOptions, key, {
+                    polarity,
+                    equipped: [localBuild[key]],
+                    getAvailableCount: mod => mod.count || Number.POSITIVE_INFINITY,
+                })
                 .map(v => ({ mod: v, income: localBuild.calcIncome(v) }))
         }
 
@@ -5385,6 +5427,29 @@ export class CharBuild {
 }
 
 export type ModTypeKey = "charMods" | "meleeMods" | "rangedMods" | "skillMods"
+
+/**
+ * 可装备判定所需的 MOD 最小字段：原始 Mod 数据与 LeveledMod 实例均满足。
+ */
+export interface ModEquipCandidate {
+    id: number
+    名称: string
+    系列: string
+    类型: string
+    极性?: "D" | "O" | "V" | "A"
+    属性?: string
+    限定?: string | number
+}
+
+/**
+ * 已装备 MOD 的互斥占用快照：互斥系列 / 非契约者名称 / 各 id 已装数量。
+ * 由 `CharBuild.collectModOccupancy` 统一收集，各调用方不再各自维护。
+ */
+export interface ModEquipOccupancy {
+    series: Set<string>
+    names: Set<string>
+    counts: Map<number, number>
+}
 export enum ModTypeMap {
     charMods = "角色",
     meleeMods = "近战",

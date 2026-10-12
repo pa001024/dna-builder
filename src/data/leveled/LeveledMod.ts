@@ -189,12 +189,34 @@ export class LeveledMod implements Mod {
         return this._originalModData
     }
 
+    /**
+     * 互斥系列归一：新版囚狼（id > 100000）按「囚狼1」参与互斥判定，其余保持原名。
+     * 阈值只允许出现在这里；互斥组展开见 exclusionGroupOf，占用记录条件见 CharBuild.collectModOccupancy。
+     * @param 系列 MOD 系列
+     * @param id MOD id
+     * @returns 互斥判定用的系列键
+     */
+    static normalizeExclusiveSeries(系列: string, id: number): string {
+        return 系列 === "囚狼" && id > 100000 ? "囚狼1" : 系列
+    }
+
+    /**
+     * 互斥组：同组系列不能共存。换生灵与海妖共同互斥，榛子与黄衣共同互斥，
+     * 新版囚狼自互斥（归一为囚狼1，旧版囚狼不在组内）。
+     * 装备侧记录（excludeSeries）与候选侧判定共用此组语义，不得各写一份。
+     * @param 系列 MOD 系列
+     * @param id MOD id
+     * @returns 同组系列键（本系列一定在内）
+     */
+    static exclusionGroupOf(系列: string, id: number): string[] {
+        const key = LeveledMod.normalizeExclusiveSeries(系列, id)
+        if (key === "换生灵" || key === "海妖") return ["换生灵", "海妖"]
+        if (key === "榛子" || key === "黄衣") return ["榛子", "黄衣"]
+        return [key]
+    }
+
     get excludeSeries() {
-        if (this.系列 === "囚狼" && this.id > 100000) return ["囚狼1"]
-        if (this.系列 === "换生灵" || this.系列 === "海妖") {
-            return ["换生灵", "海妖"]
-        }
-        return [this.系列]
+        return LeveledMod.exclusionGroupOf(this.系列, this.id)
     }
 
     get isPrime() {

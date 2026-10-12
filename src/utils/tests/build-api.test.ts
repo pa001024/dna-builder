@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest"
 import { ref } from "vue"
 import { createDefaultCharSettings, normalizeCharSettings } from "@/composables/useCharSettings"
+import { CharBuild, LeveledChar, LeveledWeapon } from "@/data"
 import { isPetRelatedBuffName } from "@/data/petTrait"
 import { BUILD_API_DTS } from "@/shared/buildApiContract"
 import { type BuildApiHost, createBuildApi } from "@/utils/build-api"
@@ -11,12 +12,49 @@ function contractFields(): string[] {
     return [...block.matchAll(/^\s{4}(\w+)\??:/gm)].map(match => match[1])
 }
 
+/**
+ * 测试用真构筑（黎瑟/雷 + 铸铁者/重剑切割 + 烈焰孤沙）：生产环境宿主恒提供有效构筑，
+ * 可装备校验依赖它做类型 / 属性 / 限定判定，脚手架必须同样给（不能传 null 绕过）。
+ */
+function makeTestBuild() {
+    return new CharBuild({
+        char: new LeveledChar("黎瑟"),
+        skillLevel: 10,
+        hpPercent: 0.5,
+        resonanceGain: 2,
+        charMods: [],
+        buffs: [],
+        melee: new LeveledWeapon(10302),
+        ranged: new LeveledWeapon(20601),
+        baseName: "快速出击",
+        enemyId: 130,
+        enemyLevel: 80,
+        enemyResistance: 0.5,
+        targetFunction: "伤害",
+    })
+}
+
 function makeApi() {
     const host = {
         charSettings: ref(normalizeCharSettings(createDefaultCharSettings())),
         selectedChar: ref("法露茜"),
         charBuild: ref(null),
         inv: undefined,
+        setChar: () => {},
+    } as unknown as BuildApiHost
+    return createBuildApi(host)
+}
+
+/**
+ * 带库存桩的宿主：getModCount 返回拥有数量，用于验证数量上限拦截。
+ * @param owned 桩库存中每种 MOD 的拥有数
+ */
+function makeModApi(owned = 8) {
+    const host = {
+        charSettings: ref(normalizeCharSettings(createDefaultCharSettings())),
+        selectedChar: ref("黎瑟"),
+        charBuild: ref(makeTestBuild()),
+        inv: { getModCount: () => owned },
         setChar: () => {},
     } as unknown as BuildApiHost
     return createBuildApi(host)
@@ -122,9 +160,78 @@ describe("createBuildApi", () => {
     })
 
     it("state().effects 报告已装件的特效等级（未配置时按最大档生效）", async () => {
-        const target = (await api.data.effects({ source: "mod" }))[0]
-        await api.mods({ type: "角色", list: [{ id: target.id, level: 10 }] })
-        const hit = (await api.state()).effects.find(item => item.id === target.id)
+        // 写槽需构筑上下文做可装备校验：用带真构筑的宿主；首个特效来源是远程 MOD，装入类型匹配的槽
+        const modApi = makeModApi()
+        const target = (await modApi.data.effects({ source: "mod" }))[0]
+        await modApi.mods({ type: "远程", list: [{ id: target.id, level: 10 }] })
+        const hit = (await modApi.state()).effects.find(item => item.id === target.id)
         expect(hit).toMatchObject({ source: "mod", name: target.owner, level: target.maxLevel, maxLevel: target.maxLevel })
+    })
+})
+
+describe("build.mod / mods / aura 可装备校验", () => {
+    it("单槽：属性 / 类型 / 光环不符直接拒绝并说明原因", async () => {
+        const api = makeModApi()
+        // 11401 全盛·暗：黎瑟是雷属性
+        const attr = await api.mod({ type: "角色", slot: 0, id: 11401 })
+        expect(attr).toMatchObject({ ok: false })
+        expect(String(attr.error)).toContain("属性")
+        // 103001 无锋剑意是近战：装不上角色槽
+        const type = await api.mod({ type: "角色", slot: 0, id: 103001 })
+        expect(type).toMatchObject({ ok: false })
+        expect(String(type.error)).toContain("近战")
+        // 31502 旋刃是光环：指引去 aura
+        const aura = await api.mod({ type: "角色", slot: 0, id: 31502 })
+        expect(aura).toMatchObject({ ok: false })
+        expect(String(aura.error)).toContain("aura")
+    })
+
+    it("单槽：合法写入成功并落到设置槽位", async () => {
+        const api = makeModApi()
+        expect(await api.mod({ type: "角色", slot: 0, id: 41001 })).toMatchObject({ ok: true })
+        expect((await api.state()).mods["角色"][0]).toMatchObject({ id: 41001 })
+    })
+
+    it("单槽：系列互斥拦截，同名非契约者拦截、契约者放行", async () => {
+        const api = makeModApi()
+        expect(await api.mod({ type: "角色", slot: 0, id: 31301 })).toMatchObject({ ok: true })
+        const rival = await api.mod({ type: "角色", slot: 1, id: 51301 })
+        expect(rival).toMatchObject({ ok: false })
+        expect(String(rival.error)).toContain("互斥")
+        // 31008 炽灼·涅槃（不死鸟）与海妖不冲突
+        expect(await api.mod({ type: "角色", slot: 1, id: 31008 })).toMatchObject({ ok: true })
+        // 同名第二张被拦
+        const dupe = await api.mod({ type: "角色", slot: 2, id: 31008 })
+        expect(dupe).toMatchObject({ ok: false })
+        expect(String(dupe.error)).toContain("同名")
+        // 41741 炽灼·涅槃（契约者/雷）：同名豁免且属性匹配，放行
+        expect(await api.mod({ type: "角色", slot: 2, id: 41741 })).toMatchObject({ ok: true })
+    })
+
+    it("单槽：库存不足拒绝，同槽覆盖同张放行", async () => {
+        const api = makeModApi(1)
+        expect(await api.mod({ type: "角色", slot: 0, id: 41741 })).toMatchObject({ ok: true })
+        const over = await api.mod({ type: "角色", slot: 1, id: 41741 })
+        expect(over).toMatchObject({ ok: false })
+        expect(String(over.error)).toContain("库存")
+        // 同一槽位换等级属于覆盖自己，不受数量限制
+        expect(await api.mod({ type: "角色", slot: 0, id: 41741, level: 5 })).toMatchObject({ ok: true })
+    })
+
+    it("批量：同批内的互斥与错槽一并拦截，合法整批写入", async () => {
+        const api = makeModApi()
+        await expect(api.mods({ type: "角色", list: [{ id: 31301 }, { id: 51301 }] })).resolves.toMatchObject({ ok: false })
+        await expect(api.mods({ type: "角色", list: [{ id: 12101 }] })).resolves.toMatchObject({ ok: false })
+        expect(await api.mods({ type: "角色", list: [{ id: 41001 }, { id: 41002 }, null] })).toMatchObject({ ok: true })
+        const mods = (await api.state()).mods["角色"]
+        expect(mods[0]).toMatchObject({ id: 41001 })
+        expect(mods[1]).toMatchObject({ id: 41002 })
+        expect(mods[2].id).toBeNull()
+    })
+
+    it("aura：非羽蛇拒绝，羽蛇放行", async () => {
+        const api = makeModApi()
+        await expect(api.aura(41001)).resolves.toMatchObject({ ok: false })
+        expect(await api.aura(31502)).toMatchObject({ ok: true })
     })
 })

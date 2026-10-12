@@ -18,6 +18,7 @@ import {
     type LeveledSkillField,
     LeveledWeaponHelper,
     modData,
+    RModTypeMap,
     weaponData,
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
@@ -1492,25 +1493,12 @@ const dialogSlots = computed<TimelineModSlot[]>(() =>
 )
 
 /**
- * 当前类型的可选魔之楔：按类型与限定（角色 / 武器类别 / 伤害类型）过滤，光环系列单独走中枢槽位。
+ * 当前类型的可选魔之楔：类型 / 属性 / 限定走 CharBuild.isModSlotCompatible 同一口径，光环系列单独走中枢槽位。
  */
 const dialogModOptions = computed(() => {
     const build = dialogBuild.value
-    const type = modDialogType.value
     if (!build) return []
-    return modData.filter(mod => {
-        if (mod.系列 === "羽蛇") return false
-        const expectedType = type === "同律" ? build.skillWeapon?.类型 : type
-        if (!expectedType || mod.类型 !== expectedType) return false
-        const limit = mod.限定
-        if (!limit) return true
-        if (type === "角色") {
-            return typeof limit === "number" ? limit === build.char.id : limit === build.char.名称 || limit === build.char.属性
-        }
-        if (type === "近战") return typeof limit === "string" && [build.meleeWeapon.类别, build.meleeWeapon.伤害类型].includes(limit)
-        if (type === "远程") return typeof limit === "string" && [build.rangedWeapon.类别, build.rangedWeapon.伤害类型].includes(limit)
-        return typeof limit === "string" && [build.skillWeapon?.类别, build.skillWeapon?.伤害类型].includes(limit)
-    })
+    return modData.filter(mod => build.isModSlotCompatible(mod, RModTypeMap[modDialogType.value]))
 })
 
 /**

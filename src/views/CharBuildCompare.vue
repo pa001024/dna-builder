@@ -24,6 +24,7 @@ import {
     LeveledMod,
     LeveledModHelper,
     LeveledWeaponHelper,
+    type ModTypeKey,
     modData,
     WeaponAttr,
 } from "@/data"
@@ -78,6 +79,21 @@ const modOptions = modData
         lv: inv.getModLv(mod.id, mod.品质),
     }))
     .filter(mod => mod.count)
+
+/**
+ * 按槽位过滤 MOD 选项：类型 / 属性 / 限定走 CharBuild.isModSlotCompatible 同一口径。
+ * @param build 目标构筑（缺失时返回空，避免无上下文写入错槽）
+ * @param key MOD 槽位类型
+ * @returns 该槽位可选的 MOD 选项
+ */
+function filterModOptionsBySlot(build: CharBuild | undefined, key: ModTypeKey) {
+    if (!build) return []
+    const rawById = new Map(modData.map(mod => [mod.id, mod]))
+    return modOptions.filter(option => {
+        const raw = rawById.get(option.value)
+        return !!raw && build.isModSlotCompatible(raw, key)
+    })
+}
 
 const _buffOptions = reactive(
     buffData.map(buff => ({
@@ -630,17 +646,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :title="$t('char-build.char_mod_config')"
                                     :mods="config.additionalMods[0].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :other-mods="getSettingsMods(config.charSettings, 0).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :mod-options="
-                                        modOptions.filter(
-                                            m =>
-                                                m.type === '角色' &&
-                                                (!m.limit ||
-                                                    (typeof m.limit === 'number'
-                                                        ? m.limit === charBuilds[index]?.char.id
-                                                        : m.limit === charBuilds[index]?.char.名称 ||
-                                                          m.limit === charBuilds[index]?.char.属性))
-                                        )
-                                    "
+                                    :mod-options="filterModOptionsBySlot(charBuilds[index], 'charMods')"
                                     :char-build="charBuilds[index]"
                                     type="角色"
                                     @remove-mod="removeMod(index, '角色', $event)"
@@ -660,18 +666,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :title="$t('char-build.melee_weapon_mod_config')"
                                     :mods="config.additionalMods[1].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :other-mods="getSettingsMods(config.charSettings, 1).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :mod-options="
-                                        modOptions.filter(
-                                            m =>
-                                                m.type === '近战' &&
-                                                (!m.limit ||
-                                                    (typeof m.limit === 'string' &&
-                                                        [
-                                                            charBuilds[index]?.meleeWeapon.类别,
-                                                            charBuilds[index]?.meleeWeapon.伤害类型,
-                                                        ].includes(m.limit)))
-                                        )
-                                    "
+                                    :mod-options="filterModOptionsBySlot(charBuilds[index], 'meleeMods')"
                                     :char-build="charBuilds[index]"
                                     type="近战"
                                     @remove-mod="removeMod(index, '近战', $event)"
@@ -685,18 +680,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :title="$t('char-build.ranged_weapon_mod_config')"
                                     :mods="config.additionalMods[2].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :other-mods="getSettingsMods(config.charSettings, 2).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :mod-options="
-                                        modOptions.filter(
-                                            m =>
-                                                m.type === '远程' &&
-                                                (!m.limit ||
-                                                    (typeof m.limit === 'string' &&
-                                                        [
-                                                            charBuilds[index]?.rangedWeapon.类别,
-                                                            charBuilds[index]?.rangedWeapon.伤害类型,
-                                                        ].includes(m.limit)))
-                                        )
-                                    "
+                                    :mod-options="filterModOptionsBySlot(charBuilds[index], 'rangedMods')"
                                     :char-build="charBuilds[index]"
                                     type="远程"
                                     @remove-mod="removeMod(index, '远程', $event)"
@@ -712,18 +696,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :other-mods="
                                         getSettingsMods(config.charSettings, 3).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))
                                     "
-                                    :mod-options="
-                                        modOptions.filter(
-                                            m =>
-                                                m.type === charBuilds[index]?.skillWeapon?.类型 &&
-                                                (!m.limit ||
-                                                    (typeof m.limit === 'string' &&
-                                                        [
-                                                            charBuilds[index]?.skillWeapon?.类别,
-                                                            charBuilds[index]?.skillWeapon?.伤害类型,
-                                                        ].includes(m.limit)))
-                                        )
-                                    "
+                                    :mod-options="filterModOptionsBySlot(charBuilds[index], 'skillMods')"
                                     :char-build="charBuilds[index]"
                                     type="同律"
                                     @remove-mod="removeMod(index, '同律', $event)"
