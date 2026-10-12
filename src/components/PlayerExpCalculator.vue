@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { DNARoleEntity } from "dna-api"
 import { computed, ref } from "vue"
 import { modMap } from "@/data"
-import { ExpPerReason, ExtraExpInputMax, PlayerLevelMaxExp } from "@/data/d/player.data"
+import { ExpPerReason, ExtraExpInputMax, PlayerLevelMaxExp, PlayerLevelMaxLevel } from "@/data/d/player.data"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
@@ -331,13 +331,20 @@ const totalExp = computed(() => {
  */
 const currentLevel = computed(() => {
     let accumulatedExp = 0
-    for (let i = 0; i < PlayerLevelMaxExp.length; i++) {
+    for (let i = 0; i < PlayerLevelMaxLevel; i++) {
         if (totalExp.value < accumulatedExp + PlayerLevelMaxExp[i]) {
             return i + 1
         }
         accumulatedExp += PlayerLevelMaxExp[i]
     }
-    return PlayerLevelMaxExp.length + 1
+    return PlayerLevelMaxLevel
+})
+
+const expToNextLevel = computed(() => {
+    if (currentLevel.value >= PlayerLevelMaxLevel) {
+        return PlayerLevelMaxExp[PlayerLevelMaxLevel - 1]
+    }
+    return PlayerLevelMaxExp[currentLevel.value - 1]
 })
 
 const remainingExp = computed(() => {
@@ -348,18 +355,11 @@ const remainingExp = computed(() => {
     return totalExp.value - accumulatedExp
 })
 
-const expToNextLevel = computed(() => {
-    if (currentLevel.value > PlayerLevelMaxExp.length) {
-        return 0
-    }
-    return PlayerLevelMaxExp[currentLevel.value - 1]
-})
-
 const progressPercent = computed(() => {
-    if (currentLevel.value > PlayerLevelMaxExp.length) {
+    if (expToNextLevel.value <= 0) {
         return 100
     }
-    return Math.round((remainingExp.value / expToNextLevel.value) * 100)
+    return Math.min(100, Math.round((remainingExp.value / expToNextLevel.value) * 100))
 })
 
 /**
@@ -579,248 +579,252 @@ const extraTotalExp = computed(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="flex h-full flex-col p-4 gap-4">
-            <!-- 顶部操作栏 -->
-            <div class="flex flex-wrap gap-2 justify-end">
-                <button class="btn btn-sm btn-primary" @click="syncGameData" :disabled="syncing">
-                    <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
-                    <span v-else>{{ $t("player-exp.sync_game") }}</span>
-                </button>
-                <button class="btn btn-sm btn-secondary" @click="importData">{{ $t("player-exp.import_json") }}</button>
-                <button class="btn btn-sm btn-secondary" @click="exportData">{{ $t("player-exp.copy_json") }}</button>
-                <button class="btn btn-sm btn-error" @click="resetData">{{ $t("player-exp.reset") }}</button>
-            </div>
+    <div class="stagger-rise grid grid-cols-1 gap-3 md:grid-cols-2">
+        <!-- 顶部操作栏 -->
+        <div class="flex flex-wrap items-center justify-end gap-2 md:col-span-2">
+            <button
+                type="button"
+                class="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-3 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="syncing"
+                @click="syncGameData"
+            >
+                <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
+                <Icon v-else icon="ri:refresh-line" class="block size-4" />
+                {{ $t("player-exp.sync_game") }}
+            </button>
+            <button
+                type="button"
+                class="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="importData"
+            >
+                <Icon icon="ri:clipboard-line" class="block size-4" />
+                {{ $t("player-exp.import_json") }}
+            </button>
+            <button
+                type="button"
+                class="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="exportData"
+            >
+                <Icon icon="ri:file-copy-line" class="block size-4" />
+                {{ $t("player-exp.copy_json") }}
+            </button>
+            <button
+                type="button"
+                class="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-error/40 px-3 text-xs text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error active:scale-[0.97]"
+                @click="resetData"
+            >
+                <Icon icon="ri:delete-bin-line" class="block size-4" />
+                {{ $t("player-exp.reset") }}
+            </button>
+        </div>
 
-            <!-- 等级显示卡片 -->
-            <div class="card bg-linear-to-r from-primary/20 to-secondary/20 border-2 border-primary/30">
-                <div class="card-body p-6">
-                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="text-6xl text-center">
-                                <div class="text-sm opacity-70">{{ $t("player-exp.level") }}</div>
-                                <span class="font-bold text-primary">{{ currentLevel }}</span>
-                            </div>
+        <!-- 等级显示 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm md:col-span-2">
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('player-exp.level')">
+                <template #trailing>
+                    <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ currentLevel }}</span>
+                </template>
+            </SectionHeader>
+            <div class="flex items-center gap-3">
+                <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-base-content/50">
+                    {{ remainingExp.toLocaleString() }} / {{ expToNextLevel.toLocaleString() }}
+                </span>
+                <div class="relative h-1.5 min-w-0 flex-1 overflow-hidden rounded-xs bg-base-content/10">
+                    <div
+                        class="absolute inset-y-0 left-0 rounded-xs bg-primary transition-all duration-300"
+                        :style="{ width: `${progressPercent}%` }"
+                    />
+                </div>
+                <span class="min-w-12 shrink-0 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                    >{{ progressPercent }}%</span
+                >
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.total_exp") }}</span>
+                <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ totalExp.toLocaleString() }}</span>
+            </div>
+        </section>
+
+        <!-- 手动输入 -->
+        <section class="flex flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MANUAL" :title="$t('player-exp.manual_input')" />
+            <div class="space-y-2.5">
+                <div v-for="reason in MANUAL_EXP_SOURCE_ORDER" :key="reason" class="grid grid-cols-[1fr_4.5rem] items-end gap-3">
+                    <div class="min-w-0">
+                        <div class="mb-1 flex items-baseline justify-between gap-2">
+                            <span class="truncate text-[11px] tracking-wide text-base-content/55"
+                                >{{ reason
+                                }}{{ ["每日任务", "其他", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}</span
+                            >
+                            <span class="shrink-0 text-[10px] text-base-content/35">{{ getExpPerItemLabel(reason) }}</span>
                         </div>
-                        <div class="flex-1 w-full md:w-auto">
-                            <div class="flex justify-between text-sm mb-2">
-                                <span>{{ remainingExp.toLocaleString() }} / {{ expToNextLevel.toLocaleString() }}</span>
-                                <span class="font-semibold">{{ progressPercent }}%</span>
-                            </div>
-                            <div class="w-full bg-base-200 rounded-full h-3">
-                                <div
-                                    class="bg-primary h-3 rounded-full transition-all duration-300"
-                                    :style="{ width: progressPercent + '%' }"
-                                ></div>
-                            </div>
-                            <div class="text-center mt-3 text-lg font-medium">
-                                {{ $t("player-exp.total_exp", { value: totalExp.toLocaleString() }) }}
-                            </div>
-                        </div>
+                        <input
+                            v-model.number="manualExpSources[reason]"
+                            type="number"
+                            min="0"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            :placeholder="$t('player-exp.amount')"
+                        />
                     </div>
+                    <span class="pb-1 text-right font-orbitron text-[13px] font-semibold tabular-nums text-base-content/45">
+                        {{ getExpPerItem(reason) }}
+                    </span>
                 </div>
             </div>
-
-            <!-- 经验来源网格 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 手动输入 -->
-                <div class="card bg-base-200">
-                    <div class="card-body p-4">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <span class="text-xl">✏️</span>
-                            {{ $t("player-exp.manual_input") }}
-                        </h3>
-                        <div class="space-y-3">
-                            <div v-for="reason in MANUAL_EXP_SOURCE_ORDER" :key="reason" class="space-y-1">
-                                <div class="flex justify-between items-center">
-                                    <label class="text-sm font-medium">
-                                        {{ reason }}
-                                        {{ ["每日任务", "其他", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}
-                                    </label>
-                                    <span class="text-xs opacity-70">{{ getExpPerItemLabel(reason) }}</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <input
-                                        v-model.number="manualExpSources[reason]"
-                                        type="number"
-                                        min="0"
-                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                        :placeholder="$t('player-exp.amount')"
-                                    />
-                                    <div
-                                        class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70"
-                                    >
-                                        {{ getExpPerItem(reason) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-auto pt-4 text-right">
-                            <span class="text-sm">{{ $t("player-exp.subtotal") }} </span>
-                            <span class="text-lg font-bold text-primary">{{
-                                $t("common.label_exp", { count: manualTotalExp.toLocaleString() })
-                            }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 突破记录 -->
-                <div class="card bg-base-200">
-                    <div class="card-body p-4">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <span class="text-xl">⭐</span>
-                            {{ $t("player-exp.breakthrough_record") }}
-                        </h3>
-                        <div class="space-y-4">
-                            <div v-for="(counts, reason) in breakthroughRecords" :key="reason" class="space-y-2">
-                                <div class="text-sm font-medium">{{ reason }}</div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div v-for="(_, index) in counts" :key="index" class="space-y-1">
-                                        <label class="text-xs opacity-70">{{ $t("player-exp.nth_time", { n: index + 1 }) }}</label>
-                                        <div class="flex gap-1">
-                                            <input
-                                                v-model.number="breakthroughRecords[reason][index]"
-                                                type="number"
-                                                min="0"
-                                                class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                                :placeholder="$t('player-exp.times')"
-                                            />
-                                            <div
-                                                class="w-12 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-center font-mono text-xs tabular-nums text-base-content/70"
-                                            >
-                                                {{ getExpPerItem(reason, index) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-auto pt-4 text-right">
-                            <span class="text-sm">{{ $t("player-exp.subtotal") }} </span>
-                            <span class="text-lg font-bold text-primary">{{
-                                $t("common.label_exp", { count: breakthroughTotalExp.toLocaleString() })
-                            }}</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="mt-auto flex items-center justify-between gap-2 border-t border-base-content/10 pt-2">
+                <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.subtotal") }}</span>
+                <span class="text-[15px] font-semibold tabular-nums text-primary">{{
+                    $t("common.label_exp", { count: manualTotalExp.toLocaleString() })
+                }}</span>
             </div>
+        </section>
 
-            <!-- 额外经验 -->
-            <div class="card bg-base-200">
-                <div class="card-body p-4">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span class="text-xl">🎁</span>
-                        {{ $t("player-exp.extra_exp") }}
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div v-for="(exp, reason) in extraExpInputs" :key="reason" class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label class="text-sm font-medium">{{ reason }}</label>
-                                <span class="text-xs opacity-70">{{
-                                    $t("player-exp.max_value", {
-                                        value: ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax].toLocaleString(),
-                                    })
-                                }}</span>
-                            </div>
-                            <div class="flex gap-2">
+        <!-- 突破记录 -->
+        <section class="flex flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BREAKTHROUGH" :title="$t('player-exp.breakthrough_record')" />
+            <div class="space-y-3">
+                <div v-for="(counts, reason) in breakthroughRecords" :key="reason" class="space-y-1.5">
+                    <div class="text-[11px] tracking-wide text-base-content/55">{{ reason }}</div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+                        <div v-for="(_, index) in counts" :key="index" class="space-y-1">
+                            <div class="text-[10px] text-base-content/40">{{ $t("player-exp.nth_time", { n: index + 1 }) }}</div>
+                            <div class="flex items-center gap-2">
                                 <input
-                                    v-model.number="extraExpInputs[reason]"
+                                    v-model.number="breakthroughRecords[reason][index]"
                                     type="number"
                                     min="0"
-                                    :max="ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax]"
-                                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                    :placeholder="$t('player-exp.exp_value')"
+                                    class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    :placeholder="$t('player-exp.times')"
                                 />
-                                <div
-                                    class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70"
-                                >
-                                    {{ exp.toLocaleString() }}
-                                </div>
+                                <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-base-content/45">{{
+                                    getExpPerItem(reason, index)
+                                }}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-base-300 text-right">
-                        <span class="text-sm">{{ $t("player-exp.subtotal") }} </span>
-                        <span class="text-lg font-bold text-primary">{{ extraTotalExp.toLocaleString() }} 经验</span>
-                    </div>
                 </div>
             </div>
+            <div class="mt-auto flex items-center justify-between gap-2 border-t border-base-content/10 pt-2">
+                <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.subtotal") }}</span>
+                <span class="text-[15px] font-semibold tabular-nums text-primary">{{
+                    $t("common.label_exp", { count: breakthroughTotalExp.toLocaleString() })
+                }}</span>
+            </div>
+        </section>
 
-            <!-- 魔之楔经验 -->
-            <div class="card bg-linear-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30">
-                <div class="card-body p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl">💎</span>
-                            <div>
-                                <div class="text-sm opacity-70">{{ $t("player-exp.mod_exp") }}</div>
-                                <div class="text-xs opacity-60">{{ $t("player-exp.auto_calc") }}</div>
-                            </div>
-                        </div>
-                        <div class="text-3xl font-bold text-purple-500">{{ modExp.toLocaleString() }}</div>
+        <!-- 额外经验 -->
+        <section class="flex flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm md:col-span-2">
+            <SectionHeader no-animate compact kicker="EXTRA" :title="$t('player-exp.extra_exp')" />
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div v-for="(_, reason) in extraExpInputs" :key="reason" class="space-y-1">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <span class="truncate text-[11px] tracking-wide text-base-content/55">{{ reason }}</span>
+                        <span class="shrink-0 text-[10px] tabular-nums text-base-content/35">{{
+                            $t("player-exp.max_value", {
+                                value: ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax].toLocaleString(),
+                            })
+                        }}</span>
                     </div>
+                    <input
+                        v-model.number="extraExpInputs[reason]"
+                        type="number"
+                        min="0"
+                        :max="ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax]"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        :placeholder="$t('player-exp.exp_value')"
+                    />
                 </div>
             </div>
+            <div class="mt-auto flex items-center justify-between gap-2 border-t border-base-content/10 pt-2">
+                <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.subtotal") }}</span>
+                <span class="text-[15px] font-semibold tabular-nums text-primary">{{
+                    $t("common.label_exp", { count: extraTotalExp.toLocaleString() })
+                }}</span>
+            </div>
+        </section>
 
-            <!-- 经验来源详情 -->
-            <div class="card bg-base-200">
-                <div class="card-body p-4">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span class="text-xl">📊</span>
-                        {{ $t("player-exp.exp_source_detail") }}
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm w-full">
-                            <thead>
-                                <tr class="bg-base-300">
-                                    <th class="text-left">{{ $t("player-exp.source") }}</th>
-                                    <th class="text-right">{{ $t("player-exp.amount") }}</th>
-                                    <th class="text-right">{{ $t("player-exp.exp_per_unit") }}</th>
-                                    <th class="text-right">{{ $t("player-exp.total_exp") }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(count, reason) in manualExpSources" :key="'manual-' + reason" class="hover:bg-base-100">
-                                    <td>{{ reason }}</td>
-                                    <td class="text-right">{{ count }}</td>
-                                    <td class="text-right">{{ getExpPerItem(reason) }}</td>
-                                    <td class="text-right font-medium">{{ (count * getExpPerItem(reason)).toLocaleString() }}</td>
-                                </tr>
-                                <tr
-                                    v-for="(counts, reason) in breakthroughRecords"
-                                    :key="'breakthrough-' + reason"
-                                    class="hover:bg-base-100"
-                                >
-                                    <td>{{ reason }}</td>
-                                    <td class="text-right">{{ counts.join(", ") }}</td>
-                                    <td class="text-right">{{ formatExpValue(reason) }}</td>
-                                    <td class="text-right font-medium">
-                                        {{ counts.reduce((sum, count, i) => sum + count * getExpPerItem(reason, i), 0).toLocaleString() }}
-                                    </td>
-                                </tr>
-                                <tr v-for="(exp, reason) in extraExpInputs" :key="'extra-' + reason" class="hover:bg-base-100">
-                                    <td>{{ reason }}</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right font-medium">{{ exp.toLocaleString() }}</td>
-                                </tr>
-                                <tr class="bg-linear-to-r from-purple-500/20 to-pink-500/20">
-                                    <td class="font-bold">{{ $t("player-exp.mod_acquisition") }}</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right font-bold">{{ modExp.toLocaleString() }}</td>
-                                </tr>
-                                <tr class="bg-primary text-primary-content font-bold text-lg">
-                                    <td>{{ $t("player-exp.total") }}</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right">-</td>
-                                    <td class="text-right">{{ totalExp.toLocaleString() }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- 魔之楔经验 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm md:col-span-2">
+            <SectionHeader no-animate compact kicker="MODS" :title="$t('player-exp.mod_exp')">
+                <template #trailing>
+                    <span class="text-[11px] text-base-content/45">{{ $t("player-exp.auto_calc") }}</span>
+                </template>
+            </SectionHeader>
+            <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.mod_acquisition") }}</span>
+                <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ modExp.toLocaleString() }}</span>
             </div>
-        </div>
-    </ScrollArea>
+        </section>
+
+        <!-- 经验来源详情 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm md:col-span-2">
+            <SectionHeader no-animate compact kicker="DETAIL" :title="$t('player-exp.exp_source_detail')" />
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-100">
+                    <thead>
+                        <tr class="border-b border-base-content/20">
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">{{ $t("player-exp.source") }}</th>
+                            <th class="px-3 py-2 text-right text-[10px] text-base-content/40">{{ $t("player-exp.amount") }}</th>
+                            <th class="px-3 py-2 text-right text-[10px] text-base-content/40">{{ $t("player-exp.exp_per_unit") }}</th>
+                            <th class="px-3 py-2 text-right text-[10px] text-base-content/40">{{ $t("player-exp.total_exp") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="(count, reason) in manualExpSources"
+                            :key="'manual-' + reason"
+                            class="border-b border-base-content/10 transition-colors duration-200 hover:bg-base-content/4"
+                        >
+                            <td class="px-3 py-2 text-sm">{{ reason }}</td>
+                            <td class="px-3 py-2 text-right text-sm tabular-nums">{{ count }}</td>
+                            <td class="px-3 py-2 text-right text-sm tabular-nums text-base-content/55">{{ getExpPerItem(reason) }}</td>
+                            <td class="px-3 py-2 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ (count * getExpPerItem(reason)).toLocaleString() }}
+                            </td>
+                        </tr>
+                        <tr
+                            v-for="(counts, reason) in breakthroughRecords"
+                            :key="'breakthrough-' + reason"
+                            class="border-b border-base-content/10 transition-colors duration-200 hover:bg-base-content/4"
+                        >
+                            <td class="px-3 py-2 text-sm">{{ reason }}</td>
+                            <td class="px-3 py-2 text-right text-sm tabular-nums text-base-content/55">{{ counts.join(", ") }}</td>
+                            <td class="px-3 py-2 text-right text-sm tabular-nums text-base-content/55">{{ formatExpValue(reason) }}</td>
+                            <td class="px-3 py-2 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ counts.reduce((sum, count, i) => sum + count * getExpPerItem(reason, i), 0).toLocaleString() }}
+                            </td>
+                        </tr>
+                        <tr
+                            v-for="(exp, reason) in extraExpInputs"
+                            :key="'extra-' + reason"
+                            class="border-b border-base-content/10 transition-colors duration-200 hover:bg-base-content/4"
+                        >
+                            <td class="px-3 py-2 text-sm">{{ reason }}</td>
+                            <td class="px-3 py-2 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ exp.toLocaleString() }}
+                            </td>
+                        </tr>
+                        <tr class="border-b border-base-content/10 bg-base-content/3">
+                            <td class="px-3 py-2 text-sm text-base-content/80">{{ $t("player-exp.mod_acquisition") }}</td>
+                            <td class="px-3 py-2 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ modExp.toLocaleString() }}
+                            </td>
+                        </tr>
+                        <tr class="border-t-2 border-primary/40">
+                            <td class="px-3 py-2.5 text-sm font-semibold text-base-content">{{ $t("player-exp.total") }}</td>
+                            <td class="px-3 py-2.5 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2.5 text-right text-sm text-base-content/35">-</td>
+                            <td class="px-3 py-2.5 text-right font-orbitron text-[15px] font-semibold tabular-nums text-primary">
+                                {{ totalExp.toLocaleString() }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 </template>

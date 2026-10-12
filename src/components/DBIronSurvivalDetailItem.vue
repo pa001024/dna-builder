@@ -1,7 +1,15 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
-import { dungeonMap, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, MonsterLevelUpperLimit, monsterLevelDropData } from "@/data"
+import {
+    dungeonMap,
+    ironSurvivalData,
+    ironSurvivalDungeonData,
+    LeveledChar,
+    MonsterLevelUpperLimit,
+    monsterLevelDropData,
+    rewardMap,
+} from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import type { CumulativeRewardBucket, IronSurvivalRewardRow } from "@/utils/iron-survival-reward-utils"
@@ -11,6 +19,7 @@ import {
     IRON_SURVIVAL_LEVEL_STEP,
     IRON_SURVIVAL_REWARD_BATCH_COUNT,
 } from "@/utils/iron-survival-reward-utils"
+import { getRewardIconBackground, getRewardIconUrl } from "@/utils/reward-icon"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 interface MonsterLevelDropRow {
@@ -18,6 +27,15 @@ interface MonsterLevelDropRow {
     probability: number
     probabilityUp: number
     rewardId: number
+    dropId: number
+    viewId: number
+}
+
+interface StrongDropOption {
+    dropId: number
+    viewId: number
+    rewardId: number
+    name: string
 }
 
 interface CumulativeRewardDisplayItem {
@@ -66,23 +84,62 @@ const ironSurvivalEndMonsterLevel = computed(() => Math.min(monsterLevelLimit.va
 
 const monsterLevelDropRows = computed<MonsterLevelDropRow[]>(() => {
     return (dungeonDetail.value?.MonsterLevelDrop || [])
-        .map(dropId => monsterLevelDropData[dropId])
-        .filter((drop): drop is NonNullable<typeof drop> => !!drop)
-        .flatMap(drop =>
+        .map(dropId => ({ dropId, drop: monsterLevelDropData[dropId] }))
+        .filter((entry): entry is { dropId: number; drop: NonNullable<(typeof monsterLevelDropData)[number]> } => !!entry.drop)
+        .flatMap(({ dropId, drop }) =>
             drop.MonsterLevel.map((level, index) => ({
                 level,
                 probability: drop.BaseProbability[index] || 0,
                 probabilityUp: drop.ProbabilityUp[index] || 0,
                 rewardId: drop.RewardId[index] || 0,
+                dropId,
+                viewId: drop.MonsterLevelDropView,
             }))
         )
 })
+
+/** 强敌掉落的定向掉落候选项（按 MonsterLevelDrop 去重，一个掉落物一项） */
+const strongDropOptions = computed<StrongDropOption[]>(() => {
+    const seen = new Map<number, StrongDropOption>()
+    for (const row of monsterLevelDropRows.value) {
+        if (seen.has(row.dropId)) continue
+        const reward = rewardMap.get(row.rewardId)
+        const name = reward?.child?.[0]?.n || `掉落 ${row.dropId}`
+        seen.set(row.dropId, { dropId: row.dropId, viewId: row.viewId, rewardId: row.rewardId, name })
+    }
+    return [...seen.values()]
+})
+
+/** 当前选中的定向掉落物（单选），默认首项 */
+const selectedStrongDropId = ref<number | null>(null)
+
+watch(
+    strongDropOptions,
+    options => {
+        if (!options.length) {
+            selectedStrongDropId.value = null
+            return
+        }
+        if (selectedStrongDropId.value == null || !options.some(option => option.dropId === selectedStrongDropId.value)) {
+            selectedStrongDropId.value = options[0].dropId
+        }
+    },
+    { immediate: true }
+)
 
 const monsterLevelDropRewards = computed(() => {
     return monsterLevelDropRows.value.map(row => ({
         ...row,
         reward: getRewardDetails(row.rewardId),
     }))
+})
+
+/** 仅展示选中定向掉落物的掉落行 */
+const filteredMonsterLevelDropRewards = computed(() => {
+    if (strongDropOptions.value.length <= 1 || selectedStrongDropId.value == null) {
+        return monsterLevelDropRewards.value
+    }
+    return monsterLevelDropRewards.value.filter(row => row.dropId === selectedStrongDropId.value)
 })
 
 /**
@@ -290,10 +347,48 @@ const rewardRowDetails = computed(() => {
 
         <section v-if="monsterLevelDropRewards.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="STRONG DROP" title="强敌掉落表" :count="`${strongKillCount}击杀/强敌`" />
+            <div v-if="strongDropOptions.length > 1" class="mt-2 mb-2">
+                <div class="mb-1.5 text-xs font-medium text-base-content/70">
+                    {{ $t("db-iron-survival-detail.directional_drop_select") }}
+                </div>
+                <div
+                    class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2"
+                    role="radiogroup"
+                    :aria-label="$t('db-iron-survival-detail.directional_drop_select')"
+                >
+                    <button
+                        v-for="option in strongDropOptions"
+                        :key="option.dropId"
+                        type="button"
+                        role="radio"
+                        :aria-checked="selectedStrongDropId === option.dropId"
+                        class="flex items-center gap-2 rounded-xs border p-2 text-left transition-colors duration-150"
+                        :class="
+                            selectedStrongDropId === option.dropId
+                                ? 'border-primary bg-primary/10'
+                                : 'border-base-content/10 bg-base-content/3 hover:border-primary/40'
+                        "
+                        @click="selectedStrongDropId = option.dropId"
+                    >
+                        <img
+                            :src="getRewardIconUrl('Resource', option.viewId)"
+                            :alt="$t(option.name)"
+                            class="size-8 shrink-0 rounded-xs bg-linear-45"
+                            :class="getRewardIconBackground('Resource', option.viewId)"
+                        />
+                        <span class="min-w-0 flex-1 truncate text-xs font-medium">{{ $t(option.name) }}</span>
+                        <span
+                            class="size-3.5 shrink-0 rounded-full border-2"
+                            :class="selectedStrongDropId === option.dropId ? 'border-primary bg-primary' : 'border-base-content/30'"
+                            aria-hidden="true"
+                        />
+                    </button>
+                </div>
+            </div>
             <div class="space-y-2">
                 <div
-                    v-for="dropRow in monsterLevelDropRewards"
-                    :key="`${dropRow.level}-${dropRow.rewardId}`"
+                    v-for="dropRow in filteredMonsterLevelDropRewards"
+                    :key="`${dropRow.dropId}-${dropRow.level}-${dropRow.rewardId}`"
                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
                     <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">

@@ -1292,6 +1292,17 @@
         "search_placeholder": "搜索副本ID或角色名称..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "免费房",
+        "async_combat_including_participation": "含参与奖励",
+        "async_combat_lead_count": "主演人数",
+        "async_combat_lead_reward": "主演奖励",
+        "async_combat_multiplier": "倍率",
+        "async_combat_mvp_per_lead": "每多一名主演，奖励增加3%",
+        "async_combat_mvp_reward": "MVP奖励",
+        "async_combat_normal_room": "普通房",
+        "async_combat_participation_reward": "参与奖励",
+        "async_combat_require_contribution": "需要贡献度达到3%",
+        "async_combat_require_lead": "需要成为主演",
         "check_time": "检查时间",
         "commander_count": "号令者 ({{count}}种)",
         "current_platform": "当前平台：{{platform}}（默认 PC）",
@@ -1442,6 +1453,7 @@
     "db-iron-survival-detail": {
         "compound": "复利",
         "cumulative_rewards": "累计奖励",
+        "directional_drop_select": "定向掉落选择",
         "with_compound": "（含复利）"
     },
     "db-iron-survival-spawn": {

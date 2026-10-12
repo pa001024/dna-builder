@@ -14,8 +14,7 @@ agent_created: true
 产物：一份可直接导入构筑页的 `charSettings` JSON（落 `outputs/`）+ 一张「各来源贡献 / 消融」表。
 
 **开工前必读**本页的「内核口径」「MOD 合法性」「陷阱」三节，绝大多数返工都错在这三处。
-角色机制数值口径先查 `.workbuddy/memory/topics/falu-mechanics.md`（灾厄武器 / 掉血 / 羽化 / 紊乱），
-线上真实构筑复现查 `.workbuddy/skills/charbuild-dps-ablation`。
+线上真实构筑复现查skill `charbuild-dps-ablation`。
 
 ### 铁律
 
@@ -62,7 +61,7 @@ agent_created: true
 
 这一步给第 3~6 步准备**有出处的先验**（铁律：数值结论要么出自数据包、要么出自线上构筑），并定一份
 **复现基线** —— 之后每一步的改动都跟它比。查询定义见 [api-queries.ts](src/api/gen/api-queries.ts)
-的 `buildsQuery` / `buildQuery`，排序逻辑在 `server/src/db/mod/build.ts`。
+的 `buildsQuery` / `buildQuery`。
 
 - 端点 `https://api.dna-builder.cn/graphql`（`src/env.ts` 的 `apiEndpoint`），公开查询、无需登录；
   **脚本里直接 `fetch`，别 import `src/api/client.ts`**（那是 urql + Vue 的浏览器链路）。

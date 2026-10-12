@@ -1300,6 +1300,17 @@
         "search_placeholder": "Search blueprint name (pinyin supported)..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "Free Room",
+        "async_combat_including_participation": "Incl. participation",
+        "async_combat_lead_count": "Lead count",
+        "async_combat_lead_reward": "Lead reward",
+        "async_combat_multiplier": "Multiplier",
+        "async_combat_mvp_per_lead": "+3% for each additional lead",
+        "async_combat_mvp_reward": "MVP reward",
+        "async_combat_normal_room": "Normal Room",
+        "async_combat_participation_reward": "Participation reward",
+        "async_combat_require_contribution": "Requires 3% contribution",
+        "async_combat_require_lead": "Requires being a lead",
         "check_time": "Check Time",
         "commander_count": "Commanders ({{count}})",
         "current_platform": "Current platform: {{platform}} (PC by default)",
@@ -1450,6 +1461,7 @@
     "db-iron-survival-detail": {
         "compound": "Compound",
         "cumulative_rewards": "Cumulative Rewards",
+        "directional_drop_select": "Featured Reward Selection",
         "with_compound": "(incl. compound interest)"
     },
     "db-iron-survival-spawn": {

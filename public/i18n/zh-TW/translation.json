@@ -1277,6 +1277,17 @@
         "search_placeholder": "搜尋設計稿名稱（支援拼音）..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "免費房",
+        "async_combat_including_participation": "含參與獎勵",
+        "async_combat_lead_count": "主演人數",
+        "async_combat_lead_reward": "主演獎勵",
+        "async_combat_multiplier": "倍率",
+        "async_combat_mvp_per_lead": "每多一名主演，獎勵增加3%",
+        "async_combat_mvp_reward": "MVP獎勵",
+        "async_combat_normal_room": "普通房",
+        "async_combat_participation_reward": "參與獎勵",
+        "async_combat_require_contribution": "需要貢獻度達到3%",
+        "async_combat_require_lead": "需要成為主演",
         "check_time": "檢查時間",
         "commander_count": "號令者 ({{count}}種)",
         "current_platform": "目前平台：{{platform}}（預設 PC）",
@@ -1427,6 +1438,7 @@
     "db-iron-survival-detail": {
         "compound": "複利",
         "cumulative_rewards": "累計獎勵",
+        "directional_drop_select": "定向掉落選擇",
         "with_compound": "（含複利）"
     },
     "db-iron-survival-spawn": {

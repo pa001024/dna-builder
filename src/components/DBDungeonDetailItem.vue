@@ -106,6 +106,35 @@ function getDungeonMonsterHpMultiplier(): number {
  */
 const isIronSurvivalDungeon = computed(() => props.dungeon.id in ironSurvivalDungeonData)
 
+const asyncCombatNormalRooms = computed(() => (props.dungeon.ac ?? []).filter(item => !item.t))
+const asyncCombatFreeRooms = computed(() => (props.dungeon.ac ?? []).filter(item => item.t === 1))
+
+/** 联袂演绎奖励倍率档位:普通房四档,免费房固定 1000%。 */
+const ASYNC_COMBAT_MULTIPLIERS = [1, 2, 8, 20] as const
+const ASYNC_COMBAT_FREE_MULTIPLIER = 10
+const asyncCombatIsFree = ref(false)
+const asyncCombatMultiplier = ref<number>(20)
+const asyncCombatLeadCount = ref(1)
+
+/** 当前生效倍率:免费房固定 10 倍,普通房按所选倍率。 */
+const asyncCombatActiveMultiplier = computed(() => (asyncCombatIsFree.value ? ASYNC_COMBAT_FREE_MULTIPLIER : asyncCombatMultiplier.value))
+
+/** MVP 档总百分比(含参与奖励,随主演人数线性增加):5 + 30 + 3 × 主演人数。 */
+const asyncCombatMvpTotalPercent = computed(() => 35 + 3 * Math.max(0, Math.floor(asyncCombatLeadCount.value)))
+
+/** 联袂演绎基础奖励:免费房勾选时用免费房清单,否则用普通房清单。 */
+const asyncCombatBaseRooms = computed(() => (asyncCombatIsFree.value ? asyncCombatFreeRooms.value : asyncCombatNormalRooms.value))
+
+/**
+ * 计算联袂演绎某档最终奖励:基础奖励 × 倍率 × 档位百分比(整数百分比,向下取整)。
+ * @param base 基础奖励数量
+ * @param percent 档位百分比整数(如 5 表示 5%)
+ * @returns 向下取整后的最终奖励数量
+ */
+function getAsyncCombatRewardAmount(base: number, percent: number): number {
+    return Math.floor((base * asyncCombatActiveMultiplier.value * percent) / 100)
+}
+
 /**
  * 计算结束波次对应的等级基数（每波 +5，最高为副本等级上限）。
  * 铁血副本直接取等级区间的实际覆盖末档（结束等级不含）。
@@ -574,6 +603,9 @@ watch(
         ironEndLevel.value = props.dungeon.lv + ENDLESS_LEVEL_STEP
         useNihaoBoxBonus.value = false
         useMobileSpawnRadius.value = false
+        asyncCombatIsFree.value = false
+        asyncCombatMultiplier.value = 20
+        asyncCombatLeadCount.value = 1
     }
 )
 </script>
@@ -1107,8 +1139,100 @@ watch(
         <template v-else>
             <section v-if="dungeon.ac?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="SELECT" :title="$t('奖励选择')" />
-                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                    <ResourceCostItem v-for="item in dungeon.ac" :key="item.id" name="" :value="[item.c, item.id, 'Resource']" />
+                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <button
+                        v-if="asyncCombatFreeRooms.length"
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            asyncCombatIsFree
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
+                        @click="asyncCombatIsFree = !asyncCombatIsFree"
+                    >
+                        {{ $t("db-dungeon-detail.async_combat_free_room") }} (1000%)
+                    </button>
+                    <template v-if="!asyncCombatIsFree">
+                        <span class="mr-1 shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                            $t("db-dungeon-detail.async_combat_multiplier")
+                        }}</span>
+                        <button
+                            v-for="rate in ASYNC_COMBAT_MULTIPLIERS"
+                            :key="rate"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                asyncCombatMultiplier === rate
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="asyncCombatMultiplier = rate"
+                        >
+                            {{ rate * 100 }}%
+                        </button>
+                    </template>
+                    <span class="mr-1 shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                        $t("db-dungeon-detail.async_combat_lead_count")
+                    }}</span>
+                    <input
+                        v-model.number="asyncCombatLeadCount"
+                        type="number"
+                        min="0"
+                        max="99"
+                        class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] tabular-nums outline-none transition-colors duration-150 focus:border-primary"
+                    />
+                </div>
+                <div class="mt-2 text-xs tabular-nums text-base-content/55">
+                    {{ asyncCombatIsFree ? "1000%" : `${asyncCombatMultiplier * 100}%` }} ×
+                    {{ $t(asyncCombatIsFree ? "db-dungeon-detail.async_combat_free_room" : "db-dungeon-detail.async_combat_normal_room") }}
+                </div>
+                <div class="mt-3 space-y-3">
+                    <div>
+                        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
+                            <span class="font-medium"
+                                >{{ $t("db-dungeon-detail.async_combat_participation_reward") }}: 5%</span
+                            >
+                            <span class="text-base-content/55">{{ $t("db-dungeon-detail.async_combat_require_contribution") }}</span>
+                        </div>
+                        <div class="mt-1 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                            <ResourceCostItem
+                                v-for="item in asyncCombatBaseRooms"
+                                :key="`p-${item.id}`"
+                                name=""
+                                :value="[getAsyncCombatRewardAmount(item.c, 5), item.id, 'Resource']"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
+                            <span class="font-medium"
+                                >{{ $t("db-dungeon-detail.async_combat_mvp_reward") }}({{ $t("db-dungeon-detail.async_combat_including_participation") }}):
+                                {{ asyncCombatMvpTotalPercent }}% = 5% + 30% + 3% × {{ Math.max(0, Math.floor(asyncCombatLeadCount)) }}</span
+                            >
+                            <span class="text-base-content/55">{{ $t("db-dungeon-detail.async_combat_mvp_per_lead") }}</span>
+                        </div>
+                        <div class="mt-1 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                            <ResourceCostItem
+                                v-for="item in asyncCombatBaseRooms"
+                                :key="`m-${item.id}`"
+                                name=""
+                                :value="[getAsyncCombatRewardAmount(item.c, asyncCombatMvpTotalPercent), item.id, 'Resource']"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
+                            <span class="font-medium">{{ $t("db-dungeon-detail.async_combat_lead_reward") }}: 100%</span>
+                            <span class="text-base-content/55">{{ $t("db-dungeon-detail.async_combat_require_lead") }}</span>
+                        </div>
+                        <div class="mt-1 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                            <ResourceCostItem
+                                v-for="item in asyncCombatBaseRooms"
+                                :key="`l-${item.id}`"
+                                name=""
+                                :value="[getAsyncCombatRewardAmount(item.c, 100), item.id, 'Resource']"
+                            />
+                        </div>
+                    </div>
                 </div>
             </section>
             <template v-else>

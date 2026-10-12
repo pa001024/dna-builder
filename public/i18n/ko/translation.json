@@ -1283,6 +1283,17 @@
         "search_placeholder": "설계도 이름 검색(병음 지원)..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "무료 룸",
+        "async_combat_including_participation": "참여 보상 포함",
+        "async_combat_lead_count": "주연 인원",
+        "async_combat_lead_reward": "주연 보상",
+        "async_combat_multiplier": "배율",
+        "async_combat_mvp_per_lead": "주연이 1명 추가될 때마다 보상 +3%",
+        "async_combat_mvp_reward": "MVP 보상",
+        "async_combat_normal_room": "일반 룸",
+        "async_combat_participation_reward": "참여 보상",
+        "async_combat_require_contribution": "기여도 3% 필요",
+        "async_combat_require_lead": "주연 필요",
         "check_time": "확인 시간",
         "commander_count": "호령자 ({{count}}종)",
         "current_platform": "현재 플랫폼: {{platform}}(기본 PC)",
@@ -1433,6 +1444,7 @@
     "db-iron-survival-detail": {
         "compound": "복리",
         "cumulative_rewards": "누적 보상",
+        "directional_drop_select": "지정 드랍 선택",
         "with_compound": "(복리 포함)"
     },
     "db-iron-survival-spawn": {

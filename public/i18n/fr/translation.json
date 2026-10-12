@@ -1315,6 +1315,17 @@
         "search_placeholder": "Rechercher un nom de plan (pinyin pris en charge)..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "Salle gratuite",
+        "async_combat_including_participation": "Participation incluse",
+        "async_combat_lead_count": "Nombre de vedettes",
+        "async_combat_lead_reward": "Récompense de vedette",
+        "async_combat_multiplier": "Multiplicateur",
+        "async_combat_mvp_per_lead": "+3 % par vedette supplémentaire",
+        "async_combat_mvp_reward": "Récompense MVP",
+        "async_combat_normal_room": "Salle normale",
+        "async_combat_participation_reward": "Récompense de participation",
+        "async_combat_require_contribution": "Contribution de 3 % requise",
+        "async_combat_require_lead": "Devenir vedette requis",
         "check_time": "Heure de vérification",
         "commander_count": "Commandants ({{count}})",
         "current_platform": "Plateforme actuelle : {{platform}} (PC par défaut)",
@@ -1465,6 +1476,7 @@
     "db-iron-survival-detail": {
         "compound": "Intérêts composés",
         "cumulative_rewards": "Récompenses cumulées",
+        "directional_drop_select": "Sélection des récompenses ciblées",
         "with_compound": "(intérêts composés inclus)"
     },
     "db-iron-survival-spawn": {

@@ -4,6 +4,8 @@ export const PlayerLevelMaxExp: number[] = [
     4460, 4860, 5260, 5660, 7660, 9660, 11660, 13660, 15660, 20660, 30660, 45660, 65660, 90660, 99999,
 ]
 
+export const PlayerLevelMaxLevel = 65
+
 export const ExpPerReason: {
     角色获取: number
     角色突破: number[]

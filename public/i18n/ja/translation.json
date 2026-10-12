@@ -1281,6 +1281,17 @@
         "search_placeholder": "図面名を検索（ピンイン対応）..."
     },
     "db-dungeon-detail": {
+        "async_combat_free_room": "無料ルーム",
+        "async_combat_including_participation": "参加報酬込み",
+        "async_combat_lead_count": "主演人数",
+        "async_combat_lead_reward": "主演報酬",
+        "async_combat_multiplier": "倍率",
+        "async_combat_mvp_per_lead": "主演が1人増えるごとに報酬+3%",
+        "async_combat_mvp_reward": "MVP報酬",
+        "async_combat_normal_room": "通常ルーム",
+        "async_combat_participation_reward": "参加報酬",
+        "async_combat_require_contribution": "貢献度3%が必要",
+        "async_combat_require_lead": "主演になる必要あり",
         "check_time": "チェック時間",
         "commander_count": "号令者 ({{count}} 種)",
         "current_platform": "現在のプラットフォーム：{{platform}}（既定 PC）",
@@ -1431,6 +1442,7 @@
     "db-iron-survival-detail": {
         "compound": "複利",
         "cumulative_rewards": "累計報酬",
+        "directional_drop_select": "指定ドロップ選択",
         "with_compound": "（複利込み）"
     },
     "db-iron-survival-spawn": {

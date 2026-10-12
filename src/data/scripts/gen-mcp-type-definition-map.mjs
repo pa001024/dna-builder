@@ -7,6 +7,7 @@ import { resolve } from "node:path"
  */
 const TYPE_DEFINITION_CONFIG = {
     AbyssDungeon: { filePath: "d/abyss.data.ts", interfaceName: "AbyssDungeon" },
+    AsyncCombat: { filePath: "d/dungeon.data.ts", interfaceName: "AsyncCombat" },
     Buff: { filePath: "d/buff.data.ts", interfaceName: "Buff" },
     Char: { filePath: "d/char.data.ts", interfaceName: "Char" },
     CharExt: { filePath: "d/charext.data.ts", interfaceName: "CharExt" },
