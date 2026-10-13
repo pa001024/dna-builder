@@ -10,4 +10,6 @@ export const env = {
     cdnBackup: "https://cdn.dobapp.cc",
     // apiEndpoint: import.meta.env.DEV ? "http://localhost:8887" : "https://api.dna-builder.cn",
     apiEndpoint: "https://api.dna-builder.cn",
+    /** 安全模式解锁密码的夸克网盘分享链接（服务端定时更新包内容，链接固定不变） */
+    quarkShareUrl: "https://pan.quark.cn/s/1419bbc8aa2d",
 }

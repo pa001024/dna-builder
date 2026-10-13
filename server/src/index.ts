@@ -18,6 +18,7 @@ import { modApiPlugin } from "./api/mod"
 import { syncDataPackDiffBackendsOnce } from "./api/package-diff"
 import { raceLotteryPlugin } from "./api/race-lottery"
 import { ragPlugin } from "./api/rag"
+import { safeModePlugin } from "./api/safe-mode"
 import { botPlugin } from "./bot"
 import { requestIndexBuild, resolveAllowedLangs, warmCurrentFingerprints } from "./rag/build"
 import { startRagProgressUi, stopRagProgressUi } from "./rag/progress-ui"
@@ -33,6 +34,7 @@ const app = new Elysia()
     .use(installPlugin())
     .use(modApiPlugin())
     .use(raceLotteryPlugin())
+    .use(safeModePlugin())
     .use(aiPlugin())
     .use(aiLogPlugin())
     .use(agentSkillPlugin())
@@ -69,10 +71,11 @@ void syncDataPackDiffBackendsOnce()
 startRagProgressUi()
 
 // 启动参数 `bun sv -- --index-all`：预热完成后把白名单内的语言全部排入后台构建队列
-// （已最新的语言只做指纹比对，不重新嵌入）
+// （已最新的语言只做指纹比对，不重新嵌入）；不传时只预热指纹，过期语言由检索请求按需触发重建
 const indexAll = process.argv.includes("--index-all")
 
-// 启动预热：算一次各语言的当前数据指纹并缓存；索引落后的语言自动排队重建
+// 启动预热：只算一次各语言的当前数据指纹并缓存，不排队构建；
+// `--index-all` 的全量排队由下面的显式循环负责，过期语言平时由检索请求按需触发重建
 void warmCurrentFingerprints()
     .then(async () => {
         // 指纹就绪后空跑一次检索：HNSW 索引首次查询要从磁盘载入（约 85ms），之后约 7ms

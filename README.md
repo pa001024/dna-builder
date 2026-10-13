@@ -32,6 +32,8 @@
 | **微软商店**        | [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1) |
 | **GitHub Releases** | [下载最新版本](https://github.com/pa001024/dna-builder/releases/latest)                          |
 
+[Quark 网盘下载](https://pan.quark.cn/s/1419bbc8aa2d)
+
 > **运行前置**：桌面版依赖 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)，通常 Windows 10/11 已内置，若未安装请前往下载。
 
 ![DNA Builder 桌面版截图](./misc/1.png)

@@ -2,7 +2,8 @@
  * 服务端 RAG 索引的自动构建。
  *
  * 分工：
- * 1. 启动：warmCurrentFingerprints 装配一次各语言语料、算出「当前数据指纹」并缓存，索引落后的语言排队重建；
+ * 1. 启动：warmCurrentFingerprints 装配一次各语言语料、算出「当前数据指纹」并缓存；
+ *    索引落后的语言只在显式要求（`--index-all`）时排队重建，否则留给请求路径按需触发；
  * 2. 请求：只做内存里的指纹比较（resolveIndexFingerprint），不装配语料；
  * 3. 构建：单飞后台任务（失败冷却 5 分钟），只处理「确实落后于当前数据」的语言。
  *
@@ -364,9 +365,15 @@ export function peekCurrentFingerprint(lang: string): RagFingerprintInfo | undef
 }
 
 /**
- * 启动预热：算出各语言的当前数据指纹并缓存；已建过索引但内容已变的语言排队重建（无需手工命令）。
+ * 启动预热：算出各语言的当前数据指纹并缓存。
+ * @param langs 要预热的语言，默认语言白名单
+ * @param options.queueStale 是否把「已建过索引但内容已过期」的语言排队重建；
+ * 不传时只算指纹不上队（重建留给请求路径按需触发），避免不带 `--index-all` 启动就全量构建
  */
-export async function warmCurrentFingerprints(langs: readonly string[] = resolveAllowedLangs()): Promise<RagWarmReport[]> {
+export async function warmCurrentFingerprints(
+    langs: readonly string[] = resolveAllowedLangs(),
+    options: { queueStale?: boolean } = {}
+): Promise<RagWarmReport[]> {
     const started = Date.now()
     const reports: RagWarmReport[] = []
 
@@ -379,9 +386,10 @@ export async function warmCurrentFingerprints(langs: readonly string[] = resolve
 
             reports.push({ lang, kinds: info.kinds, count: info.count, indexed, staleKinds })
 
-            // 已经建过索引、但内容变了 → 自动补建（没建过的语言留给「第一个来问的客户端」触发，
-            // 免得六种语言一起向量化；毕竟服务器通常只服务其中一两种）
-            if (indexed && staleKinds.length) {
+            // 已经建过索引、但内容变了 → 只有显式要求（`--index-all`）才自动补建；
+            // 默认不上队：没建过的语言、没过期的语言都不动，过期语言等「第一个来问的客户端」按需触发，
+            // 免得不带 flag 启动就把六种语言一起向量化；毕竟服务器通常只服务其中一两种
+            if (options.queueStale && indexed && staleKinds.length) {
                 requestIndexBuild(lang, `启动时发现索引内容已过期（${staleKinds.join(" / ")}）`)
             }
         } catch (error) {
