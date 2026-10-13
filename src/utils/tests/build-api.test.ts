@@ -235,3 +235,29 @@ describe("build.mod / mods / aura 可装备校验", () => {
         expect(await api.aura(31502)).toMatchObject({ ok: true })
     })
 })
+
+describe("build.weapon 灾厄唯一限制", () => {
+    it("另一槽已装备灾厄武器时再装灾厄武器直接拒绝并说明原因", async () => {
+        const api = makeModApi()
+        // 10299 无止无休（近战灾厄），20298 血染织羽（远程灾厄）
+        expect(await api.weapon({ slot: "melee", name: "无止无休" })).toMatchObject({ ok: true })
+        const dupe = await api.weapon({ slot: "ranged", name: "血染织羽" })
+        expect(dupe).toMatchObject({ ok: false })
+        expect(String(dupe.error)).toContain("灾厄")
+        expect(String(dupe.error)).toContain("无止无休")
+        // 拒绝后槽位保持原值，不能留下第二把灾厄武器
+        expect((await api.state()).melee).toMatchObject({ name: "无止无休" })
+    })
+
+    it("非灾厄武器不受影响，卸下旧灾厄后可正常换新", async () => {
+        const api = makeModApi()
+        expect(await api.weapon({ slot: "melee", name: "无止无休" })).toMatchObject({ ok: true })
+        // 远程装普通武器放行
+        expect(await api.weapon({ slot: "ranged", id: 20601 })).toMatchObject({ ok: true })
+        // 近战换回普通武器放行（等价于先换下灾厄）
+        expect(await api.weapon({ slot: "melee", id: 10302 })).toMatchObject({ ok: true })
+        // 此时再装远程灾厄放行
+        expect(await api.weapon({ slot: "ranged", name: "血染织羽" })).toMatchObject({ ok: true })
+        expect((await api.state()).ranged).toMatchObject({ name: "血染织羽" })
+    })
+})

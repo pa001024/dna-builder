@@ -81,8 +81,8 @@ const isCalamityWeapon = (weaponId: number) => weaponMap.get(weaponId)?.伤害�
 function warnCalamityConflict(equipped: Weapon, incoming: Weapon) {
     ui.showErrorMessage(
         t("weapon-list.calamityConflict", {
-            equipped: gt(equipped.名称),
-            incoming: gt(incoming.名称),
+            first: gt(equipped.名称),
+            second: gt(incoming.名称),
         })
     )
 }

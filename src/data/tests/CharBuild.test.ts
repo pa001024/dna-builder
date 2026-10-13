@@ -1532,7 +1532,7 @@ describe("CharBuild类测试", () => {
             const attrs = charBuild.calculateAttributes()
 
             expect(attrs.技能速度).toBeTypeOf("number")
-            expect(attrs.技能速度).toBeGreaterThanOrEqual(0)
+            expect(attrs.技能速度).toBeGreaterThanOrEqual(1)
         })
 
         it("应该正确计算技能倍率加数", () => {

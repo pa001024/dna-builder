@@ -446,14 +446,14 @@ export class CharBuild {
         DPH: "or(多重,1)*伤害",
         总伤: "max(1,召唤物攻击次数)*伤害",
         暴击伤害: "伤害.暴击",
-        DPS: "or(攻速,1+技能速度)*or(多重,1)*伤害",
+        DPS: "or(攻速,技能速度)*or(多重,1)*伤害",
         范围收益: "技能范围*伤害",
         耐久收益: "技能耐久*伤害",
         效益收益: "技能效益*伤害",
         每神智DPH: "1/神智消耗*伤害",
         每持续神智DPH: "1/每秒神智消耗*伤害",
-        每神智DPS: "or(攻速,1+技能速度)/神智消耗*伤害",
-        每持续神智DPS: "or(攻速,1+技能速度)/每秒神智消耗*伤害",
+        每神智DPS: "or(攻速,技能速度)/神智消耗*伤害",
+        每持续神智DPS: "or(攻速,技能速度)/每秒神智消耗*伤害",
     }
 
     public _char!: LeveledChar
@@ -1431,7 +1431,7 @@ export class CharBuild {
             属性穿透: penetration,
             无视防御: ignoreDefense,
             技能无视防御: skillIgnoreDefense,
-            技能速度: skillSpeed,
+            技能速度: 1 + skillSpeed,
             失衡易伤: imbalanceDamageBonus,
             技能倍率加数: skillAdd,
             技能倍率乘数: skillMultiplier,

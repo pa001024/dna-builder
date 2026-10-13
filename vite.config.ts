@@ -258,6 +258,7 @@ export default defineConfig(async () => ({
                 "**/server/**",
                 "**/sdk/**",
                 "**/.tmp/**",
+                "**/.agents/**",
                 // "**/externals/**",
                 // ...
             ],

@@ -1,3 +1,0 @@
-# C# 构建产物（首次 dotnet build 会重新生成，需要联网还原 UAssetAPI）
-bin/
-obj/

@@ -731,6 +731,13 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             }
             const settings = host.charSettings.value
             const isMelee = input.slot === "melee"
+            const otherId = isMelee ? settings.rangedWeapon : settings.meleeWeapon
+            const otherWeapon = otherId ? (weaponMap.get(otherId) ?? null) : null
+            if (weapon.伤害类型 === "灾厄" && otherWeapon?.伤害类型 === "灾厄") {
+                return fail(
+                    `灾厄武器只能装备一把：${isMelee ? "远程" : "近战"}槽已装备「${otherWeapon.名称}」，无法再装备「${weapon.名称}」，请先换下另一槽位的灾厄武器再试`
+                )
+            }
             const prefix = isMelee ? "meleeWeapon" : "rangedWeapon"
             const level = input.level ?? (isMelee ? settings.meleeWeaponLevel : settings.rangedWeaponLevel)
             const refine = input.refine ?? (isMelee ? settings.meleeWeaponRefine : settings.rangedWeaponRefine)

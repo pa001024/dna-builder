@@ -1,6 +1,6 @@
 ---
 name: fmodel-unpack
-description: This skill documents how to use the fmodel-mcp toolkit (a CUE4Parse-based .NET CLI plus a thin Python MCP server) to inspect and export Unreal Engine game assets — pak files, textures, meshes, animations, materials, and raw package JSON. Use it when unpacking/extracting assets from a UE game (e.g. Duet Night Abyss / "Duet: Night Abyss"), writing or troubleshooting config.json for a new title, or driving the fmodel-cli subcommands / fmodel_* MCP tools.
+description: documents how to use the fmodel-mcp toolkit (a CUE4Parse-based .NET CLI plus a thin Python MCP server) to inspect and export Unreal Engine game assets — pak files, textures, meshes, animations, materials, and raw package JSON. Use it when unpacking/extracting assets from a UE game (e.g. Duet Night Abyss), writing or troubleshooting config.json for a new title, or driving the fmodel-cli subcommands / fmodel_* MCP tools.
 ---
 
 # fmodel-unpack

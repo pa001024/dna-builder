@@ -482,7 +482,7 @@ export interface BuildApi {
         timelineDPS?: boolean
     }): Promise<ApiResult>
 
-    /** 换武器：slot 为 melee / ranged，name 与 id 给一个即可 */
+    /** 换武器：slot 为 melee / ranged，name 与 id 给一个即可；灾厄武器全配装限一把，另一槽已装备灾厄武器时再装会直接报错 */
     weapon(input: { slot: "melee" | "ranged"; name?: string; id?: number; level?: number; refine?: number }): Promise<ApiResult>
     /** 设置 MOD / 武器特效等级（level 为 0 表示移除） */
     effect(input: { source: "mod" | "weapon"; name?: string; id?: number; level: number }): Promise<ApiResult>

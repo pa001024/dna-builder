@@ -131,11 +131,11 @@ describe("全局 code 与技能限定 attr 共存", () => {
             new LeveledBuff({ 名称: "测速", code: "技能速度+=3" } as Buff, 1),
             LeveledBuffHelper.fromName("黎瑟·浴火2溯", 1)!,
         ])
-        // 技能速度 0+3=3>2，X=3×0.15=0.45
-        expect(build.calculateAttributes().技能独立增伤).toBeCloseTo(0.45, 10)
+        // 技能速度 1+3=4>2，X=4×0.15=0.6
+        expect(build.calculateAttributes().技能独立增伤).toBeCloseTo(0.6, 10)
         // 技能伤害吃到技能独立增伤
         const ratio = build.calculateTargetFunction(undefined, "E::伤害") / control.calculateTargetFunction(undefined, "E::伤害")
-        expect(ratio).toBeCloseTo(1.45, 6)
+        expect(ratio).toBeCloseTo(1.6, 6)
         // 武器伤害吃不到技能独立增伤
         const wratio =
             build.calculateTargetFunction(undefined, "普通攻击::一段伤害") /
