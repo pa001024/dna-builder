@@ -14,9 +14,10 @@ const { t } = useTranslation()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWeaponId = useSearchParam<number>("id", 0)
-const selectedCategory = useSearchParam<string>("cat", "")
+const selectedCategory = useSearchParam<string>("t", "")
 const selectedDamageType = useSearchParam<string>("dt", "")
-const selectedVersion = useSearchParam<string>("ver", "")
+const selectedVersion = useSearchParam<string>("v", "")
+const onlyCalamity = useSearchParam<boolean>("ca", false)
 
 // 根据 ID 获取选中的武器
 const selectedWeapon = computed(() => {
@@ -74,9 +75,10 @@ const filteredWeapons = computed(() => {
         const matchCategory = selectedCategory.value === "" || w.类型.includes(selectedCategory.value)
         const matchDamageType = selectedDamageType.value === "" || w.伤害类型 === selectedDamageType.value
         const matchVersion = selectedVersion.value === "" || w.版本 === selectedVersion.value
+        const matchCalamity = !onlyCalamity.value || (w.熔炉?.length ?? 0) > 0
 
         if (searchKeyword.value === "") {
-            return matchCategory && matchDamageType && matchVersion
+            return matchCategory && matchDamageType && matchVersion && matchCalamity
         }
 
         const query = searchKeyword.value
@@ -84,7 +86,7 @@ const filteredWeapons = computed(() => {
         // 直接中文匹配
         const directMatch = w.名称.includes(query) || w.类型.some(t => t.includes(query)) || w.伤害类型.includes(query)
         if (directMatch) {
-            return matchCategory && matchDamageType && matchVersion
+            return matchCategory && matchDamageType && matchVersion && matchCalamity
         }
 
         // 拼音匹配（全拼/首字母）
@@ -94,7 +96,7 @@ const filteredWeapons = computed(() => {
 
         const matchKeyword = nameMatch || typeMatch || damageMatch
 
-        return matchKeyword && matchCategory && matchDamageType && matchVersion
+        return matchKeyword && matchCategory && matchDamageType && matchVersion && matchCalamity
     })
 })
 
@@ -127,8 +129,20 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             </span>
                         </div>
 
-                        <!-- 筛选器：常驻可清除选择框 -->
+                        <!-- 过滤器开关方章 + 筛选器：常驻可清除选择框 -->
                         <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                onlyCalamity
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                                @click="onlyCalamity = !onlyCalamity"
+                            >
+                                {{ $t("database.forge") }}
+                            </button>
                             <FilterSelect
                                 v-model="selectedCategory"
                                 :options="categoryFilterOptions"

@@ -623,7 +623,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                                     {{ $t(source.entryName) }}
                                 </SRouterLink>
                             </div>
-                            <span class="shrink-0 font-mono text-[11px] tabular-nums text-base-content/55">{{
+                            <span class="shrink-0 text-[11px] text-base-content/55">{{
                                 formatWeight(source.weight)
                             }}</span>
                         </div>

@@ -1442,7 +1442,10 @@
         "search_placeholder": "Search forge level, quest or reward ID..."
     },
     "db-hardboss-detail": {
-        "monster_info": "Monster Info"
+        "active_reward_count": "{{count}} active reward groups",
+        "monster_info": "Monster Info",
+        "reward_unit": "groups",
+        "timeline_title": "Reward timeline"
     },
     "db-hardboss-list": {
         "hardboss_count": "Nightmare Echoes",
@@ -1712,6 +1715,7 @@
         "current": "Current",
         "current_only": "Current only",
         "current_time_point": "Current time point: {{label}}",
+        "item_unit": "items",
         "no_available_items": "No purchasable items at this time point",
         "no_diff_items": "No changes compared with the previous time point",
         "purchasable_count": "{{count}} available",
@@ -4276,6 +4280,12 @@
         "minutesAgo": "{{count}} minutes ago",
         "minutesAgo_one": "{{count}} minute ago",
         "minutesAgo_other": "{{count}} minutes ago"
+    },
+    "time-filter": {
+        "compare_previous": "vs previous: {{label}}",
+        "current": "Current",
+        "current_only": "Show current only",
+        "time_point_count": "{{count}} time points"
     },
     "timeline": {
         "addBuffTrack": "Add buff track",

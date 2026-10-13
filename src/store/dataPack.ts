@@ -14,6 +14,7 @@ import {
     setDataPackSourceBaseUrl,
     setDataPackSourceKind,
 } from "@/utils/data-pack/data-pack"
+import { isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
 
 export const useDataPackStore = defineStore("dataPack", {
     state: () => {
@@ -50,6 +51,7 @@ export const useDataPackStore = defineStore("dataPack", {
             return this.status
         },
         async bootstrap() {
+            if (isDataPackRewriteDisabled()) return
             this.isBootstrapping = true
             try {
                 await this.refreshStatus()

@@ -77,7 +77,7 @@
     --animate-overlayShow: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-contentShow: contentShow 300ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-shake: shake 0.4s;
-    --animate-ef-rise: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    --animate-ef-rise: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     --animate-mote-rise: mote-rise 12s linear infinite;
     --animate-track-glint: track-glint 1.6s linear infinite;
     --font-orbitron: "Orbitron", sans-serif;
@@ -290,12 +290,13 @@
 
 /**
  * 交错入场容器：直接子元素依次上浮淡入。
- * 必须用在使用 backdrop-filter 的区块卡片自身做动画的场景——
- * 动画祖先（fill 模式保留 opacity/transform）会成为 backdrop root，
- * 导致后代毛玻璃失效；让模糊元素自己动画则始终正常。
+ * fill 必须用 backwards 而非 both：both 会永久保留终帧的 transform（即使是 translateY(0)），
+ * 非 none 的 transform 让该元素成为 backdrop root / 隔离组，其内部嵌套的 backdrop-filter
+ * 卡片（如武器制造页签里嵌套的 DBDraftDetailItem）就取不到页面背景、毛玻璃视觉失效。
+ * 终帧本就等于元素自然状态，forwards 保留毫无视觉作用，只会留下隔离副作用。
  */
 .stagger-rise > * {
-    animation: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .stagger-rise > *:nth-child(2) {

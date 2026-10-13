@@ -312,7 +312,7 @@ const rewardRowDetails = computed(() => {
                             <span class="text-xs text-base-content/70">{{ $t("db-iron-survival-detail.compound") }}</span>
                             <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
                         </label>
-                        <span class="font-mono text-[11px] tabular-nums text-base-content/55">
+                        <span class="text-[11px] text-base-content/55">
                             Lv.{{ ironSurvivalStartMonsterLevel }}
                             ~ Lv.{{ ironSurvivalEndMonsterLevel }}
                         </span>
@@ -362,7 +362,7 @@ const rewardRowDetails = computed(() => {
                         type="button"
                         role="radio"
                         :aria-checked="selectedStrongDropId === option.dropId"
-                        class="flex items-center gap-2 rounded-xs border p-2 text-left transition-colors duration-150"
+                        class="flex items-center gap-2 rounded-xs border p-2 text-left transition-colors duration-150 cursor-pointer"
                         :class="
                             selectedStrongDropId === option.dropId
                                 ? 'border-primary bg-primary/10'

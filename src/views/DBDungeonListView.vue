@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import type { FilterSelectOption } from "@/components/FilterSelect.vue"
@@ -16,8 +15,8 @@ const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string>("tp", "")
 const selectedLevel = useSearchParam<string>("lv", "")
-const onlyNightHandbook = useLocalStorage("dungeon.showNightHandbook", false)
-const onlyCalamity = useLocalStorage("dungeon.showCalamity", false)
+const onlyNightHandbook = useSearchParam<boolean>("nh", false)
+const onlyCalamity = useSearchParam<boolean>("ca", false)
 
 /** 灾厄副本：100 级的探险和扼守副本（91601~91606 + 91701~91706） */
 const CALAMITY_DUNGEON_IDS = new Set([91601, 91602, 91603, 91604, 91605, 91606, 91701, 91702, 91703, 91704, 91705, 91706])

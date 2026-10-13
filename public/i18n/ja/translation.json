@@ -1423,7 +1423,10 @@
         "search_placeholder": "精錬レベル、クエスト、報酬 ID を検索..."
     },
     "db-hardboss-detail": {
-        "monster_info": "モンスター情報"
+        "active_reward_count": "有効な報酬 {{count}} 組",
+        "monster_info": "モンスター情報",
+        "reward_unit": "組",
+        "timeline_title": "報酬タイムライン"
     },
     "db-hardboss-list": {
         "hardboss_count": "件の夢魘残響",
@@ -1693,6 +1696,7 @@
         "current": "現在",
         "current_only": "現在のみ",
         "current_time_point": "現在の時点：{{label}}",
+        "item_unit": "点",
         "no_available_items": "現在の時点で購入可能な商品はありません",
         "no_diff_items": "前の時点から変化した商品はありません",
         "purchasable_count": "購入可能 {{count}} 件",
@@ -4247,6 +4251,12 @@
         "hoursAgo": "{{count}} 時間前",
         "justNow": "たった今",
         "minutesAgo": "{{count}} 分前"
+    },
+    "time-filter": {
+        "compare_previous": "前の時点と比較：{{label}}",
+        "current": "現在",
+        "current_only": "現在のみ表示",
+        "time_point_count": "{{count}} 時点"
     },
     "timeline": {
         "addBuffTrack": "BUFFトラックを追加",

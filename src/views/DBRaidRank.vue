@@ -214,13 +214,16 @@ const infoTabs = computed(() =>
 /**
  * 赛季/时期切换时重置楼层选中，并在打分与爬塔页签之间自动纠偏。
  */
-watch([selectedSeason, isFloorPreRaid], () => {
-    resetFloorProgress()
-    floorPassTime.value = 30
-    if (currentSeasonIsFloor.value && activeInfoTab.value !== "floor" && activeInfoTab.value !== "rank")
-        activeInfoTab.value = "floor"
-    if (!currentSeasonIsFloor.value && activeInfoTab.value === "floor") activeInfoTab.value = "score"
-}, { immediate: true })
+watch(
+    [selectedSeason, isFloorPreRaid],
+    () => {
+        resetFloorProgress()
+        floorPassTime.value = 30
+        if (currentSeasonIsFloor.value && activeInfoTab.value !== "floor" && activeInfoTab.value !== "rank") activeInfoTab.value = "floor"
+        if (!currentSeasonIsFloor.value && activeInfoTab.value === "floor") activeInfoTab.value = "score"
+    },
+    { immediate: true }
+)
 
 /**
  * 楼层是否为关键层（特殊样式标记）。
@@ -346,10 +349,7 @@ function settleCurrentFloor(): void {
     const floor = currentFloorData.value?.Floor ?? 0
     if (floor <= 0 || floor > floorHighestUnlocked.value) return
     floorPassed.value = Math.max(floorPassed.value, floor)
-    floorHighestUnlocked.value = Math.min(
-        floorHighest.value,
-        Math.max(floorHighestUnlocked.value, floor + floorJumpCount.value)
-    )
+    floorHighestUnlocked.value = Math.min(floorHighest.value, Math.max(floorHighestUnlocked.value, floor + floorJumpCount.value))
     selectedFloor.value = floorUnlockedList.value.at(-1)?.Floor ?? floor
 }
 
@@ -791,7 +791,9 @@ function onRankImgError(key: string): void {
                             {{ $t("db-raid-rank.goto_unlock") }}
                         </button>
                         <span class="text-[11px] tabular-nums text-base-content/55">
-                            {{ $t("db-raid-rank.passed_floor") }}：{{ floorPassed > 0 ? t("db-raid-rank.floor_name", { value: floorPassed }) : "–" }}
+                            {{ $t("db-raid-rank.passed_floor") }}：{{
+                                floorPassed > 0 ? t("db-raid-rank.floor_name", { value: floorPassed }) : "–"
+                            }}
                         </span>
                         <button
                             v-if="floorPassed > 0"
@@ -818,142 +820,153 @@ function onRankImgError(key: string): void {
                 </section>
 
                 <div class="grid grid-cols-1 items-start gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
-                <!-- 楼层列表 -->
-                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm lg:sticky lg:top-3">
-                    <SectionHeader no-animate compact kicker="FLOORS" :title="$t('db-raid-rank.floor_list')" />
-                    <div ref="floorListBox">
-                    <ScrollArea :style="{ height: `${floorListHeight}px` }">
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <button
-                            v-for="item in floorList"
-                            :key="item.FloorId"
-                            type="button"
-                            class="relative cursor-pointer rounded-xs border px-2 py-1.5 text-left transition-colors duration-150 active:scale-[0.97]"
-                            :title="item.Floor > floorHighestUnlocked ? $t('db-raid-rank.locked_preview') : ''"
-                            :class="
+                    <!-- 楼层列表 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm lg:sticky lg:top-3">
+                        <SectionHeader no-animate compact kicker="FLOORS" :title="$t('db-raid-rank.floor_list')" />
+                        <div ref="floorListBox">
+                            <ScrollArea :style="{ height: `${floorListHeight}px` }">
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <button
+                                        v-for="item in floorList"
+                                        :key="item.FloorId"
+                                        type="button"
+                                        class="relative cursor-pointer rounded-xs border px-2 py-1.5 text-left transition-colors duration-150 active:scale-[0.97]"
+                                        :title="item.Floor > floorHighestUnlocked ? $t('db-raid-rank.locked_preview') : ''"
+                                        :class="
                                 currentFloorData?.FloorId === item.FloorId
                                     ? 'border-primary bg-primary font-semibold text-primary-content'
                                     : item.Floor > floorHighestUnlocked
                                       ? 'border-base-content/10 text-base-content/40 hover:border-primary/60'
                                       : 'border-base-content/20 text-base-content/70 hover:border-primary/60'
                             "
-                            @click="selectFloor(item.Floor)"
-                        >
-                            <span class="font-orbitron text-sm font-bold tabular-nums">{{
-                                t("db-raid-rank.floor_name", { value: item.Floor })
-                            }}</span>
-                            <span class="mt-0.5 block text-[10px] tabular-nums opacity-70">Lv.{{ item.RecLevel }}</span>
-                            <span
-                                v-if="item.Floor > floorHighestUnlocked"
-                                class="mt-1 inline-block rounded-xs bg-base-content/10 px-1 text-[10px] leading-4"
-                            >
-                                {{ $t("db-raid-rank.locked") }}
-                            </span>
-                            <span class="mt-1 flex flex-wrap gap-1">
+                                        @click="selectFloor(item.Floor)"
+                                    >
+                                        <span class="font-orbitron text-sm font-bold tabular-nums">{{
+                                            t("db-raid-rank.floor_name", { value: item.Floor })
+                                        }}</span>
+                                        <span class="mt-0.5 block text-[10px] tabular-nums opacity-70">Lv.{{ item.RecLevel }}</span>
+                                        <span
+                                            v-if="item.Floor > floorHighestUnlocked"
+                                            class="mt-1 inline-block rounded-xs bg-base-content/10 px-1 text-[10px] leading-4"
+                                        >
+                                            {{ $t("db-raid-rank.locked") }}
+                                        </span>
+                                        <span class="mt-1 flex flex-wrap gap-1">
+                                            <span
+                                                v-if="isCurrentKeyFloor(item.Floor)"
+                                                class="rounded-xs bg-warning px-1 text-[10px] leading-4 text-warning-content"
+                                            >
+                                                {{ $t("db-raid-rank.key_floor") }}
+                                            </span>
+                                            <span
+                                                v-if="isCurrentBubbleFloor(item.Floor)"
+                                                class="rounded-xs bg-info px-1 text-[10px] leading-4 text-info-content"
+                                            >
+                                                {{ $t("db-raid-rank.bubble_tip") }}
+                                            </span>
+                                        </span>
+                                    </button>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </section>
+                    <!-- 选中楼层详情（与列表同页分栏） -->
+                    <div v-if="currentFloorData" class="min-w-0 space-y-3">
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="FLOOR" :title="$t('db-raid-rank.floor_detail')" />
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">
+                                    {{ t("db-raid-rank.floor_name", { value: currentFloorData.Floor }) }}
+                                </span>
                                 <span
-                                    v-if="isCurrentKeyFloor(item.Floor)"
-                                    class="rounded-xs bg-warning px-1 text-[10px] leading-4 text-warning-content"
+                                    v-if="isCurrentKeyFloor(currentFloorData.Floor)"
+                                    class="rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 text-warning-content"
                                 >
                                     {{ $t("db-raid-rank.key_floor") }}
                                 </span>
-                                <span
-                                    v-if="isCurrentBubbleFloor(item.Floor)"
-                                    class="rounded-xs bg-info px-1 text-[10px] leading-4 text-info-content"
-                                >
-                                    {{ $t("db-raid-rank.bubble_tip") }}
-                                </span>
-                            </span>
-                        </button>
-                    </div>
-                    </ScrollArea>
-                    </div>
-                </section>
-            <!-- 选中楼层详情（与列表同页分栏） -->
-            <div v-if="currentFloorData" class="min-w-0 space-y-3">
-                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="FLOOR" :title="$t('db-raid-rank.floor_detail')" />
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">
-                            {{ t("db-raid-rank.floor_name", { value: currentFloorData.Floor }) }}
-                        </span>
-                        <span
-                            v-if="isCurrentKeyFloor(currentFloorData.Floor)"
-                            class="rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 text-warning-content"
-                        >
-                            {{ $t("db-raid-rank.key_floor") }}
-                        </span>
-                    </div>
-                    <p
-                        v-if="isCurrentFloorLocked"
-                        class="mt-2 rounded-xs border border-warning/40 bg-warning/10 p-2 text-sm leading-relaxed text-base-content/80"
-                    >
-                        {{ $t("db-raid-rank.locked_preview") }}
-                    </p>
-                    <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm tabular-nums text-base-content/80 sm:grid-cols-4">
-                        <span>{{ t("db-raid-rank.monster_level_x", { value: currentFloorData.MonsterLevel }) }}</span>
-                        <span>{{ t("db-raid-rank.rec_level_x", { value: currentFloorData.RecLevel }) }}</span>
-                        <span class="col-span-2">{{ t("db-raid-rank.min_damage_x", { value: currentFloorData.MinCompleteDamage }) }}</span>
-                    </div>
-                    <!-- 通关操作：用时与结算放同一块，填完即点 -->
-                    <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                        <div class="flex flex-wrap items-end gap-x-3 gap-y-2">
-                            <label class="block w-36">
-                                <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.pass_time") }}</span>
+                            </div>
+                            <p
+                                v-if="isCurrentFloorLocked"
+                                class="mt-2 rounded-xs border border-warning/40 bg-warning/10 p-2 text-sm leading-relaxed text-base-content/80"
+                            >
+                                {{ $t("db-raid-rank.locked_preview") }}
+                            </p>
+                            <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm tabular-nums text-base-content/80 sm:grid-cols-4">
+                                <span>{{ t("db-raid-rank.monster_level_x", { value: currentFloorData.MonsterLevel }) }}</span>
+                                <span>{{ t("db-raid-rank.rec_level_x", { value: currentFloorData.RecLevel }) }}</span>
+                                <span class="col-span-2">{{
+                                    t("db-raid-rank.min_damage_x", { value: currentFloorData.MinCompleteDamage })
+                                }}</span>
+                            </div>
+                            <!-- 通关操作：用时与结算放同一块，填完即点 -->
+                            <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                                <div class="flex flex-wrap items-end gap-x-3 gap-y-2">
+                                    <label class="block w-36">
+                                        <span class="mb-1 block text-sm font-medium text-base-content/80">{{
+                                            $t("db-raid-rank.pass_time")
+                                        }}</span>
+                                        <input
+                                            :value="floorPassTime"
+                                            @input="handleFloorPassTimeInput"
+                                            type="number"
+                                            min="0"
+                                            :max="FLOOR_TIME_LIMIT"
+                                            step="0.1"
+                                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
+                                        />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        :disabled="isCurrentFloorLocked"
+                                        :title="isCurrentFloorLocked ? $t('db-raid-rank.locked_preview') : ''"
+                                        class="cursor-pointer rounded-xs border border-primary/50 px-2 py-1 text-[12px] text-primary transition-colors duration-150 hover:bg-primary hover:text-primary-content active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary"
+                                        @click="settleCurrentFloor"
+                                    >
+                                        {{ $t("db-raid-rank.settle_floor") }}
+                                    </button>
+                                    <span class="pb-1 text-[11px] tabular-nums text-base-content/55">
+                                        {{
+                                            t("db-raid-rank.time_remain_x", {
+                                                value: Math.max(0, FLOOR_TIME_LIMIT - floorPassTime).toFixed(1),
+                                            })
+                                        }}
+                                        · {{ t("db-raid-rank.jump_count_x", { value: floorJumpCount }) }}
+                                    </span>
+                                </div>
                                 <input
                                     :value="floorPassTime"
                                     @input="handleFloorPassTimeInput"
-                                    type="number"
-                                    min="0"
+                                    type="range"
                                     :max="FLOOR_TIME_LIMIT"
                                     step="0.1"
-                                    class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
+                                    class="range range-primary range-xs mt-2 w-full"
                                 />
-                            </label>
-                            <button
-                                type="button"
-                                :disabled="isCurrentFloorLocked"
-                                :title="isCurrentFloorLocked ? $t('db-raid-rank.locked_preview') : ''"
-                                class="cursor-pointer rounded-xs border border-primary/50 px-2 py-1 text-[12px] text-primary transition-colors duration-150 hover:bg-primary hover:text-primary-content active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary"
-                                @click="settleCurrentFloor"
-                            >
-                                {{ $t("db-raid-rank.settle_floor") }}
-                            </button>
-                            <span class="pb-1 text-[11px] tabular-nums text-base-content/55">
-                                {{ t("db-raid-rank.time_remain_x", { value: Math.max(0, FLOOR_TIME_LIMIT - floorPassTime).toFixed(1) }) }}
-                                · {{ t("db-raid-rank.jump_count_x", { value: floorJumpCount }) }}
-                            </span>
+                            </div>
+                            <div class="mt-3 space-y-3">
+                                <div>
+                                    <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.first_reward") }}</p>
+                                    <RewardItem v-if="currentFloorFirstReward" :reward="currentFloorFirstReward" />
+                                </div>
+                                <div>
+                                    <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.normal_reward") }}</p>
+                                    <RewardItem v-if="currentFloorNormalReward" :reward="currentFloorNormalReward" />
+                                </div>
+                            </div>
+                        </section>
+                        <div
+                            v-if="currentFloorDungeon"
+                            class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm"
+                        >
+                            <DBDungeonDetailItem
+                                :key="currentFloorData.FloorId"
+                                :dungeon="currentFloorDungeon"
+                                :initial-level="currentFloorData.MonsterLevel"
+                            />
                         </div>
-                        <input
-                            :value="floorPassTime"
-                            @input="handleFloorPassTimeInput"
-                            type="range"
-                            :max="FLOOR_TIME_LIMIT"
-                            step="0.1"
-                            class="range range-primary range-xs mt-2 w-full"
-                        />
+                        <p v-else class="text-[11px] text-base-content/45">
+                            {{ t("db-raid-rank.dungeon_missing", { id: currentFloorData.DungeonId }) }}
+                        </p>
                     </div>
-                    <div class="mt-3 space-y-3">
-                        <div>
-                            <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.first_reward") }}</p>
-                            <RewardItem v-if="currentFloorFirstReward" :reward="currentFloorFirstReward" />
-                        </div>
-                        <div>
-                            <p class="mb-1 text-sm font-medium text-base-content/80">{{ $t("db-raid-rank.normal_reward") }}</p>
-                            <RewardItem v-if="currentFloorNormalReward" :reward="currentFloorNormalReward" />
-                        </div>
-                    </div>
-                </section>
-                <div v-if="currentFloorDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm">
-                    <DBDungeonDetailItem
-                        :key="currentFloorData.FloorId"
-                        :dungeon="currentFloorDungeon"
-                        :initial-level="currentFloorData.MonsterLevel"
-                    />
-                </div>
-                <p v-else class="text-[11px] text-base-content/45">
-                    {{ t("db-raid-rank.dungeon_missing", { id: currentFloorData.DungeonId }) }}
-                </p>
-            </div>
                 </div>
             </div>
 

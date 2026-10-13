@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { CharBuild, formatModName, LeveledMod } from "@/data"
+import { CharBuild, LeveledMod } from "@/data"
 import { format100r } from "@/util"
 
 /**
@@ -182,19 +182,7 @@ function handleMouseUp(event: MouseEvent) {
         :data-index="index"
         @mousedown="handleMouseDown"
     >
-        <ShowProps
-            v-if="mod"
-            :link="`/db/mod/${mod.id}`"
-            :props="mod.getProperties()"
-            :title="formatModName(mod.系列, mod.名称, $t)"
-            :rarity="mod.品质"
-            :polarity="mod.极性"
-            :cost="mod.耐受"
-            :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-            :effdesc="mod.效果"
-            :effindex="mod.等级 - 1"
-            :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
-        >
+        <ShowProps v-if="mod" :mod="mod" :eff="charBuild?.checkModEffective(mod) || mod.getCondition()">
             <div class="relative h-full w-full overflow-hidden rounded-xs">
                 <!-- MOD 图 -->
                 <img class="h-full w-full object-cover" :src="mod.url" :alt="mod.名称" />

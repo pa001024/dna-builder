@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, watch } from "vue"
+import { useRoute } from "vue-router"
 import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
@@ -36,7 +37,7 @@ interface HardbossTimePoint {
     timestamp: number
     label: string
     shortLabel: string
-    activeRewardCount: number
+    activeCount: number
     isCurrent: boolean
 }
 
@@ -58,6 +59,7 @@ const props = defineProps<{
 }>()
 
 const { gt } = useGameText()
+const route = useRoute()
 
 const nowTimestamp = Math.floor(Date.now() / 1000)
 const timeFilterEnabled = useSearchParam("tf", true)
@@ -194,7 +196,7 @@ const hardbossTimePoints = computed<HardbossTimePoint[]>(() => {
         timestamp,
         label: formatTimestamp(timestamp),
         shortLabel: formatShortTimestamp(timestamp),
-        activeRewardCount: allDynamicRewards.value.filter(reward => isRewardAvailableAtTime(reward, timestamp)).length,
+        activeCount: allDynamicRewards.value.filter(reward => isRewardAvailableAtTime(reward, timestamp)).length,
         isCurrent: timestamp === currentTimePointTimestamp.value,
     }))
 })
@@ -231,6 +233,22 @@ const activeFilterTimestamp = computed(() => {
     }
     return selectedTimePoint.value?.timestamp ?? null
 })
+
+/**
+ * Boss 切换时回到当前时间点；首挂的深链（URL 显式带 ti）予以保留。
+ */
+let initialTimePointResolved = false
+watch(
+    () => props.boss.id,
+    () => {
+        if (initialTimePointResolved || route.query.ti == null) {
+            selectedTimePointIndex.value = currentTimePointIndex.value
+        }
+        initialTimePointResolved = true
+        diffOnlyEnabled.value = false
+    },
+    { immediate: true }
+)
 
 const effectiveDiffOnlyEnabled = computed(() => {
     return timeFilterEnabled.value && diffOnlyEnabled.value
@@ -429,13 +447,6 @@ function getWalnutRewardInfo(walnut: Walnut): WalnutRewardInfo | null {
     return null
 }
 
-/**
- * 将滑块重置到当前时间点。
- */
-function resetToCurrentTimePoint(): void {
-    selectedTimePointIndex.value = currentTimePointIndex.value
-}
-
 // 格式化时间戳为日期字符串
 function formatTimestamp(timestamp: number): string {
     return new Date(timestamp * 1000).toLocaleString("zh-CN", {
@@ -547,102 +558,19 @@ function getHardbossIcon(boss: HardBoss): string {
         </section>
 
         <!-- 时间轴 -->
-        <section
+        <TimePointFilter
             v-if="hardbossTimePoints.length > 0"
-            class="space-y-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
-        >
-            <SectionHeader no-animate compact kicker="TIMELINE" title="奖励时间轴" :count="`${hardbossTimePoints.length} 个时间点`">
-                <template #trailing>
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <label class="label cursor-pointer gap-1.5 p-0">
-                            <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                            <span class="text-xs">仅显示当前</span>
-                        </label>
-                        <label class="label cursor-pointer gap-1.5 p-0">
-                            <input
-                                v-model="diffOnlyEnabled"
-                                type="checkbox"
-                                class="toggle toggle-success toggle-sm"
-                                :disabled="!timeFilterEnabled"
-                            />
-                            <span class="text-xs" :class="{ 'text-base-content/40': !timeFilterEnabled }">仅显示差异</span>
-                        </label>
-                    </div>
-                </template>
-            </SectionHeader>
-
-            <!-- 时间点轨道 -->
-            <div v-if="timeFilterEnabled" class="space-y-2">
-                <!-- p-1 -m-1：为"当前"光点的负偏移预留溢出空间，避免被 overflow-x-auto 裁剪 -->
-                <div class="-m-1 flex items-center gap-1.5 overflow-x-auto p-1 pb-1.5">
-                    <button
-                        v-for="(point, index) in hardbossTimePoints"
-                        :key="point.timestamp"
-                        type="button"
-                        class="relative shrink-0 rounded-xs border px-2.5 py-1.5 text-center transition-all duration-200 active:scale-[0.97]"
-                        :class="
-                            index === selectedTimePointIndex
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'border-base-content/15 text-base-content/60 hover:border-primary/50 hover:text-primary'
-                        "
-                        :title="point.label"
-                        @click="selectedTimePointIndex = index"
-                    >
-                        <span v-if="point.isCurrent" class="absolute -right-1 -top-1 flex size-2">
-                            <span class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60"></span>
-                            <span class="relative inline-flex size-2 rounded-full bg-success"></span>
-                        </span>
-                        <div class="text-xs font-medium leading-tight">{{ point.shortLabel }}</div>
-                        <div class="text-[10px] leading-tight opacity-70">{{ point.activeRewardCount }} 组</div>
-                    </button>
-                </div>
-                <div class="flex items-center gap-3">
-                    <input
-                        v-model.number="selectedTimePointIndex"
-                        type="range"
-                        class="range range-primary range-xs grow"
-                        :min="0"
-                        :max="Math.max(hardbossTimePoints.length - 1, 0)"
-                        step="1"
-                    />
-                    <button
-                        type="button"
-                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40"
-                        :class="
-                            selectedTimePointIndex === currentTimePointIndex
-                                ? 'border-base-content/15 text-base-content/40'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                        "
-                        :disabled="selectedTimePointIndex === currentTimePointIndex"
-                        @click="resetToCurrentTimePoint"
-                    >
-                        回到当前
-                    </button>
-                </div>
-            </div>
-
-            <!-- 当前时间点状态栏 -->
-            <div
-                v-if="selectedTimePoint"
-                class="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xs border px-3 py-2 text-xs"
-                :class="
-                    selectedTimePoint.isCurrent
-                        ? 'border-primary/40 bg-primary/10 text-primary'
-                        : 'border-base-content/10 bg-base-content/3 text-base-content/70'
-                "
-            >
-                <span class="font-medium">{{ selectedTimePoint.label }}</span>
-                <span v-if="selectedTimePoint.isCurrent" class="rounded-xs bg-primary px-1.5 py-0.5 font-semibold text-primary-content"
-                    >当前</span
-                >
-                <span class="opacity-60">·</span>
-                <span>生效奖励 {{ selectedTimePoint.activeRewardCount }} 组</span>
-                <template v-if="effectiveDiffOnlyEnabled && previousSelectedTimePoint">
-                    <span class="opacity-60">·</span>
-                    <span>对比 {{ previousSelectedTimePoint.label }}</span>
-                </template>
-            </div>
-        </section>
+            v-model:enabled="timeFilterEnabled"
+            v-model:index="selectedTimePointIndex"
+            v-model:diff-only="diffOnlyEnabled"
+            :points="hardbossTimePoints"
+            :current-index="currentTimePointIndex"
+            :title="$t('db-hardboss-detail.timeline_title')"
+            :count-text="$t('time-filter.time_point_count', { count: hardbossTimePoints.length })"
+            :point-unit="$t('db-hardboss-detail.reward_unit')"
+            :status-count-text="$t('db-hardboss-detail.active_reward_count', { count: selectedTimePoint?.activeCount ?? 0 })"
+            :compare-label="previousSelectedTimePoint?.label ?? null"
+        />
 
         <!-- 密函预览 -->
         <section

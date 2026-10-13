@@ -16,6 +16,7 @@ interface ForgeQuestRow {
 
 const props = defineProps<{
     forge: ForgeLevel
+    embedded?: boolean
 }>()
 
 /**
@@ -48,8 +49,14 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
 </script>
 
 <template>
-    <!-- 外层区块卡：单个熔炼等级条目 -->
-    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+    <!-- 外层区块卡：单个熔炼等级条目（embedded 时扁平化，避免双层毛玻璃叠加导致内层 blur 失效） -->
+    <section
+        :class="
+            props.embedded
+                ? 'rounded-xs border border-base-content/10 bg-base-content/3 p-2.5'
+                : 'rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm'
+        "
+    >
         <!-- 档案头：主色序号块 + 标题 -->
         <header class="flex items-center gap-3 border-b-2 border-primary pb-3">
             <span

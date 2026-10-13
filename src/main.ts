@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/vue"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
-import { dataPackBootstrapLoading } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
 import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "@/utils/data-pack/data-pack-runtime"
 import { mountImgsToVirtualPath } from "@/utils/data-pack/imgs-runtime"
 import { applyAllPackTranslations } from "@/utils/data-pack/translations-pack"
@@ -55,10 +55,14 @@ async function registerImgsServiceWorker(): Promise<void> {
 
 /**
  * 初始化数据包、图片缓存与 App 图片 Service Worker。
+ *
+ * 重写插件关闭时数据直读源码，不碰数据包存储。
  */
 async function bootstrapRuntimeAssets(): Promise<void> {
     try {
-        await bootstrapDataPack()
+        if (!isDataPackRewriteDisabled()) {
+            await bootstrapDataPack()
+        }
     } catch (error) {
         console.error("数据包初始化失败", error)
     } finally {
@@ -159,9 +163,6 @@ async function bootstrap() {
         void cdnProbe.then(() => bootstrapRuntimeAssets())
     })
 
-    // 资料库外壳预热：外壳本身只有骨架屏，先把它取回来，
-    // 之后点进资料库时骨架屏才能当帧上屏，而不必先等一个 chunk 往返。
-    // 真实页（带整套游戏数据）仍在点击后才开始加载。
     const prefetchDatabaseShell = () => {
         void import("./views/DBViewShell.vue").catch(error => {
             console.error("资料库外壳预热失败", error)

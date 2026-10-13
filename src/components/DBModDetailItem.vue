@@ -451,7 +451,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
         <!-- 设计稿信息 -->
         <section v-if="modDraft" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="BLUEPRINT" title="设计稿信息" />
-            <DBDraftDetailItem :draft="modDraft" />
+            <DBDraftDetailItem embedded :draft="modDraft" />
         </section>
 
         <!-- 来源 -->

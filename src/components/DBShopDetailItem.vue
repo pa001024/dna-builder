@@ -27,7 +27,7 @@ interface ShopTimePoint {
     timestamp: number
     label: string
     shortLabel: string
-    activeItemCount: number
+    activeCount: number
     isCurrent: boolean
 }
 
@@ -68,8 +68,22 @@ const routeSubTabId = computed(() => {
     return Number.isNaN(parsedSubTabId) ? 0 : parsedSubTabId
 })
 
+function subTabAnchorId(subTabId: number): string {
+    return `shop-subtab-${subTabId}`
+}
+
 /**
- * 按路由子标签定位主标签。
+ * 把路由子标签滚动到可视区（详情页 /db/shop/:shopId/:subTabId 深链定位用）。
+ */
+function scrollToRouteSubTab(): void {
+    if (!routeSubTabId.value) {
+        return
+    }
+    document.getElementById(subTabAnchorId(routeSubTabId.value))?.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+/**
+ * 按路由子标签定位主标签，并把目标子标签滚动到可视区。
  */
 function applyRouteSubTab(): void {
     if (!routeSubTabId.value) {
@@ -80,6 +94,7 @@ function applyRouteSubTab(): void {
     if (targetMainTab) {
         selectedShop.value = targetMainTab.name
     }
+    nextTick(() => scrollToRouteSubTab())
 }
 
 /**
@@ -164,7 +179,7 @@ const shopTimePoints = computed<ShopTimePoint[]>(() => {
         timestamp,
         label: formatShopTime(timestamp),
         shortLabel: formatShopTimeShort(timestamp),
-        activeItemCount: selectedMainTabItems.value.filter(item => isItemAvailableAtTime(item, timestamp)).length,
+        activeCount: selectedMainTabItems.value.filter(item => isItemAvailableAtTime(item, timestamp)).length,
         isCurrent: timestamp === currentTimePointTimestamp.value,
     }))
 })
@@ -536,87 +551,36 @@ function formatShopTimeShort(timestamp: number): string {
 
         <AniTabs v-model="selectedShop" :tabs="shopTabs" />
 
-        <!-- 时间过滤 -->
-        <section
+        <!-- 时间过滤：工具条，不进滚动目录 -->
+        <TimePointFilter
             v-if="shopTimePoints.length > 0"
-            class="space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
-        >
-            <SectionHeader no-animate compact kicker="FILTER" :title="$t('db-shop-detail.time_filter')" />
-            <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="text-xs leading-relaxed text-base-content/55">{{ $t("db-shop-detail.timeline_desc") }}</div>
-                <div class="flex flex-wrap items-center gap-4">
-                    <button
-                        type="button"
-                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
-                        @click="resetToCurrentTimePoint"
-                    >
-                        {{ $t("common.reset_to_current") }}
-                    </button>
-                    <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">{{ $t("db-shop-detail.current_only") }}</span>
-                        <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                    </label>
-                    <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">{{ $t("common.show_diff_only") }}</span>
-                        <input
-                            v-model="diffOnlyEnabled"
-                            type="checkbox"
-                            class="toggle toggle-success toggle-sm"
-                            :disabled="!timeFilterEnabled"
-                        />
-                    </label>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
-                <span class="rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 tabular-nums">
-                    {{ $t("db-shop-detail.time_point_count", { count: shopTimePoints.length }) }}
-                </span>
-                <span v-if="selectedTimePoint" class="tabular-nums">{{
-                    $t("db-shop-detail.current_time_point", { label: selectedTimePoint.label })
-                }}</span>
-                <span v-if="selectedTimePoint" class="tabular-nums">{{
-                    $t("db-shop-detail.purchasable_count", { count: selectedTimePoint.activeItemCount })
-                }}</span>
-                <span v-if="diffOnlyEnabled && previousSelectedTimePoint" class="tabular-nums">{{
-                    $t("db-shop-detail.compare_previous", { label: previousSelectedTimePoint.label })
-                }}</span>
-                <span
-                    v-if="selectedTimePoint?.isCurrent"
-                    class="rounded-xs bg-base-content px-1.5 py-0.5 text-[10px] font-semibold text-base-100"
-                >
-                    {{ $t("db-shop-detail.current") }}
-                </span>
-            </div>
-
-            <div v-if="timeFilterEnabled && shopTimePoints.length > 1" class="flex items-center gap-3">
-                <span class="w-12 shrink-0 text-[11px] tabular-nums text-base-content/55">{{ shopTimePoints[0]?.shortLabel }}</span>
-                <input
-                    v-model.number="selectedTimePointIndex"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="0"
-                    :max="Math.max(shopTimePoints.length - 1, 0)"
-                    step="1"
-                />
-                <span class="w-12 shrink-0 text-right text-[11px] tabular-nums text-base-content/55">{{
-                    shopTimePoints.at(-1)?.shortLabel
-                }}</span>
-            </div>
-        </section>
+            v-model:enabled="timeFilterEnabled"
+            v-model:index="selectedTimePointIndex"
+            v-model:diff-only="diffOnlyEnabled"
+            :points="shopTimePoints"
+            :current-index="currentTimePointIndex"
+            data-scroll-nav-ignore
+            kicker="FILTER"
+            :title="$t('db-shop-detail.time_filter')"
+            :desc="$t('db-shop-detail.timeline_desc')"
+            :count-text="$t('db-shop-detail.time_point_count', { count: shopTimePoints.length })"
+            :point-unit="$t('db-shop-detail.item_unit')"
+            :status-count-text="$t('db-shop-detail.purchasable_count', { count: selectedTimePoint?.activeCount ?? 0 })"
+            :compare-label="previousSelectedTimePoint?.label ?? null"
+        />
 
         <!-- 商店主标签 -->
         <div v-for="mainTab in filteredMainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="space-y-3">
-            <!-- 商店子标签：v-for 批量重复组，退出滚动目录 -->
+            <!-- 商店子标签：每个子标签即一个 section，进滚动目录以便跳转 -->
             <section
                 v-for="subTab in mainTab.subTabs"
                 :key="subTab.id"
-                data-scroll-nav-ignore
-                class="rounded-xs border p-3 backdrop-blur-sm"
+                :id="subTabAnchorId(subTab.id)"
+                class="scroll-mt-3 rounded-xs border p-3 backdrop-blur-sm"
                 :class="isRouteSubTab(subTab.id) ? 'border-primary/70 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
             >
                 <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <h4 class="truncate text-sm font-semibold">{{ $t(subTab.name) }}</h4>
+                    <h2 class="truncate text-sm font-semibold">{{ $t(subTab.name) }}</h2>
                     <span
                         v-if="timeFilterEnabled"
                         class="shrink-0 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 text-[11px] tabular-nums text-base-content/60"

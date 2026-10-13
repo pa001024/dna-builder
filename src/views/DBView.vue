@@ -287,7 +287,6 @@ const databaseItems = [
     { name: "database.resource", path: "/db/resource", desc: "database.resource_desc", icon: "ri:stack-line" },
     { name: "database.ironTicket", path: "/db/iron-ticket", desc: "database.ironTicket_desc", icon: "ri:compass-3-line" },
     { name: "database.mod", path: "/db/mod", desc: "database.mod_desc", icon: "ri:puzzle-line" },
-    { name: "database.forge", path: "/db/forge", desc: "database.forge_desc", icon: "ri:hammer-line" },
     { name: "database.damage", path: "/db/damage", desc: "database.damage_desc", icon: "ri:bar-chart-grouped-line" },
     { name: "database.draft", path: "/db/draft", desc: "database.draft_desc", icon: "ri:clipboard-line" },
     { name: "database.pet", path: "/db/pet", desc: "database.pet_desc", icon: "ri:sparkling-line" },
@@ -352,7 +351,7 @@ const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/qu
 const databaseSectionMeta = [
     {
         id: "build",
-        paths: ["/db/char", "/db/trait", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
+        paths: ["/db/char", "/db/trait", "/db/weapon", "/db/mod", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
     },
     { id: "explore", paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"] },
     {

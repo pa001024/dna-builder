@@ -677,7 +677,7 @@ function getFactionName(faction: number | undefined): string {
                     <div class="flex items-center justify-between gap-2">
                         <span class="truncate text-sm font-medium">{{ $t(dungeon.n) }}</span>
                         <div class="flex shrink-0 flex-col items-end">
-                            <span class="font-mono text-[11px] tabular-nums text-base-content/55">Lv.{{ dungeon.lv }}</span>
+                            <span class="text-[11px] text-base-content/55">Lv.{{ dungeon.lv }}</span>
                             <CopyID :id="dungeon.id" />
                         </div>
                     </div>

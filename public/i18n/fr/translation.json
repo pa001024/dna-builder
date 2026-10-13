@@ -1457,7 +1457,10 @@
         "search_placeholder": "Rechercher niveau de forge, quête ou ID de récompense..."
     },
     "db-hardboss-detail": {
-        "monster_info": "Informations sur le monstre"
+        "active_reward_count": "{{count}} groupes de récompenses actifs",
+        "monster_info": "Informations sur le monstre",
+        "reward_unit": "groupes",
+        "timeline_title": "Chronologie des récompenses"
     },
     "db-hardboss-list": {
         "hardboss_count": "Échos cauchemardesques",
@@ -1727,6 +1730,7 @@
         "current": "Actuel",
         "current_only": "Actuel uniquement",
         "current_time_point": "Point temporel actuel : {{label}}",
+        "item_unit": "articles",
         "no_available_items": "Aucun article achetable à ce point temporel",
         "no_diff_items": "Aucun changement par rapport au point temporel précédent",
         "purchasable_count": "{{count}} disponibles",
@@ -4293,6 +4297,12 @@
         "minutesAgo": "il y a {{count}} minutes",
         "minutesAgo_one": "il y a {{count}} minute",
         "minutesAgo_other": "il y a {{count}} minutes"
+    },
+    "time-filter": {
+        "compare_previous": "vs précédent : {{label}}",
+        "current": "Actuel",
+        "current_only": "Afficher uniquement l'actuel",
+        "time_point_count": "{{count}} points temporels"
     },
     "timeline": {
         "addBuffTrack": "Ajouter une piste de buff",

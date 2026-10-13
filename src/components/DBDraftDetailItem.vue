@@ -12,7 +12,14 @@ import type { ShopSourceInfo } from "@/utils/weapon-source"
 
 const props = defineProps<{
     draft: Draft
+    embedded?: boolean
 }>()
+
+const sectionClass = computed(() =>
+    props.embedded
+        ? "rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+        : "rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+)
 
 // 将分钟数转换为00:00格式
 function formatDuration(minutes: number): string {
@@ -156,7 +163,7 @@ const productDisplay = computed(() => {
         </header>
 
         <!-- 基本信息 -->
-        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section :class="sectionClass">
             <SectionHeader no-animate compact kicker="INFO" :title="$t('draft-detail.basicInfo')" />
             <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
@@ -201,13 +208,13 @@ const productDisplay = computed(() => {
         </section>
 
         <!-- 产物信息 -->
-        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section :class="sectionClass">
             <SectionHeader no-animate compact kicker="PRODUCT" :title="$t('draft-detail.product')" />
             <ResourceCostItem :name="productDisplay.name" :value="productDisplay.value" />
         </section>
 
         <!-- 消耗资源 -->
-        <section v-if="draft.x && draft.x.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section v-if="draft.x && draft.x.length > 0" :class="sectionClass">
             <SectionHeader no-animate compact kicker="MATERIALS" :title="$t('draft-detail.materials')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem name="铜币" :value="draft.m" />
@@ -218,13 +225,13 @@ const productDisplay = computed(() => {
         </section>
 
         <!-- 获取途径 -->
-        <section v-if="draftShopSources.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section v-if="draftShopSources.length > 0" :class="sectionClass">
             <SectionHeader no-animate compact kicker="ACQUISITION" :title="$t('draft-detail.acquisition')" />
             <ShopSource :shop-sources="draftShopSources" />
         </section>
 
         <!-- 掉落来源 -->
-        <section v-if="draftDungeons.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section v-if="draftDungeons.length > 0" :class="sectionClass">
             <SectionHeader no-animate compact kicker="DROP SOURCES" :title="$t('draft-detail.dropSources')" />
             <DungeonSource :dungeon-sources="draftDungeons" />
         </section>

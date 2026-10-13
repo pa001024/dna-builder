@@ -207,6 +207,9 @@ function handleMouseUp(event: MouseEvent) {
             :title="trait.buffName ? `${$t(trait.name)} Lv.${trait.level}` : $t(trait.name)"
             :rarity="rarityQuality(trait.r)"
             :desc="trait.desc"
+            :image="trait.url"
+            tag="TRAIT"
+            :badge="`Lv.${trait.level}`"
         >
             <div class="flex min-w-0 flex-1 items-center gap-2">
                 <img class="size-8 shrink-0 rounded-xs object-cover" :src="trait.url" :alt="trait.name" />

@@ -1425,7 +1425,10 @@
         "search_placeholder": "제련 레벨, 퀘스트 또는 보상 ID 검색..."
     },
     "db-hardboss-detail": {
-        "monster_info": "몬스터 정보"
+        "active_reward_count": "적용 중 보상 {{count}} 그룹",
+        "monster_info": "몬스터 정보",
+        "reward_unit": "그룹",
+        "timeline_title": "보상 타임라인"
     },
     "db-hardboss-list": {
         "hardboss_count": "개 악몽 잔영",
@@ -1695,6 +1698,7 @@
         "current": "현재",
         "current_only": "현재만",
         "current_time_point": "현재 시점: {{label}}",
+        "item_unit": "개",
         "no_available_items": "현재 시점에 구매 가능한 상품이 없습니다",
         "no_diff_items": "이전 시점 대비 변화한 상품이 없습니다",
         "purchasable_count": "구매 가능 {{count}}개",
@@ -4249,6 +4253,12 @@
         "hoursAgo": "{{count}}시간 전",
         "justNow": "방금",
         "minutesAgo": "{{count}}분 전"
+    },
+    "time-filter": {
+        "compare_previous": "이전 시점과 비교: {{label}}",
+        "current": "현재",
+        "current_only": "현재만 표시",
+        "time_point_count": "{{count}}개 시점"
     },
     "timeline": {
         "addBuffTrack": "BUFF 트랙 추가",

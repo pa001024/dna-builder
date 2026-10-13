@@ -3,6 +3,7 @@ import { computed, ref } from "vue"
 import type { Dungeon } from "@/data"
 import { dungeonMap, LeveledChar } from "@/data"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
+import { getElementSoftBgClass } from "@/utils/element-utils"
 import { type ResourceDungeonSourceInfo } from "@/utils/resource-source"
 
 type DungeonSourceItem = ResourceDungeonSourceInfo & {
@@ -17,16 +18,6 @@ type DisplayDungeonSource = ResourceDungeonSourceInfo & {
 const props = defineProps<{
     dungeonSources: DungeonSourceItem[]
 }>()
-
-/** 元素对应的缩略图淡渐变背景（与 DBLatestItemCard 保持一致）。 */
-const elementBgClasses: Record<string, string> = {
-    光: "bg-linear-to-b from-yellow-500/25 to-yellow-100/10",
-    暗: "bg-linear-to-b from-gray-600/25 to-gray-200/10",
-    水: "bg-linear-to-b from-blue-500/25 to-blue-100/10",
-    火: "bg-linear-to-b from-red-500/25 to-red-100/10",
-    雷: "bg-linear-to-b from-violet-500/25 to-violet-100/10",
-    风: "bg-linear-to-b from-emerald-500/25 to-emerald-100/10",
-}
 
 /** 当前在弹窗中查看的副本来源。 */
 const selectedSource = ref<DisplayDungeonSource | null>(null)
@@ -65,7 +56,7 @@ const displayDungeonSources = computed(() => {
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs"
-                    :class="source.dungeon.e ? elementBgClasses[source.dungeon.e] || 'bg-base-content/6' : 'bg-base-content/6'"
+                    :class="source.dungeon.e ? getElementSoftBgClass(source.dungeon.e) || 'bg-base-content/6' : 'bg-base-content/6'"
                 >
                     <img
                         v-if="source.dungeon.e"

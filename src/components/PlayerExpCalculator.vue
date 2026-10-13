@@ -627,7 +627,8 @@ const extraTotalExp = computed(() => {
             </SectionHeader>
             <div class="flex items-center gap-3">
                 <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-base-content/50">
-                    {{ remainingExp.toLocaleString() }} / {{ expToNextLevel.toLocaleString() }}
+                    {{ remainingExp.toLocaleString() }}
+                    / {{ expToNextLevel.toLocaleString() }}
                 </span>
                 <div class="relative h-1.5 min-w-0 flex-1 overflow-hidden rounded-xs bg-base-content/10">
                     <div
@@ -639,7 +640,9 @@ const extraTotalExp = computed(() => {
                     >{{ progressPercent }}%</span
                 >
             </div>
-            <div class="mt-3 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+            <div
+                class="mt-3 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+            >
                 <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("player-exp.total_exp") }}</span>
                 <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ totalExp.toLocaleString() }}</span>
             </div>
@@ -653,8 +656,7 @@ const extraTotalExp = computed(() => {
                     <div class="min-w-0">
                         <div class="mb-1 flex items-baseline justify-between gap-2">
                             <span class="truncate text-[11px] tracking-wide text-base-content/55"
-                                >{{ reason
-                                }}{{ ["每日任务", "其他", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}</span
+                                >{{ reason }}{{ ["每日任务", "其他", "魔灵获取", "魔灵突破"].includes(reason) ? "" : "(可同步)" }}</span
                             >
                             <span class="shrink-0 text-[10px] text-base-content/35">{{ getExpPerItemLabel(reason) }}</span>
                         </div>

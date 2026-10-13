@@ -5,8 +5,8 @@ import { copyText } from "@/util"
 defineProps<{
     id: string | number
     name?: string
-    /** 紧凑模式：小尺寸 ID 方章；空间足够时完整显示，空间不足时自动截断 */
     compact?: boolean
+    border?: boolean
 }>()
 
 const setting = useSettingStore()
@@ -26,7 +26,8 @@ const setting = useSettingStore()
         <button
             v-else
             type="button"
-            class="truncate cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+            class="truncate cursor-pointer whitespace-nowrap rounded-xs border px-2 py-px text-[11px] transition-colors duration-150 active:scale-[0.97] text-base-content/60 hover:border-primary/60 hover:text-primary"
+            :class="[border ? 'border-base-content/20' : 'border-transparent']"
             :title="$t('copy-id.click_copy', { name: name ?? 'ID' })"
             @click.stop="copyText(`${id}`)"
         >

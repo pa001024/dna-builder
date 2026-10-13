@@ -2,12 +2,11 @@
 import { t } from "i18next"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
-import { formatModName, LeveledMod, LeveledModHelper, RModTypeMap } from "@/data"
+import { LeveledMod, LeveledModHelper, RModTypeMap } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
 import { copyText, pasteText } from "@/util"
-import { formatModLimit } from "@/utils/mod-limit"
 import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 interface ModOption {
@@ -508,17 +507,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 >
                     开销估算
                 </div>
-                <ShowProps
-                    v-if="aMod"
-                    :props="aMod.getProperties()"
-                    :title="formatModName(aMod.系列, aMod.名称, $t)"
-                    :polarity="aMod.极性"
-                    :cost="aMod.耐受"
-                    :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(formatModLimit(aMod.限定))}` : ''}`"
-                    :effdesc="aMod.效果"
-                    :effindex="aMod.等级 - 1"
-                    :eff="charBuild?.checkModEffective(aMod, true)"
-                >
+                <ShowProps v-if="aMod" :mod="aMod" :eff="charBuild?.checkModEffective(aMod, true)">
                     <div class="flex items-center gap-2">
                         <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
                         <Select

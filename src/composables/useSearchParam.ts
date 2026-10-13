@@ -37,12 +37,6 @@ function normalizeQueryValue(queryValue: LocationQueryValue | LocationQueryValue
     return queryValue
 }
 
-/**
- * 判断两个值是否相等，用于决定是否从 URL 中移除默认值。
- * @param left 左值
- * @param right 右值
- * @returns 是否相等
- */
 function isValueEqual(left: unknown, right: unknown): boolean {
     if (Object.is(left, right)) {
         return true
@@ -59,11 +53,6 @@ function isValueEqual(left: unknown, right: unknown): boolean {
     }
 }
 
-/**
- * 将值序列化为 query 字符串。
- * @param value 待序列化值
- * @returns query 字符串
- */
 function serializeSearchParamValue<T>(value: T): string | undefined {
     if (value === null || value === undefined) {
         return undefined
@@ -73,7 +62,11 @@ function serializeSearchParamValue<T>(value: T): string | undefined {
         return value
     }
 
-    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    if (typeof value === "boolean") {
+        return value ? "1" : undefined
+    }
+
+    if (typeof value === "number" || typeof value === "bigint") {
         return String(value)
     }
 

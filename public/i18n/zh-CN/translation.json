@@ -1434,7 +1434,10 @@
         "search_placeholder": "搜索商店ID/名称/商品..."
     },
     "db-hardboss-detail": {
-        "monster_info": "怪物信息"
+        "active_reward_count": "生效奖励 {{count}} 组",
+        "monster_info": "怪物信息",
+        "reward_unit": "组",
+        "timeline_title": "奖励时间轴"
     },
     "db-hardboss-list": {
         "hardboss_count": "个梦魇残声",
@@ -1704,6 +1707,7 @@
         "current": "当前",
         "current_only": "仅当前",
         "current_time_point": "当前时间点：{{label}}",
+        "item_unit": "件",
         "no_available_items": "当前时间点下没有可购买商品",
         "no_diff_items": "与上一时间点相比没有变化商品",
         "purchasable_count": "可购买 {{count}} 件",
@@ -4256,6 +4260,12 @@
         "hoursAgo": "{{count}} 小时前",
         "justNow": "刚刚",
         "minutesAgo": "{{count}} 分钟前"
+    },
+    "time-filter": {
+        "compare_previous": "对比上一时间点：{{label}}",
+        "current": "当前",
+        "current_only": "仅显示当前",
+        "time_point_count": "{{count}} 个时间点"
     },
     "timeline": {
         "addBuffTrack": "添加BUFF轨",

@@ -1419,7 +1419,10 @@
         "search_placeholder": "搜尋熔煉等級、任務或獎勵 ID..."
     },
     "db-hardboss-detail": {
-        "monster_info": "怪物資訊"
+        "active_reward_count": "生效獎勵 {{count}} 組",
+        "monster_info": "怪物資訊",
+        "reward_unit": "組",
+        "timeline_title": "獎勵時間軸"
     },
     "db-hardboss-list": {
         "hardboss_count": "個夢魘殘聲",
@@ -1689,6 +1692,7 @@
         "current": "目前",
         "current_only": "僅目前",
         "current_time_point": "目前時間點：{{label}}",
+        "item_unit": "件",
         "no_available_items": "目前時間點下沒有可購買商品",
         "no_diff_items": "與上一時間點相比沒有變化商品",
         "purchasable_count": "可購買 {{count}} 件",
@@ -4242,6 +4246,12 @@
         "hoursAgo": "{{count}} 小時前",
         "justNow": "剛剛",
         "minutesAgo": "{{count}} 分鐘前"
+    },
+    "time-filter": {
+        "compare_previous": "對比上一時間點：{{label}}",
+        "current": "當前",
+        "current_only": "僅顯示當前",
+        "time_point_count": "{{count}} 個時間點"
     },
     "timeline": {
         "addBuffTrack": "新增BUFF軌",

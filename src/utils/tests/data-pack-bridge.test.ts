@@ -46,6 +46,15 @@ describe("数据可用性判定", () => {
         expect(fresh.isDataAvailable()).toBe(true)
         expect(fresh.isDataPackHydrated()).toBe(true)
     })
+
+    it("重写关闭与否由绑定注册情况判定", async () => {
+        vi.resetModules()
+        const fresh = await import("../data-pack/data-pack-bridge")
+        expect(fresh.isDataPackRewriteDisabled()).toBe(true)
+
+        fresh.registerDataPackBinding("probe.data", "default", "array", () => {})
+        expect(fresh.isDataPackRewriteDisabled()).toBe(false)
+    })
 })
 
 describe("数据包水合版本门限", () => {

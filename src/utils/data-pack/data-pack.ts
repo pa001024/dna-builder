@@ -6,6 +6,7 @@ import { getActiveCdnBase, resolveCdnUrls } from "../cdn"
 import {
     getRegisteredDataPackModuleKeys,
     hydrateRegisteredDataPackBindings,
+    isDataPackRewriteDisabled,
     markDataPackHydrated,
     resetRegisteredDataPackBindings,
 } from "./data-pack-bridge"
@@ -809,9 +810,15 @@ export async function syncDataPackModuleBindings(moduleKey: string): Promise<voi
 
 /**
  * 确保数据包已准备好。
+ *
+ * 重写插件关闭时数据直读源码，跳过一切存储读取与版本激活。
  * @returns 是否准备成功
  */
 export async function ensureDataPackReady(): Promise<boolean> {
+    if (isDataPackRewriteDisabled()) {
+        return false
+    }
+
     if (!(await isPackStorageAvailable())) {
         return false
     }

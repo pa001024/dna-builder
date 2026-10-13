@@ -21,7 +21,7 @@ const emit = defineEmits<{
         class="group relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-200/60 backdrop-blur-sm transition-colors duration-200 hover:border-primary/60"
     >
         <div class="relative h-full w-full overflow-hidden rounded-xs">
-            <ShowProps v-if="weapon" :props="weapon.getProperties()">
+            <ShowProps v-if="weapon" :weapon="weapon">
                 <div class="relative h-full w-full">
                     <!-- 武器图 -->
                     <img class="h-full w-full object-cover" :src="weapon.url" :alt="weapon.名称" />

@@ -1094,7 +1094,7 @@ onBeforeUnmount(() => {
                                     :key="`${entry.skinId}-${entry.step.step}`"
                                     class="space-y-1"
                                 >
-                                    <div class="font-mono text-[11px] tabular-nums text-base-content/55">Lv.{{ entry.step.step }}</div>
+                                    <div class="text-[11px] text-base-content/55">Lv.{{ entry.step.step }}</div>
                                     <ResourceCostItem :name="entry.step.currency" :value="getSkinUpgradeValue(entry.step)" />
                                 </div>
                             </div>

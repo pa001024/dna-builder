@@ -3,7 +3,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window"
 import { provideClient } from "@urql/vue"
 import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
-import { dataPackBootstrapLoading, isDataPackHydrated } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
@@ -432,7 +432,7 @@ onBeforeUnmount(() => {
         >
             <RouterView
                 v-slot="{ Component, route }"
-                v-if="route.meta.requireData === false || isDataPackHydrated() || !dataPackBootstrapLoading"
+                v-if="route.meta.requireData === false || isDataAvailable() || !dataPackBootstrapLoading"
             >
                 <transition name="slide-right">
                     <KeepAlive v-if="route.meta.keepAlive">
@@ -454,7 +454,7 @@ onBeforeUnmount(() => {
             </RouterView>
         </ResizeableWindow>
         <div
-            v-if="dataPackBootstrapLoading && !isDataPackHydrated() && $route.meta.requireData !== false"
+            v-if="dataPackBootstrapLoading && !isDataAvailable() && $route.meta.requireData !== false"
             class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm gap-2"
         >
             <span>{{ $t("ai.loading") }}</span>

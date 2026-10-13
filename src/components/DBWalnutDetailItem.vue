@@ -553,7 +553,7 @@ function getRewardTypeColor(index: number): string {
                     <span class="text-[11px] text-base-content/55">{{ $t(product.mod.类型) }}</span>
                     <span v-if="product.mod.属性" class="text-[11px] text-base-content/55">{{ $t(`${product.mod.属性}属性`) }}</span>
                     <span v-if="product.mod.限定" class="text-[11px] text-base-content/55">{{ $t(formatModLimit(product.mod.限定)) }}</span>
-                    <span v-if="product.mod.版本" class="font-mono text-[11px] tabular-nums text-base-content/55">v{{ product.mod.版本 }}</span>
+                    <span v-if="product.mod.版本" class="text-[11px] text-base-content/55">v{{ product.mod.版本 }}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                     <div
@@ -749,7 +749,7 @@ function getRewardTypeColor(index: number): string {
 
         <!-- 设计稿 -->
         <div v-if="draft" class="overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm">
-            <DBDraftDetailItem :draft="draft" />
+            <DBDraftDetailItem embedded :draft="draft" />
         </div>
 
         <!-- 模拟开函 -->

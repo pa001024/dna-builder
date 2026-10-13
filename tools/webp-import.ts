@@ -22,7 +22,7 @@ import { pathToFileURL } from "node:url"
  * 编码规则：输出分辨率宽高均 <=256（即 256x256 以内）时用无损压缩，
  * 其余用有损编码（默认质量 90）；例外：bust/ 缩略图强制有损 q90（与现存一致）。
  * 缩放规则：
- *   bust/ 目录固定缩成 128x128 缩略图（视图只做 thumb-url，全图走 CDN）；
+ *   bust/ 与 fashion/ 目录固定缩成 128x128 缩略图（视图只做 thumb-url，全图走 CDN）；
  *   res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
  *   命中 SCALE_RULES（按目标贴图名匹配）的图片按规则里的 scale 等比缩小、不放大，
  *   如拍照活动大图 T_Activity_PhotoEvent_* 按 50% 缩放。
@@ -125,14 +125,14 @@ const RES_MAX_HEIGHT = Number(getArgValue("--res-max-height") ?? process.env.WEB
  */
 const LOSSLESS_MAX_DIM = 256
 
-/** bust/ 目录是 128x128 缩略图（视图里只做 thumb-url，全图走 CDN），一律缩到该尺寸 */
-const BUST_THUMB_SIZE = 128
+/** bust/ 与 fashion/ 目录是 128x128 缩略图（视图里只做 thumb-url，全图走 CDN），一律缩到该尺寸 */
+const THUMB_SIZE = 128
 
 /**
- * 是否 bust 缩略图目标（相对 public/imgs 的路径以 bust/ 开头）。
+ * 是否缩略图目标（相对 public/imgs 的路径以 bust/ 或 fashion/ 开头）。
  */
-function isBustThumb(targetRelPath: string): boolean {
-    return targetRelPath.startsWith("bust/")
+function isThumb(targetRelPath: string): boolean {
+    return targetRelPath.startsWith("bust/") || targetRelPath.startsWith("fashion/")
 }
 
 /**
@@ -869,8 +869,8 @@ function buildTasks(
 }
 
 /**
- * 计算图片的等比缩小目标尺寸（不放大，bust 缩略图除外——固定缩到 128x128）：
- *   0. bust/ 目录 → 固定缩略图尺寸（BUST_THUMB_SIZE）；
+ * 计算图片的等比缩小目标尺寸（不放大，缩略图除外——固定缩到 128x128）：
+ *   0. bust/、fashion/ 目录 → 固定缩略图尺寸（THUMB_SIZE）；
  *   1. 命中 SCALE_RULES（按贴图名匹配）→ 按规则 scale 缩小；
  *   2. res/ 目录 → maxHeight 限制（RES_MAX_HEIGHT）；
  *   3. 都不命中 → 不缩小。
@@ -880,15 +880,19 @@ function buildTasks(
  */
 async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Promise<ResizeInfo | null> {
     const name = path.posix.basename(targetRelPath, ".webp")
-    // bust/ 下是缩略图（全图走 CDN）：固定缩到 128x128，与现存缩略图一致
-    if (isBustThumb(targetRelPath)) {
+    // bust/、fashion/ 下是缩略图（全图走 CDN）：固定缩到 128x128，与现存缩略图一致
+    if (isThumb(targetRelPath)) {
         const meta = await new Bun.Image(sourceAbsPath).metadata()
+        // 源图已经够小就不放大
+        if (meta.width <= THUMB_SIZE && meta.height <= THUMB_SIZE) {
+            return null
+        }
         return {
             originalWidth: meta.width,
             originalHeight: meta.height,
-            width: BUST_THUMB_SIZE,
-            height: BUST_THUMB_SIZE,
-            reason: "bust缩略图",
+            width: THUMB_SIZE,
+            height: THUMB_SIZE,
+            reason: targetRelPath.startsWith("fashion/") ? "fashion缩略图" : "bust缩略图",
         }
     }
     const scaleRule = SCALE_RULES.find(rule => rule.pattern.test(name))
@@ -1000,8 +1004,9 @@ async function convertTask(
     }
 
     const resizeInfo = await getResizeInfo(task.sourceAbsPath, task.targetRelPath)
-    // bust 缩略图强制有损 q90，与现存 40 个缩略图一致（大图无损版走 CDN，不管本地）
-    const forceLossy = isBustThumb(task.targetRelPath)
+    // bust 缩略图强制有损 q90，与现存 40 个缩略图一致（大图无损版走 CDN，不管本地）；
+    // fashion 缩略图走默认无损（与现存 fashion 缩略图一致）
+    const forceLossy = task.targetRelPath.startsWith("bust/")
 
     if (DRY_RUN) {
         return { status: "dry-run", resizeInfo, lossless: await isLosslessOutput(task.sourceAbsPath, resizeInfo, forceLossy) }

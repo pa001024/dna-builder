@@ -4,6 +4,7 @@ import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { LeveledCharHelper, LeveledMod, LeveledWeaponHelper } from "@/data"
 import type { Char, Mod, Weapon } from "@/data/data-types"
+import { getElementAccentColor, getElementSoftBgClass } from "@/utils/element-utils"
 
 export type DBLatestItemKind = "char" | "weapon" | "mod"
 
@@ -14,30 +15,6 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-
-/**
- * 元素属性对应的强调色，用于卡片上的元素小方块。
- */
-const elementColors: Record<string, string> = {
-    光: "#f59e0b",
-    暗: "#6b7280",
-    水: "#3b82f6",
-    火: "#ef4444",
-    雷: "#8b5cf6",
-    风: "#10b981",
-}
-
-/**
- * 元素属性对应的图像区淡渐变背景（仅角色与魔之楔使用）。
- */
-const elementBgClasses: Record<string, string> = {
-    光: "bg-linear-to-b from-yellow-500/25 to-yellow-100/10",
-    暗: "bg-linear-to-b from-gray-600/25 to-gray-200/10",
-    水: "bg-linear-to-b from-blue-500/25 to-blue-100/10",
-    火: "bg-linear-to-b from-red-500/25 to-red-100/10",
-    雷: "bg-linear-to-b from-violet-500/25 to-violet-100/10",
-    风: "bg-linear-to-b from-emerald-500/25 to-emerald-100/10",
-}
 
 /**
  * 魔之楔品质对应的图像区淡渐变背景。
@@ -80,7 +57,7 @@ const iconUrl = computed(() => {
 /** 图像区背景：角色按元素、魔之楔按品质、武器用中性底 */
 const imageBgClass = computed(() => {
     if (props.entry.kind === "char") {
-        return elementBgClasses[props.entry.item.属性] || ""
+        return getElementSoftBgClass(props.entry.item.属性)
     }
     if (props.entry.kind === "mod") {
         return rarityBgClasses[props.entry.item.品质] || ""
@@ -102,10 +79,10 @@ const meta = computed(() => {
 /** 元素强调色（仅角色与魔之楔） */
 const accent = computed(() => {
     if (props.entry.kind === "char") {
-        return elementColors[props.entry.item.属性]
+        return getElementAccentColor(props.entry.item.属性)
     }
     if (props.entry.kind === "mod") {
-        return props.entry.item.属性 ? elementColors[props.entry.item.属性] : undefined
+        return props.entry.item.属性 ? getElementAccentColor(props.entry.item.属性) : undefined
     }
     return undefined
 })

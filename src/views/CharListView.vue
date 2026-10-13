@@ -1,41 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import { charData, LeveledChar } from "@/data"
+import { getElementDisplayName, getElementGradientClass, getElementHoverBorderClass } from "@/utils/element-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const tabs = ["全部", "输出", "同律武器", "武器伤害", "技能伤害", "辅助", "召唤物", "控制", "神智回复", "治疗", "最大生命", "防御", "护盾"]
 const activeTab = ref(tabs[1])
 const searchQuery = ref("")
-
-// 元素颜色映射（悬停渐变）
-const elementColors: Record<string, string> = {
-    光: "from-yellow-400 to-yellow-600",
-    暗: "from-gray-400 to-gray-700",
-    水: "from-blue-400 to-blue-600",
-    火: "from-red-400 to-red-600",
-    雷: "from-purple-400 to-purple-600",
-    风: "from-green-400 to-green-600",
-}
-
-// 元素悬停边框颜色（卡片悬停时以元素色强调）
-const elementHoverBorders: Record<string, string> = {
-    光: "hover:border-yellow-500/70",
-    暗: "hover:border-gray-500/70",
-    水: "hover:border-blue-500/70",
-    火: "hover:border-red-500/70",
-    雷: "hover:border-purple-500/70",
-    风: "hover:border-green-500/70",
-}
-
-// 元素英文徽记（纯装饰，配合等宽大写徽记的造型语言）
-const elementNames: Record<string, string> = {
-    光: "Light",
-    暗: "Dark",
-    水: "Water",
-    火: "Fire",
-    雷: "Thunder",
-    风: "Wind",
-}
 
 // 过滤后的角色列表
 const filteredChars = computed(() => {
@@ -136,14 +107,14 @@ const getAnimationDelay = (index: number) => {
                             v-for="(char, index) in filteredChars"
                             :key="`${char.id}-${activeTab}`"
                             class="animate-ef-rise group relative flex cursor-pointer flex-col overflow-hidden border border-base-content/15 bg-base-100/50 backdrop-blur-sm [transition:transform_0.3s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s_ease,border-color_0.2s_ease] hover:-translate-y-1 hover:[box-shadow:0_16px_40px_-16px_color-mix(in_srgb,var(--color-base-content)_22%,transparent)] active:scale-[0.985]"
-                            :class="elementHoverBorders[char.属性]"
+                            :class="getElementHoverBorderClass(char.属性)"
                             :style="{ animationDelay: `${getAnimationDelay(index)}ms` }"
                             @click="$router.push(`/char/${char.id}`)"
                         >
                             <!-- 元素色条：悬停时显现 -->
                             <div
                                 class="absolute inset-x-0 top-0 z-10 h-0.5 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                :class="elementColors[char.属性] || 'from-gray-400 to-gray-600'"
+                                :class="getElementGradientClass(char.属性)"
                             />
 
                             <!-- 角色头像 -->
@@ -164,10 +135,10 @@ const getAnimationDelay = (index: number) => {
                                     {{ String(index + 1).padStart(2, "0") }}
                                 </span>
                                 <span
-                                    v-if="elementNames[char.属性]"
+                                    v-if="getElementDisplayName(char.属性)"
                                     class="absolute right-2 top-2 z-10 bg-base-100/55 px-[0.45rem] py-[0.2rem] font-mono text-[9px] uppercase tracking-[0.25em] text-base-content/55 backdrop-blur-[2px] transition-colors duration-200 group-hover:text-primary"
                                 >
-                                    {{ elementNames[char.属性] }}
+                                    {{ getElementDisplayName(char.属性) }}
                                 </span>
 
                                 <!-- 悬停遮罩 -->

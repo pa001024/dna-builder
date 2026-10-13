@@ -1087,7 +1087,7 @@ watch(
                                             class="mb-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-medium text-base-content/70"
                                         >
                                             <span>{{ $t("db-dungeon-detail.commander_count", { count: spawnGenerator.sm.length }) }}</span>
-                                            <span class="font-normal tabular-nums text-base-content/55">{{
+                                            <span class="font-normal text-base-content/55">{{
                                                 $t("db-dungeon-detail.spawn_num_pool", {
                                                     value: formatSpawnCommanderNumText(spawnGenerator.smnum),
                                                 })
@@ -1188,9 +1188,7 @@ watch(
                 <div class="mt-3 space-y-3">
                     <div>
                         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
-                            <span class="font-medium"
-                                >{{ $t("db-dungeon-detail.async_combat_participation_reward") }}: 5%</span
-                            >
+                            <span class="font-medium">{{ $t("db-dungeon-detail.async_combat_participation_reward") }}: 5%</span>
                             <span class="text-base-content/55">{{ $t("db-dungeon-detail.async_combat_require_contribution") }}</span>
                         </div>
                         <div class="mt-1 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
@@ -1205,8 +1203,11 @@ watch(
                     <div>
                         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
                             <span class="font-medium"
-                                >{{ $t("db-dungeon-detail.async_combat_mvp_reward") }}({{ $t("db-dungeon-detail.async_combat_including_participation") }}):
-                                {{ asyncCombatMvpTotalPercent }}% = 5% + 30% + 3% × {{ Math.max(0, Math.floor(asyncCombatLeadCount)) }}</span
+                                >{{ $t("db-dungeon-detail.async_combat_mvp_reward") }}({{
+                                    $t("db-dungeon-detail.async_combat_including_participation")
+                                }}):
+                                {{ asyncCombatMvpTotalPercent }}% = 5% + 30% + 3% ×
+                                {{ Math.max(0, Math.floor(asyncCombatLeadCount)) }}</span
                             >
                             <span class="text-base-content/55">{{ $t("db-dungeon-detail.async_combat_mvp_per_lead") }}</span>
                         </div>

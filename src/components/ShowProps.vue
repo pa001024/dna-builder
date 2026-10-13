@@ -1,6 +1,8 @@
 <script setup lang="tsx">
 import { computed } from "vue"
+import type { ModCardSource } from "@/components/ModTooltip.vue"
 import { useGameText } from "@/composables/useGameText"
+import type { LeveledChar, LeveledWeapon } from "@/data"
 import type { ParamText } from "@/data/data-types"
 import { formatProp } from "@/util"
 import { getParamTemplate, splitByPolarity } from "@/utils/param-text"
@@ -8,7 +10,8 @@ import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const componentProps = withDefaults(
     defineProps<{
-        props: Record<string, any>
+        /** 通用分支的属性表；传入 mod / weapon / char 时由卡片自行计算，可省略 */
+        props?: Record<string, any>
         attr?: Record<string, string>
         code?: string
         /** 条件BUFF（技能限定）生效范围：字段名需包含该技能名（如 "暗影奔袭"），显示为「适用于 X」 */
@@ -28,11 +31,22 @@ const componentProps = withDefaults(
         type?: string
         link?: string
         eff?: { isEffective: boolean; props?: Record<string, any> }
+        /** 富卡片数据源：传入后 tooltip 改用对应的带图卡片（ModTooltip / WeaponTooltip / CharTooltip）渲染 */
+        mod?: ModCardSource
+        weapon?: LeveledWeapon
+        char?: LeveledChar
+        /** 通用分支的图片头：无富卡片数据源时展示（如魔灵潜质 trait.url） */
+        image?: string
+        /** 图片头左上角角标（如 MOD / TRAIT） */
+        tag?: string
+        /** 图片头右上角徽记（如 Lv.10） */
+        badge?: string
     }>(),
     {
         side: "top",
         effindex: 0,
         effstrip: false,
+        props: () => ({}),
     }
 )
 
@@ -62,7 +76,31 @@ function formatDesc(): string[] {
 <template>
     <FullTooltip :side="side">
         <template #tooltip>
-            <div class="flex flex-col gap-2 max-w-75 min-w-28">
+            <div v-if="mod" class="-mx-3.75 -my-2.5">
+                <ModTooltip :mod="mod" :eff="eff ?? mod.getCondition()" :link="link" bare />
+            </div>
+            <div v-else-if="weapon" class="-mx-3.75 -my-2.5">
+                <WeaponTooltip :weapon="weapon" :link="link" bare />
+            </div>
+            <div v-else-if="char" class="-mx-3.75 -my-2.5">
+                <CharTooltip :char="char" :link="link" bare />
+            </div>
+            <div v-else class="flex flex-col gap-2 max-w-75 min-w-28">
+                <div v-if="image" class="relative -mx-3.75 -mt-2.5 mb-1 h-24 w-64 overflow-hidden">
+                    <img :src="image" :alt="title" class="absolute inset-0 h-full w-full object-cover" />
+                    <span
+                        v-if="tag"
+                        class="absolute left-2 top-2 bg-base-content px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-base-100"
+                    >
+                        {{ tag }}
+                    </span>
+                    <span
+                        v-if="badge"
+                        class="absolute right-2 top-2 border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 font-mono text-[9px] tabular-nums text-base-content/70 backdrop-blur-sm"
+                    >
+                        {{ badge }}
+                    </span>
+                </div>
                 <div class="flex">
                     <div v-if="title" class="text-sm font-bold">
                         <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>

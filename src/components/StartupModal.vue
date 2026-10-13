@@ -7,7 +7,7 @@ import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
 import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
-import { dataPackBootstrapLoading, getRegisteredDataPackModuleKeys } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
 import pg from "../../package.json"
 
 const router = useRouter()
@@ -20,8 +20,8 @@ const { t } = useTranslation()
 const searchParams = new URLSearchParams(window.location.search)
 const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
 
-// DISABLE_REWRITE=1 时不注册数据回填绑定（bindingRegistry 为空），不会真正缺包，禁用数据包弹窗。
-const isRewriteDisabled = getRegisteredDataPackModuleKeys().length === 0
+// DISABLE_REWRITE=1 时不注册数据回填绑定，不会真正缺包，禁用数据包弹窗。
+const isRewriteDisabled = isDataPackRewriteDisabled()
 
 // 当前页面是否需要数据包：路由 meta.requireData === false 时（如脚本页面）不依赖数据包，
 // 跳过数据包更新/安装弹窗，默认值为 true（需要数据包）。

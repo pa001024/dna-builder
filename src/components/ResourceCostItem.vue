@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { formatModName, LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
+import { LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
 import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
 import { charAccessoryData, weaponAccessoryData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
@@ -306,14 +306,7 @@ function handleCardClick() {
         v-if="Array.isArray(value) && value[2] === 'Mod'"
         v-for="mod in [createLeveledMod(value[1])]"
         :key="mod.id"
-        :props="mod.getProperties()"
-        :title="formatModName(mod.系列, mod.名称, $t)"
-        :rarity="mod.品质"
-        :polarity="mod.极性"
-        :cost="mod.耐受"
-        :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-        :effdesc="mod.效果"
-        :effindex="mod.等级 - 1"
+        :mod="mod"
         :link="getRewardDetailLink('Mod', mod.id)"
     >
         <div
@@ -343,12 +336,7 @@ function handleCardClick() {
         v-else-if="Array.isArray(value) && value[2] === 'Weapon'"
         v-for="weapon in [createLeveledWeapon(value[1])]"
         :key="weapon.id"
-        :props="weapon.getProperties()"
-        :title="$t(weapon.名称)"
-        :type="weapon._originalWeaponData.类型.map((type: string) => $t(type)).join(',')"
-        :effdesc="weapon.效果"
-        :effindex="weapon.精炼"
-        :effstrip="true"
+        :weapon="weapon"
         :link="getRewardDetailLink('Weapon', weapon.id)"
     >
         <div
@@ -378,8 +366,7 @@ function handleCardClick() {
         v-else-if="Array.isArray(value) && value[2] === 'Char'"
         v-for="char in [createLeveledChar(value[1])]"
         :key="char.id"
-        :props="char.getProperties()"
-        :title="$t(char.名称)"
+        :char="char"
         :link="getRewardDetailLink('Char', char.id)"
     >
         <div

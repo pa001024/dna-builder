@@ -7,6 +7,7 @@ import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import type { BuildTabCard } from "@/components/BuildTabTooltip.vue"
 import { useCharRemote } from "@/composables/useCharRemote"
 import {
     addModVariant,
@@ -40,6 +41,7 @@ import {
     LeveledChar,
     LeveledCharHelper,
     LeveledModHelper,
+    LeveledSkillWeapon,
     LeveledWeapon,
     LeveledWeaponHelper,
     type ModTypeKey,
@@ -52,7 +54,6 @@ import { createBuffFromSettings } from "@/data/CharBuildHelper"
 import { resourceMap } from "@/data/d"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
-import type { ParamText, SkillWeapon, Weapon } from "@/data/data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import {
     collectPetBuffs,
@@ -74,7 +75,7 @@ import { useSettingStore } from "@/store/setting"
 import { useTimeline } from "@/store/timeline"
 import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
-import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
+import { copyText, formatBigNumber, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
@@ -88,7 +89,7 @@ const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
 const { t } = useTranslation()
-const { gt, gpt } = useGameText()
+const { gt } = useGameText()
 const dataPackTick = computed(() => dataPackHydrationKey.value)
 const isCharBuildReady = computed(() => {
     dataPackTick.value
@@ -530,34 +531,6 @@ const charTabs = computed(() => {
     return tabs
 })
 
-type WeaponTooltipData = {
-    title: string
-    mastery?: string[]
-    type?: string
-    desc?: string
-    props: Record<string, number | string>
-    propEntries: [string, number | string][]
-    /** 熔炼效果原文（参数化文本，按 `effindex` 求值后展示） */
-    effdesc?: ParamText
-    /** 熔炼效果档位（精炼等级） */
-    effindex?: number
-    ineffectiveProps?: Set<string>
-    /** 槽位是否为空武器（未装备） */
-    isEmpty?: boolean
-}
-
-/**
- * 将属性对象过滤为仅包含数值的记录。
- * @param props 原始属性对象
- * @returns 仅包含数值的属性对象
- */
-function pickNumericProps(props?: Record<string, number | undefined>) {
-    return Object.fromEntries(Object.entries(props || {}).filter(([, value]) => typeof value === "number" && value !== 0)) as Record<
-        string,
-        number
-    >
-}
-
 /**
  * 获取未生效的武器加成属性集合。
  * @param weapon 目标武器
@@ -569,35 +542,18 @@ function getIneffectiveWeaponBonusProps(weapon: LeveledWeapon) {
 }
 
 /**
- * 获取页签 tooltip 使用的武器属性，未生效时保留特效属性用于删除线展示。
- * @param weapon 目标武器
- * @returns tooltip 展示属性
- */
-function getWeaponTooltipProps(weapon: LeveledWeapon) {
-    const props = weapon.getProperties()
-    if (!charBuild.value.isWeaponForgeEffective(weapon)) {
-        Object.assign(props, weapon._effectiveBuffProps)
-    }
-    return props
-}
-
-/**
- * 获取页签 tooltip 数据。
+ * 解析侧边栏页签的 tooltip 卡片：角色走角色卡，近战/远程走武器卡；
+ * 同律武器继承近战/远程时按被继承槽位的实际武器展示，未装备时返回空卡。
  * @param tab 页签信息
- * @returns tooltip 数据
+ * @returns tooltip 卡片数据
  */
-function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTooltipData | undefined {
+function getBuildTabCard(tab: (typeof charTabs.value)[number]): BuildTabCard {
+    // 流程门控：解析链条会调用熔炼/武器方法，未就绪直接返回空卡
+    if (!isCharBuildReady.value) return { kind: "empty", title: tab.name }
     if (tab.name === "角色") {
-        const props = pickNumericProps(charBuild.value.char.加成)
         // 精通列表包含额外精通武器（如灾厄武器所需类型）
         const mastery = [...(charBuild.value.char.精通 || []), ...(charBuild.value.extraMastery ? [charBuild.value.extraMastery] : [])]
-        return {
-            title: charBuild.value.char.名称,
-            mastery,
-            type: charBuild.value.char.属性,
-            props,
-            propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
-        }
+        return { kind: "char", char: charBuild.value.char, mastery }
     }
 
     const weapon =
@@ -608,60 +564,20 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
               : tab.name === "同律"
                 ? charBuild.value.skillWeapon
                 : undefined
-
-    if (!weapon || (weapon instanceof LeveledWeapon && weapon.isEmpty)) {
-        return undefined
+    const resolved =
+        weapon instanceof LeveledSkillWeapon && weapon.inherit
+            ? weapon.inherit === "melee"
+                ? charBuild.value.meleeWeapon
+                : charBuild.value.rangedWeapon
+            : weapon
+    if (!resolved || (resolved instanceof LeveledWeapon && resolved.isEmpty)) {
+        return { kind: "empty", title: tab.name, isEmpty: tab.isEmpty }
     }
-    // 同律武器继承近战/远程时，被继承槽位为空武器（未装备）则无面板可展示
-    if (weapon.inherit) {
-        const inheritedEmpty =
-            weapon.inherit === "melee"
-                ? charBuild.value.meleeWeapon.isEmpty
-                : weapon.inherit === "ranged"
-                  ? charBuild.value.rangedWeapon.isEmpty
-                  : false
-        if (inheritedEmpty) {
-            return undefined
-        }
+    if (resolved instanceof LeveledWeapon) {
+        return { kind: "weapon", weapon: resolved, ineffective: getIneffectiveWeaponBonusProps(resolved) }
     }
-
-    const weaponData = weapon._originalWeaponData as Weapon | SkillWeapon
-    let props: Record<string, number | string> = weapon instanceof LeveledWeapon ? getWeaponTooltipProps(weapon) : weapon.getProperties()
-    let ineffectiveProps = weapon instanceof LeveledWeapon ? getIneffectiveWeaponBonusProps(weapon) : new Set<string>()
-    if (weapon.inherit)
-        if (weapon.inherit === "melee") {
-            props = getWeaponTooltipProps(charBuild.value.meleeWeapon)
-            ineffectiveProps = getIneffectiveWeaponBonusProps(charBuild.value.meleeWeapon)
-        } else {
-            props = getWeaponTooltipProps(charBuild.value.rangedWeapon)
-            ineffectiveProps = getIneffectiveWeaponBonusProps(charBuild.value.rangedWeapon)
-        }
-
-    return {
-        title: weapon.名称,
-        desc: "描述" in weaponData ? weaponData.描述 : undefined,
-        type: weapon.类别,
-        props,
-        propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
-        ineffectiveProps,
-        effdesc: "熔炼" in weaponData ? weaponData.熔炼 : undefined,
-        effindex: weapon instanceof LeveledWeapon ? weapon.精炼 : 0,
-    }
+    return { kind: "skill", weapon: resolved }
 }
-
-const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() => {
-    // 流程门控：tooltip 链条会调用熔炼/武器方法，未就绪直接返回空表
-    if (!isCharBuildReady.value) return {}
-    return charTabs.value.reduce<Record<string, WeaponTooltipData>>((map, tab) => {
-        map[tab.name] = getCharTabTooltipData(tab) || {
-            title: tab.name,
-            props: {},
-            propEntries: [],
-            isEmpty: tab.isEmpty,
-        }
-        return map
-    }, {})
-})
 
 /**
  * 把 MOD 槽位类型归一化为变体支持的槽位类型。
@@ -2275,9 +2191,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 backgroundPosition: 'center',
             }"
             />
-            <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级）
-             data-agent-exclude：整条顶栏不对配装助手开放——简洁模式会换掉整个视图、对比会离开本页，
-             一旦点到 assistant 就失去操作面。自动配装按钮单独用 data-agent-allow 放行。 -->
+            <!-- 顶栏 data-agent-exclude -->
             <div
                 data-tour="top-actions"
                 data-agent-exclude="chrome"
@@ -2431,55 +2345,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <div class="flex flex-col gap-4">
                         <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
                             <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
-                                <FullTooltip side="bottom">
-                                    <template #tooltip>
-                                        <div class="flex flex-col gap-2 max-w-75 min-w-28">
-                                            <div class="flex">
-                                                <div class="text-sm font-bold">
-                                                    {{ charTabTooltipMap[tab.name].title }}
-                                                </div>
-                                                <div class="ml-auto text-sm text-primary">
-                                                    {{ charTabTooltipMap[tab.name].type }}
-                                                </div>
-                                            </div>
-                                            <div
-                                                v-if="charTabTooltipMap[tab.name].isEmpty"
-                                                class="text-[11px] text-base-content/50 whitespace-nowrap"
-                                            >
-                                                {{ $t("char-build.weapon_slot_not_equipped") }}
-                                            </div>
-                                            <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
-                                                {{ gpt(charTabTooltipMap[tab.name].effdesc, charTabTooltipMap[tab.name].effindex ?? 0) }}
-                                            </div>
-                                            <div
-                                                v-if="charTabTooltipMap[tab.name].mastery?.length"
-                                                class="flex justify-between items-center gap-2 text-sm"
-                                            >
-                                                <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("武器精通") }}</div>
-                                                <div class="font-medium text-primary">
-                                                    {{ charTabTooltipMap[tab.name].mastery?.map(m => $t(m)).join("、") }}
-                                                </div>
-                                            </div>
-                                            <div
-                                                v-for="[ prop, val ] in charTabTooltipMap[tab.name].propEntries"
-                                                :key="prop"
-                                                class="flex justify-between items-center gap-2 text-sm"
-                                            >
-                                                <div
-                                                    class="text-xs text-neutral-500 whitespace-nowrap"
-                                                    :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
-                                                >
-                                                    {{ prop.startsWith("基础") ? `${$t("基础")}${$t(prop.slice(2))}` : $t(prop) }}
-                                                </div>
-                                                <div
-                                                    class="font-medium text-primary"
-                                                    :class="{ 'line-through': charTabTooltipMap[tab.name].ineffectiveProps?.has(prop) }"
-                                                >
-                                                    {{ formatProp(prop, val) }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
+                                <BuildTabTooltip :card="getBuildTabCard(tab)">
                                     <div
                                         class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
                                         :class="[
@@ -2515,7 +2381,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         />
                                         <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                                     </div>
-                                </FullTooltip>
+                                </BuildTabTooltip>
                             </div>
                             <!-- 额外精通武器：虚线加号框，点击选择额外精通的武器类型 -->
                             <div v-if="extraMasteryOptions.length > 0 || selectedExtraMastery" class="flex items-center gap-2 shrink-0">

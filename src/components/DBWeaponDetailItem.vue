@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
+import { forgeLevelData } from "@/data"
 import charData from "@/data/d/char.data"
 import { weaponDraftMap } from "@/data/d/index"
 import modData from "@/data/d/mod.data"
@@ -22,7 +23,7 @@ const { gt, gpt } = useGameText()
 const currentLevel = ref(80)
 const currentRefine = ref(5)
 const replaceModLevels = ref<Record<number, number>>({})
-const weaponInfoTab = ref<"applicable" | "breakthrough" | "manufacture">("breakthrough")
+const weaponInfoTab = ref<"applicable" | "breakthrough" | "manufacture" | "calamity">("breakthrough")
 
 const leveledWeapon = computed(() => {
     return new LeveledWeapon(props.weapon, props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : currentRefine.value, currentLevel.value)
@@ -508,13 +509,13 @@ watch(
             v-if="weaponSkillReplaceGroups.length > 0"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="MOD REPLACE" :title="$t('weapon-detail.moveDemonWedges')" />
+            <SectionHeader no-animate compact kicker="REPLACE" :title="$t('weapon-detail.moveDemonWedges')" />
             <div class="space-y-4">
                 <div v-for="group in weaponSkillReplaceGroups" :key="group.skillId">
                     <!-- 技能分组标签行 -->
                     <div class="mb-2 flex items-center gap-2">
                         <span class="text-sm font-medium">{{ $t(group.skillName) }}</span>
-                        <span class="font-mono text-[11px] tabular-nums text-base-content/40">({{ group.skillId }})</span>
+                        <CopyID :id="group.skillId" />
                         <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
                     </div>
                     <div class="space-y-2">
@@ -523,17 +524,7 @@ watch(
                             :key="item.mod.id"
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                         >
-                            <ShowProps
-                                :props="item.mod.getProperties()"
-                                :title="formatModName(item.mod.系列, item.mod.名称, $t)"
-                                :rarity="item.mod.品质"
-                                :polarity="item.mod.极性"
-                                :cost="item.mod.耐受"
-                                :type="`${$t(item.mod.类型)}${item.mod.属性 ? `,${$t(item.mod.属性 + '属性')}` : ''}${item.mod.限定 ? `,${$t(item.mod.限定)}` : ''}`"
-                                :effdesc="item.mod.效果"
-                                :effindex="item.mod.等级 - 1"
-                                :link="`/db/mod/${item.mod.id}`"
-                            >
+                            <ShowProps :mod="item.mod">
                                 <div
                                     class="mb-2 flex items-center rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200"
                                 >
@@ -567,9 +558,7 @@ watch(
                             </ShowProps>
                             <div v-if="item.showLevelControl" class="mb-2">
                                 <div class="flex items-center gap-4">
-                                    <span class="min-w-16 font-mono text-[11px] tabular-nums text-base-content/55"
-                                        >Lv. {{ item.mod.等级 }}</span
-                                    >
+                                    <span class="min-w-16 text-[11px] text-base-content/55">Lv. {{ item.mod.等级 }}</span>
                                     <input
                                         v-model.number="replaceModLevels[item.mod.id]"
                                         type="range"
@@ -592,7 +581,7 @@ watch(
 
         <!-- 突破 / 制造（灾厄武器首位加「适用角色」）：无 SectionHeader，靠注解进滚动目录 -->
         <section
-            v-if="(weapon.突破 && weapon.突破.length > 0) || weaponDraft"
+            v-if="(weapon.突破 && weapon.突破.length > 0) || weaponDraft || isCalamityWeapon"
             data-scroll-section="craft"
             :data-scroll-title="`${$t('weapon-detail.ascension')} / ${$t('weapon-detail.crafting')}`"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
@@ -605,6 +594,7 @@ watch(
                               { label: $t('weapon-detail.applicable'), value: 'applicable' },
                               { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
                               { label: $t('weapon-detail.crafting'), value: 'manufacture' },
+                              { label: $t('database.forge'), value: 'calamity' },
                           ]
                         : [
                               { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
@@ -678,8 +668,12 @@ watch(
                 <div v-else class="text-sm text-base-content/60">{{ $t("weapon-detail.noAscensionData") }}</div>
             </div>
 
-            <div v-else-if="weaponDraft" class="mt-2">
-                <DBDraftDetailItem :draft="weaponDraft" />
+            <div v-else-if="weaponInfoTab === 'manufacture' && weaponDraft" class="mt-2">
+                <DBDraftDetailItem embedded :draft="weaponDraft" />
+            </div>
+
+            <div v-else-if="weaponInfoTab === 'calamity' && isCalamityWeapon" class="mt-2 space-y-3">
+                <DBForgeDetailItem v-for="forge in forgeLevelData" :key="forge.ForgeLevel" embedded :forge="forge" />
             </div>
         </section>
 

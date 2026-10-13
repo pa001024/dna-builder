@@ -13,7 +13,7 @@ import {
     resolveCharSkillLevel,
     resolveModVariantLetter,
 } from "@/composables/useCharSettings"
-import { charMap, formatModName, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
+import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
 
 /**
  * 协战构筑弹窗——简洁模式下点击协战角色/协战武器时打开。
@@ -362,19 +362,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                             <div class="tb-modgrid">
                                 <!-- 普通槽位：空槽保留占位，体现装配数量 -->
                                 <template v-for="(mod, index) in group.mods" :key="index">
-                                    <ShowProps
-                                        v-if="mod"
-                                        :link="`/db/mod/${mod.id}`"
-                                        :props="mod.getProperties()"
-                                        :title="formatModName(mod.系列, mod.名称, $t)"
-                                        :rarity="mod.品质"
-                                        :polarity="mod.极性"
-                                        :cost="mod.耐受"
-                                        :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
-                                        :effdesc="mod.效果"
-                                        :effindex="mod.等级 - 1"
-                                        :eff="mod.getCondition()"
-                                    >
+                                    <ShowProps v-if="mod" :mod="mod" :eff="mod.getCondition()">
                                         <div class="tb-mod" :data-quality="mod.品质">
                                             <span class="tb-mod-icon">
                                                 <img :src="mod.url" :alt="$t(mod.名称)" />
@@ -397,18 +385,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                 </template>
 
                                 <!-- 中枢魔之楔：角色组的独立槽位 -->
-                                <ShowProps
-                                    v-if="group.key === 'char' && group.aura"
-                                    :link="`/db/mod/${group.aura.id}`"
-                                    :props="group.aura.getProperties()"
-                                    :title="formatModName(group.aura.系列, group.aura.名称, $t)"
-                                    :rarity="group.aura.品质"
-                                    :polarity="group.aura.极性"
-                                    :cost="group.aura.耐受"
-                                    :effdesc="group.aura.效果"
-                                    :effindex="group.aura.等级 - 1"
-                                    :eff="group.aura.getCondition()"
-                                >
+                                <ShowProps v-if="group.key === 'char' && group.aura" :mod="group.aura" :eff="group.aura.getCondition()">
                                     <div class="tb-mod" :data-quality="group.aura.品质">
                                         <span class="tb-mod-icon">
                                             <img :src="group.aura.url" :alt="$t(group.aura.名称)" />

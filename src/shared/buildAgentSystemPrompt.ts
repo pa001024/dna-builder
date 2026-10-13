@@ -24,7 +24,6 @@ const TOOL_GUIDE = `### 可用工具
 **第二类：直接操作配装页界面（兜底，接口层覆盖不到时才用）**
 - read_page: 读取配装页当前可操作的控件清单与关键数值。
 - click_ui / type_ui / select_ui / press_key / scroll_ui: 点击、输入、选择、按键、滚动。
-- ⚠️ 顶栏（分享 / 简洁模式 / 对比 / 保存方案 / 重置）不对助手开放，点它们会切换视图或离开配装页，助手将失去操作面。
 
 **第三类：资料检索（查游戏数据）**
 - list_data_modules / list_filter_options: 先看有哪些模块与合法筛选取值。

@@ -2,7 +2,6 @@
 import { computed } from "vue"
 import type { CharBuild } from "@/data/CharBuild"
 import type { LeveledMod } from "@/data/leveled/LeveledMod"
-import { formatModName } from "@/data/leveled/LeveledMod"
 
 const props = defineProps<{
     mods: (LeveledMod | null)[]
@@ -178,18 +177,7 @@ const cardLayout = {
                             ></div>
 
                             <!-- 内容层 -->
-                            <ShowProps
-                                v-if="mods[index]"
-                                :props="mods[index]!.getProperties()"
-                                :title="formatModName(mods[index]!.系列, mods[index]!.名称, $t)"
-                                :rarity="mods[index]!.品质"
-                                :polarity="mods[index]!.极性"
-                                :cost="mods[index]!.耐受"
-                                :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
-                                :effdesc="mods[index]!.效果"
-                                :effindex="mods[index]!.等级 - 1"
-                                :eff="getModEff(mods[index]!)"
-                            >
+                            <ShowProps v-if="mods[index]" :mod="mods[index]!" :eff="getModEff(mods[index]!)">
                                 <div class="relative h-full">
                                     <!-- 耐受值和极性标签 (左侧卡片在右上角) -->
                                     <div class="absolute top-1 -right-3">
@@ -244,18 +232,7 @@ const cardLayout = {
                             ></div>
 
                             <!-- 内容层 -->
-                            <ShowProps
-                                v-if="mods[index]"
-                                :props="mods[index]!.getProperties()"
-                                :title="formatModName(mods[index]!.系列, mods[index]!.名称, $t)"
-                                :rarity="mods[index]!.品质"
-                                :polarity="mods[index]!.极性"
-                                :cost="mods[index]!.耐受"
-                                :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
-                                :effdesc="mods[index]!.效果"
-                                :effindex="mods[index]!.等级 - 1"
-                                :eff="getModEff(mods[index]!)"
-                            >
+                            <ShowProps v-if="mods[index]" :mod="mods[index]!" :eff="getModEff(mods[index]!)">
                                 <div class="relative h-full">
                                     <!-- 耐受值和极性标签 (右侧卡片在右上角) -->
                                     <div class="absolute top-1 -left-3">

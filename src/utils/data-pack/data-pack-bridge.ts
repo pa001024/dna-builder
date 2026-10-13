@@ -15,21 +15,10 @@ const bindingRegistry = new Map<string, Map<string, DataPackBindingEntry>>()
 const hydrationCallbacks = new Set<() => void>()
 let hydrated = false
 
-/**
- * 标记数据包水合完成的全局刷新计数。
- */
 export const dataPackHydrationKey = ref(0)
 
-/**
- * 标记数据包是否仍在启动加载中。
- */
 export const dataPackBootstrapLoading = ref(false)
 
-/**
- * 创建数据包导出绑定的空值。
- * @param fallbackKind 空值类型
- * @returns 对应空值
- */
 function createFallbackValue(fallbackKind: DataPackFallbackKind): unknown {
     if (fallbackKind === "array") return []
     if (fallbackKind === "object") return {}
@@ -38,15 +27,7 @@ function createFallbackValue(fallbackKind: DataPackFallbackKind): unknown {
 }
 
 /**
- * 数据包水合时重放版本门限。
- *
- * 数据包按「安全模式全开」打包全量数据，版本门限只在客户端生效：
- * 条目数组（角色/武器/魔之楔等带版本字段的表）在写入导出前统一过滤，
- * rebuildStaticIndexes 等水合回调与后续读取拿到的都是裁剪后的数据。
- * 数据包按约定只装原始条目表（questChainMap 等派生索引一律放 index.ts 重建），
- * 因此只需处理数组；门限为 Infinity（安全模式关闭）时 applyVersionGate 原样返回。
- * @param value 水合值
- * @returns 应用门限后的值
+ * 数据包水合时重放版本门限 rebuildStaticIndexes
  */
 function applyVersionGateToPackedValue(value: unknown): unknown {
     if (Array.isArray(value)) {
@@ -55,13 +36,6 @@ function applyVersionGateToPackedValue(value: unknown): unknown {
     return value
 }
 
-/**
- * 注册一个可回填的数据包导出绑定。
- * @param moduleKey 模块键
- * @param exportName 导出名
- * @param fallbackKind 空值类型
- * @param setter 赋值器
- */
 export function registerDataPackBinding(
     moduleKey: string,
     exportName: string,
@@ -80,11 +54,6 @@ export function registerDataPackBinding(
     })
 }
 
-/**
- * 回填指定模块的所有已注册导出。
- * @param moduleKey 模块键
- * @param moduleRecord 模块导出记录
- */
 export function hydrateRegisteredDataPackBindings(moduleKey: string, moduleRecord: DataPackModuleRecord): void {
     const moduleBindings = bindingRegistry.get(moduleKey)
     if (!moduleBindings) {
@@ -100,9 +69,6 @@ export function hydrateRegisteredDataPackBindings(moduleKey: string, moduleRecor
     }
 }
 
-/**
- * 重置所有已注册导出为空值。
- */
 export function resetRegisteredDataPackBindings(): void {
     for (const moduleBindings of bindingRegistry.values()) {
         for (const entry of moduleBindings.values()) {
@@ -111,18 +77,10 @@ export function resetRegisteredDataPackBindings(): void {
     }
 }
 
-/**
- * 获取当前已经导入的数据包模块键。
- * @returns 模块键列表
- */
 export function getRegisteredDataPackModuleKeys(): string[] {
     return [...bindingRegistry.keys()]
 }
 
-/**
- * 使用新数据包完整替换所有已注册导出并触发刷新。
- * @param moduleRecords 新数据包的模块记录
- */
 export function replaceRegisteredDataPackBindings(moduleRecords: ReadonlyMap<string, DataPackModuleRecord>): void {
     resetRegisteredDataPackBindings()
     for (const [moduleKey, moduleRecord] of moduleRecords) {
@@ -131,9 +89,6 @@ export function replaceRegisteredDataPackBindings(moduleRecords: ReadonlyMap<str
     markDataPackHydrated()
 }
 
-/**
- * 标记数据包完成一次水合。
- */
 export function markDataPackHydrated(): void {
     hydrated = true
     dataPackHydrationKey.value += 1
@@ -142,10 +97,6 @@ export function markDataPackHydrated(): void {
     }
 }
 
-/**
- * 注册数据包完成水合后的回调。
- * @param callback 回调
- */
 export function registerDataPackHydrationCallback(callback: () => void): void {
     hydrationCallbacks.add(callback)
     if (hydrated) {
@@ -153,21 +104,14 @@ export function registerDataPackHydrationCallback(callback: () => void): void {
     }
 }
 
-/**
- * 判断数据包是否已经完成过一次水合。
- * @returns 是否已水合
- */
 export function isDataPackHydrated(): boolean {
     return hydrated
 }
 
-/**
- * 判断游戏数据当前是否可用。
- *
- * 「有数据」与「水合过」是两回事：`DISABLE_REWRITE=1` 跳过数据包水合、
- * 直接读取 `src/data/d/*.data.ts` 此时数据同样可用。
- * @returns 数据是否可用
- */
 export function isDataAvailable(): boolean {
-    return hydrated || bindingRegistry.size === 0
+    return hydrated || isDataPackRewriteDisabled()
+}
+
+export function isDataPackRewriteDisabled(): boolean {
+    return bindingRegistry.size === 0
 }
