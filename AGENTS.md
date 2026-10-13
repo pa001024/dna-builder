@@ -29,12 +29,9 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 
 ```bash
 pnpm dev                              # Development server (http://localhost:1420/)
-pnpm build                            # Production build
 pnpm lint                             # 增量 lint：Biome + vue-tsc 只处理改动过的文件
-pnpm lint:full                        # 全量检查（旧行为，约 2.5 分钟）
 pnpm test                             # Run all tests (vitest run)
 pnpm test src/data/tests/foo.test.ts  # Run single test file
-pnpm coverage                         # Tests with coverage
 pnpm format                           # Format with Biome
 ```
 
@@ -54,44 +51,14 @@ bun i18n check [--json] [--locale-gap]     # 扫描代码引用但翻译文件�
 新增文案应**一次补齐 6 种语言、每种用自己的语言书写**（别 6 个参数都填中文，模型会加漏或理解错意思）；
 `add` 结束会按实际文件内容检查，缺语言时输出 `⚠ warning`（只改一门译文、文件本就齐全时不会误报）。
 
-细节与坑见 [dev-tools.md](.agents/docs/dev-tools.md) 与技能 `.agents/skills/i18n/SKILL.md`。
-
-### Desktop App (Tauri + Rust)
-
-```bash
-pnpm tauri dev     # Development mode
-pnpm tauri build   # Build desktop app
-```
+细节见技能 `.agents/skills/i18n/SKILL.md`。
 
 ### Server (Bun + Elysia)
 
 ```bash
 cd server && bun run dev         # Start dev server (port 8887)
 bun run gen                      # Generate database migrations
-bun run migrate                  # Run migrations
 ```
-
-### Rust (MCP Server)
-
-```bash
-cd mcp_server && cargo build --release
-```
-
-## Code Style（完整清单见 code-style.md）
-
-- Biome 格式化：**4 空格缩进 / 双引号 / 省略分号 / 140 列 / ES5 尾逗号 / LF**
-- TypeScript `strict`，`@/*` → `./src/*`，不用 Prettier
-- Vue 一律 `<script setup lang="ts">` + 组合式 API + Pinia `defineStore()`
-- 命名：组件 PascalCase / 工具与组合式 camelCase / Store `use` 前缀 / 常量 UPPER_SNAKE_CASE
-- Rust：函数 snake_case、结构体 PascalCase、Tauri 命令返回 `Result<T, String>`
-
-## Testing Guidelines
-
-- **Framework**：前端 Vitest、server 侧 `bun test`
-- **Location**：`src/data/tests/` 或与源文件同目录；**Naming**：`*.test.ts`
-- 前端 vitest 排除 `server/**`、`externals/**`（server 单独跑）
-- **Coverage thresholds**：Lines 80% / Functions 80% / Branches 70% / Statements 80%
-- e2e 用 [bun-webview-test](.agents/skills/bun-webview-test/SKILL.md)，**禁止 Playwright**
 
 ## Project Structure
 
@@ -107,11 +74,7 @@ src/
 └── router.ts        # Route config
 server/              # Bun + Elysia backend
 src-tauri/           # Tauri Rust backend
-mcp_server/          # MCP server (Rust)
 tools/               # Dev tools (i18n.ts, icon-tool.ts)
-externals/dna-api/   # DNA API package
-public/i18n/         # Translation files
-.agents/docs/        # 本文件展开的细节文档
 ```
 
 ## Key Technologies
@@ -126,18 +89,12 @@ public/i18n/         # Translation files
 - **Build**: Vite v7
 - **Linting/Formatting**: Biome
 
-## Git Hooks (Husky)
-
-Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
-
-**Warning**: The pre-commit hook runs `git add .` — all files in working directory get staged.
-
 ## Important Rules
 
 <system_rules>
 
 1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
-2. **CHINESE COMMENTS**: Required for complex function (>100 lines) (JSDoc format). 1-3 line summary.
+2. **COMMENTS**: Limit the amount of comments you put in the code to astrict minimum. You should almost never add comments,except sometimes on non-trivial code, or for complex function (>100 lines) (Chinese JSDoc format). 1-3 line summary.
 3. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
 4. **Consistency**: Check sibling files before writing to match existing patterns
 5. **Always verify**: Run `pnpm lint` and `pnpm test` after frontend changes / `cargo check` after backend changes
