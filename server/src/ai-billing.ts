@@ -41,8 +41,64 @@ export async function readDailyQuota(userId: string, day: string): Promise<Daily
 }
 
 /**
- * @description 把一次请求的用量原子累加到当日记录。
- * 用 UPSERT + SQL 增量而不是「先读后写」，并发请求不会互相覆盖。
+ * @description 读取用户充值剩余额度（永久有效，不随自然日重置）。
+ * @param userId 用户 id
+ * @returns 剩余额度（微元），无记录时为 0
+ */
+export async function readRechargeBalance(userId: string): Promise<number> {
+    const [row] = await db
+        .select({ balanceMicros: schema.aiRechargeCredits.balanceMicros })
+        .from(schema.aiRechargeCredits)
+        .where(eq(schema.aiRechargeCredits.userId, userId))
+        .limit(1)
+    return row ? Math.max(0, row.balanceMicros) : 0
+}
+
+/** 某个账号的完整 AI 额度快照（免费每日重置 + 充值永久）。 */
+export interface AiQuota {
+    /** 额度所属的北京自然日。 */
+    day: string
+    /** 当日累计已用（微元，免费+充值抵扣前总量）。 */
+    usedMicros: number
+    /** 当日免费剩余额度（微元）。 */
+    freeRemainingMicros: number
+    /** 充值剩余额度（微元，永久有效）。 */
+    rechargeBalanceMicros: number
+    /** 合计可用（微元）。 */
+    totalAvailableMicros: number
+    /** 当日已记账的请求次数。 */
+    requests: number
+}
+
+/**
+ * @description 读取用户完整额度：免费剩余额度 + 充值剩余额度。
+ * 扣费顺序为先免费后充值，因此剩余额度直接相加即为本次请求可用上限。
+ * @param userId 用户 id
+ * @param day 北京自然日（YYYY-MM-DD）
+ * @returns 额度快照
+ */
+export async function readAiQuota(userId: string, day: string): Promise<AiQuota> {
+    const [daily] = await db
+        .select()
+        .from(schema.aiUsageDaily)
+        .where(and(eq(schema.aiUsageDaily.userId, userId), eq(schema.aiUsageDaily.day, day)))
+        .limit(1)
+    const usedMicros = daily ? Math.max(0, daily.costMicros) : 0
+    const rechargeBalanceMicros = await readRechargeBalance(userId)
+    const freeRemainingMicros = Math.max(0, DAILY_LIMIT_MICROS - usedMicros)
+    return {
+        day,
+        usedMicros,
+        freeRemainingMicros,
+        rechargeBalanceMicros,
+        totalAvailableMicros: freeRemainingMicros + rechargeBalanceMicros,
+        requests: daily?.requests ?? 0,
+    }
+}
+
+/**
+ * @description 把一次请求的用量原子累加到当日记录（免费部分），超出当日免费额度的溢出额从充值余额扣减。
+ * 保持原签名：内部先读免费剩余额度，再在同一事务内记账 + 扣充值。
  * @param userId 用户 id
  * @param day 北京自然日（YYYY-MM-DD）
  * @param tokens 三档 tokens
@@ -54,7 +110,32 @@ export async function recordUsage(
     tokens: { cacheHit: number; cacheMiss: number; output: number },
     costMicros: number
 ): Promise<void> {
-    await db
+    const quota = await readDailyQuota(userId, day)
+    await db.transaction(async tx => {
+        await recordUsageTx(tx, userId, day, tokens, costMicros, quota.remainingMicros)
+    })
+}
+
+/**
+ * @description 在事务内把一次请求的用量记账，并在费用超出当日免费部分时扣减充值余额。
+ * 记账用 UPSERT + SQL 增量（并发不互相覆盖），充值扣减用 `max(0, 余额 - 溢出)` 原子更新
+ * （并发 race 下最多把余额扣到 0，不会变负）。
+ * @param tx 事务上下文
+ * @param userId 用户 id
+ * @param day 北京自然日（YYYY-MM-DD）
+ * @param tokens 三档 tokens
+ * @param costMicros 本次费用（微元）
+ * @param freeRemainingMicros 本次记账前查到的免费剩余额度（微元）
+ */
+async function recordUsageTx(
+    tx: any,
+    userId: string,
+    day: string,
+    tokens: { cacheHit: number; cacheMiss: number; output: number },
+    costMicros: number,
+    freeRemainingMicros: number
+): Promise<void> {
+    await tx
         .insert(schema.aiUsageDaily)
         .values({
             userId,
@@ -73,6 +154,20 @@ export async function recordUsage(
                 outputTokens: sql`${schema.aiUsageDaily.outputTokens} + ${tokens.output}`,
                 costMicros: sql`${schema.aiUsageDaily.costMicros} + ${costMicros}`,
                 requests: sql`${schema.aiUsageDaily.requests} + 1`,
+                updateAt: schema.now(),
+            },
+        })
+
+    const overflow = Math.max(0, costMicros - freeRemainingMicros)
+    if (overflow <= 0) return
+    await tx
+        .insert(schema.aiRechargeCredits)
+        .values({ userId, balanceMicros: 0 })
+        .onConflictDoUpdate({
+            target: [schema.aiRechargeCredits.userId],
+            set: {
+                balanceMicros: sql`max(0, ${schema.aiRechargeCredits.balanceMicros} - ${overflow})`,
+                totalSpentMicros: sql`${schema.aiRechargeCredits.totalSpentMicros} + min(${schema.aiRechargeCredits.balanceMicros}, ${overflow})`,
                 updateAt: schema.now(),
             },
         })

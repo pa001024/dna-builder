@@ -2,6 +2,7 @@ import { type FieldNode, type GraphQLResolveInfo, Kind } from "graphql"
 import { resolvers as abyssUsageResolvers, typeDefs as abyssUsageSchema } from "./abyssUsage"
 import { resolvers as activityResolvers, typeDefs as activitySchema } from "./activity"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
+import { resolvers as aiRechargeResolvers, typeDefs as aiRechargeSchema } from "./aiRecharge"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
 import { resolvers as commentResolvers, typeDefs as commentSchema } from "./comment"
 import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
@@ -46,6 +47,7 @@ export function schemaWith(ctx: any) {
         scriptSchema,
         scriptCategorySchema,
         shopSchema,
+        aiRechargeSchema,
     ]
     const resolvers = mergeResolvers(
         userResolvers,
@@ -69,7 +71,8 @@ export function schemaWith(ctx: any) {
         rankingResolvers,
         scriptResolvers,
         scriptCategoryResolvers,
-        shopResolvers
+        shopResolvers,
+        aiRechargeResolvers
     )
 
     function mergeResolvers(...items: any[]) {

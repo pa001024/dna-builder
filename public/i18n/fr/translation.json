@@ -411,6 +411,21 @@
         },
         "welcome": "Bonjour ! Je suis l’assistant de montage. Je peux vous aider à optimiser les configurations des personnages.\n\nPersonnage actuel : {{charName}} ({{charElm}})\n\nVous pouvez me demander :\n- Comment équiper {{charName}} pour obtenir le plus de dégâts MOD ?\n- Quels MODs sont disponibles pour {{charElm}} ?\n- Comment augmenter les dégâts critiques de {{charName}} ?\n- Quel montage de MOD maximise les dégâts de {{charName}} avec Fushu\n\nPar défaut, je lance le flux complet de montage et j’essaie d’appliquer la configuration directement."
     },
+    "ai-recharge": {
+        "balance": "Quota IA",
+        "buy_code": "Acheter des codes",
+        "cancel": "Annuler",
+        "code_placeholder": "Saisissez le code (ex. XXXX-XXXX-XXXX)",
+        "free_balance": "Solde gratuit (réinitialisé quotidiennement)",
+        "history": "Échanges récents",
+        "no_history": "Aucun échange pour le moment",
+        "permanent_balance": "Solde rechargé (permanent)",
+        "quota_unavailable": "Quota indisponible",
+        "redeem": "Échanger",
+        "redeeming": "Échange en cours…",
+        "title": "Recharger",
+        "total_balance": "Total disponible"
+    },
     "app": {
         "initScriptHotkeysFailed": "Échec de l’enregistrement des raccourcis de script au démarrage :",
         "syncLaunchAtStartupFailed": "Échec de la synchronisation de l’état de lancement au démarrage :",

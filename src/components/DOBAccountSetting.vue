@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, watch } from "vue"
-import { meQuery, myShopSummaryQuery, type UserShopSummary, updateUserMetaMutation } from "@/api/graphql"
+import { type AiQuota, aiQuotaQuery, meQuery, myShopSummaryQuery, type UserShopSummary, updateUserMetaMutation } from "@/api/graphql"
+import AiRechargeDialog from "@/components/AiRechargeDialog.vue"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { formatCost } from "@/utils/ai-log-format"
 import { getUserLevelProgress } from "@/utils/user-level"
 
 const user = useUserStore()
@@ -107,6 +109,24 @@ function formatRemainingDuration(ms: number | null | undefined): string {
 
 const shopSummary = ref<UserShopSummary | null>(null)
 const loadingShopSummary = ref(false)
+const aiQuota = ref<AiQuota | null>(null)
+const rechargeOpen = ref(false)
+
+/**
+ * 拉取当前账号的 AI 额度（免费每日重置 + 充值永久有效），失败时静默置空。
+ */
+async function refreshAiQuota(): Promise<void> {
+    if (!user.jwtToken) {
+        aiQuota.value = null
+        return
+    }
+    try {
+        aiQuota.value = (await aiQuotaQuery(undefined, { requestPolicy: "network-only" })) ?? null
+    } catch (error) {
+        console.error("拉取 AI 额度失败:", error)
+        aiQuota.value = null
+    }
+}
 
 /**
  * 拉取当前用户的积分与装扮摘要，用于在账号设置区做轻量信息展示与入口引导。
@@ -134,6 +154,7 @@ watch(
     () => user.jwtToken,
     () => {
         refreshShopSummary()
+        refreshAiQuota()
         refreshDailyExperienceStatus()
         refreshAbyssUsageUploadStatus()
     },
@@ -428,6 +449,30 @@ async function startNameEdit() {
                                 {{ $t("dob-account.go_points_mall") }}
                             </button>
                         </div>
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs text-base-content/60">{{ $t("ai-recharge.balance") }}</div>
+                                <button
+                                    class="shrink-0 cursor-pointer rounded-xs border border-primary/50 px-2 py-0.5 text-[11px] whitespace-nowrap text-primary transition-colors duration-150 hover:bg-primary hover:text-primary-content active:scale-[0.97]"
+                                    @click="rechargeOpen = true"
+                                >
+                                    {{ $t("ai-recharge.title") }}
+                                </button>
+                            </div>
+                            <div class="font-orbitron text-2xl font-semibold leading-tight tabular-nums text-primary">
+                                {{ aiQuota ? formatCost(aiQuota.totalBalance) : "--" }}
+                            </div>
+                            <div class="mt-1 space-y-0.5 text-xs text-base-content/50">
+                                <div class="flex justify-between gap-2">
+                                    <span>{{ $t("ai-recharge.free_balance") }}</span>
+                                    <span class="tabular-nums">{{ aiQuota ? formatCost(aiQuota.freeBalance) : "--" }}</span>
+                                </div>
+                                <div class="flex justify-between gap-2">
+                                    <span>{{ $t("ai-recharge.permanent_balance") }}</span>
+                                    <span class="tabular-nums">{{ aiQuota ? formatCost(aiQuota.permanentBalance) : "--" }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -443,5 +488,6 @@ async function startNameEdit() {
         <div class="border-t border-base-content/10 pt-2.5 text-xs text-base-content/45">
             <p>{{ $t("dob-account.account_desc") }}</p>
         </div>
+        <AiRechargeDialog v-model:open="rechargeOpen" @redeemed="refreshAiQuota" />
     </div>
 </template>

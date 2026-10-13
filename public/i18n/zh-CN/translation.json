@@ -407,6 +407,21 @@
         },
         "welcome": "你好！我是配装助手，可以帮你优化角色配置。\n\n当前角色: {{charName}} ({{charElm}}属性)\n\n你可以问我：\n- {{charName}}怎么配MOD伤害最高？\n- 带{{charElm}}属性的MOD有哪些？\n- 如何提升{{charName}}的暴击伤害？\n- {{charName}}在带扶疏的情况下伤害最大化的MOD要怎么配\n\n默认会自动执行完整配装流程并尝试直接应用配置。"
     },
+    "ai-recharge": {
+        "balance": "AI 额度",
+        "buy_code": "购买兑换码",
+        "cancel": "取消",
+        "code_placeholder": "请输入兑换码（如 XXXX-XXXX-XXXX）",
+        "free_balance": "免费剩余额度（每日重置）",
+        "history": "最近兑换记录",
+        "no_history": "暂无兑换记录",
+        "permanent_balance": "充值剩余额度（永久有效）",
+        "quota_unavailable": "额度信息暂不可用",
+        "redeem": "立即兑换",
+        "redeeming": "兑换中…",
+        "title": "充值",
+        "total_balance": "合计可用"
+    },
     "app": {
         "initScriptHotkeysFailed": "启动时注册脚本热键失败:",
         "syncLaunchAtStartupFailed": "同步开机启动状态失败:",

@@ -218,6 +218,13 @@
             "when": 1789560684499,
             "tag": "0030_parallel_mystique",
             "breakpoints": true
+        },
+        {
+            "idx": 31,
+            "version": "6",
+            "when": 1791867928363,
+            "tag": "0031_chief_phantom_reporter",
+            "breakpoints": true
         }
     ]
 }

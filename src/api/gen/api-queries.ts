@@ -1436,6 +1436,80 @@ export const buildQuery = typedQuery(
     ` as const
 )<Types.Build, { id: string }>()
 
+export const aiQuotaQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            aiQuota {
+                day
+                freeBalance
+                permanentBalance
+                totalBalance
+                dailyLimit
+            }
+        }
+    ` as const
+)<Types.AiQuota>()
+
+export const adminRechargeBatchesQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int, $offset: Int) {
+            adminRechargeBatches(limit: $limit, offset: $offset) {
+                id
+                amountMicros
+                total
+                redeemed
+                revoked
+                unused
+                expiresAt
+                createdBy
+                createdAt
+            }
+        }
+    ` as const
+)<Types.RechargeBatch[], { limit?: number; offset?: number }>()
+
+export const adminRechargeCodesQuery = typedQuery(
+    /* GraphQL */ `
+        query ($batchId: String, $status: String, $search: String, $limit: Int, $offset: Int) {
+            adminRechargeCodes(batchId: $batchId, status: $status, search: $search, limit: $limit, offset: $offset) {
+                code
+                amountMicros
+                batchId
+                status
+                expiresAt
+                redeemedBy
+                redeemedAt
+                createdAt
+            }
+        }
+    ` as const
+)<Types.RechargeCode[], { batchId?: string; status?: string; search?: string; limit?: number; offset?: number }>()
+
+export const adminRechargeCodesCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($batchId: String, $status: String, $search: String) {
+            adminRechargeCodesCount(batchId: $batchId, status: $status, search: $search)
+        }
+    ` as const
+)<number, { batchId?: string; status?: string; search?: string }>()
+
+export const myRechargeRedemptionsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int) {
+            myRechargeRedemptions(limit: $limit) {
+                code
+                amountMicros
+                batchId
+                status
+                expiresAt
+                redeemedBy
+                redeemedAt
+                createdAt
+            }
+        }
+    ` as const
+)<Types.RechargeCode[], { limit?: number }>()
+
 export const adminStatsQuery = typedQuery(
     /* GraphQL */ `
         query {

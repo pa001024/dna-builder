@@ -409,6 +409,21 @@
         },
         "welcome": "こんにちは！私は配装アシスタントです。キャラクターの構成最適化をお手伝いします。\n\n現在のキャラクター: {{charName}} ({{charElm}})\n\n次のような質問ができます:\n- {{charName}} を MOD ダメージ最大化でどう配装するべきですか？\n- {{charElm}} の MOD には何がありますか？\n- {{charName}} の会心ダメージをどう上げられますか？\n- 扶疏を使うときに {{charName}} のダメージを最大化する MOD 構成は？\n\n既定では、完全な配装ワークフローを実行し、構成の直接適用を試みます。"
     },
+    "ai-recharge": {
+        "balance": "AI 枠",
+        "buy_code": "引き換えコードを購入",
+        "cancel": "キャンセル",
+        "code_placeholder": "引き換えコードを入力（例 XXXX-XXXX-XXXX）",
+        "free_balance": "無料残額（毎日リセット）",
+        "history": "最近の引き換え履歴",
+        "no_history": "引き換え履歴がありません",
+        "permanent_balance": "チャージ残額（無期限）",
+        "quota_unavailable": "枠情報が取得できません",
+        "redeem": "引き換える",
+        "redeeming": "引き換え中…",
+        "title": "チャージ",
+        "total_balance": "利用可能合計"
+    },
     "app": {
         "initScriptHotkeysFailed": "起動時のスクリプトホットキー登録に失敗しました:",
         "syncLaunchAtStartupFailed": "起動時の自動起動状態の同期に失敗しました:",

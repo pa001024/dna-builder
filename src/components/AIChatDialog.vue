@@ -2,13 +2,17 @@
 import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue"
+import { aiQuotaQuery } from "@/api/graphql"
+import AiRechargeDialog from "@/components/AiRechargeDialog.vue"
 import { useBuildChat } from "@/composables/useBuildChat"
 import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharBuild } from "@/data"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
 import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
+import { formatCost } from "@/utils/ai-log-format"
 import { createBuildApi, setBuildApi } from "@/utils/build-api"
 import type { ChatSubmitPayload } from "@/utils/chat-image"
 import type { AskUserResponse } from "@/utils/db-ask-user"
@@ -27,6 +31,7 @@ const props = defineProps<{
 const inv = useInvStore()
 const settingStore = useSettingStore()
 const ui = useUIStore()
+const user = useUserStore()
 const { t } = useTranslation()
 
 /** 数据包未就绪时的角色名兜底（与页面其它部分共用同一个本地键） */
@@ -74,6 +79,26 @@ const {
     interrupt,
 } = useBuildChat(selectedChar, settingStore)
 
+/** 充值弹窗开关 */
+const rechargeOpen = ref(false)
+/** AI 合计可用额度（微元），未登录或加载失败时为 null */
+const quotaBalance = ref<number | null>(null)
+
+/**
+ * 拉取 AI 额度余额，用于头部展示；未登录时静默跳过。
+ */
+async function refreshQuotaBalance() {
+    if (!user.jwtToken) {
+        quotaBalance.value = null
+        return
+    }
+    try {
+        quotaBalance.value = (await aiQuotaQuery(undefined, { requestPolicy: "network-only" }))?.totalBalance ?? null
+    } catch {
+        quotaBalance.value = null
+    }
+}
+
 /** 窗口是否展开 */
 const isOpen = ref(false)
 /** 输入框内容 */
@@ -110,6 +135,7 @@ async function open() {
     await loadMessages()
     await nextTick()
     askBoxRef.value?.focus()
+    void refreshQuotaBalance()
 }
 
 /**
@@ -213,6 +239,15 @@ onBeforeUnmount(() => {
 
                 <div class="flex shrink-0 items-center gap-1.5">
                     <button
+                        v-if="user.jwtToken"
+                        type="button"
+                        class="cursor-pointer border border-base-content/20 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        :title="t('ai-recharge.balance')"
+                        @click="rechargeOpen = true"
+                    >
+                        {{ quotaBalance === null ? t("ai-recharge.title") : `${formatCost(quotaBalance)} · ${t("ai-recharge.title")}` }}
+                    </button>
+                    <button
                         type="button"
                         class="grid size-6 cursor-pointer place-items-center text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
                         :title="t('ai-chat.clear')"
@@ -278,5 +313,6 @@ onBeforeUnmount(() => {
                 />
             </div>
         </section>
+        <AiRechargeDialog v-model:open="rechargeOpen" @redeemed="refreshQuotaBalance" />
     </div>
 </template>

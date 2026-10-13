@@ -88,6 +88,11 @@ const menuItems: {
         path: "/admin/agent-skill",
         icon: "ri:magic-line",
     },
+    {
+        name: "充值兑换码",
+        path: "/admin/ai-recharge",
+        icon: "ri:coupon-line",
+    },
 ]
 
 const route = useRoute()

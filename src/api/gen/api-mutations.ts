@@ -1464,6 +1464,57 @@ export const clearBuildTargetValueCacheMutation = typedMutation<number>(/* Graph
     }
 `)
 
+export const adminCreateRechargeBatchMutation = typedMutation<
+    Types.RechargeBatchResult,
+    { amountYuan: number; count: number; expiresInDays?: number }
+>(/* GraphQL */ `
+    mutation ($amountYuan: Float!, $count: Int!, $expiresInDays: Int) {
+        adminCreateRechargeBatch(amountYuan: $amountYuan, count: $count, expiresInDays: $expiresInDays) {
+            batch {
+                id
+                amountMicros
+                total
+                redeemed
+                revoked
+                unused
+                expiresAt
+                createdBy
+                createdAt
+            }
+            codes
+        }
+    }
+`)
+
+export const adminRevokeRechargeCodeMutation = typedMutation<boolean, { code: string }>(/* GraphQL */ `
+    mutation ($code: String!) {
+        adminRevokeRechargeCode(code: $code)
+    }
+`)
+
+export const adminRevokeRechargeBatchMutation = typedMutation<number, { batchId: string }>(/* GraphQL */ `
+    mutation ($batchId: String!) {
+        adminRevokeRechargeBatch(batchId: $batchId)
+    }
+`)
+
+export const redeemRechargeCodeMutation = typedMutation<Types.RedeemResult, { code: string }>(/* GraphQL */ `
+    mutation ($code: String!) {
+        redeemRechargeCode(code: $code) {
+            success
+            message
+            amountMicros
+            quota {
+                day
+                freeBalance
+                permanentBalance
+                totalBalance
+                dailyLimit
+            }
+        }
+    }
+`)
+
 export const createActivityMutation = typedMutation<Types.Activity, { server: string; input: Types.ActivityInput }>(/* GraphQL */ `
     mutation ($server: String!, $input: ActivityInput!) {
         createActivity(server: $server, input: $input) {

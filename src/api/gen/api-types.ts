@@ -472,6 +472,49 @@ export interface Build {
     targetValue?: number
 }
 
+export interface AiQuota {
+    day: string
+    freeBalance: number
+    permanentBalance: number
+    totalBalance: number
+    dailyLimit: number
+}
+
+export interface RechargeBatch {
+    id: string
+    amountMicros: number
+    total: number
+    redeemed: number
+    revoked: number
+    unused: number
+    expiresAt?: number
+    createdBy?: string
+    createdAt?: number
+}
+
+export interface RechargeCode {
+    code: string
+    amountMicros: number
+    batchId: string
+    status: string
+    expiresAt?: number
+    redeemedBy?: string
+    redeemedAt?: number
+    createdAt?: number
+}
+
+export interface RechargeBatchResult {
+    batch: RechargeBatch
+    codes?: string[]
+}
+
+export interface RedeemResult {
+    success: boolean
+    message: string
+    amountMicros: number
+    quota: AiQuota
+}
+
 export interface AdminStats {
     totalUsers: number
     totalGuides: number

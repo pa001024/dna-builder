@@ -413,6 +413,21 @@
         },
         "welcome": "Hello! I am the fitting assistant. I can help you optimize character setups.\n\nCurrent character: {{charName}} ({{charElm}})\n\nYou can ask me:\n- How should {{charName}} be fitted for the highest MOD damage?\n- Which MODs are available for {{charElm}}?\n- How can I increase {{charName}}’s critical damage?\n- What MOD setup maximizes {{charName}}’s damage when using Fushu\n\nBy default, I will run the full fitting workflow and try to apply the configuration directly."
     },
+    "ai-recharge": {
+        "balance": "AI Quota",
+        "buy_code": "Buy redemption codes",
+        "cancel": "Cancel",
+        "code_placeholder": "Enter redemption code (e.g. XXXX-XXXX-XXXX)",
+        "free_balance": "Free balance (resets daily)",
+        "history": "Recent redemptions",
+        "no_history": "No redemptions yet",
+        "permanent_balance": "Top-up balance (never expires)",
+        "quota_unavailable": "Quota unavailable",
+        "redeem": "Redeem now",
+        "redeeming": "Redeeming…",
+        "title": "Top Up",
+        "total_balance": "Total available"
+    },
     "app": {
         "initScriptHotkeysFailed": "Failed to register script hotkeys on startup:",
         "syncLaunchAtStartupFailed": "Failed to sync startup launch status:",

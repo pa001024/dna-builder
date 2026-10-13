@@ -405,6 +405,21 @@
         },
         "welcome": "你好！我是配裝助手，可以幫你優化角色配置。\n\n目前角色：{{charName}}（{{charElm}}屬性）\n\n你可以問我：\n- {{charName}}怎麼配 MOD 傷害最高？\n- 帶 {{charElm}} 屬性的 MOD 有哪些？\n- 如何提升 {{charName}} 的暴擊傷害？\n- {{charName}} 在帶扶疏的情況下傷害最大化的 MOD 要怎麼配\n\n預設會自動執行完整配裝流程並嘗試直接套用配置。"
     },
+    "ai-recharge": {
+        "balance": "AI 額度",
+        "buy_code": "購買兌換碼",
+        "cancel": "取消",
+        "code_placeholder": "請輸入兌換碼（如 XXXX-XXXX-XXXX）",
+        "free_balance": "免費剩餘額度（每日重置）",
+        "history": "最近兌換記錄",
+        "no_history": "暫無兌換記錄",
+        "permanent_balance": "儲值剩餘額度（永久有效）",
+        "quota_unavailable": "額度資訊暫不可用",
+        "redeem": "立即兌換",
+        "redeeming": "兌換中…",
+        "title": "儲值",
+        "total_balance": "合計可用"
+    },
     "app": {
         "initScriptHotkeysFailed": "啟動時註冊腳本熱鍵失敗：",
         "syncLaunchAtStartupFailed": "同步開機啟動狀態失敗：",

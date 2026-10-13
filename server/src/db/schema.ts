@@ -1243,3 +1243,73 @@ export const aiUsageDaily = sqliteTable(
 export const aiUsageDailyRelations = relations(aiUsageDaily, ({ one }) => ({
     user: one(users, { fields: [aiUsageDaily.userId], references: [users.id] }),
 }))
+
+/**
+ * AI 充值兑换码（token 充值功能）。
+ *
+ * 一张码对应一份一次性额度（`amountMicros` 微元），由管理员批量生成、用户在前端输入兑换。
+ * 码本身无用户归属，兑换后把面额累加到 `aiRechargeCredits`（永久有效）；
+ * 码可以过期（`expiresAt` 为空表示永久有效），但到账额度永不过期。
+ *
+ * 码形 `XXXX-XXXX-XXXX`（`[A-Z0-9]`，生成时剔除易混淆的 `0O1I`）；
+ * 兑换时归一化（去空格/横杠、转大写）后严格匹配，不做 `O→0` 之类猜测。
+ */
+export const aiRechargeCodes = sqliteTable(
+    "ai_recharge_codes",
+    {
+        /** 归一化后的码文本（`XXXX-XXXX-XXXX` 大写），主键即唯一约束。 */
+        code: text("code").primaryKey(),
+        /** 面额（微元，1 元 = 1_000_000 微元）。 */
+        amountMicros: integer("amount_micros").notNull(),
+        /** 同一批次 ID（自动生成 nanoid，整批查询/作废用）。 */
+        batchId: text("batch_id").notNull(),
+        /** 状态：unused（未用）| redeemed（已兑）| revoked（已作废）。 */
+        status: text("status")
+            .notNull()
+            .$default(() => "unused"),
+        /** 过期时间戳（毫秒），为空表示永久有效。 */
+        expiresAt: integer("expires_at"),
+        /** 兑换人，兑换后写入。 */
+        redeemedBy: text("redeemed_by").references(() => users.id, { onDelete: "set null" }),
+        /** 兑换时间戳（毫秒）。 */
+        redeemedAt: integer("redeemed_at"),
+        /** 生成人（管理员）。 */
+        createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [index("ai_recharge_codes_batch_idx").on(table.batchId), index("ai_recharge_codes_status_idx").on(table.status)]
+)
+
+export const aiRechargeCodesRelations = relations(aiRechargeCodes, ({ one }) => ({
+    redeemer: one(users, { fields: [aiRechargeCodes.redeemedBy], references: [users.id] }),
+}))
+
+/**
+ * 用户充值额度余额（永久有效，不随自然日重置）。
+ *
+ * 免费额度是隐式的（`DAILY_LIMIT - 当日已用`），只存在充值的显式余额表里：
+ * 兑换时累加面额，请求费用超出当日免费部分时扣减溢出额。
+ */
+export const aiRechargeCredits = sqliteTable("ai_recharge_credits", {
+    userId: text("user_id")
+        .primaryKey()
+        .references(() => users.id, { onDelete: "cascade" }),
+    /** 当前剩余额度（微元）。 */
+    balanceMicros: integer("balance_micros")
+        .notNull()
+        .$default(() => 0),
+    /** 历史累计兑换（微元，仅审计展示）。 */
+    totalRedeemedMicros: integer("total_redeemed_micros")
+        .notNull()
+        .$default(() => 0),
+    /** 历史累计抵扣（微元，仅审计展示）。 */
+    totalSpentMicros: integer("total_spent_micros")
+        .notNull()
+        .$default(() => 0),
+    createdAt: integer("created_at").$default(now),
+    updateAt: integer("update_at"),
+})
+
+export const aiRechargeCreditsRelations = relations(aiRechargeCredits, ({ one }) => ({
+    user: one(users, { fields: [aiRechargeCredits.userId], references: [users.id] }),
+}))

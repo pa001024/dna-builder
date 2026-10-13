@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { Elysia, t } from "elysia"
 import jwt from "jsonwebtoken"
-import { chargeUsage, readDailyQuota } from "./ai-billing"
+import { chargeUsage, readAiQuota } from "./ai-billing"
 import {
     AI_LOG_UPSTREAM_TRACE_HEADER,
     type AiLogAssistantMessage,
@@ -25,7 +25,6 @@ import {
     isPeakPricing,
     MICROS_PER_YUAN,
     MIN_REQUEST_MICROS,
-    PRICE_PER_MILLION_TOKENS,
     pipeMessagesWithEvents,
     pipeWithUsage,
     resolveMaxTokens,
@@ -290,10 +289,10 @@ export const aiPlugin = () =>
                 const day = beijingDayKey(startedAt)
 
                 try {
-                    const quota = await readDailyQuota(user.id, day)
-                    if (quota.remainingMicros < MIN_REQUEST_MICROS) {
+                    const quota = await readAiQuota(user.id, day)
+                    if (quota.totalAvailableMicros < MIN_REQUEST_MICROS) {
                         const errorMsg = createProxyError(
-                            `今日 AI 额度已用完（每人每天 ${formatYuan(DAILY_LIMIT_MICROS)} 元，北京时间自然日重置），请明天再试`,
+                            `AI 额度已用完（免费额度每人每天 ${formatYuan(DAILY_LIMIT_MICROS)} 元，北京时间自然日重置；也可用兑换码充值永久额度），请明天再试或先充值`,
                             "insufficient_quota",
                             "daily_quota_exceeded"
                         )
@@ -301,10 +300,10 @@ export const aiPlugin = () =>
                         return createJsonErrorResponse(errorMsg, 402)
                     }
 
-                    const maxTokens = resolveMaxTokens(body.max_tokens, quota.remainingMicros, peak)
+                    const maxTokens = resolveMaxTokens(body.max_tokens, quota.totalAvailableMicros, peak)
                     if (typeof body.max_tokens === "number" && maxTokens < Math.floor(body.max_tokens)) {
                         console.warn(
-                            `[ai] 用户 ${user.id} 剩余额度 ${formatYuan(quota.remainingMicros)} 元，max_tokens 由 ${body.max_tokens} 收紧为 ${maxTokens}`
+                            `[ai] 用户 ${user.id} 剩余额度 ${formatYuan(quota.totalAvailableMicros)} 元，max_tokens 由 ${body.max_tokens} 收紧为 ${maxTokens}`
                         )
                     }
 
@@ -553,10 +552,10 @@ export const aiPlugin = () =>
                 const day = beijingDayKey(startedAt)
 
                 try {
-                    const quota = await readDailyQuota(user.id, day)
-                    if (quota.remainingMicros < MIN_REQUEST_MICROS) {
+                    const quota = await readAiQuota(user.id, day)
+                    if (quota.totalAvailableMicros < MIN_REQUEST_MICROS) {
                         const errorMsg = createProxyError(
-                            `今日 AI 额度已用完（每人每天 ${formatYuan(DAILY_LIMIT_MICROS)} 元，北京时间自然日重置），请明天再试`,
+                            `AI 额度已用完（免费额度每人每天 ${formatYuan(DAILY_LIMIT_MICROS)} 元，北京时间自然日重置；也可用兑换码充值永久额度），请明天再试或先充值`,
                             "insufficient_quota",
                             "daily_quota_exceeded"
                         )
@@ -564,10 +563,10 @@ export const aiPlugin = () =>
                         return createJsonErrorResponse(errorMsg, 402)
                     }
 
-                    const maxTokens = resolveMaxTokens(body.max_tokens, quota.remainingMicros, peak)
+                    const maxTokens = resolveMaxTokens(body.max_tokens, quota.totalAvailableMicros, peak)
                     if (typeof body.max_tokens === "number" && maxTokens < Math.floor(body.max_tokens)) {
                         console.warn(
-                            `[ai] 用户 ${user.id} 剩余额度 ${formatYuan(quota.remainingMicros)} 元，max_tokens 由 ${body.max_tokens} 收紧为 ${maxTokens}`
+                            `[ai] 用户 ${user.id} 剩余额度 ${formatYuan(quota.totalAvailableMicros)} 元，max_tokens 由 ${body.max_tokens} 收紧为 ${maxTokens}`
                         )
                     }
 
@@ -748,38 +747,5 @@ export const aiPlugin = () =>
                 messages_base_url: AI_MESSAGES_BASE_URL,
                 /** 每个账号每天的额度上限（元）。 */
                 daily_limit_yuan: DAILY_LIMIT_MICROS / MICROS_PER_YUAN,
-            }
-        })
-        .get("/usage", async ({ headers }) => {
-            // 查询当前登录账号在北京当日的额度使用情况
-            const user = resolveUser(headers)
-            if (!user) {
-                return createJsonErrorResponse(createProxyError("请先登录后再查询 AI 额度", "authentication_error", "login_required"), 403)
-            }
-
-            const now = new Date()
-            const day = beijingDayKey(now)
-            const quota = await readDailyQuota(user.id, day)
-
-            return {
-                /** 额度所属的北京自然日。 */
-                day,
-                model: AI_MODEL,
-                /** 当前是否处于高峰计费时段。 */
-                peak: isPeakPricing(now),
-                /** 每日额度（元）。 */
-                limit_yuan: DAILY_LIMIT_MICROS / MICROS_PER_YUAN,
-                /** 已用额度（元，保留 4 位小数）。 */
-                used_yuan: Number((quota.usedMicros / MICROS_PER_YUAN).toFixed(4)),
-                /** 剩余额度（元，保留 4 位小数）。 */
-                remaining_yuan: Number((quota.remainingMicros / MICROS_PER_YUAN).toFixed(4)),
-                /** 已用额度（微元，1 元 = 1_000_000 微元，精确值）。 */
-                used_micros: quota.usedMicros,
-                /** 剩余额度（微元，精确值）。 */
-                remaining_micros: quota.remainingMicros,
-                /** 当日已记账的请求次数。 */
-                requests: quota.requests,
-                /** 计费单价（元 / 百万 tokens），空闲与高峰两档。 */
-                pricing_per_million_tokens: PRICE_PER_MILLION_TOKENS,
             }
         })

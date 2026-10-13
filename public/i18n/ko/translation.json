@@ -411,6 +411,21 @@
         },
         "welcome": "안녕하세요! 저는 세팅 도우미입니다. 캐릭터 구성을 최적화하는 데 도움을 드립니다.\n\n현재 캐릭터: {{charName}} ({{charElm}} 속성)\n\n이렇게 물어볼 수 있습니다:\n- {{charName}}의 MOD 피해를 가장 높이려면 어떻게 세팅해야 하나요?\n- {{charElm}} 속성 MOD에는 무엇이 있나요?\n- {{charName}}의 치명타 피해를 어떻게 올리나요?\n- Fushu를 넣었을 때 {{charName}}의 피해를 최대화하는 MOD 세팅은 무엇인가요?\n\n기본적으로 전체 세팅 흐름을 자동 실행하고 구성을 바로 적용하려고 시도합니다."
     },
+    "ai-recharge": {
+        "balance": "AI 할당량",
+        "buy_code": "교환 코드 구매",
+        "cancel": "취소",
+        "code_placeholder": "교환 코드를 입력하세요(예: XXXX-XXXX-XXXX)",
+        "free_balance": "무료 잔액(매일 초기화)",
+        "history": "최근 교환 내역",
+        "no_history": "교환 내역이 없습니다",
+        "permanent_balance": "충전 잔액(무기한)",
+        "quota_unavailable": "할당량 정보를 사용할 수 없습니다",
+        "redeem": "교환하기",
+        "redeeming": "교환 중…",
+        "title": "충전",
+        "total_balance": "사용 가능 합계"
+    },
     "app": {
         "initScriptHotkeysFailed": "시작 시 스크립트 단축키 등록에 실패했습니다:",
         "syncLaunchAtStartupFailed": "시작 시 실행 상태 동기화에 실패했습니다:",
