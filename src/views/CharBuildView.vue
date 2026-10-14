@@ -8,6 +8,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import type { BuildTabCard } from "@/components/BuildTabTooltip.vue"
+import { warmIncomeWorker } from "@/composables/useBuildIncomeWorker"
 import { useCharRemote } from "@/composables/useCharRemote"
 import {
     addModVariant,
@@ -1081,6 +1082,8 @@ watch(
     ready => {
         if (ready) {
             updateCharBuild()
+            // 预热共享收益 worker：首个面板打开前触发其内模块求值，避开冷启动卡顿（仅整页一次）
+            warmIncomeWorker(charBuild.value)
         }
     },
     { immediate: true }

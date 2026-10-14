@@ -133,10 +133,8 @@ function createLeveledBuff(name: string, level: number, customBuff: [string, num
         const buffObj: Buff = {
             名称: "自定义BUFF",
             描述: "自行填写",
+            attr: Object.fromEntries(customBuff),
         }
-        customBuff.forEach(([property, value]) => {
-            buffObj[property] = value
-        })
         buff = new LeveledBuff(buffObj, level)
     }
     if (coverage !== 1) {
@@ -724,8 +722,8 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 :buff-options="getFilteredBuffOptions(index)"
                                 :char-build="charBuilds[index]"
                                 @toggle-buff="toggleBuff(index, $event)"
-                                @set-buff-lv="setBuffLv(index, $event[0], $event[1])"
-                                @set-buff-coverage="setBuffCoverage(index, $event[0], $event[1])"
+                                @set-buff-lv="(...args) => setBuffLv(index, ...args)"
+                                @set-buff-coverage="(...args) => setBuffCoverage(index, ...args)"
                             />
                         </div>
                     </div>

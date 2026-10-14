@@ -24,8 +24,8 @@ describe("buff-editor", () => {
         const buff = new LeveledBuff({
             名称: "自定义BUFF",
             描述: "自行填写",
-            攻击: 1,
-        } as never)
+            attr: { 攻击: 1 },
+        })
         expect(formatBuffDisplayName(buff)).toBe("自定义BUFF(攻击+100%)")
         expect(formatBuffClipboardText([buff], [{ label: "自定义BUFF", value: buff }])).toBe("自定义BUFF(攻击+100%)")
     })

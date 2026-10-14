@@ -58,7 +58,7 @@ export interface WeaponBase {
 
 export type { AbyssBuff, AbyssDungeon, MonsterBuff } from "./d/abyss.data"
 export type { Achievement } from "./d/achievement.data"
-export type { Buff } from "./d/buff.data"
+export type { Buff, BuffAttrValue } from "./d/buff.data"
 export type { Char, CharTrait } from "./d/char.data"
 export { Elem } from "./d/char.data"
 export type { Draft } from "./d/draft.data"

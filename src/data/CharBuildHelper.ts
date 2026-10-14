@@ -1,6 +1,6 @@
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
 import { type CharSettings, getModVariantAura, getModVariantSlots, normalizeCharSkillLevels } from "./charSettings"
-import type { Weapon } from "./data-types"
+import type { Buff, Weapon } from "./data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import {
@@ -169,14 +169,12 @@ export function calcWeaponReplacementIncomes(
  * @returns 自定义 BUFF 实例
  */
 export function createCustomBuff(customBuff: [string, number][], level?: number, coverage = 1) {
-    const buffData = {
+    const buffData: Buff = {
         名称: "自定义BUFF",
         描述: "自行填写",
-    } as Record<string, string | number>
-    customBuff.forEach(([property, value]) => {
-        buffData[property] = value
-    })
-    const buff = new LeveledBuff(buffData as never, level)
+        attr: Object.fromEntries(customBuff),
+    }
+    const buff = new LeveledBuff(buffData, level)
     if (coverage !== 1) {
         buff.coverage = coverage
     }

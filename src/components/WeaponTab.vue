@@ -365,7 +365,7 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                                     baseWeapon.伤害类型 === charBuild.char.属性 &&
                                     modAttributeBonusSources.some(v => v.addAttr[key])
                                 "
-                                v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
+                                v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(`${charBuild.char.属性}MOD属性`))"
                                 :key="index"
                                 class="flex justify-between gap-8 text-sm text-primary"
                             >
@@ -373,7 +373,7 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                                 {{
                                     format100r(
                                         modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[key] ?? 0), 0) *
-                                            buff[`${charBuild.char.属性}MOD属性`]!
+                                            buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!
                                     )
                                 }}
                             </li>

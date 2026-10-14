@@ -404,20 +404,20 @@ const selectedBuffs = computed(() => {
 // 切换特效
 function toggleBuff(buff: LeveledBuff) {
     if (buff.pt === "Weapon") {
-        const lv = inv.getWBuffLv(buff.pid, "any")
-        inv.setWBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+        const lv = inv.getWBuffLv(buff.pid!, "any")
+        inv.setWBuffLv(buff.pid!, lv <= 0 ? buff.mx || 1 : 0)
     } else {
-        const lv = inv.getBuffLv(buff.pid)
-        inv.setBuffLv(buff.pid, lv <= 0 ? buff.mx || 1 : 0)
+        const lv = inv.getBuffLv(buff.pid!)
+        inv.setBuffLv(buff.pid!, lv <= 0 ? buff.mx || 1 : 0)
     }
 }
 
 // 设置特效等级
 function setBuffLv(buff: LeveledBuff, lv: number) {
     if (buff.pt === "Weapon") {
-        inv.setWBuffLv(buff.pid, lv)
+        inv.setWBuffLv(buff.pid!, lv)
     } else {
-        inv.setBuffLv(buff.pid, lv)
+        inv.setBuffLv(buff.pid!, lv)
     }
 }
 

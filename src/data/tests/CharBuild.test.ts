@@ -310,12 +310,12 @@ describe("CharBuild类测试", () => {
         const buffB = createBuffFromSettings("自定义BUFF", 1, [["攻击", 0.2]])
 
         expect(buffA).not.toBe(buffB)
-        expect(buffA.攻击).toBe(0.1)
-        expect(buffB.攻击).toBe(0.2)
+        expect(buffA.getAttrValue("攻击")).toBe(0.1)
+        expect(buffB.getAttrValue("攻击")).toBe(0.2)
 
         const halfBuff = createBuffFromSettings("自定义BUFF", 1, [["攻击", 0.1]], 0.5)
         expect(halfBuff.coverage).toBe(0.5)
-        expect(halfBuff.攻击).toBe(0.05)
+        expect(halfBuff.getAttrValue("攻击")).toBe(0.05)
 
         const buildA = new CharBuild({
             char: new LeveledChar("黎瑟"),
@@ -347,8 +347,8 @@ describe("CharBuild类测试", () => {
         })
 
         expect(buildA.buffs[0]).not.toBe(buildB.buffs[0])
-        expect(buildA.buffs[0].攻击).toBe(0.1)
-        expect(buildB.buffs[0].攻击).toBe(0.2)
+        expect(buildA.buffs[0].getAttrValue("攻击")).toBe(0.1)
+        expect(buildB.buffs[0].getAttrValue("攻击")).toBe(0.2)
     })
 
     it("选择召唤物技能时不应让namespace访问的其他技能误吃召唤物伤害", () => {
@@ -411,7 +411,7 @@ describe("CharBuild类测试", () => {
                 new LeveledBuff({
                     名称: "召唤物伤害测试",
                     描述: "测试用召唤物伤害加成",
-                    召唤物伤害: 0.5,
+                    attr: { 召唤物伤害: 0.5 },
                 }),
             ],
             melee: new LeveledWeapon(10302),
@@ -453,7 +453,7 @@ describe("CharBuild类测试", () => {
             new LeveledBuff({
                 名称: "召唤物伤害测试",
                 描述: "测试用召唤物伤害加成",
-                召唤物伤害: 0.5,
+                attr: { 召唤物伤害: 0.5 },
             }),
         ])
         const baseDamage = baseBuild.calculateTargetFunction(undefined, "e::召唤物伤害")
@@ -494,7 +494,7 @@ describe("CharBuild类测试", () => {
                 名称: "无止无休5熔",
                 mx: 30,
                 描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
-                召唤物属性继承比例: 0.0025,
+                attr: { 召唤物属性继承比例: 0.0025 },
             }),
         ])
 
@@ -529,7 +529,7 @@ describe("CharBuild类测试", () => {
                 名称: "无止无休5熔",
                 mx: 30,
                 描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
-                召唤物属性继承比例: 0.0025,
+                attr: { 召唤物属性继承比例: 0.0025 },
             }),
         ])
 
@@ -631,7 +631,7 @@ describe("CharBuild类测试", () => {
 
         const restored = createBuildFromSnapshot(snapshot)
         expect(restored.buffs[0].coverage).toBe(0.5)
-        expect(restored.buffs[0].攻击).toBeCloseTo(build.buffs[0].攻击, 10)
+        expect(restored.buffs[0].getAttrValue("攻击")).toBeCloseTo(build.buffs[0].getAttrValue("攻击")!, 10)
     })
 
     it("召唤物转化词条应按充盈威力范式汇总：近战攻速MOD 52004 + 水雾弥散 51921", () => {
@@ -753,7 +753,7 @@ describe("CharBuild类测试", () => {
                 new LeveledBuff({
                     名称: "[降灵]召唤物属性",
                     描述: "[降灵]最多叠加层数提高至30.0层，每层[降灵]使自身召唤召唤物时，召唤物属性继承比例提高0.25%。",
-                    召唤物属性继承比例: 0.0025,
+                    attr: { 召唤物属性继承比例: 0.0025 },
                 }),
             ],
             melee: new LeveledWeapon(10302),
@@ -793,7 +793,7 @@ describe("CharBuild类测试", () => {
             skillLevel: 10,
             hpPercent: 1,
             resonanceGain: 0,
-            buffs: [new LeveledBuff({ 名称: "暴虐", 描述: "x", 近战攻速: 0.3 })],
+            buffs: [new LeveledBuff({ 名称: "暴虐", 描述: "x", attr: { 近战攻速: 0.3 } })],
             melee: new LeveledWeapon(10302),
             ranged: new LeveledWeapon(20601),
             baseName: "普通攻击",
@@ -2024,7 +2024,7 @@ describe("CharBuild类测试", () => {
             charBuild.calculate = () =>
                 Math.max(
                     0,
-                    charBuild.buffs.reduce((value, currentBuff) => value * (1 + (currentBuff.技能倍率乘数 || 0)), 100)
+                    charBuild.buffs.reduce((value, currentBuff) => value * (1 + (currentBuff.getAttrValue("技能倍率乘数") ?? 0)), 100)
                 )
 
             const income = charBuild.calcIncome(buff, true)
@@ -2652,7 +2652,7 @@ describe("CharBuild类测试", () => {
                     new LeveledBuff({
                         名称: "测试追加伤害",
                         描述: "测试用追加伤害",
-                        追加伤害: 2,
+                        attr: { 追加伤害: 2 },
                     }),
                     new LeveledBuff("追加伤害BUG"),
                 ],
@@ -2680,8 +2680,10 @@ describe("CharBuild类测试", () => {
                 new LeveledBuff({
                     名称: "测试静态属性字段",
                     描述: "测试用静态属性",
-                    技能伤害: 0.2 * baseAttrs.技能威力,
-                    远程暴伤: 0.8 * baseAttrs.技能威力,
+                    attr: {
+                        技能伤害: 0.2 * baseAttrs.技能威力,
+                        远程暴伤: 0.8 * baseAttrs.技能威力,
+                    },
                 })
             )
             const buff = new LeveledBuff({
@@ -2705,8 +2707,8 @@ describe("CharBuild类测试", () => {
             })
             const preparedBuff = charBuild.prepareBuff(optionBuff)
 
-            expect(buff.技能伤害).toBeCloseTo(0.2 * baseAttrs.技能威力)
-            expect(buff.远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
+            expect(buff.getAttrValue("技能伤害")).toBeCloseTo(0.2 * baseAttrs.技能威力)
+            expect(buff.getAttrValue("远程暴伤")).toBeCloseTo(0.8 * baseAttrs.技能威力)
             expect(preparedBuff.getProperties().远程暴伤).toBeCloseTo(0.8 * baseAttrs.技能威力)
             expect(optionBuff.getProperties().远程暴伤).toBeUndefined()
             expect(charBuild.calcIncome(optionBuff)).toBeCloseTo(charBuild.calcIncome(preparedBuff))
@@ -3373,5 +3375,127 @@ describe("条件BUFF（技能限定）- 琳恩裂伤特性（code类）", () => 
         const addIncome = createLinenBuild(false).calcIncome(new LeveledBuff(linenTraitData, 1), false)
         const minusIncome = enabled.calcIncome(new LeveledBuff(linenTraitData, 1), true)
         expect(addIncome).toBeCloseTo(minusIncome, 6)
+    })
+})
+
+describe("条件BUFF（tag限定）- 莉莉蔻2溯(充盈)/4溯", () => {
+    const s2Data = buffMap.get("莉莉蔻2溯(充盈)")!
+    const s4Data = buffMap.get("莉莉蔻4溯")!
+
+    function createFalusiBuild(buffs: string[]) {
+        return new CharBuild({
+            char: new LeveledChar("法露茜"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: buffs.map(name => new LeveledBuff(buffMap.get(name)!, 1)),
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "坠入黑渊",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "Q::充盈伤害",
+        })
+    }
+
+    it("4溯独立增伤只作用于充盈tag字段（含名中无充盈的附加伤害）", () => {
+        const without = createFalusiBuild([])
+        const withBuff = createFalusiBuild(["莉莉蔻4溯"])
+        // 全局独立增伤不含条件BUFF
+        expect(withBuff.calculateAttributes().独立增伤).toBe(0)
+        const ratio = (expr: string) => withBuff.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+        // 独立增伤 0.2：充盈字段 ×1.2
+        expect(ratio("Q::充盈伤害")).toBeCloseTo(1.2, 6)
+        // 附加伤害名中无充盈但带充盈tag，同样 ×1.2
+        expect(ratio("Q::附加伤害")).toBeCloseTo(1.2, 6)
+        // 无充盈tag的同技能字段不受影响
+        expect(ratio("Q::伤害")).toBeCloseTo(1, 6)
+    })
+
+    it("2溯(充盈)属性穿透只作用于充盈tag字段", () => {
+        const without = createFalusiBuild([])
+        const withBuff = createFalusiBuild(["莉莉蔻2溯(充盈)"])
+        // 全局属性穿透不含条件BUFF
+        expect(withBuff.calculateAttributes().属性穿透).toBe(0)
+        const ratio = (expr: string) => withBuff.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+        // 抗性区 0.5 → 0.5×(1+0.16)=0.58，充盈字段 ×1.16
+        expect(ratio("Q::充盈伤害")).toBeCloseTo(1.16, 6)
+        expect(ratio("Q::附加伤害")).toBeCloseTo(1.16, 6)
+        expect(ratio("Q::伤害")).toBeCloseTo(1, 6)
+    })
+
+    it("code与attr两种表示的计算结果逐位一致", () => {
+        function createCompareBuild(options: {
+            charName: string
+            baseName: string
+            target: string
+            buffs: LeveledBuff[]
+            rangedMods?: LeveledMod[]
+        }) {
+            return new CharBuild({
+                char: new LeveledChar(options.charName),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                buffs: options.buffs,
+                melee: new LeveledWeapon(10401),
+                ranged: new LeveledWeapon(20601),
+                rangedMods: options.rangedMods,
+                baseName: options.baseName,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: options.target,
+            })
+        }
+        const cases: {
+            name: string
+            charName: string
+            baseName: string
+            target: string
+            codeBuff: LeveledBuff
+            attrBuff: LeveledBuff
+            sharedBuffs: LeveledBuff[]
+            rangedMods?: LeveledMod[]
+            spotCheck: (build: CharBuild) => number | undefined
+        }[] = [
+            // 只有纯函数（不自读目标）的 code 才能转 attr：自引用式 x+=f(x) 在 attr 下每次计算复利发散
+            //（伊薇4溯/狩月4/7 均因此保留 code，见 buff.data 注释），此处只锁定浴火被动2的等价性
+            {
+                name: "黎瑟·浴火被动2",
+                charName: "黎瑟·浴火",
+                baseName: "涡流狙击",
+                target: "Q::[狙击子弹]伤害",
+                codeBuff: new LeveledBuff({
+                    名称: "黎瑟·浴火被动2(code)",
+                    限定: 4103,
+                    技能: "狙击子弹|^伤害$",
+                    code: "if(rangedWeaponAttr)技能伤害+=Math.max(0,rangedWeaponAttr.暴击*(rangedWeaponAttr.暴伤-1))",
+                }),
+                attrBuff: new LeveledBuff(buffMap.get("黎瑟·浴火被动2")!, 1),
+                sharedBuffs: [],
+                rangedMods: [new LeveledMod(53009, 10), new LeveledMod(53010, 10)],
+                spotCheck: build => build.getConditionalBuffPropsList().find(entry => entry.技能 === "狙击子弹|^伤害$")?.props.技能伤害,
+            },
+        ]
+        for (const testCase of cases) {
+            const codeBuild = createCompareBuild({ ...testCase, buffs: [testCase.codeBuff, ...testCase.sharedBuffs] })
+            const attrBuild = createCompareBuild({ ...testCase, buffs: [testCase.attrBuff, ...testCase.sharedBuffs] })
+            expect(attrBuild.calculate(), testCase.name).toBe(codeBuild.calculate())
+            const codeValue = testCase.spotCheck(codeBuild)
+            const attrValue = testCase.spotCheck(attrBuild)
+            expect(attrValue).toBeGreaterThan(0)
+            expect(attrValue).toBe(codeValue)
+        }
+    })
+
+    it("tag条件BUFF的加/减收益对称", () => {
+        const enabled = createFalusiBuild(["莉莉蔻4溯"])
+        const addIncome = createFalusiBuild([]).calcIncome(new LeveledBuff(s4Data, 1), false)
+        const minusIncome = enabled.calcIncome(new LeveledBuff(s4Data, 1), true)
+        expect(addIncome).toBeGreaterThan(0)
+        expect(addIncome).toBeCloseTo(minusIncome, 6)
+        expect(s2Data.tag).toEqual(["充盈"])
     })
 })

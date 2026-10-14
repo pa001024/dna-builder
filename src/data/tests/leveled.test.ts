@@ -379,8 +379,8 @@ describe("LeveledBuff类测试", () => {
         // 1级时：0.5/1*(1+1/1*(1-1)) = 0.5*1 = 0.5
         // 2级时：0.5/1*(1+1/1*(2-1)) = 0.5*(1+1) = 1.0
 
-        expect((助战50攻1级 as any).攻击).toBe(0.5)
-        expect((助战50攻2级 as any).攻击).toBe(1.0)
+        expect(助战50攻1级.getAttrValue("攻击")).toBe(0.5)
+        expect(助战50攻2级.getAttrValue("攻击")).toBe(1.0)
     })
 
     it("Buff克隆后应保留动态倍率", () => {
@@ -388,7 +388,7 @@ describe("LeveledBuff类测试", () => {
         const cloned = 助战50攻2级.clone()
 
         expect(cloned.ratio).toBeCloseTo(助战50攻2级.ratio, 10)
-        expect((cloned as any).攻击).toBeCloseTo((助战50攻2级 as any).攻击, 10)
+        expect(cloned.getAttrValue("攻击")).toBeCloseTo(助战50攻2级.getAttrValue("攻击")!, 10)
     })
 
     // 测试4：设置超出上限的等级（应该被限制在mx）
@@ -438,17 +438,20 @@ describe("LeveledBuff类测试", () => {
         const buff = new LeveledBuff("煜明2溯")
         const minusAttr = buff.minusAttr
 
-        expect(minusAttr.技能倍率乘数).toBeCloseTo(-(buff.技能倍率乘数 / (1 + buff.技能倍率乘数)), 10)
+        expect(minusAttr.getAttrValue("技能倍率乘数")).toBeCloseTo(
+            -(buff.getAttrValue("技能倍率乘数")! / (1 + buff.getAttrValue("技能倍率乘数")!)),
+            10
+        )
     })
 
     it("覆盖率应缩放BUFF数值并随等级变化保持一致", () => {
         const buff = new LeveledBuff("助战50攻", 1)
         buff.coverage = 0.5
 
-        expect(buff.攻击).toBeCloseTo(0.5 * 0.5, 10)
+        expect(buff.getAttrValue("攻击")).toBeCloseTo(0.5 * 0.5, 10)
 
         buff.等级 = 2
-        expect(buff.攻击).toBeCloseTo(1.0 * 0.5, 10)
+        expect(buff.getAttrValue("攻击")).toBeCloseTo(1.0 * 0.5, 10)
     })
 
     it("覆盖率设置回100%后数值应恢复原值", () => {
@@ -456,7 +459,7 @@ describe("LeveledBuff类测试", () => {
         buff.coverage = 0.5
         buff.coverage = 1
 
-        expect(buff.攻击).toBeCloseTo(0.5, 10)
+        expect(buff.getAttrValue("攻击")).toBeCloseTo(0.5, 10)
     })
 
     it("clone应保留覆盖率", () => {
@@ -465,15 +468,15 @@ describe("LeveledBuff类测试", () => {
         const cloned = buff.clone()
 
         expect(cloned.coverage).toBe(0.5)
-        expect(cloned.攻击).toBeCloseTo(0.25, 10)
+        expect(cloned.getAttrValue("攻击")).toBeCloseTo(0.25, 10)
     })
 
     it("特效数据中以 @ 前缀声明的属性物化时剥离前缀", () => {
         // 反转（43342）的效果：@ 前缀表示该属性归属 BUFF 层，BUFF 实例上按真实属性名存放
-        const buff = new LeveledBuff({ 名称: "反转", 描述: "测试", "@近战增伤": 0.6 })
+        const buff = new LeveledBuff({ 名称: "反转", 描述: "测试", attr: { "@近战增伤": 0.6 } })
 
-        expect(buff.近战增伤).toBeCloseTo(0.6, 10)
-        expect(buff["@近战增伤"]).toBeUndefined()
+        expect(buff.getAttrValue("近战增伤")).toBeCloseTo(0.6, 10)
+        expect(buff.getAttrValue("@近战增伤")).toBeUndefined()
         expect(buff.getProperties()).toEqual({ 近战增伤: 0.6 })
         // 供 MOD 层路由判断：该属性来自 @ 前缀键
         expect(buff.isBuffLayerProperty("近战增伤")).toBe(true)
@@ -738,7 +741,7 @@ describe("LeveledWeapon类测试", () => {
         const 暴虐 = new LeveledBuff({
             名称: "暴虐",
             描述: "击败敌人后，获得1层攻击速度提高30.0%，持续10.0秒，最多叠加2层。",
-            近战攻速: 0.3,
+            attr: { 近战攻速: 0.3 },
         })
         const weapon = new LeveledWeapon(10302)
         weapon.buff = 暴虐

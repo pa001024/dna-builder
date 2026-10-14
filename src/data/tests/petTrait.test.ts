@@ -83,8 +83,8 @@ describe("魔灵潜质目录", () => {
     it("槽位批量构造构筑 BUFF 时跳过空槽与无属性潜质", () => {
         const buffs = collectTraitBuffs([XIONGMENG_SLOT, null, [1001, 3], MINRUI_SLOT])
         expect(buffs.map(buff => buff.名称)).toEqual(["魔灵潜质:凶猛", "魔灵潜质:敏锐"])
-        expect(buffs[0].攻击).toBeCloseTo(0.24)
-        expect(buffs[1].魔灵CD缩减).toBeCloseTo(0.24)
+        expect(buffs[0].getAttrValue("攻击")).toBeCloseTo(0.24)
+        expect(buffs[1].getAttrValue("魔灵CD缩减")).toBeCloseTo(0.24)
     })
 
     it("老道不产生属性 BUFF，而是给魔灵技能等级 +1", () => {
@@ -199,9 +199,9 @@ describe("魔灵 BUFF 与技能等级", () => {
 
     it("被动物按生效技能等级取值，主动技额外按覆盖率缩放", () => {
         const [passive, active] = collectPetBuffs(HEIYAO_PET_ID, 4, 0.5)
-        expect(passive.属性攻击).toBeCloseTo(0.096)
+        expect(passive.getAttrValue("属性攻击")).toBeCloseTo(0.096)
         // 4 级主动昂扬为 24%，覆盖率 50% → 12%
-        expect(active.昂扬).toBeCloseTo(0.12)
+        expect(active.getAttrValue("昂扬")).toBeCloseTo(0.12)
         expect(active.coverage).toBeCloseTo(0.5)
     })
 

@@ -160,12 +160,11 @@ export class LeveledMod implements Mod {
         if (modData.效果) this.效果 = modData.效果
         if (modData.消耗) this.消耗 = modData.消耗
         if (modData.技能替换) this.技能替换 = modData.技能替换
+        // 特效按 id 精确匹配（金/紫分行配置），命中即挂载，不再按品质二次门控
         if (effectData) {
-            if (!effectData.品质 || effectData.品质 === this.品质) {
-                this.buff = new LeveledBuff(effectData, buffLv)
-                this.buff.pid = this.id
-                this.buff.pt = "Mod"
-            }
+            this.buff = new LeveledBuff(effectData, buffLv)
+            this.buff.pid = this.id
+            this.buff.pt = "Mod"
         }
 
         // 获取该品质MOD的等级上限
@@ -304,7 +303,7 @@ export class LeveledMod implements Mod {
         this.buff?.properties.forEach(prop => {
             const lv = this._等级
             const buff = this.buff!
-            const maxValue = buff[prop] || 0
+            const maxValue = buff.getAttrValue(prop) ?? 0
             let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
             if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
             if (buff.isBuffLayerProperty(prop)) {

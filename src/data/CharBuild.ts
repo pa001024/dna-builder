@@ -2,13 +2,13 @@ import { groupBy } from "lodash-es"
 import { type ASTNode, parseAST } from "./ast"
 import type { CharBuildSettingsInput } from "./CharBuildHelper"
 import { type CharSkillLevels, normalizeCharSkillLevels, resolveCharSkillLevel } from "./charSettings"
-import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
+import type { AbstractMod, Buff, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import type { LeveledChar } from "./leveled/LeveledChar"
 import type { CharBuildInvSnapshot } from "./leveled/LeveledHelpers"
 import { LeveledMod, type LeveledModWithCount } from "./leveled/LeveledMod"
 import { type DynamicMonster, LeveledMonster } from "./leveled/LeveledMonster"
-import { LeveledSkill } from "./leveled/LeveledSkill"
+import { type BuffFieldConditional, LeveledSkill } from "./leveled/LeveledSkill"
 import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
 import { isMultiplicativeAttr } from "./leveled/minusAttr"
@@ -206,6 +206,22 @@ const weaponDamageFieldBaseMap = {
     "[远程]": "远程",
     "[同律]": "同律",
 } as const
+
+/**
+ * 条件BUFF判定：带 `技能`（字段名限定）或 `tag`（字段标签限定，如 ["充盈"]）的 BUFF
+ * 只对命中条件的字段生效，不参与全局属性汇总。
+ */
+function isFieldConditionalBuff(buff: Buff): boolean {
+    return typeof buff.技能 === "string" || (Array.isArray(buff.tag) && buff.tag.length > 0)
+}
+
+/**
+ * 取 BUFF 的字段标签限定（字符串数组），无限定或限定为空时返回 undefined。
+ */
+function getBuffFieldTags(buff: Buff): string[] | undefined {
+    const tag = Array.isArray(buff.tag) ? buff.tag.filter((t): t is string => typeof t === "string") : []
+    return tag.length ? tag : undefined
+}
 
 const weaponAttributeBaseMap = {
     攻击: "基础攻击",
@@ -763,14 +779,12 @@ export class CharBuild {
      */
     private createCustomBuffs(customBuff: [string, number][]) {
         if (!customBuff.length) return []
-        const buff = {
+        const buff: Buff = {
             名称: "自定义BUFF",
             描述: "自行填写",
-        } as Record<string, string | number>
-        customBuff.forEach(([property, value]) => {
-            buff[property] = value
-        })
-        return [new LeveledBuff(buff as never)]
+            attr: Object.fromEntries(customBuff),
+        }
+        return [new LeveledBuff(buff)]
     }
 
     /**
@@ -1003,9 +1017,9 @@ export class CharBuild {
         }
 
         for (const buff of this.buffs) {
-            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不进全局汇总表
-            if (typeof buff.技能 === "string") continue
-            accumulate(table.buffs, buff as unknown as Record<string, unknown>)
+            // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不进全局汇总表
+            if (isFieldConditionalBuff(buff)) continue
+            accumulate(table.buffs, buff.values)
         }
 
         return table
@@ -1067,9 +1081,9 @@ export class CharBuild {
 
         let product = 1
         for (const buff of this.buffs) {
-            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不参与全局乘法聚合
-            if (typeof buff.技能 === "string") continue
-            const value = buff[attribute]
+            // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不参与全局乘法聚合
+            if (isFieldConditionalBuff(buff)) continue
+            const value = buff.getAttrValue(attribute)
             if (typeof value === "number") product *= 1 + value
         }
         table.buffsMul.set(attribute, product)
@@ -1094,7 +1108,7 @@ export class CharBuild {
      *
      * 用户勾选 BUFF 的 code 走 `dynamicBuffs`；特效 code 挂在装备实例上，随装备更换与特效等级
      * （含武器熔炼生效状态）动态变化，因此每次计算时现取，不另设缓存：遍历量仅与槽位数成正比。
-     * 只收已生效（特效等级 > 0，武器还需熔炼生效）的条目；`技能` 限定的改由字段级条件合并应用。
+     * 只收已生效（特效等级 > 0，武器还需熔炼生效）的条目；`技能`/`tag` 限定的改由字段级条件合并应用。
      * @returns 本次计算需执行的特效 code buff
      */
     private getEffectCodeBuffs(): LeveledBuff[] {
@@ -1111,14 +1125,14 @@ export class CharBuild {
     }
 
     /**
-     * 差分条件codeBUFF（带 `技能` 的动态属性 BUFF）在全局属性上产生的顶层属性增量。
+     * 差分条件codeBUFF（带 `技能`/`tag` 的动态属性 BUFF）在全局属性上产生的顶层属性增量。
      * 以当前全局属性（不含条件codeBUFF）为基线跑一遍 code，把数值差转成可合并的增量：
      * 乘法池属性（独立增伤系列等）存乘法因子对应的净增量，其余属性存平值差。
      * code 对武器面板等嵌套对象的修改不参与差分（沿用全局 code 的现有口径）。
      * @returns 条件属性列表；无条件codeBUFF时为空数组
      */
-    private getScopedCodeBuffConditionals(): { 技能: string; pattern: RegExp; props: Record<string, number> }[] {
-        const scopedBuffs = [...this.dynamicBuffs, ...this.getEffectCodeBuffs()].filter(b => typeof b.技能 === "string")
+    private getScopedCodeBuffConditionals(): BuffFieldConditional[] {
+        const scopedBuffs = [...this.dynamicBuffs, ...this.getEffectCodeBuffs()].filter(b => isFieldConditionalBuff(b))
         if (!scopedBuffs.length) return []
         // 命中缓存：基线有效性随作用域属性表（MOD/武器/BUFF 增删与数值版本号）失效
         const table = this.getBonusSourceTable()
@@ -1132,7 +1146,8 @@ export class CharBuild {
             // 基线全局属性已不含条件codeBUFF（应用点已跳过），以其为参照差分出各 code 的增量
             const baseAttrs = this.calculateWeaponAttributes()
             const entries = scopedBuffs.map(buff => {
-                const 技能 = buff.技能 as string
+                const 技能 = typeof buff.技能 === "string" ? buff.技能 : undefined
+                const tag = getBuffFieldTags(buff)
                 const snapshot = { ...baseAttrs }
                 const result = buff.applyDynamicAttr(
                     this.char,
@@ -1154,7 +1169,13 @@ export class CharBuild {
                         props[key] = value - before
                     }
                 }
-                return { 技能, pattern: this.compileBuffSkillPattern(技能), props }
+                const entry: BuffFieldConditional = { props }
+                if (技能 !== undefined) {
+                    entry.技能 = 技能
+                    entry.pattern = this.compileBuffSkillPattern(技能)
+                }
+                if (tag) entry.tag = tag
+                return entry
             })
             this.scopedCodeConditionalsCache = { table, entries }
             return entries
@@ -1168,26 +1189,36 @@ export class CharBuild {
 
     private scopedCodeConditionalsCache?: {
         table: BonusSourceTable
-        entries: { 技能: string; pattern: RegExp; props: Record<string, number> }[]
+        entries: BuffFieldConditional[]
     }
 
     /**
-     * 取当前构筑全部条件 BUFF 的字段级属性增量列表（按 技能 聚合同名条件的数值）。
+     * 取当前构筑全部条件 BUFF 的字段级属性增量列表（按 技能 + tag 聚合同条件的数值）。
      * 供 LeveledSkill.getFieldsWithAttr 在字段值计算处（如 技能倍率乘数）应用条件 BUFF。
      * @returns 条件属性列表；无条件 BUFF 时为空数组
      */
-    public getConditionalBuffPropsList(): { 技能: string; pattern: RegExp; props: Record<string, number> }[] {
-        const list: { 技能: string; pattern: RegExp; props: Record<string, number> }[] = []
+    public getConditionalBuffPropsList(): BuffFieldConditional[] {
+        const list: BuffFieldConditional[] = []
         for (const buff of this.buffs) {
-            const 技能 = buff.技能
-            if (typeof 技能 !== "string") continue
-            let entry = list.find(item => item.技能 === 技能)
+            const 技能 = typeof buff.技能 === "string" ? buff.技能 : undefined
+            const tag = getBuffFieldTags(buff)
+            if (技能 === undefined && !tag) continue
+            let entry = list.find(
+                item =>
+                    item.技能 === 技能 &&
+                    (item.tag === tag || (!!item.tag && !!tag && item.tag.length === tag.length && item.tag.every(t => tag.includes(t))))
+            )
             if (!entry) {
-                entry = { 技能, pattern: this.compileBuffSkillPattern(技能), props: {} }
+                entry = { props: {} }
+                if (技能 !== undefined) {
+                    entry.技能 = 技能
+                    entry.pattern = this.compileBuffSkillPattern(技能)
+                }
+                if (tag) entry.tag = tag
                 list.push(entry)
             }
             for (const prop of buff.properties) {
-                const value = buff[prop]
+                const value = buff.getAttrValue(prop)
                 if (typeof value !== "number" || value === 0) continue
                 if (isMultiplicativeAttr(prop)) {
                     entry.props[prop] = (1 + (entry.props[prop] || 0)) * (1 + value) - 1
@@ -1200,18 +1231,20 @@ export class CharBuild {
     }
 
     /**
-     * 汇总字段名匹配的条件 BUFF 属性增量。
-     * 条件 BUFF（数据带 `技能` 字段，如 法露茜2溯）不参与全局属性汇总，
-     * 只在求值字段名匹配 `技能`（支持 "|" 交替多技能）时，把其数值属性叠加进该字段的属性上下文。
+     * 汇总命中字段的条件 BUFF 属性增量。
+     * 条件 BUFF（数据带 `技能`/`tag` 字段，如 法露茜2溯 / 莉莉蔻4溯）不参与全局属性汇总，
+     * 只在求值字段命中条件（字段名匹配 `技能`，支持 "|" 交替多技能；或字段标签命中 `tag`）时，
+     * 把其数值属性叠加进该字段的属性上下文。
      * 乘法池属性（独立增伤系列等）按 Π(1+v) 聚合后以净增量形式返回，与 minusAttr 的乘法逆元口径一致。
      * @param fieldName 求值的字段名（如 "[暗影奔袭]伤害"）
+     * @param fieldTag 求值字段的标签（如 ["充盈"]）
      * @returns 匹配条件 BUFF 的属性增量表；无匹配时返回 undefined
      */
-    private getConditionalBuffProps(fieldName?: string): Record<string, number> | undefined {
+    private getConditionalBuffProps(fieldName?: string, fieldTag?: string[]): Record<string, number> | undefined {
         if (!fieldName) return undefined
         let result: Record<string, number> | undefined
         for (const entry of this.getConditionalBuffPropsList()) {
-            if (!entry.pattern.test(fieldName)) continue
+            if (!LeveledSkill.matchesFieldConditional(entry, fieldName, fieldTag)) continue
             for (const [prop, value] of Object.entries(entry.props)) {
                 if (isMultiplicativeAttr(prop)) {
                     result = result ?? {}
@@ -1479,8 +1512,7 @@ export class CharBuild {
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
             for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
-                // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
-                if (typeof b.技能 === "string") continue
+                if (isFieldConditionalBuff(b)) continue
                 const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
                 attrs = rest
             }
@@ -1496,7 +1528,7 @@ export class CharBuild {
     private applyBuffAttr(attrs: CharAttr) {
         let changed = false
         this.buffs.forEach(buff => {
-            changed ||= this.applyBuffAttrValue(buff, attrs)
+            changed = this.applyBuffAttrValue(buff, attrs) || changed
         })
         return changed
     }
@@ -1526,7 +1558,7 @@ export class CharBuild {
         const conditionValues = this.getConditionValues()
         let changed = false
         mods.forEach(mod => {
-            changed ||= mod.applyCondition(attrs, this.charModsWithAura, conditionValues)
+            changed = mod.applyCondition(attrs, this.charModsWithAura, conditionValues) || changed
         })
         return changed
     }
@@ -1787,8 +1819,8 @@ export class CharBuild {
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
             for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
-                // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
-                if (typeof b.技能 === "string") continue
+                // 条件codeBUFF（技能/tag限定）不并入全局属性，改由字段级条件合并应用
+                if (isFieldConditionalBuff(b)) continue
                 attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
             }
         }
@@ -2216,10 +2248,11 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
-            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不参与全局减伤聚合
-            if (typeof buff.技能 === "string") return
-            if (typeof buff[attribute] === "number") {
-                bonus = 1 - (1 - bonus) * (1 - buff[attribute])
+            // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不参与全局减伤聚合
+            if (isFieldConditionalBuff(buff)) return
+            const reduceValue = buff.getAttrValue(attribute)
+            if (typeof reduceValue === "number") {
+                bonus = 1 - (1 - bonus) * (1 - reduceValue)
             }
         })
 
@@ -3401,11 +3434,12 @@ export class CharBuild {
                           昂扬: attrs.昂扬 * summonRatio,
                           背水: attrs.背水 * summonRatio,
                       }
-            // 条件BUFF（filter）：字段名命中时把属性增量合并进该字段的独立属性上下文
-            if (fieldName && !conditionalBuffCache.has(fieldName)) {
-                conditionalBuffCache.set(fieldName, this.getConditionalBuffProps(fieldName))
+            // 条件BUFF（filter）：字段名/tag命中时把属性增量合并进该字段的独立属性上下文
+            const cacheKey = fieldName ? `${key}::${fieldName}` : ""
+            if (fieldName && !conditionalBuffCache.has(cacheKey)) {
+                conditionalBuffCache.set(cacheKey, this.getConditionalBuffProps(fieldName, summonField?.tag))
             }
-            const conditionalProps = fieldName ? conditionalBuffCache.get(fieldName) : undefined
+            const conditionalProps = fieldName ? conditionalBuffCache.get(cacheKey) : undefined
             let scopedAttrs = currentAttrs
             if (conditionalProps) {
                 scopedAttrs = { ...currentAttrs }
@@ -4264,12 +4298,14 @@ export class CharBuild {
     /** 收益计算用的临时槽位 平时不应该有任何值 */
     tempMod: LeveledMod | null = null
     /**
-     * 计算单属性收益（加上属性值）
+     * 计算单属性收益（加上属性值）。
      * @param props 武器、魔之楔或 buff
+     * @param minus 是否按移除求收益
+     * @param baseValue 当前构筑的基准伤害（缺省现算；worker 批量求收益时由调用方一次性传入，避免每个候选重复计算）
      * @returns 单属性值
      */
-    public calcIncome(props: AbstractMod | LeveledBuff, minus = false): number {
-        if (props instanceof LeveledBuff && props.attr) {
+    public calcIncome(props: AbstractMod | LeveledBuff, minus = false, baseValue?: number): number {
+        if (props instanceof LeveledBuff && props.hasDynamicAttr) {
             props = this.prepareBuff(props)
         }
         if (minus) {
@@ -4281,8 +4317,8 @@ export class CharBuild {
                     this.dynamicBuffs = this.dynamicBuffs.filter(b => b.名称 !== props.名称)
                     mval = this.calculate()
                     this.pushBuffToSlots(props)
-                } else if (props.attr) {
-                    return this.calcEquippedBuffIncome(props)
+                } else if (props.hasDynamicAttr) {
+                    return this.calcEquippedBuffIncome(props, baseValue)
                 } else {
                     this.buffs.push(props.minusAttr)
                     mval = this.calculate()
@@ -4295,7 +4331,7 @@ export class CharBuild {
             }
             // 移除后总伤害为 0（如移除技能触发唯一的来源使触发条件伤害归零）：相对收益无定义，按 0 处理
             if (Math.abs(mval) < Number.EPSILON) return 0
-            return this.calculate() / mval - 1
+            return (baseValue ?? this.calculate()) / mval - 1
         } else {
             let mval = 0
             if (
@@ -4337,7 +4373,7 @@ export class CharBuild {
                 this.tempMod = null
             }
             // 当前总伤害为 0（如尚无任何触发来源）：相对收益无定义，按 0 处理
-            const base = this.calculate()
+            const base = baseValue ?? this.calculate()
             if (Math.abs(base) < Number.EPSILON) return 0
             return mval / base - 1
         }
@@ -4348,14 +4384,14 @@ export class CharBuild {
      * @param buff 目标BUFF
      * @returns 移除该BUFF后的边际收益
      */
-    public calcEquippedBuffIncome(buff: LeveledBuff) {
-        const baseValue = this.calculate()
+    public calcEquippedBuffIncome(buff: LeveledBuff, baseValue?: number) {
+        const base = baseValue ?? this.calculate()
         const copyBuild = this.clone()
         copyBuild.buffs = copyBuild.buffs.filter(item => item.名称 !== buff.名称)
         copyBuild.dynamicBuffs = copyBuild.dynamicBuffs.filter(item => item.名称 !== buff.名称)
         const withoutValue = copyBuild.calculate()
         if (Math.abs(withoutValue) < Number.EPSILON) return 0
-        return baseValue / withoutValue - 1
+        return base / withoutValue - 1
     }
 
     /**
@@ -4366,13 +4402,13 @@ export class CharBuild {
      * @param index 槽位索引
      * @returns 移除该槽位后的边际收益
      */
-    public calcEquippedModIncome(type: string, index: number): number {
+    public calcEquippedModIncome(type: string, index: number, baseValue?: number): number {
         let resolvedType = type
         if (resolvedType === "同律" && this.skillWeapon?.inherit) {
             resolvedType = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
 
-        const baseValue = this.calculate()
+        const base = baseValue ?? this.calculate()
         const copyBuild = this.clone()
 
         /**
@@ -4400,7 +4436,7 @@ export class CharBuild {
             return 0
         }
         // console.log(JSON.stringify(this), JSON.stringify(copyBuild))
-        return baseValue / removedValue - 1
+        return base / removedValue - 1
     }
 
     clone() {

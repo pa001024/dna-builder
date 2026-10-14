@@ -60,25 +60,33 @@ self.onmessage = (event: MessageEvent<IncomeRequest>) => {
     try {
         const build = createBuildFromSnapshot(event.data.build)
         const incomes: Record<string, number> = {}
+        const hasItems =
+            (event.data.buffs?.length ?? 0) +
+                (event.data.mods?.length ?? 0) +
+                (event.data.equippedMods?.length ?? 0) +
+                (event.data.equippedBuffs?.length ?? 0) >
+            0
+        // 基准伤害整请求只算一次：各候选计算前后都会恢复构筑原状，基准与逐项现算完全一致
+        const base = hasItems ? build.calculate() : 0
         event.data.buffs?.forEach(buff => {
             const leveled = new LeveledBuff(buff.data, buff.level)
             if (buff.coverage !== undefined) {
                 leveled.coverage = buff.coverage
             }
-            incomes[buff.key] = build.calcIncome(leveled, buff.minus)
+            incomes[buff.key] = build.calcIncome(leveled, buff.minus, base)
         })
         event.data.mods?.forEach(mod => {
-            incomes[mod.key] = build.calcIncome(new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect))
+            incomes[mod.key] = build.calcIncome(new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect), false, base)
         })
         event.data.equippedMods?.forEach(mod => {
-            incomes[mod.key] = build.calcEquippedModIncome(mod.type, mod.index)
+            incomes[mod.key] = build.calcEquippedModIncome(mod.type, mod.index, base)
         })
         event.data.equippedBuffs?.forEach(buff => {
             const leveled = new LeveledBuff(buff.data, buff.level)
             if (buff.coverage !== undefined) {
                 leveled.coverage = buff.coverage
             }
-            incomes[buff.key] = build.calcEquippedBuffIncome(leveled)
+            incomes[buff.key] = build.calcEquippedBuffIncome(leveled, base)
         })
         self.postMessage({ id: event.data.id, incomes } satisfies IncomeResponse)
     } catch (error) {

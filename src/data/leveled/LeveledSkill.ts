@@ -321,11 +321,13 @@ export interface LeveledSkillField {
     tag?: string[]
 }
 
-/** 条件BUFF（技能限定）的字段级属性增量：字段名匹配 技能（支持 "|" 交替多技能）时把 props 合并进该字段的求值上下文 */
+/** 条件BUFF的字段级属性增量：带 `技能` 时字段名匹配（支持 "|" 交替多技能）命中，带 `tag` 时字段标签命中（如 ["充盈"]），两者都有时需同时命中；命中后把 props 合并进该字段的求值上下文 */
 export interface BuffFieldConditional {
-    技能: string
-    /** 预编译的技能名匹配模式 */
-    pattern: RegExp
+    技能?: string
+    /** 预编译的技能名匹配模式（无技能限定时缺省） */
+    pattern?: RegExp
+    /** 字段标签限定（命中任一标签即满足标签条件） */
+    tag?: string[]
     props: Record<string, number>
 }
 
@@ -442,6 +444,23 @@ export class LeveledSkill {
      * @param props 条件BUFF属性增量
      * @returns 合并后的新属性视图；无增量时原样返回
      */
+    /**
+     * 判断条件BUFF条目是否命中指定字段。
+     * 有 `技能` 时要求字段名匹配模式，有 `tag` 时要求字段标签包含任一限定标签；两者都有时需同时满足。
+     * @param c 条件BUFF条目
+     * @param fieldName 字段名
+     * @param fieldTag 字段标签
+     * @returns 是否命中
+     */
+    static matchesFieldConditional(c: BuffFieldConditional, fieldName: string, fieldTag?: string[]): boolean {
+        const hasSkill = typeof c.技能 === "string" && c.技能.length > 0
+        const hasTag = !!c.tag?.length
+        if (!hasSkill && !hasTag) return false
+        if (hasSkill && !c.pattern?.test(fieldName)) return false
+        if (hasTag && !c.tag!.some(t => fieldTag?.includes(t))) return false
+        return true
+    }
+
     static mergeConditionalProps<T extends object>(base: T, props: Record<string, number>): T {
         const merged = { ...base } as T
         const writable = merged as unknown as Record<string, number | undefined>
@@ -469,10 +488,10 @@ export class LeveledSkill {
             多重: rangedMulti ?? attrs?.rangedWeapon?.多重 ?? attrs?.weapon?.多重 ?? 1,
         }
         const normalFields = this.字段.map(field => {
-            // 条件BUFF（技能限定）：字段名命中时把属性增量合并进该字段的独立求值上下文
+            // 条件BUFF：字段名/tag命中时把属性增量合并进该字段的独立求值上下文
             let fieldAttrs = attrs
             if (attrs && conditionalProps?.length) {
-                const matched = conditionalProps.filter(c => c.pattern.test(field.名称))
+                const matched = conditionalProps.filter(c => LeveledSkill.matchesFieldConditional(c, field.名称, field.tag))
                 if (matched.length) {
                     fieldAttrs = matched.reduce((current, c) => LeveledSkill.mergeConditionalProps(current, c.props), attrs)
                 }

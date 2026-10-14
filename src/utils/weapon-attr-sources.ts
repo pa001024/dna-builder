@@ -125,7 +125,7 @@ export function collectWeaponAttrSources(build: CharBuild, scope: string, key: s
     for (const candidate of candidates) {
         if (BARE_SCOPE_EXCLUDED.has(candidate.field)) continue
         for (const buff of build.buffs) {
-            const value = buff[candidate.field]
+            const value = buff.getAttrValue(candidate.field)
             if (typeof value === "number") push(buff.名称, value)
         }
     }

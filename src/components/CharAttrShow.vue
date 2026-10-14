@@ -357,25 +357,25 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                             {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, mod[sourceField]!) }}
                         </li>
                         <li
-                            v-for="(buff, index) in charBuild.buffs.filter(b => typeof b[sourceField] === 'number')"
+                            v-for="(buff, index) in charBuild.buffs.filter(b => typeof b.getAttrValue(sourceField) === 'number')"
                             :key="`extra-buff-${sourceField}-${index}`"
                             class="flex justify-between gap-8 text-sm text-primary"
                         >
                             <div class="text-base-content/80">
                                 {{ buff.名称 }}
                             </div>
-                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff[sourceField]!) }}
+                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff.getAttrValue(sourceField)!) }}
                         </li>
                     </template>
                     <li
-                        v-for="(buff, index) in charBuild.buffs.filter(b => b[key])"
+                        v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(key))"
                         :key="index"
                         class="flex justify-between gap-8 text-sm text-primary"
                     >
                         <div class="text-base-content/80">
                             {{ buff.名称 }}
                         </div>
-                        {{ format100r(buff[key]!) }}
+                        {{ format100r(buff.getAttrValue(key)!) }}
                     </li>
                     <li
                         v-for="(dynamicSource, index) in dynamicAttrSourceMap[key] || []"
@@ -406,7 +406,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                             charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
                             modAttributeBonusSources.some(v => v.addAttr[attrSourceKey(key)])
                         "
-                        v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
+                        v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(`${charBuild.char.属性}MOD属性`))"
                         :key="index"
                         class="flex justify-between gap-8 text-sm text-primary"
                     >
@@ -415,7 +415,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                             (key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "") +
                             format100r(
                                 modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[attrSourceKey(key)] ?? 0), 0) *
-                                    buff[`${charBuild.char.属性}MOD属性`]!
+                                    buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!
                             )
                         }}
                     </li>

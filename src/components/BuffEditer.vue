@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
+import { computed, ref, watch } from "vue"
+import { requestBuildIncomes } from "@/composables/useBuildIncomeWorker"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { LeveledBuff } from "@/data/leveled"
@@ -35,7 +36,6 @@ const props = defineProps<{
 const ui = useUIStore()
 const searchKeyword = ref("")
 const incomeMap = ref<Record<string, number>>({})
-const workerRef = shallowRef<Worker>()
 let workerRequestId = 0
 
 const emit = defineEmits<{
@@ -181,20 +181,9 @@ function refreshIncomes() {
         ...selectedBuffs.value.map(buff => ({ ...buff, minus: true })),
         ...sortedBuffs.value.map(buff => ({ ...buff, minus: false })),
     ]
-    const worker = workerRef.value || new Worker(new URL("@/data/CharBuild.worker.ts", import.meta.url), { type: "module" })
-    workerRef.value = worker
     const id = ++workerRequestId
-    worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {
-        if (event.data.id !== workerRequestId) return
-        if (event.data.error) {
-            console.error("BUFF收益worker计算失败", event.data.error)
-            return
-        }
-        incomeMap.value = event.data.incomes || {}
-    }
-    worker.postMessage(
+    requestBuildIncomes(
         cloneForWorker({
-            id,
             build: createWorkerSnapshot(props.charBuild),
             buffs: visibleBuffs.map(buff => ({
                 key: getIncomeKey(buff, buff.minus),
@@ -205,6 +194,11 @@ function refreshIncomes() {
             })),
         })
     )
+        .then(result => {
+            if (id !== workerRequestId) return
+            incomeMap.value = result
+        })
+        .catch(error => console.error("BUFF收益worker计算失败", error))
 }
 
 watch(
@@ -212,10 +206,6 @@ watch(
     () => refreshIncomes(),
     { immediate: true, deep: true }
 )
-
-onBeforeUnmount(() => {
-    workerRef.value?.terminate()
-})
 
 /**
  * 获取已按当前构筑刷新动态属性的BUFF。

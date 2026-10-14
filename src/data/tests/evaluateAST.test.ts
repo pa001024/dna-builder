@@ -101,7 +101,7 @@ describe("evaluateAST函数测试", () => {
                     new LeveledBuff({
                         名称: "召唤物继承测试",
                         描述: "测试用召唤物属性继承比例",
-                        召唤物属性继承比例: -0.5,
+                        attr: { 召唤物属性继承比例: -0.5 },
                     }),
                 ],
                 melee: new LeveledWeapon(10302),
@@ -733,8 +733,7 @@ describe("evaluateAST函数测试", () => {
                 new LeveledBuff({
                     名称: "测试近战蓄力加成",
                     描述: "测试用",
-                    近战蓄力增伤: 1,
-                    近战蓄力独立增伤: 3,
+                    attr: { 近战蓄力增伤: 1, 近战蓄力独立增伤: 3 },
                 }),
             ]
 
@@ -761,8 +760,7 @@ describe("evaluateAST函数测试", () => {
                 new LeveledBuff({
                     名称: "测试近战蓄力加成",
                     描述: "测试用",
-                    近战蓄力增伤: 3,
-                    近战蓄力独立增伤: 3,
+                    attr: { 近战蓄力增伤: 3, 近战蓄力独立增伤: 3 },
                 }),
             ]
 
@@ -789,7 +787,7 @@ describe("evaluateAST函数测试", () => {
                 new LeveledBuff({
                     名称: "测试同律近战普攻加成",
                     描述: "测试用",
-                    同律近战普攻增伤: 1,
+                    attr: { 同律近战普攻增伤: 1 },
                 }),
             ]
 
@@ -816,7 +814,7 @@ describe("evaluateAST函数测试", () => {
                 new LeveledBuff({
                     名称: "测试同律近战蓄力加成",
                     描述: "测试用",
-                    同律近战蓄力增伤: 1,
+                    attr: { 同律近战蓄力增伤: 1 },
                 }),
             ]
 
@@ -843,7 +841,7 @@ describe("evaluateAST函数测试", () => {
                 new LeveledBuff({
                     名称: "测试同律近战普攻加成",
                     描述: "测试用",
-                    同律近战普攻增伤: 1,
+                    attr: { 同律近战普攻增伤: 1 },
                 }),
             ]
 
@@ -926,7 +924,7 @@ describe("evaluateAST函数测试", () => {
                     meleeMods: [new LeveledMod(52011)],
                     rangedMods: [],
                     skillMods: [],
-                    buffs: withBuff ? [new LeveledBuff({ 名称: "测试近战蓄力降级", 描述: "测试用", 近战蓄力增伤: 1 })] : [],
+                    buffs: withBuff ? [new LeveledBuff({ 名称: "测试近战蓄力降级", 描述: "测试用", attr: { 近战蓄力增伤: 1 } })] : [],
                     melee: new LeveledWeapon(10302),
                     ranged: new LeveledWeapon(20601),
                     baseName: "萨麦尔", // 莉兹贝尔同律大剑（同律近战 重剑）

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { t } from "i18next"
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
+import { computed, ref, watch } from "vue"
+import { requestBuildIncomes } from "@/composables/useBuildIncomeWorker"
 import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
 import { LeveledMod, LeveledModHelper, RModTypeMap } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
@@ -43,7 +44,6 @@ const sortByIncome = ref(true)
 const selectedProperty = ref("")
 const selectedQuality = ref("金")
 const incomeMap = ref<Record<string, number>>({})
-const workerRef = shallowRef<Worker>()
 let workerRequestId = 0
 const mod_model_show = ref(false)
 // 当前打开选MOD弹窗的槽位索引
@@ -176,21 +176,10 @@ function cloneForWorker<T>(value: T): T {
  * 刷新当前魔之楔收益。
  */
 function refreshIncomes() {
-    const worker = workerRef.value || new Worker(new URL("@/data/CharBuild.worker.ts", import.meta.url), { type: "module" })
-    workerRef.value = worker
     const id = ++workerRequestId
-    worker.onmessage = (event: MessageEvent<{ id: number; incomes?: Record<string, number>; error?: string }>) => {
-        if (event.data.id !== workerRequestId) return
-        if (event.data.error) {
-            console.error("MOD收益worker计算失败", event.data.error)
-            return
-        }
-        incomeMap.value = event.data.incomes || {}
-    }
     const options = mod_model_show.value ? workerModOptions.value : []
-    worker.postMessage(
+    requestBuildIncomes(
         cloneForWorker({
-            id,
             build: createWorkerSnapshot(props.charBuild),
             mods: options.map(option => {
                 const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
@@ -215,6 +204,11 @@ function refreshIncomes() {
             ),
         })
     )
+        .then(result => {
+            if (id !== workerRequestId) return
+            incomeMap.value = result
+        })
+        .catch(error => console.error("MOD收益worker计算失败", error))
 }
 
 watch(
@@ -222,10 +216,6 @@ watch(
     () => refreshIncomes(),
     { immediate: true, deep: true }
 )
-
-onBeforeUnmount(() => {
-    workerRef.value?.terminate()
-})
 
 // 定义组件事件
 const emit = defineEmits<{

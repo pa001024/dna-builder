@@ -55,10 +55,29 @@ function createZeroFilledRecord(record: Record<string, number>) {
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
  */
 export class LeveledBuff implements Buff {
-    // 基础Buff属性
+    // 基础Buff属性（显式元信息：数值一律进 values 表，不再动态挂载实例键）
+    id?: number
     名称: string
-    描述: string;
-    [key: string]: any
+    描述: string
+    限定?: string | number
+    a?: number
+    b?: number
+    dx?: number
+    lx?: number
+    mx?: number
+    code?: string
+    技能?: string
+    tag?: string[]
+    display?: Record<string, string>
+    /** 来源挂载点（MOD/武器特效挂载时写入） */
+    pid?: number
+    pt?: string
+    isMinus?: boolean
+    /**
+     * 当前数值表：静态等级缩放值与动态 attr 求值结果的合并视图。
+     * 展示层（BuffCell/buff-editor 等）直接渲染此表，不再枚举实例键。
+     */
+    readonly values: Record<string, number> = {}
 
     // 等级属性
     _等级: number = 1
@@ -109,9 +128,12 @@ export class LeveledBuff implements Buff {
         // 保存原始Buff对象
         this._originalBuffData = buffData
 
-        // 复制基础属性
+        // 复制基础属性（仅元信息；数值保留在原始 attr 表中，按等级/上下文物化进 values）
         this.名称 = buffData.名称
         this.描述 = buffData.描述 ?? ""
+        if (buffData.id !== undefined) this.id = buffData.id
+        if (buffData.限定 !== undefined) this.限定 = buffData.限定
+        if (buffData.display !== undefined) this.display = buffData.display
         if (buffData.a !== undefined && buffData.a !== 1) this.a = buffData.a
         if (buffData.b !== undefined && buffData.b !== 1) this.b = buffData.b
         if (buffData.lx !== undefined) {
@@ -121,18 +143,12 @@ export class LeveledBuff implements Buff {
             this.mx = buffData.mx
             this.dx = buffData.dx ?? buffData.mx
         }
+        if (buffData.code !== undefined) this.code = buffData.code
         if (buffData.技能) this.技能 = buffData.技能
+        if (buffData.tag) this.tag = [...buffData.tag]
 
         // 设置等级（如果提供），否则使用默认等级dx
         this.等级 = 等级 !== undefined && 等级 >= 0 ? 等级 : this.dx || this.mx || 1
-
-        // 检查动态属性代码
-        if (this._originalBuffData.code) {
-            this.code = this._originalBuffData.code
-        }
-        if (this._originalBuffData.attr) {
-            this.attr = this._originalBuffData.attr
-        }
     }
 
     /**
@@ -241,24 +257,56 @@ export class LeveledBuff implements Buff {
         } else return { ...attrs, weapon: weaponAttr }
     }
 
+    /** 源数值表中是否含动态表达式（string 值），供收益计算区分静态/动态 BUFF */
+    get hasDynamicAttr(): boolean {
+        const attr = this._originalBuffData.attr
+        if (!attr) return false
+        return Object.values(attr).some(v => typeof v === "string")
+    }
+
     /**
-     * 根据当前属性上下文刷新attr字段生成的BUFF属性。
+     * 根据当前属性上下文刷新attr表中的动态表达式，结果写入 values。
+     * 静态值（number/number[]）由 updatePropertiesByLevel 按等级物化，此处只处理 string 表达式。
      * @param attrs 当前角色属性
      * @param evaluateAttr 表达式求值函数
      * @returns 是否发生字段变更
      */
     applyAttr(attrs: CharAttr, evaluateAttr: (expression: string, attrs: CharAttr) => number) {
-        if (!this.attr) return false
+        const attr = this._originalBuffData.attr
+        if (!attr) return false
         let changed = false
-        Object.entries(this.attr as Record<string, string>).forEach(([key, expression]) => {
+        for (const [key, expression] of Object.entries(attr)) {
+            if (typeof expression !== "string") continue
+            const property = resolveBuffPropertyName(key)
             const value = normalizeDynamicAttrValue(evaluateAttr(expression, attrs)) * this._coverage
-            if (this[key] !== value) {
-                this[key] = value
+            if (this.values[property] !== value) {
+                this.values[property] = value
                 changed = true
             }
-        })
+        }
         if (changed) LeveledBuff.propertiesRevision++
         return changed
+    }
+
+    /**
+     * 读取单个属性的当前数值。
+     * @param attribute 属性名
+     * @returns 属性数值；该属性不在 values 表中时返回 undefined
+     */
+    getAttrValue(attribute: string): number | undefined {
+        const value = this.values[attribute]
+        return typeof value === "number" ? value : undefined
+    }
+
+    /**
+     * 源数值表中的动态表达式（string 值）原样视图，供展示层在数值旁显示表达式。
+     */
+    get dynamicAttr(): Record<string, string> {
+        const out: Record<string, string> = {}
+        for (const [key, value] of Object.entries(this._originalBuffData.attr ?? {})) {
+            if (typeof value === "string") out[key] = value
+        }
+        return out
     }
 
     /**
@@ -282,41 +330,22 @@ export class LeveledBuff implements Buff {
         this.updatePropertiesByLevel()
     }
 
-    get baseValue(): number {
-        const a = this.a || 1
-        const b = this.b || 1
-        const lx = this.lx ?? 1
-        const x = 1
-        let val = 0
-        // 按原始数据键遍历：实例属性名可能已剥离 `@` 前缀，不能直接用于回查原始数据
-        this.baseProperties.forEach(prop => {
-            const maxValue = this._originalBuffData[prop]
-            if (maxValue !== undefined && typeof maxValue === "number") {
-                // 属性值 = 满级属性/a*(1+(x-1)/b)
-                let currentValue = (maxValue / a) * (1 + (x - lx) / b)
-                if (resolveBuffPropertyName(prop) === "神智回复") currentValue = Math.round(currentValue)
-                val = currentValue
-            } else if (Array.isArray(maxValue)) {
-                val = maxValue[x - (this.lx ?? 1)]
-            }
-        })
-        return val
-    }
     /**
-     * 判断属性是否来自特效数据中以 `@` 前缀声明的键。
+     * 判断属性是否来自数值表中以 `@` 前缀声明的键。
      * 这类属性归属 BUFF 层（如远程槽 MOD 提供的近战增伤），MOD 汇总时不应归一化到自身。
      * @param property 已剥离前缀的属性名
      * @returns 是否来自 `@` 前缀键
      */
     isBuffLayerProperty(property: string) {
-        return `@${property}` in this._originalBuffData
+        return `@${property}` in (this._originalBuffData.attr ?? {})
     }
     /**
-     * 根据等级更新Buff属性
+     * 根据等级更新Buff属性，结果写入 values。
      * 属性值 = 满级属性/a*(1+(x-1)/b)
      * 举例: 对技能来说, 如果满级属性为10级数值
      * a = 10级数值/1级数值
      * b = 1级数值/(10级数值-1级数值)*9
+     * 动态表达式（string 值）不在此处求值，由 applyAttr 按属性上下文刷新。
      */
     updatePropertiesByLevel(): void {
         // 属性被改写：推进版本号，让上层的属性汇总表知道自己的快照已过期
@@ -326,59 +355,31 @@ export class LeveledBuff implements Buff {
         const lx = this.lx ?? 1
         const x = this._等级
 
-        this.baseProperties.forEach(prop => {
-            const maxValue = this._originalBuffData[prop]
-            if (maxValue !== undefined) {
-                const property = resolveBuffPropertyName(prop)
-                if (Array.isArray(maxValue)) {
-                    this[property] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio * this._coverage
-                } else if (typeof maxValue === "number") {
-                    // 属性值 = 满级属性/a*(1+(x-1)/b)
-                    let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio * this._coverage
-                    if (property === "神智回复") currentValue = Math.round(currentValue)
-                    this[property] = currentValue
-                }
+        for (const key of Object.keys(this.values)) delete this.values[key]
+        const attr = this._originalBuffData.attr
+        if (!attr) return
+        for (const [key, maxValue] of Object.entries(attr)) {
+            const property = resolveBuffPropertyName(key)
+            if (Array.isArray(maxValue)) {
+                this.values[property] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio * this._coverage
+            } else if (typeof maxValue === "number") {
+                // 属性值 = 满级属性/a*(1+(x-1)/b)
+                let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio * this._coverage
+                if (property === "神智回复") currentValue = Math.round(currentValue)
+                this.values[property] = currentValue
             }
-        })
+        }
     }
 
     /**
-     * 获取Buff的属性信息
+     * 获取Buff的属性信息：values 表的快照，展示层直接渲染此表。
      */
     getProperties(): Record<string, number> {
-        const properties: Record<string, number> = {}
-        this.properties.forEach(prop => {
-            properties[prop] = this[prop]
-        })
-        return properties
+        return { ...this.values }
     }
-    static _exclude_properties = new Set([
-        "id",
-        "名称",
-        "描述",
-        "限定",
-        "品质",
-        "_等级",
-        "_originalBuffData",
-        "a",
-        "b",
-        "lx",
-        "bx",
-        "mx",
-        "dx",
-        "pid",
-        "pt",
-        "code",
-        "attr",
-        "技能",
-        "_ratio",
-        "_coverage",
-    ])
+    /** 数值属性键：values 表的键（显式白名单，不再用黑名单枚举实例键） */
     get properties(): string[] {
-        return Object.keys(this).filter(prop => !LeveledBuff._exclude_properties.has(prop))
-    }
-    get baseProperties(): string[] {
-        return Object.keys(this._originalBuffData).filter(prop => !LeveledBuff._exclude_properties.has(prop))
+        return Object.keys(this.values)
     }
 
     public clone() {
@@ -386,6 +387,9 @@ export class LeveledBuff implements Buff {
         buff.描述 = this.描述
         buff.ratio = this._ratio
         buff.coverage = this._coverage
+        for (const [key, value] of Object.entries(this.values)) {
+            if (!(key in buff.values)) buff.values[key] = value
+        }
         if (this.pid) buff.pid = this.pid
         if (this.pt) buff.pt = this.pt
         return buff
@@ -398,11 +402,12 @@ export class LeveledBuff implements Buff {
     }
 
     get minusAttr() {
-        const r: Record<string, any> = this.clone()
-        this.properties.forEach(prop => {
-            r[prop] = getMinusAttrValue(prop, this[prop])
-        })
+        const r = this.clone()
+        for (const prop of this.properties) {
+            const value = this.getAttrValue(prop)
+            if (value !== undefined) r.values[prop] = getMinusAttrValue(prop, value)
+        }
         r.isMinus = true
-        return r as LeveledBuff
+        return r
     }
 }

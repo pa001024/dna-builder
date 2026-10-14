@@ -27,7 +27,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
         <ShowProps
             side="top"
             :props="buff.getProperties()"
-            :attr="buff.attr"
+            :attr="buff.dynamicAttr"
             :code="buff.code"
             :applicable-skill="buff.技能"
             :title="title"
