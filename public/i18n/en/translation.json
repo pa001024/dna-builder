@@ -1509,7 +1509,7 @@
         "commander": "Commander",
         "commander_affixes": "Commander Affixes",
         "normal": "Normal",
-        "search_placeholder": "Search monster name (pinyin supported)..."
+        "search_placeholder": "Search monster name / ID (pinyin supported)..."
     },
     "db-music-list": {
         "album_count": "albums",

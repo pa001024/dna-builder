@@ -1501,7 +1501,7 @@
         "commander": "号令者",
         "commander_affixes": "号令者词条",
         "normal": "普通",
-        "search_placeholder": "搜索怪物名称（支持拼音）..."
+        "search_placeholder": "搜索怪物名称/ID（支持拼音）..."
     },
     "db-music-list": {
         "album_count": "张专辑",

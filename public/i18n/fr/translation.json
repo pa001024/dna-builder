@@ -1524,7 +1524,7 @@
         "commander": "Commandant",
         "commander_affixes": "Affixes de commandant",
         "normal": "Normal",
-        "search_placeholder": "Rechercher un nom de monstre (pinyin pris en charge)..."
+        "search_placeholder": "Rechercher nom / ID de monstre (pinyin pris en charge)..."
     },
     "db-music-list": {
         "album_count": "albums",

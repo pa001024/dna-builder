@@ -1492,7 +1492,7 @@
         "commander": "호령자",
         "commander_affixes": "호령자 옵션",
         "normal": "일반",
-        "search_placeholder": "몬스터 이름 검색(병음 지원)..."
+        "search_placeholder": "몬스터 이름 / ID 검색(병음 지원)..."
     },
     "db-music-list": {
         "album_count": "개 앨범",

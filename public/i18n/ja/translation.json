@@ -1490,7 +1490,7 @@
         "commander": "号令者",
         "commander_affixes": "号令者の詞条",
         "normal": "通常",
-        "search_placeholder": "モンスター名を検索（ピンイン対応）..."
+        "search_placeholder": "モンスター名 / ID を検索（ピンイン対応）..."
     },
     "db-music-list": {
         "album_count": "アルバム",

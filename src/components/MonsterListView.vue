@@ -60,17 +60,29 @@ function getTypeStyle(tab: MonsterTab): { key: string; color: string } {
 }
 
 function matchMonster(monster: Monster, query: string): boolean {
+    if (String(monster.id).includes(query)) {
+        return true
+    }
     if (monster.n.includes(query)) {
         return true
     }
     return matchPinyin(monster.n, query).match
 }
 
+function keywordRank(monster: Monster, query: string): number {
+    const id = String(monster.id)
+    if (id === query) {
+        return 0
+    }
+    return id.startsWith(query) ? 1 : 2
+}
+
 const filteredMonsters = computed(() => {
     const query = searchQuery.value.trim()
-    return monsterData
+    const matched = monsterData
         .filter(monster => activeTab.value === "all" || getMonsterTab(monster) === activeTab.value)
         .filter(monster => !query || matchMonster(monster, query))
+    return query === "" ? matched : matched.slice().sort((a, b) => keywordRank(a, query) - keywordRank(b, query))
 })
 
 const leveledStatsCache = new Map<string, { hp: number; es: number; def: number }>()

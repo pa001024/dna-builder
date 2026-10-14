@@ -72,22 +72,21 @@ const filteredMonsters = computed(() => {
         return []
     }
 
-    return monsterData.filter(m => {
+    const q = searchKeyword.value.trim()
+    const matched = monsterData.filter(m => {
         if (m.id < 2000000) return false
 
         // 搜索筛选
         let matchKeyword = false
-        if (searchKeyword.value === "") {
+        if (q === "") {
+            matchKeyword = true
+        } else if (String(m.id).includes(q)) {
+            matchKeyword = true
+        } else if (m.n.includes(q)) {
             matchKeyword = true
         } else {
-            const q = searchKeyword.value
-            // 直接中文匹配
-            if (m.n.includes(q)) {
-                matchKeyword = true
-            } else {
-                // 拼音匹配（全拼/首字母）
-                matchKeyword = matchPinyin(m.n, q).match
-            }
+            // 拼音匹配（全拼/首字母）
+            matchKeyword = matchPinyin(m.n, q).match
         }
 
         const matchFaction = selectedFaction.value === "" || m.f === selectedFaction.value
@@ -105,7 +104,24 @@ const filteredMonsters = computed(() => {
 
         return true
     })
+
+    // 按 ID 输入的关键词把精确命中排在最前，便于按 ID 定位怪物
+    return q === "" ? matched : matched.slice().sort((a, b) => monsterKeywordRank(a.id, q) - monsterKeywordRank(b.id, q))
 })
+
+/**
+ * 关键词命中程度，数值越小越靠前。
+ * @param monsterId 怪物ID
+ * @param q 已去除首尾空白的关键词
+ * @returns 0=ID 完全相等，1=ID 前缀命中，2=其余命中
+ */
+function monsterKeywordRank(monsterId: number, q: string): number {
+    const id = String(monsterId)
+    if (id === q) {
+        return 0
+    }
+    return id.startsWith(q) ? 1 : 2
+}
 
 // 过滤号令者列表
 const filteredMonsterTags = computed(() => {

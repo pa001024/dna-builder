@@ -1,6 +1,6 @@
 import i18next from "i18next"
 import Backend, { type HttpBackendOptions } from "i18next-http-backend"
-export const i18nLanguages = [
+export const i18nLanguages: { name: string; code: string; alias?: string[] }[] = [
     {
         name: "English",
         code: "en",
@@ -36,14 +36,41 @@ export const i18nLanguages = [
     },
 ]
 
+/** 归一化兜底语言，与 initI18n 的 fallbackLng 保持一致 */
+export const FALLBACK_I18N_LANGUAGE = "zh-CN"
+
 /**
- * 将设置语言代码映射为实际加载的 i18n 语言。
- * @param language 设置语言代码
+ * 将设置语言代码归一化为实际加载的 i18n 语言。
+ * 精确命中 code/alias 直接返回；否则按 `-` 前的主语言段匹配（如 en-US→en）；
+ * 都命中不了回落简体中文，保证返回值永远是合法的 bundle 语言。
+ * @param language 设置语言代码（setting_lang 或 navigator.language）
  * @returns 实际加载语言
  */
-export function resolveI18nLanguage(language: string) {
-    if (language === "jiaojiao") return "en"
-    return language
+export function resolveI18nLanguage(language: string): string {
+    if (!language) {
+        return FALLBACK_I18N_LANGUAGE
+    }
+    if (language === "jiaojiao") {
+        return "en"
+    }
+    for (const lang of i18nLanguages) {
+        if (lang.code === "jiaojiao") {
+            continue
+        }
+        if (language === lang.code || lang.alias?.includes(language)) {
+            return lang.code
+        }
+    }
+    const base = language.split("-")[0]
+    for (const lang of i18nLanguages) {
+        if (lang.code === "jiaojiao") {
+            continue
+        }
+        if (lang.code === base || lang.alias?.includes(base)) {
+            return lang.code
+        }
+    }
+    return FALLBACK_I18N_LANGUAGE
 }
 
 export function changeLanguage(language: string) {
