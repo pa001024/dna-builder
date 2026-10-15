@@ -45,6 +45,19 @@ const MODEL_CONTEXT_WINDOW_RULES: ReadonlyArray<readonly [RegExp, number]> = [
 ]
 
 /**
+ * @description 按模型与用户覆盖解析实际使用的上下文窗口。
+ * @param model 模型 id（大小写不敏感）
+ * @param override 用户在设置页填写的上下文窗口；null / 非正数时回落启发式解析
+ * @returns 实际使用的上下文窗口大小
+ */
+export function resolveAgentContextWindow(model: string, override: number | null | undefined): number {
+    if (typeof override === "number" && Number.isFinite(override) && override > 0) {
+        return Math.floor(override)
+    }
+    return resolveModelContextWindow(model)
+}
+
+/**
  * @description 按模型名解析上下文窗口（tokens）。
  * @param model 模型 id（大小写不敏感）
  * @returns 上下文窗口大小；匹配不到时返回兜底值

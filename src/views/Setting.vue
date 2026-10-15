@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { aiTestConnection } from "@/api/agent/test-connection"
 import type { FloatWindowConfig } from "@/api/app"
 import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
 import { LAN_SYNC_HTTPS_PORT } from "@/api/lanSync"
@@ -534,6 +535,35 @@ async function resetStorage() {
 async function openResetConfirmDialog() {
     if (await ui.showDialog(t("setting.reset"), t("setting.resetTip"))) {
         resetStorage()
+    }
+}
+
+/** 测试连接按钮的忙态：探测期间禁用按钮并转菊花，避免重复点击 */
+const aiTestBusy = ref(false)
+
+/**
+ * 用当前填写的自定义模型配置跑一轮连通性探测。
+ *
+ * 成功把模型回文片段放进成功提示（证明真实跑通而不只是端点可达）；
+ * 失败直接展示原始错误（含上游状态码与鉴权信息），便于对照排查。
+ */
+async function testAiConnection() {
+    if (aiTestBusy.value) {
+        return
+    }
+    aiTestBusy.value = true
+    try {
+        const result = await aiTestConnection({
+            baseUrl: setting.aiBaseUrl,
+            apiKey: setting.aiApiKey,
+            model: setting.aiModelName,
+        })
+        const echo = result.text.trim().slice(0, 60)
+        ui.showSuccessMessage(t("setting.aiTestConnectionSuccess") + (echo ? `：${echo}` : ""))
+    } catch (error) {
+        ui.showErrorMessage(`${t("setting.aiTestConnectionFailed")}：${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+        aiTestBusy.value = false
     }
 }
 
@@ -1610,7 +1640,7 @@ onUnmounted(() => {
                                     v-model="setting.aiBaseUrl"
                                     type="text"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="$t('setting.aiBaseUrlTip')"
+                                    placeholder="https://api.openai.com/v1"
                                 />
                             </div>
                             <div
@@ -1622,7 +1652,7 @@ onUnmounted(() => {
                                     type="password"
                                     autocomplete="off"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="$t('setting.aiApiKeyTip')"
+                                    placeholder="sk-xxxxxxxxxxxxxxxx"
                                 />
                             </div>
                             <div
@@ -1633,7 +1663,20 @@ onUnmounted(() => {
                                     v-model="setting.aiModelName"
                                     type="text"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="$t('setting.aiModelNameTip')"
+                                    placeholder="deepseek-flash"
+                                />
+                            </div>
+                            <div
+                                class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">{{ $t("setting.aiContextWindow") }}</span>
+                                <input
+                                    v-model="setting.aiContextWindow"
+                                    type="text"
+                                    spellcheck="false"
+                                    autocomplete="off"
+                                    class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-orbitron text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    placeholder="256K"
                                 />
                             </div>
                             <div
@@ -1641,12 +1684,22 @@ onUnmounted(() => {
                             >
                                 <span class="label-text">{{ $t("setting.aiMaxTokens") }}</span>
                                 <input
-                                    v-model.number="setting.aiMaxTokens"
-                                    type="number"
-                                    min="1"
+                                    v-model="setting.aiMaxTokens"
+                                    type="text"
+                                    spellcheck="false"
+                                    autocomplete="off"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-orbitron text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="$t('setting.aiMaxTokensTip')"
+                                    placeholder="32K"
                                 />
+                            </div>
+                            <div
+                                class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">{{ $t("setting.aiTestConnection") }}</span>
+                                <button class="btn btn-sm btn-secondary w-64" :disabled="aiTestBusy" @click="testAiConnection">
+                                    <span v-if="aiTestBusy" class="loading loading-spinner loading-xs" />
+                                    {{ $t("setting.aiTestConnection") }}
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,7 @@ import { executeSignFlow } from "@/api/dna-sign"
 import { isSafeModeClosed } from "@/data/versionGate"
 import { env } from "@/env"
 import { applyLanguageFontClass, changeLanguage } from "@/i18n"
-import { DEFAULT_AI_MAX_TOKENS, migrateLegacyAiMaxTokens } from "@/utils/ai-config"
+import { AI_CONTEXT_WINDOW_STORAGE_KEY, migrateLegacyAiMaxTokens, resolveAiContextWindow, resolveAiMaxTokens } from "@/utils/ai-config"
 import type { CustomTheme } from "@/utils/customTheme"
 import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
 import type { CustomFontMeta } from "@/utils/font-storage"
@@ -60,7 +60,8 @@ export const useSettingStore = defineStore("setting", {
             aiBaseUrl: useLocalStorage("ai_base_url", "", { writeDefaults: false }),
             aiApiKey: useLocalStorage("ai_api_key", "", { writeDefaults: false }),
             aiModelName: useLocalStorage("ai_model_name", "", { writeDefaults: false }),
-            aiMaxTokens: useLocalStorage("ai_max_tokens", DEFAULT_AI_MAX_TOKENS, { writeDefaults: false }),
+            aiMaxTokens: useLocalStorage<number | string | null>("ai_max_tokens", null, { writeDefaults: false }),
+            aiContextWindow: useLocalStorage<number | string | null>(AI_CONTEXT_WINDOW_STORAGE_KEY, null, { writeDefaults: false }),
             aiCustomModel: useLocalStorage("ai_custom_model", false, { writeDefaults: false }),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0, { writeDefaults: false }),
@@ -304,7 +305,8 @@ export const useSettingStore = defineStore("setting", {
                 api_key: this.aiApiKey,
                 base_url: this.aiBaseUrl,
                 default_model: this.aiModelName,
-                default_max_tokens: this.aiMaxTokens,
+                default_max_tokens: resolveAiMaxTokens(this.aiMaxTokens),
+                default_context_window: resolveAiContextWindow(this.aiContextWindow),
             }
         },
         setAiBaseUrl(baseUrl: string) {
@@ -316,14 +318,18 @@ export const useSettingStore = defineStore("setting", {
         setAiModelName(modelName: string) {
             this.aiModelName = modelName
         },
-        setAiMaxTokens(maxTokens: number) {
+        setAiMaxTokens(maxTokens: number | string | null) {
             this.aiMaxTokens = maxTokens
+        },
+        setAiContextWindow(contextWindow: number | string | null) {
+            this.aiContextWindow = contextWindow
         },
         resetAiSettings() {
             this.aiBaseUrl = ""
             this.aiApiKey = ""
             this.aiModelName = ""
-            this.aiMaxTokens = DEFAULT_AI_MAX_TOKENS
+            this.aiMaxTokens = null
+            this.aiContextWindow = null
         },
         async getCurrentUser() {
             const user = await db.dnaUsers.get(this.dnaUserId)

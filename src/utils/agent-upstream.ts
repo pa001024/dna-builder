@@ -13,6 +13,7 @@ import { type AgentUpstreamConfig, buildProxyAgentConfig } from "@/api/agent/con
 import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { useUserStore } from "@/store/user"
+import { parseTokenCount, resolveAiMaxTokens } from "@/utils/ai-config"
 
 /**
  * @description 解析当前可用的 Agent 上游配置。
@@ -33,8 +34,12 @@ export function resolveSharedAgentUpstream(): Partial<AgentUpstreamConfig> | nul
         return null
     }
 
+    // 反代模型固定（deepseek-flash），上下文窗口默认按模型名启发式解析：
+    // 只有用户填写了可解析的值才覆盖，空值与乱填都保持启发式，避免把 1M 窗口误压到 256K 默认。
+    const contextOverride = parseTokenCount(setting.aiContextWindow)
     return buildProxyAgentConfig(env.apiEndpoint, user.jwtToken, {
-        default_max_tokens: setting.aiMaxTokens,
+        default_max_tokens: resolveAiMaxTokens(setting.aiMaxTokens),
+        ...(contextOverride != null ? { default_context_window: contextOverride } : {}),
     })
 }
 
@@ -50,7 +55,15 @@ export function watchAgentUpstream(apply: (config: Partial<AgentUpstreamConfig>)
     const user = useUserStore()
 
     watch(
-        () => [setting.aiCustomModel, setting.aiApiKey, setting.aiBaseUrl, setting.aiModelName, setting.aiMaxTokens, user.jwtToken],
+        () => [
+            setting.aiCustomModel,
+            setting.aiApiKey,
+            setting.aiBaseUrl,
+            setting.aiModelName,
+            setting.aiMaxTokens,
+            setting.aiContextWindow,
+            user.jwtToken,
+        ],
         () => apply(resolveSharedAgentUpstream() ?? { api_key: "" })
     )
 }

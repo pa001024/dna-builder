@@ -8,7 +8,6 @@ import { useBuildChat } from "@/composables/useBuildChat"
 import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharBuild } from "@/data"
 import { useInvStore } from "@/store/inv"
-import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
@@ -29,7 +28,6 @@ const props = defineProps<{
 }>()
 
 const inv = useInvStore()
-const settingStore = useSettingStore()
 const ui = useUIStore()
 const user = useUserStore()
 const { t } = useTranslation()
@@ -77,7 +75,7 @@ const {
     answerAsk,
     skipAsk,
     interrupt,
-} = useBuildChat(selectedChar, settingStore)
+} = useBuildChat(selectedChar)
 
 /** 充值弹窗开关 */
 const rechargeOpen = ref(false)

@@ -23,7 +23,7 @@
 import { agentI18nText } from "@/utils/agent-chat"
 import { type AgentCompactionOutcome, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS, compactWireMessages, resolveAutoCompactThreshold } from "./compact"
 import { type AgentUpstreamConfig, createAgentTransport, normalizeAgentUpstreamConfig } from "./config"
-import { estimateMessagesTokens, estimateTextTokens, estimateToolTokens, resolveModelContextWindow } from "./context-usage"
+import { estimateMessagesTokens, estimateTextTokens, estimateToolTokens, resolveAgentContextWindow } from "./context-usage"
 import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "./tool"
 import { DEFAULT_MAX_TOOL_CONCURRENCY, scheduleToolCalls, validateToolConcurrency } from "./tool-scheduler"
 import {
@@ -442,7 +442,7 @@ export class AgentKernel<TPayload> {
     public getContextInfo(): AgentContextInfo {
         return {
             model: this.config.default_model,
-            contextWindow: resolveModelContextWindow(this.config.default_model),
+            contextWindow: resolveAgentContextWindow(this.config.default_model, this.config.default_context_window),
             maxTokens: this.config.default_max_tokens,
             system: this.options.systemPrompt(),
             metaUser: this.options.metaUserPrefix?.().trim() ?? "",
@@ -646,7 +646,10 @@ export class AgentKernel<TPayload> {
             return
         }
 
-        const threshold = resolveAutoCompactThreshold(resolveModelContextWindow(this.config.default_model), this.config.default_max_tokens)
+        const threshold = resolveAutoCompactThreshold(
+            resolveAgentContextWindow(this.config.default_model, this.config.default_context_window),
+            this.config.default_max_tokens
+        )
 
         if (this.estimateLoopContextTokens(state, system, toolDefinitions) < threshold) {
             return

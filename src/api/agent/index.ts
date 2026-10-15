@@ -36,6 +36,7 @@ export {
     estimateMessageTokens,
     estimateTextTokens,
     estimateToolTokens,
+    resolveAgentContextWindow,
     resolveModelContextWindow,
 } from "./context-usage"
 export type {
@@ -51,6 +52,7 @@ export type {
 export { AgentKernel, toWireMessages } from "./kernel"
 export { createMessagesTransport } from "./messages-transport"
 export { ensureAgentSkillsReady, getAgentSkillRegistry } from "./skills/registry"
+export { type AiTestConnectionParams, type AiTestConnectionResult, aiTestConnection } from "./test-connection"
 export type { AgentTool, AgentToolContext, AgentToolOutput, AgentToolSuspendOutput, AgentToolTextOutput } from "./tool"
 export { createSkillTools } from "./tools/skill-files"
 export {

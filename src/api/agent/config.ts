@@ -26,6 +26,8 @@ export interface AgentUpstreamConfig {
     default_temperature: number
     /** 输出 tokens 上限 */
     default_max_tokens: number
+    /** 上下文窗口（tokens）：null 表示按模型名启发式解析 */
+    default_context_window: number | null
 }
 
 /**
@@ -50,6 +52,7 @@ export const DEFAULT_AGENT_UPSTREAM: Omit<AgentUpstreamConfig, "api_key"> = {
     default_model: "",
     default_temperature: 0.4,
     default_max_tokens: 32768,
+    default_context_window: null,
 }
 
 /**
@@ -66,6 +69,7 @@ export function normalizeAgentUpstreamConfig(config: Partial<AgentUpstreamConfig
         default_model: config.default_model || DEFAULT_AGENT_UPSTREAM.default_model,
         default_temperature: config.default_temperature ?? DEFAULT_AGENT_UPSTREAM.default_temperature,
         default_max_tokens: config.default_max_tokens ?? DEFAULT_AGENT_UPSTREAM.default_max_tokens,
+        default_context_window: config.default_context_window ?? DEFAULT_AGENT_UPSTREAM.default_context_window,
     }
 }
 

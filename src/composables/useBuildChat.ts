@@ -13,10 +13,8 @@ import {
     type MessageToolTrace,
     type UBuildAgentChat,
 } from "@/store/db"
-import type { useSettingStore } from "@/store/setting"
 import { lastCompactionIndex } from "@/utils/agent-chat"
 import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
-import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 
 /** 配装助手会话主键前缀（沿用历史存档格式，保证旧记录仍可读取） */
@@ -91,15 +89,13 @@ function normalizeStoredMessage(raw: unknown, index: number): BuildAgentChatMess
  * 回调构建 / 耗时累加 / 挂起续跑 / 错误兜底），差别只在会话按角色一条存档、
  * 没有会话列表，且失败提问可重试。
  * @param selectedChar 当前角色名
- * @param settingStore 设置 store（取 AI 输出上限）
  * @returns 对话状态与操作方法
  */
-export function useBuildChat(selectedChar: Ref<string>, settingStore: ReturnType<typeof useSettingStore>) {
+export function useBuildChat(selectedChar: Ref<string>) {
     const agent = createBuildAgent({
         ...(resolveSharedAgentUpstream() ?? { api_key: "" }),
         timeout: 30000,
         max_retries: 3,
-        default_max_tokens: settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS,
     })
 
     /** 当前角色的消息列表 */
