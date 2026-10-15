@@ -1,10 +1,11 @@
 import { createHash, randomUUID } from "node:crypto"
+import { Sha1 } from "./sha1"
 
 /**
  * 夸克网盘开放平台 HTTP 客户端
  *
  * 只用原生 fetch + node:crypto，不引入第三方 SDK：
- * 鉴权为 `x-pan-*` 请求签名，上传走 秒传判定 → 分片直传 → 完成确认 五步流程，
+ * 鉴权为 `x-pan-*` 请求签名，上传走 预上传 → 补哈希 → 取地址 → 直传 → 完成确认 五步流程，
  * 解锁密码压缩包这类 KB 级小文件只会产生单个分片。
  */
 
@@ -35,6 +36,12 @@ export interface QuarkUploadUrl {
     part_number: number
     upload_url: string
     signature_info: { signature: string }
+}
+
+/** 分片并行校验上下文：part_number > 1 的分片取地址时需携带此前全部字节的 SHA1 链接值。 */
+export interface QuarkParallelSha1Ctx {
+    part_offset: number
+    h: [number, number, number, number, number]
 }
 
 /** 预上传 / 补哈希 / 完成上传共用的任务回执。 */
@@ -150,7 +157,8 @@ export class QuarkClient {
 
     private async requestRaw<T>(method: "GET" | "POST", path: string, body?: unknown, query?: Record<string, string>): Promise<T> {
         const tm = String(Date.now())
-        const params = new URLSearchParams({ req_id: randomUUID(), access_token: this.config.accessToken, device_id: this.config.deviceId })
+        const reqId = randomUUID()
+        const params = new URLSearchParams({ req_id: reqId, access_token: this.config.accessToken, device_id: this.config.deviceId })
         for (const [key, value] of Object.entries(query ?? {})) {
             params.set(key, value)
         }
@@ -175,7 +183,9 @@ export class QuarkClient {
             this.refreshed = true
             return this.requestRaw<T>(method, path, body, query)
         }
-        throw new Error(`夸克接口失败 ${path}（errno=${envelope.errno}）：${envelope.error_info || envelope.agent_msg || "未知错误"}`)
+        throw new Error(
+            `夸克接口失败 ${path}（errno=${envelope.errno}，req_id=${reqId}）：${envelope.error_info || envelope.agent_msg || "未知错误"}`
+        )
     }
 
     /**
@@ -239,6 +249,7 @@ export class QuarkClient {
         const now = Date.now()
         const ext = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : ""
 
+        // 预上传兼秒传判定：小文件命中则直接返回，大文件顺带拿服务端的真实 part_size。
         const pre = await this.request<QuarkUploadTask>("POST", "/open/v1/file/upload_pre", {
             file_name: fileName,
             size,
@@ -260,15 +271,16 @@ export class QuarkClient {
         }
 
         const partSize = pre.part_size && pre.part_size > 0 ? pre.part_size : size
-        const partCount = Math.ceil(size / partSize)
-        const partInfoList = Array.from({ length: partCount }, (_, index) => ({
-            part_number: index + 1,
-            part_size: Math.min(partSize, size - index * partSize),
-        }))
+        if (size > partSize) {
+            // 大文件走标准多分片链路（预上传 hash_update → 补哈希 → 取地址带并行校验 → 直传 → 完成确认），
+            // 缺补哈希或分片校验时取地址会被后端拒绝（get_upload_urls 报 43001 ccp error）。
+            return this.uploadMultipart(fileName, data, pdirFid)
+        }
 
+        const partInfoList = [{ part_number: 1, part_size: size }]
         let uploadUrls = pre.upload_urls ?? []
         let commonHeaders = pre.common_headers ?? {}
-        if (uploadUrls.length < partCount) {
+        if (uploadUrls.length < partInfoList.length) {
             const urls = await this.request<{ upload_urls: QuarkUploadUrl[]; common_headers?: Record<string, string> }>(
                 "POST",
                 "/open/v1/file/get_upload_urls",
@@ -280,8 +292,114 @@ export class QuarkClient {
             uploadUrls = urls.upload_urls
             commonHeaders = urls.common_headers ?? commonHeaders
         }
-        if (uploadUrls.length < partCount) {
-            throw new Error(`夸克分片地址不足（需要 ${partCount} 片，拿到 ${uploadUrls.length} 片）`)
+        return this.putPartsAndFinish(pre.task_id, data, size, partInfoList, uploadUrls, commonHeaders, fileName)
+    }
+
+    /**
+     * 大文件多分片上传：开新任务走 hash_update 预上传 → update/hash 补哈希（可再次秒传）→
+     * 分批取地址（第 2 片起携带此前字节的 SHA1 链接值）→ 分片直传 → 完成确认。
+     * @param fileName 网盘内文件名
+     * @param data 文件字节
+     * @param pdirFid 目标目录 fid
+     */
+    private async uploadMultipart(fileName: string, data: Uint8Array, pdirFid: string): Promise<QuarkUploadResult> {
+        const size = data.length
+        const now = Date.now()
+        const ext = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : ""
+        const pre = await this.request<QuarkUploadTask>("POST", "/open/v1/file/upload_pre", {
+            file_name: fileName,
+            size,
+            sha1: "",
+            pdir_fid: pdirFid,
+            format_type: ext,
+            l_created_at: now,
+            l_updated_at: now,
+            same_path_file_reuse: true,
+            parallel_upload: true,
+            hash_update: true,
+            device_id: this.config.deviceId,
+            device_name: this.config.deviceName,
+        })
+        if (pre.finish === 1 && pre.fid) {
+            return { fid: pre.fid, fileName, size }
+        }
+        const partSize = pre.part_size && pre.part_size > 0 ? pre.part_size : 4 * 1024 * 1024
+        if (partSize % 64 !== 0) {
+            throw new Error(`夸克分片大小异常（part_size=${partSize} 非 64 字节对齐，无法计算分片校验）`)
+        }
+        const partCount = Math.max(1, Math.ceil(size / partSize))
+
+        // 单遍哈希：全量 sha1/md5 + 每个分片起始处的 SHA1 链接值（分片边界必为 64 字节对齐）。
+        const sha = new Sha1()
+        const md5 = createHash("md5")
+        const states = new Map<number, [number, number, number, number, number]>()
+        for (let partNumber = 1; partNumber <= partCount; partNumber++) {
+            const start = (partNumber - 1) * partSize
+            const end = Math.min(start + partSize, size)
+            if (partNumber > 1) {
+                states.set(partNumber, sha.snapshot())
+            }
+            const chunk = data.slice(start, end)
+            sha.update(chunk)
+            md5.update(chunk)
+        }
+        const reported = await this.request<QuarkUploadTask>("POST", "/open/v1/file/update/hash", {
+            task_id: pre.task_id,
+            sha1: sha.digest(),
+            md5: md5.digest("hex"),
+        })
+        if (reported.finish === 1 && reported.fid) {
+            return { fid: reported.fid, fileName, size }
+        }
+
+        const partInfoList = Array.from({ length: partCount }, (_, index) => {
+            const partNumber = index + 1
+            const start = index * partSize
+            return {
+                part_number: partNumber,
+                part_size: Math.min(partSize, size - start),
+                ...(partNumber > 1 ? { parallel_sha1_ctx: { part_offset: start, h: states.get(partNumber)! } } : {}),
+            }
+        })
+        const uploadUrls: QuarkUploadUrl[] = []
+        let commonHeaders = pre.common_headers ?? {}
+        for (let batch = 0; batch < partInfoList.length; batch += 100) {
+            const urls = await this.request<{ upload_urls: QuarkUploadUrl[]; common_headers?: Record<string, string> }>(
+                "POST",
+                "/open/v1/file/get_upload_urls",
+                {
+                    task_id: pre.task_id,
+                    part_info_list: partInfoList.slice(batch, batch + 100),
+                }
+            )
+            uploadUrls.push(...urls.upload_urls)
+            commonHeaders = urls.common_headers ?? commonHeaders
+        }
+        return this.putPartsAndFinish(pre.task_id, data, partSize, partInfoList, uploadUrls, commonHeaders, fileName)
+    }
+
+    /**
+     * 分片直传并完成确认：按分片逐片 PUT（公共头 + 地址签名），收集 ETag 后调 upload_finish。
+     * @param taskId 上传任务 id
+     * @param data 文件字节
+     * @param partSize 均匀分片大小（用于定位每片偏移，末片以 part_size 为准）
+     * @param partInfoList 分片划分
+     * @param uploadUrls 分片上传地址
+     * @param commonHeaders 直传公共头
+     * @param fileName 网盘内文件名（仅用于回执）
+     */
+    private async putPartsAndFinish(
+        taskId: string,
+        data: Uint8Array,
+        partSize: number,
+        partInfoList: Array<{ part_number: number; part_size: number }>,
+        uploadUrls: QuarkUploadUrl[],
+        commonHeaders: Record<string, string>,
+        fileName: string
+    ): Promise<QuarkUploadResult> {
+        const size = data.length
+        if (uploadUrls.length < partInfoList.length) {
+            throw new Error(`夸克分片地址不足（需要 ${partInfoList.length} 片，拿到 ${uploadUrls.length} 片，task_id=${taskId}）`)
         }
 
         const etags: { part_number: number; etag: string }[] = []
@@ -309,7 +427,7 @@ export class QuarkClient {
         }
 
         const finish = await this.request<QuarkUploadTask>("POST", "/open/v1/file/upload_finish", {
-            task_id: pre.task_id,
+            task_id: taskId,
             part_info_list: etags,
         })
         if (!finish.fid) {
@@ -415,6 +533,41 @@ export class QuarkClient {
             }
             if (Date.now() - startedAt > timeoutMs) {
                 throw new Error(`夸克移动文件任务超时（task_id=${task_id}）`)
+            }
+        }
+    }
+
+    /**
+     * 删除文件（移入回收站）。
+     * @param fidList 文件 fid 列表（≤100）
+     * @returns finish=1 即完成，否则用 task_id 轮询任务
+     */
+    async deleteFiles(fidList: string[]): Promise<{ finish: number; task_id: string }> {
+        return this.request("POST", "/open/v1/file/delete", { fid_list: fidList })
+    }
+
+    /**
+     * 删除文件并等待异步任务终态（finish=1 直接返回，否则轮询）。
+     * @param fidList 文件 fid 列表
+     * @param timeoutMs 轮询超时（毫秒），默认 60 秒
+     */
+    async deleteFilesAndWait(fidList: string[], timeoutMs = 60_000): Promise<void> {
+        const { finish, task_id } = await this.deleteFiles(fidList)
+        if (finish === 1) {
+            return
+        }
+        const startedAt = Date.now()
+        for (;;) {
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            const status = await this.queryTaskStatus(task_id)
+            if (status === 2) {
+                return
+            }
+            if (status === 3 || status === 4) {
+                throw new Error(`夸克删除文件任务失败（status=${status}，task_id=${task_id}）`)
+            }
+            if (Date.now() - startedAt > timeoutMs) {
+                throw new Error(`夸克删除文件任务超时（task_id=${task_id}）`)
             }
         }
     }

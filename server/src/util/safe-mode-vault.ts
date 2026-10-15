@@ -275,9 +275,34 @@ export async function resolveVaultTarget(client: QuarkClient, env: NodeJS.Proces
 }
 
 /**
+ * 删除目标目录下的同名旧文件，避免上传时网盘自动改名（如 `密码(1).zip`）。
+ * 搜索失败只记日志不中断（兜底仍走同名覆盖上传）；删除失败则抛错阻止上传，
+ * 防止新旧并存导致一致性校验命中旧包。
+ * @param client 夸克客户端
+ * @param target 上传目标（目录 fid + 文件名）
+ */
+export async function removeExistingVaultFile(client: QuarkClient, target: VaultTarget): Promise<void> {
+    let candidates: Awaited<ReturnType<QuarkClient["searchFiles"]>>
+    try {
+        candidates = await client.searchFiles(target.fileName, 50)
+    } catch (error) {
+        console.warn("[safe-mode-vault] 查找同名旧文件失败，仍尝试覆盖上传：", error instanceof Error ? error.message : error)
+        return
+    }
+    const dupes = candidates.filter(
+        item => item.filename === target.fileName && (target.dirFid === "0" || item.parent_fid === target.dirFid)
+    )
+    if (dupes.length === 0) {
+        return
+    }
+    await client.deleteFilesAndWait([...new Set(dupes.map(item => item.fid))])
+}
+
+/**
  * 轮换解锁密码并上传到夸克网盘：生成新密码 → 打包 zip → 上传到配置目录 →
  * 只存 bcrypt 哈希与文件信息落盘（明文密码仅此次返回）。
- * 同名覆盖上传，文件落在固定分享覆盖的目录里，无需另建分享。
+ * 先删同名旧文件再上传（网盘同名不会自动覆盖，会改名为 `密码(1).zip`），
+ * 文件落在固定分享覆盖的目录里，无需另建分享。
  * @param client 夸克客户端（缺省按环境变量创建）
  * @param statePath 状态文件路径
  */
@@ -291,6 +316,7 @@ export async function rotateVault(
     const sha256 = createHash("sha256").update(zip).digest("hex")
     const target = await resolveVaultTarget(client)
 
+    await removeExistingVaultFile(client, target)
     const uploaded = await client.uploadBuffer(target.fileName, zip, target.dirFid)
 
     const state: VaultState = {

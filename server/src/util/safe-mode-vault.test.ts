@@ -14,6 +14,7 @@ import {
     parseVaultPasswordText,
     readVaultState,
     readVaultTargetConfig,
+    removeExistingVaultFile,
     resolveVaultDirFid,
     rotateVault,
     VAULT_PASSWORD_ENTRY,
@@ -222,6 +223,8 @@ describe("checkVaultConsistency", () => {
         try {
             const seedClient = {
                 uploadBuffer: async () => ({ fid: "fid-1", fileName: "pw.zip", size: 1 }),
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
             } as unknown as QuarkClient
             const { status } = await rotateVault(seedClient, statePath)
             const checkClient = {
@@ -241,6 +244,8 @@ describe("checkVaultConsistency", () => {
         try {
             const seedClient = {
                 uploadBuffer: async () => ({ fid: "fid-1", fileName: "pw.zip", size: 1 }),
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
             } as unknown as QuarkClient
             await rotateVault(seedClient, statePath)
             const checkClient = { searchFiles: async () => [] } as unknown as QuarkClient
@@ -252,12 +257,78 @@ describe("checkVaultConsistency", () => {
     })
 })
 
+describe("removeExistingVaultFile", () => {
+    it("同目录同名旧文件先删再传，避免网盘自动改名", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-overwrite-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            const deleted: string[][] = []
+            const calls: string[] = []
+            const fakeClient = {
+                searchFiles: async () => [{ fid: "fid-old", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "0", file_type: 1, size: 10 }],
+                deleteFilesAndWait: async (fidList: string[]) => {
+                    deleted.push(fidList)
+                },
+                uploadBuffer: async () => {
+                    calls.push(`upload-after-delete-${deleted.length}`)
+                    return { fid: "fid-new", fileName: DEFAULT_VAULT_FILE_NAME, size: 1 }
+                },
+            } as unknown as QuarkClient
+            await rotateVault(fakeClient, statePath)
+            expect(deleted).toEqual([["fid-old"]])
+            expect(calls).toEqual(["upload-after-delete-1"])
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+
+    it("不同目录的同名文件不删", async () => {
+        let deleted = 0
+        const fakeClient = {
+            searchFiles: async () => [
+                { fid: "fid-other-dir", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "dir-other", file_type: 1, size: 10 },
+            ],
+            deleteFilesAndWait: async () => {
+                deleted++
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: "dir-9", fileName: DEFAULT_VAULT_FILE_NAME })
+        expect(deleted).toBe(0)
+    })
+
+    it("无旧文件时直接上传", async () => {
+        let deleted = 0
+        const fakeClient = {
+            searchFiles: async () => [],
+            deleteFilesAndWait: async () => {
+                deleted++
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: "0", fileName: DEFAULT_VAULT_FILE_NAME })
+        expect(deleted).toBe(0)
+    })
+
+    it("搜索失败时不中断上传", async () => {
+        const fakeClient = {
+            searchFiles: async () => {
+                throw new Error("网络异常")
+            },
+            deleteFilesAndWait: async () => {
+                throw new Error("不应调用删除")
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: "0", fileName: DEFAULT_VAULT_FILE_NAME })
+    })
+})
+
 describe("rotateVault / verifyVaultPassword", () => {
     it("轮换后正确密码通过、错误密码拒绝，且落盘无明文", async () => {
         const dir = await mkdtemp(join(tmpdir(), "vault-state-"))
         const statePath = join(dir, "safe-mode-vault.json")
         const fakeClient = {
             uploadBuffer: async () => ({ fid: "fid-vault", fileName: "recovery.zip", size: 123 }),
+            searchFiles: async () => [],
+            deleteFilesAndWait: async () => {},
         } as unknown as QuarkClient
 
         const { password, status } = await rotateVault(fakeClient, statePath)

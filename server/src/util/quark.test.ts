@@ -238,6 +238,48 @@ describe("QuarkClient 移动与任务接口", () => {
     })
 })
 
+describe("QuarkClient 删除接口", () => {
+    function deleteClient(fetchFn: typeof fetch): QuarkClient {
+        return new QuarkClient({ clientId: "c", signKey: "k", deviceId: "d", deviceName: "n", accessToken: "t", refreshToken: "" }, fetchFn)
+    }
+
+    it("deleteFiles 透传 fid_list", async () => {
+        let seenBody = ""
+        const fetchFn = (async (_url: string, init: any) => {
+            seenBody = String(init.body)
+            return {
+                ok: true,
+                status: 200,
+                headers: new Headers(),
+                json: async () => ({ status: 0, errno: 0, error_info: "", data: { finish: 1, task_id: "t1" } }),
+            }
+        }) as unknown as typeof fetch
+        await expect(deleteClient(fetchFn).deleteFiles(["f-old"])).resolves.toEqual({ finish: 1, task_id: "t1" })
+        expect(JSON.parse(seenBody)).toEqual({ fid_list: ["f-old"] })
+        await expect(deleteClient(fetchFn).deleteFilesAndWait(["f-old"])).resolves.toBeUndefined()
+    })
+
+    it("deleteFilesAndWait 在异步完成前轮询", async () => {
+        let queries = 0
+        const fetchFn = mockFetch([
+            {
+                match: url => url.includes("/open/v1/file/delete"),
+                json: { status: 0, errno: 0, error_info: "", data: { finish: 0, task_id: "t2" } },
+            },
+            {
+                match: url => url.includes("/open/v1/task/query"),
+                json: { status: 0, errno: 0, error_info: "", data: { status: 2 } },
+            },
+        ])
+        const countingFetch = (async (url: string, init: any) => {
+            if (String(url).includes("/open/v1/task/query")) queries++
+            return fetchFn(url, init)
+        }) as unknown as typeof fetch
+        await deleteClient(countingFetch).deleteFilesAndWait(["f-old"])
+        expect(queries).toBeGreaterThanOrEqual(1)
+    })
+})
+
 describe("QuarkClient.uploadBuffer", () => {
     it("单分片小文件走完预上传→直传→完成确认", async () => {
         const seen: Array<{ url: string; init: any }> = []
@@ -335,5 +377,190 @@ describe("QuarkClient.uploadBuffer", () => {
         const result = await client.uploadBuffer("demo.zip", new Uint8Array([9]))
         expect(result.fid).toBe("fid-hit")
         expect(touchedUrls).toBe(false)
+    })
+
+    it("多分片走标准链路：hash_update 预上传→补哈希→取地址带分片校验→直传→完成确认", async () => {
+        const { createHash } = await import("node:crypto")
+        const calls: Array<{ url: string; body: any }> = []
+        const payload = Uint8Array.from({ length: 200 }, (_, i) => i % 256)
+        const fetchFn = (async (url: string, init: any) => {
+            const body = typeof init?.body === "string" ? JSON.parse(init.body) : undefined
+            calls.push({ url: String(url), body })
+            if (String(url).includes("/upload_pre")) {
+                // 探针（带全量哈希）回 part_size=4；多分片预上传（空哈希 + hash_update）回新 task
+                if (body.hash_update) {
+                    return {
+                        ok: true,
+                        status: 200,
+                        headers: new Headers(),
+                        json: async () => ({
+                            status: 0,
+                            errno: 0,
+                            error_info: "",
+                            data: { task_id: "task-multi", part_size: 64, finish: 0 },
+                        }),
+                    }
+                }
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data: { task_id: "task-probe", part_size: 64, finish: 0 } }),
+                }
+            }
+            if (String(url).includes("/update/hash")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data: { task_id: "task-multi", finish: 0 } }),
+                }
+            }
+            if (String(url).includes("/get_upload_urls")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({
+                        status: 0,
+                        errno: 0,
+                        error_info: "",
+                        data: {
+                            upload_urls: [1, 2, 3, 4].map(n => ({
+                                part_number: n,
+                                upload_url: `https://oss.example/p${n}`,
+                                signature_info: { signature: `sig-${n}` },
+                            })),
+                        },
+                    }),
+                }
+            }
+            if (String(url).includes("/upload_finish")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data: { finish: 1, fid: "fid-multi" } }),
+                }
+            }
+            if (String(url).startsWith("https://oss.example/")) {
+                return { ok: true, status: 200, headers: new Headers({ ETag: '"etag-x"' }), json: async () => ({}) }
+            }
+            throw new Error(`未 mock 的请求：${url}`)
+        }) as unknown as typeof fetch
+        const client = new QuarkClient(
+            { clientId: "c", signKey: "k", deviceId: "d", deviceName: "n", accessToken: "t", refreshToken: "" },
+            fetchFn
+        )
+        const result = await client.uploadBuffer("big.msi", payload)
+        expect(result.fid).toBe("fid-multi")
+
+        const pres = calls.filter(entry => entry.url.includes("/upload_pre"))
+        expect(pres).toHaveLength(2)
+        expect(pres[1].body.hash_update).toBe(true)
+        expect(pres[1].body.sha1).toBe("")
+        expect(pres[1].body).not.toHaveProperty("part_info_list")
+
+        const updateHash = calls.find(entry => entry.url.includes("/update/hash"))
+        expect(updateHash?.body.task_id).toBe("task-multi")
+        // 自研 SHA1 与 md5 须与 node:crypto 一致
+        expect(updateHash?.body.sha1).toBe(createHash("sha1").update(payload).digest("hex"))
+        expect(updateHash?.body.md5).toBe(createHash("md5").update(payload).digest("hex"))
+
+        const getUrls = calls.find(entry => entry.url.includes("/get_upload_urls"))
+        expect(getUrls?.body.task_id).toBe("task-multi")
+        const parts = getUrls?.body.part_info_list
+        expect(parts).toHaveLength(4)
+        expect(parts[0]).toEqual({ part_number: 1, part_size: 64 })
+        expect(parts[3].part_size).toBe(8)
+        for (const part of parts.slice(1)) {
+            expect(part.parallel_sha1_ctx.part_offset).toBe((part.part_number - 1) * 64)
+            expect(part.parallel_sha1_ctx.h).toHaveLength(5)
+        }
+        const finish = calls.find(entry => entry.url.includes("/upload_finish"))
+        expect(finish?.body.task_id).toBe("task-multi")
+        expect(finish?.body.part_info_list).toHaveLength(4)
+    })
+
+    it("多分片补哈希命中秒传时直接返回 fid，不再直传", async () => {
+        const fetchFn = (async (url: string, init: any) => {
+            if (String(url).includes("/upload_pre")) {
+                const body = JSON.parse(String(init.body))
+                const data = body.hash_update
+                    ? { task_id: "task-multi", part_size: 64, finish: 0 }
+                    : { task_id: "task-probe", part_size: 64, finish: 0 }
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data }),
+                }
+            }
+            if (String(url).includes("/update/hash")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data: { finish: 1, fid: "fid-instant" } }),
+                }
+            }
+            throw new Error(`不应再有请求：${url}`)
+        }) as unknown as typeof fetch
+        const client = new QuarkClient(
+            { clientId: "c", signKey: "k", deviceId: "d", deviceName: "n", accessToken: "t", refreshToken: "" },
+            fetchFn
+        )
+        const result = await client.uploadBuffer("big.msi", new Uint8Array(200))
+        expect(result.fid).toBe("fid-instant")
+    })
+
+    it("预上传直接返回全量地址时不再调 get_upload_urls", async () => {
+        const calls: string[] = []
+        const fetchFn = (async (url: string) => {
+            calls.push(String(url))
+            if (String(url).includes("/upload_pre")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({
+                        status: 0,
+                        errno: 0,
+                        error_info: "",
+                        data: {
+                            task_id: "task-pre-urls",
+                            part_size: 4,
+                            finish: 0,
+                            upload_urls: [1, 2, 3].map(n => ({
+                                part_number: n,
+                                upload_url: `https://oss.example/q${n}`,
+                                signature_info: { signature: `sig-${n}` },
+                            })),
+                        },
+                    }),
+                }
+            }
+            if (String(url).includes("/upload_finish")) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers(),
+                    json: async () => ({ status: 0, errno: 0, error_info: "", data: { finish: 1, fid: "fid-direct" } }),
+                }
+            }
+            if (String(url).startsWith("https://oss.example/")) {
+                return { ok: true, status: 200, headers: new Headers({ ETag: '"etag-x"' }), json: async () => ({}) }
+            }
+            throw new Error(`未 mock 的请求：${url}`)
+        }) as unknown as typeof fetch
+        const client = new QuarkClient(
+            { clientId: "c", signKey: "k", deviceId: "d", deviceName: "n", accessToken: "t", refreshToken: "" },
+            fetchFn
+        )
+        // 10 字节按 part_size=4 本应 3 片，但探针声明单片：单分片无需重做预上传，直接用预上传的地址
+        const result = await client.uploadBuffer("small.bin", new Uint8Array(3))
+        expect(result.fid).toBe("fid-direct")
+        expect(calls.filter(url => url.includes("/upload_pre"))).toHaveLength(1)
+        expect(calls.some(url => url.includes("/get_upload_urls"))).toBe(false)
     })
 })
