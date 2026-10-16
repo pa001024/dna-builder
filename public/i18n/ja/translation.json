@@ -1005,6 +1005,7 @@
         "show_diff_only": "差分のみ表示",
         "signature_weapon": "専用武器",
         "source": "ソース",
+        "speaker": "話者",
         "sub_region": "サブエリア",
         "test": "テスト",
         "times": "回",
@@ -1502,6 +1503,8 @@
         "search_placeholder": "魔霊名を検索（ピンイン対応）..."
     },
     "db-quest-story-nodes": {
+        "ai_voice": "AIボイス",
+        "ai_voice_tip": "AI合成音声（試聴用、公式音声ではありません）",
         "bgm_resource": "BGM リソース",
         "detective_quiz": "探偵クイズ",
         "empty_node": "このノードに表示できる内容はありません",
@@ -3462,7 +3465,7 @@
         "voice_language": "ボイス言語"
     },
     "questchain-list": {
-        "full_text_search_placeholder": "クエスト・会話内容の全文検索（ピンイン非対応）...",
+        "full_text_search_placeholder": "クエスト・会話内容・話者の全文検索（ピンイン非対応）...",
         "quest_count": "件のクエスト",
         "search_placeholder": "クエスト ID／名前で検索（ピンイン対応）...",
         "title": "クエストチェイン一覧"

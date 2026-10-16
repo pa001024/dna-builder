@@ -328,20 +328,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                 >
                     <!-- 检索带：下划线搜索 + 计数 -->
                     <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                        <div class="relative">
-                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                            <input
-                                v-model="searchKeyword"
-                                type="text"
-                                :placeholder="$t('accessory.searchPlaceholder')"
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                            />
-                            <span
-                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                            >
-                                {{ filteredAccessories.length }}
-                            </span>
-                        </div>
+                        <DbSearchBox
+                            v-model="searchKeyword"
+                            :placeholder="$t('accessory.searchPlaceholder')"
+                            :count="filteredAccessories.length"
+                        />
                     </div>
 
                     <!-- 筛选条件：类型 / 稀有度 / 获取方式（方章 chip） -->

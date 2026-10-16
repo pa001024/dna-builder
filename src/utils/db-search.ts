@@ -3812,6 +3812,8 @@ interface StoryChainIndex {
     version?: string
     path: string
     lines: StoryLine[]
+    /** 该任务链内出现过的说话人（去重），用于 speaker 筛选 */
+    speakers: string[]
     /** 整链 AI 剧情总结（storysummary.data.ts，已按剧情文本口径清洗；无则空串） */
     summary: string
     searchText: string
@@ -3884,16 +3886,23 @@ function cleanDialogueContent(content: string | undefined): string {
 function collectChainStoryLines(
     chain: QuestChain,
     questItemMap: Map<number, QuestItem>
-): { lines: StoryLine[]; imprCheck: boolean; imprIncrease: boolean } {
+): { lines: StoryLine[]; speakers: string[]; imprCheck: boolean; imprIncrease: boolean } {
     const lines: StoryLine[] = []
+    const speakerSet = new Set<string>()
     let imprCheck = false
     let imprIncrease = false
 
     const pushDialogue = (questId: number, questName: string, dialogue: Dialogue) => {
+        const speaker = getDialogueSpeaker(dialogue)
+
+        if (speaker) {
+            speakerSet.add(speaker)
+        }
+
         const text = cleanDialogueContent(dialogue.content)
 
         if (text) {
-            lines.push({ questId, questName, speaker: getDialogueSpeaker(dialogue), text })
+            lines.push({ questId, questName, speaker, text })
         }
 
         for (const option of dialogue.options ?? []) {
@@ -3904,10 +3913,16 @@ function collectChainStoryLines(
                 imprIncrease = true
             }
 
+            const optionSpeaker = getDialogueSpeaker(option)
+
+            if (optionSpeaker) {
+                speakerSet.add(optionSpeaker)
+            }
+
             const optionText = cleanDialogueContent(option.content)
 
             if (optionText) {
-                lines.push({ questId, questName, speaker: getDialogueSpeaker(option), text: optionText })
+                lines.push({ questId, questName, speaker: optionSpeaker, text: optionText })
             }
         }
     }
@@ -3928,7 +3943,7 @@ function collectChainStoryLines(
         }
     }
 
-    return { lines, imprCheck, imprIncrease }
+    return { lines, speakers: [...speakerSet], imprCheck, imprIncrease }
 }
 
 /**
@@ -3954,7 +3969,7 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
 
     const index = questChainData.map(chain => {
         const chapter = `${chain.chapterName} ${chain.chapterNumber || ""}`.trim()
-        const { lines, imprCheck, imprIncrease } = collectChainStoryLines(chain, questItemMap)
+        const { lines, speakers, imprCheck, imprIncrease } = collectChainStoryLines(chain, questItemMap)
         // 总结与对话正文同一套清洗口径（占位符替换 + 去标签），保证引用的文本与详情页一致
         const summary = cleanDialogueContent(storySummaryData[chain.id])
         // 总结正文也进检索文本：它概括了整链的人与事，是「哪条剧情提到过 X」最省事的一路召回
@@ -3972,6 +3987,7 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
             version: getQuestChainVersion(chain),
             path: `/db/questchain/${chain.id}`,
             lines,
+            speakers,
             summary,
             searchText,
             questType,
@@ -3988,7 +4004,7 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
 }
 
 /**
- * 构建剧情筛选口径下的取值定义（任务类型 / 篇章 / 版本 / 印象标记）。
+ * 构建剧情筛选口径下的取值定义（任务类型 / 篇章 / 说话人 / 版本 / 印象标记）。
  *
  * 剧情是 Agent 里唯一「正文检索 + 列表页筛选」双向都要支持的模块：
  * `search_story` 传 `filters` 时按这里的定义匹配，`list_filter_options` 也复用同一份取值。
@@ -3999,6 +4015,7 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
 function buildStoryFacets(index: StoryChainIndex[], lang: DBAgentLang = "zh"): DBFacetDefinition[] {
     const typeCounts = new Map<string, number>()
     const chapterCounts = new Map<string, number>()
+    const speakerCounts = new Map<string, number>()
     let imprCheckCount = 0
     let imprIncreaseCount = 0
 
@@ -4008,6 +4025,11 @@ function buildStoryFacets(index: StoryChainIndex[], lang: DBAgentLang = "zh"): D
 
         const chapterValue = facetValue(entry.chapterName)
         chapterCounts.set(chapterValue, (chapterCounts.get(chapterValue) ?? 0) + 1)
+
+        for (const speaker of entry.speakers) {
+            const speakerValue = facetValue(speaker)
+            speakerCounts.set(speakerValue, (speakerCounts.get(speakerValue) ?? 0) + 1)
+        }
 
         if (entry.imprCheck) {
             imprCheckCount++
@@ -4026,6 +4048,13 @@ function buildStoryFacets(index: StoryChainIndex[], lang: DBAgentLang = "zh"): D
     return [
         { id: "type", label: facetLabel("任务类型", lang), kind: "enum", values },
         { id: "chapter", label: facetLabel("篇章", lang), kind: "enum", values: toFacetValues(chapterCounts, "locale", lang) },
+        {
+            id: "speaker",
+            label: facetLabel("说话人", lang),
+            kind: "enum",
+            values: toFacetValues(speakerCounts, "locale", lang),
+            description: "只保留该说话人出场过的任务链（说话人口径与剧情列表页一致）",
+        },
         {
             id: "imprCheck",
             label: facetLabel("印象检定", lang),
@@ -4087,6 +4116,14 @@ function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, strin
 
         if (facetId === "chapter") {
             if (entry.chapterName !== target && entry.chapter !== target) {
+                return false
+            }
+
+            continue
+        }
+
+        if (facetId === "speaker") {
+            if (!entry.speakers.includes(target)) {
                 return false
             }
 

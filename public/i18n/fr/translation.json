@@ -1038,6 +1038,7 @@
         "show_diff_only": "Afficher uniquement les différences",
         "signature_weapon": "Arme signature",
         "source": "Source",
+        "speaker": "Intervenant",
         "sub_region": "Sous-région",
         "test": "Test",
         "times": "fois",
@@ -1535,6 +1536,8 @@
         "search_placeholder": "Rechercher un nom de Génimon (pinyin pris en charge)..."
     },
     "db-quest-story-nodes": {
+        "ai_voice": "Voix IA",
+        "ai_voice_tip": "Voix synthétisée par IA, aperçu uniquement, audio non officiel",
         "bgm_resource": "Ressource BGM",
         "detective_quiz": "Quiz de détective",
         "empty_node": "Aucun contenu à afficher pour ce nœud",
@@ -3501,7 +3504,7 @@
         "voice_language": "Langue des voix"
     },
     "questchain-list": {
-        "full_text_search_placeholder": "Recherche en texte intégral des quêtes / dialogues (sans pinyin)...",
+        "full_text_search_placeholder": "Recherche en texte intégral des quêtes / dialogues / intervenants (sans pinyin)...",
         "quest_count": "quêtes",
         "search_placeholder": "Rechercher un ID / nom de quête (pinyin pris en charge)...",
         "title": "Liste des chaînes de quêtes"

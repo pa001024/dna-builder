@@ -13,6 +13,7 @@ const props = defineProps<{
     speakerName?: string
     speakerAvatar?: string
     showVoiceButton?: boolean
+    voiceAi?: boolean
     voicePlaying?: boolean
     playing?: boolean
     searchKeyword?: string
@@ -108,12 +109,25 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 />
 
                 <span v-if="speakerName" class="font-medium text-primary mr-1 min-w-0 truncate" :title="speakerName">
-                    {{ speakerName }}
+                    <HighlightStoryText
+                        v-if="normalizedSearchKeyword"
+                        :text="speakerName"
+                        :keyword="normalizedSearchKeyword"
+                        :story-config="storyTextConfig"
+                    />
+                    <template v-else>{{ speakerName }}</template>
                 </span>
 
                 <button v-if="showVoiceButton" type="button" class="btn btn-ghost btn-xs shrink-0 ml-auto" @click="emit('voice-click')">
                     <Icon :icon="voicePlaying ? 'ri:pause-circle-line' : 'ri:play-circle-line'" />
                 </button>
+                <span
+                    v-if="showVoiceButton && voiceAi"
+                    class="badge badge-xs shrink-0 border-info/40 bg-info/10 text-info"
+                    :title="$t('db-quest-story-nodes.ai_voice_tip')"
+                >
+                    {{ $t("db-quest-story-nodes.ai_voice") }}
+                </span>
             </div>
             <div v-if="dialogueContent" data-dialogue-content="true" class="w-full">
                 <HighlightStoryText

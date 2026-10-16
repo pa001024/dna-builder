@@ -1058,6 +1058,7 @@
         "show_diff_only": "仅显示差异",
         "signature_weapon": "专武",
         "source": "来源",
+        "speaker": "说话人",
         "sub_region": "子区域",
         "test": "测试",
         "times": "次",
@@ -1553,6 +1554,8 @@
         "search_placeholder": "搜索角色名称/别名/ID（支持拼音）..."
     },
     "db-quest-story-nodes": {
+        "ai_voice": "AI配音",
+        "ai_voice_tip": "AI合成语音，仅供试听，非官方原声",
         "bgm_resource": "BGM 资源",
         "detective_quiz": "侦探问答",
         "empty_node": "该节点暂无可展示内容",
@@ -3511,7 +3514,7 @@
         "voice_language": "语音语言"
     },
     "questchain-list": {
-        "full_text_search_placeholder": "全文搜索任务/对话内容（不支持拼音）...",
+        "full_text_search_placeholder": "全文搜索任务/对话内容/说话人（不支持拼音）...",
         "quest_count": "个任务",
         "search_placeholder": "搜索任务 ID/名称（支持拼音）...",
         "title": "任务剧情列表"

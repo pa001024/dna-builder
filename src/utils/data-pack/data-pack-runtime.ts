@@ -80,6 +80,7 @@ const DATA_PACK_MODULES = [
     "partytopic.data",
     "quest.data",
     "questchain.data",
+    "extvoice.data",
     "storysummary.data",
     "raid.data",
     "region.data",

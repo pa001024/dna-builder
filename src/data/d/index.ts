@@ -13,6 +13,7 @@ export { weaponVerifyData } from "./weapon-verify.data"
 
 import { skinData } from "./accessory.data"
 import dynQuestData, { type DynQuest } from "./dynquest.data"
+import { type ExtVoiceEntry, extVoiceData } from "./extvoice.data"
 import { type HardBoss, hardBossData } from "./hardboss.data"
 import headSculptureData, { type HeadSculpture } from "./headsculpture.data"
 import iconticketData, { type IconTicket } from "./iconticket.data"
@@ -139,6 +140,7 @@ export { type Resource, resourceData } from "./resource.data"
 export type { Fish, FishingSpot }
 
 export const npcMap = new Map<number, NPC>()
+export const extVoiceMap = new Map<number, ExtVoiceEntry>()
 export const iconticketMap = new Map<number, IconTicket>()
 export const headSculptureMap = new Map<number, HeadSculpture>()
 export const partyTopicMap = new Map<number, PartyTopic>()
@@ -370,6 +372,11 @@ export function rebuildStaticIndexes(): void {
     questMap.clear()
     for (const questStory of questData) {
         questMap.set(questStory.id, questStory)
+    }
+
+    extVoiceMap.clear()
+    for (const entry of extVoiceData) {
+        extVoiceMap.set(entry.id, entry)
     }
 
     subRegionMap.clear()

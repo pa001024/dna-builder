@@ -19,6 +19,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
 | 在线地图→MapTool 坐标换算（`onlinemap-transform` 标定方法 / 置信度 / 坑） | [online-map-transform.md](.agents/docs/online-map-transform.md) |
 | 安全模式 | [safe-mode-unlock.md](.agents/docs/safe-mode-unlock.md) |
+| 剧情 AI 补语音流水线（缺语音扫描 / BERT 情绪 / GPT-SoVITS / aistory 发布 / AI 角标） | [voice-aistory-pipeline.md](.agents/docs/voice-aistory-pipeline.md) |
 
 - 技能：`.agents/skills/*/SKILL.md`（admin-management-page、build-creator、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
 - Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）

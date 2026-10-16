@@ -7,7 +7,7 @@ import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type Dialo
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueChain, type DialogueChainItem, orderQuestNodes } from "@/utils/dialogue-chain"
-import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
+import { resolveDialogueEffectiveVoice } from "@/utils/ext-voice"
 import { buildQuestBgmUrl } from "@/utils/quest-bgm"
 import { buildQuestVideoUrl } from "@/utils/quest-video"
 import {
@@ -596,20 +596,43 @@ function getDialogueVoiceKey(dialogue: Dialogue, nodeId: string): string {
 }
 
 /**
- * 构建对话语音播放地址。
+ * 构建对话语音播放地址（含 AI 补语音回退）。
  * @param dialogue 对话条目
  * @returns 语音 URL
  */
 function getDialogueVoiceUrl(dialogue: Dialogue): string {
-    return buildDialogueVoiceUrl({
-        voice: dialogue.voice,
-        text: getDialogueDisplayContent(dialogue),
-        npcId: dialogue.npc,
-        forceGenderNpcIds: nicknameNpcIds,
-        language: props.voiceLanguage || settingStore.lang,
-        gender: settingStore.protagonistGender,
-        gender2: settingStore.protagonistGender2,
-    })
+    return (
+        resolveDialogueEffectiveVoice(
+            dialogue,
+            getDialogueDisplayContent(dialogue),
+            {
+                language: props.voiceLanguage || settingStore.lang,
+                gender: settingStore.protagonistGender,
+                gender2: settingStore.protagonistGender2,
+                forceGenderNpcIds: nicknameNpcIds,
+            }
+        )?.url ?? ""
+    )
+}
+
+/**
+ * 判断对话播放的是否为 AI 补语音。
+ * @param dialogue 对话条目
+ * @returns 是否为 AI 语音
+ */
+function isDialogueVoiceAi(dialogue: Dialogue): boolean {
+    return (
+        resolveDialogueEffectiveVoice(
+            dialogue,
+            getDialogueDisplayContent(dialogue),
+            {
+                language: props.voiceLanguage || settingStore.lang,
+                gender: settingStore.protagonistGender,
+                gender2: settingStore.protagonistGender2,
+                forceGenderNpcIds: nicknameNpcIds,
+            }
+        )?.ai ?? false
+    )
 }
 
 /**
@@ -1176,7 +1199,8 @@ watch(flattenedDialogueChain, () => {
                     :speaker-name="
                         item.dialogue.npc !== undefined || item.dialogue.speakerName ? `${$t(getSpeakerName(item.dialogue))}:` : undefined
                     "
-                    :show-voice-button="!!item.dialogue.voice"
+                    :show-voice-button="!!getDialogueVoiceUrl(item.dialogue)"
+                    :voice-ai="isDialogueVoiceAi(item.dialogue)"
                     :voice-playing="currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id) && isVoicePlaying"
                     :playing="isVoicePlaying && currentVoiceKey === getDialogueVoiceKey(item.dialogue, node.id)"
                     :search-keyword="normalizedSearchKeyword"

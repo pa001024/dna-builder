@@ -922,8 +922,8 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                 {
                     name: "search_story",
                     description:
-                        "剧情检索：在任务链与剧情对话正文中查找人名、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”。" +
-                        '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）。' +
+                        "剧情检索：在任务链与剧情对话正文中查找人名（含说话人名）、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”“某个人在哪些剧情里出场过”。" +
+                        '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）、列出某个说话人出场过的任务链（filters 传 {"speaker":"说话人名"}，可用取值见 list_filter_options）。' +
                         "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。" +
                         "有关键词时，每条命中都附带 summary（该任务链的整链 AI 剧情总结，中文）：问“这条剧情讲了什么”时直接用 summary 作答即可，不必再读原文。",
                     parameters: {
@@ -936,7 +936,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                             },
                             filters: {
                                 type: "object",
-                                description: `${FILTERS_DESCRIPTION} 剧情模块（questchain）的可用筛选项见 list_filter_options；常用 type（主线任务/支线任务/限时任务/活动任务）、chapter（篇章名）、imprCheck、imprIncrease。`,
+                                description: `${FILTERS_DESCRIPTION} 剧情模块（questchain）的可用筛选项见 list_filter_options；常用 type（主线任务/支线任务/限时任务/活动任务）、chapter（篇章名）、speaker（说话人名）、imprCheck、imprIncrease。`,
                                 additionalProperties: { type: ["string", "number", "boolean"] },
                             },
                             limit: { type: "integer", description: "返回任务链数量上限，默认 5，最大 12" },

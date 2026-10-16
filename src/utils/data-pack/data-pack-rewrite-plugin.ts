@@ -54,6 +54,7 @@ const DATA_PACK_MODULES = new Set([
     "partytopic.data.ts",
     "quest.data.ts",
     "questchain.data.ts",
+    "extvoice.data.ts",
     "storysummary.data.ts",
 ])
 

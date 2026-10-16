@@ -347,8 +347,12 @@ const questDetails = computed<QuestDetailItem[]>(() => {
                 ...(details?.nodes ?? []).flatMap(node => [
                     formatStoryText(node.name || ""),
                     ...(node.dialogues ?? []).flatMap(dialogue => [
+                        getDialogueSpeakerName(dialogue, storyTextConfig.value),
                         formatStoryText(dialogue.content || ""),
-                        ...(dialogue.options ?? []).map(option => formatStoryText(option.content || "")),
+                        ...(dialogue.options ?? []).flatMap(option => [
+                            getDialogueSpeakerName(option, storyTextConfig.value),
+                            formatStoryText(option.content || ""),
+                        ]),
                     ]),
                 ]),
             ]
@@ -370,7 +374,8 @@ function buildExactQuestMatches(keyword: string): QuestSearchMatch[] {
         const dialogueMatches = (quest.details?.nodes ?? []).flatMap(node => {
             return (node.dialogues ?? []).flatMap(dialogue => {
                 const matches: QuestSearchMatch[] = []
-                if (formatStoryText(dialogue.content).includes(keyword)) {
+                const speakerHit = getDialogueSpeakerName(dialogue, storyTextConfig.value).includes(keyword)
+                if (formatStoryText(dialogue.content).includes(keyword) || speakerHit) {
                     matches.push({
                         questId: quest.id,
                         target: {
@@ -381,7 +386,8 @@ function buildExactQuestMatches(keyword: string): QuestSearchMatch[] {
                 }
 
                 for (const option of dialogue.options ?? []) {
-                    if (formatStoryText(option.content).includes(keyword)) {
+                    const optionSpeakerHit = getDialogueSpeakerName(option, storyTextConfig.value).includes(keyword)
+                    if (formatStoryText(option.content).includes(keyword) || optionSpeakerHit) {
                         matches.push({
                             questId: quest.id,
                             target: {

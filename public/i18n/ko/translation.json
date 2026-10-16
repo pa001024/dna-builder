@@ -1006,6 +1006,7 @@
         "show_diff_only": "차이만 표시",
         "signature_weapon": "전용 무기",
         "source": "소스",
+        "speaker": "화자",
         "sub_region": "하위 지역",
         "test": "테스트",
         "times": "회",
@@ -1503,6 +1504,8 @@
         "search_placeholder": "마령 이름 검색(병음 지원)..."
     },
     "db-quest-story-nodes": {
+        "ai_voice": "AI 음성",
+        "ai_voice_tip": "AI 합성 음성 미리듣기용이며 공식 음성이 아닙니다",
         "bgm_resource": "BGM 리소스",
         "detective_quiz": "탐정 퀴즈",
         "empty_node": "이 노드에 표시할 내용이 없습니다",
@@ -3463,7 +3466,7 @@
         "voice_language": "음성 언어"
     },
     "questchain-list": {
-        "full_text_search_placeholder": "퀘스트/대사 전체 검색 (병음 미지원)...",
+        "full_text_search_placeholder": "퀘스트/대사/화자 전체 검색 (병음 미지원)...",
         "quest_count": "개 퀘스트",
         "search_placeholder": "퀘스트 ID/이름 검색 (병음 지원)...",
         "title": "퀘스트 체인 목록"

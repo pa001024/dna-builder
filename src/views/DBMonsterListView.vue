@@ -185,20 +185,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                 >
                     <!-- 检索带：下划线搜索 + 计数 + 资料类型方章 -->
                     <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                        <div class="relative">
-                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                            <input
-                                v-model="searchKeyword"
-                                type="text"
-                                :placeholder="$t('db-monster-list.search_placeholder')"
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                            />
-                            <span
-                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                            >
-                                {{ normalizedSelectedType === "monsterTag" ? filteredMonsterTags.length : filteredMonsters.length }}
-                            </span>
-                        </div>
+                        <DbSearchBox
+                            v-model="searchKeyword"
+                            :placeholder="$t('db-monster-list.search_placeholder')"
+                            :count="normalizedSelectedType === 'monsterTag' ? filteredMonsterTags.length : filteredMonsters.length"
+                        />
 
                         <!-- 资料类型筛选方章 -->
                         <div class="mt-3 flex flex-wrap gap-1.5">

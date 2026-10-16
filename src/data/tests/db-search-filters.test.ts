@@ -6,7 +6,7 @@ import { listModuleFilters, listModules, queryModule, searchStory } from "@/util
  *
  * 覆盖两条链路：
  * - queryModule：按模块 facet 过滤（枚举 / 数值区间 / 多值命中）；
- * - searchStory：按剧情列表页口径过滤（任务类型分组、篇章、印象标记），含无关键词的纯筛选列举。
+ * - searchStory：按剧情列表页口径过滤（任务类型分组、篇章、说话人、印象标记），含无关键词的纯筛选列举。
  *
  * 剧情正文索引依赖 `getLocalizedQuestDataByLanguage` 取数据，测试里把它打桩成
  * 「直接返回中文原始数据」，避免依赖本地存储的语言设置与数据包加载。
@@ -42,13 +42,13 @@ beforeEach(() => {
 })
 
 describe("listModuleFilters", () => {
-    it("剧情模块返回任务类型 / 篇章 / 印象检定 / 印象增加四组筛选项", async () => {
+    it("剧情模块返回任务类型 / 篇章 / 说话人 / 印象检定 / 印象增加五组筛选项", async () => {
         const { module, facets } = await listModuleFilters("questchain")
 
         expect(module?.id).toBe("questchain")
 
         const facetIds = facets.map(facet => facet.id)
-        expect(facetIds).toEqual(["type", "chapter", "imprCheck", "imprIncrease"])
+        expect(facetIds).toEqual(["type", "chapter", "speaker", "imprCheck", "imprIncrease"])
 
         const typeFacet = facets.find(facet => facet.id === "type")
         expect(typeFacet?.kind).toBe("enum")
@@ -256,6 +256,35 @@ describe("searchStory filters", () => {
 
         expect(result.total).toBeGreaterThan(0)
         expect(result.hits.every(hit => hit.imprIncrease === true)).toBe(true)
+    })
+
+    it("说话人筛选项可列出取值", async () => {
+        const { facets } = await listModuleFilters("questchain")
+        const speakerFacet = facets.find(facet => facet.id === "speaker")
+
+        expect(speakerFacet).toBeTruthy()
+        expect(speakerFacet!.values.length).toBeGreaterThan(0)
+    })
+
+    it("按说话人过滤时命中数与筛选项计数一致", async () => {
+        const { facets } = await listModuleFilters("questchain")
+        const speakerFacet = facets.find(facet => facet.id === "speaker")!
+        const target = speakerFacet.values.toSorted((left, right) => right.count - left.count)[0]!
+
+        const result = await searchStory("", { filters: { speaker: target.label }, limit: 12 })
+
+        expect(result.total).toBe(target.count)
+    })
+
+    it("说话人名关键词检索命中该说话人的台词片段", async () => {
+        const { facets } = await listModuleFilters("questchain")
+        const speakerFacet = facets.find(facet => facet.id === "speaker")!
+        const target = speakerFacet.values.toSorted((left, right) => right.count - left.count)[0]!.label
+
+        const result = await searchStory(target, { limit: 5 })
+
+        expect(result.hits.length).toBeGreaterThan(0)
+        expect(result.hits.some(hit => hit.snippets.some(snippet => snippet.speaker === target))).toBe(true)
     })
 
     it("筛选项与关键词叠加时，结果仍落在筛选范围内", async () => {

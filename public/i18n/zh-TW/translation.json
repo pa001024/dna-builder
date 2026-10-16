@@ -1005,6 +1005,7 @@
         "show_diff_only": "僅顯示差異",
         "signature_weapon": "專武",
         "source": "來源",
+        "speaker": "說話人",
         "sub_region": "子區域",
         "test": "測試",
         "times": "次",
@@ -1502,6 +1503,8 @@
         "search_placeholder": "搜尋魔靈名稱（支援拼音）..."
     },
     "db-quest-story-nodes": {
+        "ai_voice": "AI配音",
+        "ai_voice_tip": "AI合成語音，僅供試聽，非官方原聲",
         "bgm_resource": "BGM 資源",
         "detective_quiz": "偵探問答",
         "empty_node": "此節點暫無可顯示內容",
@@ -3461,7 +3464,7 @@
         "voice_language": "語音語言"
     },
     "questchain-list": {
-        "full_text_search_placeholder": "全文搜尋任務／對話內容（不支援拼音）...",
+        "full_text_search_placeholder": "全文搜尋任務／對話內容／說話人（不支援拼音）...",
         "quest_count": "個任務",
         "search_placeholder": "搜尋任務 ID／名稱（支援拼音）...",
         "title": "任務劇情列表"

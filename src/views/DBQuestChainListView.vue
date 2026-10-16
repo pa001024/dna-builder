@@ -9,9 +9,10 @@ import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueSpeakerName } from "@/utils/dialogue"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
-import { stripStoryTextTags } from "@/utils/story-text"
+import { DEFAULT_STORY_TEXT_CONFIG, stripStoryTextTags } from "@/utils/story-text"
 
 const { t } = useTranslation()
 
@@ -46,6 +47,7 @@ interface QuestChainFullTextEntry {
     chapter: string
     episode: string
     snippets: string[]
+    speakers: string[]
     searchText: string
 }
 
@@ -56,6 +58,7 @@ const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const selectedVersion = useSearchParam<string>("ver", "")
 const selectedType = useSearchParam<number>("tp", 0)
+const selectedSpeaker = useSearchParam<string>("spk", "")
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
 
@@ -166,6 +169,41 @@ function collectQuestChainSnippets(questChain: QuestChain, itemMap: Map<number, 
 }
 
 /**
+ * 收集任务链内全部说话人（去重），口径与详情页一致：优先 speakerName，缺失时回退 NPC 查表。
+ * @param questChain 任务链
+ * @param itemMap 任务详情映射
+ * @returns 说话人列表
+ */
+function collectQuestChainSpeakers(questChain: QuestChain, itemMap: Map<number, QuestItem>): string[] {
+    const speakers: string[] = []
+
+    for (const quest of questChain.quests) {
+        const questItem = itemMap.get(quest.id)
+        if (!questItem) {
+            continue
+        }
+
+        for (const node of questItem.nodes ?? []) {
+            for (const dialogue of node.dialogues ?? []) {
+                const speaker = getDialogueSpeakerName(dialogue, DEFAULT_STORY_TEXT_CONFIG).trim()
+                if (speaker) {
+                    speakers.push(speaker)
+                }
+
+                for (const option of dialogue.options ?? []) {
+                    const optionSpeaker = getDialogueSpeakerName(option, DEFAULT_STORY_TEXT_CONFIG).trim()
+                    if (optionSpeaker) {
+                        speakers.push(optionSpeaker)
+                    }
+                }
+            }
+        }
+    }
+
+    return Array.from(new Set(speakers))
+}
+
+/**
  * 构建任务链全文检索索引。
  * @param itemMap 任务详情映射
  * @returns 全文检索索引
@@ -173,8 +211,9 @@ function collectQuestChainSnippets(questChain: QuestChain, itemMap: Map<number, 
 function buildQuestChainFullTextEntries(itemMap: Map<number, QuestItem>): QuestChainFullTextEntry[] {
     return questChainData.map(questChain => {
         const snippets = collectQuestChainSnippets(questChain, itemMap)
+        const speakers = collectQuestChainSpeakers(questChain, itemMap)
         const chapterText = `${questChain.chapterName} ${questChain.chapterNumber || ""}`.trim()
-        const searchText = [questChain.id, questChain.name, chapterText, questChain.episode, questChain.type, questChain.main, ...snippets]
+        const searchText = [questChain.id, questChain.name, chapterText, questChain.episode, questChain.type, questChain.main, ...snippets, ...speakers]
             .filter(v => v !== undefined && v !== null && `${v}`.trim() !== "")
             .join(" ")
 
@@ -184,7 +223,8 @@ function buildQuestChainFullTextEntries(itemMap: Map<number, QuestItem>): QuestC
             chainName: questChain.name,
             chapter: chapterText,
             episode: questChain.episode,
-            snippets,
+            snippets: [...snippets, ...speakers],
+            speakers,
             searchText,
         }
     })
@@ -377,6 +417,41 @@ const questChainImprIncreaseIdSet = computed(() => {
 })
 
 /**
+ * 任务链 ID → 说话人列表（当前语言）。
+ */
+const questChainSpeakerMap = computed(() => {
+    const map = new Map<number, string[]>()
+    for (const entry of questChainFullTextEntries.value) {
+        map.set(entry.questChain.id, entry.speakers)
+    }
+    return map
+})
+
+/**
+ * 说话人筛选选项：按出现任务链数降序，方便快速定位主要角色。
+ */
+const speakerFilterOptions = computed<FilterSelectOption[]>(() => {
+    const counts = new Map<string, number>()
+    for (const entry of questChainFullTextEntries.value) {
+        for (const speaker of entry.speakers) {
+            counts.set(speaker, (counts.get(speaker) ?? 0) + 1)
+        }
+    }
+    const sorted = [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], "zh-CN"))
+    return [{ value: "", label: t("common.all") }, ...sorted.map(([speaker, count]) => ({ value: speaker, label: `${speaker} (${count})` }))]
+})
+
+/**
+ * 判断任务链是否包含指定说话人。
+ * @param questChainId 任务链 ID
+ * @param speaker 说话人
+ * @returns 是否包含
+ */
+function hasQuestChainSpeaker(questChainId: number, speaker: string): boolean {
+    return questChainSpeakerMap.value.get(questChainId)?.includes(speaker) ?? false
+}
+
+/**
  * 根据 ID 获取选中的任务链。
  */
 const selectedQuestChain = computed(() => {
@@ -430,6 +505,10 @@ function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
     }
 
     if (selectedVersion.value && (questChain.版本 || "") !== selectedVersion.value) {
+        return false
+    }
+
+    if (selectedSpeaker.value && !hasQuestChainSpeaker(questChain.id, selectedSpeaker.value)) {
         return false
     }
 
@@ -719,24 +798,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                 >
                     <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
                     <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                        <div class="relative">
-                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                            <input
-                                v-model="searchKeyword"
-                                type="text"
-                                :placeholder="
+                        <DbSearchBox
+                            v-model="searchKeyword"
+                            :placeholder="
                                 showFullTextSearch
                                     ? $t('questchain-list.full_text_search_placeholder')
                                     : $t('questchain-list.search_placeholder')
                             "
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                            />
-                            <span
-                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                            >
-                                {{ filteredQuestChains.length }}
-                            </span>
-                        </div>
+                            :count="filteredQuestChains.length"
+                        />
 
                         <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
                         <div class="mt-3 flex flex-wrap gap-1.5">
@@ -789,6 +859,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                                 :label="$t('char-build.version')"
                                 :clear-title="$t('common.clear')"
                             />
+                            <FilterSelect v-model="selectedSpeaker" :options="speakerFilterOptions" :label="$t('common.speaker')" :clear-title="$t('common.clear')" />
                         </div>
                     </div>
 
