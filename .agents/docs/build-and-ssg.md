@@ -9,34 +9,42 @@ AGENTS.md 的细节展开，覆盖「增量 lint」与「SSG 预渲染」两套�
 
 - 无改动直接跳过；
 - 有改动时 Biome 只跑改动文件；
-- 类型检查由脚本**进程内自研 program** 完成（`@vue/language-core` 的 Vue 语言插件 +
-  `@volar/typescript` 的 `proxyCreateProgram` + TS Compiler API，与 vue-tsc 内部同一套拼装件，
-  不再把 vue-tsc CLI 当壳），由此拿到 vue-tsc CLI 给不了的两个控制点：
-  - **诊断范围**：只对「改动文件 + 依赖它们的下游文件」发起诊断；上游依赖只编译（供类型）不诊断，
-    它们自己的错误在各自被改的那次已经查过。未改动的环境声明文件（`.d.ts` / `declare global`）
-    始终进 program（缺了会冒全局类型的假报错）但不主动诊断；环境声明文件的**全局类型面变更**时整体退回
-    自研全量诊断（约 40s），影响面过半同理。全局类型面按哈希判定（GraphNode.ambientHash：
+- 类型检查由 **tsc-rs**（TypeScript 7 原生编译器的 Rust 移植，`devDependencies` 的 `tsc-rs` 包）
+  完成，再按增量口径**过滤展示**：只展示「改动文件 + 依赖它们的下游文件」（反向依赖
+  闭包）的诊断；上游依赖的错误在它们各自被改的那次已经展示过。`.vue` 文件经 `tsc-rs-vue-mapper`
+ （`file:tools/vue-mapper`，content-mapper 插件，用 @vue/language-core 与 vue-tsc 相同的 codegen
+  展开虚拟代码，诊断位置映射回原文件）参与检查。数据文件（`src/data/d/` 下 `*.data.ts`，约 70MB）
+  按「值变 / 类型变」二分处理：改动后重跑 `ts.transpileDeclaration` 求声明哈希，不变即类型未变；
+  未改动的数据文件由 `tsc-rs-data-mapper`（`file:tools/data-mapper`，零依赖，按 manifest 用缓存
+  `.d.ts` 覆盖内容）替代真实源码进 program，下游视图不变；改动过的数据文件本轮仍以真实源码参诊
+  （体语义错误可见），只在声明哈希变化时才把下游带入根集合。纯值变走最小 program 快径
+  （改动文件 + 工程 `.d.ts`，`components.d.ts` 除外；闭包含 `.vue` / 源文件全局声明 / `window` 引用
+  时退回全量）：实测单文件值变约 1.2s，其中 tsc-rs 仅 0.4s。声明缓存在 `.tmp/lint-data-decls/`
+ （按 mtime+size 寻址，声明哈希另存比对），失败运行不落盘不回收；`lint:full` 仍以真实源码全量兜底。临时 tsconfig（剥离 TS 7 已移除的 `baseUrl` / `esModuleInterop`，挂上
+  contentMappers，include / paths 等相对路径转绝对）按 PID 生成在 `.tmp/tsc-rs-check/` 下
+  （git 忽略区，不污染跟踪文件），运行结束即删，崩溃残留按「属主进程已死且超 10 分钟」清理；
+  二进制路径可用 `TSC_RS_BIN` 环境变量覆盖；
+  - 环境声明文件的**全局类型面变更**时展示全部诊断（不再是 40s 的自研全量，就是同一次 tsc-rs
+    运行去掉过滤），影响面过半同理。全局类型面按哈希判定（GraphNode.ambientHash：
     `.d.ts` 为全文哈希，普通源文件为其 `declare global/module` 块文本的 sha1）——只含 window.*
     声明扩充的普通源文件（如 CharBuildView.vue、store/db.ts）改到声明以外的代码不算变更，仍走增量；
-  - **文件体裁剪**：未改动的数据文件（`src/data/d/` 下 `*.data.ts`，约 103MB 字面量）用
-    `ts.transpileDeclaration` 预生成的声明替代真实源码参与编译（缓存在 `.tmp/lint-data-decls/`，
-    按 mtime+size 寻址），数据体不进 checker；被改动的数据文件保留真源码并完整诊断，通过后刷新
-    声明缓存。**冷缓存（首跑 / 缓存版本升级 / 指纹失效）时数据文件也走声明替换**——没有改动基线
-    就把全部数据体当「改动」塞进 program 会吃到 10GB+ 内存；数据体检查交给 lint:full。
-    声明生成要求文件满足 isolatedDeclarations 约束（导出值要有显式类型注解，
-    `satisfies` 不算）——数据文件均已改造达标，若有新文件违反约束会自动回退真源码并记负缓存。
-    同理，`components.d.ts`（unplugin 自动生成）按诊断范围裁剪——只保留被诊断文件引用到的全局
-    组件条目，否则 550 条 `typeof import` 会把 program 撑到 3500+ 文件；
 - mtime 指纹与依赖图缓存在 `.tmp/lint-cache.json`，**仅检查通过才写入**。文件集 = tsconfig include
   内的文件 **+ 数据文件**（它们被 tsconfig exclude，但通过 import 参与 program——旧版只改数据文件时
   类型检查会被整体跳过、下游类型陈旧，现版本已修复：数据文件改动会真查并传播到全部引用方）；
 - `--full` / `pnpm lint:full` 走真 vue-tsc CLI 全量（不裁剪任何文件），是唯一覆盖数据体错误检查的
   最终真相；`pnpm lint:tsc` 只跑真 vue-tsc 类型检查（调试/对比用）。
 
-典型耗时：无改动 0.3s 跳过；轻量改动 5~13s（program 大小取决于被诊断文件的依赖闭包，
-@antv/sentry/three 等重型类型树是主要成本）；环境声明变更约 40s；数据文件改动约 35s；
-首跑（冷缓存）约 100s。正确性由一次性对比 harness（`.tmp/lint-parity.ts`，注入带错探针，
-diff 自研增量与真 vue-tsc 全量的诊断集合）验证，覆盖 `.vue` 位置映射与全局组件模板诊断。
+典型耗时：无改动 0.5s 跳过；纯数据值变约 1.2s（最小 program，tsc-rs 仅 0.4s）；冷缓存全量约 13s
+（含 66 文件声明重生成 + tsc-rs 约 10s），不再有 35~40s 的数据文件/环境声明慢路径；其它单文件增量
+约 11~13s（下限即 tsc-rs 全量检查时间）。注意引擎是 TypeScript 7.1 而非 vue-tsc 的 TS 5.9，诊断不完全相同：夹具级
+（script 错误、模板变量、跨文件 props）与 vue-tsc 逐条一致；400 文件实测中约 11 条是真实模板
+bug（新 codegen 下 vue-tsc 同样报出，旧 pin 漏报），约 26 条是 TS7 严格度诊断。无原文位置的
+虚拟合成区诊断（host 注记 `has no corresponding location in the original file`，行号常越界）
+一律隐藏（`isVirtualOnlyDiagnostic`，vue-tsc 实际也不展示这类诊断），`--verbose` 下只报数量；
+`lint:full` 仍是兜底真相。全局指令的类型注册放在 `src/types/global-directives.d.ts`
+（`declare module "vue"` 增补 `GlobalDirectives`；文件必须含顶层 `export {}` 使其成为模块，
+否则会遮蔽整个 vue 模块。另注意不能在增补内部 `import("vue")` 自引用，同理致命）。
+输出解析、根过滤与虚拟诊断识别的单测在 `tools/tsc-rs-output.test.ts`。
 
 ## SSG 预渲染（仅网页版）
 

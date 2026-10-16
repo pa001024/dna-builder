@@ -189,7 +189,7 @@ describe("build.mod / mods / aura 可装备校验", () => {
     it("单槽：合法写入成功并落到设置槽位", async () => {
         const api = makeModApi()
         expect(await api.mod({ type: "角色", slot: 0, id: 41001 })).toMatchObject({ ok: true })
-        expect((await api.state()).mods["角色"][0]).toMatchObject({ id: 41001 })
+        expect((await api.state()).mods.角色[0]).toMatchObject({ id: 41001 })
     })
 
     it("单槽：系列互斥拦截，同名非契约者拦截、契约者放行", async () => {
@@ -223,7 +223,7 @@ describe("build.mod / mods / aura 可装备校验", () => {
         await expect(api.mods({ type: "角色", list: [{ id: 31301 }, { id: 51301 }] })).resolves.toMatchObject({ ok: false })
         await expect(api.mods({ type: "角色", list: [{ id: 12101 }] })).resolves.toMatchObject({ ok: false })
         expect(await api.mods({ type: "角色", list: [{ id: 41001 }, { id: 41002 }, null] })).toMatchObject({ ok: true })
-        const mods = (await api.state()).mods["角色"]
+        const mods = (await api.state()).mods.角色
         expect(mods[0]).toMatchObject({ id: 41001 })
         expect(mods[1]).toMatchObject({ id: 41002 })
         expect(mods[2].id).toBeNull()

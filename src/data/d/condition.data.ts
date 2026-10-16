@@ -10344,6 +10344,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "sp黎瑟抽卡180次",
     },
+    "4030058": {
+        id: 4030058,
+        logic: "AND",
+        map: {
+            HaveItem: [["Skin", 410301, 1]],
+        },
+        remark: "获得SP黎瑟皮肤",
+    },
     "4040001": {
         id: 4040001,
         logic: "AND",

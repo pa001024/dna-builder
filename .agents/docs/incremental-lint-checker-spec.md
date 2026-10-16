@@ -47,6 +47,54 @@
    「改动」以真实源码编译（103MB 字面量），实测 bun 内存 10GB+。现冷缓存时 `changedData`
    置空，数据文件与增量口径一致走声明替换（缺失即生成），数据体检查仍由 lint:full 兜底。
 
+## 实施记录（2026-10-17）：引擎切换为 tsc-rs
+
+进程内 TS-API 检查器退役，改调 tsc-rs 二进制（`devDependencies.tsc-rs`，上游已发布
+0.7.0，content-mapper 协议与 fork 验证版本一致；`TSC_RS_BIN` 可覆盖二进制路径）。
+`.vue` 经新包 `tsc-rs-vue-mapper`（`file:tools/vue-mapper`，内容为 fork 的
+`packages/vue-mapper` 经 Biome 风格格式化后的 vendor 拷贝，自带
+`@vue/language-core@^3.3.13` + `typescript@^5.9.0` 以保证 codegen 与 helper 类型配对一致）
+展开。删除约 300 行：数据文件声明替换（含缓存、负缓存、gc）、components.d.ts 裁剪、
+自建 program/诊断收集；program 恒全量，增量语义收缩为「tsc-rs 全量检查 + 按根集合过滤展示」
+（`parseTscRsOutput` / `filterDiagnosticsByRoots`，单测见 `tools/tsc-rs-output.test.ts`）。
+缓存版本升至 v4（旧缓存整体失效一次），`dataDecls` 块与 `.tmp/lint-data-decls/` 废弃。
+冷缓存全量约 12s（无 35~40s 慢路径）。已知差异：引擎为 TS 7.1，诊断与 vue-tsc（TS 5.9）
+不完全相同——400 文件实测 37 条中 11 条为真实模板 bug（新 codegen 下 vue-tsc 同样报出，
+旧 pin 漏报），26 条为 TS7 严格度差异（`v-html` 等内建指令、全局组件、合成代码区诊断）；
+基线变绿前缓存无法落盘（与旧引擎同语义：失败不写缓存），故需先处理这批诊断再进入增量态。
+
+## 跟进（2026-10-17）：Biome 清零 + 虚拟合成区诊断隐藏 + 基线变绿
+
+- `biome lint .` 全仓库清零：`build-api.test.ts` 两处 `mods["角色"]` 改点访问（等价），
+  `tools/vue-mapper/*.cjs` 按 Biome 风格改写（useTemplate/useOptionalChain，已同步回 fork）。
+- tsc-rs host 对无原文位置的虚拟合成区诊断（行号常越界，如 822 行文件的 844~1011 行）
+  附注记行，增量脚本按注记过滤（`isVirtualOnlyDiagnostic`），`--verbose` 下报隐藏数量。
+  这 24 条在 vue-tsc 下本就不展示；代价是同 bug 的映射版诊断若只以虚拟形态出现也会被隐藏
+  （如 LevelUpCalculator 的 Map.value 问题），兜底仍由 `lint:full` 负责。
+- 剩余 13 条可定位诊断逐一定性：`v-html`（内建）与 `v-h-resize-for`（main.ts 全局注册）
+  补 `src/types/global-directives.d.ts` 类型注册后消除；中间踩过两个坑——增补块放在全局脚本
+  文件（无顶层 import/export）会遮蔽整个 vue 模块致 2582 条连锁报错，必须独立成模块文件
+  （`export {}`）；增补内部不可 `import("vue")` 自引用，同理致命。Toast.vue 的 6 条
+  （reka-ui 组件未导入）补 import 后消除，该文件此前模板与运行时双双 broken。
+- 基线变绿后验证完整红绿循环：新增带错文件→仅展示根诊断且 exit 1；修复→通过写缓存；
+  删除→通过；无改动→0.5s 跳过。`lint:full`（vue-tsc）复核仍为 0 错误，无回退。
+
+## 跟进（2026-10-17）：数据值变/类型变二分 + 最小 program 快径
+
+- 值变只跑改动文件、不重跑全量：`prepareDataDecls` 对改动数据文件重跑 transpile 求声明哈希，
+  哈希不变即类型未变，下游不进根；`filterDataOnlySeeds` 把纯值变文件踢出种子。注意 transpile
+  不做语义检查，因此改动文件本轮仍以真实源码参诊（manifest 里不写它，data-mapper 按缺条目
+  回退真实源码 + identity 映射），体语义错误（如 `number[]` 里混 string）照常报出，无死角。
+- 新增零依赖包 `tsc-rs-data-mapper`（`file:tools/data-mapper`，manifest 驱动：临时配置旁的
+  `data-decls.json` 给绝对路径映射；缺条目回退真实源码）。tmp tsconfig 挂两个 mapper
+ （`.vue` + `.data.ts` 后缀匹配已确认）。`.data.ts` 复合扩展可注册（host 按后缀匹配）。
+- 纯值变（全改动为已存在数据文件的修改、transpile 通过、哈希全不变、无增删、非全量模式）走
+  最小 program：`planMinimalFiles`（单测）算改动文件 + 工程 `.d.ts`（`components.d.ts` 除外，
+  它会把 program 从 164 文件撑到 2134 文件、0.4s 变 5.3s，实测），闭包含 `.vue` / 非 `.d.ts`
+  环境声明文件、改动文本含 `window.` 时退回全量。实测单文件值变 1.2s（tsc-rs 0.4s）。
+- 缓存版本升至 v5（`dataDecls` 条目新增 `declHash`）。教训：msys `sed -i` 会把文件换行符改成
+  CRLF，探针改文件一律用 edit 工具，恢复用 `git show HEAD:path` 重定向。
+
 ## Problem Statement
 
 `pnpm lint` 的类型检查仍然是 vue-tsc 的"壳"：生成临时 tsconfig 交给真 vue-tsc。这带来两个性能问题：

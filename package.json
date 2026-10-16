@@ -160,6 +160,7 @@
         "rollup-plugin-graphql-tag": "^0.1.0",
         "tailwindcss": "^4.3.3",
         "tsc-rs": "0.7.0",
+        "tsc-rs-data-mapper": "file:tools/data-mapper",
         "tsc-rs-vue-mapper": "file:tools/vue-mapper",
         "typescript": "~5.9.3",
         "typescript-eslint": "^8.71.0",

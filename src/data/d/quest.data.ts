@@ -110600,7 +110600,7 @@ export const questData: QuestStory[] = [
                         id: "178739056270024906512",
                         type: "TalkNode",
                         name: "无缝对话看城墙",
-                        next: ["178739061344924907242"],
+                        next: ["178739061344924907242", "17918787001821142268"],
                         dialogues: [
                             {
                                 id: 12070699,
@@ -110745,6 +110745,12 @@ export const questData: QuestStory[] = [
                                 npc: 260001,
                             },
                         ],
+                    },
+                    {
+                        id: "17918787001821142268",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/cbt03/0071_lise_secret",
                     },
                 ],
             },
@@ -212312,7 +212318,7 @@ export const questTextEn: Record<string, string> = {
     "12063801#speaker": "Qingluan Type Ⅱ",
     "1207#name": "Towards the Dawn",
     "1207#tips": "Work out what Rae is really up to",
-    "12070081#speaker": "Forlorn Old Man",
+    "12070081#speaker": "Forlorn Old Woman",
     "120701#desc":
         "A doll found in Rae's secret hideout. A portrait bearing a striking resemblance to Lieutenant Colonel Johnson has been pasted over its face.",
     "120701#name": "A portrait resembling Lieutenant Colonel Johnson has been pasted over the doll's face",
@@ -254726,7 +254732,7 @@ export const questTextKr: Record<string, string> = {
     "12070030": "어릴 때부터 잘생겼다는 소리를 꽤 들었으니까, 군복도 아주 멋지게 소화했을 거고.",
     "12070031": "......",
     "12070032": "이제 그 답은 영영 알 수 없게 되어 버렸지만.",
-    "12070034": '"더는 필토이드가 사람을 해치는 걸 지켜보지 않겠어."',
+    "12070034": '"더 이상 그 누구도 필토이드에게 죽는 걸 보고만 있지 않겠다."',
     "12070035":
         "...그때만 해도 난 참 어리숙했어. 필토이드만 전부 없애 버리면, 더는 슬픔도 이별도 없이, 다 함께 평온히 지낼 수 있을 줄 알았거든.",
     "12070036": "나중에야 이 세상엔 필토이드 말고도 사람 목숨을 앗아 가는 게 많다는 걸 깨달았지만.",
@@ -255310,7 +255316,7 @@ export const questTextKr: Record<string, string> = {
     "12070602": "블루스는 저를 기절시킨 뒤, 제 친구에게 부탁해 저를 현장에서 데리고 나가게 했어요.",
     "12070603": "네...?",
     "12070604": "마지막으로 헤어지기 전, 블루스는 제게 이런 말을 남겼어요——",
-    "12070605": '<H>"무슨 일이 있어도, 잘 살아"</>',
+    "12070605": '<H>"무슨 일이 있어도, 잘 살아."</>',
     "12070606": "레이 씨의 언니도 마지막에 뭔가 말을 남길 수 있었다면, 분명 같은 바람을 전했을 거예요.",
     "12070607": "목숨을 내던지지 말고, 부디 잘 살아가 달라고요.",
     "12070608": "우리 언니가 무슨 생각이었는지 리듬 언니가 어떻게 알아요...",
@@ -283751,7 +283757,7 @@ export const questTextFr: Record<string, string> = {
     "12070307": "Non. J’ai quitté les Veilleurs. Aujourd’hui, je ne fais que me promener dans les environs.",
     "12070308": "Quoi ?! Vous qui aimiez tant votre travail, vous avez démissionné ? Mais qu’est-ce qui s’est passé ?",
     "12070309": "C’est pour des raisons personnelles... Ce serait trop long à expliquer.",
-    "12070310": "Ce n’est rien. Si vous ne voulez pas en parler, n’en parlons pas. Je suis simplement surpris.",
+    "12070310": "Ce n’est rien. Si vous ne voulez pas en parler, n’en parlons pas. Je suis simplement surprise.",
     "12070311":
         "Au fait, vous vous souvenez de mon amie ? Celle qui cherchait des ingrédients dans la nature et qui avait attiré des Souillés par accident. Sans votre arrivée, elle n’en serait jamais sortie vivante.",
     "12070312":
@@ -296531,7 +296537,7 @@ export const questTextFr: Record<string, string> = {
     "12063801#speaker": "Qingluan Type II",
     "1207#name": "En marche vers l’aube",
     "1207#tips": "Déduire les véritables intentions de Rae",
-    "12070081#speaker": "Vieil homme abattu",
+    "12070081#speaker": "Vieille femme abattue",
     "120701#desc":
         "Un mannequin a été découvert dans la « base secrète » de Rae. Un portrait ressemblant fortement au lieutenant-colonel Johnson est collé sur son visage.",
     "120701#name": "Un portrait ressemblant fortement au lieutenant-colonel Johnson est collé sur le visage du mannequin",

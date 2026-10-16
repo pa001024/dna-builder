@@ -4027,7 +4027,7 @@ export const charAccessoryData: Accessory[] = [
     },
     {
         id: 31007,
-        name: "胜利·初雪小夜曲",
+        name: "胜利·地狱咆哮",
         desc: "可变更胜利动作。",
         icon: "T_Fashion_SettlementAction_07",
         rarity: 5,
@@ -5128,6 +5128,7 @@ export const charAccessoryData: Accessory[] = [
         icon: "T_Fashion_Fx32_03",
         rarity: 5,
         unlock: "通过活动获得",
+        hide: 1,
     },
     {
         id: 70071,
@@ -6435,14 +6436,14 @@ export const headFrameData: HeadFrameItem[] = [
     },
     {
         id: 10052,
-        name: "糖霜满屋·鎏金",
+        name: "糖霜满屋·墨玉",
         desc: "适用于头像框。",
         icon: "T_Head_Frame48",
         access: "通过活动获得",
     },
     {
         id: 10053,
-        name: "糖霜满屋·墨玉",
+        name: "糖霜满屋·鎏金",
         desc: "适用于头像框。",
         icon: "T_Head_Frame49",
         access: "通过活动获得",

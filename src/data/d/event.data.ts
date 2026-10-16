@@ -1761,7 +1761,7 @@ export const eventData: EventItem[] = [
             boxPerDay: 2,
             coinPerBox: 3,
             eventId: 10302004,
-            questId: [1030200201, 1030200202, 1030200203, 1030200204, 1030200205, 1030200206],
+            questId: [1030200401, 1030200402, 1030200403, 1030200404, 1030200405, 1030200406],
             rewardCount: [16],
             rewardId: [114110, 114108],
         },

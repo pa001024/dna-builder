@@ -38473,7 +38473,7 @@ export const dungeonsData: Dungeon[] = [
         t: "ExtermPro",
         ts: "驱离",
         lv: 60,
-        rd: 1,
+        rd: 0,
         mod: 40,
         desc: "击败敌人，完成驱离",
         sm: [6016021],
@@ -50155,7 +50155,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,
@@ -50214,7 +50214,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,
@@ -50273,7 +50273,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,
@@ -50332,7 +50332,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,
@@ -50391,7 +50391,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,
@@ -50450,7 +50450,7 @@ export const dungeonsData: Dungeon[] = [
                     id: 9170101,
                     time: 1,
                     th: 6,
-                    radius: [1000, 4000, 1000, 4000],
+                    radius: [1000, 3000, 1000, 3000],
                     m: [
                         {
                             id: 7012001,

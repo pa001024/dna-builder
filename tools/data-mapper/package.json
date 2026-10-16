@@ -1,0 +1,21 @@
+{
+    "name": "tsc-rs-data-mapper",
+    "version": "0.1.0",
+    "description": "Declaration-overlay content mapper for tsc-rs: serves cached .d.ts for data files",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pa001024/dna-builder.git",
+        "directory": "tools/data-mapper"
+    },
+    "type": "commonjs",
+    "main": "mapper.cjs",
+    "files": ["mapper.cjs"],
+    "typescript": {
+        "contentMapper": {
+            "exec": ["node", "mapper.cjs"],
+            "compilerOptions": [],
+            "dynamicConfig": false
+        }
+    }
+}

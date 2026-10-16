@@ -7143,6 +7143,12 @@ const t: Reward[] = [
                 c: 65,
                 n: "深红凝珠",
             },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
+            },
         ],
     },
     {
@@ -7292,6 +7298,12 @@ const t: Reward[] = [
                 t: "Resource",
                 c: 70,
                 n: "深红凝珠",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
             },
         ],
     },
@@ -7443,6 +7455,12 @@ const t: Reward[] = [
                 c: 75,
                 n: "深红凝珠",
             },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
+            },
         ],
     },
     {
@@ -7592,6 +7610,12 @@ const t: Reward[] = [
                 t: "Resource",
                 c: 80,
                 n: "深红凝珠",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
             },
         ],
     },
@@ -7743,6 +7767,12 @@ const t: Reward[] = [
                 c: 85,
                 n: "深红凝珠",
             },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
+            },
         ],
     },
     {
@@ -7892,6 +7922,12 @@ const t: Reward[] = [
                 t: "Resource",
                 c: 90,
                 n: "深红凝珠",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
             },
         ],
     },
@@ -8043,6 +8079,12 @@ const t: Reward[] = [
                 c: 95,
                 n: "深红凝珠",
             },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
+            },
         ],
     },
     {
@@ -8192,6 +8234,12 @@ const t: Reward[] = [
                 t: "Resource",
                 c: 100,
                 n: "深红凝珠",
+            },
+            {
+                id: 100,
+                t: "Resource",
+                c: 20,
+                n: "月石",
             },
         ],
     },

@@ -1,0 +1,25 @@
+{
+    "name": "tsc-rs-vue-mapper",
+    "version": "0.1.0",
+    "description": "Vue SFC content mapper for tsc-rs: vue-tsc support for the Rust TypeScript compiler",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pa001024/ts-rust.git",
+        "directory": "packages/vue-mapper"
+    },
+    "type": "commonjs",
+    "main": "mapper.cjs",
+    "files": ["mapper.cjs", "transform.cjs"],
+    "typescript": {
+        "contentMapper": {
+            "exec": ["node", "mapper.cjs"],
+            "compilerOptions": ["strict", "target", "jsx", "module", "moduleResolution", "allowJs", "checkJs"],
+            "dynamicConfig": false
+        }
+    },
+    "dependencies": {
+        "@vue/language-core": "^3.3.13",
+        "typescript": "^5.9.0"
+    }
+}

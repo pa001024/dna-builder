@@ -242,7 +242,7 @@ export const skinGachaData: SkinGacha[] = [
             "<Title>必定获取金色品质道具</>\n正在进行的寻觅 <highlight>%d</>/90\n\n<Title>活动限定万华概率说明</>\n经由寻觅获取金色品质道具的基础概率为<highlight>0.3%%</>，综合概率（含保底）为<highlight>1.42%%</>，至多<highlight>90</>次寻觅必定获取金色品质道具，其中各道具概率如下：\n青羽天巡：<highlight>0.641%%</>\n虹色棱镜*25：<highlight>0.641%%</>\n虹色棱镜*50：<highlight>0.142%%</>\n经由寻觅获取紫色品质道具的基础概率为<highlight>5.1%%</>，综合概率（含保底）为<highlight>12.46%%</>，至多<highlight>10</>次寻觅必定获取紫色品质道具；\n通过保底获取紫色品质道具的概率为<highlight>99.7%%</>，获取金色品质道具的概率为<highlight>0.3%%</>。\n当触发概率提升、保底等情况时的概率，请以具体规则为准。\n\n<Title>重复获取说明</>\n如果重复获取金色品质形象青羽天巡，将转化为虹色棱镜*<highlight>25</>。\n如果重复获取其余已拥有的外观，将转化为水色棱镜；重复紫色品质外观将转化为水色棱镜*<highlight>4</>，重复蓝色品质外观将转化为水色棱镜*<highlight>1</>。\n\n<Title>万华继承说明</>\n在<highlight>执羽叩青空</>中的寻觅次数将独立计算，不与其他活动万华合并计算。",
         coreDes: "流光形象",
         coreDesColor: 5,
-        type: "活动限定",
+        type: "限时复刻",
         subTabId: 1401,
         tabId: 5,
         sequence: 5,
@@ -2671,7 +2671,7 @@ export const skinGachaTypes: SkinGachaType[] = [
     },
     {
         type: "GACHA_SKIN_TYPE_SPECIAL_4",
-        name: "活动限定",
+        name: "限时复刻",
         subTabId: 1401,
     },
     {
@@ -2692,11 +2692,6 @@ export const skinGachaTypes: SkinGachaType[] = [
     {
         type: "GACHA_SKIN_TYPE_SPECIAL_8",
         name: "活动限定",
-        subTabId: 1401,
-    },
-    {
-        type: "GACHA_SKIN_TYPE_SPECIAL_9",
-        name: "限时复刻",
         subTabId: 1401,
     },
 ]
