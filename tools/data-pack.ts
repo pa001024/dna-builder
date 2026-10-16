@@ -7,6 +7,7 @@ import { encode } from "@msgpack/msgpack"
 import { zipSync } from "fflate"
 import { globSync } from "glob"
 import { computeRagFingerprints } from "../src/data/rag/corpus"
+import { DATA_PACK_FORMAT_MAJOR, normalizeDataPackMajor } from "../src/utils/data-pack/data-pack-format"
 import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
 /** 数据包覆盖的语言（RAG 指纹按语言各算一份，与服务端索引的语言口径一致） */
@@ -18,6 +19,7 @@ type PackManifest = {
     builtAt: string
     packageFile: string
     version: string
+    major: number
     imgsHash: string
     modules: Record<string, { exports: string[]; hasFunctions: boolean; hash: string }>
     /**
@@ -40,6 +42,7 @@ type PackVersionEntry = {
     builtAt: string
     packageFile: string
     version: string
+    major?: number
     notes?: string
 }
 
@@ -132,7 +135,11 @@ function readVersions(): PackVersionEntry[] {
  * @param versions 版本列表
  */
 function writeVersions(versions: PackVersionEntry[]): void {
-    fs.writeFileSync(versionsPath, JSON.stringify(versions, null, 2))
+    const normalized = versions.map(item => ({
+        ...item,
+        major: normalizeDataPackMajor(item.major, item.version),
+    }))
+    fs.writeFileSync(versionsPath, JSON.stringify(normalized, null, 2))
 }
 
 /**
@@ -221,6 +228,7 @@ async function buildDataPack(targetVersion: string, updateVersions: boolean): Pr
         builtAt: new Date().toISOString(),
         packageFile: `${targetVersion}.zip`,
         version: targetVersion,
+        major: DATA_PACK_FORMAT_MAJOR,
         imgsHash: hashString(JSON.stringify(imgsManifest)),
         modules: manifestModules,
         rag: ragFingerprints,
@@ -242,6 +250,7 @@ async function buildDataPack(targetVersion: string, updateVersions: boolean): Pr
         builtAt: manifest.builtAt,
         packageFile: manifest.packageFile,
         version: manifest.version,
+        major: manifest.major,
         notes,
     }
     // 仅 upload 模式写版本列表；非 upload 模式（如 build）不修改 versions.json
@@ -282,8 +291,15 @@ async function uploadDataPack(entry: PackVersionEntry): Promise<void> {
 }
 
 async function main() {
+    if (args.includes("backfill")) {
+        const versions = readVersions()
+        writeVersions(versions)
+        console.log(`已回填 ${versions.length} 条版本 major（当前格式 major=${DATA_PACK_FORMAT_MAJOR}）`)
+        return
+    }
+
     if (!shouldBuild) {
-        throw new Error("请指定 build 或 upload")
+        throw new Error("请指定 build、upload 或 backfill")
     }
 
     if (!version) {

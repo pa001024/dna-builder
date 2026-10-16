@@ -329,7 +329,7 @@ function handleCardClick() {
                     {{ value[2] === "Mod" ? $t(mod.名称) : `${$t("UI_FORGING_BLUEPRINT")}${mod.名称}` }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <ShowProps
@@ -359,7 +359,7 @@ function handleCardClick() {
                     {{ $t(weapon.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <ShowProps
@@ -389,7 +389,7 @@ function handleCardClick() {
                     {{ $t(char.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <div
@@ -413,7 +413,7 @@ function handleCardClick() {
                 {{ `设计稿: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Walnut' && getWalnutReward(value[1]).walnut"
@@ -436,7 +436,7 @@ function handleCardClick() {
                 {{ getWalnutReward(value[1]).walnut?.名称 || value[1] }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="
@@ -461,7 +461,7 @@ function handleCardClick() {
                 {{ getResourceById(value[1])!.name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="
@@ -488,7 +488,7 @@ function handleCardClick() {
                 {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Title' && getTitleById(value[1])"
@@ -512,7 +512,7 @@ function handleCardClick() {
             </SRouterLink>
             <span v-else>{{ getTitleById(value[1])?.name }}</span>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isFashionCostType(value[2])"
@@ -541,7 +541,7 @@ function handleCardClick() {
             </SRouterLink>
             <span v-else-if="!mini">{{ name }}</span>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isAccessoryCostType(value[2]) && getAccessoryByType(value[2], value[1])"
@@ -564,7 +564,7 @@ function handleCardClick() {
                 {{ getAccessoryByType(value[2], value[1])?.name || name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else
@@ -587,6 +587,6 @@ function handleCardClick() {
                 {{ $t(nameString) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value }}</span>
     </div>
 </template>

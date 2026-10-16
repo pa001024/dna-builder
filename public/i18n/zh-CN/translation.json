@@ -235,6 +235,7 @@
         "draftDuration": "铸造时间",
         "draftInfo": "铸造信息",
         "draftMaterialCount": "材料种类: {{count}}",
+        "hidden": "隐藏",
         "info": "饰品信息",
         "notFound": "未找到饰品数据",
         "rarity": "稀有度",

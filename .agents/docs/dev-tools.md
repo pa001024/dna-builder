@@ -106,6 +106,18 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 - 检索层的反向索引（译文 → 原文）优先查这份表；
 - `pnpm prune-i18n`（`bun tools/prune-migrated-i18n.ts`）据此把 `public/i18n` 里已迁移的中文键条目删掉，
   `--check` 只报告；
+- **对照表全新生成、不读存量**：`translations.data.ts` = 当期模块位置配对（数组行按 id 配对，
+  术语字典`奖励/术语解释/字段`按索引配对键与值）+ 别名表（`TRANSLATION_ALIASES`，前端展示名→官方中文正典，
+  按正典查 TextMap 现场解析，强制覆盖）+ 前端自造展示名（`SUPPLEMENTAL_*`，强制覆盖），每次完整重写。
+  上游各语言的 `translation.json`（本地生成物、不进版本库，生成脚本只读旧合并从不删除）
+  不再参与合并，旧键自然消失；必须保留的新条目手工补进 `TRANSLATION_ALIASES` 或 `SUPPLEMENTAL_*`
+  （显式、可 review）。`-f <模块>` 局部导入不碰 translations 表，改名后跑一次全量 `pnpm importdata` 生效。
+- **特质文案不进 public/i18n**：角色特质名/描述（`CharTrait`）是结构化数据，对照表按 id 自动配对，
+  界面 `$t(特质名/描述)` 经数据包注入表解析；不要再往 `public/i18n/*/translation.json` 顶层手补特质串
+  （A类自创公式键如 DPS 系列只留 public，不进对照表）。
+- **属性名能进对照表的不进 public/i18n**：`昂扬/暴击/背水`等 11 个属性名数据包表逐字复现
+  （`tools/import-attr-i18n.ts` 的 `DATA_PACK_COVERED_ATTR_NAMES` 跳过写入，防复活），
+  同名不同义的（如`副本/委托密函商店/远程武器`）仍留 public（`$t` 优先 public，语境为准）。
 - **保留项**：英文点号键的界面文案、角色特质、属性名与 `attrDesc`（上游没有这些文案）；
   zh-CN 整体不动（fallbackLng，不进包）；
 - 数据包未安装时界面显示中文原文，属预期降级。
@@ -114,5 +126,9 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 
 - `pnpm dp`（`bun tools/data-pack.ts build|upload`）— 打包 `src/data/d/**/*.data.ts` 为 msgpack
   数据包并（可选）上传 OSS/CDN，同时写 `mock/data-pack/versions.json`；
+  包内 `manifest.json` 与版本列表条目都带 `major`（`src/utils/data-pack/data-pack-format.ts` 的
+  `DATA_PACK_FORMAT_MAJOR`，改动包格式、老读包侧会崩时加一；抓取侧只收 `major <= 当前值` 的包）。
+  `bun tools/data-pack.ts backfill` 给本地版本列表回填缺失的 major；缺 major 的老条目按
+  `1.6.208.7` 分割线推断（之前为 1，自 MOD 数值挪进 `加成` 起为 2）；
 - `pnpm ip`（`bun tools/imgs-pack.ts build`）— 图片包；
 - dev 环境数据包基址是 `/mock/data-pack`（本地仓库目录），无需联网即可安装。

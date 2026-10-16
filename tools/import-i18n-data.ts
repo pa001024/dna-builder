@@ -9,10 +9,11 @@ import * as ts from "typescript"
 /** 同级仓库的默认上游根（与 tools/import-attr-i18n.ts 等兄弟工具一致） */
 const DEFAULT_UPSTREAM_ROOT = path.resolve("..", "DuetNightAbyssData2")
 
-/** 命令行 --upstream（最高优先级，与兄弟工具对齐） */
+/** 命令行 --upstream（最高优先级，与兄弟工具对齐）；vitest（node）下无 Bun 全局时退回 process.argv，保证纯函数可被测试 import */
 const CLI_UPSTREAM = (() => {
-    const index = Bun.argv.indexOf("--upstream")
-    return index >= 0 ? Bun.argv[index + 1] : undefined
+    const args = typeof Bun === "undefined" ? process.argv : Bun.argv
+    const index = args.indexOf("--upstream")
+    return index >= 0 ? args[index + 1] : undefined
 })()
 
 /**
@@ -111,7 +112,7 @@ async function readLuaTable(name: string): Promise<any> {
  * 这类词在**官方文本表**（`Script/Datas/TextMap_I18n.lua`）里有权威译名，只是 ID 与模块字段不相干，
  * 因此单独按 ID 取。键是前端实际输出的中文，值是官方 TextMapId。
  */
-const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
+export const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     // 迷津房间类型：名称来自游戏脚本 Script/Datas/RougeLikeRoomType.lua，
     // 不在任何一个 i18n 模块数据集里，只能按官方文本表 ID 取权威译名
     战斗: "RougeLike_RoomType_Name_1",
@@ -137,7 +138,6 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     // 不在任何 i18n 模块数据集里（`Walnut.json` 只含名称与奖励），
     // 但官方文本表里有同义的权威 ID —— 按 ID 取，避免另造界面键。
     副本: "UI_Dungeon_Tab_WalnutDungeon",
-    梦魇残声: "MAIN_UI_HARDBOSS",
     委托密函商店: "MAIN_UI_WALNUTBAG",
     // 资源「获取途径」分区标题：详情页与搜索/ Agent 字段用的都是这个中文词，
     // 上游各模块数据集里没有它，按官方文本表 ID 取权威译名。
@@ -148,9 +148,6 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     远程武器: "UI_BAG_Longrange",
     "弓（长弓）": "WeaponType_Bow02",
     "弓（短弓）": "WeaponType_Bow01",
-    // 远程武器的基础招式名「射击」：`weapon.data.ts` 里弓/枪类技能的 `名称` 直接用
-    // `WeaponSkillType.射击`（枚举值），官方文本表里唯一同形词条就是这条 HUD 提示，按 ID 取权威译名。
-    射击: "UI_EventHud_Shoot",
     // 招式字段 `tag` 里的「战技 / 终结技」：上游模块数据集里没有这两个词条，
     // 官方文本表里有独立的同形条目（引导与键位提示用的技能名），按 ID 取权威译名。
     战技: "Guide_HighlightButton_Skill1",
@@ -159,9 +156,116 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     维塔: "PlayerDefaultName",
     墨斯: "ExPlayerDefaultName",
     秽兽: "UI_Archive_Tab_InfectionEnemy",
-    神弃者同盟: "UI_Archive_Tab_AllianceEnemy",
     最大耐受: "UI_Mod_CostIncrease",
     放生获得: "UI_Pet_DecomposeResultResource",
+    魔灵: "MAIN_UI_PET",
+    魔灵潜质: "MAINUIGUIDE_TITLE_PETTRAIN",
+    失活魔灵: "Pet_ResourcePet",
+    活力魔灵: "Pet_BattlePet",
+    // ---- 以下为对照表必须保留的展示名（与上同等效力）：位置配对拿不到或配不对的中文正典，
+    // 按 ID 取权威译名。每条都经 5 语逐条审计：配对一致的已删，剩下的至少在一门语言或引用上扛事。
+    称号: "UI_PersonalPage_Title_Name",
+    神智: "MAINUIGUIDE_TITLE_SP",
+    不朽剧目: "Abyss_Infinite",
+    经典剧目: "Abyss_Normal",
+    热映剧目: "Abyss_Rotate",
+
+    技能范围: "Attr_SkillRange_Name",
+    技能耐久: "Attr_SkillSustain_Name",
+    技能威力: "Attr_SkillIntensity_Name",
+    技能效益: "Attr_SkillEfficiency_Name",
+    充盈威力: "Attr_HyperTriggerRate_Name",
+    充盈转化: "Attr_HyperTriggerConvertRate_Name",
+    攻击范围: "Attr_AttackRange_Name",
+    弹药转化率: "Attr_BulletConver_Name",
+    攻击: "Attr_ATK_Name",
+    护盾: "Attr_ES_Name",
+    生命: "Attr_Hp_Name",
+    防御: "Attr_DEF_Name",
+    子弹爆炸范围: "Attr_AttackRange_Bullet_Name",
+    最大弹药: "Attr_BulletMax_Name",
+    武器精通: "Attr_ExcelWeaponTag_Name",
+
+    档案: "UI_Chardata_Data",
+    出生地: "UI_Chardata_Char_BrithPlace",
+    生日: "UI_Chardata_Char_Brithday",
+    语音: "UI_CharVoice_Tab",
+
+    暗属性: "UI_Attr_Dark_Name",
+    火属性: "UI_Attr_Fire_Name",
+    光属性: "UI_Attr_Light_Name",
+    雷属性: "UI_Attr_Thunder_Name",
+    水属性: "UI_Attr_Water_Name",
+    风属性: "UI_Attr_Wind_Name",
+    追加伤害: "TERM_Common_AdditionalDmg",
+    技能追加伤害: "TERM_Common_AdditionalDmg_Skill",
+    技能速度: "TERM_Common_SkillSpeed",
+
+    基础: "UI_CameraSystem_Basic",
+    技能: "MAIN_UI_SKILL",
+    减伤: "Tag_DmgReducion",
+    取消: "AFDayEvent_Photo_Cancel",
+    全部: "UI_ALL",
+    任意: "UI_ImpressionShop_UnlockCon_Any",
+    溯源: "MAIN_UI_CARDLEVEL",
+    头像: "UI_HeadFrame_Head",
+    头像框: "UI_HeadFrame_Frame",
+    遗物: "UI_RLArchiveTitle_Treasure",
+    灾厄熔炼: "UI_Armory_HyperStrengthen",
+    烛芯: "UI_RLArchiveTitle_Blessing",
+}
+
+/**
+ * 前端展示名 -> 官方中文正典（B类：能用游戏官方名翻译的；A类自创公式键只留 public/i18n）。
+ *
+ * 学上游 create_translation.py 的 EX_T / root-keys：对照表里只认展示名，上游模块与文本表里
+ * 只有正典（如「暴击」->「暴击率」）。导入时按正典查 TextMapContent 取各语言译文，查不到
+ * 则按展示名本身回退再查一次；都查不到或译文与展示名相同则跳过（上游改名后旧键自然消失）。
+ * 本表每条正典都至少一门语言可解析；新增请先确认正典在 TextMap 存在。
+ */
+export const TRANSLATION_ALIASES: Record<string, string> = {
+    百首: "百首之",
+    暴击: "暴击率",
+    暴伤: "暴击伤害",
+    不死鸟: "不死鸟之",
+    触发: "触发概率",
+    弹匣: "弹匣容量",
+    弹药: "最大弹药",
+    多重: "多重射击",
+    攻速: "攻击速度",
+    海妖: "海妖之",
+    换生灵: "换生灵之",
+    黄衣: "黄衣之",
+    技能伤害: "造成技能伤害",
+    金乌: "金乌之",
+    近战: "近战武器",
+    巨鲸: "巨鲸之",
+    冥犬: "冥犬之",
+    牧神: "牧神之",
+    普攻增伤: "普通攻击伤害",
+    歧视: "阵营增伤",
+    契约者: "契约者之",
+    囚狼: "囚狼之",
+    人面狮: "人面狮之",
+    审判者: "审判者之",
+    狮鹫: "狮鹫之",
+    属性穿透: "全属性穿透",
+    属性伤: "属性攻击",
+    同律近战: "近战同律武器",
+    同律远程: "远程同律武器",
+    下落增伤: "下落攻击伤害",
+    邪龙: "邪龙之",
+    蓄力增伤: "蓄力攻击伤害",
+    焰灵: "焰灵之",
+    夜魔: "夜魔之",
+    夜使: "夜使之",
+    异化冥犬: "异化冥犬之",
+    异化夜魔: "异化夜魔之",
+    羽蛇: "羽蛇之",
+    远程: "远程武器",
+    增伤: "造成的伤害",
+    中庭蛇: "中庭蛇之",
+    装填: "子弹装填速度",
 }
 
 /**
@@ -211,6 +315,15 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         "[羽化]伤害": "[羽化]傷害",
         "[羽化]额外伤害": "[羽化]額外傷害",
         充盈: "充盈",
+        // 上游 translation.json 曾含、现按位置配对拿不到的对照（旧 translations.data.ts 存量回填）
+        独立增伤: "獨立增傷",
+        段数: "段數",
+        额外字段: "額外欄位",
+        贯穿: "貫穿",
+        削韧: "削韌",
+        延迟: "延遲",
+        连段: "連段",
+        震荡: "震盪",
     },
     en: {
         铜: "Bronze",
@@ -224,6 +337,20 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         "[羽化]伤害": "[Eclosion] Damage",
         "[羽化]额外伤害": "[Eclosion] Bonus Damage",
         充盈: "Overflow",
+        // Restored from legacy translations.data.ts (present in upstream translation.json, unreachable by positional pairing)
+        独立增伤: "Independent damage increase",
+        段数: "Hits",
+        额外字段: "Extra Fields",
+        贯穿: "Spike",
+        宝物组: "Treasure group",
+        弹片伤害: "Bullet DMG",
+        祝福组: "Blessing group",
+        削韧: "Toughness Damage",
+        延迟: "Delay",
+        卡肉: "Hit Stop",
+        连段: "Combo",
+        切割: "Slash",
+        震荡: "Smash",
     },
     jp: {
         铜: "銅",
@@ -237,6 +364,18 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         "[羽化]伤害": "[羽化]ダメージ",
         "[羽化]额外伤害": "[羽化]追加ダメージ",
         充盈: "チャージ",
+        独立增伤: "独立ダメージ増加",
+        额外字段: "追加フィールド",
+        贯穿: "貫通",
+        宝物组: "宝物グループ",
+        弹片伤害: "破片によるダメージ",
+        祝福组: "祝福グループ",
+        削韧: "靭性削り",
+        延迟: "遅延",
+        卡肉: "ヒットストップ",
+        连段: "コンボ",
+        切割: "切断",
+        震荡: "衝撃",
     },
     kr: {
         铜: "동",
@@ -250,6 +389,19 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         "[羽化]伤害": "[우화] 대미지",
         "[羽化]额外伤害": "[우화] 추가 대미지",
         充盈: "오버차지",
+        独立增伤: "독립 피해 증가",
+        段数: "타수",
+        额外字段: "추가 필드",
+        贯穿: "관통",
+        宝物组: "보물 그룹",
+        弹片伤害: "파편 손상",
+        祝福组: "축복 그룹",
+        削韧: "강인도削减",
+        延迟: "지연",
+        卡肉: "히트 스톱",
+        连段: "콤보",
+        切割: "베기",
+        震荡: "진동",
     },
     fr: {
         铜: "Bronze",
@@ -263,6 +415,19 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         "[羽化]伤害": "[Éclosion] Dégâts",
         "[羽化]额外伤害": "[Éclosion] Dégâts supplémentaires",
         充盈: "Surabondance",
+        独立增伤: "Augmentation de dégâts indépendante",
+        段数: "Nombre de coups",
+        额外字段: "Champs supplémentaires",
+        贯穿: "perforants",
+        宝物组: "Groupe de trésors",
+        弹片伤害: "Dégâts de projectiles",
+        祝福组: "Groupe de bénédictions",
+        削韧: "Dégâts de ténacité",
+        延迟: "Délai",
+        卡肉: "Hit Stop",
+        连段: "Combo",
+        切割: "tranchants",
+        震荡: "contondants",
     },
 }
 
@@ -273,7 +438,7 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
  * **按语言独立的数据集**：结构与字段名在简繁/各语言下一致，只有文本值不同。
  * 因此按位置同步遍历两侧，即可把同一字段的简体中文原文与目标语言译文配成对照。
  */
-const TRANSLATION_SOURCE_FILES = [
+export const TRANSLATION_SOURCE_FILES = [
     "AbyssBuff.json",
     "AbyssDungeon.json",
     "Achievement.json",
@@ -322,7 +487,6 @@ const TRANSLATION_SOURCE_FILES = [
     "Resource.json",
     "Review.json",
     "Reward.json",
-    "RewardView.json",
     "RobotEquip.json",
     "RougeLikeBlessing.json",
     "RougeLikeBlessingGroup.json",
@@ -377,7 +541,6 @@ const TRANSLATION_SOURCE_FILES = [
     "WeaponAccessory.json",
     "WeaponSkin.json",
     "Wiki.json",
-    "translation.json",
 ] as const
 
 /**
@@ -388,7 +551,7 @@ const TRANSLATION_SOURCE_FILES = [
  * 不经 i18next，因此收进对照表只会白占包体（合计约 3.8MB）。
  * storySummary 只有简体中文，无法构成对照。
  */
-const TRANSLATION_EXCLUDED_SOURCES = new Set([
+export const TRANSLATION_EXCLUDED_SOURCES = new Set([
     "QuestStory.json",
     "PartyTopic.json",
     "CharVoice.json",
@@ -581,7 +744,8 @@ const MAPPINGS: Mapping[] = [
             }
             const event = value.find(row => isRecord(row) && row.id === 1030031)
             if (!isRecord(event)) {
-                // throw new Error("后处理找不到 Event[1030031]")
+                console.warn("[warn] Event 后处理跳过：快照无 Event[1030031]（老版本尚无该活动）")
+                return value
             }
             event.startTime = 1785142800
             return value
@@ -1241,6 +1405,11 @@ const MAPPINGS: Mapping[] = [
         // 上游各语言是**独立数据集**（不是文本表映射），所以中文原文必须从对应语言的同名字段取
         // ——即两个语言包按同一位置遍历得到的字符串才构成一对。简体中文不进表：它是 fallbackLng，
         // 且键与值同形，各语言缺失时由 i18next 回落得到原文。
+        //
+        // 输出是**全新生成**：当期模块位置配对（数组行按 id，术语字典按索引）+ 别名表
+        // （TRANSLATION_ALIASES，展示名按中文正典查 TextMap 现场解析）+ 前端自造展示名
+        // （SUPPLEMENTAL_*），完整重写，不读任何存量条目。上游各语言的
+        // translation.json（本地生成物，不进版本库，会残留改名旧键）不再参与合并。
         source: async () => {
             const tables = await buildTranslationTables()
 
@@ -1415,6 +1584,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * 术语字典字段名：值是「展示名 -> 文本」的字典，且键本身会被翻译（如技能术语名 交响→交響、
+ * 奖励名 铜币→銅幣）。这类字典不能按 `target[key]` 取值（键已改名必然 miss，整棵子树全丢），
+ * 必须按索引配对键与值。口径对齐上游 create_translation.py 的 FIELD_CONFIG
+ * （奖励 / 技能.术语解释 / 技能.字段 这三类字典字段）。
+ */
+const TERM_DICT_FIELDS = new Set(["奖励", "术语解释", "字段"])
+
+/**
  * 按「同一位置」比较源语言与目标语言的值，收集对照条目。
  *
  * 上游各语言是独立数据集，同一字段在不同语言下只是文本不同、结构一致，
@@ -1427,8 +1604,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * @param source 源语言（简体中文）节点。
  * @param target 目标语言节点。
  * @param table 输出对照表。
+ * @param parentKey 父字段名（术语字典按索引配对键与值，见 TERM_DICT_FIELDS）。
  */
-function collectTranslationPairs(source: unknown, target: unknown, table: Map<string, string>): void {
+export function collectTranslationPairs(source: unknown, target: unknown, table: Map<string, string>, parentKey?: string): void {
     if (typeof source === "string") {
         if (typeof target !== "string") {
             return
@@ -1447,26 +1625,107 @@ function collectTranslationPairs(source: unknown, target: unknown, table: Map<st
         if (!Array.isArray(target)) {
             return
         }
+        // 上游各语言由同一份 Lua 按同一顺序渲染，数组一律按下标配对：按 id 配对会在同 id 多行
+        // （如 Reward 子奖励里 HeadFrame 与 TitleFrame 共用 10041）时以后行覆盖前行，把
+        // 「华彩殿堂·闪烁」错配成「華彩殿堂·9」。
         source.forEach((item, index) => collectTranslationPairs(item, target[index], table))
         return
     }
 
     if (isRecord(source) && isRecord(target)) {
-        for (const [key, item] of Object.entries(source)) {
-            collectTranslationPairs(item, target[key], table)
+        // 术语字典：键本身是展示名且已被翻译，按索引配对键与值（上游同逻辑，zip 到较短一边）
+        if (parentKey !== undefined && TERM_DICT_FIELDS.has(parentKey)) {
+            const sourceEntries = Object.entries(source)
+            const targetEntries = Object.entries(target)
+            const count = Math.min(sourceEntries.length, targetEntries.length)
+            for (let index = 0; index < count; index++) {
+                const [sourceKey, sourceValue] = sourceEntries[index]
+                const [targetKey, targetValue] = targetEntries[index]
+                collectTranslationPairs(sourceKey, targetKey, table)
+                collectTranslationPairs(sourceValue, targetValue, table, sourceKey)
+            }
+            return
         }
+        for (const [key, item] of Object.entries(source)) {
+            collectTranslationPairs(item, target[key], table, key)
+        }
+    }
+}
+
+/**
+ * 把别名表的展示名按中文正典查 TextMap 取译文写入对照表（强制覆盖位置配对的结果）。
+ * @param table 输出对照表。
+ * @param locale 打包语言。
+ * @param textMap 官方文本表（TextMap_I18n）。
+ */
+export function applyTranslationAliases(
+    table: Map<string, string>,
+    locale: TranslationLocale,
+    textMap: Record<string, Record<string, string>>
+): void {
+    const field = TEXT_MAP_LOCALE_FIELDS[locale]
+    const contentIndex = new Map<string, Record<string, string>>()
+    for (const row of Object.values(textMap)) {
+        const content = row?.TextMapContent
+        if (typeof content === "string" && content && !contentIndex.has(content)) {
+            contentIndex.set(content, row)
+        }
+    }
+    for (const [key, canonical] of Object.entries(TRANSLATION_ALIASES)) {
+        const text =
+            contentIndex.get(canonical)?.[field]?.replace("{空格}", " ") ??
+            (canonical === key ? undefined : contentIndex.get(key)?.[field]?.replace("{空格}", " "))
+        if (!text || text === key) {
+            continue
+        }
+        table.set(key, text)
+    }
+}
+
+/**
+ * 收集称号对照：后缀（`suf: true`）只补缺不覆盖。
+ *
+ * 英文后缀自带前导空格（" Rebecca"，供游戏内前缀+后缀直接拼接），按文件顺序后写入会把
+ * 角色名（Char.json 的 "Rebecca"）等正常翻译覆盖掉；后缀优先级最低，已有键一律保留。
+ * 仅后缀行走补缺，前缀与来源文案仍正常写入。
+ * @param source 简体中文 Title 行数组。
+ * @param target 目标语言 Title 行数组。
+ * @param table 输出对照表。
+ */
+export function collectTitlePairs(source: unknown, target: unknown, table: Map<string, string>): void {
+    const rowsOf = (value: unknown): Record<string, unknown>[] => (Array.isArray(value) ? value.filter(isRecord) : [])
+    const sourceRows = rowsOf(source)
+    const targetRows = rowsOf(target)
+    const normalSource: unknown[] = []
+    const normalTarget: unknown[] = []
+    const suffixSource: unknown[] = []
+    const suffixTarget: unknown[] = []
+    // 各语言同顺序渲染，按下标拆组后相对顺序不变，配对仍正确
+    const count = Math.min(sourceRows.length, targetRows.length)
+    for (let index = 0; index < count; index++) {
+        if (sourceRows[index].suf === true || targetRows[index].suf === true) {
+            suffixSource.push(sourceRows[index])
+            suffixTarget.push(targetRows[index])
+        } else {
+            normalSource.push(sourceRows[index])
+            normalTarget.push(targetRows[index])
+        }
+    }
+    collectTranslationPairs(normalSource, normalTarget, table)
+    const suffixTable = new Map<string, string>()
+    collectTranslationPairs(suffixSource, suffixTarget, suffixTable)
+    for (const [key, value] of suffixTable) {
+        if (!table.has(key)) table.set(key, value.trimStart())
     }
 }
 
 /**
  * 生成各语言的「简体中文原文 → 译文」对照表。
  *
- * 逐个模块比对简体中文与目标语言的数据集：同位置的字符串配成一条对照。
- * 这样名称、描述、技能文本、熔炼文案（含数值的模板句）等**一切非枚举文本**都能覆盖，
- * 不依赖前端是否已经把该字段接到 i18next 上。
- *
- * `translation.json` 是游戏内文本表的权威对照，最后合并以它的译法为准
- * （同一中文在其他模块可能有不同译法，如「外观」）。
+ * 输出 = 当期模块位置配对（数组按下标，术语字典按索引，全新生成，不读任何存量条目）
+ * + 别名表（TRANSLATION_ALIASES，前端展示名按中文正典查 TextMap 现场解析，强制覆盖）
+ * + 前端自造展示名（SUPPLEMENTAL_*，强制覆盖）。translations.data.ts 每次都是完整重写，
+ * 上游改名/删文案后旧键自然消失，不再保留（必须保留的请收进上述两处静态声明，显式、可 review）。
  * @returns 打包语言 → 对照表
  */
 async function buildTranslationTables(): Promise<Record<TranslationLocale, Record<string, string>>> {
@@ -1476,7 +1735,7 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
         const table = new Map<string, string>()
 
         for (const fileName of TRANSLATION_SOURCE_FILES) {
-            if (TRANSLATION_EXCLUDED_SOURCES.has(fileName) || fileName === "translation.json") {
+            if (TRANSLATION_EXCLUDED_SOURCES.has(fileName)) {
                 continue
             }
 
@@ -1489,19 +1748,19 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
                 continue
             }
 
+            if (fileName === "Title.json") {
+                collectTitlePairs(JSON.parse(sourceText), JSON.parse(targetText), table)
+                continue
+            }
+
             collectTranslationPairs(JSON.parse(sourceText), JSON.parse(targetText), table)
         }
 
-        // 权威表最后写入，覆盖其它模块的译法
-        const authoritativeText = await readFile(path.join(SOURCE_ROOT, locale, "translation.json"), "utf8").catch(() => null)
-        if (authoritativeText) {
-            const authoritative = JSON.parse(authoritativeText) as Record<string, unknown>
-            for (const [key, value] of Object.entries(authoritative)) {
-                if (typeof value === "string" && value.trim() && value !== key && /[\u4e00-\u9fff]/.test(key)) {
-                    table.set(key, value)
-                }
-            }
-        }
+        const textMap = (await readLuaTable("TextMap_I18n")) as Record<string, Record<string, string>>
+        const field = TEXT_MAP_LOCALE_FIELDS[locale]
+
+        // 静态存量强制覆盖：引用式（按中文正典查 TextMap 现场解析）+ 逐语言冻结旧值
+        applyTranslationAliases(table, locale, textMap)
 
         // 前端自造展示名：先按官方 TextMapId 取权威译名，再用人工表兜底。
         // 两者都**强制覆盖**——上游按位置比对可能在别的语境下撞出同名键，
@@ -1510,8 +1769,6 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
         // 但这里的键就是全局翻译键，**与游戏原文同形的词一律不能进表**：
         // 稀有度「白/绿/蓝/紫/金/红」曾按 BackpackResource_RarityN 覆盖，结果把剧情人物「白」
         // 翻成了 White——界面已改为只用色块表示稀有度（见 `src/utils/rarity-utils.ts`），不再需要译文。
-        const textMap = (await readLuaTable("TextMap_I18n")) as Record<string, Record<string, string>>
-        const field = TEXT_MAP_LOCALE_FIELDS[locale]
         for (const [key, textMapId] of Object.entries(SUPPLEMENTAL_TEXT_MAP_IDS)) {
             const text = textMap[textMapId]?.[field]?.trim()
             if (text) {
@@ -1561,7 +1818,7 @@ type PanDialogueTable = Record<number, string>
 /**
  * 读取 6 个语言的 Pan.json，产出中文全量结构 + 各语言 id→文本大表。
  *
- * 配对一律按 id（行按潘神 id，行内对话按对话 id），不依赖数组顺序；
+ * 配对一律按 id（Region 按 Region id，组按 ExploreGroup id，组内对话按对话 id），不依赖数组顺序；
  * 与原文相同的条目（如 `{空格}` 占位行）不进表，调用方查不到时回退中文原文。
  * 潘神名称一并按潘神 id 进表（地图点位标签的多语言显示用），不再另建表。
  * @returns 中文结构与各语言大表（键按数值升序，保证同样输入产出同样的文件内容）
@@ -1588,11 +1845,20 @@ async function buildPanDataWithDialogueTables(): Promise<{
             if (typeof row.name === "string" && row.name !== cnRow.name) {
                 table[cnRow.id] = row.name
             }
-            const dialoguesById = new Map<number, any>((row.dialogues ?? []).map((dialogue: any) => [dialogue?.id, dialogue]))
-            for (const dialogue of cnRow.dialogues ?? []) {
-                const translated = dialoguesById.get(dialogue?.id)
-                if (translated && typeof translated.content === "string" && translated.content !== dialogue.content) {
-                    table[dialogue.id] = translated.content
+            const groupsById = new Map<number, any>((row.groups ?? []).map((group: any) => [group?.id, group]))
+            for (const group of cnRow.groups ?? []) {
+                const translatedGroup = groupsById.get(group?.id)
+                if (!translatedGroup) {
+                    continue
+                }
+                const dialoguesById = new Map<number, any>(
+                    (translatedGroup.dialogues ?? []).map((dialogue: any) => [dialogue?.id, dialogue])
+                )
+                for (const dialogue of group.dialogues ?? []) {
+                    const translated = dialoguesById.get(dialogue?.id)
+                    if (translated && typeof translated.content === "string" && translated.content !== dialogue.content) {
+                        table[dialogue.id] = translated.content
+                    }
                 }
             }
         }
@@ -2402,7 +2668,10 @@ async function main() {
     }
 }
 
-main().catch(error => {
-    console.error(error)
-    process.exit(1)
-})
+// 直接执行时才跑导入；被测试 import 时只取纯函数，不触发导入。
+if (import.meta.main) {
+    main().catch(error => {
+        console.error(error)
+        process.exit(1)
+    })
+}

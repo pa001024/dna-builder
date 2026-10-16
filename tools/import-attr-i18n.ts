@@ -446,6 +446,27 @@ async function formatWithBiome(files: string[]): Promise<void> {
 }
 
 /**
+ * 数据包对照表已覆盖的属性名：不再写入 public/i18n（`$t` 经注入的数据包表解析到同一译文）。
+ *
+ * 这些键在 `tools/import-i18n-data.ts` 侧由模块位置配对 / TRANSLATION_ALIASES / SUPPLEMENTAL_*
+ * 与 public 旧值逐字比对一致（5 语言全覆盖），留在这里只会造成双源并在上游改译文时
+ * 因「已存在不覆盖」而守旧。若数据包未安装，界面按既有惯例降级显示中文原文。
+ */
+const DATA_PACK_COVERED_ATTR_NAMES = new Set([
+    "昂扬",
+    "暴击",
+    "充盈转化",
+    "触发",
+    "多重",
+    "技能范围",
+    "背水",
+    "充盈威力",
+    "技能耐久",
+    "技能威力",
+    "技能效益",
+])
+
+/**
  * 执行导入。
  */
 async function main() {
@@ -471,9 +492,13 @@ async function main() {
         const originalText = await readFile(filePath, "utf-8")
         const translations = JSON.parse(originalText) as Record<string, unknown>
 
-        // 1) 属性名：只补齐缺失的键，绝不覆盖已有译名；与键同名的条目按 zh-CN 既有惯例省略
+        // 1) 属性名：只补齐缺失的键，绝不覆盖已有译名；与键同名的条目按 zh-CN 既有惯例省略；
+        // 数据包对照表已覆盖的不再写入（见 DATA_PACK_COVERED_ATTR_NAMES），避免下次导入复活已迁移的键
         let mutated = false
         for (const entry of entries) {
+            if (DATA_PACK_COVERED_ATTR_NAMES.has(entry.name)) {
+                continue
+            }
             const nameText = entry.nameTexts[locale]
             if (!nameText || nameText === entry.name) {
                 continue

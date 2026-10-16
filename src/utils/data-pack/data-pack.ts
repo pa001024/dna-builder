@@ -10,6 +10,7 @@ import {
     markDataPackHydrated,
     resetRegisteredDataPackBindings,
 } from "./data-pack-bridge"
+import { DATA_PACK_FORMAT_MAJOR, isDataPackMajorSupported, normalizeDataPackMajor } from "./data-pack-format"
 import { applyHdiff } from "./hpatchz-wasm"
 import { mountImgsToVirtualPath } from "./imgs-runtime"
 import { getPackStorageRoot, isPackStorageAvailable, type PackDirectoryHandle } from "./pack-storage"
@@ -26,6 +27,7 @@ export interface DataPackVersionInfo {
     builtAt: string
     packageFile: string
     version: string
+    major?: number
     notes?: string
 }
 
@@ -33,6 +35,7 @@ export interface DataPackManifest {
     builtAt: string
     packageFile: string
     version: string
+    major?: number
     imgsHash?: string
     modules: Record<string, DataPackModuleMeta>
     /**
@@ -544,6 +547,7 @@ async function readInstalledVersionInfo(version: string): Promise<DataPackVersio
         builtAt: manifest.builtAt,
         packageFile: manifest.packageFile,
         version: manifest.version,
+        major: manifest.major,
     }
 }
 
@@ -707,10 +711,11 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
     remoteState.promise = (async () => {
         try {
             const info = await fetchDataPackVersions(source.versionsUrls)
-            info.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
+            const supported = info.filter(item => isDataPackMajorSupported(item.major, item.version))
+            supported.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
             remoteState.hasCached = true
-            remoteState.cached = info
-            return info
+            remoteState.cached = supported
+            return supported
         } catch {
             remoteState.hasCached = true
             remoteState.cached = null
@@ -766,6 +771,12 @@ async function fetchDataPackVersions(versionsUrls: string[]): Promise<DataPackVe
 async function loadLocalVersion(version: string): Promise<boolean> {
     const manifest = await readInstalledManifest(version)
     if (!manifest) {
+        return false
+    }
+    if (!isDataPackMajorSupported(manifest.major, manifest.version)) {
+        console.warn(
+            `跳过不支持的数据包版本: ${version}（major=${normalizeDataPackMajor(manifest.major, manifest.version)}，当前支持到 ${DATA_PACK_FORMAT_MAJOR}，请更新应用）`
+        )
         return false
     }
 
@@ -838,7 +849,15 @@ export async function ensureDataPackReady(): Promise<boolean> {
                 return false
             }
 
-            return await loadLocalVersion(installed.version)
+            if (await loadLocalVersion(installed.version)) {
+                return true
+            }
+            const fallback = (await scanInstalledDataPackVersions()).find(item => isDataPackMajorSupported(item.major, item.version))
+            if (fallback && fallback.version !== installed.version) {
+                await writeInstalledInfo(fallback)
+                return await loadLocalVersion(fallback.version)
+            }
+            return false
         } catch (error) {
             console.error("初始化数据包失败:", error)
             return false
@@ -947,6 +966,11 @@ export async function setActiveDataPackVersion(version: string): Promise<DataPac
     const active = installedVersions.find(item => item.version === version)
     if (!active) {
         throw new Error(`未找到已安装的数据包版本: ${version}`)
+    }
+    if (!isDataPackMajorSupported(active.major, active.version)) {
+        throw new Error(
+            `数据包版本 ${version} 需要更新应用后才能安装（major=${normalizeDataPackMajor(active.major, active.version)}，当前支持到 ${DATA_PACK_FORMAT_MAJOR}）`
+        )
     }
 
     await writeInstalledInfo(active)
@@ -1077,6 +1101,11 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     if (!remote) {
         throw new Error("无法获取数据包版本信息")
     }
+    if (!isDataPackMajorSupported(remote.major, remote.version)) {
+        throw new Error(
+            `数据包版本 ${remote.version} 需要更新应用后才能安装（major=${normalizeDataPackMajor(remote.major, remote.version)}，当前支持到 ${DATA_PACK_FORMAT_MAJOR}）`
+        )
+    }
 
     // 优先走差分路径；不可用时回退整包下载。
     let bytes = await tryDownloadDataPackViaDiff(remote.version, remote.packageFile)
@@ -1104,6 +1133,11 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     // 差分路径没有逐块进度，这里统一把进度顶满再进入安装
     onProgress?.(1)
     const pack = await decodePack(bytes)
+    if (!isDataPackMajorSupported(pack.manifest.major, pack.manifest.version)) {
+        throw new Error(
+            `数据包版本 ${pack.manifest.version} 需要更新应用后才能安装（major=${normalizeDataPackMajor(pack.manifest.major, pack.manifest.version)}，当前支持到 ${DATA_PACK_FORMAT_MAJOR}）`
+        )
+    }
     await writePackBytes(remote.version, bytes, pack)
     await writeInstalledInfo(remote)
     await activateStoredPack(remote.version, pack.manifest, pack.imgsManifest)
@@ -1136,6 +1170,11 @@ export async function importDataPackFile(file: File): Promise<DataPackInstallSta
     const bytes = new Uint8Array(await file.arrayBuffer())
     const pack = await decodePack(bytes)
     const { manifest } = pack
+    if (!isDataPackMajorSupported(manifest.major, manifest.version)) {
+        throw new Error(
+            `数据包版本 ${manifest.version} 需要更新应用后才能安装（major=${normalizeDataPackMajor(manifest.major, manifest.version)}，当前支持到 ${DATA_PACK_FORMAT_MAJOR}）`
+        )
+    }
     await writePackBytes(manifest.version, bytes, pack)
     await writeInstalledInfo({
         builtAt: manifest.builtAt,

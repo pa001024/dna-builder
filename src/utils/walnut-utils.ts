@@ -3,10 +3,16 @@
  * 核心逻辑：生成奖励池→洗牌非金奖→金奖后置→每次抽3个→抽中金则重置
  */
 export class WalnutSequenceSimulator {
+    /**
+     * 模拟器默认参数：[占位, 大银上限, 小银上限, 铜1上限, 铜2上限, 铜3上限]。
+     * 详情页模拟开函、出金概率表、来源期望都用这一套模型（金期望恰为 10）；
+     * walnut.参数不参与模拟，只做奖励池范围展示。
+     */
+    static readonly DEFAULT_PARAMETER = [1, 7, 10, 13, 13, 13]
     // 当前奖励序列（存储奖励类型：1=金，2=大银，3=小银，4=铜1，5=铜2，6=铜3）
     private currentSequence: number[] = []
 
-    constructor(public parameter: number[] = [1, 7, 10, 13, 13, 13]) {
+    constructor(public parameter: number[] = [...WalnutSequenceSimulator.DEFAULT_PARAMETER]) {
         // 初始化生成奖励序列
         this.resetSequence()
     }
@@ -90,7 +96,7 @@ export class WalnutSequenceSimulator {
      * @param parameter 密函参数（walnut.参数）：[占位, 大银上限, 小银上限, 铜1上限, 铜2上限, 铜3上限]
      * @returns Map<M的取值, 概率>
      */
-    static calculateMDistribution(parameter: number[] = [1, 7, 10, 13, 13, 13]): Map<number, number> {
+    static calculateMDistribution(parameter: number[] = [...WalnutSequenceSimulator.DEFAULT_PARAMETER]): Map<number, number> {
         // 各档均匀分布（键=取值，值=概率），档位 i 的上限为 parameter[i]
         const uniformDists: Map<number, number>[] = []
         for (let tier = 1; tier <= 5; tier++) {
@@ -119,10 +125,11 @@ export class WalnutSequenceSimulator {
     /**
      * 单轮序列的期望开函次数 E[ceil((M+1)/3)]：每次开函取 3 个奖励，金奖殿后。
      * 金奖每轮恰出 1 个，该值即金奖成品的期望开函数；非金奖档位再除以该档期望产出数即得单件期望。
-     * @param parameter 密函参数（walnut.参数）
+     * 参数必须从外面传入（walnut.参数），不可写死——不同密函的参数不同。
+     * @param parameter 密函参数（walnut.参数）：[占位, 大银上限, 小银上限, 铜1上限, 铜2上限, 铜3上限]
      * @returns 期望开函次数
      */
-    static expectedCycleOpens(parameter: number[] = [1, 7, 10, 13, 13, 13]): number {
+    static expectedCycleOpens(parameter: number[]): number {
         const mDist = WalnutSequenceSimulator.calculateMDistribution(parameter)
         let expected = 0
         for (const [m, p] of mDist) {
@@ -133,10 +140,11 @@ export class WalnutSequenceSimulator {
 
     /**
      * 指定奖励档位的单件期望开函次数（长期平均口径：单轮期望开函 ÷ 单轮期望产出数）。
+     * 参数必须从外面传入（walnut.参数），不可写死——不同密函的参数不同。
      * @param parameter 密函参数（walnut.参数）
      * @param rewardIndex 奖励在密函奖励数组中的索引（0=金，1=大银，2=小银，3+=铜）
      * @param count 该档位单次产出数量
-     * @returns 单件期望开函次数；参数缺失导致无法产出时返回 Infinity
+     * @returns 单件期望开函次数；档位无法产出时返回 Infinity
      */
     static expectedOpensForRewardIndex(parameter: number[], rewardIndex: number, count = 1): number {
         const cycleOpens = WalnutSequenceSimulator.expectedCycleOpens(parameter)
@@ -149,29 +157,31 @@ export class WalnutSequenceSimulator {
     }
 
     /**
-     * 计算n次开密函「至少一次出金」的概率（符合实际规则：n≥19时必出金）
+     * 计算n次开密函「至少一次出金」的概率。
      * 核心逻辑：
      * 1. 总取奖数 k = 3*n；
      * 2. 非金奖数量 M < k → 取奖数覆盖非金奖，触达金奖（出金）；
-     * 3. n≥19 → k=57 ≥ M最大56 → 概率=100%；
-     * 4. n<19 → 概率=Σ P(M=m) （m从0到min(k-1, 56)）
+     * 3. k 超过 M 上限 → 概率=100%（默认参数下 M 最大 56，n≥19 必出金）；
+     * 4. 否则概率=Σ P(M=m)（m 从 0 到 k-1）。
+     * 参数必须从外面传入（walnut.参数），不可写死——不同密函的参数不同。
      * @param n 开密函次数（正整数）
+     * @param parameter 密函参数（walnut.参数）
      * @returns 出金概率（保留6位小数）
      */
-    static calculateGoldProbability(n: number): number {
+    static calculateGoldProbability(n: number, parameter: number[] = [...WalnutSequenceSimulator.DEFAULT_PARAMETER]): number {
         // 1. 参数校验
         if (!Number.isInteger(n) || n <= 0) {
             throw new Error("开密函次数n必须是正整数")
         }
 
-        // 2. 核心常量（序列物理上限）
-        const maxM = 56 // 非金奖最大数量（7+10+13+13+13）
+        // 2. M 上限由传入参数推导（各档上限之和）
+        const maxM = [1, 2, 3, 4, 5].reduce((total, tier) => total + Math.max(0, Math.floor(parameter[tier] ?? 0)), 0)
         const k = 3 * n // n次开函总取奖数
 
-        // 4. n<19 → 计算P(M < k)（M<k时能取到金奖）
-        const mDist = WalnutSequenceSimulator.calculateMDistribution()
+        // 4. 计算P(M < k)（M<k时能取到金奖；k超过M上限时覆盖全分布，概率=100%）
+        const mDist = WalnutSequenceSimulator.calculateMDistribution(parameter)
         let goldProb = 0
-        const maxEffectiveM = Math.min(k - 1, maxM) // M的有效上限：k-1（M<k）且≤56
+        const maxEffectiveM = Math.min(k - 1, maxM) // M的有效上限：k-1（M<k）且≤参数上限
 
         // 遍历所有可能的M值，累加概率
         for (const [m, p] of mDist) {

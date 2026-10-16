@@ -64,8 +64,8 @@ const draft = computed(() => {
  */
 const product = computed(() => getWalnutProduct(props.walnut))
 
-// 模拟开函相关状态
-const simulator = new WalnutSequenceSimulator()
+// 模拟开函相关状态：模拟器必须吃到当前密函的参数（walnut.参数），不可用默认参数
+let simulator = new WalnutSequenceSimulator(props.walnut.参数)
 const openResults = ref<number[][]>([])
 const isAutoOpening = ref(false)
 const autoOpenTimer = ref<number | null>(null)
@@ -247,7 +247,7 @@ function getRewardColor(rarity: number): string {
 const probabilityData = computed(() => {
     const data = []
     for (let n = 1; n <= 19; n++) {
-        const prob = WalnutSequenceSimulator.calculateGoldProbability(n)
+        const prob = WalnutSequenceSimulator.calculateGoldProbability(n, props.walnut.参数)
         data.push({
             n,
             probability: parseFloat(prob.toFixed(6)),
@@ -410,6 +410,8 @@ function stopAutoOpen() {
  */
 function resetSimulation() {
     stopAutoOpen()
+    // 密函切换时同步重建模拟器，保证序列按新密函的参数生成
+    simulator = new WalnutSequenceSimulator(props.walnut.参数)
     openResults.value = []
     totalOpens.value = 0
     goldCount.value = 0

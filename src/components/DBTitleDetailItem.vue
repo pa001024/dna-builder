@@ -6,7 +6,7 @@ import type { Title } from "@/data/d/title.data"
 const props = defineProps<{
     title: Title
 }>()
-const { t } = useTranslation()
+const { t, i18next } = useTranslation()
 
 const titleTypeLabel = computed(() => {
     return props.title.suf ? "后缀" : "前缀"
@@ -14,7 +14,12 @@ const titleTypeLabel = computed(() => {
 
 const titlePreview = computed(() => {
     const playerName = "-"
-    return props.title.suf ? `${playerName}${t(props.title.name)}` : `${t(props.title.name)}${playerName}`
+    if (!props.title.suf) return `${t(props.title.name)}${playerName}`
+    // 后缀翻译不再自带前导空格（称号后缀已降为补缺优先级，英文取到的是角色名 "Rebecca"）；
+    // 英文标题用空格拼接，其他语言直接拼接
+    const suffix = String(t(props.title.name)).trimStart()
+    const sep = (i18next.language ?? "").startsWith("en") ? " " : ""
+    return `${playerName}${sep}${suffix}`
 })
 </script>
 

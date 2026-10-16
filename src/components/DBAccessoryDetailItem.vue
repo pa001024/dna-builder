@@ -385,6 +385,7 @@ const accessoryIcon = computed(() => {
  */
 const accessoryName = computed(() => props.accessory.name)
 const accessoryVersionText = computed(() => (isSkinAccessory(props.accessory) ? getSkinReleaseText(props.accessory) : ""))
+const isHiddenAccessory = computed(() => "hide" in props.accessory && props.accessory.hide === 1)
 const accessoryDetailLink = computed(() => {
     if (props.accessory.accessoryType === "char") {
         return `/db/accessory/char/${props.accessory.id}`
@@ -508,6 +509,12 @@ const accessoryUnlock = computed(() => {
                         >
                             {{ $t(accessoryName) }}
                         </div>
+                        <span
+                            v-if="isHiddenAccessory"
+                            class="shrink-0 rounded-xs border border-warning/60 bg-warning/10 px-2 py-0.5 text-[10px] tracking-[0.15em] text-warning"
+                        >
+                            {{ $t("accessory.hidden") }}
+                        </span>
                         <span
                             v-if="accessoryVersionText"
                             class="shrink-0 rounded-xs border border-base-content/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-base-content/50"

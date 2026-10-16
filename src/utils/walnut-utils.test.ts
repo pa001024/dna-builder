@@ -29,4 +29,11 @@ describe("walnut-utils", () => {
         expect(WalnutSequenceSimulator.calculateGoldProbability(5)).toBeCloseTo(0.045997, 6)
         expect(WalnutSequenceSimulator.calculateGoldProbability(19)).toBe(1)
     })
+
+    it("出金概率按传入参数计算（羽蛇背水密函）", () => {
+        const parameter = [1, 5, 36, 36, 36, 36]
+        expect(WalnutSequenceSimulator.calculateGoldProbability(10, parameter)).toBeCloseTo(0.016005, 6)
+        expect(WalnutSequenceSimulator.calculateGoldProbability(19, parameter)).toBeCloseTo(0.207617, 6)
+        expect(WalnutSequenceSimulator.calculateGoldProbability(50, parameter)).toBe(1)
+    })
 })
