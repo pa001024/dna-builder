@@ -10,6 +10,7 @@ import shopData from "@/data/d/shop.data"
 import { weaponVerifyData } from "@/data/d/weapon-verify.data"
 import type { Mod } from "@/data/data-types"
 import { findInRewardTree, getRewardDetails } from "@/utils/reward-utils"
+import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
 import type { ShopSourceInfo, WeaponHardbossSourceInfo } from "@/utils/weapon-source"
 
 export interface ResourceDungeonSourceInfo {
@@ -458,6 +459,69 @@ export function collectModPackSources(modId: number): PackSourceInfo[] {
             rewardId: resource.pack,
             pp: matched.pp,
             times: matched.times,
+        })
+    }
+
+    return sources
+}
+
+export interface ModWalnutSourceInfo {
+    key: string
+    walnutId: number
+    rewardIndex: number
+    /** 组别 i18n 键（walnut-source.tier_*）：金 / 大银 / 小银 / 铜 */
+    tierKey: string
+    /** 是否图纸奖励（d=1） */
+    isDraft: boolean
+    /** 该档位单次产出数量 */
+    count: number
+    /** 单件期望开函次数（长期平均口径，不可产出时为 Infinity） */
+    expectedOpens: number
+}
+
+/**
+ * 按奖励索引取组别 i18n 键：0=金，1=大银，2=小银，3+=铜。
+ * @param rewardIndex 奖励在密函奖励数组中的索引
+ * @returns 组别 i18n 键
+ */
+function getWalnutTierKey(rewardIndex: number): string {
+    if (rewardIndex === 0) return "walnut-source.tier_gold"
+    if (rewardIndex === 1) return "walnut-source.tier_big_silver"
+    if (rewardIndex === 2) return "walnut-source.tier_small_silver"
+    return "walnut-source.tier_copper"
+}
+
+/**
+ * 扫描全部密函奖励表，反查产出指定魔之楔的奖励条目。
+ * 同一只密函的成品（首位奖励）与图纸（d=1）是两条来源，组别与期望各算各的。
+ * @param modId 魔之楔ID
+ * @returns 密函来源列表
+ */
+export function collectModWalnutSources(modId: number): ModWalnutSourceInfo[] {
+    const sources: ModWalnutSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    for (const walnut of walnutMap.values()) {
+        walnut.奖励?.forEach((reward, rewardIndex) => {
+            if (reward.type !== "Mod" || reward.id !== modId) {
+                return
+            }
+
+            const key = `mod-walnut-${modId}-${walnut.id}-${rewardIndex}`
+            if (sourceKeySet.has(key)) {
+                return
+            }
+
+            sourceKeySet.add(key)
+            sources.push({
+                key,
+                walnutId: walnut.id,
+                rewardIndex,
+                tierKey: getWalnutTierKey(rewardIndex),
+                isDraft: reward.d === 1,
+                count: reward.count,
+                expectedOpens: WalnutSequenceSimulator.expectedOpensForRewardIndex(walnut.参数, rewardIndex, reward.count),
+            })
         })
     }
 

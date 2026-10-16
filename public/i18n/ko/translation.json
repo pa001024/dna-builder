@@ -4531,6 +4531,13 @@
     "walnut-list": {
         "title": "호두 목록"
     },
+    "walnut-source": {
+        "expected_opens": "기대 {{n}} 회",
+        "tier_big_silver": "큰 은",
+        "tier_copper": "구리",
+        "tier_gold": "금",
+        "tier_small_silver": "작은 은"
+    },
     "weapon-detail": {
         "applicable": "적용 캐릭터",
         "ascension": "돌파",

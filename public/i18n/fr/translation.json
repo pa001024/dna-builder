@@ -4575,6 +4575,13 @@
     "walnut-list": {
         "title": "Liste des noix"
     },
+    "walnut-source": {
+        "expected_opens": "{{n}} tirages attendus",
+        "tier_big_silver": "Grand argent",
+        "tier_copper": "Cuivre",
+        "tier_gold": "Or",
+        "tier_small_silver": "Petit argent"
+    },
     "weapon-detail": {
         "applicable": "Personnages compatibles",
         "ascension": "Ascension",

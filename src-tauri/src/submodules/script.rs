@@ -387,11 +387,11 @@ impl ScriptRunningGuard {
             });
         });
 
-        SCRIPT_RUNNING.store(true, Ordering::Release);
         if let Ok(mut guard) = SCRIPT_RUNNING_PATH_COUNTS.lock() {
             let counter = guard.entry(script_path.clone()).or_insert(0);
             *counter += 1;
         }
+        SCRIPT_RUNNING.store(true, Ordering::Release);
         emit_script_runtime_updated(&app_handle);
         Self {
             script_path,
@@ -811,11 +811,6 @@ pub fn is_script_path_running(script_path: &str) -> bool {
 
 /// 获取脚本运行信息（运行状态 + 正在执行的脚本路径列表 + 总运行实例数）。
 pub fn get_script_runtime_info() -> (bool, Vec<String>, usize) {
-    let running = SCRIPT_RUNNING.load(Ordering::Acquire);
-    if !running {
-        return (false, Vec::new(), 0);
-    }
-
     let mut script_paths: Vec<String> = Vec::new();
     let mut running_count = 0usize;
     if let Ok(guard) = SCRIPT_RUNNING_PATH_COUNTS.lock() {
@@ -915,5 +910,41 @@ mod runtime_state_tests {
             .lock()
             .expect("获取脚本运行映射锁失败")
             .remove(script_path);
+    }
+
+    #[test]
+    /// 快照必须自洽：running 与 paths/count 始终一致，不受原子 bool 瞬时值影响。
+    /// 回归“停止按钮偶现点不动”：旧实现先读 bool 再锁表，启动瞬间可读到运行中但路径为空，
+    /// 前端同步后永久禁用停止按钮。
+    fn runtime_info_snapshot_is_consistent() {
+        let saved_bool = SCRIPT_RUNNING.load(Ordering::Acquire);
+        let saved_map = SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .clone();
+
+        // 模拟启动撕裂窗口：bool 已置 true，计数尚未写入。
+        SCRIPT_RUNNING.store(true, Ordering::Release);
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .clear();
+        let (running, paths, count) = get_script_runtime_info();
+        assert!(!running && paths.is_empty() && count == 0);
+
+        // 有计数时即使 bool 为 false 也必须报告运行中。
+        SCRIPT_RUNNING.store(false, Ordering::Release);
+        SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败")
+            .insert("consistency-probe-script.js".to_string(), 2);
+        let (running, paths, count) = get_script_runtime_info();
+        assert!(running && paths == vec!["consistency-probe-script.js".to_string()] && count == 2);
+
+        // 恢复现场，避免污染并行用例。
+        SCRIPT_RUNNING.store(saved_bool, Ordering::Release);
+        *SCRIPT_RUNNING_PATH_COUNTS
+            .lock()
+            .expect("获取脚本运行映射锁失败") = saved_map;
     }
 }

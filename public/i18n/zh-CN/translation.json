@@ -4538,6 +4538,13 @@
     "walnut-list": {
         "title": "密函列表"
     },
+    "walnut-source": {
+        "expected_opens": "期望 {{n}} 次",
+        "tier_big_silver": "大银",
+        "tier_copper": "铜",
+        "tier_gold": "金",
+        "tier_small_silver": "小银"
+    },
     "weapon-detail": {
         "applicable": "适用角色",
         "ascension": "突破",

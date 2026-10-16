@@ -5,6 +5,7 @@ import {
     collectModCharBreakthroughSources,
     collectModPackSources,
     collectModQuestSources,
+    collectModWalnutSources,
     collectResourceDungeonSources,
     collectResourceEventSources,
     collectResourceHardbossSources,
@@ -82,6 +83,26 @@ describe("resource-source", () => {
         expect(matchedSource?.sourceTypeLabel).toBe("角色突破")
         expect(matchedSource?.detail).toBe("20级突破奖励")
         expect(matchedSource?.title).toBe("苏乙")
+    })
+
+    it("应该从密函奖励中反查魔之楔来源", () => {
+        const sources = collectModWalnutSources(51735)
+
+        expect(sources).toHaveLength(2)
+        const product = sources.find(source => source.rewardIndex === 0)
+        expect(product?.walnutId).toBe(151735)
+        expect(product?.tierKey).toBe("walnut-source.tier_gold")
+        expect(product?.isDraft).toBe(false)
+        expect(product?.expectedOpens).toBeCloseTo(25.5, 10)
+        const draft = sources.find(source => source.rewardIndex === 1)
+        expect(draft?.walnutId).toBe(151735)
+        expect(draft?.tierKey).toBe("walnut-source.tier_big_silver")
+        expect(draft?.isDraft).toBe(true)
+        expect(draft?.expectedOpens).toBeCloseTo(10.2, 10)
+    })
+
+    it("未知魔之楔没有密函来源", () => {
+        expect(collectModWalnutSources(999999999)).toEqual([])
     })
 
     it("应该从道具箱中反查魔之楔来源", () => {

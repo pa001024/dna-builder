@@ -4529,6 +4529,13 @@
     "walnut-list": {
         "title": "クルミリスト"
     },
+    "walnut-source": {
+        "expected_opens": "期待値 {{n}} 回",
+        "tier_big_silver": "大銀",
+        "tier_copper": "銅",
+        "tier_gold": "金",
+        "tier_small_silver": "小銀"
+    },
     "weapon-detail": {
         "applicable": "適用キャラクター",
         "ascension": "限界突破",

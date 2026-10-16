@@ -202,7 +202,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (mod) {
             links.push({
                 icon: LeveledMod.url(mod.icon),
-                text: formatModName(mod.系列, mod.名称, $t),
+                text: $t(mod.名称),
                 to: `/db/mod/${mod.id}`,
             })
         }

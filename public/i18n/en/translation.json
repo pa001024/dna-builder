@@ -4558,6 +4558,13 @@
     "walnut-list": {
         "title": "Walnut List"
     },
+    "walnut-source": {
+        "expected_opens": "{{n}} draws expected",
+        "tier_big_silver": "Big Silver",
+        "tier_copper": "Copper",
+        "tier_gold": "Gold",
+        "tier_small_silver": "Small Silver"
+    },
     "weapon-detail": {
         "applicable": "Applicable Characters",
         "ascension": "Ascension",

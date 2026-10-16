@@ -83,7 +83,8 @@
     --font-orbitron: "Orbitron", sans-serif;
     --font-mona: "Mona Sans", sans-serif;
     --font-wt: "WorldText02", sans-serif;
-    --font-mono: Consolas, monospace;
+    /* 等宽中文回退指向 is-app-font 簇，避免中文字符落到系统 monospace */
+    --font-mono: Consolas, var(--app-user-font, "HarmonyOS Sans SC", var(--app-font-fallback)), monospace;
 
     /* 尘埃粒子自下而上缓慢上浮 */
     @keyframes mote-rise {

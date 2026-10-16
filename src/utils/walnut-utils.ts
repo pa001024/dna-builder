@@ -85,54 +85,67 @@ export class WalnutSequenceSimulator {
     }
 
     /**
-     * 计算 M = 大银+小银+铜1+铜2+铜3 的概率分布（卷积法，精确推导M的所有可能值及概率）
-     * X2(0~7)、X3(0~10)、X4/X5/X6(0~13) 均为均匀分布
+     * 计算 M = 各非金奖档数量之和的概率分布（卷积法，精确推导M的所有可能值及概率）
+     * 各档（大银/小银/铜1/铜2/铜3）在 0~上限内均匀分布，上限取自密函参数。
+     * @param parameter 密函参数（walnut.参数）：[占位, 大银上限, 小银上限, 铜1上限, 铜2上限, 铜3上限]
      * @returns Map<M的取值, 概率>
      */
-    static calculateMDistribution(): Map<number, number> {
-        // 初始化各变量的均匀分布（键=取值，值=概率）
-        const x2Dist = new Map<number, number>()
-        for (let x = 0; x <= 7; x++) x2Dist.set(x, 1 / 8) // 大银：0~7（8种可能）
-        const x3Dist = new Map<number, number>()
-        for (let x = 0; x <= 10; x++) x3Dist.set(x, 1 / 11) // 小银：0~10（11种可能）
-        const x456Dist = new Map<number, number>()
-        for (let x = 0; x <= 13; x++) x456Dist.set(x, 1 / 14) // 铜1/2/3：0~13（14种可能）
-
-        // 分步卷积：X2+X3 → +X4 → +X5 → +X6（计算M的联合分布）
-        const sumDist = new Map<number, number>()
-        // 第一步：X2 + X3
-        for (const [x2, p2] of x2Dist) {
-            for (const [x3, p3] of x3Dist) {
-                const sum = x2 + x3
-                sumDist.set(sum, (sumDist.get(sum) || 0) + p2 * p3)
-            }
-        }
-        // 第二步：+X4
-        const sumDist2 = new Map<number, number>()
-        for (const [s, ps] of sumDist) {
-            for (const [x4, p4] of x456Dist) {
-                const sum = s + x4
-                sumDist2.set(sum, (sumDist2.get(sum) || 0) + ps * p4)
-            }
-        }
-        // 第三步：+X5
-        const sumDist3 = new Map<number, number>()
-        for (const [s, ps] of sumDist2) {
-            for (const [x5, p5] of x456Dist) {
-                const sum = s + x5
-                sumDist3.set(sum, (sumDist3.get(sum) || 0) + ps * p5)
-            }
-        }
-        // 第四步：+X6（最终M的分布）
-        const finalDist = new Map<number, number>()
-        for (const [s, ps] of sumDist3) {
-            for (const [x6, p6] of x456Dist) {
-                const sum = s + x6
-                finalDist.set(sum, (finalDist.get(sum) || 0) + ps * p6)
-            }
+    static calculateMDistribution(parameter: number[] = [1, 7, 10, 13, 13, 13]): Map<number, number> {
+        // 各档均匀分布（键=取值，值=概率），档位 i 的上限为 parameter[i]
+        const uniformDists: Map<number, number>[] = []
+        for (let tier = 1; tier <= 5; tier++) {
+            const max = Math.max(0, Math.floor(parameter[tier] ?? 0))
+            const dist = new Map<number, number>()
+            for (let x = 0; x <= max; x++) dist.set(x, 1 / (max + 1))
+            uniformDists.push(dist)
         }
 
-        return finalDist
+        // 分步卷积求联合分布
+        let sumDist = new Map<number, number>([[0, 1]])
+        for (const tierDist of uniformDists) {
+            const next = new Map<number, number>()
+            for (const [s, ps] of sumDist) {
+                for (const [x, px] of tierDist) {
+                    const sum = s + x
+                    next.set(sum, (next.get(sum) || 0) + ps * px)
+                }
+            }
+            sumDist = next
+        }
+
+        return sumDist
+    }
+
+    /**
+     * 单轮序列的期望开函次数 E[ceil((M+1)/3)]：每次开函取 3 个奖励，金奖殿后。
+     * 金奖每轮恰出 1 个，该值即金奖成品的期望开函数；非金奖档位再除以该档期望产出数即得单件期望。
+     * @param parameter 密函参数（walnut.参数）
+     * @returns 期望开函次数
+     */
+    static expectedCycleOpens(parameter: number[] = [1, 7, 10, 13, 13, 13]): number {
+        const mDist = WalnutSequenceSimulator.calculateMDistribution(parameter)
+        let expected = 0
+        for (const [m, p] of mDist) {
+            expected += Math.ceil((m + 1) / 3) * p
+        }
+        return expected
+    }
+
+    /**
+     * 指定奖励档位的单件期望开函次数（长期平均口径：单轮期望开函 ÷ 单轮期望产出数）。
+     * @param parameter 密函参数（walnut.参数）
+     * @param rewardIndex 奖励在密函奖励数组中的索引（0=金，1=大银，2=小银，3+=铜）
+     * @param count 该档位单次产出数量
+     * @returns 单件期望开函次数；参数缺失导致无法产出时返回 Infinity
+     */
+    static expectedOpensForRewardIndex(parameter: number[], rewardIndex: number, count = 1): number {
+        const cycleOpens = WalnutSequenceSimulator.expectedCycleOpens(parameter)
+        if (rewardIndex === 0) {
+            return count > 0 ? cycleOpens / count : Number.POSITIVE_INFINITY
+        }
+        const max = parameter[rewardIndex] ?? 0
+        const expectedCopies = (max / 2) * count
+        return expectedCopies > 0 ? cycleOpens / expectedCopies : Number.POSITIVE_INFINITY
     }
 
     /**
