@@ -812,6 +812,8 @@
         "tag": "標籤",
         "target_function": "目標函數",
         "team": "隊伍",
+        "team_build_copy_code": "複製社群代碼",
+        "team_build_desc_empty": "該構築沒有填寫描述",
         "team_build_empty": "構築內容為空",
         "team_build_empty_list": "此角色暫無公開構築",
         "team_build_failed": "協戰構築載入失敗",

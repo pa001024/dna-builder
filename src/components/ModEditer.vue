@@ -35,9 +35,14 @@ interface Props {
     variantIndex?: number
     /** 已有变体数量（1-3）；不传则不展示变体切换（如构筑对比页的追加MOD区域） */
     variantCount?: number
+    /**
+     * 候选收益口径：`replace`（默认）按替换正在编辑的槽位计算，与装上后一致；
+     * `append` 按额外附加计算，仅用于构筑对比页的追加 MOD 区域（追加槽本就是附加语义）。
+     */
+    incomeMode?: "replace" | "append"
 }
 
-const props = withDefaults(defineProps<Props>(), { variantIndex: 0, variantCount: 0 })
+const props = withDefaults(defineProps<Props>(), { variantIndex: 0, variantCount: 0, incomeMode: "replace" })
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
@@ -51,7 +56,14 @@ const localSelectedSlot = ref(-1)
 // 养成开销估算面板是否展开（默认隐藏）
 const showCostCalc = ref(false)
 const auraModOptions = computed(() => {
-    const options = props.modOptions.filter(option => option.ser === "羽蛇")
+    const options = props.modOptions.filter(option => {
+        if (option.ser !== "羽蛇") return false
+        try {
+            return props.charBuild.isAuraCompatible(LeveledModHelper.fromId(option.value))
+        } catch {
+            return true
+        }
+    })
     /**
      * 兼容历史构筑或库存变更场景：若当前已选光环不在可选列表中，补入一条用于显示名称。
      */
@@ -202,6 +214,8 @@ function refreshIncomes() {
                       ]
                     : []
             ),
+            // 候选落槽位置：替换口径下 worker 按替换该槽位求收益，避免同系列互斥把附加的新楔恒算成 0
+            ...(props.incomeMode === "replace" ? { replaceSlot: { type: props.type, index: localSelectedSlot.value } } : {}),
         })
     )
         .then(result => {
@@ -212,7 +226,14 @@ function refreshIncomes() {
 }
 
 watch(
-    () => [props.charBuild, props.mods, props.type, mod_model_show.value, mod_model_show.value ? workerModOptions.value : []],
+    () => [
+        props.charBuild,
+        props.mods,
+        props.type,
+        mod_model_show.value,
+        localSelectedSlot.value,
+        mod_model_show.value ? workerModOptions.value : [],
+    ],
     () => refreshIncomes(),
     { immediate: true, deep: true }
 )

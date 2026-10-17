@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { isQaPass, readQaThresholds } from "./asr"
 import { classifyEmotionHeuristic } from "./emotion"
 import {
     buildRequiredVariants,
@@ -9,8 +10,10 @@ import {
 } from "./text-prep"
 
 describe("stripNicknamePlaceholders", () => {
-    it("去除昵称占位符", () => {
-        expect(stripNicknamePlaceholders("{nickname}总说你做的饭很好吃")).toBe("总说你做的饭很好吃")
+    it("昵称占位符替换为默认主角名", () => {
+        expect(stripNicknamePlaceholders("{nickname}总说你做的饭很好吃")).toBe("维塔总说你做的饭很好吃")
+        expect(stripNicknamePlaceholders("卡米拉，{nickname}的下落有消息了吗？")).toBe("卡米拉，维塔的下落有消息了吗？")
+        expect(stripNicknamePlaceholders("{nickname2}，你来了")).toBe("墨斯，你来了")
     })
 })
 
@@ -62,6 +65,26 @@ describe("buildTtsVariants", () => {
 
     it("纯标点不过审", () => {
         expect(buildTtsVariants("……", "zh-CN")).toEqual([])
+    })
+})
+
+describe("isQaPass", () => {
+    const thresholds = readQaThresholds()
+
+    it("好文件通过", () => {
+        expect(isQaPass({ cer: 0, recall: 1, missing: 0, longest_missing: 0 }, thresholds, 20)).toBe(true)
+    })
+
+    it("整句丢失拒绝", () => {
+        expect(isQaPass({ cer: 0.49, recall: 0.33, missing: 20, longest_missing: 19 }, thresholds, 59)).toBe(false)
+    })
+
+    it("短句单字 ASR 噪声放行", () => {
+        expect(isQaPass({ cer: 0.33, recall: 0.67, missing: 2, longest_missing: 1 }, thresholds, 6)).toBe(true)
+    })
+
+    it("长句中间丢段拒绝", () => {
+        expect(isQaPass({ cer: 0.35, recall: 0.65, missing: 15, longest_missing: 13 }, thresholds, 43)).toBe(false)
     })
 })
 

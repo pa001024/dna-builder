@@ -1502,9 +1502,13 @@ const dialogModOptions = computed(() => {
 })
 
 /**
- * 中枢魔之楔（光环）可选项。
+ * 中枢魔之楔（光环）可选项：与构筑页中枢下拉同口径，按当前弹窗构筑过滤属性 / 限定。
  */
-const auraModOptions = modData.filter(mod => mod.系列 === "羽蛇")
+const auraModOptions = computed(() => {
+    const build = dialogBuild.value
+    if (!build) return modData.filter(mod => mod.系列 === "羽蛇")
+    return modData.filter(mod => build.isAuraCompatible(mod))
+})
 
 /**
  * 弹窗内「挑选魔之楔」列表（按品质与关键字过滤）。

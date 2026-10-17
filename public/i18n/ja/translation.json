@@ -812,6 +812,8 @@
         "tag": "タグ",
         "target_function": "目標関数",
         "team": "チーム",
+        "team_build_copy_code": "コミュニティコードをコピー",
+        "team_build_desc_empty": "このビルドには説明がありません",
         "team_build_empty": "ビルドの内容が空です",
         "team_build_empty_list": "このキャラの公開ビルドはありません",
         "team_build_failed": "チームビルドの読み込みに失敗しました",

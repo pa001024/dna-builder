@@ -1,12 +1,15 @@
 import { existsSync } from "node:fs"
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
 import type { ExtVoiceEntry } from "../../src/data/d/extvoice.data"
 import { npcData } from "../../src/data/d/npc.data"
+import { AsrServeSession, isQaPass, type QaFailure, readQaThresholds } from "./asr"
 import type { ExtVoiceEmotion } from "./emotion"
 import { classifyEmotionsBatch, type EmotionBackend } from "./emotion"
 import { readGptSoVitsConfig, synthesizeOnce } from "./gpt-sovits"
+import { indexTtsOnce, readIndexTtsConfig } from "./index-client"
 import { NANZHU_LIGHT_EMOTION_REF, resolveMalePromptText } from "./male-ref"
+import { modelverseInferOnce, readModelverseConfig } from "./modelverse-client"
 import { isUnknownSpeakerName } from "./ref-voice-story"
 import { convertWavToOgg, resolveRefAudioWav, resolveStoryRefAudioWav } from "./resolve-ref-audio"
 import type { MissingScanResult } from "./scan-missing"
@@ -172,11 +175,25 @@ async function main(): Promise<void> {
     ): StoryCandidate[] {
         const score = (candidate: StoryCandidate): number => {
             const candidateEmotion = npcEmotions[candidate.voice]
-            if (candidateEmotion === emotion) return 0
-            if (candidateEmotion === "neutral" || candidateEmotion === undefined) return 1
-            return 2
+            let base: number
+            if (candidateEmotion === emotion) base = 0
+            else if (candidateEmotion === "neutral" || candidateEmotion === undefined) base = 1
+            else base = 2
+            const length = candidate.text.length
+            if (length < 12 || length > 70) base += 0.5
+            return base
         }
         return [...candidates].sort((a, b) => score(a) - score(b))
+    }
+
+    /**
+     * 挑同名声纹：优先 12~70 字的候选（过短多为带混响的语气词），都没有才回退首个。
+     * @param candidates 同名候选
+     * @returns 首选候选
+     */
+    function pickNameCandidate(candidates: StoryCandidate[]): StoryCandidate | undefined {
+        if (!candidates.length) return undefined
+        return candidates.find(candidate => candidate.text.length >= 12 && candidate.text.length <= 70) ?? candidates[0]
     }
 
     /**
@@ -261,16 +278,38 @@ async function main(): Promise<void> {
         npcCharMap = new Map()
     }
 
-    const candidates = missing.items.filter(item => item.speakable && item.content.trim()).slice(0, maxItems)
+    const questFilter = args.quest ? new Set(args.quest.split(",").map(Number)) : undefined
+    const candidates = missing.items
+        .filter(item => item.speakable && item.content.trim())
+        .filter(item => !questFilter || questFilter.has(item.storyId) || questFilter.has(item.questId))
+        .slice(0, maxItems)
     const emotions = await classifyEmotionsBatch(
         candidates.map(item => item.content),
         (args.emotion as EmotionBackend | undefined) ?? "bert-local"
     )
     const textLang = TEXT_LANG_BY_DATASET[datasetLanguage] ?? "zh"
-    const sovits = readGptSoVitsConfig()
+    const backend = args.backend ?? process.env.VOICE_BACKEND ?? "gptsvits"
+    const sovits = backend === "gptsvits" ? readGptSoVitsConfig() : undefined
+    const indexCfg = backend === "index" ? readIndexTtsConfig() : undefined
+    const modelverseCfg = backend === "modelverse" ? readModelverseConfig() : undefined
     const forceGenderNpcIds = new Set(npcData.filter(npc => npc.name === "{nickname}").map(npc => npc.id))
     const maleRefOverride = args["male-ref"] ?? process.env.VOICE_MALE_REF ?? ""
     const refAudioCacheDir = path.resolve(args["ref-audio-cache"] ?? ".tmp/voice-ref-audio")
+    const qaEnabled = args["no-qa"] !== "true"
+    const qaThresholds = readQaThresholds()
+    const qaAttempts = Math.max(1, Number(args["qa-attempts"] ?? process.env.VOICE_QA_ATTEMPTS ?? 3))
+    const qaReportPath = path.join(outDir, "qa-report.json")
+    const qaFailures: QaFailure[] = []
+    const recordQaFailure = async (failure: QaFailure): Promise<void> => {
+        qaFailures.push(failure)
+        await writeFile(qaReportPath, JSON.stringify({ thresholds: qaThresholds, failures: qaFailures }, null, 2))
+    }
+    const asrSession = qaEnabled ? new AsrServeSession() : undefined
+    const passedOggByKey = new Map<string, string>()
+    if (asrSession) {
+        console.log("starting ASR QA session...")
+        await asrSession.start()
+    }
     const entries: ExtVoiceEntry[] = []
 
     await mkdir(outDir, { recursive: true })
@@ -278,7 +317,23 @@ async function main(): Promise<void> {
     let doneCount = 0
     let skipCount = 0
     let failCount = 0
-    for (const [index, item] of candidates.entries()) {
+    const jobsCount = Math.max(1, Number(args.jobs ?? process.env.VOICE_JOBS ?? (modelverseCfg !== undefined ? 8 : 1)))
+    let asrLock: Promise<void> = Promise.resolve()
+    const withAsrLock = async <T>(task: () => Promise<T>): Promise<T> => {
+        const previous = asrLock
+        let release!: () => void
+        asrLock = new Promise<void>(resolve => {
+            release = resolve
+        })
+        await previous
+        try {
+            return await task()
+        } finally {
+            release()
+        }
+    }
+    let completedCount = 0
+    const processItem = async (index: number, item: (typeof candidates)[number]): Promise<void> => {
         const emotion: ExtVoiceEmotion = emotions[index] ?? "neutral"
         const directCharId = item.npc !== undefined ? npcCharMap.get(item.npc) : undefined
         const rawSpeaker = isUnknownSpeakerName(item.speakerName) ? undefined : item.speakerName
@@ -290,20 +345,20 @@ async function main(): Promise<void> {
         const storyCandidates =
             identity && !SKIP_IDENTITY_NAMES.has(identity) ? (storyByName[identity] ?? storyByName[stripIdentityTags(identity)] ?? []) : []
         const variants = buildRequiredVariants(item.content, item.npc, language, forceGenderNpcIds)
-        if (!variants.length) continue
+        if (!variants.length) return
         const entry: ExtVoiceEntry = {
             id: item.id,
             voice: `aistory/${item.id}`,
         }
         if (dryRun) {
             entries.push(entry)
-            continue
+            return
         }
         const oggNames = variants.map(variant => `voice_${datasetLanguage}_aistory_${item.id}${variant.fileSuffix}.ogg`)
         if (oggNames.every(name => existsSync(path.join(outDir, name)))) {
             entries.push(entry)
             skipCount += 1
-            continue
+            return
         }
         const jobContext: VariantRefContext = {
             emotion,
@@ -314,7 +369,7 @@ async function main(): Promise<void> {
             promptTextByRes: refIndex.promptTextByRes,
             npcCandidates: item.npc !== undefined ? (storyByNpc[String(item.npc)] ?? []) : [],
             npcEmotions: npcRefEmotions,
-            nameRef: storyCandidates[0],
+            nameRef: pickNameCandidate(storyCandidates),
             maleOverride: maleRefOverride,
         }
         const jobs: VariantRef[] = []
@@ -330,11 +385,11 @@ async function main(): Promise<void> {
         } catch (error) {
             failCount += 1
             console.log(`failed ${item.id}: ${error instanceof Error ? error.message.slice(0, 200) : error}`)
-            continue
+            return
         }
         if (!jobs.length) {
             skipCount += 1
-            continue
+            return
         }
         const pendingJobs = jobs.filter(job => {
             const finalName = `voice_${datasetLanguage}_aistory_${item.id}${job.variant.fileSuffix}.ogg`
@@ -343,31 +398,86 @@ async function main(): Promise<void> {
         if (!pendingJobs.length) {
             entries.push(entry)
             skipCount += 1
-            continue
+            return
         }
         try {
-            const uniqueTexts = [...new Map(pendingJobs.map(job => [job.variant.text + job.refWav, job])).values()]
-            const wavByKey = new Map<string, string>()
-            for (const job of uniqueTexts) {
-                const wav = await synthesizeOnce(sovits, {
-                    text: job.variant.text,
-                    textLang,
-                    refAudioPath: job.refWav,
-                    promptText: job.promptText,
-                    promptLang: textLang,
-                })
-                const tmpWavPath = path.join(outDir, `tmp_${item.id}${job.variant.fileSuffix}.wav`)
-                await writeFile(tmpWavPath, Buffer.from(wav))
-                wavByKey.set(job.variant.text + job.refWav, tmpWavPath)
-            }
+            let itemOk = true
             for (const job of pendingJobs) {
-                const srcWavPath = wavByKey.get(job.variant.text + job.refWav)!
                 const finalName = `voice_${datasetLanguage}_aistory_${item.id}${job.variant.fileSuffix}.ogg`
-                await convertWavToOgg(srcWavPath, path.join(outDir, finalName))
+                const finalPath = path.join(outDir, finalName)
+                const cacheKey = `${job.variant.text}\n${job.refWav}`
+                const cachedOgg = passedOggByKey.get(cacheKey)
+                if (cachedOgg) {
+                    await copyFile(cachedOgg, finalPath)
+                    console.log(`synthesized ${finalName} emotion=${emotion} ref=${job.refLabel} reused`)
+                    continue
+                }
+                const tmpWavPath = path.join(outDir, `tmp_${item.id}${job.variant.fileSuffix}.wav`)
+                let passed = false
+                for (let attempt = 0; attempt < qaAttempts; attempt += 1) {
+                    const wav =
+                        modelverseCfg !== undefined
+                            ? await modelverseInferOnce(modelverseCfg, {
+                                  text: job.variant.text,
+                                  refAudioPath: job.refWav,
+                                  emoAudioPath: job.refWav,
+                              })
+                            : indexCfg !== undefined
+                              ? await indexTtsOnce(indexCfg, {
+                                    text: job.variant.text,
+                                    refAudioPath: job.refWav,
+                                })
+                              : await synthesizeOnce(sovits!, {
+                                    text: job.variant.text,
+                                    textLang,
+                                    refAudioPath: job.refWav,
+                                    promptText: job.promptText,
+                                    promptLang: textLang,
+                                    seed: attempt === 0 ? -1 : 1000 + attempt,
+                                })
+                    await writeFile(tmpWavPath, Buffer.from(wav))
+                    if (!asrSession) {
+                        passed = true
+                        break
+                    }
+                    const qa = await withAsrLock(() => asrSession!.verify({ id: item.id, wav: tmpWavPath, text: job.variant.text }))
+                    if (isQaPass(qa, qaThresholds, job.variant.text.length)) {
+                        passed = true
+                        if (attempt > 0) console.log(`qa-pass ${finalName} cer=${qa.cer} recall=${qa.recall} attempt=${attempt}`)
+                        break
+                    }
+                    console.log(
+                        `qa-retry ${finalName} cer=${qa.cer} recall=${qa.recall} miss=${qa.longest_missing} attempt=${attempt} asr=${qa.transcript.slice(0, 40)}`
+                    )
+                    if (attempt === qaAttempts - 1) {
+                        await withAsrLock(() =>
+                            recordQaFailure({
+                                id: item.id,
+                                suffix: job.variant.fileSuffix,
+                                cer: qa.cer,
+                                recall: qa.recall,
+                                missing: qa.missing,
+                                longest_missing: qa.longest_missing,
+                                transcript: qa.transcript,
+                                text: job.variant.text,
+                                ref: job.refLabel,
+                            })
+                        )
+                    }
+                }
+                if (!passed) {
+                    itemOk = false
+                    await rm(tmpWavPath, { force: true })
+                    return
+                }
+                await convertWavToOgg(tmpWavPath, path.join(outDir, finalName))
+                if (!keepWav) await rm(tmpWavPath, { force: true })
+                passedOggByKey.set(cacheKey, finalPath)
                 console.log(`synthesized ${finalName} emotion=${emotion} ref=${job.refLabel}`)
             }
-            for (const tmpWavPath of new Set(wavByKey.values())) {
-                if (!keepWav) await rm(tmpWavPath, { force: true })
+            if (!itemOk) {
+                failCount += 1
+                return
             }
             entries.push(entry)
             doneCount += 1
@@ -375,19 +485,39 @@ async function main(): Promise<void> {
             failCount += 1
             console.log(`failed ${item.id}: ${error instanceof Error ? error.message.slice(0, 200) : error}`)
         }
-        if ((index + 1) % 20 === 0) {
-            const elapsedMin = (Date.now() - startedAt) / 60000
-            console.log(
-                `progress ${index + 1}/${candidates.length} done=${doneCount} skip=${skipCount} fail=${failCount} ${elapsedMin.toFixed(1)}min`
-            )
-        }
     }
 
+    let cursor = 0
+    const nextIndex = (): number | undefined => {
+        if (cursor >= candidates.length) return undefined
+        const current = cursor
+        cursor += 1
+        return current
+    }
+    await Promise.all(
+        Array.from({ length: jobsCount }, async () => {
+            for (;;) {
+                const next = nextIndex()
+                if (next === undefined) break
+                await processItem(next, candidates[next])
+                completedCount += 1
+                if (completedCount % 20 === 0) {
+                    const elapsedMin = (Date.now() - startedAt) / 60000
+                    console.log(
+                        `progress ${completedCount}/${candidates.length} done=${doneCount} skip=${skipCount} fail=${failCount} ${elapsedMin.toFixed(1)}min`
+                    )
+                }
+            }
+        })
+    )
+    entries.sort((a, b) => a.id - b.id)
+
+    if (asrSession) asrSession.stop()
     const fragment =
         `import type { ExtVoiceEntry } from "@/data/d/extvoice.data"\n\n` +
         `export const extVoiceFragment: ExtVoiceEntry[] = ${JSON.stringify(entries, null, 4)}\n`
     await writeFile(path.join(outDir, "extvoice.fragment.ts"), fragment)
-    console.log(`entries=${entries.length} -> ${path.join(outDir, "extvoice.fragment.ts")}`)
+    console.log(`entries=${entries.length} qaFailures=${qaFailures.length} -> ${path.join(outDir, "extvoice.fragment.ts")}`)
 }
 
 if (import.meta.main) {

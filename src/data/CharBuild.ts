@@ -4439,6 +4439,50 @@ export class CharBuild {
         return base / removedValue - 1
     }
 
+    /**
+     * 计算候选魔之楔替换指定槽位后的收益（替换后总伤害 / 当前总伤害 - 1）。
+     * 与 `calcIncome`（附加口径）不同：同系列 / 同名互斥下附加的新楔会被直接排除而恒得 0，
+     * 只有真实落槽才能反映换上后的变化；选楔弹窗编辑的是固定槽位，一律走替换口径。
+     * @param type 魔之楔槽位类型
+     * @param index 被编辑的槽位索引
+     * @param mod 候选魔之楔
+     * @param baseValue 当前构筑的基准伤害（缺省现算；worker 批量求收益时由调用方一次性传入）
+     * @returns 替换该槽位后的收益
+     */
+    public calcReplacementModIncome(type: string, index: number, mod: LeveledMod, baseValue?: number): number {
+        let resolvedType = type
+        if (resolvedType === "同律" && this.skillWeapon?.inherit) {
+            resolvedType = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
+        }
+
+        const base = baseValue ?? this.calculate()
+        if (Math.abs(base) < Number.EPSILON) return 0
+        let slot: (LeveledMod | null)[]
+        switch (resolvedType) {
+            case "角色":
+                slot = this.charMods
+                break
+            case "近战":
+                slot = this.meleeMods
+                break
+            case "远程":
+                slot = this.rangedMods
+                break
+            case "同律":
+                slot = this.skillMods
+                break
+            default:
+                return 0
+        }
+        // 槽位越界（槽位数组与弹窗索引失配时）退化为附加口径，避免抛错导致整批收益丢失
+        if (index < 0 || index >= slot.length) return this.calcIncome(mod, false, base)
+        const prev = slot[index]
+        slot[index] = mod
+        const mval = this.calculate()
+        slot[index] = prev
+        return mval / base - 1
+    }
+
     clone() {
         const cloned = new CharBuild({
             char: this.char.clone(),
@@ -4983,6 +5027,20 @@ export class CharBuild {
             case "skillMods":
                 return !!this.skillWeapon && typeof limit === "string" && [this.skillWeapon.类别, this.skillWeapon.伤害类型].includes(limit)
         }
+    }
+
+    /**
+     * 判断 MOD 与中枢槽的静态兼容性：仅光环系列，类型 / 属性 / 限定与角色槽同口径。
+     * @param mod 待判定的 MOD（原始数据或实例均可）
+     * @returns 是否可装入中枢槽
+     */
+    isAuraCompatible(mod: ModEquipCandidate): boolean {
+        if (mod.系列 !== "羽蛇") return false
+        if (mod.类型 !== ModTypeMap.charMods) return false
+        if (mod.属性 && mod.属性 !== this.char.属性) return false
+        const limit = mod.限定
+        if (limit === undefined || limit === null) return true
+        return typeof limit === "number" ? limit === this.char.id : limit === this.char.名称 || limit === this.char.属性
     }
 
     /**

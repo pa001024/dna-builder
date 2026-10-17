@@ -76,6 +76,17 @@ pnpm voice:upload --lang ch --write             # 拷入 ../dna-voice-dataset/ch
   参考音频从 modelscope 按 `_f` / `_m` / 无后缀依次试下，prompt 用原台词。故事参考不做情绪对齐（同声纹优先），
   有 404 的 key 会记 `failed` 跳过。
 
+## ASR 质检（FunASR 防丢字）
+
+GPT-SoVITS 偶发丢字（如整句未读）。合成后每条经 FunASR（`paraformer-zh`，常驻进程）转写算 CER：
+
+- `pnpm voice:synth`：每变体合成后即验，`cer > 0.6` 或整句丢失（`recall < 0.8` 或最长连续缺字 ≥ 8）自动换 seed 重试，
+  最多 3 次（`VOICE_QA_ATTEMPTS`），仍不过则删文件记 `qa-report.json`，条目不入库；短句（≤12 字）缺 ≤2 字且 `cer ≤ 0.4`
+  视为 ASR 专名噪声放行；同文本多变体只验一次后直拷。`--no-qa` 跳过。
+- `pnpm voice:qa`：存量横扫（`qa-sweep-report.json`），坏文件删除后下次合成断点续跑自动重做。
+
+实测标定：好文件 CER 0.0，丢整句的文件 CER 0.49。
+
 ## 前端
 
 - `src/utils/ext-voice.ts`：原生 voice 优先，无则回退 `extVoiceMap`，返回 `{url, ai}`。

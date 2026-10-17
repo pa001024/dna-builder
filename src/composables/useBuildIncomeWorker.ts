@@ -1,6 +1,12 @@
 import { ref } from "vue"
 import type { CharBuild } from "@/data"
-import type { IncomeBuffItem, IncomeEquippedBuffItem, IncomeEquippedModItem, IncomeModItem } from "@/data/CharBuild.worker"
+import type {
+    IncomeBuffItem,
+    IncomeEquippedBuffItem,
+    IncomeEquippedModItem,
+    IncomeModItem,
+    IncomeReplaceSlot,
+} from "@/data/CharBuild.worker"
 import { type CharBuildWorkerSnapshot, createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 
 /**
@@ -14,6 +20,8 @@ import { type CharBuildWorkerSnapshot, createWorkerSnapshot } from "@/data/CharB
 export interface BuildIncomeRequest {
     buffs?: IncomeBuffItem[]
     mods?: IncomeModItem[]
+    /** 候选魔之楔的落槽位置：有则按替换该槽位求收益，无则退化为附加口径 */
+    replaceSlot?: IncomeReplaceSlot
     equippedMods?: IncomeEquippedModItem[]
     equippedBuffs?: IncomeEquippedBuffItem[]
 }

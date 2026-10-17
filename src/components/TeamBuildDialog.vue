@@ -7,13 +7,15 @@ import {
     getModVariantAura,
     getModVariantIndex,
     getModVariantSlots,
-    type ModSlotType,
+    type ModSlot,
     type ModVariantLetter,
     normalizeCharSettings,
     resolveCharSkillLevel,
     resolveModVariantLetter,
 } from "@/composables/useCharSettings"
 import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
+import { useUIStore } from "@/store/ui"
+import { base36Pad, copyText } from "@/util"
 
 /**
  * 协战构筑弹窗——简洁模式下点击协战角色/协战武器时打开。
@@ -23,6 +25,9 @@ import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weap
  * 展示的 MOD 取关联时选定的配置变体（charSettings.teamNBuildVariant，A/B/C）；
  * 关联的构筑没有该变体时降级为配置 A（默认配置），并在标题栏标注实际展示的配置。
  * 本组件只读，不修改任何构筑数据。
+ *
+ * 每个魔之楔分组都带一个「复制社区代码」按钮：把该组魔之楔按游戏社区代码格式抄出来，
+ * 方便直接把队友的那套方案粘进游戏（角色组含中枢，武器组只有 8 个普通槽位）。
  *
  * 弹窗以 Teleport 挂到 body 上：简洁模式根节点是 overflow:hidden 的定高容器，
  * 且内部大量视差图层带 transform，就地渲染会被裁剪/定位错乱；teleport 后自带的暗色主题也不受父级 CSS 变量影响。
@@ -44,6 +49,8 @@ interface ModGroup {
     mods: (LeveledMod | null)[]
     /** 中枢魔之楔（仅角色组有值） */
     aura: LeveledMod | null
+    /** 该组的社区代码（同律组没有对应的游戏代码，为空串） */
+    code: string
 }
 
 /** 弹窗展示数据 */
@@ -88,6 +95,7 @@ const props = withDefaults(
 const open = defineModel<boolean>({ default: false })
 
 const { t } = useTranslation()
+const ui = useUIStore()
 
 const loading = ref(false)
 const error = ref("")
@@ -116,13 +124,34 @@ const focusKey = computed(() => {
 /**
  * 读取普通槽位的魔之楔实例。
  * 静态表查不到（数据包未更新）的槽位退化为空槽，避免整块弹窗失败。
- * @param settings 已标准化的角色配置
- * @param type 槽位类型
- * @param variantIndex 要展示的 MOD 配置变体索引（0/1/2 ↔ A/B/C）
- * @returns 该槽位类型的魔之楔数组
+ * @param slots 槽位数组（元素为 [魔之楔id, 等级] 或空槽）
+ * @returns 该槽位的魔之楔实例数组
  */
-function readMods(settings: CharSettings, type: ModSlotType, variantIndex: number): (LeveledMod | null)[] {
-    return getModVariantSlots(settings, type, variantIndex).map(slot => (slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null))
+function toMods(slots: ModSlot[]): (LeveledMod | null)[] {
+    return slots.map((slot): LeveledMod | null => (slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null))
+}
+
+/**
+ * 8 槽位魔之楔在社区代码里的排列位置（与 CharBuild.codeSwapR 的交换表一致）：
+ * 第 i 个槽位占据代码中的第 SLOT_CODE_POSITIONS[i] 组。
+ */
+const SLOT_CODE_POSITIONS = [0, 2, 3, 1, 4, 6, 7, 5]
+
+/**
+ * 把一套魔之楔按游戏社区代码格式编码（与专业模式「复制代码」的 CharBuild.getCode 同格式）。
+ * 角色组为 C + 角色id + 8 槽 + 中枢，武器组为 W + 武器id + 8 槽，空槽编 0。
+ * @param flag 代码类型（C 角色 / W 武器）
+ * @param ownerId 角色 id 或武器 id
+ * @param slots 8 个普通槽位
+ * @param auraId 中枢魔之楔 id（仅角色组使用）
+ * @returns 社区代码
+ */
+function encodeModCode(flag: "C" | "W", ownerId: number, slots: ModSlot[], auraId = 0) {
+    const groups = Array.from({ length: 8 }, () => "0000")
+    for (let index = 0; index < 8; index += 1) {
+        groups[SLOT_CODE_POSITIONS[index]] = base36Pad(slots[index]?.[0] ?? 0)
+    }
+    return `${flag}${base36Pad(ownerId)}${groups.join("")}${flag === "C" ? base36Pad(auraId) : ""}`
 }
 
 /**
@@ -159,6 +188,7 @@ function createView(charId: number, settings: CharSettings, title: string, reque
     // 中枢魔之楔在该变体里只存 id（无等级字段），与构筑页一致按品质满级展示
     const auraModId = getModVariantAura(settings, variantIndex)
     const auraQuality = LeveledModHelper.getQuality(auraModId)
+    const charSlots = getModVariantSlots(settings, "角色", variantIndex)
     const groups: ModGroup[] = [
         {
             key: "char",
@@ -166,34 +196,39 @@ function createView(charId: number, settings: CharSettings, title: string, reque
             weaponName: "",
             weaponIcon: "",
             weaponMeta: "",
-            mods: readMods(settings, "角色", variantIndex),
+            mods: toMods(charSlots),
             aura: LeveledModHelper.optionalFromId(auraModId, LeveledMod.getMaxLevel(auraQuality)),
+            code: encodeModCode("C", charId, charSlots, auraModId),
         },
     ]
 
     const melee = readWeapon(settings.meleeWeapon, settings.meleeWeaponLevel, settings.meleeWeaponRefine)
     if (melee.name) {
+        const meleeSlots = getModVariantSlots(settings, "近战", variantIndex)
         groups.push({
             key: "melee",
             label: t("char-build.team_weapon_mods", { slot: t("char-build.melee") }),
             weaponName: melee.name,
             weaponIcon: melee.icon,
             weaponMeta: melee.meta,
-            mods: readMods(settings, "近战", variantIndex),
+            mods: toMods(meleeSlots),
             aura: null,
+            code: encodeModCode("W", settings.meleeWeapon, meleeSlots),
         })
     }
 
     const ranged = readWeapon(settings.rangedWeapon, settings.rangedWeaponLevel, settings.rangedWeaponRefine)
     if (ranged.name) {
+        const rangedSlots = getModVariantSlots(settings, "远程", variantIndex)
         groups.push({
             key: "ranged",
             label: t("char-build.team_weapon_mods", { slot: t("char-build.ranged") }),
             weaponName: ranged.name,
             weaponIcon: ranged.icon,
             weaponMeta: ranged.meta,
-            mods: readMods(settings, "远程", variantIndex),
+            mods: toMods(rangedSlots),
             aura: null,
+            code: encodeModCode("W", settings.rangedWeapon, rangedSlots),
         })
     }
 
@@ -205,8 +240,10 @@ function createView(charId: number, settings: CharSettings, title: string, reque
             weaponName: skillWeapon.名称,
             weaponIcon: skillWeapon.icon ? LeveledWeapon.url(skillWeapon.icon) : "",
             weaponMeta: "",
-            mods: readMods(settings, "同律", variantIndex),
+            mods: toMods(getModVariantSlots(settings, "同律", variantIndex)),
             aura: null,
+            // 同律武器在游戏里没有对应的社区代码，不给复制按钮
+            code: "",
         })
     }
 
@@ -264,6 +301,20 @@ async function scrollToFocus() {
 /** 关闭弹窗 */
 function close() {
     open.value = false
+}
+
+/**
+ * 复制某个分组的社区代码到剪贴板（只读动作，不改任何构筑数据）。
+ * @param group 魔之楔分组（只用到其中的代码串）
+ */
+async function copyGroupCode(group: { code: string }) {
+    if (!group.code) return
+    try {
+        await copyText(group.code)
+        ui.showSuccessMessage(t("char-build.copied_to_clipboard"))
+    } catch (error) {
+        ui.showErrorMessage(t("char-build.copy_failed"), error instanceof Error ? error.message : "")
+    }
 }
 
 /**
@@ -357,6 +408,18 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                     <span v-if="group.weaponMeta" class="tb-group-weapon-meta">{{ group.weaponMeta }}</span>
                                 </span>
                                 <span class="tb-group-line" />
+                                <!-- 复制该组魔之楔的社区代码：没有对应游戏代码的同律组不显示 -->
+                                <button
+                                    v-if="group.code"
+                                    type="button"
+                                    class="tb-copy"
+                                    :title="$t('char-build.team_build_copy_code')"
+                                    :aria-label="$t('char-build.team_build_copy_code')"
+                                    @click="copyGroupCode(group)"
+                                >
+                                    <Icon icon="ri:file-copy-line" class="tb-copy-icon" />
+                                    <span>{{ $t("char-build.team_build_copy_code") }}</span>
+                                </button>
                             </div>
 
                             <div class="tb-modgrid">
@@ -618,6 +681,36 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
     height: 1px;
     flex: 1;
     background: linear-gradient(90deg, color-mix(in srgb, var(--tb-accent) 45%, transparent), transparent);
+}
+
+/* 复制社区代码：与头部关闭按钮同一套方形描边，hover 时才提亮到强调色 */
+.tb-copy {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--tb-accent) 32%, transparent);
+    background: color-mix(in srgb, var(--tb-accent) 10%, transparent);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--tb-accent) 78%, white);
+    cursor: pointer;
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.tb-copy:hover {
+    border-color: color-mix(in srgb, var(--tb-accent) 70%, transparent);
+    background: color-mix(in srgb, var(--tb-accent) 20%, transparent);
+    color: var(--tb-text);
+}
+
+.tb-copy-icon {
+    width: 11px;
+    height: 11px;
 }
 
 .tb-modgrid {

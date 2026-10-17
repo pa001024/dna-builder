@@ -233,6 +233,11 @@ describe("build.mod / mods / aura 可装备校验", () => {
         const api = makeModApi()
         await expect(api.aura(41001)).resolves.toMatchObject({ ok: false })
         expect(await api.aura(31502)).toMatchObject({ ok: true })
+        // 41745 权能（雷）：黎瑟是雷属性，放行；41735 背水（火）：属性不符拒绝
+        expect(await api.aura(41745)).toMatchObject({ ok: true })
+        const mismatch = await api.aura(41735)
+        expect(mismatch).toMatchObject({ ok: false })
+        expect(String(mismatch.error)).toContain("属性")
     })
 })
 

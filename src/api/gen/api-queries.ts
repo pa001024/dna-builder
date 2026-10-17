@@ -1331,6 +1331,7 @@ export const buildsQuery = typedQuery(
                 title
                 desc
                 charId
+                charSettings
                 userId
                 views
                 likes

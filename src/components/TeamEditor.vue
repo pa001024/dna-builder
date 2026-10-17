@@ -16,6 +16,7 @@ import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
  * 「协战构筑」是可选的服务器构筑关联：写入 charSettings.teamNBuild（"-" 表示未关联），
  * 简洁模式点击该协战角色或武器即可弹窗查看其魔之楔。
  * 关联时还可以指定查看该构筑的哪一份 MOD 配置（A/B/C）：目标构筑没有所选配置时降级为 A。
+ * 构筑挑选器是「选中 → 读描述 → 点确定」两步：同名构筑较多时，先看描述再决定关联哪一份。
  */
 
 /** 协战下拉选项（角色按元素分组 / 武器按类型分组后由父级传入） */
@@ -35,6 +36,8 @@ interface BuildChoice {
     title: string
     /** 构筑作者名（列出全部公开构筑时用于区分同名标题） */
     author: string
+    /** 构筑描述（作者填写的纯文本，可能为空） */
+    desc: string
 }
 
 /** 协战槽位序号（1/2，与 charSettings 的 teamN 字段一一对应） */
@@ -72,6 +75,9 @@ const picker = ref<{ kind: PickerKind; slot: TeamSlot } | null>(null)
 
 /** 构筑挑选器里待提交的 MOD 配置变体（A/B/C）：打开挑选器时同步为当前已关联的变体 */
 const pickerVariant = ref<ModVariantLetter>("A")
+
+/** 构筑挑选器里待提交的构筑 id（"-" 表示不关联）：只是选中态，点「确定」才写入配置 */
+const pickerBuild = ref<string>(EMPTY_VALUE)
 
 /** 每个协战角色可选的构筑列表（按角色 id 缓存，仅缓存成功结果） */
 const buildOptions = ref<Record<number, BuildChoice[]>>({})
@@ -216,7 +222,12 @@ async function loadBuildOptions(charId: number | "-") {
         const result = await buildsQuery({ charId, limit: 200, offset: 0 }, { requestPolicy: "network-only" })
         buildOptions.value = {
             ...buildOptions.value,
-            [charId]: (result || []).map(build => ({ id: build.id, title: build.title, author: build.user?.name ?? "" })),
+            [charId]: (result || []).map(build => ({
+                id: build.id,
+                title: build.title,
+                author: build.user?.name ?? "",
+                desc: build.desc ?? "",
+            })),
         }
     } catch (error) {
         // 服务器不可用时保持空列表：构筑关联是可选增强，不应打断构筑编辑
@@ -250,7 +261,8 @@ function buildTitle(slot: TeamSlot) {
 function openPicker(kind: PickerKind, slot: TeamSlot) {
     picker.value = { kind, slot }
     if (kind === "build") {
-        // 以当前已关联的变体作为起点，用户只改想改的部分
+        // 以当前已关联的构筑/变体作为起点，用户只改想改的部分
+        pickerBuild.value = teamBuild(slot)
         pickerVariant.value = teamBuildVariant(slot)
         void loadBuildOptions(teamChar(slot))
     }
@@ -300,8 +312,13 @@ const pickerBuilds = computed<BuildChoice[]>(() => {
     const options = buildOptions.value[charId] ?? []
     const buildId = teamBuild(current.slot)
     if (buildId === EMPTY_VALUE || options.some(option => option.id === buildId)) return options
-    return [{ id: buildId, title: buildId, author: "" }, ...options]
+    return [{ id: buildId, title: buildId, author: "", desc: "" }, ...options]
 })
+
+/** 构筑挑选器里选中项的详情（选「不关联」或兜底项查不到描述时为 null） */
+const pickerBuildDetail = computed(() =>
+    pickerBuild.value === EMPTY_VALUE ? null : (pickerBuilds.value.find(option => option.id === pickerBuild.value) ?? null),
+)
 
 /** 构筑挑选器是否正在加载 */
 const pickerBuildsLoading = computed(() => {
@@ -321,14 +338,12 @@ function isPicked(option: TeamSelectOption) {
 }
 
 /**
- * 判断构筑候选项是否为该槽位当前已关联的构筑（用于列表高亮）。
+ * 判断构筑候选项是否为挑选器里的选中项（用于列表高亮）。
  * @param buildId 服务器构筑 id（"-" 表示不关联）
- * @returns 是否为当前已关联项
+ * @returns 是否为当前选中项
  */
 function isBuildPicked(buildId: string) {
-    const current = picker.value
-    if (!current) return false
-    return teamBuild(current.slot) === buildId
+    return !!picker.value && pickerBuild.value === buildId
 }
 
 /**
@@ -367,12 +382,12 @@ function commitTeamOption(value: number | "-") {
 }
 
 /**
- * 提交协战构筑关联（"-" 表示取消关联），同时写入要查看的 MOD 配置变体。
- * @param buildId 服务器构筑 id
+ * 提交协战构筑关联：把挑选器里选中的构筑（"-" 表示取消关联）连同 MOD 配置变体一起写入。
  */
-function commitBuild(buildId: string) {
+function commitBuild() {
     const current = picker.value
     if (!current) return
+    const buildId = pickerBuild.value
     setTeamBuild(current.slot, buildId)
     // 取消关联时变体回到配置 A，避免留下指向不存在构筑的配置字母
     setTeamBuildVariant(current.slot, buildId === EMPTY_VALUE ? "A" : pickerVariant.value)
@@ -496,7 +511,7 @@ watch(
             </div>
         </div>
 
-        <!-- 选择器：卡片网格，选中即写入并关闭（与额外精通/武器选择弹窗同一套交互） -->
+        <!-- 选择器：卡片网格选中即写入并关闭（与额外精通/武器选择弹窗同一套交互）；协战构筑例外，选中后先看描述再点确定 -->
         <!-- teleport 到 body：面板外壳带 backdrop-blur，会给 fixed 弹窗造出一个错误的包含块 -->
         <Teleport to="body">
             <dialog class="modal" :class="{ 'modal-open': !!picker }">
@@ -533,30 +548,60 @@ watch(
                         <p v-if="pickerBuildsLoading" class="py-4 text-sm text-base-content/60">
                             {{ $t("char-build.team_build_loading") }}
                         </p>
-                        <div v-else class="flex flex-col gap-1.5">
-                            <button
-                                type="button"
-                                class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
-                                :class="pickRowClass(isBuildPicked(EMPTY_VALUE))"
-                                @click="commitBuild(EMPTY_VALUE)"
-                            >
-                                <span class="min-w-0 truncate">{{ $t("char-build.team_build_none") }}</span>
-                            </button>
-                            <button
-                                v-for="build in pickerBuilds"
-                                :key="build.id"
-                                type="button"
-                                class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
-                                :class="pickRowClass(isBuildPicked(build.id))"
-                                @click="commitBuild(build.id)"
-                            >
-                                <span class="min-w-0 truncate">{{ build.title }}</span>
-                                <span v-if="build.author" class="ml-auto shrink-0 text-xs text-base-content/50">{{ build.author }}</span>
-                            </button>
-                            <p v-if="!pickerBuilds.length" class="py-4 text-center text-sm text-base-content/45">
-                                {{ $t("char-build.team_build_empty_list") }}
-                            </p>
-                        </div>
+                        <template v-else>
+                            <!-- 列表限高滚动：描述区与底部「确定」按钮始终可见 -->
+                            <div class="flex max-h-[45vh] flex-col gap-1.5 overflow-y-auto pr-1">
+                                <button
+                                    type="button"
+                                    class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
+                                    :class="pickRowClass(isBuildPicked(EMPTY_VALUE))"
+                                    @click="pickerBuild = EMPTY_VALUE"
+                                >
+                                    <span class="min-w-0 truncate">{{ $t("char-build.team_build_none") }}</span>
+                                </button>
+                                <button
+                                    v-for="build in pickerBuilds"
+                                    :key="build.id"
+                                    type="button"
+                                    class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
+                                    :class="pickRowClass(isBuildPicked(build.id))"
+                                    @click="pickerBuild = build.id"
+                                >
+                                    <span class="min-w-0 truncate">{{ build.title }}</span>
+                                    <span v-if="build.author" class="ml-auto shrink-0 text-xs text-base-content/50">{{ build.author }}</span>
+                                </button>
+                                <p v-if="!pickerBuilds.length" class="py-4 text-center text-sm text-base-content/45">
+                                    {{ $t("char-build.team_build_empty_list") }}
+                                </p>
+                            </div>
+
+                            <!-- 选中构筑的描述：先读描述再决定关联哪一份，未选中/选「不关联」时回落到关联说明 -->
+                            <div class="mt-3 flex flex-col gap-1.5 rounded-xs border border-base-content/12 bg-base-content/5 px-2.5 py-2">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="shrink-0 text-xs font-semibold text-base-content/70">{{ $t("common.description") }}</span>
+                                    <span v-if="pickerBuildDetail?.title" class="min-w-0 truncate text-[11px] text-base-content/50">
+                                        {{ pickerBuildDetail.title }}
+                                    </span>
+                                </div>
+                                <p
+                                    v-if="pickerBuildDetail"
+                                    class="max-h-32 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/75"
+                                >
+                                    {{ pickerBuildDetail.desc || $t("char-build.team_build_desc_empty") }}
+                                </p>
+                                <p v-else class="text-xs leading-relaxed text-base-content/45">{{ $t("char-build.team_build_hint") }}</p>
+                            </div>
+
+                            <!-- 选中不写入，点确定才关联（与角色/武器的点击即选区分开，因为要先看描述） -->
+                            <div class="mt-3 flex items-center justify-end gap-2 border-t border-base-content/10 pt-3">
+                                <button type="button" class="btn btn-sm btn-ghost" @click="closePicker">
+                                    {{ $t("common.close") }}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" @click="commitBuild">
+                                    {{ $t("common.confirm") }}
+                                </button>
+                            </div>
+                        </template>
                     </template>
 
                     <!-- 队友角色 / 队友武器：按元素或类型分组的卡片网格 -->

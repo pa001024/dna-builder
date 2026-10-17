@@ -110,6 +110,19 @@ describe("MOD 可装备口径（CharBuild 原生能力）", () => {
         })
     })
 
+    describe("isAuraCompatible", () => {
+        it("通用光环与同属性光环可装，异属性光环被拦", () => {
+            const build = createTestBuild()
+            expect(build.isAuraCompatible(new LeveledMod(31502))).toBe(true)
+            expect(build.isAuraCompatible(new LeveledMod(41745))).toBe(true)
+            expect(build.isAuraCompatible(new LeveledMod(41735))).toBe(false)
+        })
+        it("非光环系列不可装入中枢槽", () => {
+            const build = createTestBuild()
+            expect(build.isAuraCompatible(new LeveledMod(41001))).toBe(false)
+        })
+    })
+
     describe("isModEquipable", () => {
         it("同名非契约者被拦，契约者同名豁免", () => {
             const build = createTestBuild()

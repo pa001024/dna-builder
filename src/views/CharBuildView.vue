@@ -451,8 +451,8 @@ function filterModOptionsBySlot(key: ModTypeKey) {
     return modOptions.value.filter(option => {
         const raw = rawById.get(option.value)
         if (!raw) return false
-        // 中枢光环（羽蛇）随角色槽选项下发、由光环下拉使用，不占用普通槽位
-        if (key === "charMods" && raw.系列 === "羽蛇") return true
+        // 中枢光环（羽蛇）随角色槽选项下发、由光环下拉使用，不占用普通槽位；仍需按属性 / 限定过滤
+        if (key === "charMods" && raw.系列 === "羽蛇") return charBuild.value.isAuraCompatible(raw)
         return charBuild.value.isModSlotCompatible(raw, key)
     })
 }

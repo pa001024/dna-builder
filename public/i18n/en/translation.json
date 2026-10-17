@@ -826,6 +826,8 @@
         "tag": "Tag",
         "target_function": "Target Function",
         "team": "Team",
+        "team_build_copy_code": "Copy community code",
+        "team_build_desc_empty": "This build has no description",
         "team_build_empty": "The linked build is empty",
         "team_build_empty_list": "No public build for this character",
         "team_build_failed": "Failed to load teammate build",

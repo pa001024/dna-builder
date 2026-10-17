@@ -806,6 +806,16 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             if (mod.系列 !== "羽蛇") {
                 return fail(`「${mod.名称}」不是光环（羽蛇系列），中枢槽只能装羽蛇系列，请用 build.mod 装入普通槽位`)
             }
+            const build = host.charBuild.value
+            if (build && !build.isAuraCompatible(mod)) {
+                if (mod.类型 !== "角色") {
+                    return fail(`「${mod.名称}」是${mod.类型}魔之楔，装不上中枢槽`)
+                }
+                if (mod.属性 && mod.属性 !== build.char.属性) {
+                    return fail(`「${mod.名称}」需要${mod.属性}属性角色，当前是${build.char.属性}属性${build.char.名称}`)
+                }
+                return fail(`「${mod.名称}」有装配限定（${String(mod.限定)}），当前构筑不满足`)
+            }
             setModVariantAura(host.charSettings.value, mod.id)
             record(`中枢魔之楔换为 ${mod.名称}`)
             return ok(`中枢魔之楔已设为 ${mod.名称}`, damage())

@@ -647,6 +647,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :mod-options="filterModOptionsBySlot(charBuilds[index], 'charMods')"
                                     :char-build="charBuilds[index]"
                                     type="角色"
+                                    income-mode="append"
                                     @remove-mod="removeMod(index, '角色', $event)"
                                     @select-mod="selectMod(index, '角色', $event[0], $event[1], $event[2])"
                                 />
@@ -667,6 +668,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :mod-options="filterModOptionsBySlot(charBuilds[index], 'meleeMods')"
                                     :char-build="charBuilds[index]"
                                     type="近战"
+                                    income-mode="append"
                                     @remove-mod="removeMod(index, '近战', $event)"
                                     @select-mod="selectMod(index, '近战', $event[0], $event[1], $event[2])"
                                 />
@@ -681,6 +683,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :mod-options="filterModOptionsBySlot(charBuilds[index], 'rangedMods')"
                                     :char-build="charBuilds[index]"
                                     type="远程"
+                                    income-mode="append"
                                     @remove-mod="removeMod(index, '远程', $event)"
                                     @select-mod="selectMod(index, '远程', $event[0], $event[1], $event[2])"
                                 />
@@ -697,6 +700,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :mod-options="filterModOptionsBySlot(charBuilds[index], 'skillMods')"
                                     :char-build="charBuilds[index]"
                                     type="同律"
+                                    income-mode="append"
                                     @remove-mod="removeMod(index, '同律', $event)"
                                     @select-mod="selectMod(index, '同律', $event[0], $event[1], $event[2])"
                                 />

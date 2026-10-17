@@ -7,6 +7,8 @@ import { stripStoryTextTags } from "../../src/data/story-text"
 export interface MissingDialogue {
     id: number
     kind: "dialogue" | "option"
+    storyId: number
+    questId: number
     npc?: number
     speakerName?: string
     content: string
@@ -50,6 +52,8 @@ export function scanMissingVoices(): MissingScanResult {
                     items.push({
                         id: dialogue.id,
                         kind: "dialogue",
+                        storyId: story.id,
+                        questId: quest.id,
                         npc: dialogue.npc,
                         speakerName: dialogue.speakerName,
                         content: dialogue.content ?? "",
@@ -64,6 +68,8 @@ export function scanMissingVoices(): MissingScanResult {
                         items.push({
                             id: option.id,
                             kind: "option",
+                            storyId: story.id,
+                            questId: quest.id,
                             npc: option.npc,
                             content: option.content ?? "",
                             speakable: isSpeakable(option.content ?? ""),

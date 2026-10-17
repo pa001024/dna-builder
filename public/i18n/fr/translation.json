@@ -842,6 +842,8 @@
         "target_function": "Fonction cible",
         "team": "Équipe",
         "team_build": "Build de l'équipier",
+        "team_build_copy_code": "Copier le code communautaire",
+        "team_build_desc_empty": "Cette configuration n'a pas de description",
         "team_build_empty": "Le build lié est vide",
         "team_build_failed": "Échec du chargement du build de l'équipier",
         "team_build_hint": "Associez un build partagé à un équipier : en mode simple, cliquez sur le personnage ou l'arme pour voir ses sceaux",

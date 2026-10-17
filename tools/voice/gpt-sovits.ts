@@ -11,6 +11,7 @@ export interface GptSoVitsSynthRequest {
     refAudioPath: string
     promptText: string
     promptLang: string
+    seed?: number
 }
 
 /**
@@ -41,6 +42,7 @@ export async function synthesizeOnce(config: GptSoVitsConfig, request: GptSoVits
         prompt_lang: request.promptLang,
         media_type: "wav",
         streaming_mode: "false",
+        seed: String(request.seed ?? -1),
     })
     let lastError: unknown = null
     for (let attempt = 0; attempt <= config.retries; attempt += 1) {

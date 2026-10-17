@@ -12,15 +12,17 @@ const HOMOPHONE_NEUTRAL_PAIRS = new Set(["他|她", "他们|她们", "他們|她
 const GENDER_PLACEHOLDER_REGEX = /\{(性[别別]2?)[:：]([^|丨{}]*)[|丨]([^|丨{}]*)\}/g
 
 /**
- * 去除 TTS 不应朗读的昵称占位符，保留语句通顺。
+ * 昵称占位符替换为默认主角名（与前端设置缺省一致：维塔/墨斯，第三人称不 manifesto 第二人称）。
  * @param text 原始剧情文本
- * @returns 去昵称后的文本
+ * @returns 处理后的文本
  */
 export function stripNicknamePlaceholders(text: string): string {
     return text
-        .replace(/\{nickname2?\}/g, "")
+        .replace(/\{nickname2\}/g, "墨斯")
+        .replace(/\{nickname\}/g, "维塔")
         .replace(/ {2,}/g, " ")
         .replace(/\s+([，。？！、,.?!])/g, "$1")
+        .replace(/^[，、。]+/g, "")
         .trim()
 }
 

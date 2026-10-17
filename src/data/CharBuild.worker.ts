@@ -25,6 +25,12 @@ export type IncomeModItem = {
     effect?: Buff
 }
 
+/** 候选魔之楔落槽位置：选楔弹窗正在编辑的槽位，同请求内全部候选共用 */
+export type IncomeReplaceSlot = {
+    type: string
+    index: number
+}
+
 /** 已装备魔之楔（按移除对应槽位求收益） */
 export type IncomeEquippedModItem = {
     key: string
@@ -46,6 +52,8 @@ type IncomeRequest = {
     build: CharBuildWorkerSnapshot
     buffs?: IncomeBuffItem[]
     mods?: IncomeModItem[]
+    /** 候选魔之楔的落槽位置：有则按替换该槽位求收益，无则退化为附加口径 */
+    replaceSlot?: IncomeReplaceSlot
     equippedMods?: IncomeEquippedModItem[]
     equippedBuffs?: IncomeEquippedBuffItem[]
 }
@@ -76,7 +84,10 @@ self.onmessage = (event: MessageEvent<IncomeRequest>) => {
             incomes[buff.key] = build.calcIncome(leveled, buff.minus, base)
         })
         event.data.mods?.forEach(mod => {
-            incomes[mod.key] = build.calcIncome(new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect), false, base)
+            const leveled = new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect)
+            incomes[mod.key] = event.data.replaceSlot
+                ? build.calcReplacementModIncome(event.data.replaceSlot.type, event.data.replaceSlot.index, leveled, base)
+                : build.calcIncome(leveled, false, base)
         })
         event.data.equippedMods?.forEach(mod => {
             incomes[mod.key] = build.calcEquippedModIncome(mod.type, mod.index, base)

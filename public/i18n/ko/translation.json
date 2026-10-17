@@ -813,6 +813,8 @@
         "tag": "태그",
         "target_function": "타겟 함수",
         "team": "팀",
+        "team_build_copy_code": "커뮤니티 코드 복사",
+        "team_build_desc_empty": "이 빌드에는 설명이 없습니다",
         "team_build_empty": "빌드 내용이 비어 있습니다",
         "team_build_empty_list": "이 캐릭터의 공개 빌드가 없습니다",
         "team_build_failed": "팀 빌드를 불러오지 못했습니다",

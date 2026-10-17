@@ -861,6 +861,8 @@
         "tag": "标签",
         "target_function": "目标函数",
         "team": "协战",
+        "team_build_copy_code": "复制社区代码",
+        "team_build_desc_empty": "该构筑没有填写描述",
         "team_build_empty": "构筑内容为空",
         "team_build_empty_list": "该角色暂无公开构筑",
         "team_build_failed": "协战构筑载入失败",
