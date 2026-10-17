@@ -47,8 +47,15 @@ export type IncomeEquippedBuffItem = {
     coverage?: number
 }
 
+/** 目标值请求条目：一次请求可携带多份构筑（构筑列表场景） */
+export type TargetValueItem = {
+    key: string
+    build: CharBuildWorkerSnapshot
+}
+
 type IncomeRequest = {
     id: number
+    kind?: "income"
     build: CharBuildWorkerSnapshot
     buffs?: IncomeBuffItem[]
     mods?: IncomeModItem[]
@@ -58,49 +65,93 @@ type IncomeRequest = {
     equippedBuffs?: IncomeEquippedBuffItem[]
 }
 
+type TargetValueRequest = {
+    id: number
+    kind: "targetValues"
+    builds: TargetValueItem[]
+}
+
 type IncomeResponse = {
     id: number
     incomes?: Record<string, number>
     error?: string
 }
 
-self.onmessage = (event: MessageEvent<IncomeRequest>) => {
+type TargetValueResponse = {
+    id: number
+    values?: Record<string, number>
+    /** 单份构筑计算失败不影响整批，失败项只在这里留痕 */
+    failed?: string[]
+}
+
+/**
+ * 批量求解构筑目标值（`calculate()`）：主线程只负责组装快照，重活全部落在本线程。
+ * @param request 目标值请求
+ */
+function handleTargetValues(request: TargetValueRequest) {
+    const values: Record<string, number> = {}
+    const failed: string[] = []
+    for (const item of request.builds) {
+        try {
+            const value = createBuildFromSnapshot(item.build).calculate()
+            if (Number.isFinite(value)) {
+                values[item.key] = value
+            } else {
+                failed.push(item.key)
+            }
+        } catch (error) {
+            failed.push(`${item.key}:${error instanceof Error ? error.message : String(error)}`)
+        }
+    }
+    self.postMessage({
+        id: request.id,
+        values,
+        ...(failed.length > 0 ? { failed } : {}),
+    } satisfies TargetValueResponse)
+}
+
+self.onmessage = (event: MessageEvent<IncomeRequest | TargetValueRequest>) => {
+    const request = event.data
+    if (request.kind === "targetValues") {
+        handleTargetValues(request)
+        return
+    }
     try {
-        const build = createBuildFromSnapshot(event.data.build)
+        const build = createBuildFromSnapshot(request.build)
         const incomes: Record<string, number> = {}
         const hasItems =
-            (event.data.buffs?.length ?? 0) +
-                (event.data.mods?.length ?? 0) +
-                (event.data.equippedMods?.length ?? 0) +
-                (event.data.equippedBuffs?.length ?? 0) >
+            (request.buffs?.length ?? 0) +
+                (request.mods?.length ?? 0) +
+                (request.equippedMods?.length ?? 0) +
+                (request.equippedBuffs?.length ?? 0) >
             0
         // 基准伤害整请求只算一次：各候选计算前后都会恢复构筑原状，基准与逐项现算完全一致
         const base = hasItems ? build.calculate() : 0
-        event.data.buffs?.forEach(buff => {
+        request.buffs?.forEach(buff => {
             const leveled = new LeveledBuff(buff.data, buff.level)
             if (buff.coverage !== undefined) {
                 leveled.coverage = buff.coverage
             }
             incomes[buff.key] = build.calcIncome(leveled, buff.minus, base)
         })
-        event.data.mods?.forEach(mod => {
+        request.mods?.forEach(mod => {
             const leveled = new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect)
-            incomes[mod.key] = event.data.replaceSlot
-                ? build.calcReplacementModIncome(event.data.replaceSlot.type, event.data.replaceSlot.index, leveled, base)
+            incomes[mod.key] = request.replaceSlot
+                ? build.calcReplacementModIncome(request.replaceSlot.type, request.replaceSlot.index, leveled, base)
                 : build.calcIncome(leveled, false, base)
         })
-        event.data.equippedMods?.forEach(mod => {
+        request.equippedMods?.forEach(mod => {
             incomes[mod.key] = build.calcEquippedModIncome(mod.type, mod.index, base)
         })
-        event.data.equippedBuffs?.forEach(buff => {
+        request.equippedBuffs?.forEach(buff => {
             const leveled = new LeveledBuff(buff.data, buff.level)
             if (buff.coverage !== undefined) {
                 leveled.coverage = buff.coverage
             }
             incomes[buff.key] = build.calcEquippedBuffIncome(leveled, base)
         })
-        self.postMessage({ id: event.data.id, incomes } satisfies IncomeResponse)
+        self.postMessage({ id: request.id, incomes } satisfies IncomeResponse)
     } catch (error) {
-        self.postMessage({ id: event.data.id, error: error instanceof Error ? error.message : String(error) } satisfies IncomeResponse)
+        self.postMessage({ id: request.id, error: error instanceof Error ? error.message : String(error) } satisfies IncomeResponse)
     }
 }

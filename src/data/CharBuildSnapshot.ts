@@ -131,6 +131,7 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         teamWeaponCategories: charBuild.teamWeaponCategories,
         extraMastery: charBuild.extraMastery,
         dotSettings: { ...charBuild.dotSettings },
+        petBaseCd: charBuild.petBaseCd,
     }
 }
 

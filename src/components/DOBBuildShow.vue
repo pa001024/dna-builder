@@ -11,13 +11,14 @@ import {
     unlikeBuildMutation,
     updateBuildMutation,
 } from "@/api/graphql"
+import { type BuildSummary, type BuildSummaryWeapon, useBuildSummaries } from "@/composables/useBuildSummaries"
 import { useCharRemote } from "@/composables/useCharRemote"
 import { CharSettings, serializeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { copyText } from "@/util"
+import { copyText, formatBigNumber } from "@/util"
 import { formatDateTime } from "@/utils/time"
 
 const props = defineProps<{
@@ -53,6 +54,67 @@ const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 // 当前角色的 charSettings
 const charSettings = useCharSettings(computed(() => props.charId))
 const remoteId = useCharRemote(computed(() => props.charId))
+
+// 构筑概要（目标值 / 武器 / 协战角色）：列表接口已带 charSettings，本地解析 + worker 算目标值
+const { summaries: buildSummaries, refresh: refreshSummaries } = useBuildSummaries()
+
+/**
+ * 把列表条目转成概要解析入参。
+ * @param list 构筑列表
+ * @returns 概要来源数组
+ */
+function toSummarySources(list: Build[]) {
+    return list.map(build => ({ key: build.id, charId: build.charId, charSettings: build.charSettings }))
+}
+
+/**
+ * 读取指定构筑的概要。
+ * @param buildId 构筑 ID
+ * @returns 概要；尚未解析完成时为 undefined
+ */
+function buildSummary(buildId: string): BuildSummary | undefined {
+    return buildSummaries.value[buildId]
+}
+
+/**
+ * 取出概要里可展示的武器（近战 + 远程）。
+ * @param summary 构筑概要
+ * @returns 有图有名字的武器列表
+ */
+function weaponsOf(summary?: BuildSummary): BuildSummaryWeapon[] {
+    if (!summary) return []
+    return [summary.melee, summary.ranged].filter((weapon): weapon is BuildSummaryWeapon => weapon !== null)
+}
+
+/**
+ * 目标函数值的展示文本：卡片空间窄，用全站大数口径压缩显示。
+ * @param value 目标函数计算结果
+ * @returns 展示文本，无数据时为短横
+ */
+function formatTargetValue(value?: number | null): string {
+    if (typeof value !== "number" || !Number.isFinite(value)) return "—"
+    return formatBigNumber(value)
+}
+
+/**
+ * 目标函数值的精确值（悬停时补全被压缩的位数）。
+ * @param value 目标函数计算结果
+ * @returns 千分位整数文本，无数据时为空串
+ */
+function formatTargetValueExact(value?: number | null): string {
+    if (typeof value !== "number" || !Number.isFinite(value)) return ""
+    return Math.round(value).toLocaleString()
+}
+
+/**
+ * 目标函数的全量说明（截断展示时用 tooltip 补全）。
+ * @param summary 构筑概要
+ * @returns 「计算技能 - 目标函数」文本
+ */
+function summaryTitle(summary?: BuildSummary): string {
+    if (!summary) return ""
+    return [summary.baseName, summary.targetFunction].filter(Boolean).join(" - ")
+}
 
 /**
  * 判断描述是否超过折叠阈值，超长时显示展开按钮。
@@ -104,6 +166,7 @@ async function fetchBuilds(offset = 0) {
             builds.value = result.builds
             totalCount.value = result.buildsCount
             expandedBuildIds.value = {}
+            void refreshSummaries(toSummarySources(result.builds))
         }
     } catch (error) {
         ui.showErrorMessage("加载构筑列表失败:", error instanceof Error ? error.message : "未知错误")
@@ -177,24 +240,28 @@ async function confirmEdit() {
     }
 
     updatingBuild.value = editingBuildId.value
+    // 保存的是当前页面的配置，成功后概要要按这份配置重算，否则目标值 / 武器会停在旧数据上
+    const savedId = editingBuildId.value
+    const savedCharId = editingBuild.value.charId
     try {
         const result = await updateBuildMutation({
-            id: editingBuildId.value,
+            id: savedId,
             input: {
                 title: edit_title.value,
                 desc: edit_desc.value,
-                charId: editingBuild.value.charId,
+                charId: savedCharId,
                 charSettings: serializeCharSettings(charSettings.value),
             },
         })
 
         if (result) {
             // 更新本地构筑列表
-            const index = builds.value.findIndex(b => b.id === editingBuildId.value)
+            const index = builds.value.findIndex(b => b.id === savedId)
             if (index > -1) {
                 builds.value[index].title = edit_title.value
                 builds.value[index].desc = edit_desc.value
             }
+            void refreshSummaries([{ key: savedId, charId: savedCharId, charSettings: serializeCharSettings(charSettings.value) }])
             ui.showSuccessMessage("构筑已更新")
         }
     } catch (error) {
@@ -329,6 +396,7 @@ async function loadMore() {
 
             if (result) {
                 builds.value.push(...result.builds)
+                void refreshSummaries(toSummarySources(result.builds))
             }
         } catch (error) {
             ui.showErrorMessage("加载更多失败:", error instanceof Error ? error.message : "未知错误")
@@ -442,6 +510,63 @@ defineExpose({
                                 </div>
                             </div>
                             <span class="text-xs text-base-content/70">{{ build.user.name }}</span>
+                        </div>
+
+                        <!-- 构筑概要：目标值 + 所用武器 + 协战角色 -->
+                        <div
+                            class="mb-3 flex items-center justify-between gap-2 rounded-xs"
+                        >
+                            <div class="flex min-w-0 items-center gap-0.5">
+                                <ShowProps v-for="weapon in weaponsOf(buildSummary(build.id))" :key="weapon.id" :weapon="weapon.weapon">
+                                    <ImageFallback
+                                        :src="weapon.icon"
+                                        :alt="weapon.name"
+                                        class="size-6 rounded-full bg-base-200 object-cover"
+                                        loading="lazy"
+                                    >
+                                        <Icon icon="ri:sword-line" class="size-6 opacity-30" />
+                                    </ImageFallback>
+                                </ShowProps>
+                                <template v-if="buildSummary(build.id)?.team.length">
+                                    <span class="h-4 w-px shrink-0 bg-base-content/15" />
+                                    <template v-for="mate in buildSummary(build.id)?.team" :key="mate.id">
+                                        <ShowProps :char="mate.char">
+                                            <ImageFallback
+                                                :src="mate.icon"
+                                                :alt="mate.name"
+                                                class="size-6 rounded-full bg-base-200 object-cover"
+                                                loading="lazy"
+                                            >
+                                                <Icon icon="ri:user-line" class="size-6 opacity-40" />
+                                            </ImageFallback>
+                                        </ShowProps>
+                                        <ShowProps v-if="mate.weapon" :weapon="mate.weapon.weapon">
+                                            <ImageFallback
+                                                :src="mate.weapon.icon"
+                                                :alt="mate.weapon.name"
+                                                class="size-6 rounded-full bg-base-200 object-cover"
+                                                loading="lazy"
+                                            >
+                                                <Icon icon="ri:sword-line" class="size-6 opacity-30" />
+                                            </ImageFallback>
+                                        </ShowProps>
+                                    </template>
+                                </template>
+                            </div>
+                            <div class="flex min-w-0 flex-1 flex-col items-end justify-center gap-0.5 leading-none">
+                                <span
+                                    class="w-full truncate text-right text-[11px] text-base-content/55"
+                                    :title="summaryTitle(buildSummary(build.id))"
+                                >
+                                    {{ buildSummary(build.id)?.targetFunction || "—" }}
+                                </span>
+                                <span
+                                    class="w-full truncate text-right font-orbitron text-sm font-bold tabular-nums text-primary"
+                                    :title="formatTargetValueExact(buildSummary(build.id)?.targetValue)"
+                                >
+                                    {{ formatTargetValue(buildSummary(build.id)?.targetValue) }}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- 统计信息 -->

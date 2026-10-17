@@ -3471,12 +3471,12 @@ describe("条件BUFF（tag限定）- 莉莉蔻2溯(充盈)/4溯", () => {
                     名称: "黎瑟·浴火被动2(code)",
                     限定: 4103,
                     技能: "狙击子弹|^伤害$",
-                    code: "if(rangedWeaponAttr)技能伤害+=Math.max(0,rangedWeaponAttr.暴击*(rangedWeaponAttr.暴伤-1))",
+                    code: "if(rangedWeaponAttr)技能独立增伤+=Math.max(0,rangedWeaponAttr.暴击*(rangedWeaponAttr.暴伤-1))",
                 }),
                 attrBuff: new LeveledBuff(buffMap.get("黎瑟·浴火被动2")!, 1),
                 sharedBuffs: [],
                 rangedMods: [new LeveledMod(53009, 10), new LeveledMod(53010, 10)],
-                spotCheck: build => build.getConditionalBuffPropsList().find(entry => entry.技能 === "狙击子弹|^伤害$")?.props.技能伤害,
+                spotCheck: build => build.getConditionalBuffPropsList().find(entry => entry.技能 === "狙击子弹|^伤害$")?.props.技能独立增伤,
             },
         ]
         for (const testCase of cases) {
