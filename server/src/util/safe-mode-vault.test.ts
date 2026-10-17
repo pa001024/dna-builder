@@ -11,6 +11,8 @@ import {
     DEFAULT_VAULT_FILE_NAME,
     extractStoredZipEntry,
     generateVaultPassword,
+    isInVaultDir,
+    isVaultDuplicateName,
     parseVaultPasswordText,
     readVaultState,
     readVaultTargetConfig,
@@ -182,6 +184,25 @@ describe("extractStoredZipEntry / parseVaultPasswordText", () => {
     })
 })
 
+describe("isVaultDuplicateName / isInVaultDir", () => {
+    it("精确同名与 (N) 改名副本均视为旧件", () => {
+        expect(isVaultDuplicateName("密码.zip", "密码.zip")).toBe(true)
+        expect(isVaultDuplicateName("密码(1).zip", "密码.zip")).toBe(true)
+        expect(isVaultDuplicateName("密码(12).zip", "密码.zip")).toBe(true)
+        expect(isVaultDuplicateName("密码1.zip", "密码.zip")).toBe(false)
+        expect(isVaultDuplicateName("密码(1.zip", "密码.zip")).toBe(false)
+        expect(isVaultDuplicateName("密码（1）.zip", "密码.zip")).toBe(false)
+        expect(isVaultDuplicateName("其他.zip", "密码.zip")).toBe(false)
+    })
+
+    it("根目录严格匹配 parent 0，不再匹配全盘", () => {
+        expect(isInVaultDir("0", "0")).toBe(true)
+        expect(isInVaultDir("dir-other", "0")).toBe(false)
+        expect(isInVaultDir("dir-9", "dir-9")).toBe(true)
+        expect(isInVaultDir("dir-other", "dir-9")).toBe(false)
+    })
+})
+
 describe("checkVaultConsistency", () => {
     it("远端包与本地一致时通过并回写校验结论", async () => {
         const dir = await mkdtemp(join(tmpdir(), "vault-check-ok-"))
@@ -212,6 +233,78 @@ describe("checkVaultConsistency", () => {
             const state = await readVaultState(statePath)
             expect(state?.consistent).toBe(true)
             expect(typeof state?.lastCheckedAt).toBe("number")
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+
+    it("搜索排第一的是旧包时仍以落盘 fid 为准，不误报 password-mismatch", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-check-fid-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            let uploadedBytes: Uint8Array | null = null
+            const seedClient = {
+                uploadBuffer: async (_name: string, data: Uint8Array) => {
+                    uploadedBytes = data
+                    return { fid: "fid-new", fileName: "pw.zip", size: data.length }
+                },
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
+            } as unknown as QuarkClient
+            const { status } = await rotateVault(seedClient, statePath)
+            const staleZip = buildVaultZip("AAAAAAAAAAAAAAAA", Date.now())
+            const checkClient = {
+                // 搜索把 10-15 旧包排在前面（复现线上 bug），fid 直下拿到的是本次新包
+                searchFiles: async () => [
+                    { fid: "fid-stale", filename: status.fileName, parent_fid: "0", file_type: 1, size: staleZip.length },
+                    { fid: "fid-new", filename: status.fileName, parent_fid: "0", file_type: 1, size: 1 },
+                ],
+                downloadFile: async (fid: string) => {
+                    if (fid === "fid-new") {
+                        if (!uploadedBytes) throw new Error("未上传")
+                        return uploadedBytes
+                    }
+                    return staleZip
+                },
+            } as unknown as QuarkClient
+            const result = await checkVaultConsistency(checkClient, statePath)
+            expect(result).toMatchObject({ ok: true, reason: "ok" })
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+
+    it("fid 文件被删后在多个同名候选中找到密码一致的包并修正指向", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-check-fallback-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            let uploadedBytes: Uint8Array | null = null
+            const seedClient = {
+                uploadBuffer: async (_name: string, data: Uint8Array) => {
+                    uploadedBytes = data
+                    return { fid: "fid-gone", fileName: "pw.zip", size: data.length }
+                },
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
+            } as unknown as QuarkClient
+            const { status } = await rotateVault(seedClient, statePath)
+            if (!uploadedBytes) throw new Error("未上传")
+            const goodBytes: Uint8Array = uploadedBytes
+            const staleZip = buildVaultZip("AAAAAAAAAAAAAAAA", Date.now())
+            const checkClient = {
+                searchFiles: async () => [
+                    { fid: "fid-stale", filename: status.fileName, parent_fid: "0", file_type: 1, size: staleZip.length },
+                    { fid: "fid-moved", filename: status.fileName, parent_fid: "0", file_type: 1, size: goodBytes.length },
+                ],
+                downloadFile: async (fid: string) => {
+                    if (fid === "fid-gone") throw new Error("文件已删除")
+                    if (fid === "fid-moved") return goodBytes
+                    return staleZip
+                },
+            } as unknown as QuarkClient
+            const result = await checkVaultConsistency(checkClient, statePath)
+            expect(result).toMatchObject({ ok: true, reason: "ok" })
+            expect((await readVaultState(statePath))?.fid).toBe("fid-moved")
         } finally {
             await rm(dir, { recursive: true, force: true })
         }
@@ -280,6 +373,40 @@ describe("removeExistingVaultFile", () => {
         } finally {
             await rm(dir, { recursive: true, force: true })
         }
+    })
+
+    it("目标目录内的 (N) 改名副本一并删除，其他目录的不动", async () => {
+        const deleted: string[][] = []
+        const fakeClient = {
+            searchFiles: async () => [
+                { fid: "fid-old", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "dir-9", file_type: 1, size: 10 },
+                { fid: "fid-n1", filename: "密码(1).zip", parent_fid: "dir-9", file_type: 1, size: 10 },
+                { fid: "fid-n2", filename: "密码(2).zip", parent_fid: "dir-9", file_type: 1, size: 10 },
+                { fid: "fid-other", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "dir-other", file_type: 1, size: 10 },
+                { fid: "fid-other-n", filename: "密码(1).zip", parent_fid: "dir-other", file_type: 1, size: 10 },
+            ],
+            deleteFilesAndWait: async (fidList: string[]) => {
+                deleted.push(fidList)
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: "dir-9", fileName: DEFAULT_VAULT_FILE_NAME })
+        expect(deleted).toEqual([["fid-old", "fid-n1", "fid-n2"]])
+    })
+
+    it("根目录只删 parent 为 0 的旧件，不删其他目录同名文件", async () => {
+        const deleted: string[][] = []
+        const fakeClient = {
+            searchFiles: async () => [
+                { fid: "fid-root", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "0", file_type: 1, size: 10 },
+                { fid: "fid-root-n", filename: "密码(1).zip", parent_fid: "0", file_type: 1, size: 10 },
+                { fid: "fid-other", filename: DEFAULT_VAULT_FILE_NAME, parent_fid: "dir-other", file_type: 1, size: 10 },
+            ],
+            deleteFilesAndWait: async (fidList: string[]) => {
+                deleted.push(fidList)
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: "0", fileName: DEFAULT_VAULT_FILE_NAME })
+        expect(deleted).toEqual([["fid-root", "fid-root-n"]])
     })
 
     it("不同目录的同名文件不删", async () => {

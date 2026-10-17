@@ -275,7 +275,39 @@ export async function resolveVaultTarget(client: QuarkClient, env: NodeJS.Proces
 }
 
 /**
- * 删除目标目录下的同名旧文件，避免上传时网盘自动改名（如 `密码(1).zip`）。
+ * 判定网盘文件名是否为上传目标的同名旧件（含夸克自动改名的 `stem(N).ext` 副本）。
+ * @param fileName 网盘实际文件名
+ * @param targetFileName 本次上传目标文件名
+ */
+export function isVaultDuplicateName(fileName: string, targetFileName: string): boolean {
+    if (fileName === targetFileName) {
+        return true
+    }
+    const dot = targetFileName.lastIndexOf(".")
+    const stem = dot < 0 ? targetFileName : targetFileName.slice(0, dot)
+    const ext = dot < 0 ? "" : targetFileName.slice(dot)
+    if (!fileName.startsWith(`${stem}(`) || !fileName.endsWith(`)${ext}`)) {
+        return false
+    }
+    const serial = fileName.slice(stem.length + 1, fileName.length - ext.length - 1)
+    return serial.length > 0 && /^\d+$/.test(serial)
+}
+
+/**
+ * 判定网盘文件是否落在上传目标目录内（根目录 fid "0" 严格匹配 parent "0"，不再沿用“根目录匹配全盘”的宽松口径）。
+ * @param parentFid 文件的父目录 fid
+ * @param dirFid 目标目录 fid
+ */
+export function isInVaultDir(parentFid: unknown, dirFid: string): boolean {
+    const parent = String(parentFid ?? "")
+    if (dirFid === "0") {
+        return parent === "0" || parent === ""
+    }
+    return parent === dirFid
+}
+
+/**
+ * 删除目标目录下的同名旧文件（含 `密码(1).zip` 类自动改名副本），避免上传时网盘自动改名。
  * 搜索失败只记日志不中断（兜底仍走同名覆盖上传）；删除失败则抛错阻止上传，
  * 防止新旧并存导致一致性校验命中旧包。
  * @param client 夸克客户端
@@ -284,13 +316,13 @@ export async function resolveVaultTarget(client: QuarkClient, env: NodeJS.Proces
 export async function removeExistingVaultFile(client: QuarkClient, target: VaultTarget): Promise<void> {
     let candidates: Awaited<ReturnType<QuarkClient["searchFiles"]>>
     try {
-        candidates = await client.searchFiles(target.fileName, 50)
+        candidates = await client.searchFiles(target.fileName, 100)
     } catch (error) {
         console.warn("[safe-mode-vault] 查找同名旧文件失败，仍尝试覆盖上传：", error instanceof Error ? error.message : error)
         return
     }
     const dupes = candidates.filter(
-        item => item.filename === target.fileName && (target.dirFid === "0" || item.parent_fid === target.dirFid)
+        item => isVaultDuplicateName(item.filename, target.fileName) && isInVaultDir(item.parent_fid, target.dirFid)
     )
     if (dupes.length === 0) {
         return
@@ -318,6 +350,18 @@ export async function rotateVault(
 
     await removeExistingVaultFile(client, target)
     const uploaded = await client.uploadBuffer(target.fileName, zip, target.dirFid)
+    // 上传后确认网盘实际文件名：若同名旧件没清干净，夸克会静默改名为 `密码(1).zip`。
+    // 只告警不清退（落盘 fid 仍指向新包，一致性校验以 fid 为准，不会被旧包带偏）。
+    if (typeof client.getFileInfo === "function") {
+        try {
+            const info = await client.getFileInfo(uploaded.fid)
+            if (info.filename !== target.fileName) {
+                console.warn(`[safe-mode-vault] 网盘实际文件名与预期不一致（${info.filename}），疑似残留同名旧件，请手动清理`)
+            }
+        } catch (error) {
+            console.warn("[safe-mode-vault] 上传后校验文件名失败：", error instanceof Error ? error.message : error)
+        }
+    }
 
     const state: VaultState = {
         passwordHash: await hash(password, 10),
@@ -391,15 +435,26 @@ export interface VaultCheckResult {
     checkedAt: number
 }
 
-/** 写回落盘状态（保留密码哈希，仅更新校验结论）。 */
-async function writeVaultCheckResult(statePath: string, state: VaultState, result: VaultCheckResult): Promise<VaultCheckResult> {
+/** 写回落盘状态（保留密码哈希，仅更新校验结论；兜底命中时可附带 patch 修正 fid/sha 等指向）。 */
+async function writeVaultCheckResult(
+    statePath: string,
+    state: VaultState,
+    result: VaultCheckResult,
+    patch?: Partial<VaultState>
+): Promise<VaultCheckResult> {
     await mkdir(dirname(statePath), { recursive: true })
-    await writeFile(statePath, JSON.stringify({ ...state, lastCheckedAt: result.checkedAt, consistent: result.ok }, null, 2), "utf-8")
+    await writeFile(
+        statePath,
+        JSON.stringify({ ...state, ...patch, lastCheckedAt: result.checkedAt, consistent: result.ok }, null, 2),
+        "utf-8"
+    )
     return result
 }
 
 /**
- * 一致性校验：按配置找到网盘上的密码压缩包，下载解出密码与本地哈希比对。
+ * 一致性校验：优先按落盘 fid 直下本次轮换的密码包，解密比对本地哈希。
+ * 全盘全文搜索只做兜底（fid 文件被删/被移走时），且兜底会逐个下载同名候选、
+ * 以“密码对得上”而非“搜索排第一”判定，避免命中历史旧包导致每次启动误轮换。
  * 网络/API 异常直接抛错（调用方视为“未知”，不触发自动修复）；
  * 包缺失/解包失败/密码对不上则返回明确结论（调用方可自动重传修复）。
  * @param client 夸克客户端（缺省按环境变量创建）
@@ -417,27 +472,79 @@ export async function checkVaultConsistency(
     const fail = (reason: VaultCheckReason): Promise<VaultCheckResult> =>
         writeVaultCheckResult(statePath, state, { ok: false, reason, checkedAt })
     const target = await resolveVaultTarget(client)
-    const candidates = await client.searchFiles(target.fileName)
-    const remote =
-        candidates.find(item => item.filename === target.fileName && (target.dirFid === "0" || item.parent_fid === target.dirFid)) ??
-        candidates.find(item => item.filename === target.fileName)
-    if (!remote) {
+
+    let direct: Uint8Array | null = null
+    try {
+        direct = await client.downloadFile(state.fid)
+    } catch {
+        direct = null
+    }
+    if (direct) {
+        let password: string
+        try {
+            password = parseVaultPasswordText(extractStoredZipEntry(direct, VAULT_PASSWORD_ENTRY))
+        } catch {
+            return fail("bad-zip")
+        }
+        if (!(await compare(password, state.passwordHash))) {
+            return fail("password-mismatch")
+        }
+        if (createHash("sha256").update(direct).digest("hex") !== state.sha256) {
+            return fail("content-drift")
+        }
+        return writeVaultCheckResult(statePath, state, { ok: true, reason: "ok", checkedAt })
+    }
+
+    const candidates = await client.searchFiles(target.fileName, 50)
+    const exact = candidates
+        .filter(item => item.filename === target.fileName)
+        .sort((a, b) => Number(isInVaultDir(b.parent_fid, target.dirFid)) - Number(isInVaultDir(a.parent_fid, target.dirFid)))
+    if (exact.length === 0) {
         return fail("missing-remote")
     }
-    const bytes = await client.downloadFile(remote.fid)
-    let password: string
-    try {
-        password = parseVaultPasswordText(extractStoredZipEntry(bytes, VAULT_PASSWORD_ENTRY))
-    } catch {
-        return fail("bad-zip")
+    let sawMismatch = false
+    let sawBadZip = false
+    let lastError: unknown = null
+    for (const item of exact) {
+        let bytes: Uint8Array
+        try {
+            bytes = await client.downloadFile(item.fid)
+        } catch (error) {
+            lastError = error
+            continue
+        }
+        let password: string
+        try {
+            password = parseVaultPasswordText(extractStoredZipEntry(bytes, VAULT_PASSWORD_ENTRY))
+        } catch {
+            sawBadZip = true
+            continue
+        }
+        if (!(await compare(password, state.passwordHash))) {
+            sawMismatch = true
+            continue
+        }
+        return writeVaultCheckResult(
+            statePath,
+            state,
+            { ok: true, reason: "ok", checkedAt },
+            {
+                fid: item.fid,
+                size: bytes.length,
+                sha256: createHash("sha256").update(bytes).digest("hex"),
+            }
+        )
     }
-    if (!(await compare(password, state.passwordHash))) {
+    if (sawMismatch) {
         return fail("password-mismatch")
     }
-    if (createHash("sha256").update(bytes).digest("hex") !== state.sha256) {
-        return fail("content-drift")
+    if (sawBadZip) {
+        return fail("bad-zip")
     }
-    return writeVaultCheckResult(statePath, state, { ok: true, reason: "ok", checkedAt })
+    if (lastError) {
+        throw lastError
+    }
+    return fail("missing-remote")
 }
 
 /** 定时任务入口：未配置夸克令牌时跳过（只记日志，不抛错中断 cron）。 */
