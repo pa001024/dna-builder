@@ -5,9 +5,10 @@ import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import { modDraftMap, modDungeonMap } from "@/data/d/index"
 import weaponData from "@/data/d/weapon.data"
-import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
+import type { Mod, WeaponSkill } from "@/data/data-types"
 import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { formatProp } from "@/util"
+import { type ResourceDraftSourceInfo } from "@/utils/draft-source"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getParamTemplate } from "@/utils/param-text"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -75,9 +76,13 @@ const formatEffDesc = (raw: string, translated: string) => {
     return [translated.slice(0, marker.index), polarity, translated.slice(marker.index + polarity.length)]
 }
 
-// 获取当前mod的设计稿信息
-const modDraft = computed<Draft | undefined>(() => {
-    return modDraftMap.get(props.mod.id)
+/**
+ * 组装当前魔之楔的设计稿来源信息，交给 DraftSource 以弹窗+链接双入口渲染。
+ * @returns 设计稿来源列表（无设计稿时为空）
+ */
+const modDraftSources = computed<ResourceDraftSourceInfo[]>(() => {
+    const draft = modDraftMap.get(props.mod.id)
+    return draft ? [{ key: `mod-draft-${props.mod.id}-${draft.id}`, draft }] : []
 })
 
 /**
@@ -449,15 +454,10 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
             </div>
         </section>
 
-        <!-- 设计稿信息 -->
-        <section v-if="modDraft" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="BLUEPRINT" title="设计稿信息" />
-            <DBDraftDetailItem embedded :draft="modDraft" />
-        </section>
-
         <!-- 来源 -->
         <section
             v-if="
+                modDraftSources.length > 0 ||
                 modDungeonSources.length > 0 ||
                 modShopSources.length > 0 ||
                 modQuestSources.length > 0 ||
@@ -469,6 +469,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
         >
             <SectionHeader no-animate compact kicker="SOURCE" title="来源" />
             <div class="space-y-3 text-sm">
+                <DraftSource :draft-sources="modDraftSources" />
                 <QuestSource :quest-sources="modQuestSources" :mod-id="mod.id" />
                 <ModCustomSource :custom-sources="modCharBreakthroughSources" />
                 <DungeonSource :dungeon-sources="modDungeonSources" />

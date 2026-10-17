@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { t } from "i18next"
+import { computed, ref } from "vue"
 import { resourceMap } from "@/data"
 import { modMap, weaponMap } from "@/data/d"
 import type { Draft } from "@/data/d/draft.data"
@@ -11,6 +12,21 @@ import { getRarityGradientClass } from "@/utils/rarity-utils"
 const props = defineProps<{
     draftSources: ResourceDraftSourceInfo[]
 }>()
+
+/** 当前在弹窗中查看的设计稿。 */
+const selectedSource = ref<Draft | null>(null)
+
+/**
+ * 详情弹窗显示状态：选中设计稿即打开，关闭时清空选中。
+ */
+const showDetailDialog = computed({
+    get: () => selectedSource.value !== null,
+    set: (value: boolean) => {
+        if (!value) {
+            selectedSource.value = null
+        }
+    },
+})
 
 /**
  * 格式化设计稿名称展示。
@@ -50,44 +66,17 @@ function getDraftProductIcon(draft: Draft): string {
     }
     return ""
 }
-
-/**
- * 获取材料图标地址。
- * @param material 材料条目
- * @returns 图标路径
- */
-function getMaterialIconUrl(material: Draft["x"][number]): string {
-    if (material.t === "Resource") {
-        const resource = resourceMap.get(material.id)
-        return resource?.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (material.t === "Mod") {
-        return LeveledMod.url(modMap.get(material.id)?.icon)
-    }
-    if (material.t === "Weapon") {
-        return LeveledWeapon.url(weaponMap.get(material.id)?.icon)
-    }
-    return "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取铜币图标地址。
- * @returns 图标路径
- */
-function getCoinIconUrl(): string {
-    const coin = resourceMap.get("铜币")
-    return coin?.icon ? `/imgs/res/${coin.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
 </script>
 
 <template>
     <div v-if="props.draftSources.length > 0" class="space-y-2">
         <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("database.draft") }}</div>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2 text-sm">
             <div
                 v-for="source in props.draftSources"
                 :key="source.key"
-                class="group flex w-full items-start gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
+                class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                @click="selectedSource = source.draft"
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b"
@@ -110,7 +99,7 @@ function getCoinIconUrl(): string {
                         <h4
                             class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                         >
-                            <SRouterLink :to="`/db/draft/${source.draft.id}`" class="hover:underline">
+                            <SRouterLink :to="`/db/draft/${source.draft.id}`" stop class="hover:underline">
                                 {{ getDraftLabel(source.draft) }}
                             </SRouterLink>
                         </h4>
@@ -127,24 +116,18 @@ function getCoinIconUrl(): string {
                             DRAFT
                         </span>
                         <span class="truncate">{{ source.draft.v ? `v${source.draft.v}` : "" }} · 产物 x{{ source.draft.c }}</span>
-                    </div>
-                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-base-content/10 pt-1 text-[10px]">
-                        <span class="flex items-center gap-1 text-base-content/70">
-                            <img :src="getCoinIconUrl()" :alt="$t('铜币')" class="size-3.5 shrink-0 rounded-xs object-cover" />
-                            铜币 x{{ source.draft.m }}
-                        </span>
-                        <span
-                            v-for="material in source.draft.x"
-                            :key="`${source.draft.id}:${material.t}:${material.id}`"
-                            class="flex min-w-0 items-center gap-1 text-base-content/70"
-                        >
-                            <img :src="getMaterialIconUrl(material)" :alt="material.n" class="size-3.5 shrink-0 rounded-xs object-cover" />
-                            <span class="truncate">{{ $t(material.n) }}</span>
-                            <span class="shrink-0 font-semibold text-base-content/80">x{{ material.c }}</span>
-                        </span>
+                        <Icon
+                            icon="ri:arrow-right-up-line"
+                            class="ml-auto h-3 w-3 shrink-0 text-base-content/35 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+                        />
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- 设计稿详情弹窗（标题由 DBDraftDetailItem 档案头承担） -->
+        <SourceDetailDialog v-model="showDetailDialog">
+            <DBDraftDetailItem v-if="selectedSource" :draft="selectedSource" />
+        </SourceDetailDialog>
     </div>
 </template>

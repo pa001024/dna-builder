@@ -243,14 +243,25 @@ function getRewardColor(rarity: number): string {
     }
 }
 
-// 概率数据
+// 概率数据：行数由密函参数动态推导（n 次开函取 3n 个奖励，M 为非金总数上限时 ceil((M+1)/3) 次必出金）
 const probabilityData = computed(() => {
-    const data = []
-    for (let n = 1; n <= 19; n++) {
-        const prob = WalnutSequenceSimulator.calculateGoldProbability(n, props.walnut.参数)
+    const param = props.walnut.参数
+    const maxM = [1, 2, 3, 4, 5].reduce((total, tier) => total + Math.max(0, Math.floor(param[tier] ?? 0)), 0)
+    const maxN = Math.max(1, Math.ceil((maxM + 1) / 3))
+    const mDist = WalnutSequenceSimulator.calculateMDistribution(param)
+    const sorted = [...mDist.entries()].sort((a, b) => a[0] - b[0])
+    const data: { n: number; probability: number }[] = []
+    let cumulative = 0
+    let cursor = 0
+    for (let n = 1; n <= maxN; n++) {
+        const k = 3 * n
+        while (cursor < sorted.length && sorted[cursor][0] <= Math.min(k - 1, maxM)) {
+            cumulative += sorted[cursor][1]
+            cursor++
+        }
         data.push({
             n,
-            probability: parseFloat(prob.toFixed(6)),
+            probability: parseFloat(Math.min(1, cumulative).toFixed(6)),
         })
     }
     return data

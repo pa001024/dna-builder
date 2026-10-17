@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { walnutMap } from "@/data/d"
 import type { Walnut } from "@/data/d/walnut.data"
 import type { ModWalnutSourceInfo } from "@/utils/resource-source"
@@ -35,16 +35,32 @@ const displayWalnutSources = computed<DisplayWalnutSource[]>(() => {
         })
         .filter((source): source is DisplayWalnutSource => source !== null)
 })
+
+/** 当前在弹窗中查看的密函来源。 */
+const selectedSource = ref<DisplayWalnutSource | null>(null)
+
+/**
+ * 详情弹窗显示状态：选中来源即打开，关闭时清空选中。
+ */
+const showDetailDialog = computed({
+    get: () => selectedSource.value !== null,
+    set: (value: boolean) => {
+        if (!value) {
+            selectedSource.value = null
+        }
+    },
+})
 </script>
 
 <template>
     <div v-if="displayWalnutSources.length > 0" class="space-y-2">
         <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("密函") }}</div>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2 text-sm">
             <div
                 v-for="source in displayWalnutSources"
                 :key="source.key"
-                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
+                class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                @click="selectedSource = source"
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-15"
@@ -61,7 +77,7 @@ const displayWalnutSources = computed<DisplayWalnutSource[]>(() => {
                         <h4
                             class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                         >
-                            <SRouterLink :to="`/db/walnut/${source.walnut.id}`" class="hover:underline">
+                            <SRouterLink :to="`/db/walnut/${source.walnut.id}`" stop class="hover:underline">
                                 {{ $t(source.walnut.名称) }}
                             </SRouterLink>
                         </h4>
@@ -81,9 +97,18 @@ const displayWalnutSources = computed<DisplayWalnutSource[]>(() => {
                         <span v-if="source.expectedText" class="truncate">{{
                             $t("walnut-source.expected_opens", { n: source.expectedText })
                         }}</span>
+                        <Icon
+                            icon="ri:arrow-right-up-line"
+                            class="ml-auto h-3 w-3 shrink-0 text-base-content/35 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+                        />
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- 密函详情弹窗（标题由 DBWalnutDetailItem 档案头承担） -->
+        <SourceDetailDialog v-model="showDetailDialog">
+            <DBWalnutDetailItem v-if="selectedSource" :walnut="selectedSource.walnut" />
+        </SourceDetailDialog>
     </div>
 </template>
