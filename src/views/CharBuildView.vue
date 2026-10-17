@@ -2805,7 +2805,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         >
                             <DOBBuildShow
                                 :charId="charBuild.char.id"
-                                :charName="charBuild.char.名称"
                                 ref="buildShow"
                                 @use-build="applyLoadedSettings"
                             />

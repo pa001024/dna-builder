@@ -419,7 +419,7 @@ defineExpose({
     <div class="h-full flex flex-col">
         <!-- 搜索和筛选栏 -->
         <div class="p-2">
-            <div class="flex flex-wrap gap-2 rounded-xs border border-base-content/10 bg-base-100/70 p-2.5 backdrop-blur-sm">
+            <div class="flex flex-wrap gap-2 p-1.5">
                 <input
                     v-model="searchKeyword"
                     type="text"
@@ -635,87 +635,87 @@ defineExpose({
         <div class="p-2 border-t border-base-content/10 text-center text-xs text-base-content/50">
             {{ $t("共") }} <span class="font-orbitron tabular-nums">{{ totalCount }}</span> {{ $t("个构筑") }}
         </div>
-    </div>
 
-    <!-- 编辑弹窗 -->
-    <DialogModel v-model="edit_model_show" class="bg-base-300">
-        <div class="space-y-4">
-            <h3 class="text-xl font-bold">{{ $t("编辑构筑") }}</h3>
-            <div>
-                <label class="label" for="edit-title">
-                    <span class="label-text">{{ $t("标题") }}</span>
-                </label>
-                <input
-                    id="edit-title"
-                    v-model="edit_title"
-                    type="text"
-                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                    :placeholder="t('输入标题...')"
-                    maxlength="50"
-                />
-            </div>
-            <div>
-                <label class="label" for="edit-desc">
-                    <span class="label-text">{{ $t("描述") }}</span>
-                </label>
-                <textarea
-                    id="edit-desc"
-                    v-model="edit_desc"
-                    class="w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 py-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                    :placeholder="t('输入描述...')"
-                    rows="3"
-                    maxlength="800"
-                ></textarea>
-            </div>
-            <!-- 推荐状态（仅管理员可见） -->
-            <div
-                v-if="userStore.isAdmin"
-                class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3"
-            >
-                <div class="flex min-w-0 items-center gap-2">
-                    <Icon
-                        :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'"
-                        class="size-4 shrink-0"
-                        :class="editingBuild?.isRecommended ? 'text-warning' : 'text-base-content/40'"
+        <!-- 编辑弹窗 -->
+        <DialogModel v-model="edit_model_show" class="bg-base-300">
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold">{{ $t("编辑构筑") }}</h3>
+                <div>
+                    <label class="label" for="edit-title">
+                        <span class="label-text">{{ $t("标题") }}</span>
+                    </label>
+                    <input
+                        id="edit-title"
+                        v-model="edit_title"
+                        type="text"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        :placeholder="t('输入标题...')"
+                        maxlength="50"
                     />
-                    <div class="min-w-0">
-                        <div class="text-sm font-medium">{{ $t("推荐") }}</div>
-                        <div class="text-xs text-base-content/60">{{ $t("推荐后将在首页推荐区域展示该构筑") }}</div>
-                    </div>
                 </div>
+                <div>
+                    <label class="label" for="edit-desc">
+                        <span class="label-text">{{ $t("描述") }}</span>
+                    </label>
+                    <textarea
+                        id="edit-desc"
+                        v-model="edit_desc"
+                        class="w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 py-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        :placeholder="t('输入描述...')"
+                        rows="3"
+                        maxlength="800"
+                    ></textarea>
+                </div>
+                <!-- 推荐状态（仅管理员可见） -->
+                <div
+                    v-if="userStore.isAdmin"
+                    class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3"
+                >
+                    <div class="flex min-w-0 items-center gap-2">
+                        <Icon
+                            :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'"
+                            class="size-4 shrink-0"
+                            :class="editingBuild?.isRecommended ? 'text-warning' : 'text-base-content/40'"
+                        />
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium">{{ $t("推荐") }}</div>
+                            <div class="text-xs text-base-content/60">{{ $t("推荐后将在首页推荐区域展示该构筑") }}</div>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-sm shrink-0"
+                        :class="editingBuild?.isRecommended ? 'btn-warning' : 'btn-ghost border border-base-content/20'"
+                        :disabled="recommendingBuild === editingBuildId"
+                        @click="toggleRecommend"
+                    >
+                        <span v-if="recommendingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                        <Icon v-else :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'" class="w-4 h-4" />
+                        {{ editingBuild?.isRecommended ? $t("已推荐") : $t("推荐") }}
+                    </button>
+                </div>
+            </div>
+            <template #action>
                 <button
                     type="button"
-                    class="btn btn-sm shrink-0"
-                    :class="editingBuild?.isRecommended ? 'btn-warning' : 'btn-ghost border border-base-content/20'"
-                    :disabled="recommendingBuild === editingBuildId"
-                    @click="toggleRecommend"
+                    class="btn btn-danger flex-1"
+                    @click="deleteBuild"
+                    :class="{ 'btn-disabled': deletingBuild === editingBuildId }"
                 >
-                    <span v-if="recommendingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
-                    <Icon v-else :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'" class="w-4 h-4" />
-                    {{ editingBuild?.isRecommended ? $t("已推荐") : $t("推荐") }}
+                    <span v-if="deletingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                    <Icon v-else icon="ri:delete-bin-line" class="w-4 h-4" />
+                    {{ $t("game-launcher.delete") }}
                 </button>
-            </div>
-        </div>
-        <template #action>
-            <button
-                type="button"
-                class="btn btn-danger flex-1"
-                @click="deleteBuild"
-                :class="{ 'btn-disabled': deletingBuild === editingBuildId }"
-            >
-                <span v-if="deletingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
-                <Icon v-else icon="ri:delete-bin-line" class="w-4 h-4" />
-                {{ $t("game-launcher.delete") }}
-            </button>
-            <button
-                type="button"
-                class="btn btn-primary flex-1"
-                @click="confirmEdit"
-                :class="{ 'btn-disabled': updatingBuild === editingBuildId }"
-            >
-                <span v-if="updatingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
-                {{ $t("char-build.save") }}
-            </button>
-        </template>
-    </DialogModel>
+                <button
+                    type="button"
+                    class="btn btn-primary flex-1"
+                    @click="confirmEdit"
+                    :class="{ 'btn-disabled': updatingBuild === editingBuildId }"
+                >
+                    <span v-if="updatingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                    {{ $t("char-build.save") }}
+                </button>
+            </template>
+        </DialogModel>
+    </div>
 </template>

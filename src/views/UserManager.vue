@@ -62,7 +62,15 @@ const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUser
     }
     if (data.user.isOfficial) userData.isOfficial = data.user.isOfficial
     if (data.user.isRegister) userData.isRegister = data.user.isRegister
-    await db.dnaUsers.add(userData)
+    // 同一 uid 重新登录会拿到新 token：原地更新旧行而不是再插一行，否则旧 token 行继续被使用
+    const existing = await db.dnaUsers.where("uid").equals(userData.uid).filter(u => u.server === userData.server).first()
+    if (existing) {
+        await db.dnaUsers.update(existing.id, userData)
+    } else {
+        await db.dnaUsers.add(userData)
+    }
+    // 新凭证落库后吊销旧 DNAAPI 对象，下次 getDNAAPI 用新 token 重建
+    setting.invalidateDNAAPI()
     await loadUsers()
     isAddIframeOpen.value = false
 }
@@ -85,7 +93,13 @@ const jsonPlaceholder = `{
 const addUserByToken = async () => {
     try {
         const userData = parseDnaUserImportJson(jsonInput.value)
-        await db.dnaUsers.add(userData)
+        const existing = await db.dnaUsers.where("uid").equals(userData.uid).filter(u => u.server === userData.server).first()
+        if (existing) {
+            await db.dnaUsers.update(existing.id, userData)
+        } else {
+            await db.dnaUsers.add(userData)
+        }
+        setting.invalidateDNAAPI()
         await loadUsers()
         isAddByTokenOpen.value = false
         ui.showSuccessMessage("添加账号成功")
@@ -102,13 +116,16 @@ const deleteUser = async (id: number) => {
         await loadUsers()
         if (setting.dnaUserId === id) {
             setting.dnaUserId = users.value.length > 0 ? users.value[0].id : 0
+            setting.invalidateDNAAPI()
         }
     }
 }
 
-// 切换皎皎角账号
+// 切换皎皎角账号：旧 DNAAPI 对象持有旧账号 token，必须吊销，否则后续请求仍用旧身份
 const switchUser = (id: number) => {
+    if (setting.dnaUserId === id) return
     setting.dnaUserId = id
+    setting.invalidateDNAAPI()
 }
 
 // 复制皎皎角账号JSON

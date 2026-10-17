@@ -35,12 +35,17 @@ import {
     type SkillCdOverlayStoredSettings,
 } from "@/utils/skill-cd-overlay"
 import { readCustomWallpaper, removeCustomWallpaper, writeCustomWallpaper } from "@/utils/wallpaper-storage"
-import { db } from "./db"
+import { type DNAUser, db } from "./db"
 
 let apiCache: DNAAPI | null = null
+/** apiCache 对应的 dnaUsers 行主键（db id）：同一 uid 重新登录会产生新行，必须按行吊销旧对象 */
 let apiCacheKey = ""
 let signInterval: number | null = null
 let apiInitPromise: Promise<DNAAPI | undefined> | null = null
+/** 进行中的初始化对应的 dnaUsers 行主键：切号后不再复用旧初始化 */
+let apiInitKey = ""
+/** 缓存代际：invalidateDNAAPI 时递增，迟到的初始化结果不得覆盖新代际 */
+let apiGeneration = 0
 /** 最近一次心跳完整握手的 promise：快速路径超时后，后续请求失败时等它 resolve 再重试。 */
 let heartbeatReadyPromise: Promise<boolean> | null = null
 
@@ -341,22 +346,41 @@ export const useSettingStore = defineStore("setting", {
                 this.stopHeartbeat()
                 return undefined
             }
+            const cacheKey = String(user.id)
 
-            // 检查缓存是否有效
-            if (apiCache && apiCacheKey === user.uid) {
+            // 同一账号行：复用旧对象，但必须把 DB 里最新凭证同步进去。
+            // 重新登录/refreshToken/局域网同步只换 token 不换行时走这里，否则旧对象会一直拿着过期 token 请求。
+            if (apiCache && apiCacheKey === cacheKey) {
+                this.syncDNAAPICredentials(apiCache, user)
                 return apiCache
             }
 
-            // 如果已有初始化Promise，直接返回
+            // 已有初始化在进行：同行直接复用；不同行则等它结束再建自己的，避免并发 loginLog 互相干扰
             if (apiInitPromise) {
-                return await apiInitPromise
+                if (apiInitKey === cacheKey) {
+                    const genBefore = apiGeneration
+                    const existing = await apiInitPromise
+                    if (existing || apiGeneration === genBefore) return existing
+                    // 初始化期间缓存被吊销：继续走下面的新建流程
+                } else {
+                    try {
+                        await apiInitPromise
+                    } catch {
+                        // 忽略旧初始化的错误，走自己的初始化
+                    }
+                    if (apiCache && apiCacheKey === cacheKey) {
+                        this.syncDNAAPICredentials(apiCache, user)
+                        return apiCache
+                    }
+                }
             }
 
             // 创建新的初始化Promise
-            apiInitPromise = (async () => {
+            const generation = apiGeneration
+            const initKey = cacheKey
+            const promise = (async () => {
                 try {
                     const lang = this.lang === "zh-CN" ? "zh-Hans" : this.lang === "zh-TW" ? "zh-Hant" : this.lang
-                    this.dnaUserUID = user.uid
                     const api = new DNAAPI({
                         dev_code: user.dev_code,
                         token: user.token,
@@ -373,25 +397,81 @@ export const useSettingStore = defineStore("setting", {
                         if (refreshRes.is_success && refreshRes.data?.token) {
                             api.token = refreshRes.data.token
                             await db.dnaUsers.update(user.id, { token: refreshRes.data.token })
+                            if (heartbeatReadyPromise) {
+                                void this.startHeartbeat(user.uid, refreshRes.data.token).catch(() => undefined)
+                            }
+                        } else {
+                            // refreshToken 也已过期：旧对象继续留着只会让前端显示 token 无效，直接吊销并按未登录处理
+                            this.invalidateDNAAPI()
+                            return undefined
                         }
                     }
 
+                    // 初始化期间账号被切换/缓存被吊销：丢弃本次结果，下次调用重建
+                    if (generation !== apiGeneration || this.dnaUserId !== user.id) {
+                        return undefined
+                    }
+
+                    // 替换旧对象：旧心跳持有旧 token，由新会话按需重建，这里先停掉（直接调 Rust 层，不走国际服直接返回的 store 封装）
+                    if (apiCache && heartbeatReadyPromise) {
+                        heartbeatReadyPromise = null
+                        void stopHeartbeat().catch(() => undefined)
+                    }
+
                     // 更新缓存
+                    this.dnaUserUID = user.uid
                     apiCache = api
                     ;(window as any).DNAAPI = api
-                    apiCacheKey = user.uid
+                    apiCacheKey = initKey
 
                     return api
                 } catch (error) {
                     console.error("获取DNAAPI失败:", error)
                     return undefined
                 } finally {
-                    // 清除初始化Promise，允许下次重新初始化
-                    apiInitPromise = null
+                    // 只清除属于自己的初始化标记（key 被后来的初始化覆盖则不动），允许下次重新初始化
+                    if (apiInitKey === initKey) {
+                        apiInitPromise = null
+                        apiInitKey = ""
+                    }
                 }
             })()
+            apiInitPromise = promise
+            apiInitKey = initKey
 
-            return await apiInitPromise
+            return await promise
+        },
+        /**
+         * 把数据库里最新的凭证同步到已缓存的 DNAAPI 对象上（原地修改，不断开调用方持有的引用）。
+         * 重新登录/refreshToken/局域网同步都只写 DB 不换对象，靠每次 getDNAAPI 命中时同步来消除旧 token。
+         * @param api 已缓存的 DNAAPI 对象
+         * @param user 数据库中的账号行
+         */
+        syncDNAAPICredentials(api: DNAAPI, user: DNAUser) {
+            const lang = this.lang === "zh-CN" ? "zh-Hans" : this.lang === "zh-TW" ? "zh-Hant" : this.lang
+            const tokenRotated = api.token !== user.token
+            api.token = user.token
+            api.kf_token = user.kf_token || ""
+            api.dev_code = user.dev_code
+            if (api.server !== (user.server || "cn")) api.server = user.server || "cn"
+            if (api.lang !== lang) api.lang = lang
+            ;(window as any).DNAAPI = api
+            // token 已轮换而 Rust 心跳还拿着旧 token：重建心跳，否则心跳持续用无效身份
+            if (tokenRotated && heartbeatReadyPromise) {
+                void this.startHeartbeat(user.uid, user.token).catch(() => undefined)
+            }
+        },
+        /**
+         * 吊销 DNAAPI 缓存对象：切号/删号/重新登录/refreshToken 失效后调用。
+         * 旧对象不再被任何后续 getDNAAPI 返回；Rust 心跳无条件停掉（它持有旧 token，不能走国际服直接返回的 store 封装）。
+         */
+        invalidateDNAAPI() {
+            apiGeneration++
+            apiCache = null
+            apiCacheKey = ""
+            heartbeatReadyPromise = null
+            if (typeof window !== "undefined") (window as any).DNAAPI = undefined
+            void stopHeartbeat().catch(() => undefined)
         },
 
         // 启动心跳计时器（快速路径：最多等待 500ms 即返回，握手在后台继续；
@@ -453,7 +533,9 @@ export const useSettingStore = defineStore("setting", {
             const user = await this.getCurrentUser()
             if (!user) return
             await db.dnaUsers.update(user.id, { kf_token: token })
-            // apiCache = null
+            if (apiCache && apiCacheKey === String(user.id)) {
+                apiCache.kf_token = token
+            }
         },
 
         /**
