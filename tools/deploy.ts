@@ -56,8 +56,8 @@ const CONFIG = {
         quarkDir: envConfig.QUARK_APP_DIR || "Duet Night Abyss Builder",
         /** 历史版本归档子目录名 */
         quarkOldDirName: "老版本",
-        /** MSI 文件名模式：同目录下命中但版本不同的包视为老版本 */
-        quarkMsiPattern: /^DNA Builder_.+_x64_zh-CN\.msi$/,
+        /** MSI 文件名模式：同目录下命中但版本不同的包视为老版本（早期包为小写 dna-builder 开头，故忽略大小写） */
+        quarkMsiPattern: /^DNA Builder_.+_x64_zh-CN\.msi$/i,
     },
 }
 
@@ -225,19 +225,20 @@ async function deployQuarkMsi(msiAbsPath: string): Promise<void> {
 
     const oldDir = await client.createDir(CONFIG.app.quarkOldDirName, dirFid)
     const dirName = await resolveDeployDirName(client, CONFIG.app.quarkDir, dirFid)
-    const candidates = await client.searchFiles("DNA Builder")
+    const candidates = await client.searchFiles("DNA Builder", 100)
     const oldIds: string[] = []
     for (const item of candidates) {
         if (item.file_type !== 1 || item.filename === fileName || !CONFIG.app.quarkMsiPattern.test(item.filename)) {
             continue
         }
-        // 搜索回的 parent_fid 是复合 token，对不上目录 fid：用详情完整路径二次确认同目录才归档
-        if (dirName) {
-            const info = await client.getFileInfo(item.fid)
-            if (!isPathUnderDir(info.full_path, dirName)) {
-                console.log(`⏭️  跳过非投放目录文件: ${item.filename}`)
-                continue
-            }
+        // 搜索结果自带 full_path（数组形态），有则直接用，缺失才调详情接口（搜索回的 parent_fid 是复合 token，对不上目录 fid）
+        const fullPath = item.full_path ?? (await client.getFileInfo(item.fid)).full_path
+        if (dirName && !isPathUnderDir(fullPath, dirName)) {
+            console.log(`⏭️  跳过非投放目录文件: ${item.filename}`)
+            continue
+        }
+        if (isPathUnderDir(fullPath, CONFIG.app.quarkOldDirName)) {
+            continue
         }
         oldIds.push(item.fid)
     }
@@ -280,7 +281,15 @@ function isPathUnderDir(fullPath: unknown, dirName: string): boolean {
         return fullPath.split("/").includes(dirName)
     }
     if (Array.isArray(fullPath)) {
-        return fullPath.some(segment => Object.values(segment as Record<string, string>).includes(dirName))
+        return fullPath.some(segment =>
+            typeof segment === "string"
+                ? segment.split("/").includes(dirName)
+                : typeof segment === "object" && segment !== null
+                  ? Object.values(segment as Record<string, unknown>).some(value =>
+                        typeof value === "string" ? value.split("/").includes(dirName) : value === dirName
+                    )
+                  : segment === dirName
+        )
     }
     return false
 }

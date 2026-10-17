@@ -12,7 +12,9 @@ beforeAll(async () => {
     designSystem = await loadDesignSystem()
 }, 30_000)
 
-describe("canonicalizeClassValue 单位转换", () => {
+// 设计系统编译 + 首调用懒加载在全量并行时可能超过默认 5s 超时，整文件放宽
+
+describe("canonicalizeClassValue 单位转换", { timeout: 30_000 }, () => {
     it("将 daisyUI 颜色透明度任意值规范化为百分比（border-base-content/[0.01] -> /1）", () => {
         expect(canonicalizeClassValue(designSystem, "border-base-content/[0.01]")).toBe("border-base-content/1")
         expect(canonicalizeClassValue(designSystem, "bg-primary/[0.5]")).toBe("bg-primary/50")
@@ -53,7 +55,7 @@ describe("canonicalizeClassValue 单位转换", () => {
     })
 })
 
-describe("fallbackCanonicalizeCandidate 兜底换算", () => {
+describe("fallbackCanonicalizeCandidate 兜底换算", { timeout: 30_000 }, () => {
     it("支持 px 单位", () => {
         expect(fallbackCanonicalizeCandidate(designSystem, "p-[8px]")).toBe("p-2")
     })
@@ -72,7 +74,7 @@ describe("fallbackCanonicalizeCandidate 兜底换算", () => {
     })
 })
 
-describe("canonicalizeSource", () => {
+describe("canonicalizeSource", { timeout: 30_000 }, () => {
     it("改写静态 class 属性", () => {
         const src = `<div class="border-base-content/[0.01] p-[8px]">x</div>`
         expect(canonicalizeSource(designSystem, src)).toBe(`<div class="border-base-content/1 p-2">x</div>`)

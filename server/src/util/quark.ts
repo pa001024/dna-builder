@@ -580,11 +580,18 @@ export class QuarkClient {
     async searchFiles(
         keyword: string,
         size = 10
-    ): Promise<Array<{ fid: string; filename: string; parent_fid: string; file_type: number; size: number }>> {
+    ): Promise<Array<{ fid: string; filename: string; parent_fid: string; file_type: number; size: number; full_path?: unknown }>> {
         const data = await this.request<{
-            file_list: Array<{ fid: string; filename: string; parent_fid: string; file_type: number; size: number }>
+            file_list: Array<{
+                fid: string
+                filename: string
+                parent_fid: string
+                file_type: number | string
+                size: number
+                full_path?: unknown
+            }>
         }>("POST", "/agent/v1/file/search", { search_type: "mix", keyword, size })
-        return data.file_list ?? []
+        return (data.file_list ?? []).map(item => ({ ...item, file_type: Number(item.file_type) }))
     }
 
     /**
