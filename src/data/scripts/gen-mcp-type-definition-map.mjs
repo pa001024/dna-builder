@@ -1,5 +1,7 @@
-import { readFileSync, writeFileSync } from "node:fs"
-import { resolve } from "node:path"
+import { spawnSync } from "node:child_process"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 /**
  * MCP 类型定义映射配置。
@@ -100,6 +102,28 @@ export const DATA_TYPE_INTERFACE_DEFINITION_MAP = ${JSON.stringify(result, null,
 }
 
 /**
+ * 用仓库 Biome 落盘格式化生成文件，保证 regen 不产生格式分叉。
+ * 发布流水线仅安装本包依赖、无 Biome 时跳过（不影响构建产物语义）。
+ * @param targetPath 生成文件路径
+ */
+function formatGeneratedFile(targetPath) {
+    const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
+    const binDir = resolve(repoRoot, "node_modules", ".bin")
+    const candidates = process.platform === "win32" ? ["biome.CMD", "biome.cmd", "biome"] : ["biome"]
+    const bin = candidates.map(name => resolve(binDir, name)).find(path => existsSync(path))
+    if (!bin) {
+        console.warn(`[gen-mcp-type-definition-map] biome not found, skip formatting: ${targetPath}`)
+        return
+    }
+    const command = `"${bin}" check --write "${targetPath}"`
+    const result = spawnSync(command, { stdio: "inherit", shell: true })
+    if (result.status !== 0) {
+        console.error(`[gen-mcp-type-definition-map] biome format failed: ${targetPath}`)
+        process.exit(1)
+    }
+}
+
+/**
  * 执行生成流程。
  */
 function main() {
@@ -112,6 +136,7 @@ function main() {
     }
 
     writeFileSync(targetPath, code, "utf-8")
+    formatGeneratedFile(targetPath)
     console.log(`[gen-mcp-type-definition-map] generated: ${targetPath}`)
 }
 

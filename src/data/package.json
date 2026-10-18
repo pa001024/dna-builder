@@ -4,13 +4,37 @@
     "description": "DNA Builder game data models and utilities",
     "type": "module",
     "bin": "./dist/mcp/index.js",
-    "main": "./index.ts",
-    "types": "./index.ts",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./d": {
+            "types": "./dist/d/index.d.ts",
+            "default": "./dist/d/index.js"
+        },
+        "./leveled": {
+            "types": "./dist/leveled/index.d.ts",
+            "default": "./dist/leveled/index.js"
+        },
+        "./mcp": {
+            "types": "./dist/mcp/index.d.ts",
+            "default": "./dist/mcp/index.js"
+        },
+        "./package.json": "./package.json",
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "default": "./dist/*.js"
+        }
+    },
     "scripts": {
-        "build": "tsc --noEmit",
-        "prebuild:mcp": "node ./scripts/gen-mcp-type-definition-map.mjs",
-        "build:mcp": "node ./scripts/build-mcp.mjs",
-        "prepack": "pnpm run build:mcp",
+        "build": "node ./scripts/build.mjs",
+        "lint": "tsc --noEmit",
+        "prebuild": "node ./scripts/gen-mcp-type-definition-map.mjs",
+        "prepack": "pnpm run build",
         "release": "npm run build && npm publish --access public --registry https://registry.npmjs.org/",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
@@ -36,7 +60,7 @@
         "typescript": "~5.6.2",
         "vitest": "^4.0.15"
     },
-    "files": ["*.ts", "leveled/*.ts", "d/*.ts", "mcp/*.ts", "dist/mcp/index.js", "README.md"],
+    "files": ["dist/**/*", "README.md"],
     "engines": {
         "node": ">=18"
     }

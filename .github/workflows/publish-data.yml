@@ -45,9 +45,9 @@ jobs:
               if: steps.version_check.outputs.skip != 'true'
               run: pnpm install --frozen-lockfile
 
-            - name: build mcp bundle
+            - name: build package
               if: steps.version_check.outputs.skip != 'true'
-              run: pnpm run build:mcp
+              run: pnpm run build
 
             - name: publish to npm via OIDC
               if: steps.version_check.outputs.skip != 'true'

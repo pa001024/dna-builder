@@ -2,6 +2,10 @@
 
 游戏数据层，包含角色构建系统的核心计算逻辑和游戏数据。
 
+## 构建与发布
+
+`pnpm run build` 单次产出 `dist/` 下全部 JS + d.ts（`tsconfig.build.json` 负责声明，`scripts/build.mjs` 负责转译与相对引用补 `.js` 后缀）。MCP 入口 `dist/mcp/index.js` 仅转译、不打包数据，与数据模块共享 `dist/` 产物。`prebuild` 会先重跑类型快照生成并用仓库 Biome 落盘，保证 regen 无格式分叉。
+
 ## 目录结构
 
 ```
