@@ -21,7 +21,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | 安全模式 | [safe-mode-unlock.md](.agents/docs/safe-mode-unlock.md) |
 | 剧情 AI 补语音流水线（缺语音扫描 / BERT 情绪 / GPT-SoVITS / aistory 发布 / AI 角标） | [voice-aistory-pipeline.md](.agents/docs/voice-aistory-pipeline.md) |
 
-- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、build-creator、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
+- 技能：`.agents/skills/*/SKILL.md`
 - Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）
 - 业务与设计文档：`docs/`
 
