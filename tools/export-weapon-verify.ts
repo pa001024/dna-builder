@@ -8,7 +8,7 @@ const eventId = 103026
 const levelIds = [40701, 40702, 40703, 40704, 40711, 40712, 40713, 40714, 40721, 40722, 40723, 40724]
 const defaultInputDir = resolve(import.meta.dir, "../../DuetNightAbyssData2/out")
 const defaultScriptDir = resolve(import.meta.dir, "../../DuetNightAbyssData2/script")
-const defaultOutputFile = resolve(import.meta.dir, "../src/data/d/weapon-verify.data.ts")
+const defaultOutputFile = resolve(import.meta.dir, "../packages/data/d/weapon-verify.data.ts")
 
 type WeaponVerifyExport = {
     event: { id: number; name: string; description: string; rule: string; startTime: number; endTime: number; jumpUnlockCondition: number }

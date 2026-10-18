@@ -1,10 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
-import charData from "../../src/data/d/char.data"
-import { charVoiceData } from "../../src/data/d/charvoice.data"
-import { npcData } from "../../src/data/d/npc.data"
-import { questData } from "../../src/data/d/quest.data"
-import { stripStoryTextTags } from "../../src/data/story-text"
+import charData from "../../packages/data/d/char.data"
+import { charVoiceData } from "../../packages/data/d/charvoice.data"
+import { npcData } from "../../packages/data/d/npc.data"
+import { questData } from "../../packages/data/d/quest.data"
+import { stripStoryTextTags } from "../../packages/data/story-text"
 
 export interface CharTrainSet {
     charId: number

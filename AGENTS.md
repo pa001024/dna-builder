@@ -34,7 +34,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 pnpm dev                              # Development server (http://localhost:1420/)
 pnpm lint                             # 增量 lint：Biome + vue-tsc 只处理改动过的文件
 pnpm test                             # Run all tests (vitest run)
-pnpm test src/data/tests/foo.test.ts  # Run single test file
+pnpm --filter dna-builder-data test -- tests/foo.test.ts  # Run single data test file
 pnpm format                           # Format with Biome
 ```
 
@@ -66,18 +66,18 @@ bun run gen                      # Generate database migrations
 ## Project Structure
 
 ```
-src/
-├── components/      # Vue components
-├── data/            # Game data and calculations (tests in data/tests/)
-├── store/           # Pinia stores
-├── views/           # Page components
-├── api/             # API calls
-├── utils/           # Utility functions
-├── shared/          # Agent 提示词等跨端共享文本
-└── router.ts        # Route config
-server/              # Bun + Elysia backend
-src-tauri/           # Tauri Rust backend
-tools/               # Dev tools (i18n.ts, icon-tool.ts)
+apps/
+├── web/               # 前端应用（Vue）：src/（components/store/views/api/utils/shared…）、
+│                      # public/、mock/、index.html、vite/vitest 配置与 src-tauri 桌面壳
+├── server/            # Bun + Elysia backend（bun 独立安装，不在 pnpm workspace 内）
+└── dob-bot/           # GitHub App bot（bun 独立安装）
+packages/
+├── data/              # dna-builder-data：游戏数据模型与计算（原 src/data）
+├── dna-api/           # BBS API 客户端（原 externals/dna-api，workspace 包）
+├── graphql-mobius/    # GraphQL 类型安全客户端（原 externals/graphql-mobius）
+└── dob-script/        # dob-script CLI 的 npm 包装
+tools/                # 仓库级 Dev tools（i18n.ts、icon-tool.ts、data-pack.ts…），cwd 无关
+crates/               # Rust crates（hpatchz-wasm、mcp_server）
 ```
 
 ## Key Technologies

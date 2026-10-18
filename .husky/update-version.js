@@ -9,12 +9,12 @@ const version = (process.env.VERSION || "").trim()
 const packageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "package.json")
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
 
-// 读取tauri.conf.json文件
-const tauriConfPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "src-tauri", "tauri.conf.json")
+// 读取tauri.conf.json文件（前端工程已收拢到 apps/web）
+const tauriConfPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "src-tauri", "tauri.conf.json")
 const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf8"))
 
 // 读取Cargo.toml文件
-const cargoTomlPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "src-tauri", "Cargo.toml")
+const cargoTomlPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "src-tauri", "Cargo.toml")
 const cargoTomlContent = fs.readFileSync(cargoTomlPath, "utf8")
 
 // 递增小版本号
@@ -35,6 +35,13 @@ const cargoTomlVersionChanged = updatedCargoTomlContent !== cargoTomlContent
 if (packageJsonVersionChanged) {
     packageJson.version = newVersion
     fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
+    // 同步 workspace 成员版本（apps/web/package.json 与 tauri.conf / Cargo.toml 保持一致）
+    const webPackageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "package.json")
+    const webPackageJson = JSON.parse(fs.readFileSync(webPackageJsonPath, "utf8"))
+    if (webPackageJson.version !== newVersion) {
+        webPackageJson.version = newVersion
+        fs.writeFileSync(webPackageJsonPath, `${JSON.stringify(webPackageJson, null, 4)}\n`)
+    }
 }
 if (tauriConfVersionChanged) {
     tauriConf.version = newVersion
@@ -59,7 +66,7 @@ function sortJson(obj) {
 
 const langs = ["en", "zh-CN", "zh-TW", "ja", "ko", "fr"]
 for (const lang of langs) {
-    const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "public", "i18n", lang, `translation.json`)
+    const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "public", "i18n", lang, `translation.json`)
     let i18n = JSON.parse(fs.readFileSync(i18nPath, "utf8"))
     i18n = sortJson(i18n)
     fs.writeFileSync(i18nPath, `${JSON.stringify(i18n, null, 4)}\n`)

@@ -17,10 +17,13 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { installDomStubs } from "./ssg-dom-stub.mjs"
 
-const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+/**
+ * Web 应用根：SSG 必须在 apps/web 下运行（pnpm --filter 调度时 cwd 即是该目录），
+ * Vite root、public/i18n 与构建产物 dist 都以它为准。
+ */
+const ROOT_DIR = path.resolve(".")
 
 /** 站点主域：canonical / og:url 用它拼绝对地址 */
 const SITE_ORIGIN = "https://dna-builder.cn"

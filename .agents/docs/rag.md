@@ -5,7 +5,7 @@
 ## 〇、开关（实验性: 上下文检索增强）
 
 输入框右下角的 toggle（`DBAskBox.vue`，`RAG` 标签在图片按钮左侧），**默认关闭**，状态在
-`src/utils/rag/enabled.ts`（模块级缓存 + `setting_db_agent_rag`，不用 Pinia——读它的还有工具层）。
+`apps/web/src/utils/rag/enabled.ts`（模块级缓存 + `setting_db_agent_rag`，不用 Pinia——读它的还有工具层）。
 
 关闭时的四处闸门（缺一处就会在关闭态下建索引或发请求）：
 
@@ -28,7 +28,7 @@
   全新对话用 `chatPlaceholderStart`「向资料检索提问」，不写「继续追问」）。
 - 开启时立刻预热索引（`DBView.vue` 的 `watch`），不必等首次检索；关闭时已建好的索引保留在内存，不做回收。
 
-## 一、客户端检索层（`src/utils/rag/`）
+## 一、客户端检索层（`apps/web/src/utils/rag/`）
 
 对外是一个工具：`rag_search` —— 一次跨「剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 全库条目」召回，
 返回**可直接引用的证据**：命中正文 + 前后几行片段 + 出处路径 + 得分与命中原因。
@@ -37,16 +37,16 @@
 
 | 文件 | 职责 |
 |---|---|
-| `src/data/rag/types.ts` | chunk 模型、锚点格式、内容指纹、`RAG_CHUNK_SCHEMA_VERSION`、`RAG_SUMMARY_LANG` |
-| `src/data/rag/chunks.ts` | 切块（**双端共用**，服务端建索引也用同一份，见下）|
-| `src/utils/rag/tokenize.ts` | 归一化 + CJK bigram / 拉丁词切分 |
-| `src/utils/rag/lexical.ts` | 字段加权 BM25 倒排、短语/标题加成、拉丁前缀召回、拼音字段 |
-| `src/utils/rag/query.ts` | 召回执行（词法变体 + 向量通道 → RRF 融合 → 片段拼装 → 标题多样性约束）|
-| `src/utils/rag/corpus.ts` | 主线程读数据 + 分片切块 + 交给引擎 |
-| `src/utils/rag/engine.ts` | 引擎选择：浏览器用 Worker，其余（vitest / SSG）退回进程内实现 |
-| `src/utils/rag/rag.worker.ts` | Worker：建索引 + 执行召回 |
-| `src/utils/rag/search.ts` | 对外入口 `ragSearch()`：语言归一化、跨语言关键词扩展、向量通道、note 组装 |
-| `src/utils/rag/vector.ts` | 服务端向量通道客户端（未登录 / 版本不符 / 超时都静默退回词法）|
+| `packages/data/rag/types.ts` | chunk 模型、锚点格式、内容指纹、`RAG_CHUNK_SCHEMA_VERSION`、`RAG_SUMMARY_LANG` |
+| `packages/data/rag/chunks.ts` | 切块（**双端共用**，服务端建索引也用同一份，见下）|
+| `apps/web/src/utils/rag/tokenize.ts` | 归一化 + CJK bigram / 拉丁词切分 |
+| `apps/web/src/utils/rag/lexical.ts` | 字段加权 BM25 倒排、短语/标题加成、拉丁前缀召回、拼音字段 |
+| `apps/web/src/utils/rag/query.ts` | 召回执行（词法变体 + 向量通道 → RRF 融合 → 片段拼装 → 标题多样性约束）|
+| `apps/web/src/utils/rag/corpus.ts` | 主线程读数据 + 分片切块 + 交给引擎 |
+| `apps/web/src/utils/rag/engine.ts` | 引擎选择：浏览器用 Worker，其余（vitest / SSG）退回进程内实现 |
+| `apps/web/src/utils/rag/rag.worker.ts` | Worker：建索引 + 执行召回 |
+| `apps/web/src/utils/rag/search.ts` | 对外入口 `ragSearch()`：语言归一化、跨语言关键词扩展、向量通道、note 组装 |
+| `apps/web/src/utils/rag/vector.ts` | 服务端向量通道客户端（未登录 / 版本不符 / 超时都静默退回词法）|
 
 ### 语料种类
 
@@ -89,12 +89,12 @@
   **只新增语料种类不升版本**（已有锚点的正文与指纹未变，旧索引仍然准确，新锚点缺向量只是少了那一路召回）。
 - **缓存失效**：数据包水合（换版本）时清空语料缓存并 `engine.reset()`。
 
-## 二、服务端向量索引（`server/src/rag/`，自动运维）
+## 二、服务端向量索引（`apps/server/src/rag/`，自动运维）
 
 语义召回（「谁把我从雪地里救出来」这类措辞对不上的提问）由服务端提供，
 **向量必须预索引**：客户端没有 embedding 模型，也不该下载向量（单语言 110MB）。
 
-**索引库后端是 DuckDB**（`server/data/rag-index.duckdb`，曾用 bun:sqlite + int8 BLOB + JS 暴力点积，已完全移除）：
+**索引库后端是 DuckDB**（`apps/server/data/rag-index.duckdb`，曾用 bun:sqlite + int8 BLOB + JS 暴力点积，已完全移除）：
 每张语言表建 HNSW 向量索引（`vss` 扩展，cosine 度量，持久化），向量按 float32 落盘，
 检索 `ORDER BY array_cosine_distance(vec, ?)` 走索引扫描、打分为精确余弦（无量化损失）；
 远端模式下本地只存元数据行（vec 为 NULL），向量本体只在 DashVector。
@@ -105,12 +105,12 @@
 
 | 文件 | 职责 |
 |---|---|
-| `server/src/rag/embedding.ts` | OpenAI 兼容 embeddings 客户端：批量 256、并发 4、L2 归一化、退避重试、按 `index` 重排 |
-| `server/src/rag/build.ts` | **自动构建**：启动预热指纹、单飞后台任务、增量复用、按种类回收、事务提交 |
-| `server/src/rag/duckstore.ts` | 独立索引库（**DuckDB**）：meta 表 + 每语言一张 `chunks_<lang>` 表（`vec FLOAT[dims]`）+ HNSW 索引 + 按语言/种类的指纹 + 严格校验 + 实例缓存复用 |
-| `server/src/rag/search.ts` | 本地：查询向量化 → DuckDB HNSW 检索（部分种类可服务时下推指纹过滤，退化为精确扫描）；远端：DashVector 查询 |
-| `server/src/rag/progress-ui.tsx` | 主进程内的构建进度固定区域（ink/React，仅交互式终端）|
-| `server/src/api/rag.ts` | `POST /api/v1/rag/search`（每账号限流，`RAG_SEARCH_RATE_LIMIT` 可调，默认 60/min）、`GET /api/v1/rag/status`（含进程 RSS） |
+| `apps/server/src/rag/embedding.ts` | OpenAI 兼容 embeddings 客户端：批量 256、并发 4、L2 归一化、退避重试、按 `index` 重排 |
+| `apps/server/src/rag/build.ts` | **自动构建**：启动预热指纹、单飞后台任务、增量复用、按种类回收、事务提交 |
+| `apps/server/src/rag/duckstore.ts` | 独立索引库（**DuckDB**）：meta 表 + 每语言一张 `chunks_<lang>` 表（`vec FLOAT[dims]`）+ HNSW 索引 + 按语言/种类的指纹 + 严格校验 + 实例缓存复用 |
+| `apps/server/src/rag/search.ts` | 本地：查询向量化 → DuckDB HNSW 检索（部分种类可服务时下推指纹过滤，退化为精确扫描）；远端：DashVector 查询 |
+| `apps/server/src/rag/progress-ui.tsx` | 主进程内的构建进度固定区域（ink/React，仅交互式终端）|
+| `apps/server/src/api/rag.ts` | `POST /api/v1/rag/search`（每账号限流，`RAG_SEARCH_RATE_LIMIT` 可调，默认 60/min）、`GET /api/v1/rag/status`（含进程 RSS） |
 
 ### DuckDB 后端要点（duckstore.ts）
 
@@ -153,7 +153,7 @@
 
 ### 构建时机：启动预热一次，请求路径只比较
 
-1. **启动**（`server/src/index.ts` 调 `warmCurrentFingerprints`）：装配各语言语料、算出当前数据指纹并缓存；
+1. **启动**（`apps/server/src/index.ts` 调 `warmCurrentFingerprints`）：装配各语言语料、算出当前数据指纹并缓存；
    索引里已建过、但内容已变的语言**自动排队重建**（无需任何手工命令）。
 2. **请求**：只把客户端指纹与「索引里的指纹」「当前数据指纹」做字符串比较（`resolveIndexFingerprint`），
    **不装配语料**——客户端怎么刷都不会引起重复计算。
@@ -194,7 +194,7 @@ DashVector 三件套（`AI_EMBEDDING_SERVER_ENDPOINT` / `_API_KEY` / `_COLLECTIO
   这正是远端后端的目的（本地只留几 MB 元数据，而不是 100MB+/语言的向量）。
 - 检索直接走远端 `query`，门禁（语言 + 本次可服务的种类指纹）**下推成过滤表达式**，
   不需要把整库取回来再筛；远端不可用时没有本地向量可退，本次退回纯词法（日志会写明原因）。
-- 契约细节（都按真机验证，见 `server/src/rag/dashvector.ts` 的注记）：
+- 契约细节（都按真机验证，见 `apps/server/src/rag/dashvector.ts` 的注记）：
   - 鉴权头是 **`dashvector-auth-token`**（不是 `Authorization: Bearer`）；
   - 向量必须写成**浮点字面量**（`1` 会被拒为 `Mismatched Data Type`，`1.0` 才行）；
   - 文档 id 只允许 `[a-zA-Z0-9_-!@#$%+=.]` 且 ≤64 字符，锚点里的 `:` 转写成 `.`，真锚点放 `anchor` 字段；
@@ -212,11 +212,11 @@ DashVector 三件套（`AI_EMBEDDING_SERVER_ENDPOINT` / `_API_KEY` / `_COLLECTIO
 | `AI_EMBEDDING_DIM` | 可选：指定输出维度（MRL 截断）。要求显式指定维度的渠道必须配；改维度会自动全量重建 |
 | `AI_EMBEDDING_BATCH_SIZE` | 可选：单请求条数（默认 256、上限 1024）|
 | `AI_EMBEDDING_SERVER_ENDPOINT` / `_API_KEY` / `_COLLECTION` | DashVector 集群地址、密钥与集合名；**三件套配齐即启用远端向量库**，留空任一项 = 本地 DuckDB 索引 |
-| `RAG_INDEX_DB` | 可选：索引库文件路径（默认 `server/data/rag-index.duckdb`；两种后端共用该配置）|
+| `RAG_INDEX_DB` | 可选：索引库文件路径（默认 `apps/server/data/rag-index.duckdb`；两种后端共用该配置）|
 | `AI_EMBEDDING_LANG` | 可选：语言白名单（`zh,en,ja`；支持 ja→jp、ko→kr 别名；留空 = 全部）。只构建白名单内的语言 |
 | `PORT` | 可选：服务监听端口（默认 8887），同机并行多实例时用 |
 
-**本地 → 远端迁移**：`bun run rag:migrate`（`server/src/rag/migrate-to-remote.ts`）——把本地已构建的向量
+**本地 → 远端迁移**：`bun run rag:migrate`（`apps/server/src/rag/migrate-to-remote.ts`）——把本地已构建的向量
 **原样**推送到 DashVector（不重新嵌入），成功后把 meta 的 vectorStore 改写为 `remote:<集合>`；
 三件套本来就已配置时推送完成即无缝接管，重启服务即可，不触发全量重嵌。
 支持 `--lang=zh`、`--dry-run`（只分析本地）、`--no-switch`（只推送不改标记）；推送按锚点 upsert，可安全重跑。

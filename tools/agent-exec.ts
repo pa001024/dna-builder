@@ -2,23 +2,23 @@
 import { readFileSync } from "node:fs"
 import { createInterface, type Interface } from "node:readline"
 import i18next from "i18next"
-import { ensureAgentSkillsReady, getAgentSkillRegistry } from "../src/api/agent/skills/registry"
-import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "../src/api/agent/tool"
-import { scheduleToolCalls } from "../src/api/agent/tool-scheduler"
-import { createDbRetrievalTools } from "../src/api/agent/tools/db-retrieval"
-import { DB_RETRIEVAL_PROFILES } from "../src/api/agent/tools/retrieval-modules"
-import { createSkillTools } from "../src/api/agent/tools/skill-files"
-import { type AgentToolCall, parseToolArguments } from "../src/api/agent/wire"
-import { agentToolLabel } from "../src/utils/agent-chat"
+import { ensureAgentSkillsReady, getAgentSkillRegistry } from "../apps/web/src/api/agent/skills/registry"
+import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "../apps/web/src/api/agent/tool"
+import { scheduleToolCalls } from "../apps/web/src/api/agent/tool-scheduler"
+import { createDbRetrievalTools } from "../apps/web/src/api/agent/tools/db-retrieval"
+import { DB_RETRIEVAL_PROFILES } from "../apps/web/src/api/agent/tools/retrieval-modules"
+import { createSkillTools } from "../apps/web/src/api/agent/tools/skill-files"
+import { type AgentToolCall, parseToolArguments } from "../apps/web/src/api/agent/wire"
+import { agentToolLabel } from "../apps/web/src/utils/agent-chat"
 import {
     type AskUserRequest,
     type AskUserResponse,
     formatAskUserResponse,
     hasAskAnswer,
     summarizeAskUserRequest,
-} from "../src/utils/db-ask-user"
-import { type DBAgentLang, normalizeDBAgentLang, toI18nLanguage } from "../src/utils/db-locale"
-import { isRagEnabled } from "../src/utils/rag/enabled"
+} from "../apps/web/src/utils/db-ask-user"
+import { type DBAgentLang, normalizeDBAgentLang, toI18nLanguage } from "../apps/web/src/utils/db-locale"
+import { isRagEnabled } from "../apps/web/src/utils/rag/enabled"
 
 const HELP = `资料检索 Agent 工具台 —— 不接模型，按 DBAgent 的装配方式直接调用它的工具。
 

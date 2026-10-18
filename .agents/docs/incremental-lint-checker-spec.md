@@ -72,7 +72,7 @@
   这 24 条在 vue-tsc 下本就不展示；代价是同 bug 的映射版诊断若只以虚拟形态出现也会被隐藏
   （如 LevelUpCalculator 的 Map.value 问题），兜底仍由 `lint:full` 负责。
 - 剩余 13 条可定位诊断逐一定性：`v-html`（内建）与 `v-h-resize-for`（main.ts 全局注册）
-  补 `src/types/global-directives.d.ts` 类型注册后消除；中间踩过两个坑——增补块放在全局脚本
+  补 `apps/web/src/types/global-directives.d.ts` 类型注册后消除；中间踩过两个坑——增补块放在全局脚本
   文件（无顶层 import/export）会遮蔽整个 vue 模块致 2582 条连锁报错，必须独立成模块文件
   （`export {}`）；增补内部不可 `import("vue")` 自引用，同理致命。Toast.vue 的 6 条
   （reka-ui 组件未导入）补 import 后消除，该文件此前模板与运行时双双 broken。
@@ -100,7 +100,7 @@
 `pnpm lint` 的类型检查仍然是 vue-tsc 的"壳"：生成临时 tsconfig 交给真 vue-tsc。这带来两个性能问题：
 
 1. **上游依赖被重复检查**：改 a 时，a 所 import 的上游文件（b、c…整棵上游闭包）被拉进程序并完整做类型检查、报诊断，而这些文件的错误早在它们各自被改的那次就应该查过。
-2. **数据文件拖垮一切**：`src/data/d/**/*.data.ts` 共 80 个文件约 103MB（translations 19MB、quest 系列每个 8~9MB），且被核心模块引用，几乎每次增量的上游闭包都包含若干个——每次都要重新 parse + check 几百 MB 字面量。
+2. **数据文件拖垮一切**：`packages/data/d/**/*.data.ts` 共 80 个文件约 103MB（translations 19MB、quest 系列每个 8~9MB），且被核心模块引用，几乎每次增量的上游闭包都包含若干个——每次都要重新 parse + check 几百 MB 字面量。
 
 此外，环境声明文件（如自动生成的 `components.d.ts`）变更时会整体退回 2.5 分钟的真 vue-tsc 全量，开发期频繁触发。
 
@@ -140,7 +140,7 @@
 - **程序化构建 program**：`@vue/language-core` 的 `createVueLanguagePlugin`（.vue → 虚拟 TS）+ `@volar/typescript` 的 `proxyCreateProgram` + TypeScript Compiler API；诊断映射沿用 vue-tsc 自身 `runTsc` 内对 program 诊断做变换的方式（实现时照其源码移植）。不使用 vue-tsc CLI（`lint:full` 除外）。
 - **依赖登记**：`@vue/language-core` 与 `@volar/typescript` 显式登记进 devDependencies（均为 vue-tsc 3.3.11 的既有传递依赖，版本对齐，不引入新包）。
 - **诊断范围**：根集合 = 改动文件 + 反向依赖闭包 + 环境声明文件（与现有口径一致）；program 中其余文件只编译。选项/配置级诊断随 program 一并收集。
-- **数据文件裁剪**：命中范围 `src/data/d/**/*.data.ts`（与数据包改写插件同口径）。未改动者由 CompilerHost 以 `ts.transpileDeclaration` 预生成的声明内容替代真实源码；声明产物按 mtime+size 缓存于 `.tmp`。被改动者用真实源码、作为根文件正常诊断，并在检查前用新内容刷新其声明缓存（保证本次运行的下游拿到新类型）。
+- **数据文件裁剪**：命中范围 `packages/data/d/**/*.data.ts`（与数据包改写插件同口径）。未改动者由 CompilerHost 以 `ts.transpileDeclaration` 预生成的声明内容替代真实源码；声明产物按 mtime+size 缓存于 `.tmp`。被改动者用真实源码、作为根文件正常诊断，并在检查前用新内容刷新其声明缓存（保证本次运行的下游拿到新类型）。
 - **回退层级**：环境声明变更 / 根集合占工程比例过半 → 自研全量（对 program 全部文件诊断，数据仍替换）；`--full` 参数与 `lint:full` 脚本 → 真 vue-tsc CLI 全量（唯一检查数据体的路径）。
 - **缓存**：沿用 `.tmp/lint-cache.json` 的指纹与"通过才落盘"语义；新增数据文件声明缓存块，缓存结构版本 +1 使旧缓存整体失效一次。
 - **边界**：Biome 半边（分块、全量/增量判定）不动；输出格式沿用 vue-tsc 风格（`file(line,col): error TSxxxx`）；无新增 pnpm 脚本。
@@ -151,7 +151,7 @@
 - **好的测试只验证外部行为**：CLI 退出码、诊断输出内容与位置、缓存落盘语义；不测内部函数切分。
 - **主验证手段（seam）**：增量 lint 驱动器的 CLI 边界（argv → 退出码 + stdout 诊断 + `.tmp/lint-cache.json` 副作用）。开发期用 `.tmp` 内一次性对比工具：对若干典型场景（改组件 / 改 store / 改类型导出 / 删文件 / 改数据文件 / 改 `.vue` 模板），diff 新驱动与真 vue-tsc 全量的诊断集合，除数据体错误外应一致；该工具用完即弃、不进仓库。
 - **纯逻辑单测**（改动集合 → 根集合计算、声明缓存键等）：仅在 vitest 现有配置可覆盖工具目录时补少量用例，不为凑测试改 vitest 配置。
-- **先例**：仓库现有测试位于 `src/data/tests/`（vitest），工具目录此前无测试；对比 harness 参考该脚本自身已有的"缓存失效回全量"自保逻辑设计场景。
+- **先例**：仓库现有测试位于 `packages/data/tests/`（vitest），工具目录此前无测试；对比 harness 参考该脚本自身已有的"缓存失效回全量"自保逻辑设计场景。
 
 ## Out of Scope
 

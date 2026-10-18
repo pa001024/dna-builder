@@ -54,7 +54,7 @@ bun --cpu-prof --cpu-prof-dir .tmp/prof .tmp/prof-calc.ts
 然后解析 self-time（**不要只看 total time**，被调用的下游会污染）：
 
 ```bash
-node .agents/skills/perf-hotspot-profiling/scripts/profile-self-time.mjs .tmp/prof/c.cpuprofile --filter src/ --top 20
+node .agents/skills/perf-hotspot-profiling/scripts/profile-self-time.mjs .tmp/prof/c.cpuprofile --filter apps/web/src/ --filter packages/data/ --top 20
 ```
 
 输出按 self-time 降序的函数表（含占比、文件:行）。**盯占比最高的那一两个**，优化它们；
@@ -126,5 +126,5 @@ node node_modules/vitest/vitest.mjs run <test files>
 - `scripts/profile-self-time.mjs` — 解析 `.cpuprofile`，按 self-time 输出热点函数表。
 - 本仓库正式基准：`tools/benchmark-charbuild.ts`（`bun bench:charbuild:real`）。
   加速路径（Wasm/SIMD）的决策复核工具在结论落地后已删除——**结论：无收益，勿复活**。
-- 本仓库已验证案例：`src/data/CharBuild.ts` 属性结算查表化（`calculate()` 约 45× 提速），
+- 本仓库已验证案例：`packages/data/CharBuild.ts` 属性结算查表化（`calculate()` 约 45× 提速），
   详见 `.workbuddy/memory/2026-09-19.md` 与 `MEMORY.md` 的「CharBuild 属性结算」小节。

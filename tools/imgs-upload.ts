@@ -10,10 +10,12 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { assertStorageConfig, getActiveBackends, getPublicUrl, listAllKeysInBackend, putFileToBackend } from "./object-storage"
 
-const rootDir = path.resolve(".")
-const localImgsDir = path.resolve(rootDir, "public/imgs")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const localImgsDir = path.resolve(rootDir, "apps", "web", "public", "imgs")
 
 /**
  * @description 由本地相对路径生成远端 key。

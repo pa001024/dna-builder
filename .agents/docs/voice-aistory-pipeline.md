@@ -31,7 +31,7 @@ cd E:/soft/GPT-SoVITS-v2
 
 ## 数据口径
 
-- `src/data/d/extvoice.data.ts`：对话 id → AI 语音映射（`voice: "aistory/<对话id>"`），
+- `packages/data/d/extvoice.data.ts`：对话 id → AI 语音映射（`voice: "aistory/<对话id>"`），
   由 `synthesize.ts` 输出的 `extvoice.fragment.ts` 合并而成，已纳入数据包改写名单。
 - 文件命名：`voice_<lang>_aistory_<对话id>[_m|_f].ogg`，与 `buildDialogueVoiceUrl` 的
   `<lang>/<folder>/voice_<lang>_<folder>_<rest>` 规则对齐（folder=`aistory`）。
@@ -89,6 +89,6 @@ GPT-SoVITS 偶发丢字（如整句未读）。合成后每条经 FunASR（`para
 
 ## 前端
 
-- `src/utils/ext-voice.ts`：原生 voice 优先，无则回退 `extVoiceMap`，返回 `{url, ai}`。
+- `apps/web/src/utils/ext-voice.ts`：原生 voice 优先，无则回退 `extVoiceMap`，返回 `{url, ai}`。
 - `DBQuestStoryNodes.vue` + `DBDialogueCard.vue`（`voiceAi` prop）：AI 语音显示
   `db-quest-story-nodes.ai_voice` 角标，悬停见 `ai_voice_tip` 说明。

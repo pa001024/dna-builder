@@ -9,7 +9,7 @@
  *   bun tools/i18n-hardcoded-check.ts                 # 打印统计与待办清单摘要
  *   bun tools/i18n-hardcoded-check.ts --json          # 输出 tools/i18n-hardcoded-report.json
  *   bun tools/i18n-hardcoded-check.ts --md            # 输出 tools/i18n-hardcoded-report.md（含逐条清单）
- *   bun tools/i18n-hardcoded-check.ts --include-data  # 连 src/data 下的数据集一起扫（默认排除游戏数据集）
+ *   bun tools/i18n-hardcoded-check.ts --include-data  # 连 packages/data 下的数据集一起扫（默认排除游戏数据集）
  *
  * 检测方式:
  *   - .vue 模板: 取文本节点、静态属性值（title/placeholder/aria-label/alt/label 等）与内联字符串字面量
@@ -20,20 +20,23 @@
  */
 
 import { readdir, readFile, writeFile } from "node:fs/promises"
-import { extname, join, relative } from "node:path"
+import { dirname, extname, join, relative } from "node:path"
+import { fileURLToPath } from "node:url"
 import ts from "typescript"
 
-const ROOT = process.cwd()
-const SRC_DIR = join(ROOT, "src")
-const JSON_REPORT = join(ROOT, "tools", "i18n-hardcoded-report.json")
-const MD_REPORT = join(ROOT, "tools", "i18n-hardcoded-report.md")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
+const ROOT = REPO_ROOT
+const SRC_DIRS = [join(REPO_ROOT, "apps", "web", "src"), join(REPO_ROOT, "packages", "data")]
+const JSON_REPORT = join(REPO_ROOT, "tools", "i18n-hardcoded-report.json")
+const MD_REPORT = join(REPO_ROOT, "tools", "i18n-hardcoded-report.md")
 
 /** 中日韩统一表意文字（含扩展 A 与兼容区） */
 const CJK_RE = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/
 /** 需要跳过的目录 */
 const SKIP_DIRS = new Set(["node_modules", "dist", ".vitest", "coverage", "tests", "generated"])
 /** 生成目录：游戏数据集，文案由数据包下发，不属于界面硬编码 */
-const DATA_DIR_RE = /^src\/data\/(d|generated)\//
+const DATA_DIR_RE = /^packages\/data\/(d|generated)\//
 
 /**
  * 判定为「不是文案」的属性名。
@@ -231,7 +234,7 @@ async function main(): Promise<void> {
     const wantMd = args.has("--md")
     const includeData = args.has("--include-data")
 
-    const files = await collectFiles(SRC_DIR, includeData)
+    const files = (await Promise.all(SRC_DIRS.map(dir => collectFiles(dir, includeData)))).flat()
     const hits: Hit[] = []
     for (const file of files) {
         const content = await readFile(file, "utf-8")

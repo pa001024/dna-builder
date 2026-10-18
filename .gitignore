@@ -5,6 +5,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+# 根目录用 pnpm 管理，误跑 bun install 会掉出 bun.lock/bun.lockb，一律忽略
+bun.lock
+bun.lockb
 lerna-debug.log*
 
 node_modules
@@ -24,7 +27,7 @@ crates/*/target/
 *.njsproj
 *.sln
 *.sw?
-src/components.d.ts
+apps/web/src/components.d.ts
 *.xlsx
 *.ipynb
 weixin/
@@ -51,17 +54,17 @@ INTRO.md
 .umap-export/
 .workbuddy/
 .docs/
-externals/dna-api/java/
-externals/dna-api/js/
+packages/dna-api/java/
+packages/dna-api/js/
 mock/
 output/playwright/
 public/imgs/map
-server/.env
-server/data/
-src-tauri/gen/android/keystore.properties
-src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
-src/data/txt/*
-src/game/*.md
+apps/server/.env
+apps/server/data/
+apps/web/src-tauri/gen/android/keystore.properties
+apps/web/src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
+packages/data/txt/*
+apps/web/src/game/*.md
 test-results/
 tools/*.json
 tools/*.sh

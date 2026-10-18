@@ -20,8 +20,8 @@ import {
  */
 
 // 配置
-const SERVER_API_DIR = "server/src/db/mod"
-const OUTPUT_DIR = "src/api/gen"
+const SERVER_API_DIR = "apps/server/src/db/mod"
+const OUTPUT_DIR = "apps/web/src/api/gen"
 const OUTPUT_QUERY_FILE = "api-queries.ts"
 const OUTPUT_MUTATION_FILE = "api-mutations.ts"
 

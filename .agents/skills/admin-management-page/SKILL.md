@@ -1,38 +1,38 @@
 ---
 name: admin-management-page
-description: 在 dna-builder 里新增一个 /admin 后台管理页（侧边栏菜单 + 路由 + REST 封装 + 统计卡/筛选卡/表格/分页 + 详情弹窗），并在本地实测验证。当需要给后台加新的管理页面、或改动 src/admin/ 下的页面结构时使用。
+description: 在 dna-builder 里新增一个 /admin 后台管理页（侧边栏菜单 + 路由 + REST 封装 + 统计卡/筛选卡/表格/分页 + 详情弹窗），并在本地实测验证。当需要给后台加新的管理页面、或改动 apps/web/src/admin/ 下的页面结构时使用。
 agent_created: true
 ---
 
 # 新增后台管理页
 
-`src/admin/` 下有 15+ 个同构管理页（`UserManagement.vue`、`RankingManagement.vue` …），
+`apps/web/src/admin/` 下有 15+ 个同构管理页（`UserManagement.vue`、`RankingManagement.vue` …），
 改造或新增前先挑一个**同类**的读一遍当模板，别从零写。
 
 ## 两类页面，先分清
 
 | 类型 | 适用 | 落点 |
 | --- | --- | --- |
-| GraphQL CRUD | 增删改查挂在 GraphQL schema 上的普通实体 | **不写页面**，往 `src/admin/crud-config.ts` 加一段配置，复用 `AdminCrudPage.vue` |
-| 自定义 REST 页 | 数据不在数据表里（文件分片、外部服务、聚合统计） | 新建 `src/admin/<Feature>Management.vue`，按下面的配方 |
+| GraphQL CRUD | 增删改查挂在 GraphQL schema 上的普通实体 | **不写页面**，往 `apps/web/src/admin/crud-config.ts` 加一段配置，复用 `AdminCrudPage.vue` |
+| 自定义 REST 页 | 数据不在数据表里（文件分片、外部服务、聚合统计） | 新建 `apps/web/src/admin/<Feature>Management.vue`，按下面的配方 |
 
 判据：数据是「数据库里的一行」→ 配 CRUD；是「磁盘文件 / 日志 / 外部接口」→ 自定义页。
 
 ## 改动清单（自定义 REST 页）
 
-1. **`src/api/<feature>.ts`** — REST 封装，抄 `src/api/modShare.ts` 的写法：
+1. **`apps/web/src/api/<feature>.ts`** — REST 封装，抄 `apps/web/src/api/modShare.ts` 的写法：
    - 内部一个 `request<T>(path, token, params?, init?)`：拼 `${env.apiEndpoint.replace(/\/$/, "")}/api/v1/<...>`、
      用 `URLSearchParams` 丢空值、头带 `token`、非 2xx 或 `{success:false}` 统一抛 `Error(error 文案)`。
-   - 导出**具名函数**（`listXxx` / readXxx / …），每个都要 JSDoc；不要把接口类型塞进 `src/api/app.ts`（那里只 re-export）。
-2. **`src/admin/<Feature>Management.vue`** — 页面本体，结构固定四段：
+   - 导出**具名函数**（`listXxx` / readXxx / …），每个都要 JSDoc；不要把接口类型塞进 `apps/web/src/api/app.ts`（那里只 re-export）。
+2. **`apps/web/src/admin/<Feature>Management.vue`** — 页面本体，结构固定四段：
    统计卡（`grid` 一排 4 张）→ 筛选卡（起止日期/关键字/下拉 + 查询/重置）→ 结果表 → `PageFoot`。
-3. **`src/router.ts`** — 在 `/admin` 的 `children` 里加**懒加载**路由：
+3. **`apps/web/src/router.ts`** — 在 `/admin` 的 `children` 里加**懒加载**路由：
    `{ name: "admin-<kebab>", path: "<kebab>", component: () => import("./admin/<Feature>Management.vue") }`
-4. **`src/admin/AdminLayout.vue`** — `menuItems` 数组加 `{ name: "中文菜单名", path: "/admin/<kebab>", icon: "ri:xxx-line" }`。
+4. **`apps/web/src/admin/AdminLayout.vue`** — `menuItems` 数组加 `{ name: "中文菜单名", path: "/admin/<kebab>", icon: "ri:xxx-line" }`。
 
 ## 硬约定（踩过）
 
-- **图标必须在 `src/components/Icon.vue` 注册**，否则全量 vue-tsc 报 `TS2820`（`Type '"ri:xxx"' is not assignable`）。
+- **图标必须在 `apps/web/src/components/Icon.vue` 注册**，否则全量 vue-tsc 报 `TS2820`（`Type '"ri:xxx"' is not assignable`）。
   用项目工具加：`bun tools/icon-tool.ts add ri:xxx-line`，别手改那个大对象。
 - **组件是全局自动注册的**（`unplugin-vue-components`）：`Icon` / `Dialog` / `ScrollArea` / `PageFoot` 直接用，
   **不要写 import**，写了反而与同目录文件不一致。

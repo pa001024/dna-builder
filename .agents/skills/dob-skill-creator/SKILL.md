@@ -1,6 +1,6 @@
 ---
 name: dob-skill-creator
-description: 创建 / 修改 dna-builder 的**远端下发技能**（`server/skills/<技能名>/SKILL.md`，由服务端实时打包下发给资料检索 Agent 与配装助手）。当需要新增一个给 Agent 用的领域技能（黑话表、机制读法、检索口径、判据清单…）、调整已有技能正文、或排查「技能不生效 / 描述没更新 / 下发被跳过」时使用。注意：`server/skills/`（下发库）与 `.agents/skills/`（本机 agent 技能）是两套东西，别混。
+description: 创建 / 修改 dna-builder 的**远端下发技能**（`apps/server/skills/<技能名>/SKILL.md`，由服务端实时打包下发给资料检索 Agent 与配装助手）。当需要新增一个给 Agent 用的领域技能（黑话表、机制读法、检索口径、判据清单…）、调整已有技能正文、或排查「技能不生效 / 描述没更新 / 下发被跳过」时使用。注意：`apps/server/skills/`（下发库）与 `.agents/skills/`（本机 agent 技能）是两套东西，别混。
 ---
 
 # 创建「远端下发技能」
@@ -11,7 +11,7 @@ dna-builder 里有**两套技能**，职责完全不同 —— 动手前先确�
 
 | | **下发技能**（本技能管这套） | 本机 agent 技能 |
 |---|---|---|
-| 位置 | `server/skills/<技能名>/SKILL.md` | `.agents/skills/<名>/SKILL.md` |
+| 位置 | `apps/server/skills/<技能名>/SKILL.md` | `.agents/skills/<名>/SKILL.md` |
 | 给谁看 | **资料检索 Agent / 配装助手**（线上模型） | 你（本机编码 agent） |
 | 怎么分发 | 服务端实时打包 zip → 客户端落盘 → 模型用 `skill` 加载 | 本地直接读 |
 | 内容形态 | 面向**模型**的领域知识与检索口径 | 面向**编码 agent** 的操作手册（可含脚本、命令） |
@@ -19,12 +19,12 @@ dna-builder 里有**两套技能**，职责完全不同 —— 动手前先确�
 
 **判断依据**：内容主要是「跑脚本 / 执行命令 / 改仓库代码 / 访问文件系统」这类**你（本机 agent）的操作步骤**
 → 那是 `.agents/skills/`。内容主要是「一份对照表 / 一段口径 / 一套读法 / 一批判据」这类**给模型的知识**
-→ 才是 `server/skills/`。
+→ 才是 `apps/server/skills/`。
 
-⚠️ 注意 `server/skills/` 的技能会**同时下发给两个能力面不同的 Agent**（见铁律 1）：
+⚠️ 注意 `apps/server/skills/` 的技能会**同时下发给两个能力面不同的 Agent**（见铁律 1）：
 配装助手有 `run_code` 沙盒，资料检索 Agent 没有 —— 写正文前先想清楚这条内容服务谁。
 
-机制细节见 `.agents/docs/agent-skills.md`；库自带说明见 `server/skills/README.md`。
+机制细节见 `.agents/docs/agent-skills.md`；库自带说明见 `apps/server/skills/README.md`。
 
 ---
 
@@ -58,7 +58,7 @@ dna-builder 里有**两套技能**，职责完全不同 —— 动手前先确�
 - 要引用机制术语 → 必须是 `技能术语解释` 的原文。
 - 要引用 id / 路径 → 必须与 `query_module_entries` 返回的 `path` 一致（如 `/db/char/1101`）。
 - **不要照抄 `outputs/` 里的脚本或旧稿** —— 脚本可能有错、口径可能已改，必须用下面这个工具复现一遍，
-  必要时再回数据包（`src/data/d/*.data.ts`）核对。
+  必要时再回数据包（`packages/data/d/*.data.ts`）核对。
 
 **权威取数工具：`bun tools/agent-exec.ts`**（仓库自带，不接模型、不花 token、不联网）。
 它跑的就是**线上 Agent 的工具实现** —— 同一份 `createDbRetrievalTools` 装配、同一份检索层，
@@ -76,13 +76,13 @@ bun tools/agent-exec.ts list_data_modules --profile build  # 配装助手的检�
 
 - **技能里要写「去读 X 字段 / 用 Y 工具」之前，先用它跑一遍**，确认字段名与工具名真实存在：
   模型只能按投影读（`read_entry` 的 `fields`），`--list` 与 `selectableFields` 才是可写进技能的名字来源。
-- **它读的是检索层投影，不是 `src/data/d/*.data.ts` 的原始结构**：技能里指路要写投影里的字段名
+- **它读的是检索层投影，不是 `packages/data/d/*.data.ts` 的原始结构**：技能里指路要写投影里的字段名
   （例：魔之楔写 `词条属性（满级）` / `效果（满级）` / `效果（1级）`，而不是数据包内部结构名）。
 - **判断「这条内容服务谁」也用它**：`--profile build` 里少掉的模块（剧情、读物、NPC…）就是配装助手查不到的，
   涉及这些模块的指令必须限定适用方（见铁律 1）。
 - 其他开关：`--json` 出原文便于管道（`| jq`）；`--lang en|jp|kr|fr|tc` 核对多语言口径；`--max <n>` 只截默认输出；
   `--script <file.json>` 批量、无参数进交互模式。完整用法见 `--help`。
-- ⚠️ **改过 `src/utils/db-search.ts` / `src/api/agent/tools/*` 之后更要跑它** —— 技能里写的取数路径一旦失效，
+- ⚠️ **改过 `apps/web/src/utils/db-search.ts` / `apps/web/src/api/agent/tools/*` 之后更要跑它** —— 技能里写的取数路径一旦失效，
   线上模型是**静默查错**的（把查不到当成没有），本地跑一遍才能发现。
 
 ### 3. 只写模型**读不到 / 推不出**的东西
@@ -115,7 +115,7 @@ bun tools/agent-exec.ts list_data_modules --profile build  # 配装助手的检�
 ### 第 2 步 · 建目录与 SKILL.md
 
 ```
-server/skills/<技能名>/
+apps/server/skills/<技能名>/
 ├── SKILL.md          # 必需，且在根级
 └── references/       # 可选，按需加载的补充资料（正文里用路径引用）
 ```
@@ -170,7 +170,7 @@ sortOrder: <可选，数字，小者靠前>
 ```ts
 import { readdir, readFile, stat } from "node:fs/promises"
 import { join, relative } from "node:path"
-import { deriveSkillMeta } from "../server/src/util/skill-source"
+import { deriveSkillMeta } from "../apps/server/src/util/skill-source"
 
 const ROOT = join(import.meta.dir, "..", "server", "skills")
 for (const dir of await readdir(ROOT, { withFileTypes: true })) {
@@ -192,17 +192,17 @@ for (const dir of await readdir(ROOT, { withFileTypes: true })) {
 
 另外必须**核对技能里的事实**：每一个数值 / id / 术语 / 路径，先用 `bun tools/agent-exec.ts` 跑一遍
 （见铁律 2 的权威取数工具），确认「模型用工具确实读得到、且与你写的一致」；投影没覆盖的底层结构
-再回数据包（`src/data/d/*.data.ts`）对一遍。**这是最容易省掉、也最不该省的一步**（见铁律 2）。
+再回数据包（`packages/data/d/*.data.ts`）对一遍。**这是最容易省掉、也最不该省的一步**（见铁律 2）。
 
-⚠️ **线上构筑 `charSettings` 里的原始字段不能照抄**：如 `petCoverage: 1` 在 `petAutoCoverage: true` 时只是手动档回退值，生效值 = 自动计算（`resolvePetCoverage`：主动持续 ÷ 冷却，见 `src/data/petTrait.ts`），转述前先用模型算出生效值；作者的 `customVariables` 是手写估算式，引用它的结论前先 `createCharBuildFromSettings(...).calculate()` 确认与作者标注一致（偏差 >0.1% 说明口径没吃对，先修口径再往下写）。消融类数字（升级收益 / 溯源阶梯 / 单件撤除）一律实测，不许按公式心算。
+⚠️ **线上构筑 `charSettings` 里的原始字段不能照抄**：如 `petCoverage: 1` 在 `petAutoCoverage: true` 时只是手动档回退值，生效值 = 自动计算（`resolvePetCoverage`：主动持续 ÷ 冷却，见 `packages/data/petTrait.ts`），转述前先用模型算出生效值；作者的 `customVariables` 是手写估算式，引用它的结论前先 `createCharBuildFromSettings(...).calculate()` 确认与作者标注一致（偏差 >0.1% 说明口径没吃对，先修口径再往下写）。消融类数字（升级收益 / 溯源阶梯 / 单件撤除）一律实测，不许按公式心算。
 
 ### 第 5 步 · 更新 README
 
-`server/skills/README.md` 的「当前技能」表加一行（技能名 + 一句话说明）。
+`apps/server/skills/README.md` 的「当前技能」表加一行（技能名 + 一句话说明）。
 
 ---
 
-## 约束速查（`server/src/util/skill-source.ts` 的 `deriveSkillMeta`）
+## 约束速查（`apps/server/src/util/skill-source.ts` 的 `deriveSkillMeta`）
 
 | 项 | 限制 |
 |---|---|

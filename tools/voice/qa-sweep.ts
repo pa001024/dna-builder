@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
-import { npcData } from "../../src/data/d/npc.data"
+import { npcData } from "../../packages/data/d/npc.data"
 import { type AsrVerifyResult, isQaPass, readQaThresholds, verifyPronunciationBatch } from "./asr"
 import type { MissingScanResult } from "./scan-missing"
 import { buildRequiredVariants } from "./text-prep"

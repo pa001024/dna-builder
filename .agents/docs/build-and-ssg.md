@@ -13,7 +13,7 @@ AGENTS.md 的细节展开，覆盖「增量 lint」与「SSG 预渲染」两套�
   完成，再按增量口径**过滤展示**：只展示「改动文件 + 依赖它们的下游文件」（反向依赖
   闭包）的诊断；上游依赖的错误在它们各自被改的那次已经展示过。`.vue` 文件经 `tsc-rs-vue-mapper`
  （`file:tools/vue-mapper`，content-mapper 插件，用 @vue/language-core 与 vue-tsc 相同的 codegen
-  展开虚拟代码，诊断位置映射回原文件）参与检查。数据文件（`src/data/d/` 下 `*.data.ts`，约 70MB）
+  展开虚拟代码，诊断位置映射回原文件）参与检查。数据文件（`packages/data/d/` 下 `*.data.ts`，约 70MB）
   按「值变 / 类型变」二分处理：改动后重跑 `ts.transpileDeclaration` 求声明哈希，不变即类型未变；
   未改动的数据文件由 `tsc-rs-data-mapper`（`file:tools/data-mapper`，零依赖，按 manifest 用缓存
   `.d.ts` 覆盖内容）替代真实源码进 program，下游视图不变；改动过的数据文件本轮仍以真实源码参诊
@@ -41,7 +41,7 @@ AGENTS.md 的细节展开，覆盖「增量 lint」与「SSG 预渲染」两套�
 bug（新 codegen 下 vue-tsc 同样报出，旧 pin 漏报），约 26 条是 TS7 严格度诊断。无原文位置的
 虚拟合成区诊断（host 注记 `has no corresponding location in the original file`，行号常越界）
 一律隐藏（`isVirtualOnlyDiagnostic`，vue-tsc 实际也不展示这类诊断），`--verbose` 下只报数量；
-`lint:full` 仍是兜底真相。全局指令的类型注册放在 `src/types/global-directives.d.ts`
+`lint:full` 仍是兜底真相。全局指令的类型注册放在 `apps/web/src/types/global-directives.d.ts`
 （`declare module "vue"` 增补 `GlobalDirectives`；文件必须含顶层 `export {}` 使其成为模块，
 否则会遮蔽整个 vue 模块。另注意不能在增补内部 `import("vue")` 自引用，同理致命）。
 输出解析、根过滤与虚拟诊断识别的单测在 `tools/tsc-rs-output.test.ts`。
@@ -49,7 +49,7 @@ bug（新 codegen 下 vue-tsc 同样报出，旧 pin 漏报），约 26 条是 T
 ## SSG 预渲染（仅网页版）
 
 `pnpm build` 在 vite build 之后会跑 `node tools/ssg.mjs`：用 Vite 的 SSR 模块加载器
-（middlewareMode 开发服务器 + `ssrLoadModule` 载入 `src/ssr/entry-server.ts`）把主要路由渲染成静态
+（middlewareMode 开发服务器 + `ssrLoadModule` 载入 `apps/web/src/ssr/entry-server.ts`）把主要路由渲染成静态
 HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description / canonical / og 标签。
 
 - 客户端**不做 hydration**：静态标记只服务爬虫与首屏，`main.ts` 挂载时会整体替换 `#app` 的内容。
@@ -62,7 +62,17 @@ HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description /
 
 ## 前端构建的数据包改写（动手前必读）
 
-`pnpm build` 会启用 `src/utils/data-pack/data-pack-rewrite-plugin.ts`，把 `src/data/d/**/*.data.ts` 的导出改写成
+## 桌面端版本同步（Tauri）
+
+`apps/web/package.json` 里所有 `@tauri-apps/*` 依赖都用 `~` 钉住 minor：Tauri CLI 要求 JS 包与
+Rust crate 的 major/minor 一致（见 `apps/web/src-tauri/Cargo.lock`），`^` 会在全新安装时浮到新 minor
+直接导致 `tauri dev/build` 报 version mismatched。升级任一端时两端一起升。
+
+`apps/web/src-tauri/Cargo.toml` 引用的 workspace 外部 crate 用相对仓库根的路径
+（如 `mcp_server = { path = "../../../crates/mcp_server" }`）；移动 src-tauri 后若 cargo 报旧绝对路径，
+是 `target/` 里指纹缓存中毒，`cd apps/web/src-tauri && cargo clean -p <包名>` 后重查即可（别整目录删）。
+
+`pnpm build` 会启用 `apps/web/src/utils/data-pack/data-pack-rewrite-plugin.ts`，把 `packages/data/d/**/*.data.ts` 的导出改写成
 **空 fallback + 运行时水合回填的活绑定**：生产环境里数据来自数据包（IndexedDB/OPFS），未安装数据包时
 这些模块是空的。由此有两条硬约束：
 

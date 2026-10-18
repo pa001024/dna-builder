@@ -1,8 +1,8 @@
 # 局域网设备发现与一键登录同步协议（手机端实现 Spec）
 
 > 本文档面向手机 App 端实现者。桌面端（dna-builder，Tauri）已实现服务端部分，
-> 代码位于 `src-tauri/src/submodules/lan_sync.rs`（服务）与
-> `src/store/lanSync.ts`（账号导入导出逻辑），可实现时对照参考。
+> 代码位于 `apps/web/src-tauri/src/submodules/lan_sync.rs`（服务）与
+> `apps/web/src/store/lanSync.ts`（账号导入导出逻辑），可实现时对照参考。
 
 ## 1. 功能概述
 

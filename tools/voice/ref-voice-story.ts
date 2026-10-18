@@ -1,8 +1,8 @@
 import { writeFile } from "node:fs/promises"
 import path from "node:path"
-import { npcData } from "../../src/data/d/npc.data"
-import { questData } from "../../src/data/d/quest.data"
-import { stripStoryTextTags } from "../../src/data/story-text"
+import { npcData } from "../../packages/data/d/npc.data"
+import { questData } from "../../packages/data/d/quest.data"
+import { stripStoryTextTags } from "../../packages/data/story-text"
 
 export interface StoryVoiceCandidate {
     voice: string

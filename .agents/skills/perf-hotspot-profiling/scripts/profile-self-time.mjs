@@ -7,10 +7,10 @@
  * self-time 才回答「时间到底烧在哪一行」。
  *
  * 用法：
- *   node profile-self-time.mjs <file.cpuprofile> [--top 20] [--filter src/] [--json]
+ *   node profile-self-time.mjs <file.cpuprofile> [--top 20] [--filter apps/web/src/] [--json]
  *
  *   --top <n>      只显示前 n 行（默认 25）
- *   --filter <str> 只保留 url 含该子串的节点（如 src/ 过滤掉 node 内部帧，可重复传多次取并集）
+ *   --filter <str> 只保留 url 含该子串的节点（如 apps/web/src/ 过滤掉 node 内部帧，可重复传多次取并集）
  *   --exclude <str> 排除 url 含该子串的节点（可重复）
  *   --json         输出 JSON（便于脚本消费）
  */
@@ -88,7 +88,7 @@ function normalizeUrl(url) {
 function main() {
     const args = parseArgs(process.argv.slice(2))
     if (!args.file) {
-        console.error("用法: node profile-self-time.mjs <file.cpuprofile> [--top 20] [--filter src/] [--json]")
+        console.error("用法: node profile-self-time.mjs <file.cpuprofile> [--top 20] [--filter apps/web/src/] [--json]")
         process.exit(1)
     }
 

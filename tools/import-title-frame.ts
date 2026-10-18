@@ -40,22 +40,22 @@ import type {
     TitleFrameLayerTrack,
     TitleFrameTextStyle,
     TitleFrameTransformCurves,
-} from "../src/utils/title-frame/title-frame"
-import { TITLE_FONT_LINE_RATIO, unionBounds } from "../src/utils/title-frame/title-frame"
+} from "../apps/web/src/utils/title-frame/title-frame"
+import { TITLE_FONT_LINE_RATIO, unionBounds } from "../apps/web/src/utils/title-frame/title-frame"
 
 const ROOT_DIR = path.resolve(import.meta.dir, "..")
 const CLI = process.env.FMODEL_CLI ?? "D:/dev/fmodel-mcp/Cli/bin/publish/fmodel-cli.exe"
 const TITLE_FRAME_LUA = process.env.TITLE_FRAME_LUA ?? "D:/dev/dna-unpack/lua/EM/Content/Script/Datas/TitleFrame.lua"
 const CACHE_DIR = process.env.TITLE_FRAME_CACHE ?? path.join(ROOT_DIR, ".tmp", "titleframe-cache")
-const OUTPUT_DATA = path.join(ROOT_DIR, "src", "utils", "title-frame", "title-frame.generated.ts")
+const OUTPUT_DATA = path.join(ROOT_DIR, "apps", "web", "src", "utils", "title-frame", "title-frame.generated.ts")
 /**
  * 贴图清单：webp 文件名 → 游戏内包路径。
  *
  * 称号框贴图遇到同名冲突会被改写成带父目录前缀的名字（如 13_T_PersonalInfo_Title_13_08.webp），
  * 靠 basename 已经反查不回源 PNG。这里把映射落盘，tools/webp-import.ts 读它来补齐这些引用。
  */
-const OUTPUT_TEXTURE_MANIFEST = path.join(ROOT_DIR, "src", "utils", "title-frame", "title-frame-textures.json")
-const OUTPUT_IMAGES = path.join(ROOT_DIR, "public", "imgs", "titleframe")
+const OUTPUT_TEXTURE_MANIFEST = path.join(ROOT_DIR, "apps", "web", "src", "utils", "title-frame", "title-frame-textures.json")
+const OUTPUT_IMAGES = path.join(ROOT_DIR, "apps", "web", "public", "imgs", "titleframe")
 
 /** 动画时间轴刻度：UMG 默认 60000 tick / 秒。 */
 const DEFAULT_TICK_RESOLUTION = 60000

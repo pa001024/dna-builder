@@ -5,7 +5,7 @@ import * as ts from "typescript"
 type JsonObject = Record<string, any>
 
 const defaultInputDir = resolve(import.meta.dir, "../../DuetNightAbyssData2/out")
-const defaultOutputFile = resolve(import.meta.dir, "../src/data/d/race-lottery.data.ts")
+const defaultOutputFile = resolve(import.meta.dir, "../packages/data/d/race-lottery.data.ts")
 
 type RaceLotteryExport = {
     players: {

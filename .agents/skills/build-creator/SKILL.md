@@ -61,11 +61,11 @@ agent_created: true
 ### 第 2 步：参考线上高人气或推荐构筑
 
 这一步给第 3~6 步准备**有出处的先验**（铁律：数值结论要么出自数据包、要么出自线上构筑），并定一份
-**复现基线** —— 之后每一步的改动都跟它比。查询定义见 [api-queries.ts](src/api/gen/api-queries.ts)
+**复现基线** —— 之后每一步的改动都跟它比。查询定义见 [api-queries.ts](../../apps/web/src/api/gen/api-queries.ts)
 的 `buildsQuery` / `buildQuery`。
 
-- 端点 `https://api.dna-builder.cn/graphql`（`src/env.ts` 的 `apiEndpoint`），公开查询、无需登录；
-  **脚本里直接 `fetch`，别 import `src/api/client.ts`**（那是 urql + Vue 的浏览器链路）。
+- 端点 `https://api.dna-builder.cn/graphql`（`apps/web/src/env.ts` 的 `apiEndpoint`），公开查询、无需登录；
+  **脚本里直接 `fetch`，别 import `apps/web/src/api/client.ts`**（那是 urql + Vue 的浏览器链路）。
 - ⚠️ 列表查询**不含 `charSettings`**，要按 id 逐份再查详情；`sortBy` 只认 `likes` / `views`，
   其余值（含 `createdAt`）一律落回 `updateAt` 倒序；`buildsCount(charId)` 对总数（`list` 会报告 N/M）；
   另有 `recommendedBuilds` / `trendingBuilds` 可直接拿推荐与热门。
@@ -255,7 +255,7 @@ for (const [key, tab] of [["charMods","角色"],["meleeMods","近战"],["rangedM
 1. **`autoBuild` 不校验耐受上限**，输出必须复核 `getModCostMax(tab) ≤ getModCap(tab)`；自写搜索（爬山/随机）要自带全套合法性校验，否则产出不可用 BD。
 2. **`excludeSeries` / `weapon.类别` 是派生 getter**（`LeveledMod` / `LeveledWeapon` 上），原始 `modMap` / `weaponMap` 里没有 ⇒ 直接读得 `undefined`，互斥与限定校验会**静默失效**，要按规则现算。
 3. **`calculateTargetFunction` 只认有 `tag` 的字段** —— 说明性文本字段（易伤 / 减抗 / 条件）不进结算，必须自己在表达式里补。
-4. **`customBuff` 是加进属性池，不是独立乘区，目标是把它清空**：凡有出处的效果一律写 `buffs` 条目（缺定义补 `src/data/d/buff.data.ts` —— 手写文件，不会被 `importdata` 覆盖）。武器 `加成`（含精炼）与熔炉技能内核已自动进表，再写就是重复（实测虚高 13.6%）。
+4. **`customBuff` 是加进属性池，不是独立乘区，目标是把它清空**：凡有出处的效果一律写 `buffs` 条目（缺定义补 `packages/data/d/buff.data.ts` —— 手写文件，不会被 `importdata` 覆盖）。武器 `加成`（含精炼）与熔炉技能内核已自动进表，再写就是重复（实测虚高 13.6%）。
 5. **「敌人受到来自 X 的伤害提高」是增伤加算池，不是独立乘区**：不限定属性写 `增伤`，限定元素 / 物理 / 技能写 `元素增伤` / `物理增伤` / `技能伤害`（先例：主角-暗被动 → `元素增伤`、妮弗尔夫人2溯 → `技能伤害`）。技能字段**已含增伤池**，表达式绝不能 `×(1+系数)`。验证法：`customBuff` 加 `["增伤", 1.0]`，DPS 比值 ≈ `(1+池+1)/(1+池)` ⇒ 已含。**状态型加成**（「进入 X 状态时攻速/背水提高」）则写 `buffs` 条目 —— 两类混用会重复计算。
 6. **溯源没有专门字段**，写成 `buffs` 条目 `<角色名><N>溯`；能否常驻要结合手法建模（需操作的按覆盖率折算）。
 7. **buff 命名统一 `<角色名><技能标识>`**（`XXQ` / `XXE` / `XX被动` / `XX<N>溯` / `XX助战`），别用状态名 / 术语名；命名前回 `char.data.ts` 确认效果挂在哪个 id。

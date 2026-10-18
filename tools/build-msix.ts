@@ -26,28 +26,28 @@ const CONFIG = {
     // 发布者显示名称
     publisherDisplayName: "pa001024",
     // Logo路径
-    logo: resolve(__dirname, "../src-tauri/icons/StoreLogo.png"),
+    logo: resolve(__dirname, "../apps/web/src-tauri/icons/StoreLogo.png"),
     // 不同尺寸的图标路径
     icons: {
-        square44x44: resolve(__dirname, "../src-tauri/icons/Square44x44Logo.png"),
-        square150x150: resolve(__dirname, "../src-tauri/icons/Square150x150Logo.png"),
-        square310x310: resolve(__dirname, "../src-tauri/icons/Square310x310Logo.png"),
-        square71x71: resolve(__dirname, "../src-tauri/icons/Square71x71Logo.png"),
-        wide310x150: resolve(__dirname, "../src-tauri/icons/Square310x310Logo.png"),
-        splashScreen: resolve(__dirname, "../src-tauri/icons/128x128@2x.png"),
-        lockScreenBadge: resolve(__dirname, "../src-tauri/icons/Square44x44Logo.png"),
+        square44x44: resolve(__dirname, "../apps/web/src-tauri/icons/Square44x44Logo.png"),
+        square150x150: resolve(__dirname, "../apps/web/src-tauri/icons/Square150x150Logo.png"),
+        square310x310: resolve(__dirname, "../apps/web/src-tauri/icons/Square310x310Logo.png"),
+        square71x71: resolve(__dirname, "../apps/web/src-tauri/icons/Square71x71Logo.png"),
+        wide310x150: resolve(__dirname, "../apps/web/src-tauri/icons/Square310x310Logo.png"),
+        splashScreen: resolve(__dirname, "../apps/web/src-tauri/icons/128x128@2x.png"),
+        lockScreenBadge: resolve(__dirname, "../apps/web/src-tauri/icons/Square44x44Logo.png"),
     },
     // 语言
     language: "zh-CN",
     // 输出文件夹
-    binFolder: resolve(__dirname, "../src-tauri/target/release"),
+    binFolder: resolve(__dirname, "../apps/web/src-tauri/target/release"),
     exeFileName: "dna-builder.exe",
     // 输出文件夹
-    outputFolder: resolve(__dirname, "../src-tauri/target/release/msix"),
+    outputFolder: resolve(__dirname, "../apps/web/src-tauri/target/release/msix"),
     // 构建文件名称
     fileName: "DNA Builder.msix",
     // 打包目录
-    packageDir: resolve(__dirname, "../src-tauri/target/release/msix/package-content"),
+    packageDir: resolve(__dirname, "../apps/web/src-tauri/target/release/msix/package-content"),
     // makeappx工具路径
     makeappxPath: "makeappx",
 }

@@ -3,11 +3,11 @@
 import { readFile, writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import * as ts from "typescript"
-import { DNAAPI } from "../externals/dna-api/src/index.ts"
-import regionData from "../src/data/d/region.data"
-import { subRegionData } from "../src/data/d/subregion.data"
+import { DNAAPI } from "../packages/dna-api/src/index.ts"
+import regionData from "../packages/data/d/region.data"
+import { subRegionData } from "../packages/data/d/subregion.data"
 
-const TARGET_FILE = resolve(process.cwd(), "src/data/d/onlinemapcache.data.ts")
+const TARGET_FILE = resolve(process.cwd(), "packages/data/d/onlinemapcache.data.ts")
 
 /**
  * 将任意 JSON 值序列化为 TypeScript 友好的格式。
@@ -503,7 +503,7 @@ async function rewriteTransformFile(tableText: string): Promise<void> {
  * @returns 校验通过返回换算行
  */
 async function checkCommittedTransforms(): Promise<Record<number, FittedMapTransform>> {
-    const snapshot = (await import("../src/data/d/onlinemapcache.data")) as { onlineMapCache: Record<number, OnlineMapDetailLike> }
+    const snapshot = (await import("../packages/data/d/onlinemapcache.data")) as { onlineMapCache: Record<number, OnlineMapDetailLike> }
     const rows = fitAllMapTransforms(snapshot.onlineMapCache)
     const fileText = await readFile(TARGET_FILE, "utf-8")
     const sourceFile = ts.createSourceFile(TARGET_FILE, fileText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
@@ -533,7 +533,7 @@ async function main() {
     }
     if (process.argv.includes("--transforms-only")) {
         // 离线重算：用已提交的静态快照拟合并写回换算表（不碰网络，用于改完锚点后刷新）
-        const snapshot = (await import("../src/data/d/onlinemapcache.data")) as {
+        const snapshot = (await import("../packages/data/d/onlinemapcache.data")) as {
             onlineMapCache: Record<number, OnlineMapDetailLike>
         }
         const transformRows = fitAllMapTransforms(snapshot.onlineMapCache)

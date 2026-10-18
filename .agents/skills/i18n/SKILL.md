@@ -8,7 +8,7 @@ description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translati
 ## Overview
 
 所有翻译文件操作统一走 `bun i18n`（= `bun tools/i18n.ts`），取代旧的 `tools/i18n-tool.ts` 与
-`tools/i18n-check.ts`。**不要**手改 `public/i18n/*/translation.json`：该文件必须整体按
+`tools/i18n-check.ts`。**不要**手改 `apps/web/public/i18n/*/translation.json`：该文件必须整体按
 `localeCompare` 排序，手工插入极易破坏顺序并在 commit 时被 hook 重排。
 
 翻译文件共 6 个语言目录：`en` `fr` `ja` `ko` `zh-CN` `zh-TW`（`zh-CN` 是 fallbackLng）。
@@ -91,7 +91,7 @@ bun i18n add "限时任务" \
   `.husky/update-version.js` 的 `sortJson` 一致。工具已保证；**不要手工编辑该文件**。
 - **不要自己拼 `writeFile`** 写翻译文件，直接用 `bun i18n add`，否则会打乱排序。
 - **验证必须真跑**：`bun i18n get <key>` 看到值、`bun i18n check` 无缺失，才算完成。
-- 数据包术语（角色名 / 物品名 / 副本名等）已由 `src/data/d/translations.data.ts` 随包下发，
+- 数据包术语（角色名 / 物品名 / 副本名等）已由 `packages/data/d/translations.data.ts` 随包下发，
   **不要**往 `public/i18n` 塞这类中文键（见 `.agents/docs/dev-tools.md` 的「游戏文本包」）；
   只有「上游没有的前端自造展示名」才补进来（走 `tools/import-i18n-data.ts` 的
   `SUPPLEMENTAL_TRANSLATIONS` 或直接 `bun i18n add` 顶层中文键）。

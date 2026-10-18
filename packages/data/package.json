@@ -1,0 +1,68 @@
+{
+    "name": "dna-builder-data",
+    "version": "1.4.12",
+    "description": "DNA Builder game data models and utilities",
+    "type": "module",
+    "bin": "./dist/mcp/index.js",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./d": {
+            "types": "./dist/d/index.d.ts",
+            "default": "./dist/d/index.js"
+        },
+        "./leveled": {
+            "types": "./dist/leveled/index.d.ts",
+            "default": "./dist/leveled/index.js"
+        },
+        "./mcp": {
+            "types": "./dist/mcp/index.d.ts",
+            "default": "./dist/mcp/index.js"
+        },
+        "./package.json": "./package.json",
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "default": "./dist/*.js"
+        }
+    },
+    "scripts": {
+        "build": "node ./scripts/build.mjs",
+        "lint": "tsc --noEmit",
+        "prebuild": "node ./scripts/gen-mcp-type-definition-map.mjs",
+        "prepack": "pnpm run build",
+        "release": "npm run build && npm publish --access public --registry https://registry.npmjs.org/",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest",
+        "test:ui": "vitest --ui"
+    },
+    "keywords": ["dna-builder", "game", "data", "models"],
+    "author": "pa001024",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pa001024/dna-builder.git",
+        "directory": "packages/data"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.26.0",
+        "dna-api": "^0.6.7",
+        "fuse.js": "^7.1.0",
+        "lodash-es": "^4.17.21",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.9",
+        "typescript": "~5.6.2",
+        "vitest": "^4.0.15"
+    },
+    "files": ["dist/**/*", "README.md"],
+    "engines": {
+        "node": ">=18"
+    }
+}

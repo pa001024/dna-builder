@@ -1,0 +1,271 @@
+import fs from "node:fs"
+import { resolve } from "node:path"
+import tailwindcss from "@tailwindcss/vite"
+import vue from "@vitejs/plugin-vue"
+import vueJsx from "@vitejs/plugin-vue-jsx"
+import RekaResolver from "reka-ui/resolver"
+// @ts-expect-error
+import graphqlTag from "rollup-plugin-graphql-tag"
+import Component from "unplugin-vue-components/vite"
+import { defineConfig } from "vite"
+import { chunkSplitPlugin } from "vite-plugin-chunk-split"
+import { VitePWA } from "vite-plugin-pwa"
+import { i18nHmrPlugin } from "./src/i18n-hmr-plugin"
+import { dataPackRewritePlugin } from "./src/utils/data-pack/data-pack-rewrite-plugin"
+
+const host = process.env.TAURI_DEV_HOST
+const mockDataPackDir = resolve(__dirname, "mock/data-pack")
+const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
+const isDisableRewrite = process.env.DISABLE_REWRITE === "1"
+
+/**
+ * 从构建产物中剔除 public/imgs 资源。
+ */
+function stripPublicImgsPlugin(): import("vite").Plugin {
+    let outDir = resolve(__dirname, "dist")
+
+    return {
+        name: "dna-builder-strip-public-imgs",
+        configResolved(config) {
+            outDir = resolve(config.root, config.build.outDir)
+        },
+        closeBundle() {
+            fs.rmSync(resolve(outDir, "imgs"), { recursive: true, force: true })
+        },
+    }
+}
+
+// https://vite.dev/config/
+export default defineConfig(async () => ({
+    test: {
+        includeSource: ["src/**/*.{js,ts}"],
+    },
+    define: {
+        "import.meta.vitest": "undefined",
+        __APP_BUILD__: JSON.stringify(isAppBuild),
+        __WEB_BUILD__: JSON.stringify(!isAppBuild),
+    },
+    resolve: {
+        alias: [
+            // 数据包（packages/data）源码直引：必须排在 "@" 之前，Vite 按顺序取首个命中的前缀
+            { find: "@/data", replacement: resolve(__dirname, "../../packages/data") },
+            { find: "@", replacement: resolve(__dirname, "src") },
+            // "dna-api": resolve(__dirname, "../../packages/dna-api/src/index.ts"),
+            { find: "node:async_hooks", replacement: resolve(__dirname, "src/polyfills/async_hooks.ts") },
+            { find: "async_hooks", replacement: resolve(__dirname, "src/polyfills/async_hooks.ts") },
+        ],
+    },
+    plugins: [
+        ...(isAppBuild ? [stripPublicImgsPlugin()] : []),
+        i18nHmrPlugin(),
+        // 仅在构建时启用数据包重写插件，dev 启动（command 为 serve）时直接使用源码数据模块
+        ...(!isDisableRewrite ? [dataPackRewritePlugin()] : []),
+        vue({
+            template: {
+                // 模板注释不进产物：默认值取自 compiler 的构建模式（prod 关、dev 开），
+                // 而 SSG 预渲染跑在 middlewareMode 开发服务器里，走的是 dev 编译器，
+                // 不显式关掉的话 dist/*/index.html 里会留下一堆 <!-- 中文说明 -->。
+                compilerOptions: {
+                    comments: false,
+                },
+            },
+        }),
+        vueJsx(),
+        tailwindcss(),
+        Component({
+            dts: "./src/components.d.ts",
+            resolvers: [RekaResolver()],
+        }),
+        chunkSplitPlugin({
+            strategy: "default",
+            customSplitting: {
+                // DNA/DB 两类页面存在交叉依赖，拆成独立 chunk 容易形成循环引用，统一合并到同一块避免闭环
+                // db: [/src\/views\/DB/],
+            },
+        }),
+        graphqlTag({
+            include: ["src/**/*.{vue,js,ts}"],
+        }),
+        VitePWA({
+            registerType: "autoUpdate",
+            includeAssets: [],
+            manifest: {
+                name: "DNA Builder",
+                short_name: "DNA Builder",
+                description: "A character builder and damage calculator for Duet Night Abyss",
+                theme_color: "#ffffff",
+                icons: [
+                    {
+                        src: "app-icon.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                    },
+                    {
+                        src: "app-icon.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                    },
+                    {
+                        src: "app-icon.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any maskable",
+                    },
+                ],
+            },
+            workbox: {
+                navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
+                maximumFileSizeToCacheInBytes: 12000000,
+                globPatterns: ["**/*.{js,css,html,json}"],
+                runtimeCaching: [
+                    {
+                        urlPattern: /\.json$/,
+                        handler: "StaleWhileRevalidate",
+                        options: {
+                            cacheName: "res-cache",
+                            expiration: {
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "image-cache",
+                            expiration: {
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                        },
+                    },
+                ],
+            },
+        }),
+    ],
+    // 这些依赖只被懒加载 chunk 首次引入：它们由 unplugin-vue-components 自动注册的组件
+    // （DNAGameInfo、CharHPCurve、GameSimulator、CodeEditor、ResourceTreeGraph、Sidebar 等）在运行时才带入，
+    // Vite 启动时的依赖扫描器无法跟踪这种插件注入的 import，会在用户首次进入对应页面时才"新发现"依赖，
+    // 触发 "optimized dependencies changed. reloading page" 整页刷新。
+    // 这里显式预声明，让它们从启动时就进入预构建缓存（node_modules/.vite），避免进页面被强制 reload。
+    optimizeDeps: {
+        include: [
+            "html-to-image",
+            "echarts",
+            "three",
+            "@antv/g",
+            "@antv/g6",
+            "@codemirror/commands",
+            "@codemirror/lang-javascript",
+            "@codemirror/language",
+            "@codemirror/state",
+            "@codemirror/view",
+            "@lezer/highlight",
+            "gsap",
+            "js-ini",
+            "@tauri-apps/plugin-updater",
+            "@tauri-apps/plugin-process",
+            "@tauri-apps/api/path",
+            "zod",
+            "@chenglou/pretext",
+            "bcryptjs",
+            "lexical",
+            "@lexical/plain-text",
+            "@lexical/history",
+        ],
+    },
+    build: {
+        rollupOptions: {
+            input: {
+                index: resolve(__dirname, "index.html"),
+                login: resolve(__dirname, "login_jjj.html"),
+            },
+        },
+    },
+
+    // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+    //
+    // 1. prevent Vite from obscuring rust errors
+    clearScreen: false,
+    // 2. tauri expects a fixed port, fail if that port is not available
+    css: {
+        preprocessorOptions: {
+            less: {
+                javascriptEnabled: true,
+            },
+        },
+    },
+    server: {
+        port: 1420,
+        strictPort: true,
+        host: host || false,
+        hmr: host
+            ? {
+                  protocol: "ws",
+                  host,
+                  port: 1421,
+              }
+            : undefined,
+        proxy: {
+            // 代理API请求到后端服务器
+            "/api/v1": {
+                target: "http://localhost:8887",
+                changeOrigin: true,
+                secure: false,
+            },
+        },
+        // "@/data" 别名指向 workspace 根下的 packages/data（项目根之外），必须显式放行
+        fs: {
+            allow: [".", resolve(__dirname, "..", "..", "packages")],
+        },
+        middlewareMode: false,
+        configureServer(server: {
+            middlewares: {
+                use: (arg0: string, arg1: { (req: any, res: any, next: any): void; (req: any, res: any, next: any): void }) => void
+            }
+        }) {
+            server.middlewares.use("/mock/data-pack", (req, res, next) => {
+                const url = req.url || "/"
+                const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")
+                const absPath = resolve(mockDataPackDir, filePath)
+                if (!absPath.startsWith(mockDataPackDir)) {
+                    res.statusCode = 403
+                    res.end("Forbidden")
+                    return
+                }
+
+                fs.readFile(absPath, (error, buffer) => {
+                    if (error) {
+                        next()
+                        return
+                    }
+
+                    res.statusCode = 200
+                    if (absPath.endsWith(".json")) {
+                        res.setHeader("Content-Type", "application/json; charset=utf-8")
+                    } else if (absPath.endsWith(".zip")) {
+                        res.setHeader("Content-Type", "application/zip")
+                    }
+                    res.end(buffer)
+                })
+            })
+        },
+        watch: {
+            // 3. tell Vite to ignore watching `src-tauri`
+            ignored: [
+                "**/src-tauri/**",
+                "**/*.md",
+                "**/*.test.ts",
+                "**/mcp_server/**",
+                "**/server/**",
+                "**/sdk/**",
+                "**/.tmp/**",
+                "**/.agents/**",
+                "**/tools/**",
+                // "**/packages/**",
+                // ...
+            ],
+        },
+    },
+}))

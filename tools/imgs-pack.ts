@@ -2,6 +2,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { zipSync } from "fflate"
 import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
@@ -13,9 +14,11 @@ type ImgsPackVersionEntry = {
     files: string[]
 }
 
-const rootDir = path.resolve(".")
-const publicImgsRoot = path.resolve(rootDir, "public", "imgs")
-const outDir = path.resolve(rootDir, "mock", "imgs-pack")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const webDir = path.resolve(rootDir, "apps", "web")
+const publicImgsRoot = path.resolve(webDir, "public", "imgs")
+const outDir = path.resolve(webDir, "mock", "imgs-pack")
 const versionsPath = path.resolve(outDir, "versions.json")
 
 /**

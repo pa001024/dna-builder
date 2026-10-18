@@ -3,11 +3,13 @@
 import { existsSync, readdirSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import * as ts from "typescript"
 
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 /** 同级仓库的默认上游根（与 tools/import-attr-i18n.ts 等兄弟工具一致） */
-const DEFAULT_UPSTREAM_ROOT = path.resolve("..", "DuetNightAbyssData2")
+const DEFAULT_UPSTREAM_ROOT = path.resolve(REPO_ROOT, "..", "DuetNightAbyssData2")
 
 /** 命令行 --upstream（最高优先级，与兄弟工具对齐）；vitest（node）下无 Bun 全局时退回 process.argv，保证纯函数可被测试 import */
 const CLI_UPSTREAM = (() => {
@@ -32,7 +34,8 @@ const UPSTREAM_ROOT = resolveUpstreamRoot()
  * 允许把 i18n 产物目录指到别处（如只拿到 final 产物的机器），优先级同「.env > 默认」。
  */
 const SOURCE_ROOT = process.env.DNA_UPSTREAM_I18N ? path.resolve(process.env.DNA_UPSTREAM_I18N) : path.join(UPSTREAM_ROOT, "final", "i18n")
-const TARGET_DIR = path.resolve("src", "data", "d")
+const WEB_DIR = path.resolve(REPO_ROOT, "apps", "web")
+const TARGET_DIR = path.resolve(REPO_ROOT, "packages", "data", "d")
 const LOCALES = ["cn", "en", "fr", "jp", "kr", "tc"] as const
 type Locale = (typeof LOCALES)[number]
 
@@ -1272,7 +1275,7 @@ const MAPPINGS: Mapping[] = [
         source: async () => {
             const skinText = await readFile(path.join(SOURCE_ROOT, "cn", "Skin.json"), "utf-8")
             const skinRows = JSON.parse(skinText) as SkinImportRow[]
-            const bustDir = path.resolve("public", "imgs", "bust")
+            const bustDir = path.resolve(WEB_DIR, "public", "imgs", "bust")
             const bustFileNames = new Set(
                 existsSync(bustDir) ? readdirSync(bustDir).filter(name => name.toLowerCase().endsWith(".webp")) : []
             )
@@ -2673,7 +2676,7 @@ async function readOrCreateSkeleton(filePath: string, skeletonVars: string[]): P
  * 它们是纯机器生成的字面量，格式已由 formatTsValue 固定；体量也远超 Biome 的
  * maxSize，传进去只会让 biome 报「paths were provided but ignored」而非零退出。
  */
-const BIOME_SKIPPED_FILES = new Set(["src/data/d/translations.data.ts", "src/data/d/quest.data.ts"])
+const BIOME_SKIPPED_FILES = new Set(["packages/data/d/translations.data.ts", "packages/data/d/quest.data.ts"])
 
 /**
  * 仅对本次实际写入的文件执行 Biome 格式化，避免全仓库扫描。

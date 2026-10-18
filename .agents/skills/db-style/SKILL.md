@@ -1,11 +1,11 @@
 ---
 name: db-style
-description: DNA Builder 资料库（/db）页面风格改造标准。对 src/views/DB*.vue 及其 DetailItem 子组件做 Home 设计语言统一改造时使用，定义卡片分层、方章、下划线搜索、章节头等可复制的类名配方与禁则。
+description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/web/src/views/DB*.vue 及其 DetailItem 子组件做 Home 设计语言统一改造时使用，定义卡片分层、方章、下划线搜索、章节头等可复制的类名配方与禁则。
 ---
 
 # DB 页面风格改造标准（Home 设计语言）
 
-以 `src/views/DBCharListView.vue`、`src/components/DBCharDetailItem.vue`、`src/components/CharSkillShow.vue` 为**唯一权威参考实现**。改造前先通读这三个文件。
+以 `apps/web/src/views/DBCharListView.vue`、`apps/web/src/components/DBCharDetailItem.vue`、`apps/web/src/components/CharSkillShow.vue` 为**唯一权威参考实现**。改造前先通读这三个文件。
 
 ## 设计原则
 
@@ -236,7 +236,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 
 ## 稀有度/品质徽章
 
-- 统一使用 `src/utils/rarity-utils.ts`：
+- 统一使用 `apps/web/src/utils/rarity-utils.ts`：
     - 徽章：`:class="getRarityBadgeClass(x.rarity)"`（返回完整方章配方——直角细边框 + 半透明底 + 同色系文字，接受数字或中文品质名）；调用处不要再补形状类
     - 文本：`getRarityName(x.rarity)`；图标底色渐变：`getRarityGradientClass(...)`
 - ❌ 本地再写任何稀有度色表（`bg-gray-500 text-white` / `bg-X-200 text-X-800` 一律删除改走 util）。
@@ -271,7 +271,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 ## 其他约定
 
 - 注释一律中文 JSDoc（遵循 AGENTS.md）。
-- 图标只能用已注册的（见 `src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
+- 图标只能用已注册的（见 `apps/web/src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
 - 不要运行 `pnpm lint` / `pnpm test` / `pnpm dev`，由主会话统一验证。
 - 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBDamageView（输入/选择框标准落地范例）、DBView（db-rise 风格，可对照但不必改动）。
 - **全部 `DB*DetailItem.vue` 已按「档案头」章节统一**（25 个文件，2026-09）。新增详情组件一律照「档案头」四件套写；

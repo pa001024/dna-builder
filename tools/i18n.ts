@@ -30,13 +30,17 @@
  */
 
 import { readdir, readFile, unlink, writeFile } from "node:fs/promises"
-import { extname, join, relative } from "node:path"
+import { dirname, extname, join, relative } from "node:path"
+import { fileURLToPath } from "node:url"
 
-const ROOT = process.cwd()
-const I18N_DIR = join(ROOT, "public", "i18n")
-const DIFF_FILE = join(ROOT, "tools", "i18n-diff.json")
-const SRC_DIR = join(ROOT, "src")
-const REPORT_FILE = join(ROOT, "tools", "i18n-check-report.json")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
+const WEB_DIR = join(REPO_ROOT, "apps", "web")
+const ROOT = REPO_ROOT
+const I18N_DIR = join(WEB_DIR, "public", "i18n")
+const DIFF_FILE = join(REPO_ROOT, "tools", "i18n-diff.json")
+const SRC_DIRS = [join(WEB_DIR, "src"), join(REPO_ROOT, "packages", "data")]
+const REPORT_FILE = join(REPO_ROOT, "tools", "i18n-check-report.json")
 
 const LOCALES = ["en", "fr", "ja", "ko", "zh-CN", "zh-TW"]
 const SOURCE_LOCALE = "zh-CN"
@@ -652,8 +656,8 @@ interface CheckReport {
 }
 
 async function cmdCheck(wantJson: boolean, wantLocaleGap: boolean): Promise<void> {
-    console.log(`扫描目录: ${relative(ROOT, SRC_DIR) || "."}`)
-    const files = await collectFiles(SRC_DIR)
+    console.log(`扫描目录: ${SRC_DIRS.map(dir => relative(ROOT, dir)).join(", ") || "."}`)
+    const files = (await Promise.all(SRC_DIRS.map(dir => collectFiles(dir)))).flat()
     console.log(`待扫描文件: ${files.length}`)
 
     let skippedDynamic = 0

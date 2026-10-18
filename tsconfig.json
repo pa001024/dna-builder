@@ -1,32 +1,26 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
-        "skipLibCheck": true,
-        "types": ["vitest/importMeta"],
-        /* Bundler mode */
+        "lib": ["ESNext"],
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "esModuleInterop": false,
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,
-        "jsx": "preserve",
-        "jsxImportSource": "vue",
-        "experimentalDecorators": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "types": ["bun-types"],
         "baseUrl": ".",
         "paths": {
-            "@/*": ["./src/*"]
-        },
-        /* Linting */
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
+            "@/*": ["./apps/web/src/*"],
+            "@/data": ["./packages/data/index.ts"],
+            "@/data/*": ["./packages/data/*"],
+            "dna-builder-data": ["./packages/data/index.ts"],
+            "dna-builder-data/*": ["./packages/data/*"]
+        }
     },
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-    "exclude": ["src/data/d/*.data.ts"]
+    "include": ["tools/**/*.ts", "apps/web/src/**/*.ts", "packages/data/**/*.ts"],
+    "exclude": ["node_modules", "**/node_modules", "**/dist/**", "apps/web/src-tauri/target"]
 }

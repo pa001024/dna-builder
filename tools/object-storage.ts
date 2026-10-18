@@ -16,14 +16,15 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { parse } from "dotenv"
 
 /** 超过该体积才汇报上传进度，避免小文件刷屏 */
 const PROGRESS_THRESHOLD = 1024 * 1024
 
-/** `server/.env` 的解析结果；发布脚本各自的私有配置（APP_TARGET 等）也从这里读 */
+/** `apps/server/.env` 的解析结果；发布脚本各自的私有配置（APP_TARGET 等）也从这里读 */
 export const envConfig: Record<string, string> = (() => {
-    const envPath = path.resolve("server", ".env")
+    const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "apps", "server", ".env")
     return fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
 })()
 

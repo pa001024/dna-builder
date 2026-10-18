@@ -8,9 +8,9 @@
 // 如日后复用此结论，务必沿用「同进程交替 + best 统计量」的测法，跨批次比较会被加载顺序污染 ±30%。
 //
 // 运行：bun tools/benchmark-charbuild.ts（或 pnpm bench:charbuild:real）
-import type { CharBuild } from "../src/data/CharBuild"
-import { LeveledWeapon } from "../src/data/leveled"
-import { createShardBuild1 } from "../src/data/tests/fixtures/shardBuild1"
+import type { CharBuild } from "../packages/data/CharBuild"
+import { LeveledWeapon } from "../packages/data/leveled"
+import { createShardBuild1 } from "../packages/data/tests/fixtures/shardBuild1"
 
 /**
  * 构造基准用的真实构筑实例（莉兹贝尔，同律武器「萨麦尔」）。

@@ -13,14 +13,14 @@
 
 | 文件 | 职责 |
 |---|---|
-| `src/utils/page-html-snapshot.ts` | 离屏渲染、净化（DOMPurify 白名单）、结构化文本化 |
-| `src/api/agent/tools/page-snapshot.ts` | `render_page` 工具：参数收敛、按结构截断、结果说明 |
-| `src/api/agent/tools/retrieval-modules.ts` | `DB_RETRIEVAL_PROFILES.db` 打开 `page: true`（配装 profile 不开） |
-| `src/shared/dbAgentSystemPrompt.ts` | 只在决策流程里给触发场景与判断口径；参数与机制写在工具定义里，不重复 |
+| `apps/web/src/utils/page-html-snapshot.ts` | 离屏渲染、净化（DOMPurify 白名单）、结构化文本化 |
+| `apps/web/src/api/agent/tools/page-snapshot.ts` | `render_page` 工具：参数收敛、按结构截断、结果说明 |
+| `apps/web/src/api/agent/tools/retrieval-modules.ts` | `DB_RETRIEVAL_PROFILES.db` 打开 `page: true`（配装 profile 不开） |
+| `apps/web/src/shared/dbAgentSystemPrompt.ts` | 只在决策流程里给触发场景与判断口径；参数与机制写在工具定义里，不重复 |
 
 ## 渲染机制
 
-- 建一个**独立的 memory history router**（复用 `src/router.ts` 的 `routes`），把目标路径 `push` 进去；
+- 建一个**独立的 memory history router**（复用 `apps/web/src/router.ts` 的 `routes`），把目标路径 `push` 进去；
   不复用主应用的路由实例，快照期间不会切走用户当前页面。
 - 用 `createApp({ render: () => h(RouterView) })` 挂到 `document.body` 上的**离屏容器**
   （`position:fixed; left:-12000px; visibility:hidden`）。留在文档里而不是游离节点，是为了让布局、
@@ -69,7 +69,7 @@
 
 ### 数据包
 
-dev server 的 `DISABLE_REWRITE=1` 直读源码（实测 `/src/data/d/event.data.ts` 未被重写），所以水合路径只能在机制层验证：
+dev server 的 `DISABLE_REWRITE=1` 直读源码（实测 `/packages/data/d/event.data.ts` 未被重写），所以水合路径只能在机制层验证：
 
 - 快照用的是**同一份模块实例与活绑定**，不是导入时的拷贝。实测把 `eventData` 清空 → 快照报 `Event with id 103036 not found`，把数据填回 → 立即恢复；
   数据包水合正是往同一批绑定里回填，因此生产环境读到的就是水合后的数据。
@@ -103,7 +103,7 @@ DB 页面里唯一会起 Worker 的是背包拼图求解（`BackpackPuzzle.worke
 - 返回值带 `truncated` / `chars`：HTML 截在标签边界并补齐未闭合标签，文本截在行边界。
 - 结果里的 `errors` 非空说明有区块渲染失败，`note` 会说明「对应区块不完整，不代表资料库没有这些数据」。
 - 工具没有标 `concurrentSafe`：渲染是重活，串行执行。
-- 单测（`src/utils/page-html-snapshot.test.ts`）只覆盖纯逻辑的路径收敛；渲染链路依赖真实浏览器，
+- 单测（`apps/web/src/utils/page-html-snapshot.test.ts`）只覆盖纯逻辑的路径收敛；渲染链路依赖真实浏览器，
   验证走 `.agents/skills/bun-webview-test`（在页面里 `await import("/src/utils/page-html-snapshot.ts")` 直接调用）。
 - **改了本功能的模块后，如果浏览器里仍看到旧行为，先确认 dev server 的模块图已经失效重编**
   （实测长时间运行的 vite 偶尔会继续吐旧的 transform 结果，重启 dev server 即恢复）。

@@ -105,7 +105,7 @@
 
 | 语言            | 包                                                                 | 说明                                           | 文档                          |
 | --------------- | ------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------- |
-| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | 游戏数据 + 角色构筑 / 伤害计算，可作 MCP Server 使用 | [src/data/README.md](src/data/README.md) |
+| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | 游戏数据 + 角色构筑 / 伤害计算，可作 MCP Server 使用 | [packages/data/README.md](packages/data/README.md) |
 | Python          | `dna-builder-sdk`                                                  | 后端公开读接口 + 数据包 / 按需加载 + 纯表达式计算 | [sdk/python/README.md](sdk/python/README.md) |
 | Go              | `dob`                                                              | 与 Python SDK 同能力：后端公开读接口 + 数据加载 + 计算 | [sdk/go](sdk/go/README.md) |
 

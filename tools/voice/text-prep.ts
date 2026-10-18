@@ -1,5 +1,5 @@
-import { type StoryGender, stripStoryTextTags } from "../../src/data/story-text"
-import { buildDialogueVoiceUrl } from "../../src/utils/dialogue-voice"
+import { type StoryGender, stripStoryTextTags } from "../../packages/data/story-text"
+import { buildDialogueVoiceUrl } from "../../apps/web/src/utils/dialogue-voice"
 
 export interface TtsVariant {
     gender: StoryGender | "neutral"

@@ -3,7 +3,7 @@
  * prune-migrated-i18n.ts — 清理已迁移进数据包的翻译条目。
  *
  * 游戏内零散文案（角色名、物品名、成就名等）已由 tools/import-i18n-data.ts 生成
- * `src/data/d/translations.data.ts` 随数据包下发，内置翻译文件里对应的中文键条目即为冗余，
+ * `packages/data/d/translations.data.ts` 随数据包下发，内置翻译文件里对应的中文键条目即为冗余，
  * 本工具把它们从 public/i18n/<locale>/translation.json 移除。
  *
  * 判据：语言在数据包承载范围内（tc/en/jp/kr/fr）
@@ -21,13 +21,16 @@
 
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 /** 上游数据仓库根目录候选（与 import-i18n-data.ts 保持一致） */
-const UPSTREAM_CANDIDATES = [path.resolve("..", "DuetNightAbyssData2"), "D:/dev/DuetNightAbyssData2"]
+const UPSTREAM_CANDIDATES = [path.resolve(REPO_ROOT, "..", "DuetNightAbyssData2"), "D:/dev/DuetNightAbyssData2"]
 /** 上游 i18n 目录（相对上游根目录） */
 const UPSTREAM_I18N_DIR = path.join("final", "i18n")
 /** 内置翻译文件目录 */
-const I18N_DIR = path.resolve("public", "i18n")
+const I18N_DIR = path.resolve(REPO_ROOT, "apps", "web", "public", "i18n")
 
 /** 应用语言 → 上游语言目录 */
 const LOCALE_DIRS = [

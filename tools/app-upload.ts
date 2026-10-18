@@ -14,6 +14,7 @@
 import { createHash } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { $ } from "bun"
 import { assertStorageConfig, envConfig, getPublicUrl, putFile } from "./object-storage"
 
@@ -57,18 +58,19 @@ const versionArg = versionArgIndex >= 0 ? (args[versionArgIndex + 1] ?? "").trim
 const notesArgIndex = args.findIndex(arg => arg === "-m" || arg === "--msg")
 const notes = notesArgIndex >= 0 ? args[notesArgIndex + 1] : undefined
 
-const rootDir = path.resolve(".")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const tmpDir = path.resolve(rootDir, ".tmp")
 const localManifestPath = path.resolve(tmpDir, "apk-latest.json")
 
 /**
- * 读取 server/.env 中的 APP_TARGET，解析为安装包绝对路径。
+ * 读取 apps/server/.env 中的 APP_TARGET，解析为安装包绝对路径。
  * @returns 安装包绝对路径
  */
 function resolveAppTarget(): string {
     const raw = (envConfig.APP_TARGET || "").trim()
     if (!raw) {
-        throw new Error("server/.env 中缺少 APP_TARGET")
+        throw new Error("apps/server/.env 中缺少 APP_TARGET")
     }
 
     return path.isAbsolute(raw) ? raw : path.resolve(rootDir, raw)

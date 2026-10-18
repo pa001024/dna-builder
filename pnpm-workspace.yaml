@@ -1,0 +1,10 @@
+packages:
+  # Web 前端（含 Tauri 桌面壳 apps/web/src-tauri）
+  - 'apps/web'
+  # 服务端（Bun + Elysia）：pnpm 只负责安装依赖，运行仍用 bun（用到 Bun.file/spawn 等运行时 API）
+  - 'apps/server'
+  # 可发布的纯 TS 包
+  - 'packages/*'
+  # tsc-rs 的 content-mapper 插件（被 apps/web 以 file: 引用，同时纳入 workspace 统一管理版本）
+  - 'tools/data-mapper'
+  - 'tools/vue-mapper'

@@ -26,9 +26,12 @@
 
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 /** 翻译文件目录 */
-const I18N_DIR = path.resolve("public", "i18n")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const I18N_DIR = path.resolve(REPO_ROOT, "apps", "web", "public", "i18n")
 /** 属性说明写入的命名空间 */
 const NAMESPACE = "attrDesc"
 /**
@@ -36,7 +39,7 @@ const NAMESPACE = "attrDesc"
  * 优先与 import-i18n-data.ts 保持一致的同级目录，其次 D 盘正式副本
  * （同级副本可能缺少 out/TextMap_I18n.json，缺失时自动跳到下一个候选）。
  */
-const UPSTREAM_CANDIDATES = [path.resolve("..", "DuetNightAbyssData2"), "D:/dev/DuetNightAbyssData2"]
+const UPSTREAM_CANDIDATES = [path.resolve(REPO_ROOT, "..", "DuetNightAbyssData2"), "D:/dev/DuetNightAbyssData2"]
 /** 上游必需文件（相对上游根目录），用于判定候选路径是否有效 */
 const REQUIRED_FILES = ["out/AttrConfig.json", "out/TextMap_I18n.json"]
 
@@ -129,7 +132,7 @@ const FRONTEND_COINED_ATTRS: AttrEntry[] = [
 
 /**
  * 前端可能拿来做属性名/属性说明查询的属性名集合。
- * 与 src/data/CharBuild.ts 的 CharAttr / WeaponAttr 键保持一致，
+ * 与 packages/data/CharBuild.ts 的 CharAttr / WeaponAttr 键保持一致，
  * 外加两个组件攻击行拼出的展示名（角色元素 + 属性攻击、武器伤害类型 + 攻击）。
  * 不在此集合内的上游属性不会写入翻译文件，仅打印提示，避免留下永不展示的死文案。
  */

@@ -22,9 +22,9 @@
 
 | 文件 | 说明 |
 |---|---|
-| `server/src/util/quark.ts` | 夸克开放平台客户端（协议见 wlor0623/quark-api）：`x-pan-*` 签名、秒传→分片直传→完成确认、建目录、分享创建/详情、文件详情、token 失效自动 rotate 一次 |
-| `server/src/util/safe-mode-vault.ts` | 密码生成、stored-zip 打包（零依赖，系统解包器可直接打开）、上传目标解析、bcrypt 哈希、状态落盘、`syncVaultScheduled` 定时入口 |
-| `server/src/api/safe-mode.ts` | `GET /api/safe-mode/vault/status`（公开）、`POST /vault/verify`（公开，只返回对错）、`POST /vault/rotate`（仅 admin），cron 注册与冷启动补传 |
+| `apps/server/src/util/quark.ts` | 夸克开放平台客户端（协议见 wlor0623/quark-api）：`x-pan-*` 签名、秒传→分片直传→完成确认、建目录、分享创建/详情、文件详情、token 失效自动 rotate 一次 |
+| `apps/server/src/util/safe-mode-vault.ts` | 密码生成、stored-zip 打包（零依赖，系统解包器可直接打开）、上传目标解析、bcrypt 哈希、状态落盘、`syncVaultScheduled` 定时入口 |
+| `apps/server/src/api/safe-mode.ts` | `GET /api/safe-mode/vault/status`（公开）、`POST /vault/verify`（公开，只返回对错）、`POST /vault/rotate`（仅 admin），cron 注册与冷启动补传 |
 
 ## 环境变量
 
@@ -64,7 +64,7 @@ OAuth 授权走标准流程（见 quark-api 第 3 章）：授权页拿 code →
 
 ## 测试
 
-- `server/src/util/quark.test.ts`：签名向量、包络/刷新重试、分片上传与秒传、建目录/分享详情/文件详情（全 mock fetch）。
-- `server/src/util/safe-mode-vault.test.ts`：密码格式、目标解析（根回退/fid 直用/路径建目录）、CRC32 向量、zip 中央目录 + 系统 `unzip` 真实解包、轮换/校验（含落盘无明文断言）。
-- `src/api/tests/safe-mode.test.ts`：前端接口封装（verify 401→false、异常抛错）。
+- `apps/server/src/util/quark.test.ts`：签名向量、包络/刷新重试、分片上传与秒传、建目录/分享详情/文件详情（全 mock fetch）。
+- `apps/server/src/util/safe-mode-vault.test.ts`：密码格式、目标解析（根回退/fid 直用/路径建目录）、CRC32 向量、zip 中央目录 + 系统 `unzip` 真实解包、轮换/校验（含落盘无明文断言）。
+- `apps/web/src/api/tests/safe-mode.test.ts`：前端接口封装（verify 401→false、异常抛错）。
 - 浏览器实测：`.tmp/safe-mode-dialog.spec.ts`（Playwright + Edge，需 `http://localhost:1420` 运行），截图见 `.tmp/screenshots/safe-mode-dialog.png`。

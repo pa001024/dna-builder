@@ -2,7 +2,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
 /**
  * webp-import
@@ -10,7 +10,7 @@ import { pathToFileURL } from "node:url"
  * 自动把 data 中真正引用的图片从 FModel 导出的纹理 PNG 目录转成 WebP 并复制到 public/imgs 下。
  *
  * 引用来源有两种，两者合并即为“真实引用集合”：
- *   1. 文本扫描：src/data 里出现的 /imgs/** 字符串字面量（精确引用，如 rank 目录、占位图等）。
+ *   1. 文本扫描：packages/data 里出现的 /imgs/** 字符串字面量（精确引用，如 rank 目录、占位图等）。
  *   2. 数据评估：导入实际数据层，调用 Leveled* 的 URL 生成器，
  *      枚举全部角色/武器/魔之楔/怪物/宠物/钓鱼/读物/乐谱专辑/技能等真实取值。
  *      不再用 `${icon}` 模板对源目录做通配展开，避免导入从未使用的贴图。
@@ -31,7 +31,7 @@ import { pathToFileURL } from "node:url"
  *   bun tools/webp-import.ts                 # 增量导入缺失的 WebP
  *   bun tools/webp-import.ts --force         # 强制重新转换（覆盖已有 WebP）
  *   bun tools/webp-import.ts --dry-run       # 只统计不落盘
- *   bun tools/webp-import.ts --data <dir>    # 覆盖文本扫描目录（默认 src/data）
+ *   bun tools/webp-import.ts --data <dir>    # 覆盖文本扫描目录（默认 packages/data）
  *   bun tools/webp-import.ts --source <dir>  # 覆盖 FModel 纹理导出目录
  *   bun tools/webp-import.ts --out <dir>     # 覆盖输出目录（默认 public/imgs）
  *   bun tools/webp-import.ts --quality 90    # 覆盖 WebP 质量（默认 90）
@@ -111,7 +111,8 @@ type ResizeInfo = {
     reason: string
 }
 
-const rootDir = path.resolve(".")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
 const FORCE = args.includes("--force")
 const DRY_RUN = args.includes("--dry-run")
@@ -141,8 +142,8 @@ function isThumb(targetRelPath: string): boolean {
  */
 const SCALE_RULES: { pattern: RegExp; scale: number }[] = [{ pattern: /^T_Activity_PhotoEvent_\d+$/i, scale: 0.5 }]
 
-const dataDir = getArgValue("--data") ?? process.env.WEBP_IMPORT_DATA_DIR ?? path.join(rootDir, "src", "data")
-const publicImgsDir = getArgValue("--out") ?? process.env.WEBP_IMPORT_OUT ?? path.join(rootDir, "public", "imgs")
+const dataDir = getArgValue("--data") ?? process.env.WEBP_IMPORT_DATA_DIR ?? path.join(rootDir, "packages", "data")
+const publicImgsDir = getArgValue("--out") ?? process.env.WEBP_IMPORT_OUT ?? path.join(rootDir, "apps", "web", "public", "imgs")
 const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP_IMPORT_SOURCE)
 /**
  * 称号框贴图清单（webp 文件名 → 游戏内包路径），由 tools/import-title-frame.ts 生成。
@@ -150,7 +151,7 @@ const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP
  * 称号框贴图遇到同名冲突会改写成带父目录前缀的名字，basename 与源 PNG 对不上，
  * 必须靠这份清单按“包路径”去导出目录里定位，否则会被报成 349 条缺失里的 73 条。
  */
-const TITLE_FRAME_MANIFEST = path.join(rootDir, "src", "utils", "title-frame", "title-frame-textures.json")
+const TITLE_FRAME_MANIFEST = path.join(rootDir, "apps", "web", "src", "utils", "title-frame", "title-frame-textures.json")
 
 /**
  * 收集指向项目根目录的所有路径别名。

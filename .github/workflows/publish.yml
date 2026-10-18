@@ -79,7 +79,7 @@ jobs:
             - name: Rust cache
               uses: swatinem/rust-cache@v2
               with:
-                  workspaces: "./src-tauri -> target"
+                  workspaces: "./apps/web/src-tauri -> target"
 
             - name: install frontend dependencies
               run: pnpm install # change this to npm, pnpm or bun depending on which one you use.
@@ -154,6 +154,7 @@ jobs:
                       "
                   releaseDraft: false
                   prerelease: false
+                  projectPath: apps/web
                   args: ${{ matrix.args }}
 
             - name: Add summary

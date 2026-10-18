@@ -1,13 +1,14 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
-import type { NPC } from "../src/data/d/npc.data"
-import type { PartyTopic } from "../src/data/d/partytopic.data"
-import type { Dialogue, DialogueOption, QuestItem, QuestNode, QuestStory } from "../src/data/d/quest.data"
-import type { Char, Mod, Weapon } from "../src/data/data-types"
-import type { LeveledSkillField } from "../src/data/leveled/LeveledSkill"
-import { DNA_CURRENT_VERSION_GLOBAL_KEY } from "../src/data/versionGate"
-import { formatParamText } from "../src/utils/param-text"
-import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../src/utils/story-text"
+import { fileURLToPath } from "node:url"
+import type { NPC } from "../packages/data/d/npc.data"
+import type { PartyTopic } from "../packages/data/d/partytopic.data"
+import type { Dialogue, DialogueOption, QuestItem, QuestNode, QuestStory } from "../packages/data/d/quest.data"
+import type { Char, Mod, Weapon } from "../packages/data/data-types"
+import type { LeveledSkillField } from "../packages/data/leveled/LeveledSkill"
+import { DNA_CURRENT_VERSION_GLOBAL_KEY } from "../packages/data/versionGate"
+import { formatParamText } from "../apps/web/src/utils/param-text"
+import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../apps/web/src/utils/story-text"
 
 interface DialogueChainItem {
     dialogue: Dialogue
@@ -18,7 +19,9 @@ interface QuestNodeWithChain extends QuestNode {
     chain: DialogueChainItem[]
 }
 
-const OUTPUT_DIR = resolve("src/data/txt")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+const OUTPUT_DIR = resolve(REPO_ROOT, "packages", "data", "txt")
 const QUEST_OUTPUT_PATH = resolve(OUTPUT_DIR, "quest.txt")
 const PARTY_TOPIC_OUTPUT_PATH = resolve(OUTPUT_DIR, "partytopic.txt")
 const CHAR_OUTPUT_PATH = resolve(OUTPUT_DIR, "char.txt")
@@ -28,9 +31,9 @@ const MOD_OUTPUT_PATH = resolve(OUTPUT_DIR, "mod.txt")
 const ROOT_INDEX_NAME = ["一", "二", "三", "四", "五", "六", "七"] as const
 const MOD_QUALITY_PRIORITY = ["金", "紫", "蓝", "绿", "白"] as const
 
-let LeveledModClass: typeof import("../src/data/leveled/LeveledMod").LeveledMod
-let LeveledSkillClass: typeof import("../src/data/leveled/LeveledSkill").LeveledSkill
-let LeveledWeaponClass: typeof import("../src/data/leveled/LeveledWeapon").LeveledWeapon
+let LeveledModClass: typeof import("../packages/data/leveled/LeveledMod").LeveledMod
+let LeveledSkillClass: typeof import("../packages/data/leveled/LeveledSkill").LeveledSkill
+let LeveledWeaponClass: typeof import("../packages/data/leveled/LeveledWeapon").LeveledWeapon
 
 let questData: QuestStory[] = []
 let questChainData: { id: number; name?: string; quests?: { id: number }[] }[] = []
@@ -727,16 +730,16 @@ async function main(): Promise<void> {
         { LeveledSkill: loadedLeveledSkill },
         { LeveledWeapon: loadedLeveledWeapon },
     ] = await Promise.all([
-        import("../src/data/d/quest.data"),
-        import("../src/data/d/questchain.data"),
-        import("../src/data/d/partytopic.data"),
-        import("../src/data/d/npc.data"),
-        import("../src/data/d/char.data"),
-        import("../src/data/d/weapon.data"),
-        import("../src/data/d/mod.data"),
-        import("../src/data/leveled/LeveledMod"),
-        import("../src/data/leveled/LeveledSkill"),
-        import("../src/data/leveled/LeveledWeapon"),
+        import("../packages/data/d/quest.data"),
+        import("../packages/data/d/questchain.data"),
+        import("../packages/data/d/partytopic.data"),
+        import("../packages/data/d/npc.data"),
+        import("../packages/data/d/char.data"),
+        import("../packages/data/d/weapon.data"),
+        import("../packages/data/d/mod.data"),
+        import("../packages/data/leveled/LeveledMod"),
+        import("../packages/data/leveled/LeveledSkill"),
+        import("../packages/data/leveled/LeveledWeapon"),
     ])
 
     questData = loadedQuestData

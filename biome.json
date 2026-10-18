@@ -5,11 +5,11 @@
         "includes": [
             "**",
             "!!**/dist",
-            "!!**/externals/graphql-mobius",
+            "!!packages/graphql-mobius",
             "!!**/target",
             "!!**/skills",
-            "!!src-tauri/target",
-            "!!src/data/d/translations.data.ts"
+            "!!apps/web/src-tauri/target",
+            "!!packages/data/d/translations.data.ts"
         ],
         "maxSize": 100000000
     },

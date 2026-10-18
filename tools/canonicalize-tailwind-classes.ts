@@ -1,10 +1,12 @@
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import process from "node:process"
 import { __unstable__loadDesignSystem } from "@tailwindcss/node"
 import { glob } from "glob"
 
-const ROOT = process.cwd()
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关（pnpm fmttw 一律从仓库根运行） */
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const STATIC_CLASS_ATTRIBUTE_PATTERN = /(?<![:\w-])(class(?:Name)?\s*=\s*)(["'])([\s\S]*?)\2/g
 /**
  * 动态 class 绑定：`:class="..."` / `v-bind:class="..."`。
@@ -29,7 +31,7 @@ const DEFAULT_IGNORE_PATTERNS = [
     "**/mcp_server/target/**",
 ]
 const ROOT_FONT_SIZE_PX = 16
-const STYLE_CSS_PATH = path.join(ROOT, "src", "style.css")
+const STYLE_CSS_PATH = path.join(ROOT, "apps", "web", "src", "style.css")
 const MINIMAL_CSS_SOURCE = '@import "tailwindcss";'
 
 let designSystemPromise: Promise<any> | null = null

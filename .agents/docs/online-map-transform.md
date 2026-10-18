@@ -1,6 +1,6 @@
 # 在线地图 → MapTool 坐标换算
 
-`src/data/d/onlinemapcache.data.ts` 文件尾的换算表：把同文件快照里各楼层底图上的
+`packages/data/d/onlinemapcache.data.ts` 文件尾的换算表：把同文件快照里各楼层底图上的
 像素坐标（`site.x / site.y`）换算成 MapTool 世界坐标（UE 单位，100 单位 = 1 米）的逐地图参数表。
 
 ## 模型

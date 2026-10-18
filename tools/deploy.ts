@@ -20,8 +20,9 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { $ } from "bun"
-import { isQuarkConfigured, QuarkClient, readQuarkConfig, resolveDirFid } from "../server/src/util/quark"
+import { isQuarkConfigured, QuarkClient, readQuarkConfig, resolveDirFid } from "../apps/server/src/util/quark"
 import { envConfig, getActiveBackends, getPublicUrlOn, isObjectStorageConfigured, putFile, putGenerated } from "./object-storage"
 
 const args = process.argv.slice(2)
@@ -32,7 +33,10 @@ const skipQuark = args.includes("--skip-quark")
 const printJson = args.includes("-v")
 const generateOnly = args.includes("json")
 
-const packageJsonPath = path.resolve("./package.json")
+/** 仓库根：发布脚本一律从仓库根运行，所有产物路径都锚定到它 */
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const WEB_DIR = path.resolve(REPO_ROOT, "apps", "web")
+const packageJsonPath = path.resolve(REPO_ROOT, "package.json")
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
 const version = packageJson.version
 
@@ -42,7 +46,7 @@ const CONFIG = {
     },
     local: {
         buildCommand: "pnpm build",
-        distDir: "./dist",
+        distDir: "./apps/web/dist",
         zipFile: "dist.zip",
         serverDir: "/var/www",
     },
@@ -50,9 +54,9 @@ const CONFIG = {
         commands: ["rm -rf /var/www/dna-builder", "unzip -o /var/www/dist.zip -d /var/www/dna-builder"],
     },
     app: {
-        msiPath: `./src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi`,
-        sigPath: `./src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi.sig`,
-        /** 夸克网盘投放目录：fid 或路径（server/.env 的 QUARK_APP_DIR 覆盖，缺省 `Duet Night Abyss Builder`） */
+        msiPath: `./apps/web/src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi`,
+        sigPath: `./apps/web/src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi.sig`,
+        /** 夸克网盘投放目录：fid 或路径（apps/server/.env 的 QUARK_APP_DIR 覆盖，缺省 `Duet Night Abyss Builder`） */
         quarkDir: envConfig.QUARK_APP_DIR || "Duet Night Abyss Builder",
         /** 历史版本归档子目录名 */
         quarkOldDirName: "老版本",
@@ -80,7 +84,7 @@ async function uploadToStorage(filePath: string, objectKey: string): Promise<voi
  * @returns 清单对象
  */
 function generateLatestJson(version: string, signature: string, msiUrl: string): object {
-    const versionsPath = path.resolve("./public/versions.json")
+    const versionsPath = path.resolve(WEB_DIR, "public/versions.json")
     const versionsData = JSON.parse(fs.readFileSync(versionsPath, "utf-8"))
     const versionInfo = versionsData.find((v: { version: string }) => v.version === `v${version}`)
     const notes = versionInfo ? `更新内容: ${versionInfo.msg}` : ""
@@ -109,7 +113,7 @@ function generateLatestJson(version: string, signature: string, msiUrl: string):
  * @throws 不允许兜底且签名缺失时抛错
  */
 function readSignature(options: { allowMock: boolean }): string {
-    const sigAbsPath = path.resolve(CONFIG.app.sigPath)
+    const sigAbsPath = path.resolve(REPO_ROOT, CONFIG.app.sigPath)
     if (fs.existsSync(sigAbsPath)) {
         return fs.readFileSync(sigAbsPath, "utf-8").trim()
     }
@@ -167,8 +171,8 @@ async function deployWeb() {
 
         // 3. 打包dist目录为zip文件
         console.log("2. 打包dist目录为zip文件...")
-        const zipPath = path.resolve(CONFIG.local.zipFile)
-        const distPath = path.resolve(CONFIG.local.distDir)
+        const zipPath = path.resolve(REPO_ROOT, CONFIG.local.zipFile)
+        const distPath = path.resolve(REPO_ROOT, CONFIG.local.distDir)
 
         // 使用 PowerShell 的 Compress-Archive 命令创建zip文件
         await $`pwsh -Command "Compress-Archive -Path ${distPath}\* -DestinationPath ${zipPath} -Force"`
@@ -212,7 +216,7 @@ async function deployQuarkMsi(msiAbsPath: string): Promise<void> {
         return
     }
     if (!isQuarkConfigured(envConfig)) {
-        console.log("⚠️  未配置夸克令牌（server/.env 缺 QUARK_ACCESS_TOKEN），跳过网盘发布")
+        console.log("⚠️  未配置夸克令牌（apps/server/.env 缺 QUARK_ACCESS_TOKEN），跳过网盘发布")
         return
     }
     const client = new QuarkClient(readQuarkConfig(envConfig))
@@ -312,7 +316,7 @@ async function deployApp() {
             console.log("1. 跳过构建，使用现有文件")
         }
 
-        const msiAbsPath = path.resolve(CONFIG.app.msiPath)
+        const msiAbsPath = path.resolve(REPO_ROOT, CONFIG.app.msiPath)
         if (!fs.existsSync(msiAbsPath)) {
             throw new Error(`MSI文件不存在: ${msiAbsPath}`)
         }

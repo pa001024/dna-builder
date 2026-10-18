@@ -71,7 +71,7 @@ describe("prepareTscRsConfig", () => {
                 paths: { "@/*": ["./src/*"], lodash: ["lodash"] },
             },
             include: ["src/**/*.ts"],
-            exclude: ["src/data/d/*.data.ts"],
+            exclude: ["packages/data/d/*.data.ts"],
         })
         const options = tmp.compilerOptions as Record<string, unknown>
         expect(options.baseUrl).toBeUndefined()
@@ -98,7 +98,7 @@ describe("prepareTscRsConfig", () => {
 describe("filterDataOnlySeeds", () => {
     const changes = {
         added: [],
-        modified: ["src/a.ts", "src/data/d/quest.data.ts", "src/data/d/shop.data.ts", "src/data/d/broken.data.ts"],
+        modified: ["apps/web/src/a.ts", "packages/data/d/quest.data.ts", "packages/data/d/shop.data.ts", "packages/data/d/broken.data.ts"],
         deleted: [],
     }
 
@@ -111,47 +111,47 @@ describe("filterDataOnlySeeds", () => {
             manifest: {},
             served: new Set<string>(),
             decls: {},
-            typeChanged: new Set(["src/data/d/shop.data.ts"]),
-            genFailed: new Set(["src/data/d/broken.data.ts"]),
+            typeChanged: new Set(["packages/data/d/shop.data.ts"]),
+            genFailed: new Set(["packages/data/d/broken.data.ts"]),
             internalErrors: [],
         }
         const filtered = filterDataOnlySeeds(changes, plan)
-        expect(filtered.modified).toEqual(["src/a.ts", "src/data/d/shop.data.ts", "src/data/d/broken.data.ts"])
+        expect(filtered.modified).toEqual(["apps/web/src/a.ts", "packages/data/d/shop.data.ts", "packages/data/d/broken.data.ts"])
     })
 })
 
 describe("planMinimalFiles", () => {
     const graph = {
-        "src/data/d/a.data.ts": { imports: ["src/types.ts"], ambient: false, ambientHash: "" },
-        "src/types.ts": { imports: [], ambient: false, ambientHash: "" },
-        "src/vite-env.d.ts": { imports: [], ambient: true, ambientHash: "h" },
-        "src/components.d.ts": { imports: [], ambient: true, ambientHash: "h" },
-        "src/views/V.vue": { imports: [], ambient: false, ambientHash: "" },
+        "packages/data/d/a.data.ts": { imports: ["apps/web/src/types.ts"], ambient: false, ambientHash: "" },
+        "apps/web/src/types.ts": { imports: [], ambient: false, ambientHash: "" },
+        "apps/web/src/vite-env.d.ts": { imports: [], ambient: true, ambientHash: "h" },
+        "apps/web/src/components.d.ts": { imports: [], ambient: true, ambientHash: "h" },
+        "apps/web/src/views/V.vue": { imports: [], ambient: false, ambientHash: "" },
     }
-    const ambientDts = ["src/vite-env.d.ts", "src/components.d.ts"]
+    const ambientDts = ["apps/web/src/vite-env.d.ts", "apps/web/src/components.d.ts"]
 
     it("空变更返回 null", () => {
         expect(planMinimalFiles([], graph, ambientDts)).toBeNull()
     })
 
     it("纯值变数据文件返回改动 + 环境声明（components.d.ts 除外）", () => {
-        const files = planMinimalFiles([{ rel: "src/data/d/a.data.ts", text: "export const x = 1" }], graph, ambientDts)
-        expect(files?.[0]).toBe("src/data/d/a.data.ts")
-        expect(files).toContain("src/vite-env.d.ts")
-        expect(files).not.toContain("src/components.d.ts")
+        const files = planMinimalFiles([{ rel: "packages/data/d/a.data.ts", text: "export const x = 1" }], graph, ambientDts)
+        expect(files?.[0]).toBe("packages/data/d/a.data.ts")
+        expect(files).toContain("apps/web/src/vite-env.d.ts")
+        expect(files).not.toContain("apps/web/src/components.d.ts")
     })
 
     it("window 引用退回 null", () => {
-        const files = planMinimalFiles([{ rel: "src/data/d/a.data.ts", text: "export const x = window.y" }], graph, ambientDts)
+        const files = planMinimalFiles([{ rel: "packages/data/d/a.data.ts", text: "export const x = window.y" }], graph, ambientDts)
         expect(files).toBeNull()
     })
 
     it("闭包含 .vue 退回 null", () => {
         const graphWithVue = {
             ...graph,
-            "src/data/d/a.data.ts": { imports: ["src/views/V.vue"], ambient: false, ambientHash: "" },
+            "packages/data/d/a.data.ts": { imports: ["apps/web/src/views/V.vue"], ambient: false, ambientHash: "" },
         }
-        const files = planMinimalFiles([{ rel: "src/data/d/a.data.ts", text: "export const x = 1" }], graphWithVue, ambientDts)
+        const files = planMinimalFiles([{ rel: "packages/data/d/a.data.ts", text: "export const x = 1" }], graphWithVue, ambientDts)
         expect(files).toBeNull()
     })
 })

@@ -27,7 +27,7 @@ bun i18n add setting.generative_ai \
 
 ## 图标
 
-`bun tools/icon-tool.ts add|check|clean|list` — 管理 `src/components/Icon.vue` 里的图标；
+`bun tools/icon-tool.ts add|check|clean|list` — 管理 `apps/web/src/components/Icon.vue` 里的图标；
 lint 报「icon not found」时用它。
 
 ## API 生成
@@ -38,8 +38,8 @@ lint 报「icon not found」时用它。
 
 `pnpm itf`（`bun tools/import-title-frame.ts`）— 通过 fmodel-cli 读取游戏 pak，重新生成称号框渲染数据：
 
-- 产物：`src/utils/title-frame/title-frame.generated.ts`、
-  `src/utils/title-frame/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）、
+- 产物：`apps/web/src/utils/title-frame/title-frame.generated.ts`、
+  `apps/web/src/utils/title-frame/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）、
   `public/imgs/titleframe/*.webp`；
 - 预览：dev server 上打开 `tools/title-frame-preview.html`（`?frames=07_1,09_1` 可缩小范围）。
 
@@ -80,7 +80,7 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 
 - 键均为属性在 zh-CN 下的展示名（攻击行按元素/伤害类型区分，如 `火属性攻击`、`切割攻击`）；
 - **只补缺失键，不覆盖已有译文**；
-- 读取入口 `src/composables/useAttrI18n.ts`，展示在角色属性面板（`CharAttrShow.vue`）与武器面板
+- 读取入口 `apps/web/src/composables/useAttrI18n.ts`，展示在角色属性面板（`CharAttrShow.vue`）与武器面板
   （`WeaponTab.vue`）的属性来源 tooltip 标题与说明里；
 - 上游目录默认取同级 `DuetNightAbyssData2`，缺失时回退 `D:/dev/DuetNightAbyssData2`，
   可用 `--upstream <dir>` 或 `DNA_UPSTREAM` 覆盖；`--check` 只比对不落盘。
@@ -88,7 +88,7 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 ## 游戏文本包
 
 `pnpm importdata`（`bun tools/import-i18n-data.ts`）是数据层主导入脚本：把上游各模块文本表写进
-`src/data/d/<stem>.data.ts`，并额外产出 `src/data/d/translations.data.ts` —— 把上游
+`packages/data/d/<stem>.data.ts`，并额外产出 `packages/data/d/translations.data.ts` —— 把上游
 `final/i18n/<locale>/translation.json`（本身就是「简体中文原文 → 译文」扁平表）压成 tc/en/jp/kr/fr
 五份对照表，随数据包下发。
 
@@ -101,7 +101,7 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
   `DNA_UPSTREAM=<DuetNightAbyssData2 仓库根>`（Bun 自动加载 `.env`），也可用 `--upstream <dir>` 覆盖；
   优先级 `--upstream` > `.env` > 同级默认。`final/i18n` 一侧默认取 `<仓库根>/final/i18n`，可用
   `DNA_UPSTREAM_I18N=<目录>` 单独指向别处（如只拿到 final 产物的机器）。
-- 前端由 `src/utils/data-pack/translations-pack.ts` 在读包后注入 i18next（走 `data-pack.ts` 的激活钩子，
+- 前端由 `apps/web/src/utils/data-pack/translations-pack.ts` 在读包后注入 i18next（走 `data-pack.ts` 的激活钩子，
   **禁止反向 import 以免循环依赖**）；
 - 检索层的反向索引（译文 → 原文）优先查这份表；
 - `pnpm prune-i18n`（`bun tools/prune-migrated-i18n.ts`）据此把 `public/i18n` 里已迁移的中文键条目删掉，
@@ -124,9 +124,9 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 
 ## 数据包与图片包
 
-- `pnpm dp`（`bun tools/data-pack.ts build|upload`）— 打包 `src/data/d/**/*.data.ts` 为 msgpack
-  数据包并（可选）上传 OSS/CDN，同时写 `mock/data-pack/versions.json`；
-  包内 `manifest.json` 与版本列表条目都带 `major`（`src/utils/data-pack/data-pack-format.ts` 的
+- `pnpm dp`（`bun tools/data-pack.ts build|upload`）— 打包 `packages/data/d/**/*.data.ts` 为 msgpack
+  数据包并（可选）上传 OSS/CDN，同时写 `apps/web/mock/data-pack/versions.json`；
+  包内 `manifest.json` 与版本列表条目都带 `major`（`apps/web/src/utils/data-pack/data-pack-format.ts` 的
   `DATA_PACK_FORMAT_MAJOR`，改动包格式、老读包侧会崩时加一；抓取侧只收 `major <= 当前值` 的包）。
   `bun tools/data-pack.ts backfill` 给本地版本列表回填缺失的 major；缺 major 的老条目按
   `1.6.208.7` 分割线推断（之前为 1，自 MOD 数值挪进 `加成` 起为 2）；

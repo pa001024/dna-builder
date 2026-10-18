@@ -442,7 +442,7 @@ CharBuild 已把这些能力分布在页面、配置模型、纯计算内核、W
 
 | 行为 | 测试文件 | 用例数 |
 |---|---|---:|
-| 时间轴多事件累计、BUFF 附加、DPS 折算与除零 | `src/data/tests/timeline.test.ts` | 8 |
+| 时间轴多事件累计、BUFF 附加、DPS 折算与除零 | `packages/data/tests/timeline.test.ts` | 8 |
 
 ### 验收矩阵与已有依据
 
@@ -476,7 +476,7 @@ CharBuild 已把这些能力分布在页面、配置模型、纯计算内核、W
 | 数据层其余模块（资料库、RAG、地图等） | 26 | 416 |
 | 前端合计 | 31 | 799 |
 
-以上为 `src/data/tests/` 全量加 `useCharSettings` 与 `build-api` 的定向结果，不是全量 `pnpm test`、UI E2E 或服务端全部测试。
+以上为 `packages/data/tests/` 全量加 `useCharSettings` 与 `build-api` 的定向结果，不是全量 `pnpm test`、UI E2E 或服务端全部测试。
 
 ## 不在范围内
 
@@ -517,14 +517,14 @@ CharBuild 已把这些能力分布在页面、配置模型、纯计算内核、W
 
 | 边界 | 当前来源 |
 |---|---|
-| 配置、变体、迁移与序列化 | [charSettings](../src/data/charSettings.ts)、[本地设置](../src/composables/useCharSettings.ts)、[配置测试](../src/composables/useCharSettings.test.ts) |
-| 设置装配与武器替换收益 | [CharBuildHelper](../src/data/CharBuildHelper.ts)、[特效等级](../src/data/effectLv.ts)、[装备限定](../src/utils/mod-equip.ts) |
-| 魔灵与潜质 | [petTrait](../src/data/petTrait.ts)、[潜质测试](../src/data/tests/petTrait.test.ts) |
-| 计算与表达式 | [CharBuild](../src/data/CharBuild.ts)、[表达式解析](../src/data/ast.ts)、[内核测试](../src/data/tests/CharBuild.test.ts)、[表达式测试](../src/data/tests/evaluateAST.test.ts)、[DOT 测试](../src/data/tests/dot.test.ts)、[时间轴测试](../src/data/tests/timeline.test.ts) |
-| 等级对象与查表 | [LeveledHelpers](../src/data/leveled/LeveledHelpers.ts)、[武器](../src/data/leveled/LeveledWeapon.ts)、[MOD](../src/data/leveled/LeveledMod.ts)、[BUFF](../src/data/leveled/LeveledBuff.ts) |
+| 配置、变体、迁移与序列化 | [charSettings](../packages/data/charSettings.ts)、[本地设置](../src/composables/useCharSettings.ts)、[配置测试](../src/composables/useCharSettings.test.ts) |
+| 设置装配与武器替换收益 | [CharBuildHelper](../packages/data/CharBuildHelper.ts)、[特效等级](../packages/data/effectLv.ts)、[装备限定](../src/utils/mod-equip.ts) |
+| 魔灵与潜质 | [petTrait](../packages/data/petTrait.ts)、[潜质测试](../packages/data/tests/petTrait.test.ts) |
+| 计算与表达式 | [CharBuild](../packages/data/CharBuild.ts)、[表达式解析](../packages/data/ast.ts)、[内核测试](../packages/data/tests/CharBuild.test.ts)、[表达式测试](../packages/data/tests/evaluateAST.test.ts)、[DOT 测试](../packages/data/tests/dot.test.ts)、[时间轴测试](../packages/data/tests/timeline.test.ts) |
+| 等级对象与查表 | [LeveledHelpers](../packages/data/leveled/LeveledHelpers.ts)、[武器](../packages/data/leveled/LeveledWeapon.ts)、[MOD](../packages/data/leveled/LeveledMod.ts)、[BUFF](../packages/data/leveled/LeveledBuff.ts) |
 | 页面与比较 | [构筑页](../src/views/CharBuildView.vue)、[简洁模式](../src/components/CharBuildSimpleView.vue)、[比较页](../src/views/CharBuildCompare.vue)、[路由](../src/router.ts) |
-| 时间轴形状与持久化 | [RawTimelineData](../src/data/timeline-data.ts)、[内联动作转换](../src/utils/inlineActionsToTimeline.ts)、[时间轴存储](../src/store/timeline.ts) |
-| Worker | [构筑快照](../src/data/CharBuildSnapshot.ts)、[收益 Worker](../src/data/CharBuild.worker.ts)、[自动配装 Worker](../src/data/AutoBuild.worker.ts) |
+| 时间轴形状与持久化 | [RawTimelineData](../packages/data/timeline-data.ts)、[内联动作转换](../src/utils/inlineActionsToTimeline.ts)、[时间轴存储](../src/store/timeline.ts) |
+| Worker | [构筑快照](../packages/data/CharBuildSnapshot.ts)、[收益 Worker](../packages/data/CharBuild.worker.ts)、[自动配装 Worker](../packages/data/AutoBuild.worker.ts) |
 | 本地远端来源 | [useCharRemote](../src/composables/useCharRemote.ts) |
 | 公开构筑服务 | [构筑解析器](../server/src/db/mod/build.ts)、[服务端目标值](../server/src/build-target-value.ts)、[目标值测试](../server/src/build-target-value.test.ts) |
 | 程序接口与 Agent | [API 契约](../src/utils/build-api.contract.d.ts)、[API 实现](../src/utils/build-api.ts)、[沙箱](../src/utils/code-sandbox.ts)、[配装 Agent](../src/api/buildAgent.ts)、[对话存储](../src/composables/useBuildChat.ts) |

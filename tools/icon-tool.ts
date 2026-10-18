@@ -1,12 +1,15 @@
 #!/usr/bin/env bun
 
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
-import { join, relative } from "node:path"
-import { format } from "prettier"
+import { dirname, join, relative } from "node:path"
+import { fileURLToPath } from "node:url"
 
-const ICON_FILE = "src/components/Icon.vue"
-const REMIXICON_GLYPH_FILE = "node_modules/remixicon/fonts/remixicon.glyph.json"
-const PROJECT_DIR = "src"
+/** 以下相对路径一律相对仓库根：切到工具所在目录的上级，保证从任何 cwd 调用口径一致 */
+process.chdir(join(dirname(fileURLToPath(import.meta.url)), ".."))
+
+const ICON_FILE = "apps/web/src/components/Icon.vue"
+const REMIXICON_GLYPH_FILE = "apps/web/node_modules/remixicon/fonts/remixicon.glyph.json"
+const PROJECT_DIR = "apps/web/src"
 const IGNORE_LIST_FILE = "tools/.icon_ignore"
 // radix 图标缓存目录（被 .gitignore 忽略，丢失时由本工具自动重建）
 const RADIX_ICONS_DIR = join(__dirname, "radix-icons")

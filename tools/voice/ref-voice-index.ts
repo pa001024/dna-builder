@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises"
 import path from "node:path"
-import charData from "../../src/data/d/char.data"
-import { charVoiceData } from "../../src/data/d/charvoice.data"
+import charData from "../../packages/data/d/char.data"
+import { charVoiceData } from "../../packages/data/d/charvoice.data"
 import type { ExtVoiceEmotion } from "./emotion"
 import { classifyEmotionHeuristic } from "./emotion"
 

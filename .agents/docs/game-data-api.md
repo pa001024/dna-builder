@@ -1,17 +1,17 @@
 # 游戏数据 GraphQL 接口（gameData*）
 
-把 `src/data/d/*.data.ts` 的全部数据集收敛到一个统一的 GraphQL 入口，供 MCP、脚本与第三方工具查询，
+把 `packages/data/d/*.data.ts` 的全部数据集收敛到一个统一的 GraphQL 入口，供 MCP、脚本与第三方工具查询，
 不必为每张表单独定义 GraphQL 类型。
 
 ## 代码位置
 
 | 文件 | 职责 |
 |---|---|
-| `server/src/db/mod/gameData.ts` | GraphQL typeDefs / resolvers / `JSON` 标量 |
-| `server/src/db/mod/gameDataRegistry.ts` | 数据模块登记表、数据集枚举、记录标准化、字段与取值统计 |
-| `server/src/db/mod/gameDataQuery.ts` | 纯函数查询引擎（过滤 / 全文匹配 / 排序 / 投影 / 分页） |
-| `server/src/db/mod/gameData.test.ts` | 三层测试：注册表、查询引擎、GraphQL 端到端 |
-| `server/src/db/introspection.ts` | 内省查询识别（graphql-jit 守卫，见文末） |
+| `apps/server/src/db/mod/gameData.ts` | GraphQL typeDefs / resolvers / `JSON` 标量 |
+| `apps/server/src/db/mod/gameDataRegistry.ts` | 数据模块登记表、数据集枚举、记录标准化、字段与取值统计 |
+| `apps/server/src/db/mod/gameDataQuery.ts` | 纯函数查询引擎（过滤 / 全文匹配 / 排序 / 投影 / 分页） |
+| `apps/server/src/db/mod/gameData.test.ts` | 三层测试：注册表、查询引擎、GraphQL 端到端 |
+| `apps/server/src/db/introspection.ts` | 内省查询识别（graphql-jit 守卫，见文末） |
 
 ## 查询入口
 
@@ -50,7 +50,7 @@ query {
 }
 ```
 
-前端调用由 `pnpm gen` 生成（`src/api/gen/api-queries.ts` 的 `gameDataQuery` / `gameDataSetsQuery` / …）。
+前端调用由 `pnpm gen` 生成（`apps/web/src/api/gen/api-queries.ts` 的 `gameDataQuery` / `gameDataSetsQuery` / …）。
 
 ## 数据集 id 口径
 
@@ -114,8 +114,8 @@ query {
   在类型上过不去。需要懒加载的信息一律做成 Query 字段（`gameDataFields` 就是这么来的）。
 - **内省查询绕开 graphql-jit**：graphql v17 把参数默认值改成 `default: { value }`，而 graphql-jit 仍读 v16 的
   `defaultValue`，于是内省字段 `directives(includeDeprecated: Boolean!)` 被判成「必填参数未提供」，
-  GraphiQL 直接报 `Error fetching schema`。`server/src/db/yoga.ts` 用 `useGraphQlJit({}, { enableIf })`
-  把内省查询放行给默认执行器，回归测试在 `server/src/db/introspection.test.ts`。
+  GraphiQL 直接报 `Error fetching schema`。`apps/server/src/db/yoga.ts` 用 `useGraphQlJit({}, { enableIf })`
+  把内省查询放行给默认执行器，回归测试在 `apps/server/src/db/introspection.test.ts`。
 - **graphql-jit 的字面量告警**是既有现象：它对所有 `parseLiteral` 形参个数 > 1 的标量都会打印
   `Scalar with variable inputs detected...`，graphql v17 的内置标量（String / Int / Boolean）也是这个形状，
   与自定义标量无关，不影响结果。

@@ -2,12 +2,12 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import { encode } from "@msgpack/msgpack"
 import { zipSync } from "fflate"
 import { globSync } from "glob"
-import { computeRagFingerprints } from "../src/data/rag/corpus"
-import { DATA_PACK_FORMAT_MAJOR, normalizeDataPackMajor } from "../src/utils/data-pack/data-pack-format"
+import { computeRagFingerprints } from "../packages/data/rag/corpus"
+import { DATA_PACK_FORMAT_MAJOR, normalizeDataPackMajor } from "../apps/web/src/utils/data-pack/data-pack-format"
 import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
 /** 数据包覆盖的语言（RAG 指纹按语言各算一份，与服务端索引的语言口径一致） */
@@ -54,11 +54,13 @@ const version = versionArgIndex >= 0 ? args[versionArgIndex + 1] : null
 const notesArgIndex = args.findIndex(arg => arg === "-m" || arg === "--msg")
 const notes = notesArgIndex >= 0 ? args[notesArgIndex + 1] : undefined
 
-const rootDir = path.resolve(".")
-const sourceRoot = path.resolve(rootDir, "src", "data", "d")
-const outDir = path.resolve(rootDir, "mock", "data-pack")
-const versionsPath = path.resolve(rootDir, "mock", "data-pack", "versions.json")
-const publicImgsRoot = path.resolve(rootDir, "public", "imgs")
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关，保证从任何目录调用口径一致 */
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const webDir = path.resolve(rootDir, "apps", "web")
+const sourceRoot = path.resolve(rootDir, "packages", "data", "d")
+const outDir = path.resolve(webDir, "mock", "data-pack")
+const versionsPath = path.resolve(webDir, "mock", "data-pack", "versions.json")
+const publicImgsRoot = path.resolve(webDir, "public", "imgs")
 
 /**
  * 将特殊值转换为可序列化结构。

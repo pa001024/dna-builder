@@ -5,7 +5,7 @@ on:
         branches:
             - master
         paths:
-            - "src/data/package.json"
+            - "packages/data/package.json"
     workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: src/data
+                working-directory: packages/data
         steps:
             - uses: actions/checkout@v4
 

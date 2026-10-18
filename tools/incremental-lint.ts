@@ -14,8 +14,9 @@
  * components.d.ts 裁剪等程序内裁剪手段：program 恒为全量，控制力只体现在诊断过滤。
  *
  * 工作流程：
- * 1. 按 `tsconfig.json` 的 include/exclude 枚举工程内源文件，另枚举数据文件
- *    （tsconfig 排除了它们，但它们通过 import 参与 program，必须纳入指纹与依赖图，
+ * 1. 按 `apps/web/tsconfig.json` 的 include/exclude 枚举 Web 工程内源文件，
+ *    另枚举数据包源码（packages/data 非数据集模块）与数据文件
+ *    （数据文件被 Web tsconfig 排除，但它们通过 import 参与 program，必须纳入指纹与依赖图，
  *    且本次直接以真实源码参与检查），记录 mtime + size 指纹；
  * 2. 与上次「检查通过」时写入 `.tmp/lint-cache.json` 的指纹比对，得到新增 / 修改 / 删除集合；
  * 3. 用缓存的 import 关系图求反向依赖闭包：改动文件 + 所有直接/间接依赖它们的文件
@@ -46,12 +47,18 @@ import * as ts from "typescript"
 
 /** 工程根目录：本文件位于 `<root>/tools/` 下 */
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+/** Web 应用目录：前端工程（含 src、public、mock、vite 配置）已收拢到 apps/web */
+const WEB_ROOT = path.join(PROJECT_ROOT, "apps", "web")
+/** Web 应用的根 tsconfig（类型检查 program 的 include / paths 口径以它为准） */
+const WEB_TSCONFIG = path.join(WEB_ROOT, "tsconfig.json")
+/** 数据包源码目录：原 src/data 已独立为 workspace 包 packages/data */
+const DATA_PKG_DIR = path.join(PROJECT_ROOT, "packages", "data")
 /** 临时文件目录（已被 .gitignore 忽略），指纹缓存放这里 */
 const TMP_DIR = path.join(PROJECT_ROOT, ".tmp")
 /** 改动指纹缓存文件 */
 const CACHE_FILE = path.join(TMP_DIR, "lint-cache.json")
 /** 缓存结构版本：本脚本的判断语义变化时 +1，让旧缓存整体失效 */
-const CACHE_VERSION = 5
+const CACHE_VERSION = 6
 /** 影响闭包超过工程文件总数的该比例时，退回自研全量诊断（增量已无意义） */
 const FULL_CHECK_RATIO = 0.5
 /** 单次传给 Biome 的最大文件数，避免 Windows 命令行过长 */
@@ -62,12 +69,15 @@ const STAT_CONCURRENCY = 64
 const NODE_OPTIONS = "--max-old-space-size=8192"
 /** 运行 vue-tsc / biome 用的 node 可执行文件（避免 .cmd / shell 包装的平台差异） */
 const NODE_BIN = process.env.DNA_LINT_NODE ?? "node"
-/** vue-tsc 入口（仅 --full / lint:full 路径使用） */
-const VUE_TSC_ENTRY = path.join(PROJECT_ROOT, "node_modules", "vue-tsc", "bin", "vue-tsc.js")
+/** vue-tsc 入口（仅 --full / lint:full 路径使用；随前端工程收拢到 apps/web 内安装） */
+const VUE_TSC_ENTRY = path.join(WEB_ROOT, "node_modules", "vue-tsc", "bin", "vue-tsc.js")
 /** tsc-rs 启动器（ESM，由 node 直接执行；node_modules/.bin 的包装在 Windows 下需要 shell） */
-const TSC_RS_ENTRY = process.env.TSC_RS_BIN ?? path.join(PROJECT_ROOT, "node_modules", "tsc-rs", "bin", "tsc-rs")
-/** 传给 tsc-rs 的临时 tsconfig 所在目录（.tmp 已被 git 忽略，不会污染跟踪文件） */
-const TSC_RS_TMP_DIR = path.join(TMP_DIR, "tsc-rs-check")
+const TSC_RS_ENTRY = process.env.TSC_RS_BIN ?? path.join(WEB_ROOT, "node_modules", "tsc-rs", "bin", "tsc-rs")
+/** 传给 tsc-rs 的临时 tsconfig 所在目录。
+ * 放在 apps/web/.tmp 下（同样被 git 忽略）：contentMapper 的包解析与 @types 的
+ * typeRoots 都锚定在 tsconfig 所在目录，随 Web 工程的 node_modules（含
+ * tsc-rs-*-mapper、@vue/language-core 与全套 @types）才能被解析到。 */
+const TSC_RS_TMP_DIR = path.join(WEB_ROOT, ".tmp", "tsc-rs-check")
 /** 本次运行的临时 tsconfig 路径（带 PID，防并发 lint 互踩） */
 const TSC_RS_TMP_CONFIG = path.join(TSC_RS_TMP_DIR, `tsconfig.${process.pid}.json`)
 /** 最小 program 的临时 tsconfig 路径（数据值变动快径） */
@@ -116,16 +126,20 @@ const LINT_IGNORES = [
     "**/.workbuddy/**",
     "**/.vscode/**",
     "**/.idea/**",
-    "externals/graphql-mobius/**",
-    "public/imgs/**",
-    "public/audio/**",
-    "public/shaders/**",
-    "src/data/txt/**",
-    "src-tauri/gen/**",
-    "src-tauri/sidecar/**",
+    "packages/graphql-mobius/**",
+    "apps/web/public/imgs/**",
+    "apps/web/public/audio/**",
+    "apps/web/public/shaders/**",
+    "packages/data/txt/**",
+    "apps/web/src-tauri/gen/**",
+    "apps/web/src-tauri/sidecar/**",
 ]
-/** 数据文件判定：与数据包改写插件同口径（tsconfig include 排除了它们） */
-const DATA_GLOBS = ["src/data/d/**/*.data.ts"]
+/** 数据文件判定：与数据包改写插件同口径（它们在 Web tsconfig include 之外，独立成包） */
+const DATA_GLOBS = ["packages/data/d/**/*.data.ts"]
+/** 数据包内除大体量数据集外的源码：随 Web 工程文件一起纳入 program（原 src 下全量口径） */
+const PKG_DATA_GLOBS = ["packages/data/**/*.ts"]
+/** 数据包源码枚举时跳过：数据集（走 DATA_GLOBS + 声明覆盖）、依赖与构建产物 */
+const PKG_DATA_IGNORES = ["packages/data/d/**/*.data.ts", "**/node_modules/**", "**/dist/**"]
 /** import / export ... from / require / 动态 import 的说明符抽取（宁可多抽，不可漏抽） */
 const SPECIFIER_PATTERN = /(?:\bfrom\s*|\bimport\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)["']([^"']+)["']/g
 /** 环境声明判定：`.d.ts` 或源码里的 declare global / declare module */
@@ -394,11 +408,11 @@ function isClean(changes: ChangeSet): boolean {
  * @returns include / exclude 模式列表
  */
 async function loadTsProject(): Promise<{ include: string[]; exclude: string[] }> {
-    const raw = await readTextSafe(path.join(PROJECT_ROOT, "tsconfig.json"))
-    if (!raw) throw new Error("找不到 tsconfig.json")
+    const raw = await readTextSafe(WEB_TSCONFIG)
+    if (!raw) throw new Error(`找不到 ${path.relative(PROJECT_ROOT, WEB_TSCONFIG)}`)
 
     const parsed = parseJsonc(raw) as { include?: unknown; exclude?: unknown; extends?: unknown }
-    if (parsed.extends) throw new Error("tsconfig.json 使用了 extends，增量脚本无法推断检查范围，请改用 pnpm lint:full")
+    if (parsed.extends) throw new Error("apps/web/tsconfig.json 使用了 extends，增量脚本无法推断检查范围，请改用 pnpm lint:full")
 
     const toPatterns = (value: unknown, field: string): string[] => {
         if (value === undefined) return []
@@ -409,20 +423,33 @@ async function loadTsProject(): Promise<{ include: string[]; exclude: string[] }
     }
 
     const include = toPatterns(parsed.include, "include")
-    if (include.length === 0) throw new Error("tsconfig.json 未配置 include，增量脚本无法推断检查范围，请改用 pnpm lint:full")
+    if (include.length === 0) throw new Error("apps/web/tsconfig.json 未配置 include，增量脚本无法推断检查范围，请改用 pnpm lint:full")
 
     return { include, exclude: toPatterns(parsed.exclude, "exclude") }
 }
 
 /**
- * 枚举工程内的 TS / Vue 源文件（tsconfig include 口径，不含被 exclude 的数据文件）。
+ * 枚举 Web 应用内的 TS / Vue 源文件（apps/web/tsconfig.json 的 include 口径）。
+ * 返回路径统一换算成相对工程根（`apps/web/` 前缀），与缓存 / 诊断口径一致。
  *
- * @param include tsconfig 的 include
- * @param exclude tsconfig 的 exclude
+ * @param include tsconfig 的 include（相对 apps/web）
+ * @param exclude tsconfig 的 exclude（相对 apps/web）
  * @returns 相对工程根的 posix 路径（已排序）
  */
-async function listTsFiles(include: string[], exclude: string[]): Promise<string[]> {
-    const files = await glob(include, { cwd: PROJECT_ROOT, ignore: exclude, nodir: true, posix: true })
+async function listWebFiles(include: string[], exclude: string[]): Promise<string[]> {
+    const files = await glob(include, { cwd: WEB_ROOT, ignore: exclude, nodir: true, posix: true })
+    return files.map(rel => `apps/web/${rel}`).sort()
+}
+
+/**
+ * 枚举数据包（packages/data）内除数据集外的 TS 源文件。
+ * 它们原先被根 tsconfig 的 `src/**` 覆盖，独立成包后必须显式枚举，
+ * 否则 CharBuild / leveled / mcp / rag 等模块会掉出类型检查。
+ *
+ * @returns 相对工程根的 posix 路径（已排序）
+ */
+async function listPkgDataFiles(): Promise<string[]> {
+    const files = await glob(PKG_DATA_GLOBS, { cwd: PROJECT_ROOT, ignore: PKG_DATA_IGNORES, nodir: true, posix: true })
     return files.sort()
 }
 
@@ -462,7 +489,7 @@ async function listLintFiles(): Promise<string[]> {
 async function computeFingerprint(): Promise<string> {
     const hash = createHash("sha1")
     hash.update(`v${CACHE_VERSION}`)
-    for (const rel of ["tsconfig.json", "package.json", "pnpm-lock.yaml", "biome.json"]) {
+    for (const rel of ["apps/web/tsconfig.json", "apps/web/package.json", "package.json", "pnpm-lock.yaml", "biome.json"]) {
         hash.update(rel)
         hash.update((await readTextSafe(path.join(PROJECT_ROOT, rel))) ?? "<missing>")
     }
@@ -535,7 +562,8 @@ function resolveSpecifier(specifier: string, fromRel: string, known: Set<string>
     if (!clean) return null
 
     let target: string
-    if (clean.startsWith("@/")) target = path.posix.join("src", clean.slice(2))
+    if (clean === "@/data" || clean.startsWith("@/data/")) target = path.posix.join("packages/data", clean.slice("@/data".length + 1))
+    else if (clean.startsWith("@/")) target = path.posix.join("apps/web/src", clean.slice(2))
     else if (clean.startsWith("./") || clean.startsWith("../")) target = path.posix.join(path.posix.dirname(fromRel), clean)
     else if (clean.startsWith("/")) target = clean.replace(/^\/+/, "")
     else return null
@@ -814,7 +842,7 @@ export function planMinimalFiles(
         if (rel.endsWith(".d.ts")) continue
         if (graph[rel]?.ambient) return null
     }
-    return [...changed.map(item => item.rel), ...ambientDts.filter(rel => rel !== "src/components.d.ts")]
+    return [...changed.map(item => item.rel), ...ambientDts.filter(rel => rel !== "apps/web/src/components.d.ts")]
 }
 
 /**
@@ -890,20 +918,22 @@ function isAbsoluteConfigPath(value: string): boolean {
  * 把 tsconfig 里的相对路径模式转成绝对路径，使临时配置放在任何目录下口径一致。
  * 只处理字符串数组（include / exclude / files）与 paths / typeRoots 这类映射表；
  * 通配符（`*`）按字面保留，path.resolve 不会动它。
+ * Web tsconfig 的相对路径一律相对 apps/web 解析（base 默认为 WEB_ROOT）。
  *
  * @param value 配置值
+ * @param base 相对路径的基准目录
  * @returns 转换后的配置值
  */
-function absolutizeConfigPaths(value: unknown): unknown {
+function absolutizeConfigPaths(value: unknown, base: string = WEB_ROOT): unknown {
     if (Array.isArray(value)) {
         return value.map(item =>
-            typeof item === "string" && !isAbsoluteConfigPath(item) ? path.resolve(PROJECT_ROOT, item).split(path.sep).join("/") : item
+            typeof item === "string" && !isAbsoluteConfigPath(item) ? path.resolve(base, item).split(path.sep).join("/") : item
         )
     }
     if (value !== null && typeof value === "object" && !Array.isArray(value)) {
         const out: Record<string, unknown> = {}
         for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
-            out[key] = absolutizeConfigPaths(entry)
+            out[key] = absolutizeConfigPaths(entry, base)
         }
         return out
     }
@@ -911,15 +941,15 @@ function absolutizeConfigPaths(value: unknown): unknown {
 }
 
 /**
- * 判断文件是否为数据文件（src/data/d 下的 *.data.ts）。
- * 数据文件被 tsconfig 排除但通过 import 参与 program，改动会波及引用方，
+ * 判断文件是否为数据文件（packages/data/d 下的 *.data.ts）。
+ * 数据文件被 Web tsconfig 排除但通过 import 参与 program，改动会波及引用方，
  * 必须纳入指纹与依赖图；program 内一律以缓存声明替代真实源码。
  *
  * @param rel 相对工程根路径
  * @returns 是数据文件时返回 true
  */
 function isDataFile(rel: string): boolean {
-    return rel.startsWith("src/data/d/") && rel.endsWith(".data.ts")
+    return rel.startsWith("packages/data/d/") && rel.endsWith(".data.ts")
 }
 
 /**
@@ -1074,13 +1104,15 @@ async function gcDataDeclDir(decls: Record<string, DataDeclEntry>): Promise<void
 }
 
 /**
- * 由根 tsconfig 生成传给 tsc-rs 的临时配置对象（纯函数，便于单测）：
+ * 由 Web tsconfig 生成传给 tsc-rs 的临时配置对象（纯函数，便于单测）：
  * 剥离 TS 7 已移除的选项、挂上 tsc-rs-vue-mapper，并把相对路径模式转成绝对路径。
+ * 数据包非数据集源码（packages/data）由调用方以 files 追加进 program。
  *
- * @param rootConfig 根 tsconfig 解析结果
+ * @param rootConfig Web tsconfig 解析结果
+ * @param base 相对路径的基准目录（默认 apps/web）
  * @returns 临时配置对象
  */
-export function prepareTscRsConfig(rootConfig: Record<string, unknown>): Record<string, unknown> {
+export function prepareTscRsConfig(rootConfig: Record<string, unknown>, base: string = WEB_ROOT): Record<string, unknown> {
     const compilerOptions = { ...((rootConfig.compilerOptions as Record<string, unknown> | undefined) ?? {}) }
     // TS 7 移除了 baseUrl 与 esModuleInterop=false，保留会直接报 TS5102/TS5108；
     // paths 在无 baseUrl 时相对 tsconfig 所在目录解析，转成绝对路径后口径不变
@@ -1088,9 +1120,9 @@ export function prepareTscRsConfig(rootConfig: Record<string, unknown>): Record<
     delete compilerOptions.esModuleInterop
     const tmp: Record<string, unknown> = { ...rootConfig, compilerOptions }
     for (const field of ["include", "exclude", "files"]) {
-        if (tmp[field] !== undefined) tmp[field] = absolutizeConfigPaths(tmp[field])
+        if (tmp[field] !== undefined) tmp[field] = absolutizeConfigPaths(tmp[field], base)
     }
-    if (compilerOptions.paths !== undefined) compilerOptions.paths = absolutizeConfigPaths(compilerOptions.paths)
+    if (compilerOptions.paths !== undefined) compilerOptions.paths = absolutizeConfigPaths(compilerOptions.paths, base)
     if (compilerOptions.typeRoots !== undefined) compilerOptions.typeRoots = absolutizeConfigPaths(compilerOptions.typeRoots)
     tmp.contentMappers = [
         { package: VUE_MAPPER_PACKAGE, extensions: [".vue"] },
@@ -1102,10 +1134,13 @@ export function prepareTscRsConfig(rootConfig: Record<string, unknown>): Record<
 /**
  * 生成传给 tsc-rs 的临时 tsconfig（位于 .tmp 下，不污染跟踪文件），运行结束即删。
  */
-async function writeTscRsConfig(): Promise<void> {
-    const raw = await readTextSafe(path.join(PROJECT_ROOT, "tsconfig.json"))
-    if (!raw) throw new Error("找不到 tsconfig.json")
+async function writeTscRsConfig(pkgDataFiles: string[]): Promise<void> {
+    const raw = await readTextSafe(WEB_TSCONFIG)
+    if (!raw) throw new Error(`找不到 ${path.relative(PROJECT_ROOT, WEB_TSCONFIG)}`)
     const tmp = prepareTscRsConfig(parseJsonc(raw) as Record<string, unknown>)
+    const files = new Set((tmp.files as string[] | undefined) ?? [])
+    for (const rel of pkgDataFiles) files.add(path.join(PROJECT_ROOT, rel).split(path.sep).join("/"))
+    tmp.files = [...files].sort()
     await mkdir(TSC_RS_TMP_DIR, { recursive: true })
     await cleanupStaleTscRsConfigs()
     await writeFile(TSC_RS_TMP_CONFIG, `${JSON.stringify(tmp, null, 4)}\n`, "utf8")
@@ -1226,21 +1261,23 @@ export function isVirtualOnlyDiagnostic(diagnostic: TscRsDiagnostic): boolean {
  *
  * @param roots 增量根文件（相对路径，已过滤存在性）；null 表示展示全部诊断
  * @param verbose 是否打印过程信息
+ * @param pkgDataFiles 数据包非数据集源码（相对工程根），写入临时配置的 files
  * @returns 退出码（0 通过，1 有 error 级诊断或执行失败）
  */
 async function runTscRsCheck(
     roots: string[] | null,
     manifest: Record<string, string>,
     verbose: boolean,
-    minimalFiles: string[] | null = null
+    minimalFiles: string[] | null = null,
+    pkgDataFiles: string[] = []
 ): Promise<{ code: number }> {
     const started = Date.now()
-    await writeTscRsConfig()
+    await writeTscRsConfig(pkgDataFiles)
     await writeFile(path.join(TSC_RS_TMP_DIR, DATA_DECL_MANIFEST), `${JSON.stringify(manifest, null, 4)}\n`, "utf8")
     let configPath = TSC_RS_TMP_CONFIG
     if (minimalFiles !== null) {
-        const raw = await readTextSafe(path.join(PROJECT_ROOT, "tsconfig.json"))
-        if (!raw) throw new Error("找不到 tsconfig.json")
+        const raw = await readTextSafe(WEB_TSCONFIG)
+        if (!raw) throw new Error(`找不到 ${path.relative(PROJECT_ROOT, WEB_TSCONFIG)}`)
         const full = prepareTscRsConfig(parseJsonc(raw) as Record<string, unknown>)
         const minimal = {
             compilerOptions: full.compilerOptions,
@@ -1366,9 +1403,12 @@ async function main(): Promise<void> {
 
     const started = Date.now()
     const tsProject = await loadTsProject()
-    const projectFiles = await listTsFiles(tsProject.include, tsProject.exclude)
+    const webFiles = await listWebFiles(tsProject.include, tsProject.exclude)
+    // 数据包非数据集源码：单体时代被根 tsconfig 的 src/** 覆盖，独立成包后显式并入
+    const pkgDataFiles = await listPkgDataFiles()
+    const projectFiles = [...webFiles, ...pkgDataFiles].sort()
     const projectSet = new Set(projectFiles)
-    // 数据文件被 tsconfig 排除但通过 import 参与 program，必须并入指纹与依赖图口径
+    // 数据文件被 Web tsconfig 排除但通过 import 参与 program，必须并入指纹与依赖图口径
     const dataFiles = (await listDataFiles()).filter(rel => !projectSet.has(rel))
     const tsFiles = [...projectFiles, ...dataFiles].sort()
     const tsSet = new Set(tsFiles)
@@ -1400,7 +1440,7 @@ async function main(): Promise<void> {
     const tsDirty = !cacheValid || !isClean(tsChanges)
     const biomeDirty = !cacheValid || !isClean(lintChanges)
 
-    // 环境声明文件影响的是整个程序（例如 src/components.d.ts 一变，所有用到自动导入组件的
+    // 环境声明文件影响的是整个程序（例如 apps/web/src/components.d.ts 一变，所有用到自动导入组件的
     // 模板推断结果都会变），而模板引用不产生 import 边，闭包算不到它们，只能全量诊断。
     // 但「环境声明文件被改动」≠「全局类型面变了」：普通源文件里的 window.* 声明扩充
     // （如 CharBuildView.vue / store/db.ts）改到声明以外的代码是常事，按全局类型面哈希判定，
@@ -1530,7 +1570,8 @@ async function main(): Promise<void> {
                 minimalFiles !== null ? tsChanges.modified : displayRoots,
                 dataPlan?.manifest ?? {},
                 options.verbose,
-                minimalFiles
+                minimalFiles,
+                pkgDataFiles
             )
             if (result.code !== 0) {
                 console.error("[lint] 类型检查未通过（缓存不更新，下次会重新检查这些文件）")
@@ -1539,7 +1580,7 @@ async function main(): Promise<void> {
             }
         }
     } else {
-        log("没有改动的 TS 文件或不在src目录下，跳过类型检查", false, options)
+        log("没有改动的 TS 文件，跳过类型检查", false, options)
     }
 
     // 只有全部通过才落盘指纹：失败时缓存保持旧值，下次会重新检查这批文件；

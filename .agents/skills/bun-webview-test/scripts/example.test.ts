@@ -10,7 +10,7 @@
  * 关键约定: 导航地址统一带 `?hideUpdateInfo=1`。
  * 应用启动会依次弹「应用更新 → 数据包安装/更新 → 更新日志」，无头环境里没有数据包，
  * 「安装数据包」弹窗会盖住整个页面，后面的 DOM 断言就全部拿不到内容。
- * 该参数禁用整套启动弹窗（见 src/components/StartupModal.vue），必须在首次导航的 URL 上带上。
+ * 该参数禁用整套启动弹窗（见 apps/web/src/components/StartupModal.vue），必须在首次导航的 URL 上带上。
  *
  * 失败时会自动在 `screenshots/` 下保存 PNG，方便定位问题；
  * 以 `.tmp` 为工作目录运行可让截图落在 `.tmp/screenshots/`。

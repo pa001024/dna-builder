@@ -12,7 +12,7 @@
  * ```json
  * {
  *   "files": {
- *     "src/components/Foo.vue": {
+ *     "apps/web/src/components/Foo.vue": {
  *       "ns": "foo",
  *       "texts": { "保存成功": "save_ok", "取消": "cancel" }
  *     }
@@ -37,9 +37,14 @@
  */
 
 import { readFile, writeFile } from "node:fs/promises"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 
-const ROOT = process.cwd()
+/** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
+const WEB_DIR = join(REPO_ROOT, "apps", "web")
+
+const ROOT = REPO_ROOT
 /** 语言包目录固定 6 个 */
 const LOCALES = ["zh-CN", "zh-TW", "en", "ja", "ko", "fr"]
 /** 视为「用户可见文案」的静态属性 */
@@ -174,7 +179,7 @@ async function main(): Promise<void> {
     if (apply && Object.keys(i18n).length) {
         console.log("\n=== 写入翻译条目 ===")
         for (const locale of LOCALES) {
-            const path = join(ROOT, "public", "i18n", locale, "translation.json")
+            const path = join(WEB_DIR, "public", "i18n", locale, "translation.json")
             const json = JSON.parse(await readFile(path, "utf-8")) as Record<string, unknown>
             let added = 0
             let skipped = 0

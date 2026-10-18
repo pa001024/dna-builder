@@ -105,7 +105,7 @@ Game-data and damage-calculation SDKs, pick your language (aligned calculation r
 
 | Language        | Package                                                            | Description                                                              | Docs                                     |
 | --------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ | ---------------------------------------- |
-| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | Game data + character builds / damage calculation, also usable as MCP Server | [src/data/README.md](src/data/README.md) |
+| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | Game data + character builds / damage calculation, also usable as MCP Server | [packages/data/README.md](packages/data/README.md) |
 | Python          | `dna-builder-sdk`                                                  | Public backend read API + data packs / on-demand loading + pure expression evaluation | [sdk/python/README.md](sdk/python/README.md) |
 | Go              | `dob`                                                              | Same capabilities as the Python SDK: public backend read API + data loading + calculation | [sdk/go](sdk/go/README.md) |
 

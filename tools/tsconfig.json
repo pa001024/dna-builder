@@ -17,7 +17,11 @@
         "jsxImportSource": "vue",
         "experimentalDecorators": true,
         "baseUrl": ".",
-        "paths": {},
+        "paths": {
+            "@/*": ["../apps/web/src/*"],
+            "@/data": ["../packages/data/index.ts"],
+            "@/data/*": ["../packages/data/*"]
+        },
         /* Linting */
         "strict": true,
         "forceConsistentCasingInFileNames": true,
