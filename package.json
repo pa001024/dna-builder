@@ -31,7 +31,7 @@
         "voice:synth": "bun tools/voice/synthesize.ts",
         "voice:qa": "bun tools/voice/qa-sweep.ts",
         "voice:upload": "bun tools/voice/upload-aistory.ts",
-        "build:dob-script": "cargo build --manifest-path apps/web/src-tauri/Cargo.toml --release --features dob-script-cli --example dob-script && node tools/prepare-dob-script.mjs",
+        "build:dob-script": "cargo build --manifest-path crates/dob-script-runtime/Cargo.toml --release --features dob-script-cli --example dob-script && node tools/prepare-dob-script.mjs",
         "build:hpatchz-wasm": "cargo build --manifest-path crates/hpatchz-wasm/Cargo.toml --target wasm32-unknown-unknown --release && node tools/prepare-hpatchz-wasm.mjs",
         "build:all": "pnpm build:app",
         "build:api": "cd packages/dna-api && bun run build && cd ../.. && pnpm install",

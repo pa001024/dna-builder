@@ -32,7 +32,7 @@ static BASE64_TEMPLATE_CACHE: LazyLock<RwLock<HashMap<String, Box<Mat>>>> =
 
 /// 获取模板（优先从缓存读取，未命中则加载文件并缓存）
 /// 返回Result<Box<Mat>, TemplateError>，方便调用者处理错误
-pub(crate) fn get_template(path: &str) -> Result<Box<Mat>, TemplateError> {
+pub fn get_template(path: &str) -> Result<Box<Mat>, TemplateError> {
     // 步骤1：路径规范化（解析./、../，转为绝对路径），避免重复缓存
     let path_buf = Path::new(path)
         .canonicalize() // 规范化路径，失败则返回文件不存在错误
@@ -86,7 +86,7 @@ pub(crate) fn get_template(path: &str) -> Result<Box<Mat>, TemplateError> {
 
 /// 从 base64 字符串获取模板（优先从缓存读取，未命中则解码并缓存）
 /// 返回Result<Box<Mat>, TemplateError>，方便调用者处理错误
-pub(crate) fn get_template_b64(b64_str: &str) -> Result<Box<Mat>, TemplateError> {
+pub fn get_template_b64(b64_str: &str) -> Result<Box<Mat>, TemplateError> {
     // 步骤1：先查缓存（仅获取读锁，支持多线程同时读取，锁持有时间极短）
     {
         let cache = BASE64_TEMPLATE_CACHE

@@ -1,19 +1,19 @@
-use crate::submodules::async_tokio::TokioJobExecutor;
-use crate::submodules::fx::hide_border_immediately;
-use crate::submodules::input::clear_last_background_activated_hwnd;
-use crate::submodules::jsdnn::JsDnnNet;
-use crate::submodules::jsmat::JsMat;
-use crate::submodules::jstimer::JsTimer;
+use crate::async_tokio::TokioJobExecutor;
+use crate::fx::hide_border_immediately;
+use crate::input::clear_last_background_activated_hwnd;
+use crate::jsdnn::JsDnnNet;
+use crate::jsmat::JsMat;
+use crate::jstimer::JsTimer;
 #[cfg(feature = "dob-script-cli")]
-use crate::submodules::logger::StdioLogger;
-use crate::submodules::logger::TauriLogger;
+use crate::logger::StdioLogger;
+use crate::logger::TauriLogger;
 #[cfg(feature = "dob-script-cli")]
-use crate::submodules::script_builtin::set_script_cli_config;
-use crate::submodules::script_builtin::{
+use crate::script_builtin::set_script_cli_config;
+use crate::script_builtin::{
     register_builtin_functions, set_current_script_path, set_script_event_app_handle,
 };
-use crate::submodules::script_console::{Console, ConsoleState, Logger};
-use crate::submodules::script_module::ScriptModuleLoader;
+use crate::script_console::{Console, ConsoleState, Logger};
+use crate::script_module::ScriptModuleLoader;
 use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::context::ContextBuilder;
@@ -42,7 +42,7 @@ thread_local! {
 pub const SCRIPT_STOP_INTERRUPT_MESSAGE: &str = "__SCRIPT_STOP_REQUESTED__";
 
 #[derive(Clone)]
-pub(crate) struct ScriptStopSnapshot {
+pub struct ScriptStopSnapshot {
     global_generation: u64,
     path_generation: u64,
     script_path: String,
@@ -832,12 +832,12 @@ pub fn get_script_runtime_info() -> (bool, Vec<String>, usize) {
 }
 
 /// 捕获当前线程绑定的脚本停止快照（用于跨线程传播停止语义）。
-pub(crate) fn capture_current_script_stop_snapshot() -> Option<ScriptStopSnapshot> {
+pub fn capture_current_script_stop_snapshot() -> Option<ScriptStopSnapshot> {
     CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| storage.borrow().clone())
 }
 
 /// 在当前线程临时安装指定停止快照并执行任务，任务完成后恢复原快照。
-pub(crate) fn run_with_script_stop_snapshot<T>(
+pub fn run_with_script_stop_snapshot<T>(
     snapshot: Option<ScriptStopSnapshot>,
     task: impl FnOnce() -> T,
 ) -> T {

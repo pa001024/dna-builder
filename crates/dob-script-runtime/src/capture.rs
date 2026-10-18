@@ -1,5 +1,5 @@
-use crate::submodules::d3d11::{self, create_d3d_device};
-use crate::submodules::script::should_stop_current_script;
+use crate::d3d11::{self, create_d3d_device};
+use crate::script::should_stop_current_script;
 use opencv::{
     core::{CV_8UC4, Mat},
     imgproc,
@@ -52,7 +52,7 @@ pub enum UtilError {
     #[error("OpenCV 错误: {0}")]
     OpenCV(String),
 }
-pub(crate) fn hbitmap_to_bgr_mat(hbmp: HBITMAP) -> Result<Mat, UtilError> {
+pub fn hbitmap_to_bgr_mat(hbmp: HBITMAP) -> Result<Mat, UtilError> {
     unsafe {
         // Query bitmap size via GetObjectW
         let mut bmp: BITMAP = zeroed();
@@ -132,7 +132,7 @@ pub(crate) fn hbitmap_to_bgr_mat(hbmp: HBITMAP) -> Result<Mat, UtilError> {
 }
 
 #[allow(unused)]
-pub(crate) fn get_color(hwnd: HWND, x: i32, y: i32) -> u32 {
+pub fn get_color(hwnd: HWND, x: i32, y: i32) -> u32 {
     use windows::Win32::Graphics::Gdi::GetPixel;
     unsafe {
         let (_window_rect, _client_rect, offset_x, offset_y) =
@@ -144,7 +144,7 @@ pub(crate) fn get_color(hwnd: HWND, x: i32, y: i32) -> u32 {
     }
 }
 #[allow(unused)]
-pub(crate) fn check_color(hwnd: HWND, x: i32, y: i32, color: i32) -> bool {
+pub fn check_color(hwnd: HWND, x: i32, y: i32, color: i32) -> bool {
     // 获取指定坐标的颜色
     let pixel_value = get_color(hwnd, x, y);
 
@@ -173,7 +173,7 @@ pub(crate) fn check_color(hwnd: HWND, x: i32, y: i32, color: i32) -> bool {
 ///
 /// - `target_width/target_height` 为目标客户区宽高；
 /// - 当客户区尺寸不一致时，将窗口调整到目标尺寸（位置保持旧逻辑：移动到 0,0）。
-pub(crate) fn check_size(hwnd: HWND, target_width: i32, target_height: i32) -> bool {
+pub fn check_size(hwnd: HWND, target_width: i32, target_height: i32) -> bool {
     use windows::Win32::Foundation::RECT;
     use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, GetWindowRect, MoveWindow};
 
@@ -916,12 +916,12 @@ fn is_window_alive(hwnd: HWND) -> bool {
 }
 
 /// WGC 截图（完整客户区）。
-pub(crate) fn capture_window_wgc(hwnd: HWND) -> Option<Box<Mat>> {
+pub fn capture_window_wgc(hwnd: HWND) -> Option<Box<Mat>> {
     capture_window_wgc_roi_internal(hwnd, None)
 }
 
 /// WGC 截图并按 ROI 裁剪，ROI 相对客户区。
-pub(crate) fn capture_window_wgc_roi(
+pub fn capture_window_wgc_roi(
     hwnd: HWND,
     x: i32,
     y: i32,
@@ -988,7 +988,7 @@ fn capture_window_wgc_roi_internal(
 }
 
 /// 运行计数 JSON，`hwnd` 为空时汇总全部服务器。
-pub(crate) fn wgc_capture_stats_json(hwnd: Option<isize>) -> String {
+pub fn wgc_capture_stats_json(hwnd: Option<isize>) -> String {
     WGC_SERVERS.with(|cell| {
         let servers = cell.borrow();
         let mut entries = Vec::new();
@@ -1048,12 +1048,12 @@ mod wgc_server_tests {
 }
 
 // 截图（完整客户区）
-pub(crate) fn capture_window(hwnd: HWND) -> Option<Box<Mat>> {
+pub fn capture_window(hwnd: HWND) -> Option<Box<Mat>> {
     capture_window_with_roi_internal(hwnd, None)
 }
 
 /// 截图并直接按 ROI 裁剪（ROI 相对客户区）。
-pub(crate) fn capture_window_roi(hwnd: HWND, x: i32, y: i32, w: i32, h: i32) -> Option<Box<Mat>> {
+pub fn capture_window_roi(hwnd: HWND, x: i32, y: i32, w: i32, h: i32) -> Option<Box<Mat>> {
     capture_window_with_roi_internal(hwnd, Some((x, y, w, h)))
 }
 

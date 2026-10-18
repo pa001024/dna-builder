@@ -1,4 +1,4 @@
-use crate::submodules::jsmat::{IntoJs, JsMat};
+use crate::jsmat::{IntoJs, JsMat};
 use boa_engine::object::ObjectInitializer;
 use boa_engine::object::builtins::JsArray;
 use boa_engine::property::Attribute;
@@ -19,7 +19,7 @@ use std::cell::RefCell;
 #[derive(Debug, Trace, Finalize, JsData)]
 pub struct JsDnnNet {
     #[unsafe_ignore_trace]
-    pub(crate) inner: RefCell<dnn::Net>,
+    pub inner: RefCell<dnn::Net>,
 }
 
 /// 将 JS 值解析为 `Mat` 对象引用。

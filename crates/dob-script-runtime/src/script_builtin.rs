@@ -35,8 +35,8 @@ use windows::Win32::Graphics::Gdi::{ClientToScreen, GetDC, GetPixel, ReleaseDC, 
 use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
 use zip::ZipArchive;
 
-use crate::submodules::script_mcp::record_script_console;
-use crate::submodules::{
+use crate::script_mcp::record_script_console;
+use crate::{
     color_match::{check_color_mat, find_color_and_match_template, rgb_to_bgr},
     dll_call::dll_call_js,
     fx::draw_border,
@@ -62,7 +62,7 @@ use crate::submodules::{
     },
     tpl::{get_template, get_template_b64},
     tpl_match::match_template,
-    util::{
+    capture::{
         capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size,
         wgc_capture_stats_json,
     },
@@ -5361,8 +5361,8 @@ fn _emit_script_status(
         } else {
             "upsert"
         };
-        if crate::submodules::script_mcp::should_record_script_mcp_cache() {
-            crate::submodules::script_mcp::record_script_status(
+        if crate::script_mcp::should_record_script_mcp_cache() {
+            crate::script_mcp::record_script_status(
                 scope.clone(),
                 action.to_string(),
                 title.clone(),

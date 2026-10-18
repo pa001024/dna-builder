@@ -24,7 +24,7 @@ pub enum MatchError {
 ///
 /// # 返回值
 /// * `Result<Option<(i32, i32)>>` - 匹配位置（x, y）或错误
-pub(crate) fn match_template(
+pub fn match_template(
     img_bgr: &Mat,
     template: &Mat,
     tolerance: f64,

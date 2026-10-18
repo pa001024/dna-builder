@@ -1,6 +1,6 @@
-use crate::submodules::script_builtin::get_current_script_path;
-use crate::submodules::script_console::{ConsoleState, Logger};
-use crate::submodules::script_mcp::{record_script_console, should_record_script_mcp_cache};
+use crate::script_builtin::get_current_script_path;
+use crate::script_console::{ConsoleState, Logger};
+use crate::script_mcp::{record_script_console, should_record_script_mcp_cache};
 use boa_engine::{Context, JsResult};
 use boa_gc::{Finalize, Trace};
 use std::sync::Arc;

@@ -2,25 +2,6 @@
 
 use serde::Serialize;
 
-/// CLI 入口：执行指定脚本文件。
-///
-/// # 参数
-/// - `script_path`: 脚本路径（可相对或绝对）
-/// - `script_config`: 可选脚本配置（用于 CLI 模式 readConfig）
-/// - `script_config_file_path`: 可选配置文件路径（用于 CLI 模式 setConfig 写回）
-///
-/// # 返回
-/// 返回脚本执行结果字符串；失败时返回错误信息
-#[cfg(feature = "dob-script-cli")]
-pub async fn run_script_cli(
-    script_path: String,
-    script_config: Option<serde_json::Value>,
-    script_config_file_path: Option<String>,
-) -> Result<String, String> {
-    use crate::submodules::script::run_script_file_cli;
-    run_script_file_cli(script_path, script_config, script_config_file_path).await
-}
-
 #[tauri::command]
 pub async fn run_script(
     script_path: String,

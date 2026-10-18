@@ -20,18 +20,16 @@ fn main() {
 }
 
 /**
- * 为 Windows 可执行目标注入新版 Common Controls 清单，并为 example 启用 comctl32 延迟加载。
+ * 为 Windows 可执行目标注入新版 Common Controls 清单。
+ *
+ * 说明：dob-script CLI 已迁移到 dob-script-runtime crate 的 example，
+ * comctl32 延迟加载等 example 链接参数见该 crate 的 build.rs。
  */
 #[cfg(target_os = "windows")]
 fn inject_common_controls_manifest() {
     println!(
         "cargo:rustc-link-arg-bins=/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
     );
-    println!(
-        "cargo:rustc-link-arg-examples=/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
-    );
-    println!("cargo:rustc-link-arg-examples=/DELAYLOAD:comctl32.dll");
-    println!("cargo:rustc-link-arg-examples=delayimp.lib");
 }
 
 /**
@@ -47,24 +45,23 @@ fn inject_vendor_runtime_dlls() {
         );
     }
     let profile_dir = cargo_profile_dir();
-    for target_dir in [
-        profile_dir.clone(),
-        profile_dir.join("examples"),
-        profile_dir.join("deps"),
-    ] {
+    for target_dir in [profile_dir.clone(), profile_dir.join("deps")] {
         link_or_copy_runtime_dll(&vendor_dll_path, &target_dir.join(OPENCV_DLL_NAME));
     }
 }
 
 /**
- * 返回 OpenCV vendor DLL 的标准路径。
+ * 返回 OpenCV vendor DLL 的标准路径（运行时 DLL 归 dob-script-runtime 所有）。
  */
 #[cfg(target_os = "windows")]
 fn vendor_opencv_dll_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("vendor")
-        .join("opencv")
-        .join(OPENCV_DLL_NAME)
+    let mut base = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    base.push("..");
+    base.push("..");
+    base.push("..");
+    base.push("crates");
+    base.push("dob-script-runtime");
+    base.join("vendor").join("opencv").join(OPENCV_DLL_NAME)
 }
 
 /**

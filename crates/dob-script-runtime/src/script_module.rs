@@ -85,7 +85,7 @@ mod tests {
             .expect("创建 ESM 测试上下文失败");
         // DSL 播放（Cap.play）依赖全局 Timer 类，测试上下文需注册
         context
-            .register_global_class::<crate::submodules::jstimer::JsTimer>()
+            .register_global_class::<crate::jstimer::JsTimer>()
             .expect("注册 JsTimer 失败");
         context
     }

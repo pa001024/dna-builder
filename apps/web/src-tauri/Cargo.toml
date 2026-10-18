@@ -20,7 +20,6 @@ tauri-build = { version = "2", features = [] }
 
 [features]
 default = []
-dob-script-cli = []
 
 [[bin]]
 name = "dna-builder"
@@ -28,6 +27,7 @@ path = "src/main.rs"
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-ico", "unstable"] }
+dob-script-runtime = { path = "../../../crates/dob-script-runtime" }
 mcp_server = { path = "../../../crates/mcp_server" }
 async-trait = "0.1.89"
 tauri-plugin-opener = "2"

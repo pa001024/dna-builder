@@ -51,7 +51,7 @@ impl Drop for HiResTimerGuard {
     }
 }
 /// An event queue using tokio to drive futures to completion.
-pub(crate) struct TokioJobExecutor {
+pub struct TokioJobExecutor {
     async_jobs: RefCell<VecDeque<NativeAsyncJob>>,
     promise_jobs: RefCell<VecDeque<PromiseJob>>,
     timeout_jobs: RefCell<BTreeMap<JsInstant, TimeoutJob>>,
@@ -104,7 +104,7 @@ impl TokioJobExecutor {
         context.clear_kept_objects();
     }
 
-    // pub(crate) fn is_empty(&self) -> bool {
+    // pub fn is_empty(&self) -> bool {
     //     self.async_jobs.borrow().is_empty()
     //         && self.promise_jobs.borrow().is_empty()
     //         && self.timeout_jobs.borrow().is_empty()
@@ -138,7 +138,7 @@ impl JobExecutor for TokioJobExecutor {
 
     // ...the async flavor won't, which allows concurrent execution with external async tasks.
     async fn run_jobs_async(self: Rc<Self>, context: &RefCell<&mut Context>) -> JsResult<()> {
-        use crate::submodules::script::should_stop_current_script;
+        use crate::script::should_stop_current_script;
         use std::time::Duration;
         // 单次休眠上限：超时前无事可做时睡满该时长即醒，空转唤醒可忽略；
         // 同时保证停止请求最多延迟该时长生效。取 100 而非更小：

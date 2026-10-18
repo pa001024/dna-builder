@@ -1,15 +1,11 @@
 //! 应用入口：只负责插件注册、托盘装配与 Tauri 命令注册，
-//! 具体命令实现按领域拆分在 `commands/` 下，引擎实现放在 `submodules/` 下。
+//! 具体命令实现按领域拆分在 `commands/` 下，脚本运行时实现位于 `dob-script-runtime` crate。
 
 mod commands;
 mod submodules;
 mod util;
 
 use tauri::Manager;
-
-// CLI 示例（examples/dob-script.rs）通过库根路径调用脚本执行入口。
-#[cfg(feature = "dob-script-cli")]
-pub use commands::script_cmds::run_script_cli;
 
 /// 应用主入口：注册插件、装配托盘并启动 Tauri 应用。
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

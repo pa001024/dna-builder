@@ -13,7 +13,7 @@ use tokio::time::Instant;
 #[derive(Debug, Trace, Finalize, JsData)]
 pub struct JsTimer {
     #[unsafe_ignore_trace]
-    pub(crate) start_time: Arc<Mutex<Instant>>,
+    pub start_time: Arc<Mutex<Instant>>,
 }
 
 impl Class for JsTimer {

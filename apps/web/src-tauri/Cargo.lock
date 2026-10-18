@@ -1534,6 +1534,7 @@ dependencies = [
  "boa_gc",
  "boa_runtime",
  "clipper2-rust",
+ "dob-script-runtime",
  "futures-concurrency",
  "futures-lite",
  "futures-util",
@@ -1582,6 +1583,39 @@ dependencies = [
  "windows-core 0.62.2",
  "winit",
  "winreg",
+ "zip 0.6.6",
+]
+
+[[package]]
+name = "dob-script-runtime"
+version = "1.4.12"
+dependencies = [
+ "arboard",
+ "async-trait",
+ "base64 0.22.1",
+ "boa_engine",
+ "boa_gc",
+ "boa_runtime",
+ "clipper2-rust",
+ "futures-concurrency",
+ "futures-lite",
+ "libffi",
+ "mcp_server",
+ "md5",
+ "ndarray",
+ "opencv",
+ "ort",
+ "regex",
+ "reqwest 0.12.28",
+ "scopeguard",
+ "serde",
+ "serde_json",
+ "tauri",
+ "thiserror 2.0.19",
+ "tokio",
+ "widestring",
+ "windows 0.62.2",
+ "windows-core 0.62.2",
  "zip 0.6.6",
 ]
 

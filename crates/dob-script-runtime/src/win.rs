@@ -7,7 +7,7 @@ use windows::{
 };
 
 /// 根据窗口标题查找窗口句柄
-pub(crate) fn find_window(title: &str) -> Option<HWND> {
+pub fn find_window(title: &str) -> Option<HWND> {
     let title_wide: Vec<u16> = title.encode_utf16().chain(std::iter::once(0)).collect();
     match unsafe { FindWindowW(PCWSTR::null(), PCWSTR(title_wide.as_ptr())) } {
         Ok(hwnd) => {
@@ -21,7 +21,7 @@ pub(crate) fn find_window(title: &str) -> Option<HWND> {
     }
 }
 
-pub(crate) fn win_get_client_pos(hwnd: HWND) -> Option<(i32, i32, i32, i32)> {
+pub fn win_get_client_pos(hwnd: HWND) -> Option<(i32, i32, i32, i32)> {
     let mut rect = RECT::default();
     if unsafe { GetClientRect(hwnd, &mut rect) }.is_ok() {
         let mut point = POINT::default();
@@ -34,7 +34,7 @@ pub(crate) fn win_get_client_pos(hwnd: HWND) -> Option<(i32, i32, i32, i32)> {
     }
 }
 
-pub(crate) fn get_window_by_process_name(process_name: &str) -> Option<HWND> {
+pub fn get_window_by_process_name(process_name: &str) -> Option<HWND> {
     // 1. 获取 PID
     match get_pid_by_name(process_name) {
         Some(pid) => {
@@ -48,7 +48,7 @@ pub(crate) fn get_window_by_process_name(process_name: &str) -> Option<HWND> {
 }
 
 /// 根据进程名查找 PID (不区分大小写)
-pub(crate) fn get_pid_by_name(process_name: &str) -> Option<u32> {
+pub fn get_pid_by_name(process_name: &str) -> Option<u32> {
     // 创建进程快照
     let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).ok() }?;
 
@@ -123,7 +123,7 @@ unsafe extern "system" fn enum_windows_callback(hwnd: HWND, lparam: LPARAM) -> B
 }
 
 /// 移动窗口并设置大小
-pub(crate) fn move_window(hwnd: HWND, x: i32, y: i32, w: Option<i32>, h: Option<i32>) -> bool {
+pub fn move_window(hwnd: HWND, x: i32, y: i32, w: Option<i32>, h: Option<i32>) -> bool {
     unsafe {
         let (width, height) = match (w, h) {
             (Some(w), Some(h)) => (w, h),
@@ -159,7 +159,7 @@ pub(crate) fn move_window(hwnd: HWND, x: i32, y: i32, w: Option<i32>, h: Option<
 ///
 /// 其中 `+` 表示按位或，`-` 表示按位清除。
 #[cfg(target_os = "windows")]
-pub(crate) fn apply_window_style_expression(
+pub fn apply_window_style_expression(
     hwnd: HWND,
     expression: &str,
 ) -> std::result::Result<(i32, i32), String> {
@@ -304,7 +304,7 @@ fn resolve_window_style_mask(name: &str) -> std::result::Result<(i32, i32), Stri
 
 /// 修改窗口样式，直接写入完整样式位掩码。
 #[cfg(target_os = "windows")]
-pub(crate) fn set_window_style(
+pub fn set_window_style(
     hwnd: HWND,
     style: i32,
     ex_style: Option<i32>,
@@ -339,7 +339,7 @@ pub(crate) fn set_window_style(
 
 /// 非 Windows 平台下的窗口样式修改兜底实现。
 #[cfg(not(target_os = "windows"))]
-pub(crate) fn set_window_style(
+pub fn set_window_style(
     _hwnd: HWND,
     _style: i32,
     _ex_style: Option<i32>,
@@ -349,7 +349,7 @@ pub(crate) fn set_window_style(
 
 /// 非 Windows 平台下的窗口样式表达式合并兜底实现。
 #[cfg(not(target_os = "windows"))]
-pub(crate) fn apply_window_style_expression(
+pub fn apply_window_style_expression(
     _hwnd: HWND,
     _expression: &str,
 ) -> std::result::Result<(i32, i32), String> {

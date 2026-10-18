@@ -1,4 +1,4 @@
-use crate::submodules::color::rgb_to_hsl;
+use crate::color::rgb_to_hsl;
 use boa_engine::{
     Context, Finalize, JsData, JsNativeError, JsObject, JsResult, JsValue, Trace,
     class::{Class, ClassBuilder},
@@ -15,7 +15,7 @@ use opencv::{
 #[derive(Debug, Trace, Finalize, JsData)]
 pub struct JsMat {
     #[unsafe_ignore_trace]
-    pub(crate) inner: Box<opencv::core::Mat>,
+    pub inner: Box<opencv::core::Mat>,
 }
 
 /// 读取 Mat 中指定位置的 BGR 像素。

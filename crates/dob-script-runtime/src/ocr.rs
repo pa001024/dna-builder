@@ -1211,12 +1211,12 @@ fn recognize_text_blocks(
 }
 
 #[cfg(test)]
-pub(crate) fn ocr_test_assets_root() -> PathBuf {
+pub fn ocr_test_assets_root() -> PathBuf {
     default_ocr_root_dir()
 }
 
 #[cfg(test)]
-pub(crate) fn ocr_test_image_path() -> PathBuf {
+pub fn ocr_test_image_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .map(|parent| parent.join("misc").join("1.png"))
@@ -1224,7 +1224,7 @@ pub(crate) fn ocr_test_image_path() -> PathBuf {
 }
 
 #[cfg(test)]
-pub(crate) fn ocr_test_load_mat(image_path: &Path) -> Result<Mat, String> {
+pub fn ocr_test_load_mat(image_path: &Path) -> Result<Mat, String> {
     let path_string = image_path.to_string_lossy().to_string();
     opencv::imgcodecs::imread(&path_string, opencv::imgcodecs::IMREAD_COLOR)
         .map_err(|e| format!("读取测试图像失败: {}: {e}", image_path.display()))

@@ -1,0 +1,92 @@
+[package]
+name = "dob-script-runtime"
+version = "1.4.12"
+description = "DNA Builder script runtime (Boa JS engine + vision/CV builtins). Depends on nothing inside apps/; apps/web/src-tauri and the dob-script CLI both depend on this crate."
+edition = "2024"
+
+[lib]
+name = "dob_script_runtime"
+path = "src/lib.rs"
+crate-type = ["rlib"]
+
+[features]
+default = []
+# CLI 模式：启用 StdioLogger 与 readConfig/setConfig 文件直读直写（不依赖 Tauri 事件通道）。
+dob-script-cli = []
+
+[dependencies]
+tauri = { version = "2" }
+mcp_server = { path = "../mcp_server" }
+async-trait = "0.1.89"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+futures-concurrency = "7.7.1"
+futures-lite = "2.6.1"
+thiserror = "2.0.18"
+widestring = "1"
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+base64 = "0.22.1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "rustls-tls",
+    "blocking",
+    "system-proxy",
+] }
+arboard = "3.6.1"
+regex = "1.11.1"
+md5 = "0.8.0"
+scopeguard = "1.2.0"
+opencv = { version = "0.98.1" }
+boa_engine = "0.21.0"
+boa_gc = "0.21.0"
+boa_runtime = "0.21.0"
+libffi = "5.1.0"
+ndarray = "0.17"
+ort = { version = "=2.0.0-rc.12", features = ["directml"] }
+clipper2-rust = "1.0.3"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_SystemInformation",
+    "Win32_System_SystemServices",
+    "Win32_System_Memory",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
+    "Win32_Security",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+    "Win32_System_Registry",
+    "Win32_System_DataExchange",
+    "Win32_System",
+    "Win32_System_Variant",
+    "Win32_System_Com",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_WinRT",
+    "Win32_System_WinRT_Direct3D11",
+    "Win32_System_WinRT_Graphics_Capture",
+    "Win32_Media",
+    "Win32_Media_Audio",
+    "Win32_Graphics",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Graphics",
+    "Graphics_Capture",
+    "Graphics_DirectX",
+    "Graphics_DirectX_Direct3D11",
+    "Win32_UI",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_Storage",
+    "Win32_Storage_Xps",
+    "Win32_System_LibraryLoader",
+] }
+windows-core = "0.62.2"

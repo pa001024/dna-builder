@@ -1,4 +1,4 @@
-use crate::submodules::script::{
+use crate::script::{
     exec_script_with_tauri_console, get_script_runtime_info, normalize_script_path,
     run_script_file, stop_script, stop_script_by_path,
 };

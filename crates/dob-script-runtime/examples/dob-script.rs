@@ -167,7 +167,7 @@ async fn main() -> ExitCode {
         Err(code) => return code,
     };
 
-    match dna_builder_lib::run_script_cli(
+    match dob_script_runtime::run_script_file_cli(
         cli_args.script_path,
         cli_args.script_config,
         cli_args.script_config_file_path,

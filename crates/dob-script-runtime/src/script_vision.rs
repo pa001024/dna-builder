@@ -16,7 +16,7 @@ use std::{
 };
 use zip::{CompressionMethod, ZipArchive, ZipWriter, write::FileOptions};
 
-use crate::submodules::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::match_template};
+use crate::{color::rgb_to_hsl, color_match::rgb_to_bgr, tpl_match::match_template};
 
 pub type SiftLocateResult = (f64, f64, f64, f64, i32, i32, Vec<Point2f>);
 pub type SiftStitchResult = (Mat, f64, f64, f64, f64, i32, i32, Vec<Point2f>);

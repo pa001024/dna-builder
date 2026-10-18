@@ -13,14 +13,14 @@ pub enum ColorMatchError {
     OpenCV(String),
 }
 
-pub(crate) fn rgb_to_bgr(color: u32) -> (u8, u8, u8) {
+pub fn rgb_to_bgr(color: u32) -> (u8, u8, u8) {
     let r = ((color >> 16) & 0xFF) as u8;
     let g = ((color >> 8) & 0xFF) as u8;
     let b = (color & 0xFF) as u8;
     (b, g, r)
 }
 
-pub(crate) fn check_color_mat(img_bgr: &Mat, x: i32, y: i32, color: u32, tolerance: u8) -> bool {
+pub fn check_color_mat(img_bgr: &Mat, x: i32, y: i32, color: u32, tolerance: u8) -> bool {
     return img_bgr
         .at_2d::<core::Vec3b>(y, x)
         .map(|pixel| {
@@ -48,7 +48,7 @@ pub(crate) fn check_color_mat(img_bgr: &Mat, x: i32, y: i32, color: u32, toleran
 ///
 /// # 返回值
 /// * `Result<Option<(i32, i32)>>` - 匹配位置（x, y）或错误
-pub(crate) fn find_color_and_match_template(
+pub fn find_color_and_match_template(
     img_bgr: &Mat,
     template: &Mat,
     target_color: (u8, u8, u8), // B, G, R
