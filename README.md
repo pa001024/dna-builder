@@ -1,4 +1,6 @@
-# 二重螺旋构筑模拟器 — Duet Night Abyss Builder (DNA Builder)
+English | [简体中文](./README.zh-CN.md)
+
+# Duet Night Abyss Builder (DNA Builder)
 
 <p align="center">
   <a href="https://dna-builder.cn/"><img alt="Website" src="https://img.shields.io/website/https/dna-builder.cn"></a>
@@ -9,103 +11,103 @@
 </p>
 
 <p align="center">
-  <strong>DNA Builder</strong>（简称 DOB）是面向《二重螺旋 Duet Night Abyss》的一站式综合工具，提供<b>资料检索、角色构建、养成分析与伤害计算</b>能力，帮助玩家高效优化角色配装方案。
+  <strong>DNA Builder</strong> (DOB for short) is an all-in-one toolkit for <b>Duet Night Abyss (二重螺旋)</b>, offering <b>data lookup, character building, progression analysis and damage calculation</b> to help players optimize their builds efficiently.
 </p>
 
-## 使用入口
+## Access
 
-### 🌐 网页版（支持 PWA）
+### 🌐 Web (PWA supported)
 
-可直接在浏览器中打开，亦可安装为 PWA 应用，支持离线访问。
+Open it directly in your browser, or install it as a PWA app with offline support.
 
-| 部署节点               | 链接                                                                 |
-| ---------------------- | -------------------------------------------------------------------- |
-| **国内服务器**（推荐） | [https://dna-builder.cn/](https://dna-builder.cn/)                   |
-| EdgeOne 加速节点       | [https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/) |
-| Vercel 全球节点        | [https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)   |
+| Mirror                        | Link                                                                 |
+| ----------------------------- | -------------------------------------------------------------------- |
+| **China server** (recommended) | [https://dna-builder.cn/](https://dna-builder.cn/)                   |
+| EdgeOne CDN node              | [https://dna-builder.edgeone.dev/](https://dna-builder.edgeone.dev/) |
+| Vercel global node            | [https://dna-builder.vercel.app/](https://dna-builder.vercel.app/)   |
 
-### 🖥️ 桌面版（推荐体验）
+### 🖥️ Desktop (recommended experience)
 
-| 安装方式            | 命令 / 链接                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| **winget**          | `winget install pa001024.dna-builder`                                                            |
-| **微软商店**        | [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1) |
-| **GitHub Releases** | [下载最新版本](https://github.com/pa001024/dna-builder/releases/latest)                          |
+| Method            | Command / Link                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| **winget**        | `winget install pa001024.dna-builder`                                                              |
+| **Microsoft Store** | [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1) |
+| **GitHub Releases** | [Download the latest release](https://github.com/pa001024/dna-builder/releases/latest)           |
 
-[Quark 网盘下载](https://pan.quark.cn/s/1419bbc8aa2d)
+[Quark Pan download](https://pan.quark.cn/s/1419bbc8aa2d)
 
-> **运行前置**：桌面版依赖 [Microsoft Edge WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)，通常 Windows 10/11 已内置，若未安装请前往下载。
+> **Prerequisite**: the desktop build depends on [Microsoft Edge WebView2](https://developer.microsoft.com/microsoft-edge/webview2/), which is usually pre-installed on Windows 10/11. If missing, download it from there.
 
-![DNA Builder 桌面版截图](./misc/1.png)
+![DNA Builder screenshot](./misc/1.png)
 
-## 功能特点
+## Features
 
-### 🎯 配装与计算
+### 🎯 Builds & Calculation
 
-| 功能         | 说明                               |
-| ------------ | ---------------------------------- |
-| **角色构建** | 角色、武器、MOD、BUFF 的可视化配置 |
-| **自动构建** | 一键搜索当前条件下的高收益组合     |
-| **伤害计算** | 技能与武器伤害期望的实时计算       |
-| **目标函数** | 支持自定义表达式优化               |
+| Feature              | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| **Character builds** | Visual setup of characters, weapons, MODs and BUFFs      |
+| **Auto build**       | One-click search for high-value combinations             |
+| **Damage calc**      | Real-time expected skill and weapon damage               |
+| **Target function**  | Custom-expression optimization supported                 |
 
-### 📦 数据管理
+### 📦 Data Management
 
-| 功能         | 说明                            |
-| ------------ | ------------------------------- |
-| **库存管理** | 支持武器与 MOD 的库存记录与筛选 |
-| **拼音搜索** | 快速检索角色、武器与 MOD        |
+| Feature       | Description                              |
+| ------------- | ---------------------------------------- |
+| **Inventory** | Record and filter owned weapons and MODs |
+| **Pinyin search** | Quickly find characters, weapons and MODs |
 
-### 🎮 模拟工具
+### 🎮 Simulators
 
-| 功能           | 说明                   |
-| -------------- | ---------------------- |
-| **钓鱼模拟器** | 内置鱼类与钓点相关数据 |
-| **密函模拟器** | 内置密函数据与模拟流程 |
-| **成就系统**   | 记录与跟踪成就进度     |
+| Feature          | Description                          |
+| ---------------- | ------------------------------------ |
+| **Fishing sim**  | Built-in fish and fishing-spot data  |
+| **Secret-letter sim** | Built-in secret-letter data and sim flow |
+| **Achievements** | Record and track achievement progress |
 
-### 🤖 扩展集成
+### 🤖 Integrations
 
-| 功能           | 说明                                   |
-| -------------- | -------------------------------------- |
-| **MCP Server** | 支持 AI 工具集成，可供第三方客户端调用 |
+| Feature        | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| **MCP Server** | AI-tool integration, callable by third-party clients     |
 
-## 技术栈
+## Tech Stack
 
-### 前端
+### Frontend
 
-| 技术                                               | 用途                                |
-| -------------------------------------------------- | ----------------------------------- |
-| **Vue 3** + **TypeScript**                         | 核心框架，组合式 API + 严格类型安全 |
-| **Vite 7**                                         | 构建工具与开发服务器                |
-| **Tailwind CSS v4** + **daisyUI v5** + **reka-ui** | 样式框架与 UI 组件库                |
-| **Pinia** + **Vue Router**                         | 状态管理与路由                      |
-| **i18next**                                        | 国际化（支持多语言）                |
-| **Vitest** + **Biome**                             | 单元测试与代码质量工具              |
+| Tech                                               | Purpose                                            |
+| -------------------------------------------------- | -------------------------------------------------- |
+| **Vue 3** + **TypeScript**                         | Core framework, Composition API + strict type safety |
+| **Vite 7**                                         | Build tool and dev server                           |
+| **Tailwind CSS v4** + **daisyUI v5** + **reka-ui** | Styling framework and UI component libraries        |
+| **Pinia** + **Vue Router**                         | State management and routing                        |
+| **i18next**                                        | Internationalization (multi-language support)       |
+| **Vitest** + **Biome**                             | Unit testing and code quality tooling               |
 
-### 桌面应用
+### Desktop App
 
-| 技术                           | 用途                                        |
-| ------------------------------ | ------------------------------------------- |
-| **Tauri 2**（Rust + WebView2） | 跨平台桌面壳，将 Web 应用打包为原生桌面应用 |
+| Tech                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| **Tauri 2** (Rust + WebView2) | Cross-platform desktop shell packaging the web app as a native desktop app |
 
-### 服务端（可选，用于数据同步）
+### Server (optional, for data sync)
 
-| 技术                         | 用途              |
-| ---------------------------- | ----------------- |
-| **Bun** + **Elysia**         | 运行时与 Web 框架 |
-| **SQLite** + **Drizzle ORM** | 数据库与 ORM      |
-| **GraphQL Yoga**             | GraphQL API 网关  |
+| Tech                         | Purpose              |
+| ---------------------------- | -------------------- |
+| **Bun** + **Elysia**         | Runtime and web framework |
+| **SQLite** + **Drizzle ORM** | Database and ORM     |
+| **GraphQL Yoga**             | GraphQL API gateway  |
 
 ## SDK
 
-游戏数据与伤害计算 SDK，按语言选择（计算口径对齐）：
+Game-data and damage-calculation SDKs, pick your language (aligned calculation results):
 
-| 语言            | 包                                                                 | 说明                                           | 文档                          |
-| --------------- | ------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------- |
-| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | 游戏数据 + 角色构筑 / 伤害计算，可作 MCP Server 使用 | [src/data/README.md](src/data/README.md) |
-| Python          | `dna-builder-sdk`                                                  | 后端公开读接口 + 数据包 / 按需加载 + 纯表达式计算 | [sdk/python/README.md](sdk/python/README.md) |
-| Go              | `dob`                                                              | 与 Python SDK 同能力：后端公开读接口 + 数据加载 + 计算 | [sdk/go](sdk/go/README.md) |
+| Language        | Package                                                            | Description                                                              | Docs                                     |
+| --------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ | ---------------------------------------- |
+| Node.js / Bun   | [`dna-builder-data`](https://www.npmjs.com/package/dna-builder-data) | Game data + character builds / damage calculation, also usable as MCP Server | [src/data/README.md](src/data/README.md) |
+| Python          | `dna-builder-sdk`                                                  | Public backend read API + data packs / on-demand loading + pure expression evaluation | [sdk/python/README.md](sdk/python/README.md) |
+| Go              | `dob`                                                              | Same capabilities as the Python SDK: public backend read API + data loading + calculation | [sdk/go](sdk/go/README.md) |
 
 ### Node.js / Bun
 
@@ -124,7 +126,7 @@ const build = new CharBuild({
 const damage = build.calculate()
 ```
 
-MCP Server（供 AI 工具调用）：
+MCP Server (for AI tools):
 
 ```bash
 npx -y dna-builder-data
@@ -132,88 +134,88 @@ npx -y dna-builder-data
 
 ### Python / Go
 
-用法见各自 README：[sdk/python/README.md](sdk/python/README.md)、[sdk/go](sdk/go)。
+See their respective READMEs: [sdk/python/README.md](sdk/python/README.md), [sdk/go](sdk/go).
 
-## 多语言
+## Languages
 
-目前支持（含部分数据翻译）：
+Currently supported (including partial data translations):
 
-- 中文（简体 / 繁体）
+- Chinese (Simplified / Traditional)
 - English
 - 日本語
 - 한국어
 
-欢迎提交翻译改进。
+Translation improvements are welcome.
 
-## 开发说明
+## Development
 
-### 环境要求
+### Requirements
 
-- Node.js（建议 20+）
-- `pnpm`（项目使用 `pnpm`）
-- `bun`（用于 server 与工具脚本）
-- Rust 工具链（开发 Tauri 时需要）
+- Node.js (20+ recommended)
+- `pnpm` (this project uses `pnpm`)
+- `bun` (for the server and tooling scripts)
+- Rust toolchain (for Tauri development)
 
-### 前端
+### Frontend
 
 ```bash
-# 安装依赖
+# Install dependencies
 pnpm install
 
-# 本地开发（默认 http://localhost:1420/）
+# Local dev (default http://localhost:1420/)
 pnpm dev
 
-# 代码检查（Biome + vue-tsc）
+# Lint (Biome + vue-tsc)
 pnpm lint
 
-# 单元测试
+# Unit tests
 pnpm test
 
-# 代码格式化
+# Format code
 pnpm format
 ```
 
-### 桌面应用（Tauri）
+### Desktop App (Tauri)
 
 ```bash
 pnpm tauri dev
 pnpm tauri build
 ```
 
-### 服务端（Bun + Elysia）
+### Server (Bun + Elysia)
 
 ```bash
 cd server
 bun install
 
-# 开发模式（含迁移）
+# Dev mode (with migrations)
 bun run dev
 
-# 生成迁移
+# Generate migrations
 bun run gen
 
-# 执行迁移
+# Run migrations
 bun run mig
 ```
 
-## 支持作者
+## Support the Author
 
-如果这个项目对你有帮助，欢迎支持：
+If this project helps you, consider supporting it:
 
-- 爱发电: [https://afdian.com/a/pa001024](https://afdian.com/a/pa001024)
-- 微软商店购买: [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1)
+- Afdian: [https://afdian.com/a/pa001024](https://afdian.com/a/pa001024)
+- Microsoft Store purchase: [https://apps.microsoft.com/detail/9nk8zw43shb1](https://apps.microsoft.com/detail/9nk8zw43shb1)
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 与 Pull Request。
+Issues and Pull Requests are welcome.
 
-## 许可证
+## License
 
 MIT License
 
-## 联系方式
+## Contact
 
-如有问题或建议，请在 GitHub 仓库提交 Issue。
+For questions or suggestions, please open an Issue in the GitHub repo.
 
 ## Star History
 
