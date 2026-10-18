@@ -11,8 +11,8 @@ import {
     SelectViewport,
     useForwardPropsEmits,
 } from "reka-ui"
-import type { VNode } from "vue"
-import { computed, nextTick, onMounted, ref, useSlots, watch } from "vue"
+import { type ComponentPublicInstance, computed, defineComponent, Fragment, nextTick, onBeforeUnmount, onMounted, type PropType, ref, useSlots, type VNode, watch } from "vue"
+import VirtualRowItem from "./SelectItem.vue"
 
 export interface SelectOption {
     type?: "label" | "group" | "separator" | "option"
@@ -37,6 +37,14 @@ export interface SelectOption {
     onKeyPress?: () => void
 }
 
+/** 数据驱动模式的行类型，配合 valueKey/labelKey/disabledKey 也支持任意字段名与原始值数组。 */
+export interface VirtualSelectItem {
+    value?: unknown
+    label?: string
+    disabled?: boolean
+    [key: string]: unknown
+}
+
 const props = defineProps<
     Omit<SelectRootProps, "modelValue"> & {
         contentClass?: string
@@ -51,6 +59,25 @@ const props = defineProps<
          * - chip：自带胶囊底色的触发器（bg-base-content/5 圆角胶囊，适合工具栏/筛选栏）
          */
         variant?: "default" | "ghost" | "chip"
+        /**
+         * 数据驱动模式：传入后下拉内容按行高窗口化虚拟渲染，不再渲染默认 slot。
+         * 行数未超 virtualThreshold 时退化为全量渲染（键盘导航/typeahead 完整可用）。
+         */
+        items?: VirtualSelectItem[] | unknown[]
+        /** items 行中取值的字段名，原始值数组会被直接当作 value。 */
+        valueKey?: string
+        /** items 行中取展示文本的字段名，缺失时回退 name/title/值本身。 */
+        labelKey?: string
+        /** items 行中取禁用态的字段名。 */
+        disabledKey?: string
+        /** 虚拟行高（px），须 ≥ 行内容实际高度，默认 36 与 SelectItem 自然高度一致。 */
+        itemHeight?: number
+        /** 可视窗口上下各多渲染的行数。 */
+        overscan?: number
+        /** 行数超过该阈值才启用窗口化（含 slot 自动虚拟化路径）。 */
+        virtualThreshold?: number
+        /** items 为空时的提示文案，不传则只渲染空白。 */
+        emptyText?: string
     }
 >()
 const emits = defineEmits<{
@@ -62,6 +89,15 @@ const emits = defineEmits<{
 }>()
 const slots = useSlots()
 const selectRootKey = ref(0)
+
+/** 按 NodeList 原样回放 VNode 数组，用于渲染窗口化切片（保留原 key，开销远小于挂载全部行组件）。 */
+const VNodeList = defineComponent({
+    name: "SelectVNodeList",
+    props: { nodes: { type: Array as PropType<VNode[]>, default: () => [] } },
+    setup(nodeProps) {
+        return () => nodeProps.nodes
+    },
+})
 
 /**
  * 递归提取插槽VNode签名，用于感知SelectItem结构变化。
@@ -164,7 +200,24 @@ const selectedItemTextMap = computed(() => {
     collectSelectItemText(nodes, map)
     return map
 })
+
+/** items 数据驱动模式下 modelValue 对应的展示文本。 */
+const itemsSelectedText = computed(() => {
+    if (!props.items) {
+        return null
+    }
+    const value = props.modelValue
+    if (value === undefined || value === null) {
+        return ""
+    }
+    const found = props.items.find(item => sameValue(resolveItemValue(item), value))
+    return found === undefined ? "" : resolveItemLabel(found)
+})
 const selectedItemText = computed(() => {
+    const fromItems = itemsSelectedText.value
+    if (fromItems !== null) {
+        return fromItems
+    }
     const value = props.modelValue
     if (value === null || value === undefined) {
         return ""
@@ -224,6 +277,254 @@ onMounted(async () => {
     selectRootKey.value += 1
 })
 
+/** items 行取值，原始值直接返回，对象按 valueKey 取值。 */
+function resolveItemValue(item: unknown): unknown {
+    if (item === null || typeof item !== "object") {
+        return item
+    }
+    const rec = item as Record<string, unknown>
+    const key = props.valueKey ?? "value"
+    return key in rec ? rec[key] : item
+}
+
+/** items 行展示文本，依次回退 labelKey/name/title/值本身。 */
+function resolveItemLabel(item: unknown): string {
+    if (item === null || typeof item !== "object") {
+        return String(item ?? "")
+    }
+    const rec = item as Record<string, unknown>
+    const label = rec[props.labelKey ?? "label"] ?? rec.name ?? rec.title
+    if (label !== undefined && label !== null && String(label).trim() !== "") {
+        return String(label)
+    }
+    return String(resolveItemValue(item) ?? "")
+}
+
+/** items 行禁用态。 */
+function resolveItemDisabled(item: unknown): boolean {
+    if (item === null || typeof item !== "object") {
+        return false
+    }
+    return Boolean((item as Record<string, unknown>)[props.disabledKey ?? "disabled"])
+}
+
+/** 值相等判定，兼容 number/string 混用。 */
+function sameValue(a: unknown, b: unknown): boolean {
+    if (a === b) {
+        return true
+    }
+    if (a === undefined || b === undefined || a === null || b === null) {
+        return false
+    }
+    return String(a) === String(b)
+}
+
+/** 行 key 优先用值本身，原始值重复或缺失时回退绝对下标（窗口内稳定）。 */
+function itemKey(item: unknown, index: number): string | number {
+    const value = resolveItemValue(item)
+    if ((typeof value === "string" || typeof value === "number") && value !== "") {
+        return value
+    }
+    return index
+}
+
+/**
+ * 拍平默认 slot 的顶层节点（Fragment/注释/空白文本不计入）。
+ * @param nodes 插槽返回的 VNode 列表
+ * @returns 拍平后的顶层节点
+ */
+function flattenSlotNodes(nodes: VNode[]): VNode[] {
+    const flat: VNode[] = []
+    for (const node of nodes) {
+        if (!node || typeof node !== "object" || !("type" in node)) {
+            continue
+        }
+        if ((node.type as unknown) === (Fragment as unknown)) {
+            if (Array.isArray(node.children)) {
+                flat.push(...flattenSlotNodes(node.children as VNode[]))
+            }
+            continue
+        }
+        if (typeof node.type === "symbol") {
+            continue
+        }
+        flat.push(node)
+    }
+    return flat
+}
+
+/** 仅扁平 SelectItem 列表（每个节点都带 value）才做窗口化，分组/混排结构保持原样渲染。 */
+function isItemVNode(node: VNode): boolean {
+    if (typeof node.type === "string" || typeof node.type === "symbol") {
+        return false
+    }
+    return !!node.props && "value" in (node.props as Record<string, unknown>)
+}
+
+/**
+ * slot 自动虚拟化：扁平 SelectItem 超长时只挂载可视窗口。
+ * 取舍：窗口外的行不进 reka collection，键盘方向键/typeahead 仅在已挂载窗口内有效，滚轮/触摸/滚动按钮正常。
+ */
+const flatSlotNodes = computed<VNode[] | null>(() => {
+    if (props.items) {
+        return null
+    }
+    void slotSignature.value
+    const nodes = flattenSlotNodes(slots.default?.() ?? [])
+    if (nodes.length <= (props.virtualThreshold ?? 50)) {
+        return null
+    }
+    return nodes.every(isItemVNode) ? nodes : null
+})
+
+const itemHeight = computed(() => props.itemHeight ?? 36)
+const overscan = computed(() => props.overscan ?? 5)
+/**
+ * 视口实测高度：不由我们限高（reka 按可用空间定位、随滚动自动展开，限高会顶死该逻辑），
+ * 只读出来算窗口大小，读不到时沿用上次值。
+ */
+const viewportHeight = ref(300)
+const rowCount = computed(() => (props.items ? props.items.length : (flatSlotNodes.value?.length ?? 0)))
+const virtualActive = computed(() => rowCount.value > (props.virtualThreshold ?? 50))
+
+const viewportRef = ref<ComponentPublicInstance | null>(null)
+const scrollTop = ref(0)
+let scrollRaf = 0
+
+const totalHeight = computed(() => rowCount.value * itemHeight.value)
+const startIndex = computed(() => Math.max(0, Math.floor(scrollTop.value / itemHeight.value) - overscan.value))
+const windowSize = computed(() => Math.ceil(viewportHeight.value / itemHeight.value) + overscan.value * 2)
+const endIndex = computed(() => Math.min(rowCount.value, startIndex.value + windowSize.value))
+const offsetY = computed(() => startIndex.value * itemHeight.value)
+
+const visibleItems = computed(() => (props.items ? props.items.slice(startIndex.value, endIndex.value) : []))
+const visibleSlotNodes = computed(() => flatSlotNodes.value?.slice(startIndex.value, endIndex.value) ?? [])
+
+/** 取 SelectViewport 真实滚动元素（reka 用 forwardRef 暴露，取 $el 即可）。 */
+function viewportEl(): HTMLElement | null {
+    const el = (viewportRef.value as unknown as { $el?: unknown } | null)?.$el
+    return el instanceof HTMLElement ? el : null
+}
+
+/** 读取视口实际高度供窗口计算（含 reka 随滚动展开后的新高度），读不到时沿用上次值。 */
+function measureViewport() {
+    const el = viewportEl()
+    if (el && el.clientHeight > 0) {
+        viewportHeight.value = el.clientHeight
+    }
+}
+
+/** rAF 节流的滚动同步，避免滚动每帧触发多次切片计算。 */
+function onViewportScroll(event: Event) {
+    if (!virtualActive.value) {
+        return
+    }
+    const el = event.target as HTMLElement | null
+    if (!el) {
+        return
+    }
+    if (scrollRaf) {
+        cancelAnimationFrame(scrollRaf)
+    }
+    scrollRaf = requestAnimationFrame(() => {
+        measureViewport()
+        scrollTop.value = el.scrollTop
+    })
+}
+onBeforeUnmount(() => {
+    if (scrollRaf) {
+        cancelAnimationFrame(scrollRaf)
+    }
+})
+
+/** 当前选中值在虚拟列表中的下标，未找到返回 -1。 */
+function selectedIndex(): number {
+    const value = props.modelValue
+    if (value === undefined || value === null) {
+        return -1
+    }
+    if (props.items) {
+        return props.items.findIndex(item => sameValue(resolveItemValue(item), value))
+    }
+    const nodes = flatSlotNodes.value
+    if (!nodes) {
+        return -1
+    }
+    return nodes.findIndex(node => sameValue((node.props as Record<string, unknown> | null)?.value, value))
+}
+
+/** 选中行居中所需的 scrollTop。 */
+function centerTarget(index: number): number {
+    return Math.max(0, index * itemHeight.value - viewportHeight.value / 2 + itemHeight.value / 2)
+}
+
+/** 打开时把选中行滚到视口中央，窗口计算先行、DOM 滚动随后补齐。 */
+function scrollToIndex(index: number) {
+    if (index < 0 || !virtualActive.value) {
+        return
+    }
+    const target = centerTarget(index)
+    scrollTop.value = target
+    nextTick(() => {
+        const el = viewportEl()
+        if (el) {
+            el.scrollTop = target
+        } else {
+            requestAnimationFrame(() => {
+                const retryEl = viewportEl()
+                if (retryEl) {
+                    retryEl.scrollTop = target
+                }
+            })
+        }
+    })
+}
+
+/** items 整体替换（如异步加载完成）时回到顶部，避免停留在越界滚动位置。 */
+watch(
+    () => props.items,
+    () => {
+        scrollTop.value = 0
+        nextTick(() => {
+            measureViewport()
+            const el = viewportEl()
+            if (el) {
+                el.scrollTop = 0
+            }
+        })
+    }
+)
+
+/** 拦截 open 事件做选中行定位后手动透出，保持父级 @update:open 可用。 */
+function handleOpenChange(open: boolean) {
+    emits("update:open", open)
+    if (!open || !virtualActive.value) {
+        return
+    }
+    scrollToIndex(selectedIndex())
+    nextTick(() => {
+        requestAnimationFrame(() => {
+            if (!virtualActive.value) {
+                return
+            }
+            measureViewport()
+            scrollToIndex(selectedIndex())
+        })
+    })
+}
+
+defineExpose({
+    /** 把指定下标滚动到视口中央（仅虚拟激活时有效）。 */
+    scrollToIndex,
+    /** 按值定位并滚动到视口中央（找不到时无动作）。 */
+    scrollToValue: (value: unknown) => {
+        if (!props.items) {
+            return
+        }
+        scrollToIndex(props.items.findIndex(item => sameValue(resolveItemValue(item), value)))
+    },
+})
+
 const forward = useForwardPropsEmits(props, emits)
 
 /**
@@ -246,7 +547,7 @@ const chevronClass = computed(() => (props.variant === "default" ? "size-4 opaci
 </script>
 
 <template>
-    <SelectRoot :key="selectRootKey" v-bind="forward">
+    <SelectRoot :key="selectRootKey" v-bind="forward" @update:open="handleOpenChange">
         <slot name="trigger">
             <SelectTrigger
                 :class="['select-trigger inline-flex items-center justify-between gap-1.5', triggerVariantClass]"
@@ -271,8 +572,80 @@ const chevronClass = computed(() => (props.variant === "default" ? "size-4 opaci
                     <Icon icon="radix-icons:chevron-up" />
                 </SelectScrollUpButton>
 
-                <SelectViewport class="relative p-2 space-y-1">
-                    <slot />
+                <SelectViewport
+                    ref="viewportRef"
+                    :class="['relative p-2', virtualActive ? 'select-virtual-viewport' : 'space-y-1']"
+                    @scroll="onViewportScroll"
+                >
+                    <template v-if="props.items">
+                        <div
+                            v-if="props.items.length === 0"
+                            class="flex items-center justify-center px-3 py-8 text-sm text-base-content/40"
+                        >
+                            <slot name="empty">{{ emptyText }}</slot>
+                        </div>
+                        <div v-else-if="virtualActive" :style="{ height: `${totalHeight}px`, position: 'relative' }">
+                            <div
+                                :style="{
+                                    position: 'absolute',
+                                    top: '0',
+                                    left: '0',
+                                    right: '0',
+                                    transform: `translateY(${offsetY}px)`,
+                                }"
+                            >
+                                <div
+                                    v-for="(item, i) in visibleItems"
+                                    :key="itemKey(item, startIndex + i)"
+                                    :style="{ height: `${itemHeight}px` }"
+                                    class="flex flex-col justify-center overflow-hidden"
+                                >
+                                    <VirtualRowItem
+                                        :value="resolveItemValue(item)"
+                                        :disabled="resolveItemDisabled(item)"
+                                        class="h-full w-full shrink-0"
+                                    >
+                                        <slot name="item" :item="item" :index="startIndex + i">
+                                            {{ resolveItemLabel(item) }}
+                                        </slot>
+                                    </VirtualRowItem>
+                                </div>
+                            </div>
+                        </div>
+                        <template v-else>
+                            <VirtualRowItem
+                                v-for="(item, index) in props.items"
+                                :key="itemKey(item, index)"
+                                :value="resolveItemValue(item)"
+                                :disabled="resolveItemDisabled(item)"
+                            >
+                                <slot name="item" :item="item" :index="index">{{ resolveItemLabel(item) }}</slot>
+                            </VirtualRowItem>
+                        </template>
+                    </template>
+                    <template v-else-if="virtualActive && flatSlotNodes">
+                        <div :style="{ height: `${totalHeight}px`, position: 'relative' }">
+                            <div
+                                :style="{
+                                    position: 'absolute',
+                                    top: '0',
+                                    left: '0',
+                                    right: '0',
+                                    transform: `translateY(${offsetY}px)`,
+                                }"
+                            >
+                                <div
+                                    v-for="(node, i) in visibleSlotNodes"
+                                    :key="node.key ?? startIndex + i"
+                                    :style="{ height: `${itemHeight}px` }"
+                                    class="flex flex-col justify-center overflow-hidden"
+                                >
+                                    <VNodeList :nodes="[node]" />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <slot v-else />
                 </SelectViewport>
 
                 <SelectScrollDownButton
@@ -308,5 +681,25 @@ const chevronClass = computed(() => (props.variant === "default" ? "size-4 opaci
         linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 5%, transparent) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+/* 虚拟模式下恢复可见滚动条（reka 默认隐藏，长列表需可拖拽定位）。 */
+.select-virtual-viewport {
+    scrollbar-width: thin !important;
+    scrollbar-color: color-mix(in oklab, var(--color-base-content) 25%, transparent) transparent !important;
+}
+
+.select-virtual-viewport::-webkit-scrollbar {
+    display: block !important;
+    width: 8px !important;
+}
+
+.select-virtual-viewport::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-base-content) 25%, transparent);
+    border-radius: 9999px;
+}
+
+.select-virtual-viewport::-webkit-scrollbar-track {
+    background: transparent;
 }
 </style>

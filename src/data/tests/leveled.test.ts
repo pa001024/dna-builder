@@ -173,6 +173,7 @@ describe("DynamicBuff", () => {
             异常数量: 1,
             魔灵CD: 0,
             魔灵CD缩减: 0,
+            神智回复: 0,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])
         expect(attrs.技能威力).toBe(2)
@@ -228,6 +229,7 @@ describe("DynamicBuff", () => {
             异常数量: 1,
             魔灵CD: 0,
             魔灵CD缩减: 0,
+            神智回复: 0,
         }
 
         attrs = buff.applyDynamicAttr(char, attrs, [], undefined, enemy)
@@ -290,6 +292,7 @@ describe("DynamicBuff", () => {
             异常数量: 1,
             魔灵CD: 0,
             魔灵CD缩减: 0,
+            神智回复: 0,
         }
 
         attrs = buff.applyDynamicAttr(char, attrs, [], undefined, undefined, modAttrs)

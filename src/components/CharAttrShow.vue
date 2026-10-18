@@ -4,7 +4,7 @@ import { computed } from "vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useExprDrag } from "@/composables/useExprDrag"
-import { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
+import { CharAttr, CharBuild, CommonAttr, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
 import { resolveCharFieldExpression } from "@/utils/expr-field"
 import { copyExprField } from "@/utils/expr-field-copy"
@@ -82,6 +82,129 @@ interface DynamicAttrSource {
     sourceName: string
     value: number
 }
+
+/**
+ * 有效生命的输入属性键：单个来源对有效生命的贡献 = 移除该来源的全部相关加成后重算的差值。
+ * 固定攻击不影响承伤，不在移除范围内。
+ */
+const EFFECTIVE_HP_INPUT_KEYS = ["生命", "护盾", "防御", "减伤", "固定生命"] as const
+
+/**
+ * 记录是否含有效生命输入属性（数值非零）。
+ * @param record 来源的属性记录（角色加成 / 武器面板 / MOD 词条 / 效果层）
+ * @returns 是否含任一非零输入属性
+ */
+function hasEffectiveHpInput(record: Record<string, unknown> | undefined | null): boolean {
+    if (!record) return false
+    return EFFECTIVE_HP_INPUT_KEYS.some(key => typeof record[key] === "number" && record[key] !== 0)
+}
+
+interface EffectiveHpSource {
+    type: "resonance" | "char" | "weapon" | "mod" | "buff"
+    name: string
+    /** 相对提升：移除重算的差值 ÷ 移除后的剩余值（装上该来源带来的有效生命提升幅度） */
+    value: number
+}
+
+/**
+ * 有效生命按来源的贡献：逐个移除来源后重算有效生命，差值除以移除后的剩余值即该来源的相对提升。
+ * 与 dynamicAttrSourceMap 同口径（深拷贝构筑后移除重算），覆盖静态来源：
+ * 和鸣增益、角色加成、近战/远程武器、全部 MOD（含中枢）与静态 BUFF；
+ * 动态 BUFF 与特效 code 由既有映射覆盖，不在此重复。
+ * 全量重算单次约 0.5ms，来源数一般十余个，仅在打开有效生命 tooltip 时求值一次并缓存。
+ */
+const effectiveHpSources = computed<EffectiveHpSource[]>(() => {
+    const total = props.attributes.有效生命
+    if (typeof total !== "number") return []
+    const build = props.charBuild
+    const sources: EffectiveHpSource[] = []
+    const epsilon = 1e-9
+
+    const recalcWithout = (mutate: (clone: CharBuild) => void): number | undefined => {
+        try {
+            const clone = build.clone()
+            mutate(clone)
+            const value = clone.calculateWeaponAttributes().有效生命
+            return typeof value === "number" ? value : undefined
+        } catch {
+            return undefined
+        }
+    }
+    const push = (type: EffectiveHpSource["type"], name: string, without: number | undefined) => {
+        if (typeof without !== "number" || without <= epsilon) return
+        const delta = total - without
+        if (Math.abs(delta) < epsilon) return
+        sources.push({ type, name, value: delta / without })
+    }
+    const zeroHpInputs = (record: Record<string, number>): Record<string, number> => {
+        const copy = { ...record }
+        for (const key of EFFECTIVE_HP_INPUT_KEYS) {
+            if (typeof copy[key] === "number") copy[key] = 0
+        }
+        return copy
+    }
+
+    // 和鸣增益：生命/护盾/防御同吃共鸣加成
+    if (build.resonanceGain) {
+        push("resonance", "", recalcWithout(clone => {
+            clone.resonanceGain = 0
+        }))
+    }
+    // 角色加成：只清承伤相关键，进攻加成不影响有效生命
+    if (hasEffectiveHpInput(build.char.加成)) {
+        push(
+            "char",
+            "",
+            recalcWithout(clone => {
+                clone.char.加成 = zeroHpInputs({ ...(clone.char.加成 ?? {}) } as Record<string, number>) as CommonAttr
+            })
+        )
+    }
+    // 近战/远程武器：词条与武器效果层的承伤加成（addAttr 为计算属性，直接清实例字段与效果层）
+    for (const [weapon, select] of [
+        [build.meleeWeapon, (clone: CharBuild) => clone.meleeWeapon],
+        [build.rangedWeapon, (clone: CharBuild) => clone.rangedWeapon],
+    ] as const) {
+        if (!hasEffectiveHpInput(weapon as unknown as Record<string, unknown>) && !hasEffectiveHpInput(weapon.buffProps)) continue
+        push("weapon", weapon.名称, recalcWithout(clone => {
+            const target = select(clone) as unknown as Record<string, unknown>
+            for (const key of EFFECTIVE_HP_INPUT_KEYS) {
+                if (typeof target[key] === "number") target[key] = 0
+            }
+            select(clone).buffProps = zeroHpInputs({ ...select(clone).buffProps })
+        }))
+    }
+    // 中枢 MOD：移除即置空
+    if (build.auraMod && (hasEffectiveHpInput(build.auraMod as unknown as Record<string, unknown>) || hasEffectiveHpInput(build.auraMod.buffProps))) {
+        push("mod", build.auraMod.名称, recalcWithout(clone => {
+            clone.auraMod = undefined
+        }))
+    }
+    // 四槽 MOD：整卡移除（词条 + 效果层 + 条件 + MOD 属性耦合一次算清）
+    const slots = [build.charMods, build.meleeMods, build.rangedMods, build.skillMods]
+    slots.forEach((slot, slotIndex) => {
+        slot.forEach((mod, modIndex) => {
+            if (!mod) return
+            if (!hasEffectiveHpInput(mod as unknown as Record<string, unknown>) && !hasEffectiveHpInput(mod.buffProps)) return
+            push("mod", mod.名称, recalcWithout(clone => {
+                const target = [clone.charMods, clone.meleeMods, clone.rangedMods, clone.skillMods][slotIndex]
+                target[modIndex] = null
+            }))
+        })
+    })
+    // 临时代入的比较 MOD：clone 本就不携带，直接重算即移除后的值
+    if (build.tempMod && (hasEffectiveHpInput(build.tempMod as unknown as Record<string, unknown>) || hasEffectiveHpInput(build.tempMod.buffProps))) {
+        push("mod", build.tempMod.名称, recalcWithout(() => {}))
+    }
+    // 静态 BUFF：整条移除（带 code 的复合 BUFF 的 code 部分由动态映射覆盖）
+    build.buffs.forEach((buff, buffIndex) => {
+        if (!EFFECTIVE_HP_INPUT_KEYS.some(key => buff.getAttrValue(key))) return
+        push("buff", buff.名称, recalcWithout(clone => {
+            clone.buffs = clone.buffs.filter((_, index) => index !== buffIndex)
+        }))
+    })
+    return sources
+})
 
 /**
  * 通过“移除单个动态BUFF后重算”的方式，得到每个动态来源对角色属性的实际数值贡献。
@@ -229,8 +352,9 @@ function attrSourceKey(key: string): string {
 }
 
 /**
- * 动态来源的展示格式与主属性保持一致：数值型属性（攻击/生命/护盾/防御/神智/有效生命）按带符号数值展示，
+ * 动态来源的展示格式与主属性保持一致：数值型属性（攻击/生命/护盾/防御/神智/有效生命/神智回复）按带符号数值展示，
  * 其余百分比型属性按带符号百分比展示，避免 flat 差值（如「法露茜Q」将攻击百位转化生命）被误显示为百分比。
+ * 神智回复的「每 3 秒」口径见属性说明（attrDesc.神智回复），数值本身不带单位后缀。
  * @param key 属性键名
  * @param value 来源贡献值
  * @returns 展示字符串
@@ -239,7 +363,7 @@ function formatDynamicSource(key: string, value: number): string {
     if (key === "魔灵CD") {
         return `${value >= 0 ? "+" : ""}${+value.toFixed(1)}s`
     }
-    if (["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)) {
+    if (["攻击", "生命", "护盾", "防御", "神智", "有效生命", "神智回复"].includes(key)) {
         return `${value >= 0 ? "+" : ""}${+value.toFixed(key === "攻击" ? 2 : 0)}`
     }
     return format100r(value)
@@ -287,13 +411,32 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                 </div>
                 <div v-if="key === '有效生命'" class="text-sm text-primary">{{ $t('char-build.effective_hp_formula') }}</div>
                 <ul class="space-y-1">
+                    <li
+                        v-for="(source, index) in key === '有效生命' ? effectiveHpSources : []"
+                        :key="`ehp-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            <template v-if="source.type === 'resonance'">{{ $t("char-build.resonance_gain") }}</template>
+                            <template v-else-if="source.type === 'char'">{{ $t(charBuild.char.名称) }}</template>
+                            <template v-else-if="source.type === 'buff'">{{ source.name }}</template>
+                            <template v-else>{{ $t(source.name) }}</template>
+                        </div>
+                        {{ format100r(source.value) }}
+                    </li>
                     <li v-if="'基础' + key in charBuild.char" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
                         {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
                     </li>
+                    <li v-if="key === '神智回复'" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">
+                            {{ $t("char-build.natural_regen") }}
+                        </div>
+                        {{ formatDynamicSource("神智回复", 2 + Math.floor(Math.round(attributes.神智) / 200)) }}
+                    </li>
                     <li v-if="charBuild.char.加成 && key in charBuild.char.加成" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">{{ $t(charBuild.char.名称) }}</div>
-                        {{ format100r(charBuild.char.加成[key]!) }}
+                        {{ formatDynamicSource(key, charBuild.char.加成[key]!) }}
                     </li>
                     <li v-if="['生命', '护盾', '防御', '攻击'].includes(key)" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">{{ $t("char-build.resonance_gain") }}</div>
@@ -303,13 +446,13 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">
                             {{ $t(charBuild.meleeWeapon.名称) }}
                         </div>
-                        {{ format100r(charBuild.meleeWeapon.addAttr[key]!) }}
+                        {{ formatDynamicSource(key, charBuild.meleeWeapon.addAttr[key]!) }}
                     </li>
                     <li v-if="key in (charBuild.rangedWeapon.addAttr || {})" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">
                             {{ $t(charBuild.rangedWeapon.名称) }}
                         </div>
-                        {{ format100r(charBuild.rangedWeapon.addAttr[key]!) }}
+                        {{ formatDynamicSource(key, charBuild.rangedWeapon.addAttr[key]!) }}
                     </li>
                     <li
                         v-for="(mod, index) in [charBuild.auraMod].filter((m): m is LeveledMod => m && m[key])"
@@ -319,7 +462,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">
                             {{ $t(mod.名称) }}
                         </div>
-                        {{ format100r(mod[key]!) }}
+                        {{ formatDynamicSource(key, mod[key]!) }}
                     </li>
                     <li
                         v-for="(mod, index) in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
@@ -329,7 +472,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">
                             {{ $t(mod.名称) }}
                         </div>
-                        {{ format100r(mod[key]!) }}
+                        {{ formatDynamicSource(key, mod[key]!) }}
                     </li>
                     <!-- MOD 效果层属性（特效中以 @ 前缀声明）：与 BUFF 同理仅按属性自身作用域生效，不受 MOD 槽位限制 -->
                     <li
@@ -340,7 +483,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">
                             {{ $t(mod.名称) }}
                         </div>
-                        {{ format100r(mod.buffProps[key]!) }}
+                        {{ formatDynamicSource(key, mod.buffProps[key]!) }}
                     </li>
                     <template v-for="sourceField in extraAttrSourceKeys(key)" :key="sourceField">
                         <li
@@ -375,7 +518,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">
                             {{ buff.名称 }}
                         </div>
-                        {{ format100r(buff.getAttrValue(key)!) }}
+                        {{ formatDynamicSource(key, buff.getAttrValue(key)!) }}
                     </li>
                     <li
                         v-for="(dynamicSource, index) in dynamicAttrSourceMap[key] || []"
@@ -413,7 +556,8 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">{{ buff.名称 }}</div>
                         {{
                             (key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "") +
-                            format100r(
+                            formatDynamicSource(
+                                key,
                                 modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[attrSourceKey(key)] ?? 0), 0) *
                                     buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!
                             )
@@ -439,6 +583,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                 <template v-else-if="['攻击', '生命', '护盾', '防御', '神智', '有效生命'].includes(key)">
                     {{ +val.toFixed(key === "攻击" ? 2 : 0) }}
                 </template>
+                <template v-else-if="key === '神智回复'">+{{ +val.toFixed(0) }}</template>
                 <template v-else>{{ +(val * 100).toFixed(2) }}%</template>
             </div>
         </div>

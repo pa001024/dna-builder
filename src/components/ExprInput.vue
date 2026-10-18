@@ -32,6 +32,10 @@ const model = defineModel<string>({ default: "" })
 
 const emit = defineEmits<{
     (e: "cursor", position: number): void
+    /** 编辑器获得焦点（用于 ASTHelp 记住上一次聚焦的外部编辑框） */
+    (e: "focus"): void
+    /** 编辑器失去焦点 */
+    (e: "blur"): void
 }>()
 
 const hostRef = ref<HTMLElement | null>(null)
@@ -176,6 +180,8 @@ function initEditor() {
                     // 点击聚焦时延迟到手势结束再开换行：mousedown→mouseup 之间版式不变，mouseup 就不会错位拖选。
                     // 键盘聚焦（无手势）则立即开换行。
                     if (update.focusChanged) {
+                        if (update.view.hasFocus) emit("focus")
+                        else emit("blur")
                         if (update.view.hasFocus && pointerPressed) return
                         pointerPressed = false
                         syncWrap(update.view)

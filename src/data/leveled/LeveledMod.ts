@@ -274,7 +274,7 @@ export class LeveledMod implements Mod {
                 const mv = source[key]
                 if (typeof mv === "number") {
                     let value = (mv / (this.maxLevel + 1)) * (this._等级 + 1)
-                    if (key === "神智回复" || key === "最大耐受") value = Math.ceil(value)
+                    if (key === "神智回复" || key === "单次神智回复" || key === "最大耐受") value = Math.ceil(value)
                     scaled[key] = value
                 } else if (Array.isArray(mv) && mv.every((v): v is number => typeof v === "number")) {
                     scaled[key] = mv.map(v => (v / (this.maxLevel + 1)) * (this._等级 + 1))
@@ -305,7 +305,7 @@ export class LeveledMod implements Mod {
             const buff = this.buff!
             const maxValue = buff.getAttrValue(prop) ?? 0
             let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-            if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+            if (prop === "神智回复" || prop === "单次神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
             if (buff.isBuffLayerProperty(prop)) {
                 buffProps[prop] = (buffProps[prop] || 0) + currentValue
             } else {
@@ -357,7 +357,7 @@ export class LeveledMod implements Mod {
      */
     private scaleBaseNumberProperty(prop: string, maxValue: number, lv: number) {
         let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
-        if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
+        if (prop === "神智回复" || prop === "单次神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
         return currentValue
     }
 
@@ -498,6 +498,7 @@ export class LeveledMod implements Mod {
             异常数量: 1,
             魔灵CD: 0,
             魔灵CD缩减: 0,
+            神智回复: 0,
         }
         // 遍历与取值使用同一份属性表：效果层（`@` 属性）不在 MOD 自身的属性上，直接读 this[prop] 会得到 undefined
         const properties = this.getProperties()

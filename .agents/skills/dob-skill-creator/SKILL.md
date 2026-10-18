@@ -194,6 +194,8 @@ for (const dir of await readdir(ROOT, { withFileTypes: true })) {
 （见铁律 2 的权威取数工具），确认「模型用工具确实读得到、且与你写的一致」；投影没覆盖的底层结构
 再回数据包（`src/data/d/*.data.ts`）对一遍。**这是最容易省掉、也最不该省的一步**（见铁律 2）。
 
+⚠️ **线上构筑 `charSettings` 里的原始字段不能照抄**：如 `petCoverage: 1` 在 `petAutoCoverage: true` 时只是手动档回退值，生效值 = 自动计算（`resolvePetCoverage`：主动持续 ÷ 冷却，见 `src/data/petTrait.ts`），转述前先用模型算出生效值；作者的 `customVariables` 是手写估算式，引用它的结论前先 `createCharBuildFromSettings(...).calculate()` 确认与作者标注一致（偏差 >0.1% 说明口径没吃对，先修口径再往下写）。消融类数字（升级收益 / 溯源阶梯 / 单件撤除）一律实测，不许按公式心算。
+
 ### 第 5 步 · 更新 README
 
 `server/skills/README.md` 的「当前技能」表加一行（技能名 + 一句话说明）。
@@ -248,5 +250,10 @@ for (const dir of await readdir(ROOT, { withFileTypes: true })) {
 ❌ 「魔之楔的 `词条属性` 里能查到充盈威力 +300%」
    → 字段名凭印象写的。先用 bun tools/agent-exec.ts read_entry '{"module":"mod","name":"充盈·巧力"}' 核对：
      投影里的名字是 `词条属性（满级）`（带等级后缀），另外 `selectableFields` 里才出现 `充盈威力`。
+
+❌ 「推荐构筑带紫晶艾尔芙 L3，主动覆盖率 100%」
+   → 照抄了 `charSettings` 里的 `petCoverage: 1`。它在 `petAutoCoverage: true` 时只是手动档回退值，
+     不生效；生效值 = 自动计算（`resolvePetCoverage`：持续 ÷ 冷却，12s / 40s = 30%）。
+     转述配装前先用模型算出生效值，别照抄 JSON 里的原始字段。
 
 ```

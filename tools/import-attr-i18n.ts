@@ -93,6 +93,38 @@ const FRONTEND_COINED_ATTRS: AttrEntry[] = [
             en: "Cooldown reduction for the Geniemon support skill, granted by Geniemon Traits (e.g. 敏锐 gives 24% at max tier).",
         },
     },
+    {
+        // 上游 AttrConfig.SpRecoverValue（神智自然回复速度）只有属性名没有说明；
+        // 每 3 秒口径来自上游 MOD_DESC_1430（全盛·安神）与 TERMEXP_2401_Summon（云螭）。
+        id: "Frontend_SanityRegen",
+        name: "神智回复",
+        // 属性名已有数据包对照表覆盖（translations.data.ts），运行时注入，不写入文件
+        nameTexts: {},
+        descTexts: {
+            "zh-CN": "每 3 秒回复的神智总量 = 自然回复 + 额外回复。自然回复 = 2 + ⌊最大神智/200⌋。",
+            "zh-TW": "每 3 秒回復的神智總量 = 自然回復 + 額外回復。自然回復 = 2 + ⌊最大神智/200⌋。",
+            en: "Total Sanity restored every 3s = natural regen + bonus regen. Natural regen = 2 + ⌊Max Sanity/200⌋.",
+            ja: "3秒ごとに回復するSPの合計 = 自然回復 + 追加回復。自然回復 = 2 + ⌊最大SP/200⌋。",
+            ko: "3초마다 회복되는 정신력 총량 = 자연 회복 + 추가 회복. 자연 회복 = 2 + ⌊최대 정신력/200⌋.",
+            fr: "Lucidité totale restaurée toutes les 3 s = régén. naturelle + régén. bonus. Régén. naturelle = 2 + ⌊Lucidité max/200⌋.",
+        },
+    },
+    {
+        // 上游没有减伤属性（最接近的 DamagedRate 只是受伤倍率且无说明）；
+        // 前端减伤为多来源乘法叠加，与有效生命公式同口径。
+        id: "Frontend_DamageReduction",
+        name: "减伤",
+        // 属性名已有数据包对照表覆盖（translations.data.ts），运行时注入，不写入文件
+        nameTexts: {},
+        descTexts: {
+            "zh-CN": "受到的伤害降低比例，多来源按 1 - ∏(1 - 减伤)叠乘。",
+            "zh-TW": "受到的傷害降低比例，多來源按 1 - ∏(1 - 減傷)疊乘。",
+            en: "Incoming damage reduction, stacking multiplicatively across sources as 1 − ∏(1 − reduction).",
+            ja: "受けるダメージの軽減割合。複数ソースは 1 - ∏(1 - 軽減)で乗算される。",
+            ko: "받는 대미지 감소 비율. 여러 출처는 1 - ∏(1 - 감소)로 곱연산 적용.",
+            fr: "Réduction des dégâts subis, cumulée de façon multiplicative : 1 − ∏(1 − réduction).",
+        },
+    },
 ]
 
 /**
@@ -464,6 +496,8 @@ const DATA_PACK_COVERED_ATTR_NAMES = new Set([
     "技能耐久",
     "技能威力",
     "技能效益",
+    "神智回复",
+    "减伤",
 ])
 
 /**

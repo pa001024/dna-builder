@@ -85,6 +85,12 @@ export interface CharAttr {
      * 魔灵CD缩减（角色属性，0 起始的比例）：魔灵支援技能的冷却缩减，来源为魔灵潜质（如 敏锐 r5 → 24%）。
      */
     魔灵CD缩减: number
+    /**
+     * 神智回复（角色属性，每 3 秒回复总量）：神智自然回复（2 + floor(最大神智 / 200)）
+     * + BUFF / MOD 的持续性额外回复（如 全盛·安神、扶疏E）。
+     * 一次性回复（魔灵主动等）改记单次神智回复，不计入本属性。
+     */
+    神智回复: number
 }
 
 export interface WeaponAttr {
@@ -276,6 +282,7 @@ const characterBonusAttributes = [
     "技能触发",
     "异常数量",
     "魔灵CD缩减",
+    "神智回复",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -1381,6 +1388,8 @@ export class CharBuild {
         const anomalyCountBonus = bonuses[characterBonusIndex.异常数量]
         // 魔灵CD缩减（0 起始）：魔灵支援技能冷却缩减比例，由魔灵潜质（如 敏锐）等提供
         const petCdReduce = bonuses[characterBonusIndex.魔灵CD缩减]
+        // 神智回复（0 起始，每 3 秒额外回复量）：BUFF / MOD 的持续性额外回复
+        let sanityRegenBonus = bonuses[characterBonusIndex.神智回复]
 
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
@@ -1414,6 +1423,7 @@ export class CharBuild {
             summonRange += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物范围")
             summonDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物伤害")
             summonIndependentDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物独立增伤")
+            sanityRegenBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "神智回复")
         }
 
         // 计算基础属性
@@ -1495,6 +1505,8 @@ export class CharBuild {
             魔灵CD: Math.max(0, this.petBaseCd * (1 - Math.max(0, Math.min(1, petCdReduce)))),
             // 魔灵CD缩减：缩减比例本身（钳制在 [0,1]）
             魔灵CD缩减: Math.max(0, Math.min(1, petCdReduce)),
+            // 神智回复总量（每 3 秒）：自然回复 + BUFF / MOD 持续性额外回复
+            神智回复: sanityRegenBonus + 2 + Math.floor(sanity / 200),
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)

@@ -365,7 +365,7 @@ export class LeveledBuff implements Buff {
             } else if (typeof maxValue === "number") {
                 // 属性值 = 满级属性/a*(1+(x-1)/b)
                 let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio * this._coverage
-                if (property === "神智回复") currentValue = Math.round(currentValue)
+                if (property === "神智回复" || property === "单次神智回复") currentValue = Math.round(currentValue)
                 this.values[property] = currentValue
             }
         }

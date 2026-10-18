@@ -45,6 +45,7 @@ import {
 import { isRagEnabled } from "@/utils/rag/enabled"
 import { ragSearch } from "@/utils/rag/search"
 import type { AgentTool, AgentToolContext, AgentToolOutput } from "../tool"
+import { createPageSnapshotTool } from "./page-snapshot"
 
 /**
  * filters 参数的说明文案。
@@ -103,6 +104,8 @@ export interface DbRetrievalToolOptions {
     ragEnabled?: boolean
     /** 是否包含 ask_user（会挂起等待用户作答） */
     askUser?: boolean
+    /** 是否包含 render_page（在客户端渲染资料库页面后读取成品内容） */
+    page?: boolean
 }
 
 /**
@@ -1035,6 +1038,10 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                 }
             )
         )
+    }
+
+    if (options.page === true) {
+        tools.push(createPageSnapshotTool<TPayload>())
     }
 
     if (includeAskUser) {

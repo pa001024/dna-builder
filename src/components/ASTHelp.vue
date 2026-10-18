@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { t } from "i18next"
 import { debounce } from "lodash-es"
-import { computed, defineComponent, h, ref, type VNode, watch } from "vue"
+import { computed, defineComponent, h, nextTick, onMounted, ref, type VNode, watch } from "vue"
 import type { CharBuild, LeveledSkill } from "@/data"
 import { CharBuild as CharBuildClass } from "@/data"
 import { type ASTNode, parseAST } from "@/data/ast"
@@ -10,12 +10,14 @@ import CodeEditor from "./CodeEditor.vue"
 const props = defineProps<{
     skill?: LeveledSkill
     charBuild?: CharBuild
+    /** 打开时一次性载入的外部表达式（上一次聚焦的编辑框内容）；之后编辑只活在内部，确认才写回 */
+    initialExpression?: string
 }>()
 
 const model = defineModel<boolean>()
 const emit = defineEmits(["select"])
 
-const inputExpression = ref("")
+const inputExpression = ref(props.initialExpression ?? "")
 const astTree = ref<ASTNode | null>(null)
 const parseError = ref("")
 // CodeMirror 代码编辑器实例（language="ast"）。编辑器内部状态不随失焦丢失，光标位置始终准确。
@@ -159,7 +161,7 @@ const attributeGroups: { key: string; title: string; items: string[] }[] = [
     {
         key: "basic",
         title: t("ast-help.attrGroups.basic"),
-        items: ["攻击", "固定攻击", "生命", "固定生命", "防御", "护盾", "神智"],
+        items: ["攻击", "固定攻击", "生命", "固定生命", "防御", "护盾", "神智", "神智回复"],
     },
     {
         key: "damage",
@@ -478,6 +480,12 @@ watch(
     }, 300)
 )
 
+onMounted(() => {
+    // 打开时第一次：载入外部值并解析一次，之后与外部完全脱钩（确认写一次，直接关闭不写）。
+    parseExpression()
+    nextTick(() => codeEditorRef.value?.focus())
+})
+
 // AST 树渲染：递归生成带颜色高亮的 VNode，便于区分不同节点类型。
 const nodeColors = {
     number: "text-cyan-400",
@@ -772,6 +780,7 @@ const badgeColors: Record<string, string> = {
                         <Icon icon="ri:delete-bin-line" class="h-4 w-4" />
                         {{ $t("ast-help.clear") }}
                     </button>
+                    <button class="btn btn-ghost" @click="model = false">{{ $t("取消") }}</button>
                 </div>
             </div>
         </div>

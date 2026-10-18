@@ -1,8 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { charData, LeveledChar } from "@/data"
 import { getElementDisplayName, getElementGradientClass, getElementHoverBorderClass } from "@/utils/element-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
+
+// 空闲预取构筑页 chunk：/char/:id 是懒加载路由，首次进入要现场拉取 + 求值
+// 约 40 个子组件与 3MB 级数据模块（dev 实测点击到可交互约 700ms，其中计算本身仅约 5ms）。
+// 列表页空闲时预热一次，点进时只剩 setup（约 40ms）。import 本身无副作用（setup 按实例执行）。
+onMounted(() => {
+    const prefetch = () => import("@/views/CharBuildView.vue").catch(() => {})
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void })
+        .requestIdleCallback
+    if (idle) idle(prefetch, { timeout: 3000 })
+    else setTimeout(prefetch, 1500)
+})
 
 const tabs = ["全部", "输出", "同律武器", "武器伤害", "技能伤害", "辅助", "召唤物", "控制", "神智回复", "治疗", "最大生命", "防御", "护盾"]
 const activeTab = ref(tabs[1])

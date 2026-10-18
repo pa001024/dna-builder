@@ -16,6 +16,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
+| 资料库页面渲染为净化 HTML（`render_page`、离屏渲染 / 净化 / 点击展开页签） | [page-html-snapshot.md](.agents/docs/page-html-snapshot.md) |
 | Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
 | 在线地图→MapTool 坐标换算（`onlinemap-transform` 标定方法 / 置信度 / 坑） | [online-map-transform.md](.agents/docs/online-map-transform.md) |
 | 安全模式 | [safe-mode-unlock.md](.agents/docs/safe-mode-unlock.md) |

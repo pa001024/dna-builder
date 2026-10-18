@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
 import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import type { BuildTabCard } from "@/components/BuildTabTooltip.vue"
@@ -82,6 +82,39 @@ import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from 
 import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { isModAllowedInSlot, type ModLimitContext } from "@/utils/mod-equip"
+
+// 首屏外组件异步化：弹窗类与次级章节（05-09）内容不进首屏 chunk。
+// DOBBuildShow（模板 ref 调方法）、简洁视图与 01-04 章节组件保持同步引入。
+const loadAutoBuild = () => import("@/components/AutoBuild.vue")
+const loadASTHelp = () => import("@/components/ASTHelp.vue")
+const loadWeaponListView = () => import("@/components/WeaponListView.vue")
+const loadMonsterListView = () => import("@/components/MonsterListView.vue")
+const loadDotConfigDialog = () => import("@/components/DotConfigDialog.vue")
+const loadResourceCostItem = () => import("@/components/ResourceCostItem.vue")
+const loadAIChatDialog = () => import("@/components/AIChatDialog.vue")
+const loadTeamEditor = () => import("@/components/TeamEditor.vue")
+const loadPetEditor = () => import("@/components/PetEditor.vue")
+const loadTraitEditer = () => import("@/components/TraitEditer.vue")
+const loadBuffEditer = () => import("@/components/BuffEditer.vue")
+const loadCustomBuffEditor = () => import("@/components/CustomBuffEditor.vue")
+const loadCharActionEditor = () => import("@/components/CharActionEditor.vue")
+const loadEquipmentPreview = () => import("@/components/EquipmentPreview.vue")
+const loadCommentSection = () => import("@/components/CommentSection.vue")
+const AutoBuild = defineAsyncComponent(loadAutoBuild)
+const ASTHelp = defineAsyncComponent(loadASTHelp)
+const WeaponListView = defineAsyncComponent(loadWeaponListView)
+const MonsterListView = defineAsyncComponent(loadMonsterListView)
+const DotConfigDialog = defineAsyncComponent(loadDotConfigDialog)
+const ResourceCostItem = defineAsyncComponent(loadResourceCostItem)
+const AIChatDialog = defineAsyncComponent(loadAIChatDialog)
+const TeamEditor = defineAsyncComponent(loadTeamEditor)
+const PetEditor = defineAsyncComponent(loadPetEditor)
+const TraitEditer = defineAsyncComponent(loadTraitEditer)
+const BuffEditer = defineAsyncComponent(loadBuffEditer)
+const CustomBuffEditor = defineAsyncComponent(loadCustomBuffEditor)
+const CharActionEditor = defineAsyncComponent(loadCharActionEditor)
+const EquipmentPreview = defineAsyncComponent(loadEquipmentPreview)
+const CommentSection = defineAsyncComponent(loadCommentSection)
 
 //#region 角色
 const inv = useInvStore()
@@ -1035,6 +1068,30 @@ const pselectedChar = useLocalStorage("selectedChar", "赛琪")
 
 onMounted(async () => {
     pselectedChar.value = selectedChar.value
+    // 首屏先画 01-04，次级章节空闲后补挂（requestIdleCallback 800ms 兜底，低端机也不会拖太久）
+    const mountDeferred = () => (deferredSectionsMounted.value = true)
+    const idle = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void })
+        .requestIdleCallback
+    if (idle) {
+        idle(mountDeferred, { timeout: 800 })
+        // 弹窗类 chunk 空闲预取：首次打开弹窗不再现场加载
+        idle(
+            () => {
+                for (const load of [
+                    loadAutoBuild,
+                    loadASTHelp,
+                    loadWeaponListView,
+                    loadMonsterListView,
+                    loadDotConfigDialog,
+                    loadResourceCostItem,
+                    loadAIChatDialog,
+                ]) void load().catch(() => {})
+            },
+            { timeout: 3000 }
+        )
+    } else {
+        setTimeout(mountDeferred, 350)
+    }
     if (route.params.buildId && typeof route.params.buildId === "string") await loadSharedBuild(route.params.buildId)
 })
 //#endregion
@@ -1386,7 +1443,13 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     comments: false,
 })
 
+// 次级章节（05 特效 / 06 BUFF 大列表 / 07 动作 / 08 预览 / 09 评论）是否已补挂：
+// 首渲染只挂 01-04，进页少一次大体量同步挂载；空闲后（或用户开合章节时）再挂载次级内容。
+const deferredSectionsMounted = ref(false)
+
 function toggleSection(section: keyof typeof collapsedSections.value) {
+    // 用户一旦手动开合章节，说明已开始交互：次级章节立即补挂，避免点开展示空内容
+    deferredSectionsMounted.value = true
     collapsedSections.value[section] = !collapsedSections.value[section]
 }
 
@@ -1798,6 +1861,47 @@ function selectEnemy(id: number) {
 }
 
 const ast_help_model_show = ref(false)
+/** ASTHelp 关联的外部编辑框 key（target-function 或 custom-variable:index），确认时一次性写回该框 */
+const astHelpTargetKey = ref("target-function")
+/** 打开 ASTHelp 时一次性快照的外部表达式（打开后与外部脱钩，直接关闭不写回） */
+const astHelpInitialExpression = ref("")
+/** 上一次聚焦的外部表达式编辑框，打开 ASTHelp 时默认关联它 */
+const lastFocusedExprKey = ref("target-function")
+
+/**
+ * 打开 ASTHelp：把编辑框关联到上一次聚焦的外部编辑框，打开时读一次外部值。
+ * 自定义变量行被删除后 key 失效时回退到目标函数。
+ * @returns void
+ */
+function openAstHelp() {
+    let targetKey = lastFocusedExprKey.value
+    if (targetKey.startsWith("custom-variable:")) {
+        const index = Number(targetKey.slice("custom-variable:".length))
+        if (!customVariableInputs.value[index]) targetKey = "target-function"
+    } else if (targetKey !== "target-function") {
+        targetKey = "target-function"
+    }
+    astHelpTargetKey.value = targetKey
+    astHelpInitialExpression.value =
+        targetKey === "target-function"
+            ? targetFunction.value
+            : (customVariableInputs.value[Number(targetKey.slice("custom-variable:".length))]?.[1] ?? "")
+    ast_help_model_show.value = true
+}
+
+/**
+ * ASTHelp 确认后写一次：把编辑结果一次性写回打开时关联的外部编辑框。
+ * @param expression 确认的表达式
+ * @returns void
+ */
+function onAstHelpSelect(expression: string) {
+    if (astHelpTargetKey.value === "target-function") {
+        targetFunction.value = expression
+        return
+    }
+    const index = Number(astHelpTargetKey.value.slice("custom-variable:".length))
+    if (customVariableInputs.value[index]) customVariableInputs.value[index][1] = expression
+}
 
 async function shareCharBuild(title: string, desc: string = "") {
     try {
@@ -2005,7 +2109,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         </dialog>
         <dialog class="modal" :class="{ 'modal-open': autobuild_model_show }">
             <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-                <AutoBuild :update="autobuild_model_show" :char-build="charBuild" @change="newBuild = $event" />
+                <AutoBuild v-if="autobuild_model_show" :update="autobuild_model_show" :char-build="charBuild" @change="newBuild = $event" />
                 <div class="modal-action">
                     <form class="flex justify-end gap-2" method="dialog">
                         <button class="btn btn-primary" @click="applyAutobuild">
@@ -2026,7 +2130,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     v-model="ast_help_model_show"
                     :char-build="charBuild"
                     :skill="charBuild.selectedSkill"
-                    @select="targetFunction = $event"
+                    :initial-expression="astHelpInitialExpression"
+                    @select="onAstHelpSelect"
                 />
             </div>
             <div class="modal-backdrop" @click="ast_help_model_show = false" />
@@ -2594,7 +2699,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <SectionHeader :title="isTimeline ? $t('时间线') : $t('目标函数')" no-animate compact>
                                 <template #trailing>
                                     <div class="flex items-center gap-1">
-                                        <div class="btn btn-xs btn-ghost btn-circle" @click="ast_help_model_show = true">
+                                        <div class="btn btn-xs btn-ghost btn-circle" @click="openAstHelp">
                                             <Icon icon="ri:question-line" />
                                         </div>
                                         <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary toggle-sm" />
@@ -2648,6 +2753,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                         referenceHighlightClass(`custom-variable:${index}`),
                                                     ]"
                                                         @click="handleExprDropClick(`custom-variable:${index}`)"
+                                                        @focus="lastFocusedExprKey = `custom-variable:${index}`"
                                                     />
                                                 </FullTooltip>
                                                 <button
@@ -2741,6 +2847,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             data-expr-drop="target-function"
                                             data-agent="target-function"
                                             @click="handleExprDropClick('target-function')"
+                                            @focus="lastFocusedExprKey = 'target-function'"
                                         />
                                         <div
                                             v-if="targetFunction"
@@ -3096,6 +3203,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             lazy
                             @toggle="toggleSection('effects')"
                         >
+                            <template v-if="deferredSectionsMounted">
                             <div class="mt-2">
                                 <EffectSettings
                                     :mods="charBuild.modsWithWeapons"
@@ -3105,6 +3213,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     @update:use-global="charSettings.useGlobal = $event"
                                 />
                             </div>
+                            </template>
                         </CollapsibleSection>
 
                         <!-- BUFF列表 -->
@@ -3117,6 +3226,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             lazy
                             @toggle="toggleSection('buffs')"
                         >
+                            <template v-if="deferredSectionsMounted">
                             <!-- 协战选择：图标化展示队友/队友武器，并可关联该角色的服务器构筑（简洁模式据此弹窗查看其魔之楔） -->
                             <div class="my-2">
                                 <TeamEditor
@@ -3171,6 +3281,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </div>
                                 <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
                             </template>
+                            </template>
                         </CollapsibleSection>
 
                         <!-- 动作序列 -->
@@ -3182,7 +3293,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             lazy
                             @toggle="toggleSection('actions')"
                         >
+                            <template v-if="deferredSectionsMounted">
                             <CharActionEditor :char-name="selectedChar" :char-build="charBuild" />
+                            </template>
                         </CollapsibleSection>
 
                         <!-- 装配预览 -->
@@ -3194,12 +3307,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             lazy
                             @toggle="toggleSection('preview')"
                         >
+                            <template v-if="deferredSectionsMounted">
                             <EquipmentPreview
                                 :char-build="charBuild"
                                 :attributes="attributes"
                                 :char-name="selectedChar"
                                 :char-settings="charSettings"
                             />
+                            </template>
                         </CollapsibleSection>
 
                         <!-- 评论 -->
@@ -3212,9 +3327,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             lazy
                             @toggle="toggleSection('comments')"
                         >
+                            <template v-if="deferredSectionsMounted">
                             <div class="mt-2">
                                 <CommentSection :target-id="buildCommentTargetId" @count="buildCommentCount = $event" />
                             </div>
+                            </template>
                         </CollapsibleSection>
                     </div>
                 </ScrollArea>

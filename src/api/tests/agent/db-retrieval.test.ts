@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createDbRetrievalTools } from "@/api/agent/tools/db-retrieval"
+import { DB_RETRIEVAL_PROFILES } from "@/api/agent/tools/retrieval-modules"
 
 /**
  * @description 执行工具并解析它返回的 JSON 正文。
@@ -48,6 +49,29 @@ describe("资料检索工具集裁剪", () => {
 
     it("上下文检索增强关闭时不声明 rag_search", () => {
         expect(names(createDbRetrievalTools({ ragEnabled: false }))).not.toContain("rag_search")
+    })
+
+    it("页面渲染工具只按 page 开关声明", () => {
+        expect(names(createDbRetrievalTools({ page: true }))).toContain("render_page")
+        expect(names(createDbRetrievalTools({}))).not.toContain("render_page")
+        // 资料检索 profile 开、配装 profile 不开：配装页自己有 read_page
+        expect(DB_RETRIEVAL_PROFILES.db.page).toBe(true)
+        expect(DB_RETRIEVAL_PROFILES.build.page).not.toBe(true)
+    })
+
+    it("render_page 拒绝非资料库路径并给出提示", async () => {
+        const tools = createDbRetrievalTools({ page: true })
+        const pageTool = tools.find(tool => tool.definition.name === "render_page")
+
+        expect(pageTool).toBeDefined()
+
+        const denied = (await pageTool!.execute({ path: "/setting" }, { isInterrupted: () => false })) as {
+            content?: string
+            isError?: boolean
+        }
+
+        expect(denied.isError).toBe(true)
+        expect(JSON.parse(denied.content ?? "{}")).toMatchObject({ path: "/setting" })
     })
 
     it("模块白名单会收敛 list_data_modules 与越权访问", async () => {
