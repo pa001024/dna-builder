@@ -1,0 +1,54 @@
+name: publish-data
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "src/data/package.json"
+    workflow_dispatch:
+
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: src/data
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  registry-url: https://registry.npmjs.org/
+
+            - name: check if version already published
+              id: version_check
+              run: |
+                  LOCAL=$(node -p "require('./package.json').version")
+                  PUBLISHED=$(npm view dna-builder-data version 2>/dev/null || echo "0.0.0")
+                  echo "local=$LOCAL published=$PUBLISHED"
+                  if [ "$LOCAL" = "$PUBLISHED" ]; then
+                      echo "skip=true" >> $GITHUB_OUTPUT
+                  fi
+
+            - uses: pnpm/action-setup@v4
+              name: Install pnpm
+              if: steps.version_check.outputs.skip != 'true'
+
+            - name: install dependencies
+              if: steps.version_check.outputs.skip != 'true'
+              run: pnpm install --frozen-lockfile
+
+            - name: build mcp bundle
+              if: steps.version_check.outputs.skip != 'true'
+              run: pnpm run build:mcp
+
+            - name: publish to npm via OIDC
+              if: steps.version_check.outputs.skip != 'true'
+              run: npm publish --access public
