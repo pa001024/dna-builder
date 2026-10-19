@@ -20,6 +20,8 @@ const componentProps = withDefaults(
         title?: string
         rarity?: string
         desc?: string
+        /** 补充提示（如 BUFF 被已装备 MOD 禁用），展示在通用卡片属性区上方 */
+        note?: string
         /** 效果文案原文（参数化文本） */
         effdesc?: ParamText
         /** 效果档位下标（武器为精炼等级，MOD 为 `等级 - 1`） */
@@ -114,6 +116,9 @@ function formatDesc(): string[] {
                 </div>
                 <div v-if="desc" class="text-xs text-gray-400">
                     {{ desc }}
+                </div>
+                <div v-if="note" class="text-xs text-warning">
+                    {{ note }}
                 </div>
                 <div v-if="applicableSkill" class="flex justify-between items-center gap-2 text-sm">
                     <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("char-build.buff_applicable") }}</div>

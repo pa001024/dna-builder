@@ -1106,8 +1106,12 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
                 includeMelee: false,
                 includeRanged: false,
             })
-            const includeTypes = (input.includeTypes ?? autoBuildSetting.value.includeTypes).map(type => MOD_TYPE_KEY[type])
-            const preserveTypes = (input.preserveTypes ?? autoBuildSetting.value.preserveTypes).map(type => MOD_TYPE_KEY[type])
+            const includeTypes = (input.includeTypes ?? autoBuildSetting.value.includeTypes ?? []).map(type => MOD_TYPE_KEY[type])
+            const preserveTypes = (
+                input.preserveTypes ??
+                (autoBuildSetting.value as { preserveTypes?: ModSlotType[] }).preserveTypes ??
+                []
+            ).map(type => MOD_TYPE_KEY[type])
             const useInv = input.useInv ?? autoBuildSetting.value.useInv
             const includeMelee = input.includeMelee ?? autoBuildSetting.value.includeMelee
             const includeRanged = input.includeRanged ?? autoBuildSetting.value.includeRanged

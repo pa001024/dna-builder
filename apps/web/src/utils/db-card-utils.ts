@@ -2,26 +2,28 @@
  * AI 卡片（DBAICard）的条目解析。
  *
  * 模型给出的参数是「类型 + id 或名称」这种最简形态，而 `DBLatestItemCard` 需要完整的
- * Char / Weapon / Mod 数据对象，这一层负责把前者补齐成后者，让模型不必（也无法）拼出完整数据：
- * - 类型写法容错：char / weapon / mod，兼收「角色 / 武器 / 魔之楔」这类中文写法；
+ * Char / Weapon / Mod / Pet 数据对象，这一层负责把前者补齐成后者，让模型不必（也无法）拼出完整数据：
+ * - 类型写法容错：char / weapon / mod / pet，兼收「角色 / 武器 / 魔之楔 / 魔灵」这类中文写法；
  * - 定位以 id 为主，其次名称（含角色别名、魔之楔的「系列 + 名称」写法、拼音）；
  * - 名称还接受译文写法：先用 `expandDBAgentKeyword` 反查回游戏原文再匹配，
  *   否则非中文界面下模型给的名字一律落空；
- * - 类型缺失时按 角色 → 武器 → 魔之楔 的顺序找，让模型漏写 kind 时不至于渲染失败。
+ * - 类型缺失时按 角色 → 武器 → 魔之楔 → 魔灵 的顺序找，让模型漏写 kind 时不至于渲染失败。
  */
 
 import type { DBLatestItem } from "@/components/DBLatestItemCard.vue"
+import { charMap, modMap, petMap, petUidMap, weaponMap } from "@/data/d"
 import charData from "@/data/d/char.data"
 import modData from "@/data/d/mod.data"
+import petData, { type Pet } from "@/data/d/pet.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Char, Mod, Weapon } from "@/data/data-types"
 import { pickDBEntryByName, toNumericEntryId } from "@/utils/db-name-match"
 
 /** AI 卡片支持的条目类型 */
-export type DBCardKind = "char" | "weapon" | "mod"
+export type DBCardKind = "char" | "weapon" | "mod" | "pet"
 
 /** 类型缺失时按这个顺序逐个尝试 */
-const CARD_KIND_ORDER: readonly DBCardKind[] = ["char", "weapon", "mod"]
+const CARD_KIND_ORDER: readonly DBCardKind[] = ["char", "weapon", "mod", "pet"]
 
 /** 类型参数的合法写法（小写后比对） */
 const CARD_KIND_ALIASES: Record<string, DBCardKind> = {
@@ -36,6 +38,10 @@ const CARD_KIND_ALIASES: Record<string, DBCardKind> = {
     mod: "mod",
     mods: "mod",
     魔之楔: "mod",
+    pet: "pet",
+    pets: "pet",
+    魔灵: "pet",
+    宠物: "pet",
 }
 
 /**
@@ -55,7 +61,7 @@ export function normalizeDBCardKind(raw: unknown): DBCardKind | undefined {
  * @param item 条目数据
  * @returns 候选名称列表（空串会被匹配逻辑忽略）
  */
-function candidateNames(kind: DBCardKind, item: Char | Weapon | Mod): string[] {
+function candidateNames(kind: DBCardKind, item: Char | Weapon | Mod | Pet): string[] {
     if (kind === "char") {
         const char = item as Char
 
@@ -68,6 +74,10 @@ function candidateNames(kind: DBCardKind, item: Char | Weapon | Mod): string[] {
 
         // 魔之楔在界面上常写成「系列 + 名称」，两种写法都要能命中
         return [mod.名称, mod.系列 ? `${mod.系列}${mod.名称}` : ""]
+    }
+
+    if (kind === "pet") {
+        return [(item as Pet).名称]
     }
 
     return [(item as Weapon).名称]
@@ -92,6 +102,12 @@ function findByKindAndName(kind: DBCardKind, name: string): DBLatestItem | undef
         return item ? { kind: "mod", item } : undefined
     }
 
+    if (kind === "pet") {
+        const item = pickDBEntryByName(petData, name, pet => candidateNames("pet", pet))
+
+        return item ? { kind: "pet", item } : undefined
+    }
+
     const item = pickDBEntryByName(weaponData, name, weapon => candidateNames("weapon", weapon))
 
     return item ? { kind: "weapon", item } : undefined
@@ -104,18 +120,24 @@ function findByKindAndName(kind: DBCardKind, name: string): DBLatestItem | undef
  */
 function findByKindAndId(kind: DBCardKind, id: number): DBLatestItem | undefined {
     if (kind === "char") {
-        const item = charData.find(char => char.id === id)
+        const item = charMap.get(id)
 
         return item ? { kind: "char", item } : undefined
     }
 
     if (kind === "mod") {
-        const item = modData.find(mod => mod.id === id)
+        const item = modMap.get(id)
 
         return item ? { kind: "mod", item } : undefined
     }
 
-    const item = weaponData.find(weapon => weapon.id === id)
+    if (kind === "pet") {
+        const item = petMap.get(id) ?? petUidMap.get(id)
+
+        return item ? { kind: "pet", item } : undefined
+    }
+
+    const item = weaponMap.get(id)
 
     return item ? { kind: "weapon", item } : undefined
 }

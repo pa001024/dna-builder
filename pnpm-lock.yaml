@@ -78,6 +78,9 @@ importers:
       vitest:
         specifier: ^4.1.11
         version: 4.1.12(@types/node@25.9.9)(@vitest/coverage-v8@4.0.15)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.9.1)(lightningcss@1.32.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      wasm-opt:
+        specifier: 2.0.1
+        version: 2.0.1
 
   apps/server:
     dependencies:
@@ -2299,6 +2302,10 @@ packages:
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
     engines: {node: '>=18'}
 
+  '@isaacs/fs-minipass@4.0.1':
+    resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
+    engines: {node: '>=18.0.0'}
+
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
@@ -2532,6 +2539,11 @@ packages:
   '@rollup/rollup-freebsd-arm64@4.64.10':
     resolution: {integrity: sha512-v9NRQG+JztbP4DP/0yuhSyDcEJk047lYbqeNnqIgbXITcVDjGDS7OpkW5nadSY3tJ7MY8W1qIMMqP4Q3Q8BDjQ==}
     cpu: [arm64]
+    os: [freebsd]
+
+  '@rollup/rollup-freebsd-x64@4.64.10':
+    resolution: {integrity: sha512-CHc9LBHdxhn6/NXfb9IegXCWoz5VlvcDOx9QrzZ9q+XYhFlfzwymSWJjOlZcEMMtC1zgMV7qxDe6U18AI1SG0A==}
+    cpu: [x64]
     os: [freebsd]
 
   '@rollup/rollup-linux-arm-gnueabihf@4.64.10':
@@ -3362,6 +3374,36 @@ packages:
       '@vue/composition-api':
         optional: true
 
+  '@wasm-opt/darwin-arm64@2.0.1':
+    resolution: {integrity: sha512-l9z6tvWXimVwiQZ4SMjwLa8ifKUcC6WfTcSthenrldMjP2goNKr+sZbzslFG5TZQ832DtKAn3DYXqSvUm7i2ZA==}
+    engines: {node: '>=24.14.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@wasm-opt/linux-arm64@2.0.1':
+    resolution: {integrity: sha512-ry8YuQYIBB1dFscSa4/pqZLT/uPOqTx9J34O9eI80BudlV0gDLvZJrS860KtL+NK8GGC1DYHTaboFsDqdiaSzQ==}
+    engines: {node: '>=24.14.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@wasm-opt/linux-x64@2.0.1':
+    resolution: {integrity: sha512-vnIZ9/bUwqvfOcletNrLNmej6/rpLsb5GwuLjbb+2hU+laU4B+KS02YNonqfpQ5t7TJfO287gcgGMxAyk9nZng==}
+    engines: {node: '>=24.14.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@wasm-opt/win32-arm64@2.0.1':
+    resolution: {integrity: sha512-nchqI3LWfUyTEeoZrsLncnviW5ZJhaN/BilRoyRH725kzjYEn9U6n5cfWxEC5zhZ7BfUCJIhOcRaLTLcw0MHBg==}
+    engines: {node: '>=24.14.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@wasm-opt/win32-x64@2.0.1':
+    resolution: {integrity: sha512-s7kt+W7WUah8fGEF7rXEWy9cszgT8gTs1wHvorf73vcq4w4IKCeH0LKnFnY2+6hN5YQMdLCp0SYAJKcMQb9jIQ==}
+    engines: {node: '>=24.14.0'}
+    cpu: [x64]
+    os: [win32]
+
   '@webgpu/types@0.1.74':
     resolution: {integrity: sha512-lgiI4hbuLcI9unnm2cL/tvCaQU45dp0xcLWJh5uB/9MBGvIA4F8XIk7nSiBeg+K4xWGYwgZKn80LmERI5CxoTA==}
 
@@ -3717,6 +3759,10 @@ packages:
   chokidar@5.0.0:
     resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
     engines: {node: '>= 20.19.0'}
+
+  chownr@3.0.0:
+    resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
+    engines: {node: '>=18'}
 
   cli-boxes@4.0.1:
     resolution: {integrity: sha512-5IOn+jcCEHEraYolBPs/sT4BxYCe2nHg374OPiItB1O96KZFseS2gthU4twyYzeDcFew4DaUM/xwc5BQf08JJw==}
@@ -5624,6 +5670,10 @@ packages:
     resolution: {integrity: sha512-tEBHqDnIoM/1rXME1zgka9g6Q2lcoCkxHLuc7ODJ5BxbP5d4c2Z5cGgtXAku59200Cx7diuHTOYfSBD8n6mm8A==}
     engines: {node: '>=16 || 14 >=14.17'}
 
+  minizlib@3.1.0:
+    resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
+    engines: {node: '>= 18'}
+
   mitt@3.0.1:
     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
 
@@ -6488,6 +6538,10 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
+  tar@7.5.22:
+    resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
+    engines: {node: '>=18'}
+
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
     engines: {node: '>=8'}
@@ -6908,6 +6962,11 @@ packages:
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
+  wasm-opt@2.0.1:
+    resolution: {integrity: sha512-vyT4JSzrZ2O21XKtpIngTGF4a0e8uRpWkLC1CktKC0xfI/nkBgbv9ZGcOveCoBDVMc0VmrgEg3/1Flv05jpiTQ==}
+    engines: {node: '>=24.14.0'}
+    hasBin: true
+
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -7067,6 +7126,10 @@ packages:
 
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
+  yallist@5.0.0:
+    resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
+    engines: {node: '>=18'}
 
   yaml@2.9.1:
     resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
@@ -8836,6 +8899,10 @@ snapshots:
 
   '@isaacs/cliui@9.0.0': {}
 
+  '@isaacs/fs-minipass@4.0.1':
+    dependencies:
+      minipass: 7.1.3
+
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -9085,6 +9152,9 @@ snapshots:
     optional: true
 
   '@rollup/rollup-freebsd-arm64@4.64.10':
+    optional: true
+
+  '@rollup/rollup-freebsd-x64@4.64.10':
     optional: true
 
   '@rollup/rollup-linux-arm-gnueabihf@4.64.10':
@@ -9939,6 +10009,21 @@ snapshots:
       vue: 3.5.44(typescript@5.9.3)
       vue-demi: 0.14.10(vue@3.5.44(typescript@5.9.3))
 
+  '@wasm-opt/darwin-arm64@2.0.1':
+    optional: true
+
+  '@wasm-opt/linux-arm64@2.0.1':
+    optional: true
+
+  '@wasm-opt/linux-x64@2.0.1':
+    optional: true
+
+  '@wasm-opt/win32-arm64@2.0.1':
+    optional: true
+
+  '@wasm-opt/win32-x64@2.0.1':
+    optional: true
+
   '@webgpu/types@0.1.74': {}
 
   '@whatwg-node/disposablestack@0.0.6':
@@ -10363,6 +10448,8 @@ snapshots:
   chokidar@5.0.0:
     dependencies:
       readdirp: 5.1.1
+
+  chownr@3.0.0: {}
 
   cli-boxes@4.0.1: {}
 
@@ -12301,6 +12388,10 @@ snapshots:
 
   minipass@7.1.3: {}
 
+  minizlib@3.1.0:
+    dependencies:
+      minipass: 7.1.3
+
   mitt@3.0.1: {}
 
   mkdirp@0.5.6:
@@ -12841,6 +12932,7 @@ snapshots:
       '@rollup/rollup-darwin-arm64': 4.64.10
       '@rollup/rollup-darwin-x64': 4.64.10
       '@rollup/rollup-freebsd-arm64': 4.64.10
+      '@rollup/rollup-freebsd-x64': 4.64.10
       '@rollup/rollup-linux-arm-gnueabihf': 4.64.10
       '@rollup/rollup-linux-arm-musleabihf': 4.64.10
       '@rollup/rollup-linux-arm64-gnu': 4.64.10
@@ -13269,6 +13361,14 @@ snapshots:
 
   tapable@2.3.3: {}
 
+  tar@7.5.22:
+    dependencies:
+      '@isaacs/fs-minipass': 4.0.1
+      chownr: 3.0.0
+      minipass: 7.1.3
+      minizlib: 3.1.0
+      yallist: 5.0.0
+
   temp-dir@2.0.0: {}
 
   tempy@0.6.0:
@@ -13660,6 +13760,16 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
+  wasm-opt@2.0.1:
+    dependencies:
+      tar: 7.5.22
+    optionalDependencies:
+      '@wasm-opt/darwin-arm64': 2.0.1
+      '@wasm-opt/linux-arm64': 2.0.1
+      '@wasm-opt/linux-x64': 2.0.1
+      '@wasm-opt/win32-arm64': 2.0.1
+      '@wasm-opt/win32-x64': 2.0.1
+
   web-streams-polyfill@3.3.3: {}
 
   webcrypto-core@1.9.2:
@@ -13891,6 +14001,8 @@ snapshots:
   yallist@3.1.1: {}
 
   yallist@4.0.0: {}
+
+  yallist@5.0.0: {}
 
   yaml@2.9.1: {}
 

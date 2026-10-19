@@ -208,6 +208,15 @@ watch(
 )
 
 /**
+ * 取导致该 BUFF 失效的已装备 MOD 名称（数据 `禁用` 命中）。
+ * @param buff 目标 BUFF
+ * @returns MOD 名称；未被禁用时为 undefined
+ */
+function getDisabledBy(buff: LeveledBuff) {
+    return props.charBuild?.findBuffDisablingMod(buff)?.名称
+}
+
+/**
  * 获取已按当前构筑刷新动态属性的BUFF。
  * @param buff BUFF实例
  * @returns 展示用BUFF实例
@@ -245,6 +254,8 @@ function getDisplayBuff(buff: LeveledBuff) {
                     selected
                     :income="buff.income"
                     :coverage="buff.coverage"
+                    :disabled="!!getDisabledBy(buff.value)"
+                    :disabled-by="getDisabledBy(buff.value)"
                     @set-buff-lv="setBuffLv"
                     @set-buff-coverage="setBuffCoverage"
                     @click="toggleBuff(buff.value)"

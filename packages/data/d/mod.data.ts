@@ -3,52 +3,6 @@ import type { WeaponSkill } from "../leveled/LeveledSkill"
 import { applyVersionGate } from "../versionGate"
 import type { Buff } from "./buff.data"
 
-export enum Quality {
-    白 = "白",
-    紫 = "紫",
-    绿 = "绿",
-    蓝 = "蓝",
-    金 = "金",
-}
-
-export enum Polarity {
-    A = "A",
-    D = "D",
-    O = "O",
-    V = "V",
-}
-
-export enum ModType {
-    同率近战 = "同率近战",
-    同率远程 = "同率远程",
-    角色 = "角色",
-    近战 = "近战",
-    远程 = "远程",
-}
-export enum ModSeries {
-    不死鸟 = "不死鸟",
-    中庭蛇 = "中庭蛇",
-    人面狮 = "人面狮",
-    冥犬 = "冥犬",
-    囚狼 = "囚狼",
-    夜使 = "夜使",
-    夜魔 = "夜魔",
-    契约者 = "契约者",
-    审判者 = "审判者",
-    巨鲸 = "巨鲸",
-    异化冥犬 = "异化冥犬",
-    异化夜魔 = "异化夜魔",
-    海妖 = "海妖",
-    焰灵 = "焰灵",
-    牧神 = "牧神",
-    狮鹫 = "狮鹫",
-    百首 = "百首",
-    羽蛇 = "羽蛇",
-    邪龙 = "邪龙",
-    金乌 = "金乌",
-    黄衣 = "黄衣",
-}
-
 /** 条件属性：`条件` 中声明的条件成立时才计入面板（数值按与词条相同的等级倍率缩放）。 */
 export interface ModConditional {
     /** 生效条件 `[属性, 操作符, 数值]`（操作符为 `*` 时无数值项） */

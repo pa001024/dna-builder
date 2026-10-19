@@ -567,14 +567,20 @@
     "autobuild": {
         "calculating": "計算中...",
         "charMods": "角色MOD",
+        "clearSelection": "清空",
+        "copy_diagnostics": "複製診斷資訊",
         "desc": "根據目前 MOD 配置自動構建最佳 MOD 組合",
         "includeMelee": "自動更換近戰",
         "includeRanged": "自動更換遠程",
         "includeTypes": "包含 MOD 類型",
         "log": "日誌",
         "meleeMods": "近戰MOD",
+        "noEquippedMods": "目前無已裝備 MOD",
+        "preserveHint": "點擊已裝備的 MOD 進行勾選保留",
         "preserveTypes": "保留目前 MOD",
         "rangedMods": "遠程MOD",
+        "result": "配裝結果",
+        "selectAll": "全選",
         "skillWeaponMods": "同律MOD",
         "toggle_log": "展開/收合日誌",
         "useInv": "使用使用者庫存"
@@ -633,6 +639,8 @@
     },
     "buff-editor": {
         "copy_buff": "複製 BUFF",
+        "disabled": "已停用",
+        "disabled_by": "已裝備 {{mod}}，該BUFF不生效",
         "paste_buff": "貼上 BUFF",
         "search_placeholder": "搜尋 BUFF"
     },
@@ -995,6 +1003,7 @@
         "minute": "分鐘",
         "mod_icon": "魔之楔圖示",
         "no_data": "暫無資料",
+        "no_match": "找不到符合的條目",
         "none": "無",
         "official": "官方",
         "player_count": "人數",
@@ -1506,7 +1515,6 @@
         "topic_count": "條光陰集"
     },
     "db-pet-list": {
-        "no_match": "找不到符合的魔靈",
         "search_placeholder": "搜尋魔靈名稱（支援拼音）..."
     },
     "db-quest-story-nodes": {

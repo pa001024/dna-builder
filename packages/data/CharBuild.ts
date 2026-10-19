@@ -877,6 +877,40 @@ export class CharBuild {
         return mods
     }
 
+    /** 已装备 MOD id 集合（含中枢 / 临时槽）；与 `modsCache` 同生命周期缓存，供 BUFF「禁用」判定 */
+    private modIdCache?: { source: NonNullable<CharBuild["modsCache"]>; ids: Set<number> }
+    private get equippedModIds(): Set<number> {
+        const mods = this.mods
+        const source = this.modsCache!
+        if (this.modIdCache?.source !== source) {
+            this.modIdCache = { source, ids: new Set(mods.map(mod => mod.id)) }
+        }
+        return this.modIdCache.ids
+    }
+
+    /**
+     * 判断 BUFF 是否被当前已装备 MOD 禁用（BUFF 数据 `禁用` 命中任一 MOD id 时失效）。
+     * 用于 MOD 与 BUFF 提供同一增益的场景（如 海妖 / 换生灵 系列），避免重复计算。
+     * @param buff 目标 BUFF（原始数据或实例均可）
+     * @returns 是否失效
+     */
+    public isBuffDisabled(buff: { 禁用?: number[] }): boolean {
+        if (!buff.禁用?.length) return false
+        const equipped = this.equippedModIds
+        return buff.禁用.some(id => equipped.has(id))
+    }
+
+    /**
+     * 取导致该 BUFF 失效的已装备 MOD，供 UI 提示。
+     * @param buff 目标 BUFF（原始数据或实例均可）
+     * @returns 命中的 MOD；未失效时为 undefined
+     */
+    public findBuffDisablingMod(buff: { 禁用?: number[] }): LeveledMod | undefined {
+        if (!buff.禁用?.length) return undefined
+        const mods = this.mods
+        return mods.find(mod => buff.禁用!.includes(mod.id))
+    }
+
     /**
      * 取指定作用域槽位的 MOD 列表（乘法聚合用）。
      * 判据与原「遍历全部 MOD 再逐条 `continue`」一致，把结果按作用域缓存下来：
@@ -1024,6 +1058,8 @@ export class CharBuild {
         }
 
         for (const buff of this.buffs) {
+            // 被已装备 MOD 禁用的 BUFF（数据 `禁用` 命中）不参与汇总
+            if (this.isBuffDisabled(buff)) continue
             // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不进全局汇总表
             if (isFieldConditionalBuff(buff)) continue
             accumulate(table.buffs, buff.values)
@@ -1088,6 +1124,8 @@ export class CharBuild {
 
         let product = 1
         for (const buff of this.buffs) {
+            // 被已装备 MOD 禁用的 BUFF 不参与乘法聚合
+            if (this.isBuffDisabled(buff)) continue
             // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不参与全局乘法聚合
             if (isFieldConditionalBuff(buff)) continue
             const value = buff.getAttrValue(attribute)
@@ -1139,7 +1177,9 @@ export class CharBuild {
      * @returns 条件属性列表；无条件codeBUFF时为空数组
      */
     private getScopedCodeBuffConditionals(): BuffFieldConditional[] {
-        const scopedBuffs = [...this.dynamicBuffs, ...this.getEffectCodeBuffs()].filter(b => isFieldConditionalBuff(b))
+        const scopedBuffs = [...this.dynamicBuffs, ...this.getEffectCodeBuffs()].filter(
+            b => !this.isBuffDisabled(b) && isFieldConditionalBuff(b)
+        )
         if (!scopedBuffs.length) return []
         // 命中缓存：基线有效性随作用域属性表（MOD/武器/BUFF 增删与数值版本号）失效
         const table = this.getBonusSourceTable()
@@ -1207,6 +1247,8 @@ export class CharBuild {
     public getConditionalBuffPropsList(): BuffFieldConditional[] {
         const list: BuffFieldConditional[] = []
         for (const buff of this.buffs) {
+            // 被已装备 MOD 禁用的 BUFF 不参与字段条件聚合
+            if (this.isBuffDisabled(buff)) continue
             const 技能 = typeof buff.技能 === "string" ? buff.技能 : undefined
             const tag = getBuffFieldTags(buff)
             if (技能 === undefined && !tag) continue
@@ -1524,6 +1566,8 @@ export class CharBuild {
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
             for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
+                // 被已装备 MOD 禁用的 BUFF 不施加 code
+                if (this.isBuffDisabled(b)) continue
                 if (isFieldConditionalBuff(b)) continue
                 const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
                 attrs = rest
@@ -1831,6 +1875,8 @@ export class CharBuild {
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
             for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
+                // 被已装备 MOD 禁用的 BUFF 不施加 code
+                if (this.isBuffDisabled(b)) continue
                 // 条件codeBUFF（技能/tag限定）不并入全局属性，改由字段级条件合并应用
                 if (isFieldConditionalBuff(b)) continue
                 attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
@@ -2260,6 +2306,8 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
+            // 被已装备 MOD 禁用的 BUFF 不参与减伤聚合
+            if (this.isBuffDisabled(buff)) return
             // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不参与全局减伤聚合
             if (isFieldConditionalBuff(buff)) return
             const reduceValue = buff.getAttrValue(attribute)

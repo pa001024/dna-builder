@@ -37,7 +37,8 @@ describe("normalizeDBCardKind", () => {
 
     it("无法识别时返回 undefined", () => {
         expect(normalizeDBCardKind("")).toBeUndefined()
-        expect(normalizeDBCardKind("pet")).toBeUndefined()
+        expect(normalizeDBCardKind("pet")).toBe("pet")
+        expect(normalizeDBCardKind("魔灵")).toBe("pet")
         expect(normalizeDBCardKind(undefined)).toBeUndefined()
     })
 })

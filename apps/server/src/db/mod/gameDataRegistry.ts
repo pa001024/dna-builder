@@ -110,7 +110,12 @@ export const DATA_MODULES: DataModuleEntry[] = [
         file: "packages/data/d/achievement.data.ts",
         load: () => import("dna-builder-data/d/achievement.data"),
     },
-    { id: "autochess", label: "自走棋", file: "packages/data/d/autochess.data.ts", load: () => import("dna-builder-data/d/autochess.data") },
+    {
+        id: "autochess",
+        label: "自走棋",
+        file: "packages/data/d/autochess.data.ts",
+        load: () => import("dna-builder-data/d/autochess.data"),
+    },
     {
         id: "backpackpuzzle",
         label: "背包解谜",
@@ -370,7 +375,12 @@ export const DATA_MODULES: DataModuleEntry[] = [
         file: "packages/data/d/storysummary.data.ts",
         load: () => import("dna-builder-data/d/storysummary.data"),
     },
-    { id: "subregion", label: "子区域", file: "packages/data/d/subregion.data.ts", load: () => import("dna-builder-data/d/subregion.data") },
+    {
+        id: "subregion",
+        label: "子区域",
+        file: "packages/data/d/subregion.data.ts",
+        load: () => import("dna-builder-data/d/subregion.data"),
+    },
     {
         id: "template",
         label: "角色与武器模板",

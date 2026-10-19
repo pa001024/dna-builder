@@ -16,7 +16,12 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname } from "node:path"
 import { buildRagChunks, type RagFingerprintInfo } from "../../../../packages/data/rag/corpus"
-import { RAG_CHUNK_SCHEMA_VERSION, type RagChunk, type RagKindFingerprintMap, ragKindFingerprints } from "../../../../packages/data/rag/types"
+import {
+    RAG_CHUNK_SCHEMA_VERSION,
+    type RagChunk,
+    type RagKindFingerprintMap,
+    ragKindFingerprints,
+} from "../../../../packages/data/rag/types"
 import { deleteDocuments, insertDocuments, resolveDashVectorConfig } from "./dashvector"
 import {
     LOCAL_VECTOR_STORE_TAG,

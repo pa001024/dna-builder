@@ -44,7 +44,8 @@ describe("normalizeDBMapKind / normalizeDBMapPart", () => {
 
     it("无法识别时返回 undefined", () => {
         expect(normalizeDBMapKind("")).toBeUndefined()
-        expect(normalizeDBMapKind("pet")).toBeUndefined()
+        expect(normalizeDBMapKind("pet")).toBe("pet")
+        expect(normalizeDBMapKind("魔灵")).toBe("pet")
         expect(normalizeDBMapPart(undefined)).toBeUndefined()
     })
 })

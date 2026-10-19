@@ -569,14 +569,20 @@
     "autobuild": {
         "calculating": "Calcul en cours...",
         "charMods": "MOD de personnage",
+        "clearSelection": "Effacer",
+        "copy_diagnostics": "Copier les diagnostics",
         "desc": "Construit automatiquement la configuration MOD optimale selon la configuration MOD actuelle",
         "includeMelee": "Remplacer automatiquement le corps-à-corps",
         "includeRanged": "Remplacer automatiquement le distance",
         "includeTypes": "Inclure les types de MOD",
         "log": "Journal",
         "meleeMods": "MOD de mêlée",
+        "noEquippedMods": "Aucun MOD équipé",
+        "preserveHint": "Cliquez sur les MOD équipés pour les conserver",
         "preserveTypes": "Conserver les MOD actuels",
         "rangedMods": "MOD à distance",
+        "result": "Résultat",
+        "selectAll": "Tout sélectionner",
         "skillWeaponMods": "MOD d'arme de compétence",
         "toggle_log": "Développer/réduire le journal",
         "useInv": "Utiliser l’inventaire de l’utilisateur"
@@ -635,6 +641,8 @@
     },
     "buff-editor": {
         "copy_buff": "Copier le BUFF",
+        "disabled": "Désactivé",
+        "disabled_by": "{{mod}} équipé : ce BUFF est inactif",
         "paste_buff": "Coller le BUFF",
         "search_placeholder": "Rechercher un BUFF"
     },
@@ -1029,6 +1037,7 @@
         "minute": "Minute",
         "mod_icon": "Icône de mod",
         "no_data": "Aucune donnée",
+        "no_match": "Aucune entrée correspondante",
         "none": "Aucun",
         "official": "Officiel",
         "player_count": "Joueurs",
@@ -1540,7 +1549,6 @@
         "topic_count": "sujets"
     },
     "db-pet-list": {
-        "no_match": "Aucun Génimon correspondant",
         "search_placeholder": "Rechercher un nom de Génimon (pinyin pris en charge)..."
     },
     "db-quest-story-nodes": {

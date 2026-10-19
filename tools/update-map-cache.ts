@@ -3,9 +3,9 @@
 import { readFile, writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import * as ts from "typescript"
-import { DNAAPI } from "../packages/dna-api/src/index.ts"
 import regionData from "../packages/data/d/region.data"
 import { subRegionData } from "../packages/data/d/subregion.data"
+import { DNAAPI } from "../packages/dna-api/src/index.ts"
 
 const TARGET_FILE = resolve(process.cwd(), "packages/data/d/onlinemapcache.data.ts")
 

@@ -12,6 +12,10 @@ const props = defineProps<{
     coverage?: number
     /** 显式描述（特效行传入的国际化熔炼/效果文案，仅在 buff 无自带手写描述时展示） */
     description?: string
+    /** BUFF 是否被已装备 MOD 禁用（数据 `禁用` 命中）：名称加删除线且不产生收益 */
+    disabled?: boolean
+    /** 禁用该 BUFF 的 MOD 名称（用于悬停提示） */
+    disabledBy?: string
 }>()
 const emit = defineEmits<{
     setBuffLv: [buff: LeveledBuff, level: number]
@@ -31,6 +35,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
             :code="buff.code"
             :applicable-skill="buff.技能"
             :title="title"
+            :note="disabled ? (disabledBy ? $t('buff-editor.disabled_by', { mod: disabledBy }) : $t('buff-editor.disabled')) : undefined"
         >
             <div
                 class="flex-1 rounded-xs border border-base-content/10 bg-base-100/70 p-3 cursor-pointer hover:border-primary/40 transition-colors duration-200"
@@ -43,7 +48,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         <div v-if="selected" class="text-primary">
                             <Icon icon="ri:checkbox-circle-fill" />
                         </div>
-                        {{ $t(buff.名称) }}
+                        <span :class="{ 'line-through decoration-base-content/50': disabled }">{{ $t(buff.名称) }}</span>
                     </div>
                     <div v-if="buff.mx" class="text-xs text-base-content/60 font-orbitron tabular-nums">
                         Lv.

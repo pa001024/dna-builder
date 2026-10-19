@@ -98,10 +98,7 @@ const expandedToolKeys = ref<string[]>([])
 const copiedId = ref(0)
 /** 复制反馈的复位定时器 */
 let copiedTimer: number | undefined
-/**
- * 助手消息渲染体元素（消息 id → 元素）。
- * 复制助手回复时取它的 textContent，避免把 markdown 渲染出的标签也复制进去。
- */
+/** 助手消息渲染体元素（消息 id → 元素），供富组件挂载定位占位符。 */
 const assistantBodies = new Map<number, HTMLElement>()
 
 /**
@@ -520,13 +517,11 @@ function userMentionParts(text: string): ReturnType<typeof parseSkillMentions> {
 }
 
 /**
- * 复制某条消息的纯文本内容。
- * 助手回复已渲染成 HTML，这里先取 textContent，避免把标签也复制进去。
+ * 复制某条消息的原始 markdown。
  * @param message 消息
- * @param element 承载渲染结果的元素（助手消息用）
  */
-async function copyMessage(message: AgentChatMessage, element?: HTMLElement | null) {
-    const text = message.role === "user" ? message.content : element?.textContent || message.content
+async function copyMessage(message: AgentChatMessage) {
+    const text = message.content
 
     if (!text.trim()) {
         return
@@ -1302,7 +1297,7 @@ onBeforeUnmount(() => {
                                     class="grid size-4 cursor-pointer place-items-center text-base-content/35 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                                     :title="$t(label('copyAssistantTitle'))"
                                     :aria-label="$t(label('copyAssistantTitle'))"
-                                    @click="copyMessage(message, assistantBodies.get(message.id) ?? null)"
+                                    @click="copyMessage(message)"
                                 >
                                     <Icon :icon="copiedId === message.id ? 'ri:check-line' : 'ri:file-copy-line'" class="h-3.5 w-3.5" />
                                 </button>

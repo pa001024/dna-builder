@@ -1,6 +1,5 @@
 import { formatModName, LeveledChar, LeveledMod, LeveledWeaponHelper } from "@/data"
-import { modMap, resourceMap, weaponMap } from "@/data/d"
-import charData from "@/data/d/char.data"
+import { charFragmentMap, modMap, resourceMap, weaponMap } from "@/data/d"
 import type { Resource } from "@/data/d/resource.data"
 import type { Walnut } from "@/data/d/walnut.data"
 import type { Char, Mod, Weapon } from "@/data/data-types"
@@ -76,7 +75,7 @@ export function getWalnutProduct(walnut: Walnut): WalnutProduct {
 
     if (reward.type === "Resource") {
         // 角色密函的成品是角色本身，用思绪片段 ID 反查
-        const char = charData.find(c => c.碎片 === reward.id) ?? null
+        const char = charFragmentMap.get(reward.id) ?? null
         if (char) {
             return {
                 kind: "Char",

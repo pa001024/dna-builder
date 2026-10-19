@@ -3,29 +3,23 @@
 Guidelines for agentic coding assistants working on the dna-builder codebase.
 
 本文件只做**索引**：命令、约定与硬性规则留在本页，机制细节一律放独立文档，避免单文件无限膨胀。
-新增说明请写进 `.agents/docs/` 并在下方登记一行，不要往本页堆内容。
-**给外部 agent 的 Spec（协议 / 实现 spec）一律放 `.docs/` 文件夹（git 已忽略，不进版本库）。**
+新增说明请写进 `.agents/docs/`：常走到的路径登记进下表，冷路径（一次性标定 / 实施记录 / 低频子系统）只挂在下方一行，用到再读，不要往本页堆内容。
 
 ## 文档索引
 
 | 主题 | 文档 |
 |---|---|
 | 构建 / 增量 lint / SSG 预渲染 / 数据包改写（动手前必读） | [build-and-ssg.md](.agents/docs/build-and-ssg.md) |
-| 增量 lint 自研类型检查驱动器（设计规格与实施记录） | [incremental-lint-checker-spec.md](.agents/docs/incremental-lint-checker-spec.md) |
 | 代码风格细则（Formatter / TS / Vue / Rust） | [code-style.md](.agents/docs/code-style.md) |
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
-| RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
-| 脚本运行时 crate（`dob-script-runtime` 模块布局、依赖倒置、CLI 构建） | [dob-script-runtime.md](.agents/docs/dob-script-runtime.md) |
-| 资料库页面渲染为净化 HTML（`render_page`、离屏渲染 / 净化 / 点击展开页签） | [page-html-snapshot.md](.agents/docs/page-html-snapshot.md) |
+| RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
-| 在线地图→MapTool 坐标换算（`onlinemap-transform` 标定方法 / 置信度 / 坑） | [online-map-transform.md](.agents/docs/online-map-transform.md) |
-| 安全模式 | [safe-mode-unlock.md](.agents/docs/safe-mode-unlock.md) |
-| 剧情 AI 补语音流水线（缺语音扫描 / BERT 情绪 / GPT-SoVITS / aistory 发布 / AI 角标） | [voice-aistory-pipeline.md](.agents/docs/voice-aistory-pipeline.md) |
+
+其他冷路径不列出 `.agents/docs/*.md`
 
 - 技能：`.agents/skills/*/SKILL.md`
-- Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）
-- 业务与设计文档：`docs/`
+- Spec 文档：`specs/`（面向外部 agent 的协议 / 实现 spec）
 
 ## Build / Lint / Test Commands
 

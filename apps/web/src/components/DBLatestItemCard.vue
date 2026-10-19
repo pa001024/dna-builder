@@ -3,12 +3,19 @@ import { t } from "i18next"
 import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { LeveledCharHelper, LeveledMod, LeveledWeaponHelper } from "@/data"
+import type { Pet } from "@/data/d/pet.data"
 import type { Char, Mod, Weapon } from "@/data/data-types"
+import { LeveledPet } from "@/data/leveled/LeveledPet"
 import { getElementAccentColor, getElementSoftBgClass } from "@/utils/element-utils"
+import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
 
-export type DBLatestItemKind = "char" | "weapon" | "mod"
+export type DBLatestItemKind = "char" | "weapon" | "mod" | "pet"
 
-export type DBLatestItem = { kind: "char"; item: Char } | { kind: "weapon"; item: Weapon } | { kind: "mod"; item: Mod }
+export type DBLatestItem =
+    | { kind: "char"; item: Char }
+    | { kind: "weapon"; item: Weapon }
+    | { kind: "mod"; item: Mod }
+    | { kind: "pet"; item: Pet }
 
 const props = defineProps<{
     entry: DBLatestItem
@@ -28,9 +35,9 @@ const rarityBgClasses: Record<string, string> = {
     红: "bg-linear-to-b from-red-500/25 to-red-100/10",
 }
 
-/** 类型角标文字（CHAR / WEAPON / MOD） */
+/** 类型角标文字（CHAR / WEAPON / MOD / PET） */
 const kindLabel = computed(() => {
-    return ({ char: "CHAR", weapon: "WEAPON", mod: "MOD" } as const)[props.entry.kind]
+    return ({ char: "CHAR", weapon: "WEAPON", mod: "MOD", pet: "PET" } as const)[props.entry.kind]
 })
 
 /** 物品名称 */
@@ -38,8 +45,11 @@ const name = computed(() => {
     return props.entry.item.名称
 })
 
-/** 版本角标文字，如 v1.5 */
+/** 版本角标文字，如 v1.5（魔灵无版本字段） */
 const version = computed(() => {
+    if (props.entry.kind === "pet") {
+        return ""
+    }
     return props.entry.item.版本 ? `v${props.entry.item.版本}` : ""
 })
 
@@ -51,10 +61,13 @@ const iconUrl = computed(() => {
     if (props.entry.kind === "weapon") {
         return LeveledWeaponHelper.idToUrl(props.entry.item.id)
     }
+    if (props.entry.kind === "pet") {
+        return LeveledPet.url(props.entry.item.icon)
+    }
     return LeveledMod.url(props.entry.item.icon)
 })
 
-/** 图像区背景：角色按元素、魔之楔按品质、武器用中性底 */
+/** 图像区背景：角色按元素、魔之楔 / 魔灵按品质、武器用中性底 */
 const imageBgClass = computed(() => {
     if (props.entry.kind === "char") {
         return getElementSoftBgClass(props.entry.item.属性)
@@ -62,16 +75,22 @@ const imageBgClass = computed(() => {
     if (props.entry.kind === "mod") {
         return rarityBgClasses[props.entry.item.品质] || ""
     }
+    if (props.entry.kind === "pet") {
+        return rarityBgClasses[getPetQualityName(props.entry.item.品质)] || ""
+    }
     return "bg-base-content/4"
 })
 
-/** 副信息：角色为“属性 · 精通”，武器为“类型 · 伤害类型”，魔之楔为“系列 · 类型” */
+/** 副信息：角色为“属性 · 精通”，武器为“类型 · 伤害类型”，魔之楔为“系列 · 类型”，魔灵为“类型” */
 const meta = computed(() => {
     if (props.entry.kind === "char") {
         return [t(`${props.entry.item.属性}属性`, props.entry.item.属性), t(props.entry.item.精通?.[0])].filter(Boolean).join(" · ")
     }
     if (props.entry.kind === "weapon") {
         return [t(props.entry.item.类型[0]), t(props.entry.item.伤害类型)].filter(Boolean).join(" · ")
+    }
+    if (props.entry.kind === "pet") {
+        return [t(getPetTypeName(props.entry.item.类型))].filter(Boolean).join(" · ")
     }
     return [t(props.entry.item.系列), t(props.entry.item.类型)].filter(Boolean).join(" · ")
 })
@@ -94,6 +113,9 @@ const targetPath = computed(() => {
     }
     if (props.entry.kind === "weapon") {
         return `/db/weapon/${props.entry.item.id}`
+    }
+    if (props.entry.kind === "pet") {
+        return `/db/pet/${props.entry.item.id}`
     }
     return `/db/mod/${props.entry.item.id}`
 })

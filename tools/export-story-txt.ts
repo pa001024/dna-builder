@@ -1,14 +1,14 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { formatParamText } from "../apps/web/src/utils/param-text"
+import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../apps/web/src/utils/story-text"
 import type { NPC } from "../packages/data/d/npc.data"
 import type { PartyTopic } from "../packages/data/d/partytopic.data"
 import type { Dialogue, DialogueOption, QuestItem, QuestNode, QuestStory } from "../packages/data/d/quest.data"
 import type { Char, Mod, Weapon } from "../packages/data/data-types"
 import type { LeveledSkillField } from "../packages/data/leveled/LeveledSkill"
 import { DNA_CURRENT_VERSION_GLOBAL_KEY } from "../packages/data/versionGate"
-import { formatParamText } from "../apps/web/src/utils/param-text"
-import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../apps/web/src/utils/story-text"
 
 interface DialogueChainItem {
     dialogue: Dialogue

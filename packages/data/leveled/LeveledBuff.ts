@@ -68,6 +68,7 @@ export class LeveledBuff implements Buff {
     code?: string
     技能?: string
     tag?: string[]
+    禁用?: number[]
     display?: Record<string, string>
     /** 来源挂载点（MOD/武器特效挂载时写入） */
     pid?: number
@@ -146,6 +147,7 @@ export class LeveledBuff implements Buff {
         if (buffData.code !== undefined) this.code = buffData.code
         if (buffData.技能) this.技能 = buffData.技能
         if (buffData.tag) this.tag = [...buffData.tag]
+        if (buffData.禁用?.length) this.禁用 = [...buffData.禁用]
 
         // 设置等级（如果提供），否则使用默认等级dx
         this.等级 = 等级 !== undefined && 等级 >= 0 ? 等级 : this.dx || this.mx || 1

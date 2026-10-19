@@ -1,0 +1,81 @@
+name: publish-crate
+
+# 只改 crates/dob-calc-core/Cargo.toml（版本号）并合入 master 即自动发布；也可手动触发。
+# 版本已在 crates.io 上则整条流程跳过，重复推送无副作用。
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "crates/dob-calc-core/Cargo.toml"
+    workflow_dispatch:
+
+permissions:
+    id-token: write
+    contents: read
+
+concurrency:
+    group: publish-dob-calc-core
+    cancel-in-progress: false
+
+env:
+    CARGO_TERM_COLOR: always
+    CRATE_NAME: dob-calc-core
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: crates/dob-calc-core
+        env:
+            CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: dtolnay/rust-toolchain@stable
+
+            - uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: crates/dob-calc-core -> target
+
+            - name: check if version already published
+              id: version_check
+              run: |
+                  LOCAL=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+                  CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+                      -H 'User-Agent: dna-builder-ci' \
+                      "https://crates.io/api/v1/crates/${CRATE_NAME}/${LOCAL}")
+                  echo "local=$LOCAL published_http=$CODE"
+                  echo "version=$LOCAL" >> "$GITHUB_OUTPUT"
+                  if [ "$CODE" = "200" ]; then
+                      echo "skip=true" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: cargo publish --dry-run
+              if: steps.version_check.outputs.skip != 'true'
+              run: cargo publish --locked --registry crates-io --dry-run
+
+            # 没配 CARGO_REGISTRY_TOKEN 时走 OIDC 换一次性 token（需先在 crate 设置里加 trusted publisher）
+            - name: auth (trusted publishing)
+              if: steps.version_check.outputs.skip != 'true' && env.CARGO_REGISTRY_TOKEN == ''
+              id: auth
+              uses: rust-lang/crates-io-auth-action@v1
+
+            - name: cargo publish
+              if: steps.version_check.outputs.skip != 'true'
+              run: cargo publish --locked --registry crates-io
+              env:
+                  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+
+            - name: summary
+              if: steps.version_check.outputs.skip != 'true'
+              run: |
+                  version="${{ steps.version_check.outputs.version }}"
+                  {
+                      echo "### ${CRATE_NAME} ${version} 已发布"
+                      echo ""
+                      echo "- https://crates.io/crates/${CRATE_NAME}/${version}"
+                      echo "- https://docs.rs/${CRATE_NAME}/${version}"
+                  } >> "$GITHUB_STEP_SUMMARY"

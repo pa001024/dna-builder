@@ -32,7 +32,7 @@
         "voice:qa": "bun tools/voice/qa-sweep.ts",
         "voice:upload": "bun tools/voice/upload-aistory.ts",
         "build:dob-script": "cargo build --manifest-path crates/dob-script-runtime/Cargo.toml --release --features dob-script-cli --example dob-script && node tools/prepare-dob-script.mjs",
-        "build:hpatchz-wasm": "cargo build --manifest-path crates/hpatchz-wasm/Cargo.toml --target wasm32-unknown-unknown --release && node tools/prepare-hpatchz-wasm.mjs",
+        "build:dob-calc-core": "cargo build --manifest-path crates/dob-calc-core/Cargo.toml --target wasm32-unknown-unknown --release && node tools/prepare-dob-calc-core.mjs",
         "build:all": "pnpm build:app",
         "build:api": "cd packages/dna-api && bun run build && cd ../.. && pnpm install",
         "debug:mcp": "npx -y @modelcontextprotocol/inspector npx -y tsx ./packages/data/mcp/index.ts",
@@ -66,7 +66,6 @@
         "@types/markdown-it": "^14.2.0",
         "@types/node-forge": "^1.3.14",
         "@types/three": "^0.182.0",
-        "tailwindcss": "^4.3.3",
         "ali-oss": "^6.23.0",
         "bcryptjs": "^3.0.3",
         "bun-types": "^1.4.2",
@@ -78,7 +77,9 @@
         "husky": "^9.1.7",
         "i18next": "^25.10.10",
         "prettier": "^3.9.9",
+        "tailwindcss": "^4.3.3",
         "typescript": "~5.9.3",
-        "vitest": "^4.1.11"
+        "vitest": "^4.1.11",
+        "wasm-opt": "2.0.1"
     }
 }

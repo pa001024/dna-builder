@@ -6,7 +6,7 @@ import { resolveDBCardEntry } from "@/utils/db-card-utils"
 /**
  * AI 卡片：资料库条目卡片的中间层。
  *
- * 资料检索 Agent 在回复里写 `<DBAICard kind="char" name="煜明" />` 这类标签时，
+ * 资料检索 Agent 在回复里写 `<DBAICard kind="char" name="煜明" />` / `<DBAICard kind="pet" :id="4073" />` 这类标签时，
  * 渲染层会把参数原样交给本组件：这里负责把「类型 + id / 名称」补齐成完整条目数据
  * （见 `resolveDBCardEntry`），再交给 `DBLatestItemCard` 渲染——卡片本体只管展示，
  * 不做数据查找，模型也不必（更不可能）拼出完整的 Char / Weapon / Mod 结构。
@@ -16,7 +16,7 @@ import { resolveDBCardEntry } from "@/utils/db-card-utils"
  * 页面上也不会留下一串没人认识的标签文本。
  */
 const props = defineProps<{
-    /** 条目类型：char / weapon / mod（也接受「角色 / 武器 / 魔之楔」这类写法） */
+    /** 条目类型：char / weapon / mod / pet（也接受「角色 / 武器 / 魔之楔 / 魔灵」这类写法） */
     kind?: string
     /** 条目 id（优先用它定位，取自工具返回结果） */
     id?: number | string

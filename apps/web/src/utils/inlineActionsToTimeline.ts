@@ -1,5 +1,5 @@
-import type { RawTimelineData } from "@/store/timeline"
 import { createDefaultInlineActions, type InlineActions } from "@/data/charSettings"
+import type { RawTimelineData } from "@/store/timeline"
 
 /**
  * 将内联动作转换为标准时间线数据

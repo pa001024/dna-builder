@@ -607,14 +607,20 @@
     "autobuild": {
         "calculating": "计算中...",
         "charMods": "角色MOD",
+        "clearSelection": "清空",
+        "copy_diagnostics": "复制诊断信息",
         "desc": "根据当前MOD配置自动构建最优MOD组合",
         "includeMelee": "自动更换近战",
         "includeRanged": "自动更换远程",
         "includeTypes": "包含MOD类型",
         "log": "日志",
         "meleeMods": "近战MOD",
+        "noEquippedMods": "当前无已装备MOD",
+        "preserveHint": "点击已装备的MOD进行勾选保留",
         "preserveTypes": "保留当前MOD",
         "rangedMods": "远程MOD",
+        "result": "配装结果",
+        "selectAll": "全选",
         "skillWeaponMods": "同律MOD",
         "toggle_log": "展开/收起日志",
         "useInv": "使用用户库存"
@@ -673,6 +679,8 @@
     },
     "buff-editor": {
         "copy_buff": "复制BUFF",
+        "disabled": "已禁用",
+        "disabled_by": "已装备 {{mod}}，该BUFF不生效",
         "paste_buff": "粘贴BUFF",
         "search_placeholder": "搜索BUFF"
     },
@@ -1048,6 +1056,7 @@
         "minute": "分钟",
         "mod_icon": "魔之楔图标",
         "no_data": "暂无数据",
+        "no_match": "未找到匹配的条目",
         "none": "无",
         "official": "官方",
         "player_count": "人数",
@@ -1557,7 +1566,6 @@
         "topic_count": "条光阴集"
     },
     "db-pet-list": {
-        "no_match": "未找到匹配的角色",
         "search_placeholder": "搜索角色名称/别名/ID（支持拼音）..."
     },
     "db-quest-story-nodes": {

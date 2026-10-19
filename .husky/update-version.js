@@ -66,7 +66,17 @@ function sortJson(obj) {
 
 const langs = ["en", "zh-CN", "zh-TW", "ja", "ko", "fr"]
 for (const lang of langs) {
-    const i18nPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "public", "i18n", lang, `translation.json`)
+    const i18nPath = path.join(
+        import.meta.url.replace("file:///", ""),
+        "..",
+        "..",
+        "apps",
+        "web",
+        "public",
+        "i18n",
+        lang,
+        `translation.json`
+    )
     let i18n = JSON.parse(fs.readFileSync(i18nPath, "utf8"))
     i18n = sortJson(i18n)
     fs.writeFileSync(i18nPath, `${JSON.stringify(i18n, null, 4)}\n`)

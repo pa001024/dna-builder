@@ -6,6 +6,7 @@ import {
     type ModTypeKey,
     ModTypeMap,
     modData,
+    modEffectMap,
     modMap,
     weaponData,
     weaponEffectMap,
@@ -45,15 +46,14 @@ export const useInvStore = defineStore("inv", {
             else if (weaponId in this.rangedWeapons) this.rangedWeapons[weaponId] = lv
         },
         getBuffLv(modId: number) {
-            if (!(modId in this.buffLv)) return 0
-            return this.buffLv[modId] || 0
+            if (modId in this.buffLv) return this.buffLv[modId] || 0
+            return modEffectMap.get(modId)?.mx || 1
         },
         setBuffLv(modId: number, lv: number) {
             if (lv <= 0) delete this.buffLv[modId]
             else this.buffLv[modId] = lv
         },
         getWBuffLv(weaponId: number, elm: string = "any") {
-            if (!(weaponId in this.wLv)) return 0
             const weapon = weaponMap.get(weaponId)
             if (!weapon?.名称) {
                 return 0
@@ -63,7 +63,8 @@ export const useInvStore = defineStore("inv", {
             if (typeof eff?.限定 === "string" && eff.限定 !== elm && elm !== "any") {
                 return 0
             }
-            return this.wLv[weaponId] || 0
+            if (weaponId in this.wLv) return this.wLv[weaponId] || 0
+            return eff?.mx || 1
         },
         setWBuffLv(weaponId: number, lv: number) {
             if (lv <= 0) delete this.wLv[weaponId]

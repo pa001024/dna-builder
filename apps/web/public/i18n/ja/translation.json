@@ -568,14 +568,20 @@
     "autobuild": {
         "calculating": "計算中...",
         "charMods": "キャラクターMOD",
+        "clearSelection": "クリア",
+        "copy_diagnostics": "診断情報をコピー",
         "desc": "現在の MOD 構成に基づいて最適な MOD 組み合わせを自動構築します",
         "includeMelee": "近接を自動で差し替える",
         "includeRanged": "遠隔を自動で差し替える",
         "includeTypes": "MOD の種類を含める",
         "log": "ログ",
         "meleeMods": "近接MOD",
+        "noEquippedMods": "装備中のMODがありません",
+        "preserveHint": "装備中のMODをクリックして保持",
         "preserveTypes": "現在の MOD を保持",
         "rangedMods": "遠隔MOD",
+        "result": "結果",
+        "selectAll": "すべて選択",
         "skillWeaponMods": "同律MOD",
         "toggle_log": "ログの展開／折りたたみ",
         "useInv": "ユーザー所持品を使用"
@@ -634,6 +640,8 @@
     },
     "buff-editor": {
         "copy_buff": "BUFF をコピー",
+        "disabled": "無効",
+        "disabled_by": "{{mod}} を装備中のため、この BUFF は無効",
         "paste_buff": "BUFF を貼り付け",
         "search_placeholder": "BUFF を検索"
     },
@@ -996,6 +1004,7 @@
         "minute": "分",
         "mod_icon": "魔の楔アイコン",
         "no_data": "データがありません",
+        "no_match": "一致する項目がありません",
         "none": "なし",
         "official": "公式",
         "player_count": "人数",
@@ -1507,7 +1516,6 @@
         "topic_count": "件の話題"
     },
     "db-pet-list": {
-        "no_match": "一致する魔霊がいません",
         "search_placeholder": "魔霊名を検索（ピンイン対応）..."
     },
     "db-quest-story-nodes": {

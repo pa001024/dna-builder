@@ -4,7 +4,7 @@
  * 模型给出的参数是「类型 + id 或名称」这种最简形态，而地图跳转真正需要的是
  * 「区域 + 子区域 + 世界坐标」（见 `MapPosLink` 与 `MapTool` 的 query 约定），
  * 这一层负责把前者补齐成后者，让模型不必（也无法）拼出完整坐标：
- * - 类型写法容错：book / npc / resource / pan，兼收「读物 / NPC / 资源 / 道具 / 潘神」这类中文写法；
+ * - 类型写法容错：book / npc / resource / pan / pet，兼收「读物 / NPC / 资源 / 道具 / 潘神 / 魔灵」这类中文写法；
  * - **读物按页面展开**：每一页的书页坐标与藏宝点坐标各算一个位置；
  * - **NPC 一个个体一行**：同名 NPC（如「鹿」）可能有多只，全部列出；
  * - **潘神一个点位一行**：潘神（`Pan.json`，如「魔灵潘神」）在各子区域有固定点位（`groups[].srId/pos`），
@@ -18,23 +18,25 @@
  */
 
 import type { RouteLocationRaw } from "vue-router"
-import { regionMap, subRegionMap } from "@/data/d"
+import { bookMap, bookResMap, npcMap, panMap, petMap, petUidMap, regionMap, resourceMap, subRegionMap } from "@/data/d"
 import { type Book, type BookResource, booksData } from "@/data/d/book.data"
 import { type NPC, npcData } from "@/data/d/npc.data"
 import { type Pan, panData } from "@/data/d/pan.data"
+import type { Pet } from "@/data/d/pet.data"
+import petData from "@/data/d/pet.data"
 import { type Resource, resourceData } from "@/data/d/resource.data"
 import { expandDBAgentKeyword, resolveCurrentDBAgentLang } from "@/utils/db-locale"
 import { normalizeDBEntryName, pickDBEntryByName, toNumericEntryId } from "@/utils/db-name-match"
 import { getNpcDisplayText } from "@/utils/npc-utils"
 
 /** 支持地图跳转的条目类型 */
-export type DBMapKind = "book" | "npc" | "resource" | "pan"
+export type DBMapKind = "book" | "npc" | "resource" | "pan" | "pet"
 
-/** 位置类型：读物页 / 读物藏宝点 / NPC 所在点 / 资源采集点 / 潘神点位 */
-export type DBMapPointType = "page" | "treasure" | "npc" | "source" | "pan"
+/** 位置类型：读物页 / 读物藏宝点 / NPC 所在点 / 资源采集点 / 潘神点位 / 魔灵点位 */
+export type DBMapPointType = "page" | "treasure" | "npc" | "source" | "pan" | "pet"
 
 /** 类型缺失时按这个顺序逐个尝试 */
-const MAP_KIND_ORDER: readonly DBMapKind[] = ["book", "npc", "resource", "pan"]
+const MAP_KIND_ORDER: readonly DBMapKind[] = ["book", "npc", "resource", "pan", "pet"]
 
 /** 类型参数的合法写法（小写后比对） */
 const MAP_KIND_ALIASES: Record<string, DBMapKind> = {
@@ -60,6 +62,10 @@ const MAP_KIND_ALIASES: Record<string, DBMapKind> = {
     潘神: "pan",
     魔灵潘神: "pan",
     潘神魔灵: "pan",
+    pet: "pet",
+    pets: "pet",
+    魔灵: "pet",
+    宠物: "pet",
 }
 
 /** NPC 点位没有自带图标时的兜底图标（与资料库 NPC 详情页一致） */
@@ -67,6 +73,9 @@ const NPC_FALLBACK_ICON = "T_Gp_MainMission"
 
 /** 潘神点位没有自带图标时的兜底图标（潘神表本身不带图标字段） */
 const PAN_FALLBACK_ICON = "T_Head_Empty"
+
+/** 魔灵点位没有自带图标时的兜底图标 */
+const PET_FALLBACK_ICON = "T_Head_Empty"
 
 /** 位置类型的合法写法（小写后比对） */
 const MAP_PART_ALIASES: Record<string, DBMapPointType> = {
@@ -81,6 +90,9 @@ const MAP_PART_ALIASES: Record<string, DBMapPointType> = {
     藏宝点: "treasure",
     pan: "pan",
     潘神点位: "pan",
+    pet: "pet",
+    魔灵点位: "pet",
+    宠物点位: "pet",
 }
 
 /** 一个可跳转的地图位置分组 */
@@ -183,18 +195,16 @@ function resolveLocation(subRegionId: number | undefined) {
  */
 function resolveBook(params: { id?: number; name: string }): { book: Book; res?: BookResource } | undefined {
     if (params.id !== undefined) {
-        const book = booksData.find(item => item.id === params.id)
+        const book = bookMap.get(params.id)
 
         if (book) {
             return { book }
         }
 
-        for (const candidate of booksData) {
-            const res = candidate.res.find(item => item.id === params.id)
+        const page = bookResMap.get(params.id)
 
-            if (res) {
-                return { book: candidate, res }
-            }
+        if (page) {
+            return page
         }
     }
 
@@ -216,7 +226,7 @@ function resolveBook(params: { id?: number; name: string }): { book: Book; res?:
  */
 function resolveResource(params: { id?: number; name: string }): Resource | undefined {
     if (params.id !== undefined) {
-        const resource = resourceData.find(item => item.id === params.id)
+        const resource = resourceMap.get(params.id)
 
         if (resource) {
             return resource
@@ -236,7 +246,7 @@ function resolveResource(params: { id?: number; name: string }): Resource | unde
  */
 function resolvePans(params: { id?: number; name: string }): Pan[] {
     if (params.id !== undefined) {
-        const pan = panData.find(item => item.id === params.id)
+        const pan = panMap.get(params.id)
 
         return pan ? [pan] : []
     }
@@ -271,6 +281,59 @@ function resolvePans(params: { id?: number; name: string }): Pan[] {
  * @param part 只看某类位置（为空或 "pan" 时返回全部点位）
  * @returns 跳转分组列表
  */
+/**
+ * 按「id 或名称」定位魔灵。
+ * 名称支持精确匹配与类型前缀（奇迹/锐意/闪亮），按 pet 的「名称」字段匹配。
+ * 同名魔灵存在多形态时全部返回以支持指定类型跟踪。
+ */
+function resolvePets(params: { id?: number; name: string }): Pet[] {
+    if (params.id !== undefined) {
+        const pet = petMap.get(params.id) ?? petUidMap.get(params.id)
+        return pet ? [pet] : []
+    }
+    if (!params.name) return []
+    const queries = expandDBAgentKeyword(params.name, resolveCurrentDBAgentLang())
+    const normalized = new Set(
+        queries.map((q: string) => normalizeDBEntryName(q)).filter(Boolean as unknown as (v: string | undefined) => v is string)
+    )
+    if (normalized.size) {
+        const named = petData.filter((p: Pet) => normalized.has(normalizeDBEntryName(p.名称)))
+        if (named.length) return named
+    }
+    const best = pickDBEntryByName<Pet>(petData, params.name, (item: Pet) => [item.名称])
+    return best ? [best] : []
+}
+
+/**
+ * 把魔灵的固定点位展开成跳转分组。
+ * 当前 pet 表暂无固定坐标，返回空以触发降级提示并引导模型使用资源/泛查询；
+ * 未来若 pet 增加 groups[].srId/pos 将自动生效。
+ */
+function collectPetGroups(pets: Pet[], part: DBMapPointType | undefined): DBMapGroup[] {
+    if (part && part !== "pet") return []
+    // 预留：若 pet 增加 groups 按 pan 逻辑展开
+    const groups: DBMapGroup[] = []
+    for (const pet of pets) {
+        const rawGroups = (pet as unknown as { groups?: Array<{ srId: number; pos: [number, number] }> }).groups
+        if (!rawGroups) continue
+        for (const g of rawGroups) {
+            const point = normalizePoint(g.pos)
+            const location = resolveLocation(g.srId)
+            if (!point || !location) continue
+            groups.push({
+                pointType: "pet",
+                label: pet.名称,
+                entryId: pet.id,
+                entryName: pet.名称,
+                icon: pet.icon || PET_FALLBACK_ICON,
+                ...location,
+                points: [point],
+            })
+        }
+    }
+    return groups
+}
+
 function collectPanGroups(pans: Pan[], part: DBMapPointType | undefined): DBMapGroup[] {
     if (part && part !== "pan") {
         return []
@@ -312,7 +375,7 @@ function collectPanGroups(pans: Pan[], part: DBMapPointType | undefined): DBMapG
  */
 function resolveNpcs(params: { id?: number; name: string }): NPC[] {
     if (params.id !== undefined) {
-        const npc = npcData.find(item => item.id === params.id)
+        const npc = npcMap.get(params.id)
 
         return npc ? [npc] : []
     }
@@ -516,6 +579,16 @@ export function resolveDBMapGroups(params: { kind?: unknown; id?: unknown; name?
 
             if (pans.length) {
                 return collectPanGroups(pans, part)
+            }
+
+            continue
+        }
+
+        if (candidate === "pet") {
+            const pets = resolvePets({ id, name })
+
+            if (pets.length) {
+                return collectPetGroups(pets, part)
             }
 
             continue

@@ -1,6 +1,22 @@
 import Fuse from "fuse.js"
 import i18next from "i18next"
-import { modDungeonMap, npcMap } from "@/data/d"
+import {
+    achievementMap,
+    bookMap,
+    charMap,
+    dungeonMap,
+    fishMap,
+    modDungeonMap,
+    modMap,
+    monsterMap,
+    npcMap,
+    petMap,
+    questChainMap,
+    resourceMap,
+    titleMap,
+    walnutMap,
+    weaponMap,
+} from "@/data/d"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
 import { default as charData } from "@/data/d/char.data"
@@ -1737,7 +1753,7 @@ function formatModSources(mod: Mod, lang: DBAgentLang): string[] | undefined {
 }
 
 function formatWeaponSources(weaponId: string): string[] | undefined {
-    const weapon = weaponData.find(item => `${item.id}` === weaponId)
+    const weapon = weaponMap.get(Number(weaponId))
 
     if (!weapon) {
         return undefined
@@ -2507,7 +2523,7 @@ function formatMapLocations(groups: DBMapGroup[], lang: DBAgentLang, withLabel =
  * @returns 字段表；角色不存在时返回 undefined
  */
 function readCharDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const char = charData.find(item => `${item.id}` === id)
+    const char = charMap.get(Number(id))
 
     if (!char) {
         return undefined
@@ -2585,13 +2601,13 @@ function readCharDetailFields(id: string, lang: DBAgentLang): DBEntryFields | un
         fields.溯源 = traces
     }
 
-    const exclusive = char.专武 === undefined ? undefined : weaponData.find(weapon => weapon.id === char.专武)
+    const exclusive = char.专武 === undefined ? undefined : weaponMap.get(char.专武)
     if (exclusive) {
         fields.专武 = `${translateDBAgentText(exclusive.名称, lang) ?? exclusive.名称}（/db/weapon/${exclusive.id}）`
     }
 
     // 角色碎片即「思绪片段·XXX」资源，获取方式挂在资源详情页上
-    const fragment = char.碎片 === undefined ? undefined : resourceData.find(item => item.id === char.碎片)
+    const fragment = char.碎片 === undefined ? undefined : resourceMap.get(char.碎片)
     if (fragment) {
         fields.碎片 = `${translateDBAgentText(fragment.name, lang) ?? fragment.name}（/db/resource/${fragment.id}）`
     }
@@ -2614,7 +2630,7 @@ function readCharDetailFields(id: string, lang: DBAgentLang): DBEntryFields | un
  * @returns 字段表；武器不存在时返回 undefined
  */
 function readWeaponDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const weapon = weaponData.find(item => `${item.id}` === id)
+    const weapon = weaponMap.get(Number(id))
 
     if (!weapon) {
         return undefined
@@ -2689,7 +2705,7 @@ function readWeaponDetailFields(id: string, lang: DBAgentLang): DBEntryFields | 
  * @returns 字段表；魔之楔不存在时返回 undefined
  */
 function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const mod = modData.find(item => `${item.id}` === id)
+    const mod = modMap.get(Number(id))
 
     if (!mod) {
         return undefined
@@ -2774,7 +2790,7 @@ function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
  * @returns 字段表；成就不存在时返回 undefined
  */
 function readAchievementDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const achievement = achievementData.find(item => `${item.id}` === id)
+    const achievement = achievementMap.get(Number(id))
 
     if (!achievement) {
         return undefined
@@ -2799,7 +2815,7 @@ function readAchievementDetailFields(id: string, lang: DBAgentLang): DBEntryFiel
  * @returns 字段表；任务链不存在时返回 undefined
  */
 function readQuestChainDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const chain = questChainData.find(item => `${item.id}` === id)
+    const chain = questChainMap.get(Number(id))
 
     if (!chain) {
         return undefined
@@ -2899,7 +2915,7 @@ function readEventDetailFields(id: string, lang: DBAgentLang): DBEntryFields | u
  * @returns 字段表；副本不存在时返回 undefined
  */
 function readDungeonDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const dungeon = dungeonsData.find(item => `${item.id}` === id)
+    const dungeon = dungeonMap.get(Number(id))
 
     if (!dungeon) {
         return undefined
@@ -2937,7 +2953,7 @@ function readDungeonDetailFields(id: string, lang: DBAgentLang): DBEntryFields |
  * @returns 字段表；怪物不存在时返回 undefined
  */
 function readMonsterDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const monster = monsterData.find(item => `${item.id}` === id)
+    const monster = monsterMap.get(Number(id))
 
     if (!monster) {
         return undefined
@@ -2979,7 +2995,7 @@ function readMonsterDetailFields(id: string, lang: DBAgentLang): DBEntryFields |
  * @returns 字段表；NPC 不存在时返回 undefined
  */
 function readNpcDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const npc = npcData.find(item => `${item.id}` === id)
+    const npc = npcMap.get(Number(id))
 
     if (!npc) {
         return undefined
@@ -3019,7 +3035,7 @@ function readNpcDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
  * @returns 字段表；资源不存在时返回 undefined
  */
 function readResourceDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const resource = resourceData.find(item => `${item.id}` === id)
+    const resource = resourceMap.get(Number(id))
 
     if (!resource) {
         return undefined
@@ -3056,7 +3072,7 @@ function readResourceDetailFields(id: string, lang: DBAgentLang): DBEntryFields 
  * @returns 字段表；魔灵不存在时返回 undefined
  */
 function readPetDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const pet = petData.find(item => `${item.id}` === id)
+    const pet = petMap.get(Number(id))
 
     if (!pet) {
         return undefined
@@ -3092,7 +3108,7 @@ function readPetDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
  * @returns 字段表；密函不存在时返回 undefined
  */
 function readWalnutDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const walnut = walnutData.find(item => `${item.id}` === id)
+    const walnut = walnutMap.get(Number(id))
 
     if (!walnut) {
         return undefined
@@ -3117,7 +3133,7 @@ function readWalnutDetailFields(id: string, lang: DBAgentLang): DBEntryFields | 
  * @returns 字段表；称号不存在时返回 undefined
  */
 function readTitleDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const title = titleData.find(item => `${item.id}` === id)
+    const title = titleMap.get(Number(id))
 
     if (!title) {
         return undefined
@@ -3139,7 +3155,7 @@ function readTitleDetailFields(id: string, lang: DBAgentLang): DBEntryFields | u
  * @returns 字段表；读物不存在时返回 undefined
  */
 function readBookDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const book = booksData.find(item => `${item.id}` === id)
+    const book = bookMap.get(Number(id))
 
     if (!book) {
         return undefined
@@ -3206,7 +3222,7 @@ const FISH_PERIOD_LABELS: Record<number, string> = {
  * @returns 字段表；鱼不存在时返回 undefined
  */
 function readFishDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
-    const fish = fishs.find(item => `${item.id}` === id)
+    const fish = fishMap.get(Number(id))
 
     if (!fish) {
         return undefined

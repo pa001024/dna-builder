@@ -6,8 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { encode } from "@msgpack/msgpack"
 import { zipSync } from "fflate"
 import { globSync } from "glob"
-import { computeRagFingerprints } from "../packages/data/rag/corpus"
 import { DATA_PACK_FORMAT_MAJOR, normalizeDataPackMajor } from "../apps/web/src/utils/data-pack/data-pack-format"
+import { computeRagFingerprints } from "../packages/data/rag/corpus"
 import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
 /** 数据包覆盖的语言（RAG 指纹按语言各算一份，与服务端索引的语言口径一致） */

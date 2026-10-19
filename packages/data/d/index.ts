@@ -12,6 +12,8 @@ export { eventData } from "./event.data"
 export { weaponVerifyData } from "./weapon-verify.data"
 
 import { skinData } from "./accessory.data"
+import achievementData, { type Achievement } from "./achievement.data"
+import { type Book, type BookResource, booksData } from "./book.data"
 import dynQuestData, { type DynQuest } from "./dynquest.data"
 import { type ExtVoiceEntry, extVoiceData } from "./extvoice.data"
 import { type HardBoss, hardBossData } from "./hardboss.data"
@@ -20,6 +22,7 @@ import iconticketData, { type IconTicket } from "./iconticket.data"
 import modData from "./mod.data"
 import monsterData, { type Monster } from "./monster.data"
 import npcData, { type NPC } from "./npc.data"
+import { type Pan, panData } from "./pan.data"
 import partyTopicData, { type PartyTopic } from "./partytopic.data"
 import questData, { type QuestStory } from "./quest.data"
 import { type QuestChain, questChainData } from "./questchain.data"
@@ -28,12 +31,15 @@ import resourceData, { type Resource } from "./resource.data"
 import rewardData from "./reward.data"
 import shopData from "./shop.data"
 import subRegionData, { type SubRegion } from "./subregion.data"
+import titleData, { type Title } from "./title.data"
 import walnutData, { type Walnut } from "./walnut.data"
 import weaponData from "./weapon.data"
 
 export { hairData, headFrameData } from "./accessory.data"
 
 export const charMap = new Map<number | string, Char>()
+/** 角色思绪片段资源 id → 角色（密函成品反查） */
+export const charFragmentMap = new Map<number, Char>()
 
 export { cutoffData, monsterData }
 
@@ -123,6 +129,18 @@ function findModRewards(
 
 import petData, { type Pet } from "./pet.data"
 export const petMap = new Map<number, Pet>()
+/** 魔灵 uid → 魔灵（首个同 uid 条目，id 优先） */
+export const petUidMap = new Map<number, Pet>()
+/** 读物 id → 读物 */
+export const bookMap = new Map<number, Book>()
+/** 读物收录页 id → 所属读物与该页 */
+export const bookResMap = new Map<number, { book: Book; res: BookResource }>()
+/** 潘神 id → 潘神 */
+export const panMap = new Map<number, Pan>()
+/** 成就 id → 成就 */
+export const achievementMap = new Map<number, Achievement>()
+/** 称号 id → 称号 */
+export const titleMap = new Map<number, Title>()
 
 export type { DBMap, DBMapMarker } from "./onlinemapcache.data"
 
@@ -166,9 +184,13 @@ export const draftShopSourceMap = new Map<number, { shop: string; cost: string; 
  */
 export function rebuildStaticIndexes(): void {
     charMap.clear()
+    charFragmentMap.clear()
     for (const char of charData) {
         charMap.set(char.名称, char as Char)
         charMap.set(char.id, char as Char)
+        if (char.碎片 !== undefined) {
+            charFragmentMap.set(char.碎片, char as Char)
+        }
     }
 
     cutoffMap.clear()
@@ -329,8 +351,38 @@ export function rebuildStaticIndexes(): void {
     }
 
     petMap.clear()
+    petUidMap.clear()
     for (const pet of petData) {
         petMap.set(pet.id, pet)
+        if (pet.uid !== undefined && !petUidMap.has(pet.uid)) {
+            petUidMap.set(pet.uid, pet)
+        }
+    }
+
+    bookMap.clear()
+    bookResMap.clear()
+    for (const book of booksData) {
+        bookMap.set(book.id, book)
+        for (const res of book.res ?? []) {
+            if (!bookResMap.has(res.id)) {
+                bookResMap.set(res.id, { book, res })
+            }
+        }
+    }
+
+    panMap.clear()
+    for (const pan of panData) {
+        panMap.set(pan.id, pan)
+    }
+
+    achievementMap.clear()
+    for (const achievement of achievementData) {
+        achievementMap.set(achievement.id, achievement)
+    }
+
+    titleMap.clear()
+    for (const title of titleData) {
+        titleMap.set(title.id, title)
     }
 
     fishMap.clear()

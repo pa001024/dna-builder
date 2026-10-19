@@ -2109,7 +2109,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         </dialog>
         <dialog class="modal" :class="{ 'modal-open': autobuild_model_show }">
             <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
-                <AutoBuild v-if="autobuild_model_show" :update="autobuild_model_show" :char-build="charBuild" @change="newBuild = $event" />
+                <AutoBuild v-if="autobuild_model_show" :update="autobuild_model_show" :char-build="charBuild" :char-id="selectedCharId" :settings="charSettings" @change="newBuild = $event" />
                 <div class="modal-action">
                     <form class="flex justify-end gap-2" method="dialog">
                         <button class="btn btn-primary" @click="applyAutobuild">

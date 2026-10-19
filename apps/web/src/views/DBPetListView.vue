@@ -66,8 +66,8 @@ const filteredPets = computed(() => {
                 matchKeyword = true
             } else {
                 const q = searchKeyword.value
-                // 直接中文匹配
-                if (entry.name.includes(q)) {
+                // 直接中文匹配 / ID 匹配
+                if (entry.name.includes(q) || String(entry.id).includes(q)) {
                     matchKeyword = true
                 } else {
                     // 拼音匹配（全拼/首字母）
@@ -89,8 +89,8 @@ const filteredPets = computed(() => {
             matchKeyword = true
         } else {
             const q = searchKeyword.value
-            // 直接中文匹配
-            if (p.名称.includes(q)) {
+            // 直接中文匹配 / ID 匹配
+            if (p.名称.includes(q) || String(p.id).includes(q)) {
                 matchKeyword = true
             } else {
                 // 拼音匹配（全拼/首字母）
@@ -219,7 +219,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                                 v-if="filteredPets.length === 0"
                                 class="flex flex-col items-center justify-center py-20 text-base-content/45"
                             >
-                                <p class="text-sm">{{ $t("db-pet-list.no_match") }}</p>
+                                <p class="text-sm">{{ $t("common.no_match") }}</p>
                             </div>
 
                             <div v-else class="space-y-2">

@@ -1,0 +1,35 @@
+[package]
+name = "dob-calc-core"
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Duet Night Abyss build calculator core: builds attribute tables from game data, evaluates build expressions, and exposes a C ABI for wasm/cdylib."
+license = "MIT"
+repository = "https://github.com/pa001024/dna-builder"
+homepage = "https://dna-builder.cn"
+documentation = "https://docs.rs/dob-calc-core"
+readme = "README.md"
+keywords = ["game", "calculator", "damage", "gamedata", "wasm"]
+categories = ["games", "wasm"]
+
+[lib]
+name = "dob_calc_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+[features]
+prof = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true

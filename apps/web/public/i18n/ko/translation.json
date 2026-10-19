@@ -569,14 +569,20 @@
     "autobuild": {
         "calculating": "계산 중...",
         "charMods": "캐릭터 MOD",
+        "clearSelection": "지우기",
+        "copy_diagnostics": "진단 정보 복사",
         "desc": "현재 MOD 구성에 따라 최적의 MOD 조합을 자동으로 구성합니다",
         "includeMelee": "근접 자동 교체",
         "includeRanged": "원거리 자동 교체",
         "includeTypes": "MOD 유형 포함",
         "log": "로그",
         "meleeMods": "근접 MOD",
+        "noEquippedMods": "장착 중인 MOD가 없습니다",
+        "preserveHint": "장착 중인 MOD를 클릭하여 유지",
         "preserveTypes": "현재 MOD 유지",
         "rangedMods": "원거리 MOD",
+        "result": "결과",
+        "selectAll": "전체 선택",
         "skillWeaponMods": "동률 MOD",
         "toggle_log": "로그 펼치기/접기",
         "useInv": "사용자 인벤토리 사용"
@@ -635,6 +641,8 @@
     },
     "buff-editor": {
         "copy_buff": "BUFF 복사",
+        "disabled": "비활성",
+        "disabled_by": "{{mod}} 장착 중이라 이 BUFF는 적용되지 않습니다",
         "paste_buff": "BUFF 붙여넣기",
         "search_placeholder": "BUFF 검색"
     },
@@ -997,6 +1005,7 @@
         "minute": "분",
         "mod_icon": "모드 아이콘",
         "no_data": "데이터 없음",
+        "no_match": "일치하는 항목이 없습니다",
         "none": "없음",
         "official": "공식",
         "player_count": "인원",
@@ -1508,7 +1517,6 @@
         "topic_count": "개 화제"
     },
     "db-pet-list": {
-        "no_match": "일치하는 마령이 없습니다",
         "search_placeholder": "마령 이름 검색(병음 지원)..."
     },
     "db-quest-story-nodes": {
