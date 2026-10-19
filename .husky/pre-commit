@@ -56,28 +56,17 @@ fi
 # 暂存修改的版本文件
 git_add_retry -- package.json apps/web/package.json apps/web/src-tauri/tauri.conf.json apps/web/src-tauri/Cargo.lock apps/web/src-tauri/Cargo.toml
 
-# 格式化前已全部暂存时，把格式化改动补回暂存区（只补格式化过的文件，不用 git add . 全量扫描）。
-# 分批提交：全量文件一次传参会超命令行长度（本仓库一次变更可达上千文件）。
-if [ "$ALL_STAGED" = "true" ] && [ -n "$EXISTING_FILES" ]; then
-    BATCH=""
-    BATCH_COUNT=0
-    printf '%s\n' "$EXISTING_FILES" | while IFS= read -r f; do
-        if [ -z "$f" ] || [ ! -f "$f" ]; then
-            continue
-        fi
-        BATCH="$BATCH
-$f"
-        BATCH_COUNT=$((BATCH_COUNT + 1))
-        if [ "$BATCH_COUNT" -ge 80 ]; then
-            # shellcheck disable=SC2086（本仓库文件名无空格，换行分隔即可）
-            git_add_retry -- $BATCH
-            BATCH=""
-            BATCH_COUNT=0
-        fi
-    done
-    if [ -n "$BATCH" ]; then
-        # shellcheck disable=SC2086
-        git_add_retry -- $BATCH
+# 格式化前已全部暂存时，把钩子引入的改动（biome 格式化 / cargo fmt / 版本号与 i18n 排序）补回暂存区。
+# 直接取格式化后的 worktree 差异走 pathspec-from-file：不拼长命令行（本仓库一次变更可达上千文件），
+# 也兼容文件名空格。注意不能用 `printf | while` 分批 add——while 在管道子 shell 里跑，攒的列表传不回父 shell，
+# 文件数不足一批时尾单直接丢失，一个都加不回去。
+if [ "$ALL_STAGED" = "true" ]; then
+    REMAINING="$(git diff --name-only)"
+    if [ -n "$REMAINING" ]; then
+        STAGE_TMP="$(mktemp)"
+        printf '%s\n' "$REMAINING" > "$STAGE_TMP"
+        git_add_retry --pathspec-from-file="$STAGE_TMP"
+        rm -f "$STAGE_TMP"
     fi
 fi
 

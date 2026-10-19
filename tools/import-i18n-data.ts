@@ -600,6 +600,7 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
  * 因此按位置同步遍历两侧，即可把同一字段的简体中文原文与目标语言译文配成对照。
  */
 export const TRANSLATION_SOURCE_FILES = [
+    "Archive.json",
     "AbyssBuff.json",
     "AbyssDungeon.json",
     "Achievement.json",
@@ -843,6 +844,7 @@ function trimLimitedPrizePools(pools: unknown): Record<string, TrimmedLimitedPri
 }
 
 const MAPPINGS: Mapping[] = [
+    { source: "Archive", targetStem: "archive", targetVar: "archiveData", locales: ["cn"] },
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
     { source: "AbyssDungeon", targetStem: "abyss", targetVar: "abyssDungeons", locales: ["cn"] },
     { source: "Achievement", targetStem: "achievement", targetVar: "t", locales: ["cn"] },

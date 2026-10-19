@@ -22,6 +22,7 @@ function resolveDataPackDir(): string {
 
 const DATA_PACK_MODULES = new Set([
     "accessory.data.ts",
+    "archive.data.ts",
     "achievement.data.ts",
     "autochess.data.ts",
     "backpackpuzzle.data.ts",

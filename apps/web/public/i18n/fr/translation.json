@@ -1178,6 +1178,8 @@
         "achievement_desc": "Voir les informations des succès et les récompenses",
         "appearance": "Apparence",
         "appearance_desc": "Voir les apparences de personnage, skins d'arme et accessoires",
+        "archive": "Galerie",
+        "archive_desc": "Vitrine des personnages, armes, objets, lectures et ennemis",
         "book": "Livres",
         "book_desc": "Consulter les livres, textes d'indices et zones associées",
         "char": "Personnage",
@@ -1282,6 +1284,10 @@
         "achievement_count": "succès",
         "no_match": "Aucun succès correspondant",
         "search_placeholder": "Rechercher par ID / nom / description de succès (pinyin pris en charge)..."
+    },
+    "db-archive-list": {
+        "entry_unit": "entrées",
+        "search_placeholder": "Rechercher…"
     },
     "db-char-list": {
         "char_count": "personnages",

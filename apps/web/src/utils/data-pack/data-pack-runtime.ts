@@ -30,6 +30,7 @@ if (!isDataPackHydrated()) {
 
 const DATA_PACK_MODULES = [
     "translations.data",
+    "archive.data",
     "char.data",
     "mod.data",
     "weapon.data",

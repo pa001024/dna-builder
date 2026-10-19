@@ -1163,6 +1163,8 @@
         "achievement_desc": "View achievement information and rewards",
         "appearance": "Appearance",
         "appearance_desc": "View character appearance, weapon skins, and accessory info",
+        "archive": "Showroom",
+        "archive_desc": "Showcase of characters, weapons, resources, books and monsters",
         "book": "Books",
         "book_desc": "Browse books, clue texts and related locations",
         "char": "Character",
@@ -1267,6 +1269,10 @@
         "achievement_count": "achievements",
         "no_match": "No matching achievements",
         "search_placeholder": "Search achievement ID / name / description (pinyin supported)..."
+    },
+    "db-archive-list": {
+        "entry_unit": "entries",
+        "search_placeholder": "Search entries…"
     },
     "db-char-list": {
         "char_count": "characters",

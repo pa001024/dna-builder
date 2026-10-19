@@ -1145,6 +1145,8 @@
         "achievement_desc": "実績情報と報酬を確認",
         "appearance": "外観",
         "appearance_desc": "キャラクター外観・武器スキン・アクセサリー情報を表示",
+        "archive": "展示室",
+        "archive_desc": "角色・武器・アイテム・読み物・敵の図鑑展示",
         "book": "読物",
         "book_desc": "読物の条目、手がかり本文、関連エリアを確認",
         "char": "キャラクター",
@@ -1249,6 +1251,10 @@
         "achievement_count": "件の実績",
         "no_match": "一致する実績がありません",
         "search_placeholder": "実績 ID / 名前 / 説明を検索（ピンイン対応）..."
+    },
+    "db-archive-list": {
+        "entry_unit": "件",
+        "search_placeholder": "項目を検索…"
     },
     "db-char-list": {
         "char_count": "人のキャラ",

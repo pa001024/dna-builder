@@ -4,6 +4,7 @@ import { charMap, hardBossMap, regionMap, subRegionMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import achievementData from "@/data/d/achievement.data"
+import { archiveData } from "@/data/d/archive.data"
 import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
 import draftData from "@/data/d/draft.data"
@@ -533,6 +534,21 @@ export class GlobalSearchService {
                         path: `/db/title/${title.id}`,
                     },
                     [title.id, title.name, title.src, title.suf ? "后缀" : "前缀"]
+                )
+            )
+        )
+
+        entries.push(
+            ...archiveData.map(group =>
+                this.buildSearchEntry(
+                    {
+                        id: `archive:${group.id}`,
+                        title: group.title,
+                        subtitle: `陈列室 ID: ${group.id}`,
+                        typeLabel: t("database.archive"),
+                        path: `/db/archive?g=${group.id}`,
+                    },
+                    [group.id, group.title, ...(group.tabs?.map(tab => tab.name) ?? [])]
                 )
             )
         )

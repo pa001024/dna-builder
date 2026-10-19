@@ -18,6 +18,7 @@ import {
     weaponMap,
 } from "@/data/d"
 import achievementData from "@/data/d/achievement.data"
+import { archiveData } from "@/data/d/archive.data"
 import { booksData } from "@/data/d/book.data"
 import { default as charData } from "@/data/d/char.data"
 import { getCachedCharExtData, resolveCharExtLocaleBySetting } from "@/data/d/charext-locale"
@@ -781,6 +782,19 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 name: item.name,
                 subtitle: item.src,
                 path: `/db/title/${item.id}`,
+            })),
+    },
+    {
+        id: "archive",
+        labelKey: "database.archive",
+        path: "/db/archive",
+        versioned: false,
+        list: () =>
+            archiveData.map(item => ({
+                id: item.id,
+                name: item.title,
+                subtitle: joinParts([`step ${item.step}`, `reward ${item.reward}`]),
+                path: `/db/archive?g=${item.id}`,
             })),
     },
     {
@@ -3378,6 +3392,58 @@ function readDamageDetailFields(id: string): DBEntryFields | undefined {
     return undefined
 }
 
+/**
+ * 陈列室详情字段：里程碑步长/奖励与收录条目清单。
+ * @param id 档案分组 id
+ * @param lang 数据语言
+ * @returns 字段表；分组不存在时返回 undefined
+ */
+function readArchiveDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
+    const group = archiveData.find(item => item.id === Number(id))
+    if (!group) return undefined
+    const fields: DBEntryFields = {
+        里程碑步长: group.step,
+        每档奖励组: group.reward,
+    }
+    const entryIds = group.entries ?? group.series ?? [...(group.normal ?? []), ...(group.task ?? []), ...(group.groups?.AllMonster ?? [])]
+    const entryNames = entryIds.map(entryId => resolveArchiveEntryName(group.id, entryId, lang) ?? `#${entryId}`)
+    if (entryNames.length) fields.收录条目 = entryNames
+    return fields
+}
+
+/**
+ * 按档案分组取条目展示名（id 跨表重号，必须按组选表）。
+ * @param groupId 档案分组 id
+ * @param entryId 条目实体 id
+ * @param lang 数据语言
+ * @returns 展示名；实体缺失时返回 undefined
+ */
+function resolveArchiveEntryName(groupId: number, entryId: number, lang: DBAgentLang): string | undefined {
+    switch (groupId) {
+        case 1001: {
+            const name = charMap.get(entryId)?.名称
+            return name ? (translateDBAgentText(name, lang) ?? name) : undefined
+        }
+        case 1002:
+        case 1003: {
+            const name = weaponMap.get(entryId)?.名称
+            return name ? (translateDBAgentText(name, lang) ?? name) : undefined
+        }
+        case 1004: {
+            const name = resourceMap.get(entryId)?.name
+            return name ? (translateDBAgentText(name, lang) ?? name) : undefined
+        }
+        case 1005: {
+            const name = bookMap.get(entryId)?.name
+            return name ? (translateDBAgentText(name, lang) ?? name) : undefined
+        }
+        default: {
+            const name = monsterMap.get(entryId)?.n
+            return name ? (translateDBAgentText(name, lang) ?? name) : undefined
+        }
+    }
+}
+
 /** 资料库模块 id → 详情字段读取器 */
 const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
     char: readCharDetailFields,
@@ -3395,6 +3461,7 @@ const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
     pet: readPetDetailFields,
     walnut: readWalnutDetailFields,
     title: readTitleDetailFields,
+    archive: readArchiveDetailFields,
     book: readBookDetailFields,
     music: readMusicDetailFields,
     fish: readFishDetailFields,

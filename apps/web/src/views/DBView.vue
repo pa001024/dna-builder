@@ -301,6 +301,7 @@ const databaseItems = [
     { name: "database.solotreasure", path: "/db/solotreasure", desc: "database.solotreasure_desc", icon: "ri:gift-line" },
     { name: "database.mapLocal", path: "/map-tool", desc: "database.mapLocal_desc", icon: "ri:focus-3-line" },
     { name: "database.walnut", path: "/db/walnut", desc: "database.walnut_desc", icon: "ri:mail-line" },
+    { name: "database.archive", path: "/db/archive", desc: "database.archive_desc", icon: "ri:file-list-line" },
     { name: "database.title_data", path: "/db/title", desc: "database.title_data_desc", icon: "ri:bookmark-line" },
     { name: "database.book", path: "/db/book", desc: "database.book_desc", icon: "ri:book-open-line" },
     { name: "database.music", path: "/db/music", desc: "database.music_desc", icon: "ri:music-2-line" },
@@ -370,7 +371,7 @@ const databaseSectionMeta = [
         ],
     },
     { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"] },
-    { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"] },
+    { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory", "/db/archive"] },
 ] as const
 
 /**
@@ -1124,21 +1125,23 @@ onBeforeUnmount(() => {
 
                                 <ul class="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
                                     <li v-for="item in moduleCards" :key="item.path">
-                                        <button
-                                            type="button"
-                                            class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
-                                            @click="navigateTo(item.path)"
-                                        >
-                                            <Icon
-                                                :icon="item.icon"
-                                                class="h-4.5 w-4.5 shrink-0 text-base-content/45 transition-colors duration-200 group-hover:text-primary"
-                                            />
-                                            <span class="min-w-0 flex-1 truncate">{{ $t(item.name) }}</span>
-                                            <Icon
-                                                icon="ri:arrow-right-line"
-                                                class="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
-                                            />
-                                        </button>
+                                        <Tooltip :tooltip="$t(item.desc)" side="top">
+                                            <button
+                                                type="button"
+                                                class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+                                                @click="navigateTo(item.path)"
+                                            >
+                                                <Icon
+                                                    :icon="item.icon"
+                                                    class="h-4.5 w-4.5 shrink-0 text-base-content/45 transition-colors duration-200 group-hover:text-primary"
+                                                />
+                                                <span class="min-w-0 flex-1 truncate">{{ $t(item.name) }}</span>
+                                                <Icon
+                                                    icon="ri:arrow-right-line"
+                                                    class="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                                                />
+                                            </button>
+                                        </Tooltip>
                                     </li>
                                 </ul>
 

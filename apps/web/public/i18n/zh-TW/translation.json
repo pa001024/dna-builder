@@ -1144,6 +1144,8 @@
         "achievement_desc": "查看成就資訊和獎勵",
         "appearance": "外觀",
         "appearance_desc": "查看角色外觀、武器造型與飾品資訊",
+        "archive": "陳列室",
+        "archive_desc": "角色、武器、物件、讀物與敵人的圖鑑陳列",
         "book": "讀物",
         "book_desc": "查看讀物條目、線索文本與區域位置",
         "char": "角色",
@@ -1248,6 +1250,10 @@
         "achievement_count": "個成就",
         "no_match": "找不到符合的成就",
         "search_placeholder": "搜尋成就 ID/名稱/描述（支援拼音）..."
+    },
+    "db-archive-list": {
+        "entry_unit": "條",
+        "search_placeholder": "搜尋條目…"
     },
     "db-char-list": {
         "char_count": "個角色",

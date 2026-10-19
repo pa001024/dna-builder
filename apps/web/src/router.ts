@@ -315,15 +315,20 @@ export const routes: readonly RouteRecordRaw[] = [
                 path: "title",
                 component: () => import("./views/DBTitleListView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
-                meta: {
-                    title: "称号",
-                },
+                meta: { title: "database.title_data" },
             },
             {
                 name: "title-detail",
                 path: "title/:id",
                 component: () => import("./views/DBTitleDetailView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            {
+                name: "archive-list",
+                path: "archive",
+                component: () => import("./views/DBArchiveListView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "database.archive" },
             },
             {
                 name: "book-list",

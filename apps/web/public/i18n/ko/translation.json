@@ -1146,6 +1146,8 @@
         "achievement_desc": "업적 정보와 보상 보기",
         "appearance": "외형",
         "appearance_desc": "캐릭터 외형, 무기 스킨 및 장식품 정보 보기",
+        "archive": "전시실",
+        "archive_desc": "캐릭터, 무기, 오브젝트, 서적, 적의 도감 전시",
         "book": "서적",
         "book_desc": "서적 항목, 단서 본문, 관련 지역 정보를 확인",
         "char": "캐릭터",
@@ -1250,6 +1252,10 @@
         "achievement_count": "개 업적",
         "no_match": "일치하는 업적이 없습니다",
         "search_placeholder": "업적 ID / 이름 / 설명 검색(병음 지원)..."
+    },
+    "db-archive-list": {
+        "entry_unit": "개",
+        "search_placeholder": "항목 검색…"
     },
     "db-char-list": {
         "char_count": "명의 캐릭터",

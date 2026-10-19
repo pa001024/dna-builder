@@ -1197,6 +1197,8 @@
         "achievement_desc": "查看成就信息和奖励",
         "appearance": "外观",
         "appearance_desc": "查看角色外观、武器皮肤与饰品信息",
+        "archive": "陈列室",
+        "archive_desc": "角色、武器、物件、读物与敌人的图鉴陈列",
         "book": "读物",
         "book_desc": "查看读物条目、线索文本与区域位置",
         "char": "角色",
@@ -1301,6 +1303,10 @@
         "achievement_count": "个成就",
         "no_match": "未找到匹配的成就",
         "search_placeholder": "搜索成就 ID/名称/描述（支持拼音）..."
+    },
+    "db-archive-list": {
+        "entry_unit": "条",
+        "search_placeholder": "搜索条目…"
     },
     "db-char-list": {
         "char_count": "个角色",
