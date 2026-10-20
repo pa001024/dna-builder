@@ -23,6 +23,7 @@ import {
     detectMissingAbyssWeaponSlots,
 } from "@/utils/abyss-upload"
 import { imgRemoteToLocal } from "@/utils/remoteImg"
+import { SHORT_NOTE_STORAGE_KEY } from "@/utils/screen-bar"
 import { formatTimeOnly } from "@/utils/time"
 
 defineProps<{
@@ -40,7 +41,7 @@ let api: DNAAPI
 
 const loading = ref(true)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
-const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>("dna.shortNoteInfo", {} as any)
+const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>(SHORT_NOTE_STORAGE_KEY, {} as any)
 
 /**
  * 计算铸造的真实结束时间戳

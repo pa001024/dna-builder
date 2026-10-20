@@ -13,6 +13,8 @@ import {
     getMihanRefreshRemaining,
     normalizeClockFormat,
     normalizeCountdownTarget,
+    normalizeForgeAlarm,
+    normalizeForgeDrafts,
     normalizeItemTitle,
     normalizeMihanMissions,
     normalizeMihanTypes,
@@ -206,6 +208,7 @@ describe("条目归一化", () => {
         const clock = createScreenBarItem("clock")
         expect(clock).toMatchObject({ type: "clock", format: SCREEN_BAR_DEFAULTS.clockFormat })
         expect(createScreenBarItem("countdown")).toMatchObject({ type: "countdown", title: "", target: "" })
+        expect(createScreenBarItem("forge")).toMatchObject({ type: "forge" })
         expect(createScreenBarItem("mihan")).toMatchObject({ type: "mihan", types: [0, 1, 2], missions: [], onlyMatched: false })
         expect(createScreenBarItem("mihanRefresh")).toMatchObject({ type: "mihanRefresh" })
         expect(createScreenBarItem("moling")).toMatchObject({ type: "moling" })
@@ -246,6 +249,19 @@ describe("条目归一化", () => {
             { id: "a", type: "mihan", types: [0], missions: ["驱离", "驱离", "不存在的任务"], onlyMatched: true },
         ])
         expect(items[0]).toMatchObject({ type: "mihan", missions: ["驱离"], onlyMatched: true })
+    })
+
+    it("铸造完成条目只保留 id 与模式,旧配置缺 mode 时回退指定", () => {
+        const items = normalizeScreenBarItems([
+            { id: "f", type: "forge", time: 1, title: "x" },
+            { id: "g", type: "forge", mode: "summary" },
+            { id: "h", type: "forge", mode: "nope" },
+        ])
+        expect(items).toEqual([
+            { id: "f", type: "forge", mode: "alarm" },
+            { id: "g", type: "forge", mode: "summary" },
+            { id: "h", type: "forge", mode: "alarm" },
+        ])
     })
 
     it("按上限截断条目数量", () => {
@@ -409,5 +425,122 @@ describe("resolveScreenBarItem", () => {
             type: "zhouben",
             text: formatCountdownDays(getDayRefreshRemaining("zhouben", SAMPLE.getTime())),
         })
+    })
+
+    it("没设铸造提醒时给出 unset", () => {
+        expect(resolveScreenBarItem({ id: "f1", type: "forge", mode: "alarm" }, SAMPLE, mihanData, null)).toEqual({
+            id: "f1",
+            type: "forge",
+            mode: "alarm",
+            title: "",
+            text: "",
+            status: "unset",
+        })
+    })
+
+    it("铸造提醒未到点时出带产物名的倒计时", () => {
+        const alarm = { time: SAMPLE.getTime() + 90_000_000, title: "危机合约" }
+        expect(resolveScreenBarItem({ id: "f2", type: "forge", mode: "alarm" }, SAMPLE, mihanData, alarm)).toEqual({
+            id: "f2",
+            type: "forge",
+            mode: "alarm",
+            title: "危机合约",
+            text: "1天 01:00:00",
+            status: "running",
+        })
+    })
+
+    it("铸造提醒已到点时标为 expired,不出倒计时文本", () => {
+        const alarm = { time: SAMPLE.getTime() - 1, title: "危机合约" }
+        expect(resolveScreenBarItem({ id: "f3", type: "forge", mode: "alarm" }, SAMPLE, mihanData, alarm)).toEqual({
+            id: "f3",
+            type: "forge",
+            mode: "alarm",
+            title: "危机合约",
+            text: "",
+            status: "expired",
+        })
+    })
+
+    it("摘要模式按条目数统计,不看指定提醒", () => {
+        const drafts = [
+            { name: "危机合约", done: true },
+            { name: "调停", done: false },
+        ]
+        const alarm = { time: SAMPLE.getTime() + 60_000, title: "不参与汇总" }
+        expect(resolveScreenBarItem({ id: "s1", type: "forge", mode: "summary" }, SAMPLE, mihanData, alarm, drafts)).toEqual({
+            id: "s1",
+            type: "forge",
+            mode: "summary",
+            completed: 1,
+            total: 2,
+        })
+    })
+
+    it("没有进行中的铸造时摘要总条目数为 0,由组件整条隐藏", () => {
+        expect(resolveScreenBarItem({ id: "s2", type: "forge", mode: "summary" }, SAMPLE, mihanData, null, [])).toEqual({
+            id: "s2",
+            type: "forge",
+            mode: "summary",
+            completed: 0,
+            total: 0,
+        })
+    })
+})
+
+describe("normalizeForgeDrafts", () => {
+    it("按条目读出队列,只有整条走完才算 done", () => {
+        const raw = {
+            draftInfo: {
+                draftDoingNum: 2,
+                draftMaxNum: 4,
+                draftDoingInfo: [
+                    { productId: 1, productName: "危机合约", draftCompleteNum: 1, draftDoingNum: 1, startTime: "1", endTime: "2" },
+                    { productId: 2, productName: "调停", draftCompleteNum: 3, draftDoingNum: 0, startTime: "1", endTime: "2" },
+                ],
+            },
+        }
+        expect(normalizeForgeDrafts(raw)).toEqual([
+            { name: "危机合约", done: false },
+            { name: "调停", done: true },
+        ])
+    })
+
+    it("缺字段、脏数据与空队列都按没数据处理", () => {
+        expect(normalizeForgeDrafts(null)).toEqual([])
+        expect(normalizeForgeDrafts({})).toEqual([])
+        expect(normalizeForgeDrafts({ draftInfo: {} })).toEqual([])
+        expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [] } })).toEqual([])
+        expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [null, 3, {}] } })).toEqual([])
+    })
+
+    it("份数字段是字符串时按数值解析,负数与非法值按 0 处理", () => {
+        expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [{ draftCompleteNum: "3", draftDoingNum: 0 }] } })).toEqual([
+            { name: "", done: true },
+        ])
+        expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [{ draftCompleteNum: -5, draftDoingNum: 2 }] } })).toEqual([
+            { name: "", done: false },
+        ])
+    })
+})
+
+describe("normalizeForgeAlarm", () => {
+    it("保留合法的时间与标题", () => {
+        expect(normalizeForgeAlarm({ time: 1_700_000_000_000, title: "危机合约" })).toEqual({
+            time: 1_700_000_000_000,
+            title: "危机合约",
+        })
+    })
+
+    it("存储里是 null 或形状不对时视为没设提醒", () => {
+        expect(normalizeForgeAlarm(null)).toBe(null)
+        expect(normalizeForgeAlarm(undefined)).toBe(null)
+        expect(normalizeForgeAlarm("null")).toBe(null)
+        expect(normalizeForgeAlarm({ title: "x" })).toBe(null)
+        expect(normalizeForgeAlarm({ time: "abc", title: "x" })).toBe(null)
+    })
+
+    it("标题缺失时只保留时间,由渲染层省略产物名", () => {
+        expect(normalizeForgeAlarm({ time: 42 })).toEqual({ time: 42, title: "" })
     })
 })

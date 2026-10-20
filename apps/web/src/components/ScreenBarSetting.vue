@@ -5,12 +5,15 @@ import ScreenBarContent from "@/components/ScreenBarContent.vue"
 import { useScreenBar } from "@/composables/useScreenBar"
 import { useScreenBarContent } from "@/composables/useScreenBarContent"
 import { env } from "@/env"
-import { MIHAN_TYPES } from "@/store/mihan"
+import { useForgeAlarm } from "@/store/forgeAlarm"
+import { MIHAN_TYPES, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
 import { MIHAN_MISSIONS } from "@/utils/mihan-meta"
 import {
     createScreenBarItem,
+    normalizeForgeDrafts,
     SCREEN_BAR_CLOCK_PRESETS,
+    SCREEN_BAR_FORGE_MODES,
     SCREEN_BAR_ITEM_TYPES,
     SCREEN_BAR_MAX_ITEMS,
     SCREEN_BAR_MAX_OFFSET_Y,
@@ -20,6 +23,7 @@ import {
     SCREEN_BAR_MIN_OPACITY,
     SCREEN_BAR_MIN_SCALE,
     type ScreenBarCountdownItem,
+    type ScreenBarForgeMode,
     type ScreenBarItem,
     type ScreenBarItemType,
 } from "@/utils/screen-bar"
@@ -34,7 +38,12 @@ import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"
 const setting = useSettingStore()
 const { busy, error, setEnabled } = useScreenBar()
 const config = computed(() => setting.screenBar)
-const { items: previewItems } = useScreenBarContent(config)
+// 预览用主窗口的提醒单例:与浮窗一样只展示时间与标题,但这里已经存在单例,不必再额外读存储
+const { alarm: forgeAlarm } = useForgeAlarm()
+// 预览用主窗口的铸造队列:随密函同批刷新,改摘要模式后马上能看到真实数据
+const { shortNoteInfo } = useMihanNotify()
+const forgeDrafts = computed(() => normalizeForgeDrafts(shortNoteInfo.value))
+const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts)
 
 /** 条目上限已满时禁止继续添加。 */
 const addDisabled = computed(() => config.value.items.length >= SCREEN_BAR_MAX_ITEMS)
@@ -55,6 +64,15 @@ function capitalize(str: string) {
  */
 function itemTypeKey(type: ScreenBarItemType): string {
     return `screenBar.item${type[0].toUpperCase()}${type.slice(1)}`
+}
+
+/**
+ * 铸造条目模式在设置页的展示名 i18n key。
+ * @param mode 模式
+ * @returns i18n key
+ */
+function forgeModeKey(mode: ScreenBarForgeMode): string {
+    return `screenBar.forgeMode${mode[0].toUpperCase()}${mode.slice(1)}`
 }
 
 /**
@@ -157,6 +175,16 @@ function setOnlyMatched(item: ScreenBarItem, checked: boolean) {
 }
 
 /**
+ * 切换铸造条目的取数模式。
+ * @param item 目标条目
+ * @param mode 新模式
+ */
+function setForgeMode(item: ScreenBarItem, mode: ScreenBarForgeMode) {
+    if (item.type !== "forge") return
+    replaceItem(item.id, { mode })
+}
+
+/**
  * 读取条目上可直接绑定的标量参数(模板里无法对联合类型做字段访问)。
  * @param item 条目
  * @returns 各类型的标量参数,不适用时给空值
@@ -169,6 +197,7 @@ function itemParams(item: ScreenBarItem) {
         types: item.type === "mihan" ? item.types : ([] as number[]),
         missions: item.type === "mihan" ? item.missions : ([] as string[]),
         onlyMatched: item.type === "mihan" ? item.onlyMatched : false,
+        forgeMode: item.type === "forge" ? item.mode : ("alarm" as ScreenBarForgeMode),
     }
 }
 </script>
@@ -300,6 +329,30 @@ function itemParams(item: ScreenBarItem) {
                                 class="w-48 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 @input="setCountdown(item, { target: ($event.target as HTMLInputElement).value })"
                             />
+                        </div>
+
+                        <!-- 铸造完成提醒:两种取数方式,提醒来自「游戏信息」的铸造卡片,摘要来自同一份铸造队列 -->
+                        <div v-else-if="item.type === 'forge'" class="mt-1.5 flex flex-col gap-1">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-[10px] text-base-content/45">{{ $t("screenBar.forgeMode") }}</span>
+                                <button
+                                    v-for="mode in SCREEN_BAR_FORGE_MODES"
+                                    :key="mode"
+                                    type="button"
+                                    class="inline-flex h-5 cursor-pointer items-center rounded-xs border px-1.5 text-[10px] transition-colors"
+                                    :class="
+                                        itemParams(item).forgeMode === mode
+                                            ? 'border-primary/50 bg-primary/10 text-primary'
+                                            : 'border-base-content/15 text-base-content/60 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    @click="setForgeMode(item, mode)"
+                                >
+                                    {{ $t(forgeModeKey(mode)) }}
+                                </button>
+                            </div>
+                            <div class="text-[10px] leading-relaxed text-base-content/45">
+                                {{ itemParams(item).forgeMode === "summary" ? $t("screenBar.forgeSummaryHint") : $t("screenBar.forgeHint") }}
+                            </div>
                         </div>
 
                         <!-- 委托条目参数 -->

@@ -1,6 +1,7 @@
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification"
 import { useLocalStorage } from "@vueuse/core"
 import { useSound } from "@vueuse/sound"
+import type { DNAShortNoteEntity } from "dna-api"
 import { t } from "i18next"
 import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
@@ -19,6 +20,7 @@ import {
     runHourlyDoubleWriteSession,
     trackHourSession,
 } from "@/utils/hour-verify"
+import { SHORT_NOTE_STORAGE_KEY } from "@/utils/screen-bar"
 import { env } from "../env"
 import { useUIStore } from "./ui"
 
@@ -57,6 +59,8 @@ function createMihanNotify() {
     const mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
     const mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
     const mihanNotifyMissions = useLocalStorage(MIHAN_NOTIFY_MISSIONS_KEY, [] as string[])
+    /** 游戏信息:每小时与密函同一批请求刷新,屏幕信息条的铸造摘要靠它取数。 */
+    const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>(SHORT_NOTE_STORAGE_KEY, {} as any)
     const sfx = useSound("/sfx/notice.mp3")
     const watching = ref(false)
     let watchTimer: ReturnType<typeof setTimeout> | null = null
@@ -78,11 +82,14 @@ function createMihanNotify() {
      * 两类来源都需要定时刷新委托数据:
      * 1. 订阅开关 `mihanNotify`(来自委托面板)打开;
      * 2. 屏幕信息条已开启,且配置里含有至少一个委托(mihan)条目——这是此前缺失的触发路径。
+     * 3. 屏幕信息条里有"全量摘要"铸造条目:同一批请求顺带刷新的游戏信息就是它的数据源。
      * @returns 是否应持续轮询
      */
     function shouldKeepWatch() {
         const hasScreenBarMihan = setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan")
-        return mihanEnableNotify.value || hasScreenBarMihan
+        const hasScreenBarForgeSummary =
+            setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "forge" && item.mode === "summary")
+        return mihanEnableNotify.value || hasScreenBarMihan || hasScreenBarForgeSummary
     }
 
     /**
@@ -95,9 +102,11 @@ function createMihanNotify() {
 
     watch(mihanEnableNotify, () => syncWatch())
 
-    // 屏幕信息条配置(总开关 + 条目列表)变化即重算,保证加了委托条目后自动开始每小时更新
+    // 屏幕信息条配置(总开关 + 条目列表)变化即重算,保证加了委托条目或改成铸造摘要后自动开始每小时更新
     watch(
-        () => setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan"),
+        () =>
+            setting.screenBar.enabled &&
+            setting.screenBar.items.some(item => item.type === "mihan" || (item.type === "forge" && item.mode === "summary")),
         () => syncWatch(),
         { deep: true }
     )
@@ -136,7 +145,8 @@ function createMihanNotify() {
         }
 
         const setting = useSettingStore()
-        // DNA 单次取样（共享队列 + 心跳），手动立刻取数与整点首轮复用
+        // DNA 单次取样（共享队列 + 心跳），手动立刻取数与整点首轮复用。
+        // 密函与游戏信息同一批请求发出：后者只为了给屏幕信息条的铸造摘要保鲜，失败不影响密函取数。
         const sampleMissionsDNA = () =>
             enqueueDNATask(async () => {
                 const api = await setting.getDNAAPI()
@@ -145,8 +155,14 @@ function createMihanNotify() {
                 try {
                     // 心跳 500ms 快速返回后若请求失败，等完全就绪后重试一次
                     return await setting.runWithHeartbeatRetry(async () => {
-                        const data = await api.defaultRoleForTool()
+                        const [data, shortNote] = await Promise.all([
+                            api.defaultRoleForTool(),
+                            api.getShortNoteInfo().catch(() => undefined),
+                        ])
                         if (!data?.data?.instanceInfo) throw new Error("DNAAPI 未返回密函数据")
+                        if (shortNote?.is_success && shortNote.data) {
+                            shortNoteInfo.value = shortNote.data
+                        }
                         return data.data.instanceInfo.map(v => v.instances.map(v => v.name))
                     })
                 } finally {
@@ -397,6 +413,8 @@ function createMihanNotify() {
     return {
         mihanData,
         mihanUpdateTime,
+        /** 游戏信息(含铸造队列):与密函同批刷新,屏幕信息条的摘要与设置页预览共用。 */
+        shortNoteInfo,
         mihanEnableNotify,
         mihanNotifyOnce,
         mihanNotifyTypes,

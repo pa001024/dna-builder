@@ -7923,7 +7923,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 1101,
-        release: "9.9",
+        release: "1.7",
     },
     {
         id: 11020141,
@@ -7950,7 +7950,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 1102,
-        release: "1.6",
+        release: "1.7",
     },
     {
         id: 11030010,
@@ -8684,7 +8684,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 2101,
-        release: "9.9",
+        release: "1.7",
     },
     {
         id: 21020151,
@@ -8936,7 +8936,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 3102,
-        release: "1.6",
+        release: "1.7",
     },
     {
         id: 31030010,
@@ -8999,7 +8999,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 3104,
-        release: "9.9",
+        release: "1.7",
     },
     {
         id: 32010010,
@@ -9080,7 +9080,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 3201,
-        release: "1.6",
+        release: "1.7",
     },
     {
         id: 32020131,
@@ -9341,7 +9341,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 4102,
-        release: "1.6",
+        release: "1.7",
     },
     {
         id: 42010121,
@@ -9701,7 +9701,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Pack_Police",
         rarity: 5,
         charId: 5301,
-        release: "9.9",
+        release: "1.7",
     },
     {
         id: 54010010,

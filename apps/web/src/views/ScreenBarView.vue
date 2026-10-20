@@ -11,10 +11,20 @@ import {
 import ScreenBarContent from "@/components/ScreenBarContent.vue"
 import { useScreenBarContent } from "@/composables/useScreenBarContent"
 import { env } from "@/env"
+import { FORGE_ALARM_KEY } from "@/store/forgeAlarm"
 import { MIHAN_DATA_KEY, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
 import { type CustomTheme, DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
-import { parseScreenBarConfig, SCREEN_BAR_STORAGE_KEY } from "@/utils/screen-bar"
+import {
+    normalizeForgeAlarm,
+    normalizeForgeDrafts,
+    parseScreenBarConfig,
+    readStoredJson,
+    SCREEN_BAR_STORAGE_KEY,
+    type ScreenBarForgeAlarm,
+    type ScreenBarForgeDraft,
+    SHORT_NOTE_STORAGE_KEY,
+} from "@/utils/screen-bar"
 
 /**
  * 屏幕信息条页面(独立 WebviewWindow,路由 `/screen-bar`)。
@@ -22,7 +32,7 @@ import { parseScreenBarConfig, SCREEN_BAR_STORAGE_KEY } from "@/utils/screen-bar
  * 窗口由主窗口用 `openScreenBarWindow()` 创建,本页只负责三件事:按配置渲染条目、
  * 按显示模式落位(顶部悬浮时收紧到内容尺寸并水平居中到屏幕顶部;任务栏模式经原生 API
  * 嵌入任务栏,Win11 是覆盖在其上的顶层窗口)、把置顶与鼠标穿透同步给窗口。
- * 数据全部来自 localStorage(配置 + 密函数据),因此本页不依赖游戏数据包。
+ * 数据全部来自 localStorage(配置 + 密函数据 + 铸造提醒 + 铸造队列),因此本页不依赖游戏数据包。
  */
 defineOptions({ name: "ScreenBarView" })
 
@@ -36,8 +46,12 @@ const MAIN_CUSTOM_THEME_STORAGE_KEY = "setting_custom_theme"
 
 const setting = useSettingStore()
 const mihanNotify = useMihanNotify()
+/** 铸造完成提醒:只在本页读存储展示,不取 `useForgeAlarm` 单例(那会在浮窗里再排一个通知定时器)。 */
+const forgeAlarm = ref<ScreenBarForgeAlarm | null>(null)
+/** 游戏信息里的铸造队列,摘要模式用。 */
+const forgeDrafts = ref<ScreenBarForgeDraft[]>([])
 const config = computed(() => setting.screenBar)
-const { items } = useScreenBarContent(config)
+const { items } = useScreenBarContent(config, forgeAlarm, forgeDrafts)
 
 const rootRef = ref<HTMLElement | null>(null)
 let appWindow: ReturnType<typeof getCurrentWebviewWindow> | null = null
@@ -48,28 +62,19 @@ let lastSizeKey = ""
 /** 已同步过的 localStorage 快照。 */
 let syncedSnapshot = ""
 
-/** 读取并解析 localStorage 中的 JSON;缺失或损坏时返回 undefined。 */
-function readJson(key: string): unknown {
-    const raw = localStorage.getItem(key)
-    if (!raw) return undefined
-    try {
-        return JSON.parse(raw)
-    } catch {
-        return undefined
-    }
-}
-
 /**
- * 从 localStorage 同步配置与密函数据。
+ * 从 localStorage 同步配置、密函数据、铸造提醒、铸造队列与主题。
  *
  * 主窗口与信息条是两个独立 webview,不保证派发 storage 事件,因此按原始字符串比对低频轮询:
- * 主窗口改设置或整点刷新密函后,这里把手动 hydrate 回响应式引用。
+ * 主窗口改设置、整点刷新密函、设好铸造提醒或刷新游戏信息后,这里把手动 hydrate 回响应式引用。
  * 主应用主题与自定义主题一并同步:信息条"跟随主应用"模式与独立"自定义"主题都要活更新。
  */
 function syncFromStorage() {
     const snapshot = [
         localStorage.getItem(SCREEN_BAR_STORAGE_KEY) ?? "",
         localStorage.getItem(MIHAN_DATA_KEY) ?? "",
+        localStorage.getItem(FORGE_ALARM_KEY) ?? "",
+        localStorage.getItem(SHORT_NOTE_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_THEME_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_CUSTOM_THEME_STORAGE_KEY) ?? "",
     ].join("|")
@@ -80,10 +85,12 @@ function syncFromStorage() {
     if (rawConfig !== null) {
         setting.screenBar = parseScreenBarConfig(rawConfig)
     }
-    const storedMihan = readJson(MIHAN_DATA_KEY)
+    const storedMihan = readStoredJson(MIHAN_DATA_KEY)
     if (Array.isArray(storedMihan)) {
         mihanNotify.mihanData.value = storedMihan as string[][]
     }
+    forgeAlarm.value = normalizeForgeAlarm(readStoredJson(FORGE_ALARM_KEY))
+    forgeDrafts.value = normalizeForgeDrafts(readStoredJson(SHORT_NOTE_STORAGE_KEY))
     const rawTheme = localStorage.getItem(MAIN_THEME_STORAGE_KEY)
     if (rawTheme !== null) {
         setting.theme = rawTheme

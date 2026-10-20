@@ -4,13 +4,13 @@ import { isKnownTheme } from "./themes"
 /**
  * 屏幕信息条(顶部通用浮窗)的共享类型与纯逻辑。
  *
- * 浮窗是一个**条目列表**:每条是一个独立组件(时钟 / 自定义倒计时 / 委托信息 / 定时刷新),
+ * 浮窗是一个**条目列表**:每条是一个独立组件(时钟 / 自定义倒计时 / 铸造完成 / 委托信息 / 定时刷新),
  * 用户可以自由增删、排序。新增条目类型时四处同步:本文件的 `ScreenBarItemType` 联合类型,
  * `createScreenBarItem` 与 `normalizeScreenBarItem`、`resolveScreenBarItem` 的三个分支,
  * `ScreenBarContent.vue` 的渲染分支,以及各语言 `public/i18n/*` 里 `screenBar.item<类型名>` 与展示名文案。
  *
  * 渲染用 Tauri 独立 WebviewWindow(label 见 `SCREEN_BAR_WINDOW_LABEL`),页面路由 `/screen-bar`;
- * 该页面只读 localStorage 里的配置与密函数据,不加载游戏数据包,因此可以秒开。
+ * 该页面只读 localStorage 里的配置、密函数据与铸造提醒,不加载游戏数据包,因此可以秒开。
  * 本模块不依赖 Tauri 运行时与 Pinia,便于单测。
  */
 
@@ -20,14 +20,17 @@ export const SCREEN_BAR_WINDOW_LABEL = "screen-bar"
 /** 信息条整组配置在 localStorage 中的唯一键:所有字段放在一个对象里。 */
 export const SCREEN_BAR_STORAGE_KEY = "setting_screen_bar"
 
+/** 游戏信息(含铸造队列)在 localStorage 中的键,与 `DNAGameInfo` 写入的是同一个。 */
+export const SHORT_NOTE_STORAGE_KEY = "dna.shortNoteInfo"
+
 /** 条目类型。 */
-export type ScreenBarItemType = "clock" | "countdown" | "mihan" | "mihanRefresh" | "moling" | "zhouben"
+export type ScreenBarItemType = "clock" | "countdown" | "forge" | "mihan" | "mihanRefresh" | "moling" | "zhouben"
 
 /** 三种游戏定时刷新倒计时,渲染与解析共用同一套分支。 */
 export type ScreenBarRefreshType = "mihanRefresh" | "moling" | "zhouben"
 
 /** 条目类型的展示顺序(设置页"添加条目"下拉)。 */
-export const SCREEN_BAR_ITEM_TYPES: ScreenBarItemType[] = ["clock", "countdown", "mihan", "mihanRefresh", "moling", "zhouben"]
+export const SCREEN_BAR_ITEM_TYPES: ScreenBarItemType[] = ["clock", "countdown", "forge", "mihan", "mihanRefresh", "moling", "zhouben"]
 
 /** 时钟模板预设(模板语法见 `formatClock`)。 */
 export const SCREEN_BAR_CLOCK_PRESETS = ["HH:mm:ss", "HH:mm", "MM-DD ddd HH:mm", "M月D日 dddd", "YYYY-MM-DD HH:mm:ss"] as const
@@ -89,6 +92,22 @@ export type ScreenBarCountdownItem = ScreenBarItemBase & {
     target: string
 }
 
+/** 铸造完成条目的两种取数方式。 */
+export type ScreenBarForgeMode = "alarm" | "summary"
+
+/** 铸造条目模式的选择顺序(设置页)。 */
+export const SCREEN_BAR_FORGE_MODES: ScreenBarForgeMode[] = ["alarm", "summary"]
+
+/** 铸造完成条目:按模式展示指定的那条完成提醒,或整条铸造队列的已完成条目/总条目数。 */
+export type ScreenBarForgeItem = ScreenBarItemBase & {
+    type: "forge"
+    /**
+     * `alarm` 只显示用户指定的那一条完成提醒(未设时整条隐藏);
+     * `summary` 显示游戏信息里全部铸造条目,已完成条目 / 总条目数(队列为空时整条隐藏)。
+     */
+    mode: ScreenBarForgeMode
+}
+
 /** 委托信息条目:展示所选密函类型下的任务,并高亮关注的任务。 */
 export type ScreenBarMihanItem = ScreenBarItemBase & {
     type: "mihan"
@@ -106,7 +125,7 @@ export type ScreenBarRefreshItem = ScreenBarItemBase & {
 }
 
 /** 信息条条目。 */
-export type ScreenBarItem = ScreenBarClockItem | ScreenBarCountdownItem | ScreenBarMihanItem | ScreenBarRefreshItem
+export type ScreenBarItem = ScreenBarClockItem | ScreenBarCountdownItem | ScreenBarForgeItem | ScreenBarMihanItem | ScreenBarRefreshItem
 
 /** 信息条配置载荷。 */
 export type ScreenBarConfig = {
@@ -150,6 +169,71 @@ export type ScreenBarMihanEntry = {
 export type ScreenBarCountdownStatus = "unset" | "running" | "expired"
 
 /**
+ * 铸造完成提醒的持久化形状。
+ *
+ * 与 `store/forgeAlarm` 写进 localStorage 的结构一致;这里不直接引用那个 store,
+ * 否则纯逻辑模块会被 Tauri 通知插件拖下水。
+ */
+export type ScreenBarForgeAlarm = {
+    /** 触发时间戳(毫秒) */
+    time: number
+    /** 提醒标题(产物名,已按当前语言显示) */
+    title: string
+}
+
+/** 铸造队列里的一条铸造(由 `dna.shortNoteInfo` 归一化而来)。 */
+export type ScreenBarForgeDraft = {
+    /** 产物名 */
+    name: string
+    /** 这一条是否已经整条走完;跑到一半(还有进行中的份数)仍算未完成 */
+    done: boolean
+}
+
+/**
+ * 从游戏信息数据里取出铸造队列。
+ *
+ * 输入是 `dna.shortNoteInfo` 的原始结构(`draftInfo.draftDoingInfo`),形状不可信。
+ * 摘要按**条目数**统计:一条队列里可能有多份产物,只要还有一份在进行就算未完成(见 `done`)。
+ * @param raw 游戏信息数据(已解析的对象)
+ * @returns 规范化后的铸造条目列表;没有数据时为空数组
+ */
+export function normalizeForgeDrafts(raw: unknown): ScreenBarForgeDraft[] {
+    if (!raw || typeof raw !== "object") return []
+    const draftInfo = (raw as Record<string, unknown>).draftInfo
+    if (!draftInfo || typeof draftInfo !== "object") return []
+    const doingInfo = (draftInfo as Record<string, unknown>).draftDoingInfo
+    if (!Array.isArray(doingInfo)) return []
+    const result: ScreenBarForgeDraft[] = []
+    for (const entry of doingInfo) {
+        if (!entry || typeof entry !== "object") continue
+        const record = entry as Record<string, unknown>
+        const completed = Math.max(0, Math.floor(Number(record.draftCompleteNum) || 0))
+        const doing = Math.max(0, Math.floor(Number(record.draftDoingNum) || 0))
+        if (completed + doing <= 0) continue
+        result.push({
+            name: typeof record.productName === "string" ? record.productName : "",
+            done: doing <= 0,
+        })
+    }
+    return result
+}
+
+/**
+ * 读取 localStorage 里的 JSON。
+ * @param key 存储键
+ * @returns 解析后的值;键缺失或内容损坏时返回 undefined
+ */
+export function readStoredJson(key: string): unknown {
+    const raw = localStorage.getItem(key)
+    if (!raw) return undefined
+    try {
+        return JSON.parse(raw)
+    } catch {
+        return undefined
+    }
+}
+
+/**
  * 委托条目没有内容可展示的原因。
  *
  * `noTypeSelection` 是类型全被取消勾选,`noSelection` 是"只看关注"但一条任务都没选,
@@ -162,6 +246,8 @@ export type ScreenBarMihanEmptyReason = "noData" | "noSelection" | "noTypeSelect
 export type ResolvedScreenBarItem =
     | { id: string; type: "clock"; text: string }
     | { id: string; type: "countdown"; title: string; text: string; status: ScreenBarCountdownStatus }
+    | { id: string; type: "forge"; mode: "alarm"; title: string; text: string; status: ScreenBarCountdownStatus }
+    | { id: string; type: "forge"; mode: "summary"; completed: number; total: number }
     | { id: string; type: "mihan"; entries: ScreenBarMihanEntry[] /** 仅在 entries 为空时有意义 */; emptyReason: ScreenBarMihanEmptyReason }
     | { id: string; type: ScreenBarRefreshType; text: string }
 
@@ -272,6 +358,19 @@ export function normalizeCountdownTarget(value: unknown): string {
  */
 export function formatClock(date: Date, format: string): string {
     return normalizeClockFormat(format).replace(CLOCK_TOKEN_PATTERN, token => CLOCK_TOKENS[token](date))
+}
+
+/**
+ * 归一化铸造完成提醒(形状不可信)。
+ * @param raw 原始值(通常是 localStorage 里解析出来的对象)
+ * @returns 触发时间合法的提醒;缺失或损坏时返回 null(表示没设提醒)
+ */
+export function normalizeForgeAlarm(raw: unknown): ScreenBarForgeAlarm | null {
+    if (!raw || typeof raw !== "object") return null
+    const record = raw as Record<string, unknown>
+    const time = Number(record.time)
+    if (!Number.isFinite(time)) return null
+    return { time, title: typeof record.title === "string" ? record.title : "" }
 }
 
 /**
@@ -424,14 +523,22 @@ function hasMihanMissions(typeIndexes: number[], mihanData: string[][] | undefin
 /**
  * 把一个条目解析成渲染就绪的数据。
  *
- * 密函数据由调用方注入(本模块不依赖 Pinia),因此同一条解析逻辑可以服务于
- * 浮窗窗口与设置页预览。
+ * 密函数据与铸造提醒由调用方注入(本模块不依赖 Pinia,也不读 localStorage),因此同一条解析逻辑
+ * 可以服务于浮窗窗口与设置页预览。
  * @param item 条目配置
  * @param now 当前时间
  * @param mihanData 密函分组数据
+ * @param forgeAlarm 当前铸造完成提醒;null 表示没设
+ * @param forgeDrafts 游戏信息里的铸造队列(已归一化)
  * @returns 渲染就绪的条目
  */
-export function resolveScreenBarItem(item: ScreenBarItem, now: Date, mihanData: string[][] | undefined): ResolvedScreenBarItem {
+export function resolveScreenBarItem(
+    item: ScreenBarItem,
+    now: Date,
+    mihanData: string[][] | undefined,
+    forgeAlarm: ScreenBarForgeAlarm | null = null,
+    forgeDrafts: ScreenBarForgeDraft[] = []
+): ResolvedScreenBarItem {
     switch (item.type) {
         case "clock":
             return { id: item.id, type: "clock", text: formatClock(now, item.format) }
@@ -453,6 +560,33 @@ export function resolveScreenBarItem(item: ScreenBarItem, now: Date, mihanData: 
                 return { id: item.id, type: "mihan", entries, emptyReason: "filtered" }
             }
             return { id: item.id, type: "mihan", entries, emptyReason }
+        }
+        case "forge": {
+            if (item.mode === "summary") {
+                // 按条目统计:总条目数是队列里的一行,只有整条走完的才计为完成
+                return {
+                    id: item.id,
+                    type: "forge",
+                    mode: "summary",
+                    completed: forgeDrafts.filter(draft => draft.done).length,
+                    total: forgeDrafts.length,
+                }
+            }
+            if (!forgeAlarm) {
+                return { id: item.id, type: "forge", mode: "alarm", title: "", text: "", status: "unset" }
+            }
+            const remaining = forgeAlarm.time - now.getTime()
+            if (!Number.isFinite(remaining) || remaining <= 0) {
+                return { id: item.id, type: "forge", mode: "alarm", title: forgeAlarm.title, text: "", status: "expired" }
+            }
+            return {
+                id: item.id,
+                type: "forge",
+                mode: "alarm",
+                title: forgeAlarm.title,
+                text: formatCountdownDays(remaining),
+                status: "running",
+            }
         }
         case "mihanRefresh":
             return { id: item.id, type: "mihanRefresh", text: formatCountdown(getMihanRefreshRemaining(now.getTime())) }
@@ -476,6 +610,8 @@ export function createScreenBarItem(type: ScreenBarItemType): ScreenBarItem {
             return { id, type, format: SCREEN_BAR_DEFAULTS.clockFormat }
         case "countdown":
             return { id, type, title: "", target: "" }
+        case "forge":
+            return { id, type, mode: "alarm" }
         case "mihan":
             return { id, type, types: [...SCREEN_BAR_ALL_MIHAN_TYPES], missions: [], onlyMatched: false }
         case "mihanRefresh":
@@ -500,6 +636,9 @@ function normalizeScreenBarItem(raw: unknown): ScreenBarItem | null {
             return { id, type: "clock", format: normalizeClockFormat(record.format) }
         case "countdown":
             return { id, type: "countdown", title: normalizeItemTitle(record.title), target: normalizeCountdownTarget(record.target) }
+        case "forge":
+            // 旧配置没有 mode 字段:默认取"指定",与加模式之前的展示一致
+            return { id, type: "forge", mode: record.mode === "summary" ? "summary" : "alarm" }
         case "mihan": {
             // 字段整个缺失时兜底全选;显式空数组是用户把类型全取消了,必须原样保留,
             // 否则读一次存储就把"未选择"变回"全选",勾选框看起来会自己跳回选中。

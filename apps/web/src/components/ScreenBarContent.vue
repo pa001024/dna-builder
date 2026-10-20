@@ -53,6 +53,34 @@ const MIHAN_EMPTY_KEYS: Record<Exclude<ScreenBarMihanEmptyReason, "filtered">, s
                 <span v-else class="font-mono font-semibold text-primary">{{ item.text }}</span>
             </span>
 
+            <!-- 铸造完成提醒(指定一条):没设提醒时整颗隐藏,不显示占位;已结束短暂提示一下,下一秒提醒就被清了 -->
+            <span
+                v-else-if="item.type === 'forge' && item.mode === 'alarm' && item.status !== 'unset'"
+                class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
+            >
+                <Icon icon="ri:hammer-line" class="size-3 shrink-0 opacity-70" />
+                <span class="text-base-content/60">{{ $t("screenBar.forge") }}</span>
+                <span v-if="item.title" class="font-medium text-base-content/85">{{ item.title }}</span>
+                <span v-if="item.status === 'expired'" class="text-base-content/45">{{ $t("screenBar.countdownExpired") }}</span>
+                <span v-else class="font-mono font-semibold text-primary">{{ item.text }}</span>
+            </span>
+
+            <!-- 铸造队列摘要:已完成条目 / 总条目数,有完成时换成完成态;队列为空时整颗隐藏 -->
+            <span
+                v-else-if="item.type === 'forge' && item.mode === 'summary' && item.total > 0"
+                class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
+            >
+                <Icon
+                    :icon="item.completed > 0 ? 'ri:checkbox-circle-line' : 'ri:hammer-line'"
+                    class="size-3 shrink-0"
+                    :class="item.completed > 0 ? 'text-success' : 'opacity-70'"
+                />
+                <span class="text-base-content/60">{{ item.completed > 0 ? $t("screenBar.forge") : $t("screenBar.forgeDoing") }}</span>
+                <span class="font-mono font-semibold" :class="item.completed > 0 ? 'text-success' : 'text-primary'">
+                    {{ item.completed }}/{{ item.total }}
+                </span>
+            </span>
+
             <!-- 委托信息:按类型分组,关注中的任务高亮;过滤后为空时整颗隐藏,留个空胶囊反而突兀 -->
             <span
                 v-else-if="item.type === 'mihan' && item.emptyReason !== 'filtered'"
