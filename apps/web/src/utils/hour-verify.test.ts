@@ -25,10 +25,12 @@ const isSameJson = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.string
 beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(HOUR)
+    vi.spyOn(console, "log").mockImplementation(() => undefined)
     __resetHourVerifyRegistriesForTest()
 })
 
 afterEach(() => {
+    vi.restoreAllMocks()
     __resetHourVerifyRegistriesForTest()
     vi.useRealTimers()
 })
@@ -179,6 +181,82 @@ describe("二次写入验真", () => {
     })
 })
 
+describe("取样失败重试", () => {
+    it("首轮取样失败应该重试一次后继续整轮验真", async () => {
+        const sample = vi.fn(async () => "A")
+        sample.mockRejectedValueOnce(new Error("心跳未就绪")).mockResolvedValue("A")
+        const writes: string[] = []
+        const pushes: string[] = []
+        const promise = runHourlyDoubleWriteSession({
+            hourStart: HOUR,
+            sample,
+            isSame: (a, b) => a === b,
+            onSample: value => {
+                writes.push(value)
+            },
+            onVerifiedPush: async value => {
+                pushes.push(value)
+            },
+            signal: new AbortController().signal,
+        })
+        await vi.advanceTimersByTimeAsync(80 * 1000)
+        // 首轮失败后隔 3s 重试成功
+        await vi.advanceTimersByTimeAsync(3 * 1000)
+        expect(writes).toEqual(["A"])
+        await vi.advanceTimersByTimeAsync(30 * 1000)
+        await vi.advanceTimersByTimeAsync(30 * 1000)
+        const result = await promise
+        expect(sample).toHaveBeenCalledTimes(4)
+        expect(pushes).toEqual(["A"])
+        expect(result).toMatchObject({ corrected: false, pushed: true })
+    })
+
+    it("验真取样连续失败应该中止整轮验真且不推送", async () => {
+        const sample = vi.fn(async () => "A")
+        sample.mockResolvedValueOnce("A").mockRejectedValueOnce(new Error("网络失败")).mockRejectedValueOnce(new Error("网络失败"))
+        const pushes: string[] = []
+        const promise = runHourlyDoubleWriteSession({
+            hourStart: HOUR,
+            sample,
+            isSame: (a, b) => a === b,
+            onSample: () => {},
+            onVerifiedPush: async value => {
+                pushes.push(value)
+            },
+            signal: new AbortController().signal,
+        })
+        const assertion = expect(promise).rejects.toThrow("网络失败")
+        await vi.advanceTimersByTimeAsync(80 * 1000)
+        await vi.advanceTimersByTimeAsync(30 * 1000)
+        await vi.advanceTimersByTimeAsync(3 * 1000)
+        await assertion
+        expect(sample).toHaveBeenCalledTimes(3)
+        expect(pushes).toEqual([])
+    })
+
+    it("重试次数设为 0 时应该立刻抛出", async () => {
+        const sample = vi.fn(async () => {
+            throw new Error("直接失败")
+        })
+        const promise = runDoubleWriteVerify({
+            hourStart: HOUR,
+            first: { value: "A", at: HOUR },
+            verifyAt: HOUR + 30 * 1000,
+            extraGapMs: 0,
+            sample,
+            isSame: (a, b) => a === b,
+            onSample: () => {},
+            onVerifiedPush: null,
+            sampleRetry: { retries: 0 },
+            signal: new AbortController().signal,
+        })
+        const assertion = expect(promise).rejects.toThrow("直接失败")
+        await vi.advanceTimersByTimeAsync(30 * 1000)
+        await assertion
+        expect(sample).toHaveBeenCalledTimes(1)
+    })
+})
+
 describe("会话注册表与推送注册表", () => {
     it("取消全部会话应该返回数量并中断等待", async () => {
         const first = trackHourSession("整点验真")
@@ -196,7 +274,7 @@ describe("会话注册表与推送注册表", () => {
     })
 
     it("未启用管理员推送时应该返回 false 且不记录", async () => {
-        expect(await invokeHourAdminPush(HOUR, [["a"]])).toBe(false)
+        expect(await invokeHourAdminPush(HOUR, { missions: [["a"]], activities: [] })).toBe(false)
         expect(getLastAdminPushHourStart()).toBeNull()
     })
 
@@ -204,8 +282,19 @@ describe("会话注册表与推送注册表", () => {
         setHourAdminPushHandler(async () => {
             throw new Error("上传失败")
         })
-        await expect(invokeHourAdminPush(HOUR, [["a"]])).rejects.toThrow("上传失败")
+        await expect(invokeHourAdminPush(HOUR, { missions: [["a"]], activities: [] })).rejects.toThrow("上传失败")
         expect(getLastAdminPushHourStart()).toBeNull()
+    })
+
+    it("应该把同轮活动一并传给推送处理函数", async () => {
+        const received: unknown[] = []
+        setHourAdminPushHandler(async (_hourStart, sample) => {
+            received.push(sample.missions, sample.activities)
+        })
+        const activities = [{ id: 1, name: "活动" }]
+        expect(await invokeHourAdminPush(HOUR, { missions: [["a"]], activities })).toBe(true)
+        expect(received).toEqual([[["a"]], activities])
+        expect(getLastAdminPushHourStart()).toBe(HOUR)
     })
 })
 
@@ -215,8 +304,8 @@ describe("启用 admin 推送时队列被取消", () => {
         const FRESH = [["新委托"]]
         const pushed: string[][][] = []
         // 模拟“启用 admin 推送”：cron 启动时注册的处理函数
-        setHourAdminPushHandler(async (_hourStart, missions) => {
-            pushed.push(missions)
+        setHourAdminPushHandler(async (_hourStart, sample) => {
+            pushed.push(sample.missions)
         })
 
         const sampleTimes: number[] = []
@@ -268,7 +357,7 @@ describe("启用 admin 推送时队列被取消", () => {
                 writes.push(value)
             },
             onVerifiedPush: async value => {
-                await invokeHourAdminPush(HOUR, value)
+                await invokeHourAdminPush(HOUR, { missions: value, activities: [] })
             },
             signal: reverifyTracked.signal,
         })
@@ -291,8 +380,8 @@ describe("启用 admin 推送时队列被取消", () => {
         const FRESH = [["新委托"]]
         const FRESHER = [["更新委托"]]
         const pushed: string[][][] = []
-        setHourAdminPushHandler(async (_hourStart, missions) => {
-            pushed.push(missions)
+        setHourAdminPushHandler(async (_hourStart, sample) => {
+            pushed.push(sample.missions)
         })
         const verifySample = vi.fn(async () => FRESHER)
         const writes: string[][][] = [FRESH]
@@ -310,7 +399,7 @@ describe("启用 admin 推送时队列被取消", () => {
                 writes.push(value)
             },
             onVerifiedPush: async value => {
-                await invokeHourAdminPush(HOUR, value)
+                await invokeHourAdminPush(HOUR, { missions: value, activities: [] })
             },
             signal: reverifyTracked.signal,
         })

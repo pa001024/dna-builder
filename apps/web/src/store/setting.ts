@@ -493,7 +493,7 @@ export const useSettingStore = defineStore("setting", {
                     // 调用Rust实现的心跳功能
                     const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
                     if (res.includes("成功")) {
-                        console.log("心跳已启动")
+                        console.debug("心跳已启动")
                         return true
                     }
                     await stopHeartbeat()
@@ -524,7 +524,7 @@ export const useSettingStore = defineStore("setting", {
                 if (user.server === "global") return true
                 // 调用Rust实现的停止心跳功能
                 await stopHeartbeat()
-                console.log("心跳已停止")
+                console.debug("心跳已停止")
             } catch (error) {
                 console.error("停止心跳失败:", error)
             }

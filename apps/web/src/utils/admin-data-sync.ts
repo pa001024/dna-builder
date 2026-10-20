@@ -1,26 +1,23 @@
 import { useLocalStorage } from "@vueuse/core"
-import type { DNAActivity, DNAAPI, DNACommentListResponse, DNARoleEntity } from "dna-api"
+import type { DNAAPI, DNACommentListResponse, DNARoleEntity } from "dna-api"
 import type { ActivityInput } from "@/api/gen/api-types"
 import { addMissionsIngameMutation, missionsIngamesQuery, submitAbyssUsageMutation, upsertActivitiesIngameMutation } from "@/api/graphql"
+import { useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
 import { buildAbyssUploadPayload, detectMissingAbyssWeaponSlots } from "@/utils/abyss-upload"
-import { enqueueDNATask, serializeTaskData, wait } from "@/utils/dna-channel"
+import { enqueueDNATask } from "@/utils/dna-channel"
+import { sampleActivitiesDNA } from "@/utils/dna-hour-sample"
 import {
-    getHourStart,
-    isAbortError,
+    formatHourOffset,
+    getHourAdminPushHandler,
+    type HourAdminPushSample,
+    logHourVerify,
     markHourAdminPush,
-    runHourlyDoubleWriteSession,
     setHourAdminPushHandler,
-    trackHourSession,
 } from "@/utils/hour-verify"
 
-const ADMIN_SYNC_INTERVAL_MS = 60 * 60 * 1000
-const ADMIN_SYNC_RETRY_DELAY_MS = 30 * 1000
-const ADMIN_SYNC_MAX_ATTEMPTS = 2
 const PROCESSED_COMMENTS_STORAGE_KEY = "admin_abyss_processed_comments"
 
-let adminSyncTimer: ReturnType<typeof setTimeout> | null = null
-let adminSyncGeneration = 0
 const processedComments = useLocalStorage<Record<string, number[]>>(PROCESSED_COMMENTS_STORAGE_KEY, {})
 
 export interface AbyssPostUploadSummary {
@@ -28,10 +25,6 @@ export interface AbyssPostUploadSummary {
     uploaded: number
     skipped: number
     failed: number
-}
-
-export interface AdminGameDataSyncResult {
-    missionsChanged: boolean
 }
 
 export interface AbyssCommentScanDependencies {
@@ -203,60 +196,6 @@ export function uploadAbyssUsageFromPost(postId: string): Promise<AbyssPostUploa
 }
 
 /**
- * @description 将 DNA 活动数据转换为服务端输入结构。
- * @param activity DNA 活动。
- * @returns 活动上传结构。
- */
-function normalizeActivity(activity: DNAActivity): ActivityInput {
-    return {
-        id: activity.id,
-        postId: activity.postId,
-        startTime: activity.startTime,
-        endTime: activity.endTime,
-        name: activity.name,
-        icon: activity.icon,
-        desc: activity.description,
-    }
-}
-
-/** 管理员整点取样：验真后的密函与同一轮取到的活动。 */
-interface AdminHourSample {
-    missions: string[][]
-    activities: ActivityInput[]
-}
-
-/**
- * @description DNA 单次取样：一次心跳内取回密函与活动。
- * @returns 本轮样本
- */
-async function sampleAdminDNA(): Promise<AdminHourSample> {
-    const setting = useSettingStore()
-    const api = await setting.getDNAAPI()
-    if (!api) throw new Error("请先登录皎皎角账号")
-    return enqueueDNATask(async () => {
-        const heartbeatStarted = await setting.startHeartbeat()
-        if (!heartbeatStarted) throw new Error("启动心跳失败")
-        try {
-            // 心跳 500ms 快速返回后若请求失败，等完全就绪后重试一次
-            return await setting.runWithHeartbeatRetry(async () => {
-                const [roleResult, activityResult] = await Promise.all([api.defaultRoleForTool(), api.getActivityList()])
-                if (!roleResult.is_success || !roleResult.data?.instanceInfo) {
-                    throw new Error(roleResult.msg || "获取密函失败")
-                }
-                if (!activityResult.is_success || !activityResult.data?.activities) {
-                    throw new Error(activityResult.msg || "获取活动失败")
-                }
-                const missions = roleResult.data.instanceInfo.map(item => item.instances.map(instance => instance.name))
-                const activities = activityResult.data.activities.filter(activity => activity.cycleDay === -1).map(normalizeActivity)
-                return { missions, activities }
-            })
-        } finally {
-            await setting.stopHeartbeat()
-        }
-    })
-}
-
-/**
  * @description 上传验真后的密函与活动，成功后记录所属整点。
  * @param missions 验真后的密函任务
  * @param activities 同轮取到的活动
@@ -269,9 +208,16 @@ async function uploadAdminGameData(missions: string[][], activities: ActivityInp
     const server = account?.server || "cn"
     const currentMissions = await missionsIngamesQuery({ server, limit: 1, offset: 0 }, { requestPolicy: "network-only" })
     const missionsChanged = JSON.stringify(currentMissions?.[0]?.missions) !== JSON.stringify(missions)
+    logHourVerify(`[管理员] [${formatHourOffset(hourStart, Date.now())}] 上传前比对服务端密函`, {
+        server,
+        missionsChanged,
+        serverMissions: currentMissions?.[0]?.missions,
+        verifiedMissions: missions,
+    })
     if (missionsChanged) {
         const result = await addMissionsIngameMutation({ server, missions }, { requestPolicy: "network-only" })
         if (!result) throw new Error("密函上传失败")
+        logHourVerify("[管理员] 密函已上传", { server })
     }
     const activityResultValue = await upsertActivitiesIngameMutation({ server, activities }, { requestPolicy: "network-only" })
     if (!activityResultValue) throw new Error("活动上传失败")
@@ -280,141 +226,33 @@ async function uploadAdminGameData(missions: string[][], activities: ActivityInp
 }
 
 /**
- * @description 手动重验后的管理员推送：用验真后的密函拉取最新活动并上传。
- * 弹窗立刻取数取消在途队列后，正确数据的提交就靠这条路径。
+ * @description 验真后的管理员上传（主轮询的推送钩子）：密函与活动来自同一次取样，
+ * 活动为空时（当次取样活动接口失败）单独补一次，避免丢掉整点的活动同步。
  * @param hourStart 数据所属的整点
- * @param missions 验真后的密函任务
+ * @param sample 验真后的密函与同轮活动
  */
-async function pushHourVerifiedMissions(hourStart: number, missions: string[][]): Promise<void> {
-    const setting = useSettingStore()
-    const api = await setting.getDNAAPI()
-    if (!api) throw new Error("请先登录皎皎角账号")
-    const activities = await enqueueDNATask(async () => {
-        const heartbeatStarted = await setting.startHeartbeat()
-        if (!heartbeatStarted) throw new Error("启动心跳失败")
-        try {
-            // 心跳 500ms 快速返回后若请求失败，等完全就绪后重试一次
-            return await setting.runWithHeartbeatRetry(async () => {
-                const activityResult = await api.getActivityList()
-                if (!activityResult.is_success || !activityResult.data?.activities) {
-                    throw new Error(activityResult.msg || "获取活动失败")
-                }
-                return activityResult.data.activities.filter(activity => activity.cycleDay === -1).map(normalizeActivity)
-            })
-        } finally {
-            await setting.stopHeartbeat()
-        }
-    })
-    await uploadAdminGameData(missions, activities, hourStart)
+async function pushHourVerifiedMissions(hourStart: number, sample: HourAdminPushSample): Promise<void> {
+    const activities = sample.activities.length > 0 ? (sample.activities as ActivityInput[]) : await sampleActivitiesDNA()
+    await uploadAdminGameData(sample.missions, activities, hourStart)
 }
 
 /**
- * @description 立即同步当前 DNA 账号的密函与活动数据。
- * 二次写入：首轮（整点+80 秒）取数，第二轮（整点+80+30 秒）验真，
- * 不一致判首轮为假并用新数据上传，一致则上传后再取第三轮确认。
- * @returns 密函是否发生变化并完成上传。
+ * @description 安装管理员上传钩子：主轮询（密函整点二次写入）验真通过后调用它上传密函与活动，
+ * 不再单开一条定时循环；主轮询是否需要运行由密函 store 的 `shouldKeepWatch` 用逻辑或一并判断。
  */
-export function syncAdminGameData(): Promise<AdminGameDataSyncResult> {
-    return (async () => {
-        const hourStart = getHourStart(Date.now())
-        const tracked = trackHourSession("管理员整点验真")
-        try {
-            let missionsChanged = false
-            await runHourlyDoubleWriteSession({
-                hourStart,
-                sample: sampleAdminDNA,
-                isSame: (a, b) => serializeTaskData(a.missions) === serializeTaskData(b.missions),
-                onSample: () => {
-                    // 管理员流不写本地展示（由密函整点会话负责），这里只负责上传
-                },
-                onVerifiedPush: async value => {
-                    missionsChanged = (await uploadAdminGameData(value.missions, value.activities, hourStart)) || missionsChanged
-                },
-                signal: tracked.signal,
-            })
-            return { missionsChanged }
-        } finally {
-            tracked.done()
-        }
-    })()
-}
-
-/**
- * @description 执行整点同步：数据未变化或请求失败时延迟重试一次。
- * 首轮取样延迟由共享 DNA 通道负责，此处不再重复等待。
- * @param sync 执行一次同步的函数。
- * @param delay 等待函数。
- * @param shouldContinue 当前任务是否仍有效。
- */
-export async function runScheduledAdminSync(
-    sync: () => Promise<AdminGameDataSyncResult> = syncAdminGameData,
-    delay: (milliseconds: number) => Promise<void> = wait,
-    shouldContinue: () => boolean = () => true
-): Promise<void> {
-    if (!shouldContinue()) return
-
-    let lastError: unknown
-    for (let attempt = 0; attempt < ADMIN_SYNC_MAX_ATTEMPTS; attempt++) {
-        try {
-            const result = await sync()
-            if (result.missionsChanged) return
-            lastError = undefined
-        } catch (error) {
-            // 被手动刷新取消：不重试，由手动重验接管推送
-            if (isAbortError(error)) throw error
-            lastError = error
-        }
-
-        if (attempt < ADMIN_SYNC_MAX_ATTEMPTS - 1) {
-            const reason = lastError ? "同步失败" : "数据未变化"
-            console.info(`管理员整点${reason}，${ADMIN_SYNC_RETRY_DELAY_MS / 1000} 秒后重试`)
-            await delay(ADMIN_SYNC_RETRY_DELAY_MS)
-            if (!shouldContinue()) return
-        }
-    }
-
-    if (lastError) throw lastError
-    console.info("管理员整点数据重试后仍未变化")
-}
-
-/**
- * @description 安排下一次整点管理员数据同步。
- * @param generation 当前定时任务代次。
- */
-function scheduleNextAdminSync(generation: number): void {
-    if (generation !== adminSyncGeneration) return
-    const delay = ADMIN_SYNC_INTERVAL_MS - (Date.now() % ADMIN_SYNC_INTERVAL_MS)
-    adminSyncTimer = setTimeout(async () => {
-        try {
-            await runScheduledAdminSync(syncAdminGameData, wait, () => generation === adminSyncGeneration)
-        } catch (error) {
-            console.error("管理员定时数据同步失败:", error)
-        } finally {
-            scheduleNextAdminSync(generation)
-        }
-    }, delay)
-}
-
-/**
- * @description 启动管理员数据同步任务，并立即执行一次。
- */
-export function startAdminDataSyncCron(): void {
-    if (adminSyncTimer) return
-    const generation = ++adminSyncGeneration
-    // 注册手动重验用的推送：弹窗立刻取数取消队列后，仍由验真流程提交正确数据
+export function installAdminUploadHook(): void {
+    if (getHourAdminPushHandler()) return
     setHourAdminPushHandler(pushHourVerifiedMissions)
-    void syncAdminGameData().catch(error => {
-        if (!isAbortError(error)) console.error("管理员数据同步失败:", error)
-    })
-    scheduleNextAdminSync(generation)
+    logHourVerify("[管理员] 上传钩子已安装")
+    useMihanNotify().syncWatch()
 }
 
 /**
- * @description 停止管理员数据同步任务。
+ * @description 卸载管理员上传钩子，并让主轮询重算是否还需要运行。
  */
-export function stopAdminDataSyncCron(): void {
-    adminSyncGeneration++
+export function uninstallAdminUploadHook(): void {
+    if (!getHourAdminPushHandler()) return
     setHourAdminPushHandler(null)
-    if (adminSyncTimer) clearTimeout(adminSyncTimer)
-    adminSyncTimer = null
+    logHourVerify("[管理员] 上传钩子已卸载")
+    useMihanNotify().syncWatch()
 }

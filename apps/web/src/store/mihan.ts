@@ -7,15 +7,19 @@ import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
 import { useSettingStore } from "@/store/setting"
-import { enqueueDNATask, serializeTaskData } from "@/utils/dna-channel"
+import { serializeTaskData } from "@/utils/dna-channel"
+import { type DNAHourSample, sampleDNAHour } from "@/utils/dna-hour-sample"
 import {
     cancelAllHourSessions,
+    formatHourOffset,
+    getHourAdminPushHandler,
     getHourStart,
     getLastAdminPushHourStart,
     getVerifyAt,
     invokeHourAdminPush,
     isAbortError,
     isInVerifyWindow,
+    logHourVerify,
     runDoubleWriteVerify,
     runHourlyDoubleWriteSession,
     trackHourSession,
@@ -79,13 +83,16 @@ function createMihanNotify() {
     /**
      * 是否应当维持每小时轮询。
      *
-     * 两类来源都需要定时刷新委托数据:
+     * 四类来源都需要定时刷新委托数据:
      * 1. 订阅开关 `mihanNotify`(来自委托面板)打开;
      * 2. 屏幕信息条已开启,且配置里含有至少一个委托(mihan)条目——这是此前缺失的触发路径。
      * 3. 屏幕信息条里有"全量摘要"铸造条目:同一批请求顺带刷新的游戏信息就是它的数据源。
+     * 4. 管理员上传钩子已安装:整点验真通过后由本轮询推送服务端,不再单开一条循环。
+     * 以上任一成立即需要轮询(逻辑或)。
      * @returns 是否应持续轮询
      */
     function shouldKeepWatch() {
+        if (getHourAdminPushHandler()) return true
         const hasScreenBarMihan = setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan")
         const hasScreenBarForgeSummary =
             setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "forge" && item.mode === "summary")
@@ -112,6 +119,28 @@ function createMihanNotify() {
     )
 
     /**
+     * 标准化任务名称，统一勘探/勘察文案避免误判变更。
+     * @param missions 原始任务数组。
+     * @returns 标准化后的任务数组。
+     */
+    const normalizeMissions = (missions: string[][]) => missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
+
+    /**
+     * 应用任务数据到本地存储。
+     * @param missions 任务数组。
+     * @param updateTime 更新时间戳。
+     * @returns 数据拉取成功（无论内容是否发生变更均视为成功）。
+     */
+    const applyMissions = (missions: string[][], updateTime: number) => {
+        const normalized = normalizeMissions(missions)
+        if (JSON.stringify(normalized) !== JSON.stringify(mihanData.value)) {
+            mihanData.value = normalized
+        }
+        mihanUpdateTime.value = updateTime
+        return true
+    }
+
+    /**
      * 更新密函数据。
      * 整点轮询走“二次写入”：首轮立刻取数写入本地，第二轮验真，不一致覆盖修正。
      * 手动刷新走立刻取数：先取消在途验真会话，取数写入后若落在整点 110 秒窗口内则在 80+30 秒处重排验真。
@@ -120,74 +149,47 @@ function createMihanNotify() {
      * @returns 是否成功更新到新数据
      */
     async function updateMihanData(force = false, initialDelayMs = 0) {
-        if (mihanData.value && !isOutdated() && !force) return true
-
-        /**
-         * 标准化任务名称，统一勘探/勘察文案避免误判变更。
-         * @param missions 原始任务数组。
-         * @returns 标准化后的任务数组。
-         */
-        const normalizeMissions = (missions: string[][]) => missions.map(v => v.map(v => v.replace("勘探/无尽", "勘察/无尽")))
-
-        /**
-         * 应用新任务数据到本地存储。
-         * @param missions 任务数组。
-         * @param updateTime 更新时间戳。
-         * @returns 数据拉取成功（无论内容是否发生变更均视为成功）。
-         */
-        const applyMissions = (missions: string[][], updateTime: number) => {
-            const normalized = normalizeMissions(missions)
-            if (JSON.stringify(normalized) !== JSON.stringify(mihanData.value)) {
-                mihanData.value = normalized
-            }
-            mihanUpdateTime.value = updateTime
+        if (mihanData.value && !isOutdated() && !force) {
+            logHourVerify("[密函] 数据未过期，跳过更新", {
+                updateTime: new Date(mihanUpdateTime.value).toLocaleString(),
+                nextUpdateTime: new Date(getNextUpdateTime(mihanUpdateTime.value)).toLocaleString(),
+            })
             return true
         }
 
-        const setting = useSettingStore()
-        // DNA 单次取样（共享队列 + 心跳），手动立刻取数与整点首轮复用。
-        // 密函与游戏信息同一批请求发出：后者只为了给屏幕信息条的铸造摘要保鲜，失败不影响密函取数。
-        const sampleMissionsDNA = () =>
-            enqueueDNATask(async () => {
-                const api = await setting.getDNAAPI()
-                if (!api) throw new Error("未登录皎皎角账号")
-                await setting.startHeartbeat()
-                try {
-                    // 心跳 500ms 快速返回后若请求失败，等完全就绪后重试一次
-                    return await setting.runWithHeartbeatRetry(async () => {
-                        const [data, shortNote] = await Promise.all([
-                            api.defaultRoleForTool(),
-                            api.getShortNoteInfo().catch(() => undefined),
-                        ])
-                        if (!data?.data?.instanceInfo) throw new Error("DNAAPI 未返回密函数据")
-                        if (shortNote?.is_success && shortNote.data) {
-                            shortNoteInfo.value = shortNote.data
-                        }
-                        return data.data.instanceInfo.map(v => v.instances.map(v => v.name))
-                    })
-                } finally {
-                    await setting.stopHeartbeat()
-                }
-            })
-        const isSameMissions = (a: string[][], b: string[][]) => serializeTaskData(a) === serializeTaskData(b)
-        const writeMissionsLocal = (missions: string[][]) => {
-            applyMissions(missions, Date.now())
+        // DNA 单次取样（共享队列 + 心跳）：密函与活动同一次心跳取回，活动供管理员推送直接复用；
+        // 顺带取游戏信息，只为给屏幕信息窗的铸造摘要保鲜（失败不影响密函取数）。
+        const sampleMissionsDNA = async () => {
+            const sample = await sampleDNAHour({ withShortNote: true })
+            if (sample.shortNote) shortNoteInfo.value = sample.shortNote
+            return sample
+        }
+        const isSameMissions = (a: DNAHourSample, b: DNAHourSample) => serializeTaskData(a.missions) === serializeTaskData(b.missions)
+        const writeMissionsLocal = (sample: DNAHourSample) => {
+            applyMissions(sample.missions, Date.now())
         }
         if (initialDelayMs <= 0) {
             // 手动立刻取数：取消在途验真会话并重新规划，弹窗不等待验真
-            cancelAllHourSessions("手动刷新密函")
+            const cancelled = cancelAllHourSessions("手动刷新密函")
             try {
-                const missions = await sampleMissionsDNA()
-                writeMissionsLocal(missions)
+                const sample = await sampleMissionsDNA()
+                writeMissionsLocal(sample)
                 const manualAt = Date.now()
                 const hourStart = getHourStart(manualAt)
-                if (isInVerifyWindow(manualAt, hourStart)) {
+                const inWindow = isInVerifyWindow(manualAt, hourStart)
+                logHourVerify(`[${formatHourOffset(hourStart, manualAt)}] 密函手动取数完成`, {
+                    cancelledSessions: cancelled,
+                    hourStart: new Date(hourStart).toLocaleString(),
+                    inWindow,
+                    missions: sample.missions,
+                    activities: sample.activities.length,
+                })
+                if (inWindow) {
                     // 落在整点 110 秒窗口内：在 80+30 秒处重排验真（后台进行，不阻塞弹窗）
-                    const firstValue = mihanData.value ?? []
                     const tracked = trackHourSession("手动重验")
                     void runDoubleWriteVerify({
                         hourStart,
-                        first: { value: firstValue, at: manualAt },
+                        first: { value: sample, at: manualAt },
                         verifyAt: getVerifyAt(hourStart),
                         extraGapMs: 0,
                         sample: sampleMissionsDNA,
@@ -196,6 +198,7 @@ function createMihanNotify() {
                         onVerifiedPush: async value => {
                             await invokeHourAdminPush(hourStart, value)
                         },
+                        describeSample: value => serializeTaskData(value.missions),
                         signal: tracked.signal,
                     })
                         .catch(error => {
@@ -204,20 +207,28 @@ function createMihanNotify() {
                         .finally(() => tracked.done())
                 } else if (getLastAdminPushHourStart() !== hourStart) {
                     // 落在窗口外：本小时尚未推送过且管理员推送启用时，用这次新鲜取数补推一次
+                    logHourVerify(`[${formatHourOffset(hourStart, manualAt)}] 窗口外取数，尝试补推管理员数据`)
                     try {
-                        await invokeHourAdminPush(hourStart, mihanData.value ?? [])
+                        const pushed = await invokeHourAdminPush(hourStart, sample)
+                        logHourVerify(`[${formatHourOffset(hourStart, Date.now())}] 窗口外补推结果`, { pushed })
                     } catch (error) {
                         console.error("管理员推送失败:", error)
                     }
+                } else {
+                    logHourVerify(`[${formatHourOffset(hourStart, manualAt)}] 窗口外且本小时已推送，不再补推`)
                 }
                 return true
             } catch (error) {
                 console.error("DNAAPI获取密函失败:", error)
+                logHourVerify("[密函] 手动取数失败，落到服务端兜底", { error: String(error) })
                 // DNA 取数失败：落到下面的服务端兜底
             }
         }
         // 整点二次写入：首轮立刻取数写入，第二轮验真修正
         const hourStart = getHourStart(Date.now())
+        logHourVerify(`[${formatHourOffset(hourStart, Date.now())}] 密函整点会话启动`, {
+            initialDelayMs,
+        })
         const tracked = trackHourSession("整点验真")
         try {
             await runHourlyDoubleWriteSession({
@@ -225,14 +236,26 @@ function createMihanNotify() {
                 sample: sampleMissionsDNA,
                 isSame: isSameMissions,
                 onSample: writeMissionsLocal,
-                onVerifiedPush: null,
+                // 验真后推动服务端：管理员上传钩子已安装时才推，本地流不推
+                onVerifiedPush: getHourAdminPushHandler()
+                    ? async value => {
+                          await invokeHourAdminPush(hourStart, value)
+                      }
+                    : null,
+                describeSample: value => serializeTaskData(value.missions),
                 signal: tracked.signal,
             })
             return true
         } catch (error) {
             // 被手动刷新取消：不走兜底，由手动流程接管后续取数与推送
-            if (isAbortError(error)) throw error
+            if (isAbortError(error)) {
+                logHourVerify(`[${formatHourOffset(hourStart, Date.now())}] 密函整点会话被取消`)
+                throw error
+            }
             console.error("DNAAPI获取密函失败:", error)
+            logHourVerify(`[${formatHourOffset(hourStart, Date.now())}] 密函整点会话失败，落到服务端兜底`, {
+                error: String(error),
+            })
         } finally {
             tracked.done()
         }
@@ -275,7 +298,8 @@ function createMihanNotify() {
      * @returns 是否过期
      */
     function isOutdated() {
-        return Date.now() > getNextUpdateTime(mihanUpdateTime.value)
+        // 用 >= 而非 >：整点那一瞬间定时器刚好命中时也要算过期，否则整小时轮询会被跳过
+        return Date.now() >= getNextUpdateTime(mihanUpdateTime.value)
     }
 
     /**
@@ -364,6 +388,7 @@ function createMihanNotify() {
             watchTimer = null
         }
         watching.value = false
+        logHourVerify("[密函] 停止整点轮询")
     }
 
     /**
@@ -374,6 +399,10 @@ function createMihanNotify() {
         watching.value = true
         const next = getNextUpdateTime()
         const duration = next - Date.now()
+        logHourVerify("[密函] 安排下一次整点轮询", {
+            next: new Date(next).toLocaleString(),
+            durationMs: duration,
+        })
         watchTimer = setTimeout(async () => {
             watching.value = false
             watchTimer = null
@@ -390,6 +419,7 @@ function createMihanNotify() {
             while (!ok && !aborted && c < 3) {
                 c++
                 console.log("update mihan data failed, retry in 3s")
+                logHourVerify("[密函] 整点更新未成功，3s 后重试", { attempt: c })
                 ok = await updateMihanData(false, 0)
                 await sleep(3e3)
             }
@@ -430,5 +460,6 @@ function createMihanNotify() {
         stopWatch,
         shouldKeepWatch,
         ensureWatch,
+        syncWatch,
     }
 }

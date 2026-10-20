@@ -15,7 +15,7 @@ import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
-import { startAdminDataSyncCron, stopAdminDataSyncCron } from "./utils/admin-data-sync"
+import { installAdminUploadHook, uninstallAdminUploadHook } from "./utils/admin-data-sync"
 import { buildCustomThemeCss, CUSTOM_THEME_ID, captureCurrentThemeVars } from "./utils/customTheme"
 import { SCREEN_BAR_WINDOW_LABEL } from "./utils/screen-bar"
 import { postVisitorCount } from "./vercount"
@@ -216,10 +216,10 @@ watch(
     [() => user.isAdmin, () => setting.dnaUserId],
     ([isAdmin, dnaUserId]) => {
         if (env.isApp && isMainWindow && isAdmin && dnaUserId !== 0) {
-            startAdminDataSyncCron()
+            installAdminUploadHook()
             return
         }
-        stopAdminDataSyncCron()
+        uninstallAdminUploadHook()
     },
     { immediate: true }
 )
@@ -393,7 +393,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     stopOnlineExperienceTimer()
-    stopAdminDataSyncCron()
+    uninstallAdminUploadHook()
 })
 </script>
 
