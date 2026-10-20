@@ -95,33 +95,44 @@ async function loadPosts(page = 1) {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <!-- 头部 -->
-        <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
-            <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- 顶栏：返回 + 标题 + 计数（hairline 分隔，无实底页头） -->
+        <div class="flex flex-none items-center gap-2.5 border-b border-base-content/15 px-4 py-2.5">
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="router.back()"
+            >
+                <Icon icon="ri:arrow-left-line" class="size-4" />
             </button>
-            <h1 class="text-xl font-bold">{{ $t("dna-post-list.community_posts") }}</h1>
-            <div class="w-12" />
-            <!-- Spacer -->
+            <h1 class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content">
+                {{ $t("dna-post-list.community_posts") }}
+            </h1>
+            <span class="shrink-0 font-orbitron text-sm font-semibold text-primary tabular-nums">{{ postList.length }}</span>
         </div>
 
         <!-- 内容区域 -->
-        <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
-            <div v-if="postList.length > 0" class="space-y-4">
-                <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
-            </div>
-
-            <div v-else class="flex justify-center items-center h-full">
-                <div class="text-center">
-                    <p class="text-lg mb-4">{{ $t("dna-post-list.no_posts") }}</p>
-                    <button class="btn btn-secondary" @click="resetAndLoadPosts()">{{ $t("common.refresh") }}</button>
+        <ScrollArea class="flex-1" @loadref="r => (scrollContainer = r)">
+            <div class="p-3 sm:p-4">
+                <div v-if="postList.length > 0" class="space-y-2">
+                    <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
                 </div>
-            </div>
 
-            <div v-if="loading" class="flex justify-center items-center h-full">
-                <span class="loading loading-spinner loading-lg" />
+                <div v-else class="flex items-center justify-center py-20">
+                    <div class="text-center">
+                        <p class="mb-4 text-sm text-base-content/60">{{ $t("dna-post-list.no_posts") }}</p>
+                        <button
+                            type="button"
+                            class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                            @click="resetAndLoadPosts()"
+                        >
+                            {{ $t("common.refresh") }}
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="loading" class="flex items-center justify-center py-8">
+                    <span class="loading loading-spinner loading-lg" />
+                </div>
             </div>
         </ScrollArea>
     </div>

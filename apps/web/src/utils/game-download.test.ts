@@ -346,6 +346,20 @@ describe("getDiffPackageInfo", () => {
         expect(vi.mocked(tauriFetch)).not.toHaveBeenCalled()
     })
 
+    it("预下载清单缺少 min_supported_version 时仍应请求差分包", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ hdiff_file: { name: "v15001_to_v16001.hdiff", md5: "abc", size: 1 }, new_size: 2 }),
+        } as Response)
+
+        const result = await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", { latestVersion: "16001", latestVersionNumber: "1.6" }, 15001)
+
+        expect(vi.mocked(tauriFetch).mock.calls[0][0]).toBe(
+            "https://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/v15001_to_v16001/HPatchDiffMd5.json"
+        )
+        expect(result?.fileName).toBe("v15001_to_v16001.hdiff")
+    })
+
     it("远端未提供差分包（非 2xx）时应该返回 null", async () => {
         vi.mocked(tauriFetch).mockResolvedValueOnce({ ok: false, status: 404 } as Response)
 

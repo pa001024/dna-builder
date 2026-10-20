@@ -1,15 +1,21 @@
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 import { deleteFile, getFileSize, listDirectories, listFiles, readTextFile, removeDirAll, writeTextFile } from "../api/app"
 import {
     CDN_LIST,
+    type DiffPackageInfo,
+    downloadFullPackage,
     downloadHotUpdateAssets,
+    type FullPackageInfo,
+    getDiffPackageInfo,
     getDownloadProgress,
     getFullPackageInfo,
     getHotUpdatePakFilesInfo,
     getHotUpdateResDiscreteInfo,
     getHotUpdateVersionList,
+    getPreFullPackageInfo,
     type HotUpdatePakFileInfo,
     type HotUpdatePakFilesInfoRes,
     type HotUpdateVersionListRes,
@@ -20,6 +26,7 @@ import {
     normalizeOptionalPatchSigns,
     type OptionalPatchSignsRes,
     pauseDownload,
+    resolveGameVersion,
 } from "../utils/game-download"
 import { useGameStore } from "./game"
 import { useUIStore } from "./ui"
@@ -27,9 +34,27 @@ import { useUIStore } from "./ui"
 const CUSTOM_CHANNEL_VALUE = "__custom_channel__"
 
 /**
- * 游戏更新 Store：热更「检查 + 下载」的公共逻辑，供完整启动器（GameUpdate.vue）与
- * 首页迷你启动器（MiniGameLauncher.vue）共用，避免各自维护一套热更请求与下载编排。
- * 包含：下载进度状态、热更版本检查（含具体版本号提取）、热更下载、语音包签名缓存。
+ * 基础包更新目标：差分包优先，无差分包时使用完整包。
+ */
+export interface ActiveBasePackage {
+    /** hdiff 文件名。 */
+    fileName: string
+    /** 下载量（字节）。 */
+    size: number
+    /** hdiff 下载地址。 */
+    downloadUrl: string
+    /** 是否为差分包。 */
+    isDiff: boolean
+    /** 差分包来源版本号（完整包为 null）。 */
+    fromVersion: number | null
+    /** 目标版本号，应用成功后写入 GameVersion.json。 */
+    targetVersion: string
+}
+
+/**
+ * 游戏更新 Store：完整包 / 预下载 / 热更的「检查 + 下载」公共逻辑，供完整启动器（GameUpdate.vue）与
+ * 首页迷你启动器（MiniGameLauncher.vue）共用，避免各自维护一套请求、差分解析与下载编排。
+ * 包含：下载进度状态、更新目标（差分包优先）、预下载检查与下载、热更检查与下载、语音包签名缓存。
  */
 export const useGameUpdateStore = defineStore("gameUpdate", () => {
     const gameStore = useGameStore()
@@ -142,20 +167,341 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
         ensureValidCDN()
     }
 
-    /**
-     * 获取当前渠道生效的完整包信息（自定义 channel 时解析 selectedChannel.custom，
-     * 并先校正 CDN 到可用列表；无有效 channel 时返回 null）。两个启动器共用同一实现。
-     * @returns 完整包信息或 null
-     */
-    async function getFullPackageInfoForActiveChannel() {
-        const activeChannel = getActiveChannel()
-        if (!activeChannel) return null
-        ensureValidCDN()
-        return await getFullPackageInfo(selectedCDN.value, activeChannel)
-    }
-
     /** 游戏安装根目录（由 EM.exe 路径推导）。 */
     const gamePath = computed(() => gameStore.path.replace(/\\DNA Game\\EM\.exe/, ""))
+
+    //#region 完整包 / 预下载目标
+    /** 当前渠道正式完整包清单。 */
+    const fullPackageInfo = ref<FullPackageInfo | null>(null)
+    /** 当前渠道预下载完整包清单。 */
+    const preFullPackageInfo = ref<FullPackageInfo | null>(null)
+    /** 正式版更新差分包（本地版本可用且远端提供时非空）。 */
+    const diffPackageInfo = ref<DiffPackageInfo | null>(null)
+    /** 预下载目标差分包（本地版本可用且远端提供时非空）。 */
+    const preDiffPackageInfo = ref<DiffPackageInfo | null>(null)
+    /** 预下载差分包解析缓存键（CDN / 渠道 / 目标清单 / 本地版本 / 安装路径）。 */
+    let preDiffCacheKey = ""
+
+    const needUpdate = ref(false)
+    const updateSize = ref(0)
+    const needPreDownload = ref(false)
+    const preTotalSize = ref(0)
+    const preTotalFiles = ref(0)
+
+    /** 基础包下载目录（完整包与差分包共用，正式版本直接复用预下载文件）。 */
+    const fullPackageDownloadDir = computed(() => (gamePath.value ? `${gamePath.value}\\Diff\\` : ""))
+
+    /**
+     * 将完整包信息转换为统一基础包目标。
+     * @param info 完整包信息
+     * @returns 基础包更新目标
+     */
+    function toActiveFullPackage(info: FullPackageInfo): ActiveBasePackage {
+        return {
+            fileName: info.fileName,
+            size: info.size,
+            downloadUrl: info.downloadUrl,
+            isDiff: false,
+            fromVersion: null,
+            targetVersion: info.latestVersion,
+        }
+    }
+
+    /**
+     * 将差分包信息转换为统一基础包目标。
+     * @param diff 差分包信息
+     * @returns 基础包更新目标
+     */
+    function toActiveDiffPackage(diff: DiffPackageInfo): ActiveBasePackage {
+        return {
+            fileName: diff.fileName,
+            size: diff.size,
+            downloadUrl: diff.downloadUrl,
+            isDiff: true,
+            fromVersion: diff.fromVersion,
+            targetVersion: String(diff.toVersion),
+        }
+    }
+
+    /** 当前正式版基础包目标（差分包优先，无差分包时用完整包）。 */
+    const activeBasePackage = computed<ActiveBasePackage | null>(() => {
+        if (diffPackageInfo.value) return toActiveDiffPackage(diffPackageInfo.value)
+        return fullPackageInfo.value ? toActiveFullPackage(fullPackageInfo.value) : null
+    })
+
+    /** 当前预下载目标（差分包优先，无差分包时用完整包）。 */
+    const activePrePackage = computed<ActiveBasePackage | null>(() => {
+        if (preDiffPackageInfo.value) return toActiveDiffPackage(preDiffPackageInfo.value)
+        return preFullPackageInfo.value ? toActiveFullPackage(preFullPackageInfo.value) : null
+    })
+
+    /**
+     * 读取本地 GameVersion.json 的版本号。
+     * @returns 本地版本号，文件缺失或格式异常时返回 null
+     */
+    async function readLocalGameVersion() {
+        try {
+            return resolveGameVersion(await readTextFile(`${gamePath.value}\\DNA Game\\GameVersion.json`))
+        } catch {
+            return null
+        }
+    }
+
+    /**
+     * 清空完整包 / 预下载相关状态（无有效渠道或切换渠道时）。
+     */
+    function resetPackageUpdateState() {
+        fullPackageInfo.value = null
+        preFullPackageInfo.value = null
+        diffPackageInfo.value = null
+        preDiffPackageInfo.value = null
+        preDiffCacheKey = ""
+        needUpdate.value = false
+        updateSize.value = 0
+        needPreDownload.value = false
+        preTotalSize.value = 0
+        preTotalFiles.value = 0
+    }
+
+    /**
+     * 拉取当前渠道的正式 / 预下载清单（自定义 channel 与 CDN 校正复用 launcher 输入）。
+     * 预下载清单异常只降级为无预下载，不阻断正式版本检查。
+     */
+    async function refreshPackageInfo() {
+        const activeChannel = getActiveChannel()
+        if (!activeChannel) {
+            resetPackageUpdateState()
+            return
+        }
+        ensureValidCDN()
+        const cdn = selectedCDN.value
+        const [fullPackage, preFullPackage] = await Promise.all([
+            getFullPackageInfo(cdn, activeChannel),
+            getPreFullPackageInfo(cdn, activeChannel).catch(err => {
+                console.warn("获取预下载完整包信息失败:", err)
+                return null
+            }),
+        ])
+        fullPackageInfo.value = fullPackage
+        preFullPackageInfo.value = preFullPackage
+        // 目标清单已更新，清空旧差分结果，等待随后的按本地版本解析
+        diffPackageInfo.value = null
+        preDiffPackageInfo.value = null
+        preDiffCacheKey = ""
+        if (!preFullPackage) {
+            needPreDownload.value = false
+            preTotalSize.value = 0
+            preTotalFiles.value = 0
+        }
+    }
+
+    /**
+     * 判断预下载完整包是否已完整落盘（无残留进度文件且大小匹配）。
+     * @param packageInfo 预下载完整包信息
+     * @returns 是否可以直接复用
+     */
+    async function isPreFullPackageComplete(packageInfo: FullPackageInfo) {
+        if (!fullPackageDownloadDir.value) return false
+        const filePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
+        if ((await getFileSize(`${filePath}.progress`)) !== 0) return false
+        return (await getFileSize(filePath)) === packageInfo.size
+    }
+
+    /**
+     * 解析预下载目标版本的差分包：本地版本可用且远端提供时使用差分，否则回退完整包。
+     * 已完整下载的预下载完整包优先复用，避免升级到差分下载后重复占用带宽。
+     * @param localVersion 本地版本号
+     */
+    async function refreshPreDiffPackage(localVersion: number | null) {
+        const prePackage = preFullPackageInfo.value
+        const activeChannel = getActiveChannel()
+        if (!prePackage || !activeChannel) {
+            preDiffPackageInfo.value = null
+            preDiffCacheKey = ""
+            return
+        }
+        const cacheKey = [selectedCDN.value, activeChannel, prePackage.downloadUrl, localVersion ?? "", gamePath.value].join("|")
+        if (cacheKey === preDiffCacheKey) return
+        preDiffCacheKey = cacheKey
+        const diff = localVersion ? await getDiffPackageInfo(selectedCDN.value, activeChannel, prePackage, localVersion) : null
+        preDiffPackageInfo.value = diff && (await isPreFullPackageComplete(prePackage)) ? null : diff
+    }
+
+    /**
+     * 判断新清单布局下预下载是否可用；无预下载清单时返回 false，由旧版预下载逻辑接手。
+     * @returns 是否已由完整包清单处理
+     */
+    async function checkPreDownloadStatus() {
+        if (!gamePath.value || !getActiveChannel()) {
+            needPreDownload.value = false
+            return false
+        }
+        if (!preFullPackageInfo.value) {
+            needPreDownload.value = false
+            return false
+        }
+        if (preFullPackageInfo.value.latestVersion === fullPackageInfo.value?.latestVersion) {
+            needPreDownload.value = false
+            return true
+        }
+        const prePackage = activePrePackage.value
+        if (!prePackage) {
+            needPreDownload.value = false
+            return true
+        }
+        const fullFilePath = `${fullPackageDownloadDir.value}${prePackage.fileName}`
+        const progressFileSize = await getFileSize(`${fullFilePath}.progress`)
+        needPreDownload.value = progressFileSize !== 0 || (await getFileSize(fullFilePath)) !== prePackage.size
+        return true
+    }
+
+    /**
+     * 解析预下载目标（差分优先）并刷新预下载状态与展示大小。
+     * @param localVersion 本地版本号，省略时读取 GameVersion.json
+     */
+    async function resolvePreDownloadTarget(localVersion?: number | null) {
+        const version = localVersion === undefined ? await readLocalGameVersion() : localVersion
+        await refreshPreDiffPackage(version)
+        if (!preFullPackageInfo.value) {
+            needPreDownload.value = false
+            return
+        }
+        preTotalSize.value = activePrePackage.value?.size ?? 0
+        preTotalFiles.value = activePrePackage.value ? 1 : 0
+        await checkPreDownloadStatus()
+    }
+
+    /**
+     * 解析正式版更新目标（差分优先）与预下载目标。
+     * 无正式完整包清单（旧版资源分包布局）时保留调用方自行计算的更新状态。
+     * @param localVersion 本地版本号，省略时读取 GameVersion.json
+     */
+    async function refreshUpdateTargets(localVersion?: number | null) {
+        // 未选择游戏目录时无法判断本地版本，保持「无需更新」以免主按钮被更新态抢占
+        if (!gamePath.value) {
+            diffPackageInfo.value = null
+            needUpdate.value = false
+            updateSize.value = 0
+            needPreDownload.value = false
+            preTotalSize.value = 0
+            preTotalFiles.value = 0
+            return
+        }
+        const version = localVersion === undefined ? await readLocalGameVersion() : localVersion
+        const activeChannel = getActiveChannel()
+        if (fullPackageInfo.value && activeChannel) {
+            needUpdate.value = String(version) !== fullPackageInfo.value.latestVersion
+            diffPackageInfo.value = needUpdate.value
+                ? await getDiffPackageInfo(selectedCDN.value, activeChannel, fullPackageInfo.value, version ?? 0)
+                : null
+            updateSize.value = needUpdate.value ? (diffPackageInfo.value?.size ?? fullPackageInfo.value.size) : 0
+        } else {
+            diffPackageInfo.value = null
+            needUpdate.value = false
+            updateSize.value = 0
+        }
+        await resolvePreDownloadTarget(version)
+    }
+
+    /**
+     * 基础包下载候选：差分包优先，差分失败时回退正式完整包。
+     * @returns 按尝试顺序排列的下载目标
+     */
+    function getBasePackageCandidates() {
+        const active = activeBasePackage.value
+        if (!active) return []
+        return active.isDiff && fullPackageInfo.value ? [active, toActiveFullPackage(fullPackageInfo.value)] : [active]
+    }
+
+    /**
+     * 下载预下载目标（差分优先，无差分时完整包），文件保留在 Diff 目录供正式版本复用。
+     */
+    async function downloadPreDownloadPackage() {
+        const activeChannel = getActiveChannel()
+        if (!activeChannel) {
+            ui.showErrorMessage("请先填写自定义 channel")
+            return
+        }
+        if (!gamePath.value) {
+            ui.showErrorMessage(t("game-update.select_game_dir_first"))
+            return
+        }
+        const packageInfo = activePrePackage.value
+        if (!packageInfo) return
+
+        const fullFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
+        const progressFilePath = `${fullFilePath}.progress`
+        isDownloading.value = true
+        activeDownloadAction.value = "pre"
+        activeOptionalSign.value = ""
+        isRecoveredActiveDownload.value = false
+        isDownloadPaused.value = false
+        isPauseRequested.value = false
+        currentDownloaded.value = 0
+        overallProgress.value = 0
+        downloadSpeed.value = ""
+        resetSpeedBaseline()
+
+        try {
+            await prepareCurrentDownloadFile(
+                fullFilePath,
+                packageInfo.fileName,
+                packageInfo.size,
+                0,
+                packageInfo.size,
+                packageInfo.downloadUrl
+            )
+            const isPackageComplete = await canSkipBeforeHashCheck(fullFilePath, progressFilePath, packageInfo.size)
+            if (!isPackageComplete) {
+                await downloadFullPackage(packageInfo, fullFilePath, concurrentThreads.value)
+            }
+            throwIfPauseRequested()
+
+            isDownloading.value = false
+            needPreDownload.value = false
+            currentFile.value = ""
+            currentFileUrl.value = ""
+            currentDownloadPath.value = ""
+            currentDownloaded.value = packageInfo.size
+            overallProgress.value = 0
+            downloadSpeed.value = ""
+            ui.showSuccessMessage(t("game-update.pre_download_complete", { size: formatSize(packageInfo.size) }))
+        } catch (err) {
+            if (isDownloadPausedError(err)) {
+                markDownloadPaused()
+                return
+            }
+            if (isDownloadAlreadyActiveError(err)) {
+                markDownloadAlreadyActive()
+                return
+            }
+            ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
+            console.error("预下载失败:", err)
+            isDownloading.value = false
+            downloadSpeed.value = ""
+        }
+    }
+
+    /**
+     * 页面刷新后按预下载目标的进度文件恢复下载展示。
+     * @returns 是否恢复了预下载进度
+     */
+    async function resumePreDownloadProgress() {
+        if (!needPreDownload.value || !preFullPackageInfo.value) return false
+        const prePackage = activePrePackage.value
+        if (!prePackage) return false
+        const fullFilePath = `${fullPackageDownloadDir.value}${prePackage.fileName}`
+        const progress = await getDownloadProgress(fullFilePath)
+        if (!progress.hasProgressFile) return false
+        await prepareCurrentDownloadFile(fullFilePath, prePackage.fileName, prePackage.size, 0, prePackage.size, prePackage.downloadUrl)
+        isDownloading.value = progress.active
+        isPauseRequested.value = progress.active && progress.paused
+        isDownloadPaused.value = progress.paused && !progress.active
+        isRecoveredActiveDownload.value = progress.active
+        activeDownloadAction.value = "pre"
+        return true
+    }
+    //#endregion
 
     /** 热更补丁根目录（按渠道分区）。 */
     const hotUpdatePatchRootDir = computed(() => {
@@ -873,8 +1219,25 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
         syncGamePathByChannel,
         saveChannelGamePath,
         syncLauncherInputs,
-        getFullPackageInfoForActiveChannel,
         gamePath,
+        fullPackageDownloadDir,
+        fullPackageInfo,
+        preFullPackageInfo,
+        diffPackageInfo,
+        preDiffPackageInfo,
+        activeBasePackage,
+        needUpdate,
+        updateSize,
+        needPreDownload,
+        preTotalSize,
+        preTotalFiles,
+        resetPackageUpdateState,
+        refreshPackageInfo,
+        refreshUpdateTargets,
+        checkPreDownloadStatus,
+        getBasePackageCandidates,
+        downloadPreDownloadPackage,
+        resumePreDownloadProgress,
         hotUpdatePatchRootDir,
         getHotUpdateVersionDir,
         isDownloading,

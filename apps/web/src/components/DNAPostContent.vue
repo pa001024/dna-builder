@@ -16,7 +16,7 @@ defineProps<{
                 v-if="content.url"
                 :src="content.url"
                 :alt="`帖子图片 ${index + 1}`"
-                class="max-w-full rounded-lg object-cover shadow-md"
+                class="max-w-full rounded-xs border border-base-content/10 object-cover"
             />
         </div>
 
@@ -26,7 +26,7 @@ defineProps<{
                 v-if="(content as DNAPostContentBean).contentVideo?.videoUrl"
                 :src="(content as DNAPostContentBean).contentVideo.videoUrl"
                 controls
-                class="max-w-full rounded-lg object-cover shadow-md"
+                class="max-w-full rounded-xs border border-base-content/10 object-cover"
             >
                 {{ $t("dna-post-content.video_unsupported") }}
             </video>
@@ -34,11 +34,11 @@ defineProps<{
                 v-else-if="(content as DNAPostContentBean).contentVideo?.coverUrl"
                 :src="(content as DNAPostContentBean).contentVideo.coverUrl"
                 :alt="`视频封面 ${index + 1}`"
-                class="max-w-full rounded-lg shadow-md"
+                class="max-w-full rounded-xs border border-base-content/10"
             />
         </div>
 
         <!-- 其他内容类型 -->
-        <div v-else class="text-sm text-base-content/50 p-3 bg-base-200 rounded-lg">[不支持的内容类型: {{ content.contentType }}]</div>
+        <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm text-base-content/50">[不支持的内容类型: {{ content.contentType }}]</div>
     </template>
 </template>

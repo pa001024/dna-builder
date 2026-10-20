@@ -14,234 +14,242 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
 }
 </script>
 <template>
-    <div v-if="roleInfo?.roleShow" class="space-y-6" id="screenshot-container">
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <div class="avatar">
-                        <div class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <img :src="roleInfo.roleShow.headUrl" :alt="roleInfo.roleShow.roleName" />
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-bold">
+    <div v-if="roleInfo?.roleShow" class="space-y-3" id="screenshot-container">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ACCOUNT" />
+            <div class="flex flex-col items-center gap-3 md:flex-row">
+                <img
+                    :src="roleInfo.roleShow.headUrl"
+                    :alt="roleInfo.roleShow.roleName"
+                    class="size-20 shrink-0 rounded-full border border-base-content/15 object-cover"
+                />
+                <div class="min-w-0 flex-1 text-center md:text-left">
+                    <div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 md:justify-start">
+                        <h2 class="truncate text-lg leading-tight font-bold tracking-tight text-base-content">
                             {{ roleInfo.roleShow.roleName }}
                         </h2>
-                        <div class="text-sm text-base-content/70 mt-1">UID: {{ roleInfo.roleShow.roleId }}</div>
-                        <div class="text-sm text-base-content/70 mt-1">Lv. {{ roleInfo.roleShow.level }}</div>
+                        <CopyID :id="roleInfo.roleShow.roleId" />
+                    </div>
+                    <div class="mt-1 text-xs text-base-content/50">
+                        <span class="font-mono tabular-nums">Lv. {{ roleInfo.roleShow.level }}</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="roleInfo.roleShow.params.length > 0" class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                    <div v-for="(p, index) in roleInfo.roleShow.params" :key="index" class="card hover-3d">
-                        <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                            <div class="text-sm font-medium">{{ p.paramKey }}</div>
-                            <div class="text-xl font-bold">
-                                {{ p.paramValue }}
-                            </div>
-                        </div>
+        <section v-if="roleInfo.roleShow.params.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PARAMS" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                <div
+                    v-for="(p, index) in roleInfo.roleShow.params"
+                    :key="index"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ p.paramKey }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ p.paramValue }}
+                    </span>
+                </div>
+                <div
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t('dna-game-info-show.achievement_progress') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ roleInfo.roleShow.roleAchv?.total }}
+                    </span>
+                </div>
+                <div
+                    v-if="roleInfo!.roleShow.roleAchv"
+                    v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
+                        v,
+                        roleInfo!.roleShow.roleAchv[v as keyof typeof roleInfo.roleShow.roleAchv],
+                    ])"
+                    :key="k"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <img
+                        :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
+                        :alt="$t('common.quality')"
+                        class="size-8 shrink-0 object-contain"
+                    />
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ p }}
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader
+                no-animate
+                compact
+                kicker="ROSTER"
+                :title="`角色 (${roleInfo.roleShow.roleChars.filter(v => v.unLocked).length}/${roleInfo.roleShow.roleChars.length})`"
+            />
+            <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-2 justify-center">
+                <DNACharItem v-for="char in roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
+            </div>
+        </section>
+
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader
+                no-animate
+                compact
+                kicker="RANGED"
+                :title="`远程武器 (${getWeaponUnlockProgress(roleInfo.roleShow.langRangeWeapons)})`"
+            />
+            <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-2 justify-center">
+                <DNAWeaponItem v-for="weapon in roleInfo.roleShow.langRangeWeapons" :key="weapon.weaponId" :weapon="weapon" />
+            </div>
+        </section>
+
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader
+                no-animate
+                compact
+                kicker="MELEE"
+                :title="`近战武器 (${getWeaponUnlockProgress(roleInfo.roleShow.closeWeapons)})`"
+            />
+            <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-2 justify-center">
+                <DNAWeaponItem v-for="weapon in roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" :weapon="weapon" />
+            </div>
+        </section>
+
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ROGUELIKE" :title="$t('迷津')" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('dna-game-info-show.progress') }}</div>
+                    <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
+                    </div>
+                    <div class="mt-0.5 font-mono text-xs text-base-content/50 tabular-nums">
+                        Lv.{{ (roleInfo.roleShow.rougeLikeInfo.maxPassed & 8) * 10 }}
                     </div>
                 </div>
-                <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center mt-2">
-                    <div class="card hover-3d">
-                        <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                            <div class="text-sm font-medium">{{ $t('dna-game-info-show.achievement_progress') }}</div>
-                            <div class="text-xl font-bold">
-                                {{ roleInfo.roleShow.roleAchv?.total }}
-                            </div>
-                        </div>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('dna-game-info-show.weekly_trace') }}</div>
+                    <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ roleInfo.roleShow.rougeLikeInfo.rewardCount }}
                     </div>
-                    <div
-                        v-if="roleInfo!.roleShow.roleAchv"
-                        v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
-                            v,
-                            roleInfo!.roleShow.roleAchv[v as keyof typeof roleInfo.roleShow.roleAchv],
-                        ])"
-                        :key="k"
-                        class="card hover-3d"
-                    >
-                        <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                            <div class="text-xl font-bold flex flex-col justify-center h-full">
-                                <div class="flex items-end gap-4">
-                                    <img
-                                        :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
-                                        :alt="$t('common.quality')"
-                                        class="size-10"
-                                    />
-                                    {{ p }}
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mt-0.5 text-xs text-base-content/50">/ {{ roleInfo.roleShow.rougeLikeInfo.rewardTotal }}</div>
+                </div>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('dna-game-info-show.reset_time') }}</div>
+                    <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ ui.timeDistanceFuture(+roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
+                    </div>
+                    <div class="mt-0.5 text-xs text-base-content/50">
+                        {{ new Date(+roleInfo.roleShow.rougeLikeInfo.resetTime * 1000).toLocaleDateString() }}
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h3 class="card-title mb-4">
-                    角色 ({{ roleInfo.roleShow.roleChars.filter(v => v.unLocked).length }}/{{ roleInfo.roleShow.roleChars.length }})
-                </h3>
-                <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                    <DNACharItem v-for="char in roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
+            <div class="mt-1.5 grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                <div
+                    v-for="(talent, index) in roleInfo.roleShow.rougeLikeInfo.talentInfo"
+                    :key="index"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="mb-1 text-[11px] tracking-wide text-base-content/55">
+                        {{ ["技能", "适应", "近战", "远程"][index] }}强化
+                    </div>
+                    <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                        {{ talent.cur }}
+                    </div>
+                    <div class="mt-0.5 text-xs text-base-content/50">/ {{ talent.max }}</div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h3 class="card-title mb-4">远程武器 ({{ getWeaponUnlockProgress(roleInfo.roleShow.langRangeWeapons) }})</h3>
-                <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                    <DNAWeaponItem v-for="weapon in roleInfo.roleShow.langRangeWeapons" :key="weapon.weaponId" :weapon="weapon" />
-                </div>
-            </div>
-        </div>
-
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h3 class="card-title mb-4">近战武器 ({{ getWeaponUnlockProgress(roleInfo.roleShow.closeWeapons) }})</h3>
-                <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                    <DNAWeaponItem v-for="weapon in roleInfo.roleShow.closeWeapons" :key="weapon.weaponId" :weapon="weapon" />
-                </div>
-            </div>
-        </div>
-
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h3 class="card-title mb-4">{{ $t('迷津') }}</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.progress') }}</div>
-                        <div class="text-xl font-bold">
-                            {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
-                        </div>
-                        <div class="text-sm text-base-content/70">Lv.{{ (roleInfo.roleShow.rougeLikeInfo.maxPassed & 8) * 10 }}</div>
-                    </div>
-                    <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.weekly_trace') }}</div>
-                        <div class="text-xl font-bold">
-                            {{ roleInfo.roleShow.rougeLikeInfo.rewardCount }}
-                        </div>
-                        <div class="text-sm text-base-content/70">/ {{ roleInfo.roleShow.rougeLikeInfo.rewardTotal }}</div>
-                    </div>
-                    <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.reset_time') }}</div>
-                        <div class="text-xl font-bold">
-                            {{ ui.timeDistanceFuture(+roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
-                        </div>
-                        <div class="text-sm text-base-content/70">
-                            {{ new Date(+roleInfo.roleShow.rougeLikeInfo.resetTime * 1000).toLocaleDateString() }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div
-                        v-for="(talent, index) in roleInfo.roleShow.rougeLikeInfo.talentInfo"
-                        :key="index"
-                        class="bg-base-200 p-3 rounded-lg"
-                    >
-                        <div class="text-sm font-medium">{{ ["技能", "适应", "近战", "远程"][index] }}强化</div>
-                        <div class="text-xl font-bold">
-                            {{ talent.cur }}
-                        </div>
-                        <div class="text-sm text-base-content/70">/ {{ talent.max }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="roleInfo.abyssInfo" class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h3 class="card-title mb-4">
-                    {{ roleInfo.abyssInfo.operaName }}
-                    <span class="ml-auto text-base-content/70 text-sm"
+        <section v-if="roleInfo.abyssInfo" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ABYSS" :title="roleInfo.abyssInfo.operaName">
+                <template #trailing>
+                    <span class="shrink-0 text-xs text-base-content/50 tabular-nums"
                         >{{ new Date(+roleInfo.abyssInfo.startTime * 1000).toLocaleDateString() }} -
                         {{ new Date(+roleInfo.abyssInfo.endTime * 1000).toLocaleDateString() }}</span
                     >
-                </h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span class="text-base-content/70">{{ roleInfo.abyssInfo.progressName }}</span>
-                        <span class="font-semibold badge badge-primary">
-                            <Icon icon="ri:star-line" class="size-4 inline-block" />
-                            {{ roleInfo.abyssInfo.stars }}</span
-                        >
-                    </div>
+                </template>
+            </SectionHeader>
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-sm text-base-content/60">{{ roleInfo.abyssInfo.progressName }}</span>
+                    <span
+                        class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold text-primary tabular-nums"
+                    >
+                        <Icon icon="ri:star-line" class="size-3.5" />
+                        {{ roleInfo.abyssInfo.stars }}</span
+                    >
+                </div>
 
-                    <div class="flex justify-center" style="--spacing: max(0.25rem, calc(1vw / 2))">
-                        <div v-if="roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
+                <div class="flex justify-center">
+                    <div v-if="roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
+                        <img
+                            v-if="roleInfo.abyssInfo.bestTimeVo1.charIcon"
+                            :src="roleInfo.abyssInfo.bestTimeVo1.charIcon"
+                            :alt="$t('角色')"
+                            class="size-40 rounded-xs border border-base-content/10 object-cover"
+                        />
+                        <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                        <div class="flex flex-col items-center gap-2">
                             <img
-                                v-if="roleInfo.abyssInfo.bestTimeVo1.charIcon"
-                                :src="roleInfo.abyssInfo.bestTimeVo1.charIcon"
-                                :alt="$t('角色')"
-                                class="size-40 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
+                                :alt="$t('dna-game-info-show.melee_weapon')"
+                                class="size-12 rounded-xs border border-base-content/10 object-cover"
                             />
-                            <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                            <div class="flex flex-col items-center gap-2">
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
-                                    :alt="$t('dna-game-info-show.melee_weapon')"
-                                    class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
-                                    :alt="$t('dna-game-info-show.ranged_weapon')"
-                                    class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.petIcon"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.petIcon"
-                                    :alt="$t('魔灵')"
-                                    class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
-                                    :alt="$t('dna-game-info-show.coop_char_1')"
-                                    class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
-                                    :alt="$t('dna-game-info-show.coop_char_2')"
-                                    class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
-                                    :alt="$t('dna-game-info-show.coop_weapon_1')"
-                                    class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                <img
-                                    v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
-                                    :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
-                                    :alt="$t('dna-game-info-show.coop_weapon_2')"
-                                    class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                            </div>
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
+                                :alt="$t('dna-game-info-show.ranged_weapon')"
+                                class="size-12 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.petIcon"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.petIcon"
+                                :alt="$t('魔灵')"
+                                class="size-12 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
                         </div>
-                        <span v-else>{{ $t('common.no_data') }}</span>
+                        <div class="flex flex-col gap-2">
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
+                                :alt="$t('dna-game-info-show.coop_char_1')"
+                                class="size-19 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
+                                :alt="$t('dna-game-info-show.coop_char_2')"
+                                class="size-19 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
+                                :alt="$t('dna-game-info-show.coop_weapon_1')"
+                                class="size-19 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                            <img
+                                v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
+                                :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
+                                :alt="$t('dna-game-info-show.coop_weapon_2')"
+                                class="size-19 rounded-xs border border-base-content/10 object-cover"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/10 bg-base-content/5" />
+                        </div>
                     </div>
+                    <span v-else class="text-sm text-base-content/45">{{ $t('common.no_data') }}</span>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

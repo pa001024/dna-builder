@@ -75,89 +75,150 @@ async function loadRole() {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
-            <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- 顶栏：返回 + 标题（hairline 分隔，无实底页头） -->
+        <div class="flex flex-none items-center gap-2.5 border-b border-base-content/15 px-4 py-2.5">
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="router.back()"
+            >
+                <Icon icon="ri:arrow-left-line" class="size-4" />
             </button>
-            <h1 class="text-xl font-bold">{{ $t("dna-user-mine.title") }}</h1>
-            <div class="w-12" />
+            <h1 class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content">{{ $t("dna-user-mine.title") }}</h1>
         </div>
 
-        <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
-            <div v-if="mineData" class="space-y-4">
-                <div class="card bg-base-100">
-                    <div class="card-body">
-                        <div class="flex items-start gap-4">
-                            <img :src="mineData.headUrl" alt="avatar" class="w-20 h-20 rounded-full object-cover" />
-                            <div class="flex-1">
-                                <h2 class="text-xl font-bold">
+        <ScrollArea class="flex-1" @loadref="r => (scrollContainer = r)">
+            <div v-if="mineData" class="stagger-rise space-y-3 p-3 sm:p-4">
+                <!-- 用户档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+                <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+                    <!-- 引导线网格（装饰性，随主题明暗） -->
+                    <div
+                        class="pointer-events-none absolute inset-0"
+                        style="
+                            background-image:
+                                linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                                linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                            background-size: 26px 26px;
+                            mask-image: linear-gradient(to bottom, black, transparent 85%);
+                        "
+                        aria-hidden="true"
+                    />
+                    <!-- 右上角斜切楔形 -->
+                    <span
+                        class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                        aria-hidden="true"
+                    />
+                    <div class="relative flex items-start gap-3.5">
+                        <img
+                            :src="mineData.headUrl"
+                            alt="avatar"
+                            class="relative size-20 shrink-0 rounded-full border border-base-content/15 object-cover"
+                        />
+                        <div class="relative min-w-0 flex-1">
+                            <p
+                                class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
+                            >
+                                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                                User File
+                            </p>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <h2 class="truncate text-xl leading-tight font-bold tracking-tight text-base-content">
                                     {{ mineData.userName }}
-                                    <span class="badge badge-sm">Lv. {{ mineData.levelTotal }}</span>
                                 </h2>
-                                <p class="text-sm text-base-content/70">ID: {{ mineData.userId || userId }}</p>
-                                <p class="text-sm text-base-content/70 mt-1">{{ mineData.signature }}</p>
+                                <span
+                                    class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-primary tabular-nums"
+                                    >Lv. {{ mineData.levelTotal }}</span
+                                >
+                                <CopyID :id="mineData.userId || userId" />
                             </div>
-                        </div>
-                        <div class="flex gap-4 mt-4 flex-wrap">
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.followCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.follow") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.fansCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.fans") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.likeCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.likes") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.collectCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.favorites") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.commentCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.comments") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.postCount }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.posts") }}</span>
-                            </div>
-                            <div class="flex gap-1 items-baseline">
-                                <span class="text-lg font-bold">{{ mineData.goldNum }}</span>
-                                <span class="text-sm text-base-content/70">{{ $t("dna-user-mine.coins") }}</span>
-                            </div>
+                            <p v-if="mineData.signature" class="mt-1.5 text-sm leading-relaxed text-base-content/60">
+                                {{ mineData.signature }}
+                            </p>
                         </div>
                     </div>
-                </div>
-                <div class="tabs tabs-border gap-2">
-                    <div class="tab" :class="{ 'tab-active': activeTab === '游戏信息' }" @click="activeTab = '游戏信息'">
-                        {{ $t("dna-user-mine.gameInfoTab") }}
+                </header>
+                <!-- 用户统计 -->
+                <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.follow") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.followCount
+                        }}</span>
                     </div>
-                    <div class="tab" :class="{ 'tab-active': activeTab === '帖子' }" @click="activeTab = '帖子'">
-                        {{ $t("dna-user-mine.postTab") }}
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.fans") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.fansCount
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.likes") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.likeCount
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.favorites") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.collectCount
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.comments") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.commentCount
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.posts") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.postCount
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("dna-user-mine.coins") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            mineData.goldNum
+                        }}</span>
                     </div>
                 </div>
+                <AniTabs
+                    v-model="activeTab"
+                    :tabs="[
+                        { label: $t('dna-user-mine.gameInfoTab'), value: '游戏信息' },
+                        { label: $t('dna-user-mine.postTab'), value: '帖子' },
+                    ]"
+                />
                 <!-- 游戏角色信息 -->
-                <div v-if="roleInfo && activeTab === '游戏信息'" class="card bg-base-200">
-                    <DNAGameInfoShow :roleInfo="roleInfo" />
-                </div>
+                <DNAGameInfoShow v-if="roleInfo && activeTab === '游戏信息'" :roleInfo="roleInfo" />
 
                 <div v-if="activeTab === '帖子'">
-                    <div v-if="postList.length > 0" class="space-y-4">
+                    <div v-if="postList.length > 0" class="space-y-2">
                         <DNAPostListItem v-for="post in postList" :key="post.postId" :post="post" />
                     </div>
-                    <div v-else class="flex justify-center items-center py-8">
+                    <div v-else class="flex items-center justify-center py-8">
                         <div class="text-center">
-                            <p class="mb-4">{{ $t("dna-user-mine.noPosts") }}</p>
+                            <p class="text-sm text-base-content/60">{{ $t("dna-user-mine.noPosts") }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="loading" class="flex justify-center items-center py-4">
+            <div v-if="loading" class="flex items-center justify-center py-4">
                 <span class="loading loading-spinner" />
             </div>
         </ScrollArea>

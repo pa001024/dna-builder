@@ -86,231 +86,283 @@ async function loadRoleDetail() {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <!-- 头部 -->
-        <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
-            <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- 顶栏：返回 + 标题（hairline 分隔，无实底页头） -->
+        <div class="flex flex-none items-center gap-2.5 border-b border-base-content/15 px-4 py-2.5">
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="router.back()"
+            >
+                <Icon icon="ri:arrow-left-line" class="size-4" />
             </button>
-            <h1 class="text-xl font-bold">
+            <h1 class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content">
                 {{ charDetail?.charName || "角色详情" }}
             </h1>
-            <div class="w-12" />
-            <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
-        <div class="flex-1 overflow-auto p-4 bg-base-100">
-            <div v-if="loading" class="flex justify-center items-center h-full">
+        <div class="flex-1 overflow-auto">
+            <div v-if="loading" class="flex h-full items-center justify-center">
                 <span class="loading loading-spinner loading-lg" />
             </div>
 
-            <div v-else-if="charDetail" class="space-y-6">
-                <!-- 角色立绘 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm overflow-hidden">
-                    <div class="relative h-64 md:h-80">
+            <div v-else-if="charDetail" class="stagger-rise space-y-3 p-3 sm:p-4">
+                <!-- 角色档案头：立绘横幅 + 纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+                <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+                    <!-- 引导线网格（装饰性，随主题明暗） -->
+                    <div
+                        class="pointer-events-none absolute inset-0"
+                        style="
+                            background-image:
+                                linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                                linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                            background-size: 26px 26px;
+                            mask-image: linear-gradient(to bottom, black, transparent 85%);
+                        "
+                        aria-hidden="true"
+                    />
+                    <!-- 右上角斜切楔形 -->
+                    <span
+                        class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                        aria-hidden="true"
+                    />
+                    <!-- 角色立绘横幅 -->
+                    <div v-if="charDetail.paint" class="relative mb-4">
                         <img
-                            v-if="charDetail.paint"
                             :src="charDetail.paint"
                             :alt="$t('dna-role-detail.char_splash')"
-                            class="w-full h-full object-cover"
+                            class="h-48 w-full rounded-xs border border-base-content/10 object-cover object-top md:h-64"
                         />
-                        <div v-else class="w-full h-full flex items-center justify-center bg-base-200">
-                            <span class="text-base-400">{{ $t("dna-role-detail.no_splash") }}</span>
+                    </div>
+                    <div class="relative flex items-start gap-3.5">
+                        <div
+                            class="relative size-20 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/5 sm:size-24"
+                        >
+                            <img
+                                v-if="charDetail.icon"
+                                :src="charDetail.icon"
+                                :alt="$t('dna-role-detail.char_avatar')"
+                                class="h-full w-full object-cover object-top"
+                            />
+                            <div v-else class="flex h-full w-full items-center justify-center p-1 text-center">
+                                <span class="text-xs text-base-content/45">{{ $t("dna-role-detail.no_avatar") }}</span>
+                            </div>
                         </div>
-                        <!-- 半透明渐变遮罩 -->
-                        <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-base-100/90 to-transparent p-4">
-                            <div class="flex items-center gap-3">
-                                <img
-                                    v-if="charDetail.icon"
-                                    :src="charDetail.icon"
-                                    :alt="$t('dna-role-detail.char_avatar')"
-                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md object-cover"
-                                />
-                                <div
-                                    v-else
-                                    class="w-16 h-16 rounded-full border-2 border-base-100 shadow-md bg-base-200 flex items-center justify-center"
+                        <div class="relative min-w-0 flex-1">
+                            <p
+                                class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
+                            >
+                                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                                Character File
+                            </p>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <h2
+                                    class="truncate font-orbitron text-xl leading-tight font-bold tracking-tight text-base-content sm:text-2xl"
                                 >
-                                    <span class="text-base-400">{{ $t("dna-role-detail.no_avatar") }}</span>
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-bold flex items-center gap-2">
-                                        <img
-                                            v-if="charDetail.elementIcon"
-                                            :src="charDetail.elementIcon"
-                                            :alt="charDetail.elementName"
-                                            class="size-10 object-contain tooltip"
-                                            :data-tip="charDetail.elementName"
-                                        />
-                                        <span>{{ charDetail.charName }}</span>
-
-                                        <div class="badge badge-neutral badge-lg font-orbitron">
-                                            {{ ["0", "I", "II", "III", "IV", "V", "VI"][charDetail.gradeLevel] }}
-                                        </div>
-                                    </h2>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="badge badge-secondary bg-secondary/70">Lv.{{ charDetail.level }}</div>
-                                    </div>
-                                </div>
+                                    {{ charDetail.charName }}
+                                </h2>
+                                <CopyID :id="charDetail.charId" />
+                            </div>
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/60">
+                                <span v-if="charDetail.elementIcon" class="inline-flex items-center gap-1.5">
+                                    <img
+                                        :src="charDetail.elementIcon"
+                                        :alt="charDetail.elementName"
+                                        class="h-5 w-2.5 object-cover"
+                                    />
+                                    {{ charDetail.elementName }}
+                                </span>
+                                <span v-else>{{ charDetail.elementName }}</span>
+                                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                                <span
+                                    class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold text-primary tabular-nums"
+                                    >{{ ["0", "I", "II", "III", "IV", "V", "VI"][charDetail.gradeLevel] }}</span
+                                >
+                                <span
+                                    class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-secondary tabular-nums"
+                                    >Lv.{{ charDetail.level }}</span
+                                >
                             </div>
                         </div>
                     </div>
-                </div>
+                </header>
 
                 <!-- 角色属性 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-role-detail.char_attributes") }}</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t(`${charDetail.elementName}属性攻击`) }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.atk }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-role-detail.hp") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.maxHp }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("防御") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.def }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("护盾") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.maxES }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-role-detail.max_sanity") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.maxSp }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能威力") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.skillIntensity }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能耐久") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.skillSustain }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能效益") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.skillEfficiency }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("技能范围") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.skillRange }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("武器精通") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ charDetail.attribute.weaponTags.join("/") }}
-                                </div>
-                            </div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="ATTRIBUTES" :title="$t('dna-role-detail.char_attributes')" />
+                    <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t(`${charDetail.elementName}属性攻击`) }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.atk
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("dna-role-detail.hp") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.maxHp
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("防御") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.def
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("护盾") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.maxES
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("dna-role-detail.max_sanity") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.maxSp
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("技能威力") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.skillIntensity
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("技能耐久") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.skillSustain
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("技能效益") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.skillEfficiency
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("技能范围") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                charDetail.attribute.skillRange
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("武器精通") }}</span>
+                            <span class="shrink-0 text-[13px] font-semibold text-base-content/85">
+                                {{ charDetail.attribute.weaponTags.join("/") }}
+                            </span>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 角色技能 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("技能") }}</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div
-                                v-for="skill in charDetail.skills"
-                                :key="skill.skillId"
-                                class="bg-base-300 rounded-lg p-4 text-center hover:shadow-md transition-shadow duration-200"
-                            >
-                                <div class="flex justify-center items-center gap-2">
-                                    <div
-                                        :alt="$t('dna-role-detail.skill_icons')"
-                                        class="size-12 rounded-full bg-base-content"
-                                        :style="{ mask: `url(${skill.icon}) no-repeat center/contain` }"
-                                    />
-                                    <div class="text-sm font-medium">
-                                        {{ skill.skillName }}
-                                    </div>
-                                    <div class="ml-auto">Lv. {{ skill.level }}</div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SKILLS" :title="$t('技能')" />
+                    <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+                        <div
+                            v-for="skill in charDetail.skills"
+                            :key="skill.skillId"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-150 hover:border-primary/40"
+                        >
+                            <div class="flex items-center gap-2">
+                                <div
+                                    class="size-10 shrink-0 rounded-xs bg-base-content"
+                                    :style="{ mask: `url(${skill.icon}) no-repeat center/contain` }"
+                                    role="img"
+                                    :aria-label="$t('dna-role-detail.skill_icons')"
+                                />
+                                <div class="min-w-0 flex-1 truncate text-sm font-medium">
+                                    {{ skill.skillName }}
                                 </div>
+                                <div class="shrink-0 font-mono text-xs text-base-content/55 tabular-nums">Lv. {{ skill.level }}</div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 溯源 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-role-detail.char_trace") }}</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div
-                                v-for="(trace, index) in charDetail.traces"
-                                :key="index"
-                                class="bg-base-300 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
-                            >
-                                <div class="flex items-center gap-2 min-h-15">
-                                    <img :src="trace.icon" :alt="$t('dna-role-detail.trace_icons')" class="w-10 h-10 object-contain" />
-
-                                    <div class="flex-1 space-y-1">
-                                        <div class="flex items-center gap-2">
-                                            <span> 第{{ getTraceOrdinal(index) }}根源 </span>
-                                            <span
-                                                class="badge badge-sm"
-                                                :class="{
-                                                    'badge-warning': charDetail.gradeLevel > index,
-                                                    'badge-neutral': charDetail.gradeLevel <= index,
-                                                }"
-                                                >{{
-                                                    charDetail.gradeLevel > index ? "已解锁" : "未解锁"
-                                                }}</span
-                                            >
-                                        </div>
-                                        <p class="text-xs opacity-60">
-                                            {{ trace.description }}
-                                        </p>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="TRACE" :title="$t('dna-role-detail.char_trace')" />
+                    <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                        <div
+                            v-for="(trace, index) in charDetail.traces"
+                            :key="index"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <img
+                                    :src="trace.icon"
+                                    :alt="$t('dna-role-detail.trace_icons')"
+                                    class="size-10 shrink-0 rounded-xs object-contain"
+                                />
+                                <div class="min-w-0 flex-1 space-y-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="text-sm font-medium"> 第{{ getTraceOrdinal(index) }}根源 </span>
+                                        <span
+                                            class="shrink-0 rounded-xs border px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
+                                            :class="
+                                                charDetail.gradeLevel > index
+                                                    ? 'border-primary/40 bg-primary/10 text-primary'
+                                                    : 'border-base-content/15 text-base-content/40'
+                                            "
+                                            >{{
+                                                charDetail.gradeLevel > index ? "已解锁" : "未解锁"
+                                            }}</span
+                                        >
                                     </div>
+                                    <p class="text-xs leading-relaxed text-base-content/55">
+                                        {{ trace.description }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 魔之楔 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <div class="flex text-lg font-semibold mb-4">{{ $t("魔之楔") }}</div>
-                        <div class="flex justify-center items-center gap-2">
-                            <GameStyleModView
-                                :mods="roleMods"
-                                :char-build="roleCharBuild || undefined"
-                                :current-volume="Number(charDetail.currentVolume)"
-                                :sum-volume="Number(charDetail.sumVolume)"
-                            />
-                        </div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="MODS" :title="$t('魔之楔')" />
+                    <div class="flex items-center justify-center gap-2">
+                        <GameStyleModView
+                            :mods="roleMods"
+                            :char-build="roleCharBuild || undefined"
+                            :current-volume="Number(charDetail.currentVolume)"
+                            :sum-volume="Number(charDetail.sumVolume)"
+                        />
                     </div>
-                </div>
+                </section>
             </div>
 
             <!-- 错误状态 -->
-            <div v-else class="flex justify-center items-center h-full">
+            <div v-else class="flex h-full items-center justify-center">
                 <div class="text-center">
-                    <p class="text-lg mb-4 text-base-content/80">{{ $t("dna-role-detail.load_failed") }}</p>
-                    <button class="btn btn-secondary" @click="loadRoleDetail">{{ $t("dna-role-detail.retry") }}</button>
+                    <p class="mb-4 text-sm text-base-content/60">{{ $t("dna-role-detail.load_failed") }}</p>
+                    <button
+                        type="button"
+                        class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                        @click="loadRoleDetail"
+                    >
+                        {{ $t("dna-role-detail.retry") }}
+                    </button>
                 </div>
             </div>
         </div>

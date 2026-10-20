@@ -146,217 +146,306 @@ async function uploadPostAbyssUsage() {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <!-- 头部 -->
-        <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
-            <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- 顶栏：返回 + 版块 + 管理员动作（hairline 分隔，无实底页头） -->
+        <div class="flex flex-none items-center gap-2.5 border-b border-base-content/15 px-4 py-2.5">
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="router.back()"
+            >
+                <Icon icon="ri:arrow-left-line" class="size-4" />
             </button>
-            <h1 class="min-w-0 text-xl font-bold inline-flex justify-center items-center gap-4">
-                <img :src="postRes?.postDetail?.gameForumVo.iconUrl" class="size-8" />
-                <span class="truncate">{{ postRes?.postDetail?.gameForumVo.name || $t("dna-post.postDetailTitle") }}</span>
+            <img
+                v-if="postRes?.postDetail?.gameForumVo.iconUrl"
+                :src="postRes.postDetail.gameForumVo.iconUrl"
+                class="size-6 shrink-0 rounded-xs border border-base-content/10 object-contain"
+            />
+            <h1 class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content">
+                {{ postRes?.postDetail?.gameForumVo.name || $t("dna-post.postDetailTitle") }}
             </h1>
             <button
                 v-if="user.isAdmin"
-                class="btn btn-sm btn-primary shrink-0"
+                type="button"
+                class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="abyssUploadLoading"
                 @click="uploadPostAbyssUsage"
             >
                 <span v-if="abyssUploadLoading" class="loading loading-spinner loading-xs" />
-                <Icon v-else icon="ri:upload-cloud-line" />
+                <Icon v-else icon="ri:upload-cloud-line" class="size-3.5" />
                 {{ $t("dna-post-detail.upload_abyss_data") }}
             </button>
         </div>
 
         <!-- 内容区域 -->
-        <div class="flex-1 overflow-auto p-4">
-            <div v-if="loading" class="flex justify-center items-center h-full">
+        <div class="flex-1 overflow-auto">
+            <div v-if="loading" class="flex h-full items-center justify-center">
                 <span class="loading loading-spinner loading-lg" />
             </div>
 
-            <div v-else-if="postRes?.postDetail" class="space-y-6">
-                <!-- 帖子基本信息 -->
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
-                        <div class="flex items-center gap-3 mb-2">
-                            <SRouterLink :to="`/dna/mine/${postRes.postDetail.postUserId}`" class="cursor-pointer">
-                                <img
-                                    :src="postRes.postDetail.headCodeUrl"
-                                    :alt="$t('dna-post.userAvatar')"
-                                    class="w-10 h-10 rounded-full object-cover border border-base-300"
-                                />
-                            </SRouterLink>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-medium text-base-content">{{ postRes.postDetail.userName }}</span>
-                                </div>
-                                <div class="text-xs text-base-content/60">
-                                    {{ postRes.postDetail.postTime }}
-                                </div>
-                            </div>
-                            <div class="btn" @click="follow(postRes.postDetail.postUserId, !!postRes.isFollow)">
-                                {{ postRes.isFollow ? $t("dna-post.cancelFollow") : $t("dna-post.follow") }}
-                            </div>
-                        </div>
-                        <!-- 帖子标题 -->
-                        <h2 class="text-2xl font-bold mb-2">
-                            {{ postRes.postDetail.postTitle }}
-                        </h2>
-
-                        <!-- 帖子元信息 -->
-                        <div class="flex flex-wrap gap-2 mb-4 text-sm text-base-content/70">
-                            <span class="text-xs text-base-content/50 space-x-1">
-                                <span>{{ $t("dna-post.browse") }}: {{ postRes.postDetail.browseCount }}</span>
-                                <span>{{ $t("dna-post.comment") }}: {{ postRes.postDetail.commentCount }}</span>
-                                <span>{{ $t("dna-post.like") }}: {{ postRes.postDetail.likeCount }}</span>
-                                <span>{{ $t("dna-post.favorite") }}: {{ postRes.postDetail.collectionCount }}</span></span
+            <div v-else-if="postRes?.postDetail" class="stagger-rise space-y-3 p-3 sm:p-4">
+                <!-- 帖子档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+                <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+                    <!-- 引导线网格（装饰性，随主题明暗） -->
+                    <div
+                        class="pointer-events-none absolute inset-0"
+                        style="
+                            background-image:
+                                linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                                linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                            background-size: 26px 26px;
+                            mask-image: linear-gradient(to bottom, black, transparent 85%);
+                        "
+                        aria-hidden="true"
+                    />
+                    <!-- 右上角斜切楔形 -->
+                    <span
+                        class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                        aria-hidden="true"
+                    />
+                    <div class="relative flex items-start gap-3.5">
+                        <SRouterLink :to="`/dna/mine/${postRes.postDetail.postUserId}`" class="relative shrink-0 cursor-pointer">
+                            <img
+                                :src="postRes.postDetail.headCodeUrl"
+                                :alt="$t('dna-post.userAvatar')"
+                                class="size-12 rounded-full border border-base-content/15 object-cover"
+                            />
+                        </SRouterLink>
+                        <div class="relative min-w-0 flex-1">
+                            <p
+                                class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
                             >
+                                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                                Post File
+                            </p>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <h2
+                                    class="truncate font-orbitron text-xl leading-tight font-bold tracking-tight text-base-content sm:text-2xl"
+                                >
+                                    {{ postRes.postDetail.postTitle }}
+                                </h2>
+                                <CopyID :id="postRes.postDetail.id" />
+                            </div>
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50">
+                                <span class="font-medium text-base-content/80">{{ postRes.postDetail.userName }}</span>
+                                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                                <span>{{ postRes.postDetail.postTime }}</span>
+                            </div>
+                            <!-- 帖子元信息 -->
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/50">
+                                <span class="tabular-nums"
+                                    >{{ $t("dna-post.browse") }} {{ postRes.postDetail.browseCount }}</span
+                                >
+                                <span class="tabular-nums"
+                                    >{{ $t("dna-post.comment") }} {{ postRes.postDetail.commentCount }}</span
+                                >
+                                <span class="tabular-nums"
+                                    >{{ $t("dna-post.like") }} {{ postRes.postDetail.likeCount }}</span
+                                >
+                                <span class="tabular-nums"
+                                    >{{ $t("dna-post.favorite") }} {{ postRes.postDetail.collectionCount }}</span
+                                >
+                            </div>
+                            <!-- 帖子标签 -->
+                            <div class="mt-2 flex flex-wrap gap-1.5">
+                                <span
+                                    v-if="postRes.postDetail.isElite === 1"
+                                    class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary"
+                                >
+                                    {{ $t("dna-post.featured") }}
+                                </span>
+                                <span
+                                    v-if="postRes.postDetail.isOfficial === 1"
+                                    class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                                >
+                                    {{ $t("dna-post.official") }}
+                                </span>
+                                <span
+                                    v-for="(topic, index) in postRes.postDetail.topics"
+                                    :key="index"
+                                    class="inline-flex shrink-0 items-center gap-0.5 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/60"
+                                >
+                                    <Icon icon="ri:hashtag" class="size-3" />
+                                    {{ topic.topicName }}</span
+                                >
+                            </div>
                         </div>
-
-                        <!-- 帖子标签 -->
-                        <div class="flex flex-wrap gap-2">
-                            <span v-if="postRes.postDetail.isElite === 1" class="badge badge-secondary text-xs">{{
-                                $t("dna-post.featured")
-                            }}</span>
-                            <span v-if="postRes.postDetail.isOfficial === 1" class="badge badge-info text-xs">{{
-                                $t("dna-post.official")
-                            }}</span>
-                            <span v-for="(topic, index) in postRes.postDetail.topics" :key="index" class="badge badge-outline text-xs">
-                                <Icon icon="ri:hashtag" />
-                                {{ topic.topicName }}</span
-                            >
-                        </div>
+                        <button
+                            type="button"
+                            class="relative shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                postRes.isFollow
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="follow(postRes.postDetail.postUserId, !!postRes.isFollow)"
+                        >
+                            {{ postRes.isFollow ? $t("dna-post.cancelFollow") : $t("dna-post.follow") }}
+                        </button>
                     </div>
-                </div>
+                </header>
 
                 <!-- 帖子内容 -->
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body select-text">
-                        <div class="space-y-6">
-                            <DNAPostContent :contents="postRes.postDetail.postContent" />
-                        </div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="CONTENT" />
+                    <div class="select-text">
+                        <DNAPostContent :contents="postRes.postDetail.postContent" />
                     </div>
-                </div>
+                </section>
 
                 <!-- 评论区 -->
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
-                        <h3 class="card-title text-xl mb-4">{{ $t("dna-post.commentsTitle", { count: comments.length }) }}</h3>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader
+                        no-animate
+                        compact
+                        kicker="COMMENTS"
+                        :title="$t('dna-post.commentsTitle', { count: comments.length })"
+                    />
 
-                        <!-- 评论列表 -->
-                        <div class="space-y-4">
-                            <div v-for="comment in comments" :key="comment.commentId" class="p-4 bg-base-200 rounded-lg">
-                                <!-- 评论头部 -->
-                                <div class="flex items-center gap-3 mb-2">
-                                    <SRouterLink :to="`/dna/mine/${comment.userId}`" class="cursor-pointer">
-                                        <img
-                                            :src="comment.userHeadUrl"
-                                            :alt="$t('common.user_avatar')"
-                                            class="w-10 h-10 rounded-full object-cover border border-base-300"
-                                        />
-                                    </SRouterLink>
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium text-base-content">{{ comment.userName }}</span>
-                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">{{
-                                                $t("common.official")
-                                            }}</span>
-                                            <span v-if="comment.isCreator === 1" class="badge badge-sm badge-secondary text-xs">{{
-                                                $t("dna-post-detail.creator")
-                                            }}</span>
-                                        </div>
-                                        <div class="text-xs text-base-content/60">
-                                            {{ comment.commentTime }}
-                                        </div>
+                    <!-- 评论列表 -->
+                    <div class="space-y-2">
+                        <div
+                            v-for="comment in comments"
+                            :key="comment.commentId"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                        >
+                            <!-- 评论头部 -->
+                            <div class="mb-2 flex items-center gap-2.5">
+                                <SRouterLink :to="`/dna/mine/${comment.userId}`" class="shrink-0 cursor-pointer">
+                                    <img
+                                        :src="comment.userHeadUrl"
+                                        :alt="$t('common.user_avatar')"
+                                        class="size-9 rounded-full border border-base-content/15 object-cover"
+                                    />
+                                </SRouterLink>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="truncate text-sm font-medium text-base-content">{{ comment.userName }}</span>
+                                        <span
+                                            v-if="comment.isOfficial === 1"
+                                            class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                                        >
+                                            {{ $t("common.official") }}
+                                        </span>
+                                        <span
+                                            v-if="comment.isCreator === 1"
+                                            class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary"
+                                        >
+                                            {{ $t("dna-post-detail.creator") }}
+                                        </span>
                                     </div>
-                                    <span class="text-xs text-base-content/50">#{{ comment.floor }}</span>
+                                    <div class="mt-0.5 text-xs text-base-content/50">
+                                        {{ comment.commentTime }}
+                                    </div>
                                 </div>
+                                <span class="shrink-0 font-mono text-xs tabular-nums text-base-content/40"
+                                    >#{{ comment.floor }}</span
+                                >
+                            </div>
 
-                                <!-- 评论内容 -->
-                                <div class="mb-3 text-base-content">
-                                    <DNAPostContent :contents="comment.commentContent" />
-                                </div>
+                            <!-- 评论内容 -->
+                            <div class="mb-2.5 text-sm text-base-content">
+                                <DNAPostContent :contents="comment.commentContent" />
+                            </div>
 
-                                <!-- 评论操作 -->
-                                <div class="flex items-center gap-4 text-sm text-base-content/70">
-                                    <button class="flex items-center gap-1 hover:text-primary transition-colors duration-200">
-                                        <span>
-                                            <Icon icon="ri:heart-line" />
-                                        </span>
-                                        <span>{{ comment.likeCount }}</span>
-                                    </button>
-                                    <button class="flex items-center gap-1 hover:text-primary transition-colors duration-200">
-                                        <span>
-                                            <Icon icon="ri:message-2-line" />
-                                        </span>
-                                        <span>{{ comment.replyCount }}</span>
-                                    </button>
-                                </div>
+                            <!-- 评论操作 -->
+                            <div class="flex items-center gap-4 text-xs text-base-content/60">
+                                <button
+                                    type="button"
+                                    class="inline-flex cursor-pointer items-center gap-1 tabular-nums transition-colors duration-150 hover:text-primary"
+                                >
+                                    <Icon icon="ri:heart-line" class="size-3.5" />
+                                    <span>{{ comment.likeCount }}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex cursor-pointer items-center gap-1 tabular-nums transition-colors duration-150 hover:text-primary"
+                                >
+                                    <Icon icon="ri:message-2-line" class="size-3.5" />
+                                    <span>{{ comment.replyCount }}</span>
+                                </button>
+                            </div>
 
-                                <!-- 回复列表 -->
-                                <div v-if="comment.replyVos && comment.replyVos.length > 0" class="mt-3 space-y-3 pl-4">
-                                    <div
-                                        v-for="reply in comment.replyVos"
-                                        :key="reply.postCommentReplayId"
-                                        class="p-3 bg-base-100 rounded-lg"
-                                    >
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="font-medium text-sm">{{ reply.userName }}</span>
-                                            <span class="text-xs text-base-content/60">{{ reply.replyTime }}</span>
-                                        </div>
-                                        <div class="text-sm text-base-content/80">
-                                            <DNAPostContent :contents="reply.replyContent" />
-                                        </div>
+                            <!-- 回复列表 -->
+                            <div v-if="comment.replyVos && comment.replyVos.length > 0" class="mt-2.5 space-y-1.5">
+                                <div
+                                    v-for="reply in comment.replyVos"
+                                    :key="reply.postCommentReplayId"
+                                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-2.5"
+                                >
+                                    <div class="mb-1 flex flex-wrap items-center gap-2">
+                                        <span class="text-sm font-medium">{{ reply.userName }}</span>
+                                        <span class="text-xs text-base-content/50">{{ reply.replyTime }}</span>
+                                    </div>
+                                    <div class="text-sm text-base-content/80">
+                                        <DNAPostContent :contents="reply.replyContent" />
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- 无评论提示 -->
-                            <div v-if="comments.length === 0" class="text-center py-8">
-                                <p class="text-base-content/60 mb-2">{{ $t("dna-post-detail.no_comments") }}</p>
-                                <p class="text-xs text-base-content/40">{{ $t("dna-post-detail.be_first_commenter") }}</p>
-                            </div>
                         </div>
 
-                        <!-- 加载更多按钮 -->
-                        <div v-if="commentHasNext" class="flex justify-center mt-6">
-                            <button class="btn btn-outline" :disabled="moreLoading" @click="loadMoreComments">
-                                <span v-if="moreLoading" class="loading loading-spinner loading-xs mr-2" />
-                                {{ $t("common.load_more") }}
-                            </button>
+                        <!-- 无评论提示 -->
+                        <div v-if="comments.length === 0" class="py-8 text-center">
+                            <p class="mb-2 text-sm text-base-content/60">{{ $t("dna-post-detail.no_comments") }}</p>
+                            <p class="text-xs text-base-content/40">{{ $t("dna-post-detail.be_first_commenter") }}</p>
                         </div>
+                    </div>
 
-                        <!-- 发表评论 -->
-                        <div class="mt-6 pt-6 border-t border-base-200">
-                            <h3 class="text-lg font-semibold mb-4">{{ $t("dna-post-detail.post_comment") }}</h3>
-                            <div class="space-y-4">
-                                <textarea
-                                    v-model="commentContent"
-                                    :placeholder="$t('dna-post-detail.comment_placeholder')"
-                                    class="w-full min-h-30 bg-base-100 text-base-content rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
-                                    :disabled="commentLoading"
-                                />
-                                <div class="flex justify-end">
-                                    <button
-                                        class="btn btn-primary"
-                                        :disabled="commentLoading || !commentContent.trim()"
-                                        @click="submitComment"
-                                    >
-                                        <span v-if="commentLoading" class="loading loading-spinner loading-sm mr-2" />
-                                        {{ commentLoading ? "发布中..." : "发布评论" }}
-                                    </button>
-                                </div>
+                    <!-- 加载更多按钮 -->
+                    <div v-if="commentHasNext" class="mt-3 flex justify-center">
+                        <button
+                            type="button"
+                            class="cursor-pointer rounded-xs border px-3 py-1.5 text-xs font-semibold transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                            :class="
+                                moreLoading
+                                    ? 'border-base-content/10 text-base-content/35'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            :disabled="moreLoading"
+                            @click="loadMoreComments"
+                        >
+                            <span v-if="moreLoading" class="loading loading-spinner loading-xs mr-2" />
+                            {{ $t("common.load_more") }}
+                        </button>
+                    </div>
+
+                    <!-- 发表评论 -->
+                    <div class="mt-3 border-t border-base-content/15 pt-3">
+                        <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
+                            {{ $t("dna-post-detail.post_comment") }}
+                        </div>
+                        <div class="space-y-2.5">
+                            <textarea
+                                v-model="commentContent"
+                                :placeholder="$t('dna-post-detail.comment_placeholder')"
+                                class="w-full min-h-30 rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none"
+                                :disabled="commentLoading"
+                            />
+                            <div class="flex justify-end">
+                                <button
+                                    type="button"
+                                    class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                                    :disabled="commentLoading || !commentContent.trim()"
+                                    @click="submitComment"
+                                >
+                                    <span v-if="commentLoading" class="loading loading-spinner loading-sm mr-2" />
+                                    {{ commentLoading ? "发布中..." : "发布评论" }}
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
 
-            <div v-else class="flex justify-center items-center h-full">
+            <div v-else class="flex h-full items-center justify-center">
                 <div class="text-center">
-                    <p class="text-lg mb-4">{{ $t("dna-post-detail.load_failed") }}</p>
-                    <button class="btn btn-secondary" @click="loadPostDetail()">{{ $t("common.retry") }}</button>
+                    <p class="mb-4 text-sm text-base-content/60">{{ $t("dna-post-detail.load_failed") }}</p>
+                    <button
+                        type="button"
+                        class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                        @click="loadPostDetail()"
+                    >
+                        {{ $t("common.retry") }}
+                    </button>
                 </div>
             </div>
         </div>

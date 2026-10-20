@@ -9,38 +9,32 @@ import {
     cleanupTempDir,
     deleteFile,
     extractGameAssets,
-    getFileSize,
     listFiles,
     readTextFile,
     renameFile,
     writeTextFile,
 } from "@/api/app"
 import { useGameStore } from "@/store/game"
-import { useGameUpdateStore } from "@/store/gameUpdate"
+import { type ActiveBasePackage, useGameUpdateStore } from "@/store/gameUpdate"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, swapCdnBase } from "@/utils/cdn"
 import {
     compareGameVersions,
-    type DiffPackageInfo,
     type DownloadProgress,
     downloadAssets,
     downloadFullPackage,
     downloadHotUpdateAssets,
-    type FullPackageInfo,
     type GameVersionListWithPre,
     getBaseVersion,
-    getDiffPackageInfo,
     getDownloadProgress,
     getHotUpdatePakFilesInfo,
-    getPreFullPackageInfo,
     type HotUpdatePakFileInfo,
     type HotUpdatePakFilesInfoRes,
     isDownloadAlreadyActiveError,
     isDownloadPausedError,
     isLocalFileMatch,
     normalizeHotUpdatePakFilesInfo,
-    resolveGameVersion,
     resolveLocalVersions,
     toLocalBaseVersionFormat,
     VERSION_URL_PUB,
@@ -77,21 +71,25 @@ const {
     hotUpdateVersionListCache,
     hotUpdatePendingVersions,
     optionalPatchSignsCache,
+    fullPackageInfo,
+    preFullPackageInfo,
+    diffPackageInfo,
+    preDiffPackageInfo,
+    activeBasePackage,
+    needUpdate,
+    updateSize,
+    needPreDownload,
+    preTotalSize,
+    preTotalFiles,
+    fullPackageDownloadDir,
 } = storeToRefs(gameUpdateStore)
 
 const versionList = ref<GameVersionListWithPre | null>(null)
-const fullPackageInfo = ref<FullPackageInfo | null>(null)
-const preFullPackageInfo = ref<FullPackageInfo | null>(null)
-/** 当前可用的差分包（本地版本符合 min_supported_version 且远端提供时非空，否则回退完整包）。 */
-const diffPackageInfo = ref<DiffPackageInfo | null>(null)
 const isLoading = ref(false)
 const isExtracting = ref(false)
 
 const totalSize = ref(0)
 const totalFiles = ref(0)
-
-const preTotalSize = ref(0)
-const preTotalFiles = ref(0)
 
 // 可选语音包 / 热更详情 UI 状态（展示层，留在组件内）
 const showOptionalVoicePacks = ref(false)
@@ -191,9 +189,7 @@ function resetExtractionState() {
     extractionCurrentFile.value = ""
 }
 
-// 版本更新相关状态
-const needUpdate = ref(false)
-const updateSize = ref(0)
+// 版本更新相关状态统一由 store 维护（完整启动器与迷你启动器共用）
 const hasUpdate = computed(() => needUpdate.value || needHotUpdate.value)
 const displayDownloadSize = computed(() => {
     if (isDownloading.value || isDownloadPaused.value) return activeDownloadTotal.value
@@ -209,59 +205,6 @@ const displayDownloadFileCount = computed(() => {
     return totalFiles.value
 })
 const displayOverallProgressPercent = computed(() => Math.min(100, Math.max(0, Math.floor(overallProgress.value * 100))))
-
-/**
- * 本次基础包更新实际下载的目标：本地版本适配差分包（符合 min_supported_version）时用差分包，否则用完整包。
- */
-interface ActiveBasePackage {
-    /** hdiff 文件名。 */
-    fileName: string
-    /** 下载量（字节）。 */
-    size: number
-    /** hdiff 下载地址。 */
-    downloadUrl: string
-    /** 是否为差分包。 */
-    isDiff: boolean
-    /** 差分包来源版本号（完整包为 null）。 */
-    fromVersion: number | null
-    /** 目标版本号，应用成功后写入 GameVersion.json。 */
-    targetVersion: string
-}
-
-/**
- * 把完整包信息转换为统一的基础包更新目标。
- * @param info 完整包信息
- * @returns 基础包更新目标
- */
-function toActiveFullPackage(info: FullPackageInfo): ActiveBasePackage {
-    return {
-        fileName: info.fileName,
-        size: info.size,
-        downloadUrl: info.downloadUrl,
-        isDiff: false,
-        fromVersion: null,
-        targetVersion: info.latestVersion,
-    }
-}
-
-/** 当前基础包更新目标（差分包优先，无差分包时用完整包）。 */
-const activeBasePackage = computed<ActiveBasePackage | null>(() => {
-    const diff = diffPackageInfo.value
-    if (diff) {
-        return {
-            fileName: diff.fileName,
-            size: diff.size,
-            downloadUrl: diff.downloadUrl,
-            isDiff: true,
-            fromVersion: diff.fromVersion,
-            targetVersion: String(diff.toVersion),
-        }
-    }
-    return fullPackageInfo.value ? toActiveFullPackage(fullPackageInfo.value) : null
-})
-
-// 是否需要预下载
-const needPreDownload = ref(false)
 
 const channels = [
     {
@@ -313,12 +256,7 @@ watch([() => gameUpdateStore.selectedChannel, () => gameUpdateStore.customChanne
     const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
-        fullPackageInfo.value = null
-        preFullPackageInfo.value = null
-        diffPackageInfo.value = null
-        needUpdate.value = false
-        updateSize.value = 0
-        needPreDownload.value = false
+        gameUpdateStore.resetPackageUpdateState()
         needHotUpdate.value = false
         hotUpdateSize.value = 0
         hotUpdateFiles.value = 0
@@ -364,10 +302,6 @@ const tempDownloadDir = computed(() => {
 const tempPreDownloadDir = computed(() => {
     if (!gamePath.value) return ""
     return gamePath.value + "\\DNA Game\\TempPrePath\\"
-})
-const fullPackageDownloadDir = computed(() => {
-    if (!gamePath.value) return ""
-    return `${gamePath.value}\\Diff\\`
 })
 const extractDir = computed(() => {
     if (!gamePath.value) return ""
@@ -733,12 +667,7 @@ async function fetchVersionList() {
     const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
-        fullPackageInfo.value = null
-        preFullPackageInfo.value = null
-        diffPackageInfo.value = null
-        needUpdate.value = false
-        updateSize.value = 0
-        needPreDownload.value = false
+        gameUpdateStore.resetPackageUpdateState()
         needHotUpdate.value = false
         hotUpdateSize.value = 0
         hotUpdateVersionListCache.value = null
@@ -749,23 +678,12 @@ async function fetchVersionList() {
     }
     isLoading.value = true
     versionList.value = null
-    fullPackageInfo.value = null
-    preFullPackageInfo.value = null
-    diffPackageInfo.value = null
+    gameUpdateStore.resetPackageUpdateState()
     try {
-        const [fullPackage, preFullPackage] = await Promise.all([
-            gameUpdateStore.getFullPackageInfoForActiveChannel(),
-            // 预下载是可选能力：清单异常不应阻断正式版本检查
-            getPreFullPackageInfo(gameUpdateStore.selectedCDN, activeChannel).catch(err => {
-                console.warn("获取预下载完整包信息失败:", err)
-                return null
-            }),
-        ])
-        const baseVersion = fullPackage ? null : await getBaseVersion(gameUpdateStore.selectedCDN, activeChannel)
-        versionList.value = baseVersion
-        fullPackageInfo.value = fullPackage
-        preFullPackageInfo.value = preFullPackage
+        await gameUpdateStore.refreshPackageInfo()
+        versionList.value = fullPackageInfo.value ? null : await getBaseVersion(gameUpdateStore.selectedCDN, activeChannel)
         await refreshGameInstalled()
+        await gameUpdateStore.refreshUpdateTargets()
         calculateTotalSize()
         await checkPreDownloadStatus()
         await gameUpdateStore.checkHotUpdateStatus()
@@ -781,8 +699,6 @@ function calculateTotalSize() {
     if (fullPackageInfo.value) {
         totalSize.value = fullPackageInfo.value.size
         totalFiles.value = 1
-        preTotalSize.value = preFullPackageInfo.value?.size ?? 0
-        preTotalFiles.value = preFullPackageInfo.value ? 1 : 0
         return
     }
     if (!versionList.value) return
@@ -795,38 +711,24 @@ function calculateTotalSize() {
     }
     totalSize.value = size
     totalFiles.value = files
+    // 预下载清单存在时由 store 按差分目标写入大小，这里只处理旧版资源分包
+    if (preFullPackageInfo.value) return
+    let preSize = 0
+    let preFiles = 0
     if (versionList.value.preVersionList) {
-        let preSize = 0
-        let preFiles = 0
         const preVersionList = versionList.value.preVersionList.GameVersionList["1"].GameVersionList
         for (const assets of Object.values(preVersionList)) {
             preSize += assets.ZipSize
             preFiles++
         }
-        preTotalSize.value = preSize
-        preTotalFiles.value = preFiles
-    } else {
-        preTotalSize.value = 0
-        preTotalFiles.value = 0
     }
+    preTotalSize.value = preSize
+    preTotalFiles.value = preFiles
 }
 
 async function checkPreDownloadStatus() {
-    const activeChannel = gameUpdateStore.getActiveChannel()
-    if (!gamePath.value || !activeChannel) {
-        needPreDownload.value = false
-        return
-    }
-    if (fullPackageInfo.value) {
-        if (!preFullPackageInfo.value || preFullPackageInfo.value.latestVersion === fullPackageInfo.value.latestVersion) {
-            needPreDownload.value = false
-            return
-        }
-        const fullFilePath = `${fullPackageDownloadDir.value}${preFullPackageInfo.value.fileName}`
-        const progressFileSize = await getFileSize(`${fullFilePath}.progress`)
-        needPreDownload.value = progressFileSize !== 0 || (await getFileSize(fullFilePath)) !== preFullPackageInfo.value.size
-        return
-    }
+    // 新清单布局已在 refreshUpdateTargets 中由 store 统一解析；这里只处理旧版资源分包
+    if (preFullPackageInfo.value) return
     if (!versionList.value?.preVersionList) {
         needPreDownload.value = false
         return
@@ -866,41 +768,32 @@ async function checkForUpdates() {
     }
     if (!gamePath.value) return
     try {
-        if (fullPackageInfo.value) {
-            const localContent = await readTextFile(gameVersionPath.value)
-            const localVersion = resolveGameVersion(localContent)
-            needUpdate.value = String(localVersion) !== fullPackageInfo.value.latestVersion
-            // 本地版本符合 min_supported_version 时优先走差分包；远端未提供差分包时回退完整包
-            diffPackageInfo.value = needUpdate.value
-                ? await getDiffPackageInfo(gameUpdateStore.selectedCDN, activeChannel, fullPackageInfo.value, localVersion ?? 0)
-                : null
-            updateSize.value = needUpdate.value ? (diffPackageInfo.value?.size ?? fullPackageInfo.value.size) : 0
-            await checkPreDownloadStatus()
-            await gameUpdateStore.checkHotUpdateStatus()
-            await syncDownloadProgressAfterRefresh()
-            return
-        }
-        const localContent = await readTextFile(baseVersionPath.value)
-        const localVersions = resolveLocalVersions(localContent)
-        if (!localVersions) {
-            throw new Error("Unsupported BaseVersion format")
-        }
-        if (versionList.value) {
-            const remoteVersions = resolveLocalVersions(JSON.stringify(versionList.value.gameVersionList))
-            if (!remoteVersions) {
-                throw new Error("Unsupported remote BaseVersion format")
+        // 正式更新目标（差分优先）与预下载目标统一由 store 按本地版本解析
+        await gameUpdateStore.refreshUpdateTargets()
+        if (!fullPackageInfo.value) {
+            const localContent = await readTextFile(baseVersionPath.value)
+            const localVersions = resolveLocalVersions(localContent)
+            if (!localVersions) {
+                throw new Error("Unsupported BaseVersion format")
             }
-            const { hasUpdate, updateSizeBytes } = compareGameVersions(localVersions, remoteVersions)
-            needUpdate.value = hasUpdate
-            updateSize.value = updateSizeBytes
+            if (versionList.value) {
+                const remoteVersions = resolveLocalVersions(JSON.stringify(versionList.value.gameVersionList))
+                if (!remoteVersions) {
+                    throw new Error("Unsupported remote BaseVersion format")
+                }
+                const { hasUpdate, updateSizeBytes } = compareGameVersions(localVersions, remoteVersions)
+                needUpdate.value = hasUpdate
+                updateSize.value = updateSizeBytes
+            }
         }
     } catch (err) {
         needUpdate.value = true
         updateSize.value = totalSize.value
-        // 本地版本（GameVersion.json）不可读或格式异常时无法判断差分适用性，直接回退完整包
+        // 本地版本不可读或格式异常时无法判断差分适用性，直接回退完整包
         diffPackageInfo.value = null
         console.error("检查更新时出错:", err)
     }
+    calculateTotalSize()
     await checkPreDownloadStatus()
     await gameUpdateStore.checkHotUpdateStatus()
     await syncDownloadProgressAfterRefresh()
@@ -958,25 +851,10 @@ async function syncDownloadProgressAfterRefresh() {
         }
     }
 
-    if (needPreDownload.value && preFullPackageInfo.value) {
-        const fullFilePath = `${fullPackageDownloadDir.value}${preFullPackageInfo.value.fileName}`
-        const progress = await getDownloadProgress(fullFilePath)
-        if (progress.hasProgressFile) {
-            await gameUpdateStore.prepareCurrentDownloadFile(
-                fullFilePath,
-                preFullPackageInfo.value.fileName,
-                preFullPackageInfo.value.size,
-                0,
-                preFullPackageInfo.value.size,
-                preFullPackageInfo.value.downloadUrl
-            )
-            isDownloading.value = progress.active
-            isPauseRequested.value = progress.active && progress.paused
-            isDownloadPaused.value = progress.paused && !progress.active
-            isRecoveredActiveDownload.value = progress.active
-            activeDownloadAction.value = "pre"
-        }
-        return
+    if (needPreDownload.value) {
+        if (await gameUpdateStore.resumePreDownloadProgress()) return
+        // 新清单布局已由 store 接管，不再走旧版资源分包恢复
+        if (preFullPackageInfo.value) return
     }
 
     if (needPreDownload.value && versionList.value?.preVersionList) {
@@ -1124,13 +1002,9 @@ async function selectGameDir() {
  * 差分包以本地安装目录作为 hpatchz 的 oldPath，与输出目录相同即可原地更新。
  */
 async function downloadAndApplyBasePackage() {
-    const activePackage = activeBasePackage.value
-    const fullPackage = fullPackageInfo.value
-    if (!activePackage || !gamePath.value) return
+    if (!activeBasePackage.value || !gamePath.value) return
     // 回退顺序：先差分包，再完整包（无差分包时只跑完整包）
-    const candidates: ActiveBasePackage[] = activePackage.isDiff
-        ? [activePackage, ...(fullPackage ? [toActiveFullPackage(fullPackage)] : [])]
-        : [activePackage]
+    const candidates: ActiveBasePackage[] = gameUpdateStore.getBasePackageCandidates()
 
     for (const [index, packageInfo] of candidates.entries()) {
         const packageFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
@@ -1348,66 +1222,6 @@ async function downloadAllFiles() {
     }
 }
 
-/**
- * 下载并校验新版预下载完整包，保留文件供正式版本直接复用。
- */
-async function preDownloadFullPackage() {
-    const packageInfo = preFullPackageInfo.value
-    if (!packageInfo || !gamePath.value) return
-
-    const fullFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
-    const progressFilePath = `${fullFilePath}.progress`
-    isDownloading.value = true
-    activeDownloadAction.value = "pre"
-    activeOptionalSign.value = ""
-    isRecoveredActiveDownload.value = false
-    isDownloadPaused.value = false
-    isPauseRequested.value = false
-    currentDownloaded.value = 0
-    overallProgress.value = 0
-    downloadSpeed.value = ""
-    gameUpdateStore.resetSpeedBaseline()
-
-    try {
-        await gameUpdateStore.prepareCurrentDownloadFile(
-            fullFilePath,
-            packageInfo.fileName,
-            packageInfo.size,
-            0,
-            packageInfo.size,
-            packageInfo.downloadUrl
-        )
-        const isPackageComplete = await gameUpdateStore.canSkipBeforeHashCheck(fullFilePath, progressFilePath, packageInfo.size)
-        if (!isPackageComplete) {
-            await downloadFullPackage(packageInfo, fullFilePath, concurrentThreads.value)
-        }
-        gameUpdateStore.throwIfPauseRequested()
-
-        isDownloading.value = false
-        needPreDownload.value = false
-        currentFile.value = ""
-        currentFileUrl.value = ""
-        currentDownloadPath.value = ""
-        currentDownloaded.value = packageInfo.size
-        overallProgress.value = 0
-        downloadSpeed.value = ""
-        ui.showSuccessMessage(t("game-update.pre_download_complete", { size: gameUpdateStore.formatSize(packageInfo.size) }))
-    } catch (err) {
-        if (isDownloadPausedError(err)) {
-            gameUpdateStore.markDownloadPaused()
-            return
-        }
-        if (isDownloadAlreadyActiveError(err)) {
-            gameUpdateStore.markDownloadAlreadyActive()
-            return
-        }
-        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
-        console.error("预下载完整包失败:", err)
-        isDownloading.value = false
-        downloadSpeed.value = ""
-    }
-}
-
 async function preDownloadAllFiles() {
     const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
@@ -1418,8 +1232,9 @@ async function preDownloadAllFiles() {
         ui.showErrorMessage(t("game-update.select_game_dir_first"))
         return
     }
+    // 新清单布局：差分 / 完整包目标与下载统一由 store 编排
     if (preFullPackageInfo.value) {
-        await preDownloadFullPackage()
+        await gameUpdateStore.downloadPreDownloadPackage()
         return
     }
     if (!versionList.value || !versionList.value.preVersion || !versionList.value.preVersionList) {
@@ -1835,6 +1650,9 @@ const launchGame = async () => {
                                         size: gameUpdateStore.formatSize(preTotalSize),
                                     })
                                 }}
+                            </p>
+                            <p v-if="preDiffPackageInfo" class="text-[11px] text-info/70">
+                                差分 v{{ preDiffPackageInfo.fromVersion }} → v{{ preDiffPackageInfo.toVersion }}
                             </p>
                         </div>
                     </div>

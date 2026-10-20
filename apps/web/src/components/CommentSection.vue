@@ -115,7 +115,11 @@ onMounted(() => {
             <div class="text-sm font-medium">
                 {{ $t("comment-section.comment") }} <span class="opacity-60">({{ comments.length }})</span>
             </div>
-            <button class="btn btn-ghost btn-xs" type="button" @click="loadComments">
+            <button
+                class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                type="button"
+                @click="loadComments"
+            >
                 <Icon icon="ri:refresh-line" />
             </button>
         </div>
@@ -135,7 +139,12 @@ onMounted(() => {
                 :placeholder="$t('comment-section.comment_placeholder')"
                 @keyup.enter="postComment"
             />
-            <button class="btn btn-primary btn-sm shrink-0" type="button" :disabled="!content.trim() || posting" @click="postComment">
+            <button
+                class="shrink-0 cursor-pointer rounded-xs border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                type="button"
+                :disabled="!content.trim() || posting"
+                @click="postComment"
+            >
                 {{ posting ? "发表中..." : "发表" }}
             </button>
         </div>
@@ -151,7 +160,7 @@ onMounted(() => {
                         <span class="text-[10px] opacity-50">{{ formatRelativeTime(comment.createdAt, i18next.language) }}</span>
                         <button
                             v-if="canDelete(comment)"
-                            class="btn btn-ghost btn-xs btn-square ml-auto shrink-0 opacity-60 hover:opacity-100"
+                            class="ml-auto inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xs text-base-content/40 opacity-60 transition-colors duration-150 hover:text-primary hover:opacity-100 active:scale-[0.97]"
                             type="button"
                             @click="removeComment(comment)"
                         >

@@ -47,145 +47,193 @@ async function loadWeaponDetail() {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <!-- 头部 -->
-        <div class="flex-none p-4 bg-base-100 border-b border-base-200 flex items-center justify-between">
-            <button class="btn btn-ghost" @click="router.back()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- 顶栏：返回 + 标题（hairline 分隔，无实底页头） -->
+        <div class="flex flex-none items-center gap-2.5 border-b border-base-content/15 px-4 py-2.5">
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                @click="router.back()"
+            >
+                <Icon icon="ri:arrow-left-line" class="size-4" />
             </button>
-            <h1 class="text-xl font-bold">
+            <h1 class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content">
                 {{ weaponDetail?.name || "武器详情" }}
             </h1>
-            <div class="w-12" />
-            <!-- Spacer -->
         </div>
 
         <!-- 内容区域 -->
-        <div class="flex-1 overflow-auto p-4 bg-base-100">
-            <div v-if="loading" class="flex justify-center items-center h-full">
+        <div class="flex-1 overflow-auto">
+            <div v-if="loading" class="flex h-full items-center justify-center">
                 <span class="loading loading-spinner loading-lg" />
             </div>
 
-            <div v-else-if="weaponDetail" class="space-y-6">
-                <!-- 武器基本信息 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <div class="flex items-center gap-6">
-                            <!-- 武器图标 -->
-                            <div class="shrink-0">
-                                <img
-                                    v-if="weaponDetail.icon"
-                                    :src="weaponDetail.icon"
-                                    :alt="$t('dna-weapon-detail.weapon_icon')"
-                                    class="w-24 h-24 object-contain rounded-lg border border-base-200 p-2 bg-base-200"
-                                />
-                                <div
-                                    v-else
-                                    class="w-24 h-24 flex items-center justify-center rounded-lg border border-base-200 bg-base-200"
-                                >
-                                    <span class="text-base-400">{{ $t("dna-weapon-detail.no_icon") }}</span>
-                                </div>
+            <div v-else-if="weaponDetail" class="stagger-rise space-y-3 p-3 sm:p-4">
+                <!-- 武器档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+                <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+                    <!-- 引导线网格（装饰性，随主题明暗） -->
+                    <div
+                        class="pointer-events-none absolute inset-0"
+                        style="
+                            background-image:
+                                linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                                linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                            background-size: 26px 26px;
+                            mask-image: linear-gradient(to bottom, black, transparent 85%);
+                        "
+                        aria-hidden="true"
+                    />
+                    <!-- 右上角斜切楔形 -->
+                    <span
+                        class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                        aria-hidden="true"
+                    />
+                    <div class="relative flex items-start gap-3.5">
+                        <!-- 武器图标 -->
+                        <div
+                            class="relative size-20 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/5 sm:size-24"
+                        >
+                            <img
+                                v-if="weaponDetail.icon"
+                                :src="weaponDetail.icon"
+                                :alt="$t('dna-weapon-detail.weapon_icon')"
+                                class="h-full w-full object-contain p-1.5"
+                            />
+                            <div v-else class="flex h-full w-full items-center justify-center p-1.5 text-center">
+                                <span class="text-xs text-base-content/45">{{ $t("dna-weapon-detail.no_icon") }}</span>
                             </div>
-
-                            <!-- 武器名称与等级 -->
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3">
-                                    <h2 class="text-2xl font-bold">
-                                        {{ weaponDetail.name }}
-                                    </h2>
-                                    <div class="badge badge-secondary">Lv.{{ weaponDetail.level }}</div>
-                                </div>
-
-                                <!-- 元素类型 -->
-                                <div class="flex items-center gap-2 mt-2">
+                        </div>
+                        <!-- 武器名称与等级 -->
+                        <div class="relative min-w-0 flex-1">
+                            <p
+                                class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
+                            >
+                                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                                Weapon File
+                            </p>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <h2
+                                    class="truncate font-orbitron text-xl leading-tight font-bold tracking-tight text-base-content sm:text-2xl"
+                                >
+                                    {{ weaponDetail.name }}
+                                </h2>
+                                <CopyID :id="weaponId" />
+                            </div>
+                            <!-- 元素类型 -->
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/60">
+                                <span v-if="weaponDetail.elementIcon" class="inline-flex items-center gap-1.5">
                                     <img
-                                        v-if="weaponDetail.elementIcon"
                                         :src="weaponDetail.elementIcon"
                                         :alt="$t('dna-weapon-detail.element_icon')"
-                                        class="w-5 h-5 object-contain"
+                                        class="h-5 w-5 object-contain"
                                     />
-                                    <span class="text-base-content/80">{{ weaponDetail.elementName }}</span>
-                                </div>
-
+                                    {{ weaponDetail.elementName }}
+                                </span>
+                                <span v-else>{{ weaponDetail.elementName }}</span>
+                                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                                <span
+                                    class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-secondary tabular-nums"
+                                    >Lv.{{ weaponDetail.level }}</span
+                                >
+                            </div>
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50">
                                 <!-- 精炼等级 -->
-                                <div class="mt-2 text-base-content/80">
+                                <span>
                                     {{ $t("dna-weapon-detail.refine_level") }}
-                                    <span class="font-semibold">{{ weaponDetail.skillLevel }}</span>
-                                </div>
-
+                                    <span class="font-mono font-semibold text-base-content/80 tabular-nums">{{
+                                        weaponDetail.skillLevel
+                                    }}</span>
+                                </span>
+                                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                                 <!-- 魔之楔 -->
-                                <div class="mt-1 text-base-content/80">
+                                <span>
                                     {{ $t("dna-weapon-detail.mods") }}
-                                    <span class="font-semibold">{{ weaponDetail.currentVolume }}/{{ weaponDetail.sumVolume }}</span>
-                                </div>
+                                    <span class="font-mono font-semibold text-base-content/80 tabular-nums"
+                                        >{{ weaponDetail.currentVolume }}/{{ weaponDetail.sumVolume }}</span
+                                    >
+                                </span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </header>
 
                 <!-- 武器属性 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.weapon_attrs") }}</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-weapon-detail.atk") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ weaponDetail.attribute.atk }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("dna-weapon-detail.crit_rate") }}</div>
-                                <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.cri * 100).toFixed(2) }}%</div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("暴击伤害") }}</div>
-                                <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.crd * 100).toFixed(2) }}%</div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("攻速") }}</div>
-                                <div class="stat-value text-xl font-bold">
-                                    {{ weaponDetail.attribute.speed }}
-                                </div>
-                            </div>
-                            <div class="stat bg-base-200 rounded-lg p-4 text-center">
-                                <div class="stat-title text-xs text-base-content/60">{{ $t("触发") }}</div>
-                                <div class="stat-value text-xl font-bold">{{ +(weaponDetail.attribute.trigger * 100).toFixed(2) }}%</div>
-                            </div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="ATTRIBUTES" :title="$t('dna-weapon-detail.weapon_attrs')" />
+                    <div class="grid grid-cols-2 gap-1.5 md:grid-cols-5">
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("dna-weapon-detail.atk") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                                weaponDetail.attribute.atk
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("dna-weapon-detail.crit_rate") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                                >{{ +(weaponDetail.attribute.cri * 100).toFixed(2) }}%</span
+                            >
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("暴击伤害") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                                >{{ +(weaponDetail.attribute.crd * 100).toFixed(2) }}%</span
+                            >
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("攻速") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                                weaponDetail.attribute.speed
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("触发") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                                >{{ +(weaponDetail.attribute.trigger * 100).toFixed(2) }}%</span
+                            >
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 武器描述 -->
-                <div class="card bg-base-100 border border-base-200 rounded-lg shadow-sm">
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.weapon_desc") }}</h3>
-                        <p class="text-base-content/80 whitespace-pre-line">
-                            {{ weaponDetail.description || "暂无描述" }}
-                        </p>
-                    </div>
-                </div>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="DESC" :title="$t('dna-weapon-detail.weapon_desc')" />
+                    <p class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-line text-base-content/85">
+                        {{ weaponDetail.description || "暂无描述" }}
+                    </p>
+                </section>
 
                 <!-- 模式 -->
-                <div
+                <section
                     v-if="weaponDetail.modes && weaponDetail.modes.length > 0"
-                    class="card bg-base-100 border border-base-200 rounded-lg shadow-sm"
+                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
-                    <div class="card-body p-6">
-                        <h3 class="text-lg font-semibold mb-4">{{ $t("dna-weapon-detail.mode") }}</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <ModItem v-for="(mode, index) in weaponDetail.modes" :key="index" :mod="LeveledModHelper.fromDNA(mode)" />
-                        </div>
+                    <SectionHeader no-animate compact kicker="MODS" :title="$t('dna-weapon-detail.mode')" />
+                    <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                        <ModItem v-for="(mode, index) in weaponDetail.modes" :key="index" :mod="LeveledModHelper.fromDNA(mode)" />
                     </div>
-                </div>
+                </section>
             </div>
 
             <!-- 错误状态 -->
-            <div v-else class="flex justify-center items-center h-full">
+            <div v-else class="flex h-full items-center justify-center">
                 <div class="text-center">
-                    <p class="text-lg mb-4 text-base-content/80">{{ $t("dna-weapon-detail.load_failed") }}</p>
-                    <button class="btn btn-secondary" @click="loadWeaponDetail">{{ $t("dna-weapon-detail.retry") }}</button>
+                    <p class="mb-4 text-sm text-base-content/60">{{ $t("dna-weapon-detail.load_failed") }}</p>
+                    <button
+                        type="button"
+                        class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                        @click="loadWeaponDetail"
+                    >
+                        {{ $t("dna-weapon-detail.retry") }}
+                    </button>
                 </div>
             </div>
         </div>

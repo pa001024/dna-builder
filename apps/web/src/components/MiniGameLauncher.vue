@@ -3,11 +3,10 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
-import { pathExists, readTextFile } from "@/api/app"
+import { pathExists } from "@/api/app"
 import { useGameStore } from "@/store/game"
 import { useGameUpdateStore } from "@/store/gameUpdate"
 import { useUIStore } from "@/store/ui"
-import { resolveGameVersion } from "@/utils/game-download"
 
 // 迷你游戏启动器：首页 header 内的紧凑启动入口（仅 app 端）
 // 状态机：checking(检测中) / no-path(未设置路径) / needs-update(需要更新) / downloading(热更下载中) / ready(就绪)
@@ -24,6 +23,7 @@ const launcherState = ref<LauncherState>("checking")
 /**
  * 检查游戏状态：未设置路径 / 已设置路径但需要更新 / 就绪可启动。
  * 需要更新判定：完整包版本不一致或存在 .extracting（安装中），或公共热更检查发现待装热更。
+ * 完整包清单、差分目标与更新状态统一由 store 解析，与完整启动器保持一致。
  */
 async function refreshLauncherState() {
     if (!game.path) {
@@ -34,18 +34,13 @@ async function refreshLauncherState() {
     gameUpdateStore.syncLauncherInputs()
     launcherState.value = "checking"
     try {
-        const [fullPackage, localVersionRes, extracting] = await Promise.all([
-            // 复用公共 store：解析自定义 channel 并校正 CDN 后获取完整包信息（与完整启动器一致）
-            gameUpdateStore.getFullPackageInfoForActiveChannel().catch(() => null),
-            readTextFile(`${game.gameDir}GameVersion.json`)
-                .then(resolveGameVersion)
-                .catch(() => null),
+        const [extracting] = await Promise.all([
             pathExists(`${game.gameDir}.extracting`).catch(() => false),
+            gameUpdateStore.checkHotUpdateStatus(),
+            gameUpdateStore.refreshPackageInfo(),
         ])
-        // 热更检查（含具体版本号提取）复用公共 store，检查过程必然请求热更信息
-        await gameUpdateStore.checkHotUpdateStatus()
-        const baseUpToDate =
-            fullPackage !== null && localVersionRes !== null && String(localVersionRes) === String(fullPackage.latestVersion) && !extracting
+        await gameUpdateStore.refreshUpdateTargets()
+        const baseUpToDate = gameUpdateStore.fullPackageInfo !== null && !gameUpdateStore.needUpdate && !extracting
         launcherState.value = baseUpToDate && !gameUpdateStore.needHotUpdate ? "ready" : "needs-update"
     } catch (error) {
         console.error("检查游戏状态失败:", error)
