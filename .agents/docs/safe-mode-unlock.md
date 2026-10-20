@@ -2,18 +2,18 @@
 
 关闭安全模式是单流程双门控，不降级：答题全对 **且** 解锁密码正确，缺一不可。
 解锁密码由服务端每天生成新值，打进 zip 传到夸克网盘；
-用户打开固定分享链接（hover 可扫码）→ 转存到自己网盘 → 下载解压看密码 → 填回弹窗解锁。
+用户打开当期分享链接（hover 可扫码，服务端每次轮换下发新链接）→ 转存到自己网盘 → 下载解压看密码 → 填回弹窗解锁。
 
 ## 链路
 
 ```
 服务端定时（04:00 Asia/Shanghai，可配）
   rotateVault()：生成 16 位分组密码 → buildVaultZip() → QuarkClient.uploadBuffer(文件名, zip, 目录fid)
-  → bcrypt 存哈希 + 文件信息落盘（同名覆盖，目录在固定分享内，不另建分享）
+  → bcrypt 存哈希 + 文件信息 + 当期分享链接落盘（每次轮换为新包建分享）
   状态文件 server/data/safe-mode-vault.json（只存哈希与分享信息，无明文）
 
 前端 SafeModeQuizDialog.vue（答题区下方追加解锁密码卡）
-  打开即 GET /api/safe-mode/vault/status 确认密码就绪 → 链接取自 env.quarkShareUrl（静态）
+  打开即 GET /api/safe-mode/vault/status 拿当期分享链接
   → 提交时先本地验答题，再 POST /api/safe-mode/vault/verify 验密码
   无密码状态时确认按钮禁用，不退化为仅答题
 ```
@@ -35,7 +35,7 @@
 | `QUARK_CLIENT_ID` / `QUARK_SIGN_KEY` | 可选，默认 wild 模式值（`third_party_agent` / `cf1348…`） |
 | `QUARK_DEVICE_ID` / `QUARK_DEVICE_NAME` | 可选，授权时服务端分配的设备号（换令牌时自动写回） |
 | `SAFE_MODE_PASSWORD_DIR` | 解锁密码压缩包的上传目录：空（或 `0`）= 根目录；32 位 hex 按目录 fid 直用；其余视为路径经 `createDir` 幂等创建。默认与固定分享对齐到已分享文件夹 |
-| `SAFE_MODE_PASSWORD_FILE` | 网盘内文件名，默认 `密码.zip`。同名覆盖更新，固定分享长期有效 |
+| `SAFE_MODE_PASSWORD_FILE` | 网盘内文件名，默认 `密码.zip`。同名覆盖更新（前端展示以下发的当期分享为准） |
 | `SAFE_MODE_VAULT_CRON` | 可选，默认 `0 4 * * *`（croner 表达式，上海时区） |
 | `QUARK_APP_DIR` | 桌面端发布（`tools/deploy.ts`）的网盘投放目录：fid 或路径，默认 `Duet Night Abyss Builder`。`pnpm deploy app` 传完 MSI 后，把同目录历史版本移进 `老版本`（`--skip-quark` 跳过） |
 
@@ -58,13 +58,14 @@ OAuth 授权走标准流程（见 quark-api 第 3 章）：授权页拿 code →
 - `checkVaultConsistency` 兜底候选含 `(N)` 改名副本，逐个下载以密码哈希判定并修正 `fid` 指向；
   落盘 `fid`（上传返回的 32-hex）可直下，失败再走搜索兜底。
 
-## 固定分享对齐（重要）
+## 当期分享下发（每次轮换产生新链接）
 
-前端链接是静态的 `env.quarkShareUrl`，服务端不会改它，因此：
-
-- 上传目录 + 文件名必须落在该分享覆盖范围内（当前对齐到分享内的 `Duet Night Abyss Builder` 文件夹）。
-- 首次上传后检查分享内能看到新文件；之后每天同名覆盖，分享自动指向新版，无需重新分享。
-- 改了文件名或换了目录后，记得确认新文件仍在固定分享内，否则弹窗链接打不开密码。
+- 每次 `rotateVault` 上传成功后，为新包 `fid` 调 `createShare` 建一个公开永久分享
+  （`url_type: 1` 无需提取码，标题带日期如 `DNA Builder 安全模式解锁密码（2026-10-20）`），
+  `share_url` 存进落盘状态，随 `GET /vault/status` 下发给前端；前端链接与扫码一律用该地址。
+- 建分享失败不中断轮换（`shareUrl` 置空，前端回退静态 `env.quarkShareUrl` 文件夹链接照样能拿到包）。
+- 旧分享随旧包删除自然失效，无需注销；分享管理页会留下历史标题，偶尔手动清理即可。
+- 老状态文件没有 `shareUrl` 字段时服务端补空串，前端自动回退静态链接，平滑过渡。
 
 ## 测试
 

@@ -653,6 +653,56 @@ describe("rotateVault 改名重试", () => {
     })
 })
 
+describe("rotateVault 当期分享下发", () => {
+    it("轮换为新包建分享并落盘，供前端链接与扫码使用", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-share-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            const seen: Array<{ fidList: string[]; title: string }> = []
+            const fakeClient = {
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
+                uploadBuffer: async () => ({ fid: "fid-new", fileName: DEFAULT_VAULT_FILE_NAME, size: 1 }),
+                getFileInfo: async (fid: string) => ({ fid, filename: DEFAULT_VAULT_FILE_NAME, full_path: "", pdir_fid: "0" }),
+                createShare: async (fidList: string[], title: string) => {
+                    seen.push({ fidList, title })
+                    return { share_url: "https://pan.quark.cn/s/abc" }
+                },
+            } as unknown as QuarkClient
+            const { status } = await rotateVault(fakeClient, statePath)
+            expect(seen).toHaveLength(1)
+            expect(seen[0].fidList).toEqual(["fid-new"])
+            expect(seen[0].title).toContain("解锁密码")
+            expect(status.shareUrl).toBe("https://pan.quark.cn/s/abc")
+            expect((await readVaultState(statePath))?.shareUrl).toBe("https://pan.quark.cn/s/abc")
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+
+    it("建分享失败不中断轮换，shareUrl 置空由前端回退", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-share-fail-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            const fakeClient = {
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
+                uploadBuffer: async () => ({ fid: "fid-new", fileName: DEFAULT_VAULT_FILE_NAME, size: 1 }),
+                getFileInfo: async (fid: string) => ({ fid, filename: DEFAULT_VAULT_FILE_NAME, full_path: "", pdir_fid: "0" }),
+                createShare: async () => {
+                    throw new Error("分享接口异常")
+                },
+            } as unknown as QuarkClient
+            const { password, status } = await rotateVault(fakeClient, statePath)
+            expect(password).toMatch(/^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/)
+            expect(status.shareUrl).toBe("")
+            await expect(verifyVaultPassword(password, statePath)).resolves.toBe(true)
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+})
+
 describe("checkVaultConsistency 改名副本兜底", () => {
     it("在 (N) 改名副本中找到密码一致的包并修正指向", async () => {
         const DIR_FID = "23833d7b215c492ab1091964d031100c"

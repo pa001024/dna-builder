@@ -62,11 +62,14 @@ export interface QuarkUploadResult {
     size: number
 }
 
-/** 分享创建回执。 */
+/** 分享创建回执（`url_type: 1` 为公开链接，无需提取码；实测只回 `pwd_id/share_url/url_type/expired_type`）。 */
 export interface QuarkShareResult {
     share_url: string
-    passcode: string
-    title: string
+    pwd_id?: string
+    url_type?: number
+    expired_type?: number
+    passcode?: string
+    title?: string
 }
 
 /** 分享内的文件条目（转存用 share_fid_token，展示用 filename/size）。 */
@@ -437,9 +440,10 @@ export class QuarkClient {
     }
 
     /**
-     * 创建分享链接（默认永久公开，他人凭链接下载解锁密码压缩包）。
+     * 创建分享链接（默认永久公开，`url_type: 1` 无需提取码，他人凭链接下载）。
+     * 每次密码轮换对新包建一个分享，前端展示的链接与扫码均走服务端下发的这个地址。
      * @param fidList 待分享的文件 fid 列表
-     * @param title 分享标题
+     * @param title 分享标题（建议带日期，方便在网盘分享管理页辨认）
      */
     async createShare(fidList: string[], title: string): Promise<QuarkShareResult> {
         return this.request<QuarkShareResult>("POST", "/agent/v1/share/create", {

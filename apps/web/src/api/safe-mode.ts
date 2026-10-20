@@ -13,6 +13,8 @@ export interface SafeModeVaultStatus {
     fid: string
     size: number
     sha256: string
+    /** 本次轮换的密码包分享链接（服务端下发；老服务端缺失时前端回退静态链接） */
+    shareUrl?: string
     uploadedAt: number
     /** 上次一致性校验时间（毫秒，未校验过时缺失） */
     lastCheckedAt?: number

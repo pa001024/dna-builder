@@ -178,6 +178,21 @@ describe("QuarkClient 目录与分享接口", () => {
         expect(seen[0]).toContain("fid=f1")
         expect(seen[0]).toContain("fetch_full_path=1")
     })
+
+    it("createShare 透传 fid_list 与 title（公开永久）", async () => {
+        let seenBody = ""
+        const fetchFn = (async (_url: string, init: any) => {
+            seenBody = String(init.body)
+            return {
+                ok: true,
+                status: 200,
+                headers: new Headers(),
+                json: async () => ({ status: 0, errno: 0, error_info: "", data: { share_url: "https://pan.quark.cn/s/abc" } }),
+            }
+        }) as unknown as typeof fetch
+        await expect(vaultClient(fetchFn).createShare(["f-new"], "t")).resolves.toEqual({ share_url: "https://pan.quark.cn/s/abc" })
+        expect(JSON.parse(seenBody)).toEqual({ fid_list: ["f-new"], title: "t", url_type: 1, expired_type: 1 })
+    })
 })
 
 describe("QuarkClient 移动与任务接口", () => {

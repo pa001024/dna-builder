@@ -50,6 +50,8 @@ export interface VaultStatus {
     fid: string
     size: number
     sha256: string
+    /** 本次轮换为该包创建的夸克分享链接（前端链接与扫码均用它；老状态缺失时为空，前端回退静态链接） */
+    shareUrl: string
     uploadedAt: number
     /** 上次一致性校验时间（毫秒，未校验过时缺失） */
     lastCheckedAt?: number
@@ -244,11 +246,11 @@ export async function readVaultState(statePath: string = VAULT_STATE_PATH): Prom
     }
 }
 
-/** 对外状态（剥离密码哈希）。 */
+/** 对外状态（剥离密码哈希；老状态缺 shareUrl 时补空串，前端回退静态链接）。 */
 export function toVaultStatus(state: VaultState): VaultStatus {
     const { passwordHash: _omitted, ...status } = state
     void _omitted
-    return status
+    return { ...status, shareUrl: status.shareUrl ?? "" }
 }
 
 /**
@@ -522,10 +524,31 @@ function withVaultRotateLock<T>(task: () => Promise<T>): Promise<T> {
 }
 
 /**
+ * 为刚上传的密码包创建夸克分享（公开链接，无需提取码），失败只记日志不中断轮换
+ *（分享建不出来时前端回退静态文件夹链接，照样能拿到包）。
+ * @param client 夸克客户端
+ * @param fid 新包 fid
+ * @param uploadedAt 生成时间（毫秒，用于分享标题日期）
+ */
+export async function createVaultShare(client: QuarkClient, fid: string, uploadedAt: number): Promise<string> {
+    if (typeof client.createShare !== "function") {
+        return ""
+    }
+    try {
+        const date = new Date(uploadedAt).toISOString().slice(0, 10)
+        const share = await client.createShare([fid], `DNA Builder 安全模式解锁密码（${date}）`)
+        return share.share_url ?? ""
+    } catch (error) {
+        console.warn("[safe-mode-vault] 创建密码包分享失败（前端将回退静态链接）：", error instanceof Error ? error.message : error)
+        return ""
+    }
+}
+
+/**
  * 轮换解锁密码并上传到夸克网盘：生成新密码 → 打包 zip → 上传到配置目录 →
  * 只存 bcrypt 哈希与文件信息落盘（明文密码仅此次返回）。
  * 先删同名旧文件再上传（网盘同名不会自动覆盖，会改名为 `密码(1).zip`），
- * 文件落在固定分享覆盖的目录里，无需另建分享。
+ * 每次轮换为新包建一个分享链接下发给前端（旧分享随旧包删除自然失效）。
  * @param client 夸克客户端（缺省按环境变量创建）
  * @param statePath 状态文件路径
  */
@@ -541,13 +564,17 @@ export async function rotateVault(
         const target = await resolveVaultTarget(client)
         const identity = await resolveVaultDirIdentity(client, target.dirFid)
 
-        const persist = async (uploaded: { fid: string; size: number }): Promise<{ password: string; status: VaultStatus }> => {
+        const persist = async (
+            uploaded: { fid: string; size: number },
+            shareUrl: string
+        ): Promise<{ password: string; status: VaultStatus }> => {
             const state: VaultState = {
                 passwordHash: await hash(password, 10),
                 fileName: target.fileName,
                 fid: uploaded.fid,
                 size: zip.length,
                 sha256,
+                shareUrl,
                 uploadedAt,
             }
             await mkdir(dirname(statePath), { recursive: true })
@@ -585,7 +612,7 @@ export async function rotateVault(
                 }
             }
             if (actual === target.fileName) {
-                return persist(uploaded)
+                return persist(uploaded, await createVaultShare(client, uploaded.fid, uploadedAt))
             }
             console.warn(`[safe-mode-vault] 网盘实际文件名与预期不一致（${actual}，第 ${attempt} 次），疑似残留同名旧件`)
             if (attempt < 3) {
@@ -600,7 +627,10 @@ export async function rotateVault(
         // 三次仍被改名：保留最后一次的包并强告警（fid 仍指向新包，一致性校验以密码哈希为准，
         // 不受旧包干扰；历史残留的异目录旧包需手动清理一次）。
         console.error(`[safe-mode-vault] 上传 3 次均被改名，请手动清理目标目录内的 ${target.fileName} 同名旧件`)
-        return persist(lastUpload as { fid: string; size: number })
+        return persist(
+            lastUpload as { fid: string; size: number },
+            await createVaultShare(client, (lastUpload as { fid: string }).fid, uploadedAt)
+        )
     })
 }
 

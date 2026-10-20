@@ -4,7 +4,7 @@
 // 每次打开随机抽取 2 道选择题 + 1 道填空题（共 SAFE_MODE_REQUIRED_COUNT 道），
 // 答案用 bcryptjs 与哈希比对，仅校验对错。
 // 解锁为双门控（不降级）：答题全对 + 解锁密码正确才 emit("passed")；
-// 解锁密码来自 env.quarkShareUrl 指向的夸克分享（打开并转存后，从压缩包查看密码填入）。
+// 解锁密码来自服务端下发的当期密码包分享（打开并转存后，从压缩包查看密码填入）。
 // 未答对即关闭（取消）时 emit("cancelled")。
 import { t } from "i18next"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
@@ -239,8 +239,8 @@ const vaultUploadedText = computed(() => {
     return new Date(vaultStatus.value.uploadedAt).toLocaleString()
 })
 
-/** 网盘分享链接（静态配置 env.quarkShareUrl，包内容由服务端定时更新，链接不变） */
-const shareUrl = computed(() => env.quarkShareUrl.trim())
+/** 网盘分享链接（服务端当期下发优先，缺失时回退静态配置 env.quarkShareUrl） */
+const shareUrl = computed(() => vaultStatus.value?.shareUrl?.trim() || env.quarkShareUrl.trim())
 /** 是否配置了分享链接 */
 const hasShareLink = computed(() => shareUrl.value !== "")
 /** 分享链接的二维码（边长模块数 + SVG path），编码失败时为 null，供 hover 浮层渲染 */
