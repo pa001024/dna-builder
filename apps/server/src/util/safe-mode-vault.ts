@@ -307,27 +307,218 @@ export function isInVaultDir(parentFid: unknown, dirFid: string): boolean {
 }
 
 /**
+ * 取 fid 的稳定身份键：open 命名空间的 fid 形如 `xxx|stable`（`|` 前为单次请求令牌，
+ * 每次接口返回都不同），只取 `|` 后段；32-hex 等传统 fid 原样小写比对。
+ * 2026-10 实测：同一文件的 search / getFileInfo / delete 返回 fid 前段各不相同、后段一致。
+ * @param fid 网盘 fid（任意命名空间）
+ */
+export function fidIdentityKey(fid: unknown): string {
+    const raw = String(fid ?? "")
+    const bar = raw.lastIndexOf("|")
+    return (bar >= 0 ? raw.slice(bar + 1) : raw).trim().toLowerCase()
+}
+
+/** 上传目标目录的跨命名空间身份：32-hex 与 open 两套 fid 体系并存，必须同时携带才能命中。 */
+export interface VaultDirIdentity {
+    dirFid: string
+    dirName: string
+    openKey: string
+}
+
+/** 参与目录归属判定的网盘文件最小形状。 */
+export interface VaultDirFileItem {
+    parent_fid: unknown
+    full_path?: unknown
+}
+
+/**
+ * 解析目标目录的跨命名空间身份：目录名经 getFileInfo 读取，open 后缀键经按名搜索目录条目拿取。
+ * 任一步失败都降级（空字符串），不中断轮换，调用方按“能命中的信号”逐级判定。
+ * @param client 夸克客户端
+ * @param dirFid 目标目录 fid（32-hex / open / "0" 均可）
+ */
+export async function resolveVaultDirIdentity(client: QuarkClient, dirFid: string): Promise<VaultDirIdentity> {
+    if (!dirFid || dirFid === "0") {
+        return { dirFid: "0", dirName: "", openKey: "" }
+    }
+    let dirName = ""
+    try {
+        dirName = (await client.getFileInfo(dirFid)).filename ?? ""
+    } catch {
+        dirName = ""
+    }
+    let openKey = ""
+    if (dirFid.includes("|")) {
+        openKey = fidIdentityKey(dirFid)
+    } else if (dirName !== "") {
+        try {
+            const hits = await client.searchFiles(dirName, 20)
+            const dir = hits.find(item => Number(item.file_type) === 0 && item.filename === dirName)
+            if (dir) {
+                openKey = fidIdentityKey(dir.fid)
+            }
+        } catch {
+            // 目录解析失败时降级为目录名兜底，不中断轮换
+        }
+    }
+    return { dirFid, dirName, openKey }
+}
+
+/**
+ * 判定网盘文件是否落在上传目标目录内（跨命名空间版，替代裸 `parent === dirFid` 比对）。
+ * 命中顺序：同命名空间原文相等 → open 后缀键相等 → 根目录宽容（parent "0"/空或无路径）→
+ * full_path 文本含目录名。任一命中即视为同目录，避免误删其他目录的同名文件。
+ * @param item 网盘文件条目（需 parent_fid，full_path 有则更准）
+ * @param identity 目标目录身份
+ */
+export function isVaultFileInDir(item: VaultDirFileItem, identity: VaultDirIdentity): boolean {
+    const parent = String(item.parent_fid ?? "")
+    if (parent !== "" && parent === identity.dirFid) {
+        return true
+    }
+    if (identity.openKey !== "" && fidIdentityKey(parent) === identity.openKey) {
+        return true
+    }
+    if (identity.dirFid === "0") {
+        if (parent === "" || parent === "0") {
+            return true
+        }
+        try {
+            const fullPath = item.full_path as Array<unknown> | undefined
+            if (Array.isArray(fullPath) && fullPath.length === 0) {
+                return true
+            }
+        } catch {
+            // 忽略，下面返回 false
+        }
+        return false
+    }
+    if (identity.dirName !== "") {
+        try {
+            if (JSON.stringify(item.full_path ?? "").includes(identity.dirName)) {
+                return true
+            }
+        } catch {
+            // 忽略，下面返回 false
+        }
+    }
+    return false
+}
+
+/** 去掉扩展名取搜索词干（`密码.zip` → `密码`），用于兜底搜出 `(N)` 改名副本。 */
+function vaultSearchStem(fileName: string): string {
+    const dot = fileName.lastIndexOf(".")
+    return (dot <= 0 ? fileName : fileName.slice(0, dot)).trim() || fileName
+}
+
+export type VaultDupeFile = Awaited<ReturnType<QuarkClient["searchFiles"]>>[number]
+
+/**
+ * 搜集目标目录内的全部同名旧件：精确同名 + `密码(1).zip` 类自动改名副本。
+ * 用文件名与词干各搜一次取并集（按稳定身份键去重），再经目录身份过滤，
+ * 避免“搜不到改名副本删不掉 → 上传又被改名”的滚雪球。
+ * 搜索失败只记日志不抛错（兜底仍走覆盖上传，由上传后校验托底）。
+ * @param client 夸克客户端
+ * @param target 上传目标（目录 fid + 文件名）
+ * @param identity 目标目录身份
+ */
+export async function collectVaultDupeFiles(
+    client: QuarkClient,
+    target: VaultTarget,
+    identity: VaultDirIdentity
+): Promise<VaultDupeFile[]> {
+    const seen = new Map<string, VaultDupeFile>()
+    const keywords = [...new Set([target.fileName, vaultSearchStem(target.fileName)])]
+    for (const keyword of keywords) {
+        let hits: VaultDupeFile[]
+        try {
+            hits = await client.searchFiles(keyword, 100)
+        } catch (error) {
+            console.warn(`[safe-mode-vault] 搜索旧文件失败（跳过关键词${keyword}）：`, error instanceof Error ? error.message : error)
+            continue
+        }
+        for (const item of hits) {
+            if (!isVaultDuplicateName(item.filename, target.fileName)) {
+                continue
+            }
+            if (!isVaultFileInDir(item, identity)) {
+                continue
+            }
+            const key = fidIdentityKey(item.fid)
+            if (!seen.has(key)) {
+                seen.set(key, item)
+            }
+        }
+    }
+    return [...seen.values()]
+}
+
+/**
+ * 等待删除在网盘侧实际生效：删完即传仍可能因旧名未释放被改名，轮询确认后再传。
+ * getFileInfo 取不到即视为已删；超时返回 false（不抛错，由上传后校验托底）。
+ * @param client 夸克客户端
+ * @param fids 待确认的 fid 列表
+ * @param timeoutMs 轮询超时（毫秒），默认 20 秒
+ */
+async function waitUntilVaultFilesGone(client: QuarkClient, fids: string[], timeoutMs = 20_000): Promise<boolean> {
+    const startedAt = Date.now()
+    for (;;) {
+        let remaining = 0
+        for (const fid of fids) {
+            try {
+                await client.getFileInfo(fid)
+                remaining++
+            } catch {
+                // 取不到即视为已删（21001）或请求失败；后者由上传后校验托底
+            }
+        }
+        if (remaining === 0) {
+            return true
+        }
+        if (Date.now() - startedAt > timeoutMs) {
+            return false
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+}
+
+/**
  * 删除目标目录下的同名旧文件（含 `密码(1).zip` 类自动改名副本），避免上传时网盘自动改名。
+ * 跨命名空间匹配（见 resolveVaultDirIdentity），删后轮询确认旧名释放再由调用方上传。
  * 搜索失败只记日志不中断（兜底仍走同名覆盖上传）；删除失败则抛错阻止上传，
  * 防止新旧并存导致一致性校验命中旧包。
  * @param client 夸克客户端
  * @param target 上传目标（目录 fid + 文件名）
  */
 export async function removeExistingVaultFile(client: QuarkClient, target: VaultTarget): Promise<void> {
-    let candidates: Awaited<ReturnType<QuarkClient["searchFiles"]>>
-    try {
-        candidates = await client.searchFiles(target.fileName, 100)
-    } catch (error) {
-        console.warn("[safe-mode-vault] 查找同名旧文件失败，仍尝试覆盖上传：", error instanceof Error ? error.message : error)
-        return
-    }
-    const dupes = candidates.filter(
-        item => isVaultDuplicateName(item.filename, target.fileName) && isInVaultDir(item.parent_fid, target.dirFid)
-    )
+    const identity = await resolveVaultDirIdentity(client, target.dirFid)
+    const dupes = await collectVaultDupeFiles(client, target, identity)
     if (dupes.length === 0) {
         return
     }
-    await client.deleteFilesAndWait([...new Set(dupes.map(item => item.fid))])
+    const fids = [...new Set(dupes.map(item => item.fid))]
+    await client.deleteFilesAndWait(fids)
+    await waitUntilVaultFilesGone(client, fids)
+}
+
+/** 轮换串行锁：cron / 启动自检 / 手动三入口并发会产生 `(N)` 副本，必须串行。 */
+let vaultRotateQueue: Promise<void> = Promise.resolve()
+
+/** 把任务排进轮换串行队列，前一个轮换完成（无论成败）后才执行。 */
+function withVaultRotateLock<T>(task: () => Promise<T>): Promise<T> {
+    const previous = vaultRotateQueue
+    let release!: () => void
+    vaultRotateQueue = new Promise<void>(resolve => {
+        release = resolve
+    })
+    return (async () => {
+        await previous
+        try {
+            return await task()
+        } finally {
+            release()
+        }
+    })()
 }
 
 /**
@@ -342,38 +533,75 @@ export async function rotateVault(
     client: QuarkClient = new QuarkClient(),
     statePath: string = VAULT_STATE_PATH
 ): Promise<{ password: string; status: VaultStatus }> {
-    const password = generateVaultPassword()
-    const uploadedAt = Date.now()
-    const zip = buildVaultZip(password, uploadedAt)
-    const sha256 = createHash("sha256").update(zip).digest("hex")
-    const target = await resolveVaultTarget(client)
+    return withVaultRotateLock(async () => {
+        const password = generateVaultPassword()
+        const uploadedAt = Date.now()
+        const zip = buildVaultZip(password, uploadedAt)
+        const sha256 = createHash("sha256").update(zip).digest("hex")
+        const target = await resolveVaultTarget(client)
+        const identity = await resolveVaultDirIdentity(client, target.dirFid)
 
-    await removeExistingVaultFile(client, target)
-    const uploaded = await client.uploadBuffer(target.fileName, zip, target.dirFid)
-    // 上传后确认网盘实际文件名：若同名旧件没清干净，夸克会静默改名为 `密码(1).zip`。
-    // 只告警不清退（落盘 fid 仍指向新包，一致性校验以 fid 为准，不会被旧包带偏）。
-    if (typeof client.getFileInfo === "function") {
-        try {
-            const info = await client.getFileInfo(uploaded.fid)
-            if (info.filename !== target.fileName) {
-                console.warn(`[safe-mode-vault] 网盘实际文件名与预期不一致（${info.filename}），疑似残留同名旧件，请手动清理`)
+        const persist = async (uploaded: { fid: string; size: number }): Promise<{ password: string; status: VaultStatus }> => {
+            const state: VaultState = {
+                passwordHash: await hash(password, 10),
+                fileName: target.fileName,
+                fid: uploaded.fid,
+                size: zip.length,
+                sha256,
+                uploadedAt,
             }
-        } catch (error) {
-            console.warn("[safe-mode-vault] 上传后校验文件名失败：", error instanceof Error ? error.message : error)
+            await mkdir(dirname(statePath), { recursive: true })
+            await writeFile(statePath, JSON.stringify(state, null, 2), "utf-8")
+            return { password, status: toVaultStatus(state) }
         }
-    }
 
-    const state: VaultState = {
-        passwordHash: await hash(password, 10),
-        fileName: target.fileName,
-        fid: uploaded.fid,
-        size: zip.length,
-        sha256,
-        uploadedAt,
-    }
-    await mkdir(dirname(statePath), { recursive: true })
-    await writeFile(statePath, JSON.stringify(state, null, 2), "utf-8")
-    return { password, status: toVaultStatus(state) }
+        let lastUpload: { fid: string; size: number } | null = null
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            // 先删目标目录内的全部同名旧件（精确同名 + `(N)` 改名副本），删后确认旧名释放再传，
+            // 否则网盘会静默改名（如 `密码(1).zip`），分享目录越堆越多。
+            const dupes = await collectVaultDupeFiles(client, target, identity)
+            if (dupes.length > 0) {
+                const fids = [...new Set(dupes.map(item => item.fid))]
+                try {
+                    await client.deleteFilesAndWait(fids)
+                    await waitUntilVaultFilesGone(client, fids)
+                } catch (error) {
+                    console.warn(
+                        `[safe-mode-vault] 删除旧件失败（第 ${attempt} 次，仍尝试上传）：`,
+                        error instanceof Error ? error.message : error
+                    )
+                }
+            }
+            const uploaded = await client.uploadBuffer(target.fileName, zip, target.dirFid)
+            lastUpload = uploaded
+            // 上传后确认网盘实际文件名：若同名旧件没清干净，夸克会静默改名为 `密码(N).zip`。
+            // 命中则删掉本次刚传的改名件后重试；落盘 fid 永远指向新包，不会被旧包带偏。
+            let actual = target.fileName
+            if (typeof client.getFileInfo === "function") {
+                try {
+                    actual = (await client.getFileInfo(uploaded.fid)).filename
+                } catch (error) {
+                    console.warn("[safe-mode-vault] 上传后校验文件名失败：", error instanceof Error ? error.message : error)
+                }
+            }
+            if (actual === target.fileName) {
+                return persist(uploaded)
+            }
+            console.warn(`[safe-mode-vault] 网盘实际文件名与预期不一致（${actual}，第 ${attempt} 次），疑似残留同名旧件`)
+            if (attempt < 3) {
+                try {
+                    await client.deleteFilesAndWait([uploaded.fid])
+                    await waitUntilVaultFilesGone(client, [uploaded.fid])
+                } catch {
+                    // 下一轮删旧件时会一并处理
+                }
+            }
+        }
+        // 三次仍被改名：保留最后一次的包并强告警（fid 仍指向新包，一致性校验以密码哈希为准，
+        // 不受旧包干扰；历史残留的异目录旧包需手动清理一次）。
+        console.error(`[safe-mode-vault] 上传 3 次均被改名，请手动清理目标目录内的 ${target.fileName} 同名旧件`)
+        return persist(lastUpload as { fid: string; size: number })
+    })
 }
 
 /**
@@ -496,9 +724,12 @@ export async function checkVaultConsistency(
     }
 
     const candidates = await client.searchFiles(target.fileName, 50)
+    const identity = await resolveVaultDirIdentity(client, target.dirFid)
+    // 兜底候选含 `(N)` 改名副本（目录内同名旧件都可能是本次包），逐个下载以密码哈希判定，
+    // 目录内优先，避免异目录同名文件干扰判定顺序。
     const exact = candidates
-        .filter(item => item.filename === target.fileName)
-        .sort((a, b) => Number(isInVaultDir(b.parent_fid, target.dirFid)) - Number(isInVaultDir(a.parent_fid, target.dirFid)))
+        .filter(item => isVaultDuplicateName(item.filename, target.fileName))
+        .sort((a, b) => Number(isVaultFileInDir(b, identity)) - Number(isVaultFileInDir(a, identity)))
     if (exact.length === 0) {
         return fail("missing-remote")
     }

@@ -42,17 +42,21 @@
 OAuth 授权走标准流程（见 quark-api 第 3 章）：授权页拿 code → 换 `access_token`/`refresh_token` → 填进服务端环境变量。
 首次冷启动（无状态文件且已配置令牌）会在后台传一次，不阻塞服务启动。
 
-## 一致性校验与旧件清理（2026-10 轮换误触修复）
+## 一致性校验与旧件清理（2026-10 轮换误触 + 副本堆积修复）
 
-- `checkVaultConsistency` 以落盘 `fid` 直下为准：全盘全文搜索的命中顺序不可靠
-  （历史旧包 / `(N)` 改名副本会排在前面，曾导致每次启动误报 `password-mismatch` 并重传）。
-  搜索只做兜底（fid 文件被删/被移走时），兜底逐个下载同名候选、以“密码对得上”判定，
-  命中后把落盘 `fid/sha256/size` 修正为该文件；候选下载全失败则抛错（视为未知，不自动修复）。
-- `removeExistingVaultFile` 删除目标目录内的精确同名 + `密码(1).zip` 类改名副本
-  （`isVaultDuplicateName`），其他目录的不动；根目录严格匹配 `parent_fid === "0"`，
-  不再沿用“根目录匹配全盘”的宽松口径（曾误删风险 + 删漏并存）。
-- `rotateVault` 上传后用 `getFileInfo` 确认网盘实际文件名，改名副本只告警不清退
-  （落盘 fid 仍指向新包，校验不受旧包干扰；历史残留的异目录旧包需手动清理一次）。
+- 夸克存在两套 fid 命名空间：上传/详情入参用 32-hex（如配置的 `SAFE_MODE_PASSWORD_DIR`），
+  而 `searchFiles` 回来的 `fid`/`parent_fid` 全是 open 形态 `xxx|stable`（`|` 前为单次请求令牌，
+  每次接口返回都不同，后段稳定）。旧代码裸比 `parent_fid === dirFid` 永远为 false，
+  旧件一个都删不掉，每次轮换都被静默改名（`密码(1).zip`…），越堆越多。
+  现经 `resolveVaultDirIdentity`（目录名搜目录条目拿 open 后缀键）+ `isVaultFileInDir`
+  （原文相等 → 后缀键相等 → full_path 含目录名）跨命名空间判定，由 `fidIdentityKey` 归一化。
+- `deleteFiles` 必须带 `action_type: 1`，缺失报 14001（之前即使找到旧件也删不动）。
+  open 与 32-hex 两种 fid 删除均已线上实测通过。
+- `rotateVault` 串行锁（cron/启动自检/手动三入口并发会产生 `(N)` 副本）+ 删后轮询确认旧名释放
+  （`waitUntilVaultFilesGone`）再传 + 上传后校验实际文件名、被改名则删掉本次改名件重试（最多 3 次）。
+  下一次轮换会自动清掉目录内全部历史 `(N)` 副本并恢复单个 `密码.zip`，无需手动清理。
+- `checkVaultConsistency` 兜底候选含 `(N)` 改名副本，逐个下载以密码哈希判定并修正 `fid` 指向；
+  落盘 `fid`（上传返回的 32-hex）可直下，失败再走搜索兜底。
 
 ## 固定分享对齐（重要）
 

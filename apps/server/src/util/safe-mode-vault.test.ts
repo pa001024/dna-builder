@@ -10,14 +10,17 @@ import {
     createStoredZip,
     DEFAULT_VAULT_FILE_NAME,
     extractStoredZipEntry,
+    fidIdentityKey,
     generateVaultPassword,
     isInVaultDir,
     isVaultDuplicateName,
+    isVaultFileInDir,
     parseVaultPasswordText,
     readVaultState,
     readVaultTargetConfig,
     removeExistingVaultFile,
     resolveVaultDirFid,
+    resolveVaultDirIdentity,
     rotateVault,
     VAULT_PASSWORD_ENTRY,
     verifyVaultPassword,
@@ -350,6 +353,114 @@ describe("checkVaultConsistency", () => {
     })
 })
 
+describe("fidIdentityKey", () => {
+    it("open fid 取 | 后段并小写，传统 fid 原样", () => {
+        expect(fidIdentityKey("~1abcXYZ|0vBue1-M240")).toBe("0vbue1-m240")
+        expect(fidIdentityKey("23833d7b215c492ab1091964d031100c")).toBe("23833d7b215c492ab1091964d031100c")
+        expect(fidIdentityKey("0")).toBe("0")
+        expect(fidIdentityKey(undefined)).toBe("")
+    })
+})
+
+describe("resolveVaultDirIdentity / isVaultFileInDir", () => {
+    const DIR_FID = "23833d7b215c492ab1091964d031100c"
+    const DIR_NAME = "Duet Night Abyss Builder"
+    const dirEntry = {
+        fid: "~1tokendir|0vBue1-M240",
+        filename: DIR_NAME,
+        parent_fid: "~1root|60KSBKP642U",
+        file_type: 0,
+        size: 0,
+    }
+    const dirClient = {
+        getFileInfo: async (fid: string) => {
+            if (fid !== DIR_FID) throw new Error("文件找不到")
+            return { fid, filename: DIR_NAME, full_path: "x", pdir_fid: "0" }
+        },
+        searchFiles: async (keyword: string) => (keyword === DIR_NAME ? [dirEntry] : []),
+    } as unknown as QuarkClient
+
+    it("根目录直接返回空身份", async () => {
+        await expect(resolveVaultDirIdentity(dirClient, "0")).resolves.toEqual({ dirFid: "0", dirName: "", openKey: "" })
+    })
+
+    it("32-hex 目录经目录名搜出 open 后缀键（线上真实形状）", async () => {
+        const identity = await resolveVaultDirIdentity(dirClient, DIR_FID)
+        expect(identity).toEqual({ dirFid: DIR_FID, dirName: DIR_NAME, openKey: "0vbue1-m240" })
+        // 线上 search 回来的 parent 全是 open 形态，旧裸比对永远命中不了（回归锚点）
+        expect(isInVaultDir("~1other|0vBue1-M240", DIR_FID)).toBe(false)
+        // 新判定经后缀键命中同目录
+        expect(isVaultFileInDir({ parent_fid: "~1other|0vBue1-M240", full_path: [{ missing: DIR_NAME }] }, identity)).toBe(true)
+        // 异目录（后缀不同、路径名不同）不动
+        expect(isVaultFileInDir({ parent_fid: "~1other|AAAAAAAAAA", full_path: [{ missing: "别处" }] }, identity)).toBe(false)
+        // 同命名空间原文相等仍命中（兼容旧行为）
+        expect(isVaultFileInDir({ parent_fid: DIR_FID }, { dirFid: DIR_FID, dirName: "", openKey: "" })).toBe(true)
+    })
+
+    it("目录信息取不到时降级为空身份，不中断", async () => {
+        const broken = {
+            getFileInfo: async () => {
+                throw new Error("no")
+            },
+            searchFiles: async () => [],
+        } as unknown as QuarkClient
+        await expect(resolveVaultDirIdentity(broken, DIR_FID)).resolves.toEqual({ dirFid: DIR_FID, dirName: "", openKey: "" })
+    })
+})
+
+describe("collectVaultDupeFiles", () => {
+    it("跨命名空间搜集精确同名 + (N) 副本，异目录排除", async () => {
+        const DIR_FID = "23833d7b215c492ab1091964d031100c"
+        const DIR_NAME = "Duet Night Abyss Builder"
+        const files = [
+            {
+                fid: "~1a|AAAA",
+                filename: "密码.zip",
+                parent_fid: "~1p|0vBue1-M240",
+                file_type: 1,
+                size: 440,
+                full_path: [{ missing: DIR_NAME }],
+            },
+            {
+                fid: "~1b|BBBB",
+                filename: "密码(1).zip",
+                parent_fid: "~1p|0vBue1-M240",
+                file_type: 1,
+                size: 440,
+                full_path: [{ missing: DIR_NAME }],
+            },
+            {
+                fid: "~1c|CCCC",
+                filename: "密码.zip",
+                parent_fid: "~1q|ZZZZZZZZZZ",
+                file_type: 1,
+                size: 440,
+                full_path: [{ missing: "别处" }],
+            },
+            { fid: "~1d|DDDD", filename: "无关.txt", parent_fid: "~1p|0vBue1-M240", file_type: 1, size: 440 },
+        ]
+        const gone = new Set<string>()
+        const deleted: string[][] = []
+        const fakeClient = {
+            getFileInfo: async (fid: string) => {
+                if (fid === DIR_FID) return { fid, filename: DIR_NAME, full_path: "", pdir_fid: "0" }
+                if (gone.has(fid)) throw new Error("文件找不到")
+                return { fid, filename: files.find(item => item.fid === fid)?.filename ?? "?", full_path: "", pdir_fid: "x" }
+            },
+            searchFiles: async (keyword: string) =>
+                keyword === DIR_NAME
+                    ? [{ fid: "~1dir|0vBue1-M240", filename: DIR_NAME, parent_fid: "~1r|RRRR", file_type: 0, size: 0 }]
+                    : files,
+            deleteFilesAndWait: async (fidList: string[]) => {
+                deleted.push([...fidList])
+                for (const fid of fidList) gone.add(fid)
+            },
+        } as unknown as QuarkClient
+        await removeExistingVaultFile(fakeClient, { dirFid: DIR_FID, fileName: DEFAULT_VAULT_FILE_NAME })
+        expect(deleted).toEqual([["~1a|AAAA", "~1b|BBBB"]])
+    })
+})
+
 describe("removeExistingVaultFile", () => {
     it("同目录同名旧文件先删再传，避免网盘自动改名", async () => {
         const dir = await mkdtemp(join(tmpdir(), "vault-overwrite-"))
@@ -477,6 +588,132 @@ describe("rotateVault / verifyVaultPassword", () => {
         try {
             await expect(verifyVaultPassword("anything", join(dir, "missing.json"))).resolves.toBe(false)
             await expect(readVaultState(join(dir, "missing.json"))).resolves.toBeNull()
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+})
+
+describe("rotateVault 改名重试", () => {
+    it("上传被改名时删掉改名件后重试，最终精确同名", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-retry-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            const uploads: string[] = []
+            const deleted: string[][] = []
+            const gone = new Set<string>()
+            const fakeClient = {
+                searchFiles: async () => [],
+                deleteFilesAndWait: async (fidList: string[]) => {
+                    deleted.push([...fidList])
+                    for (const fid of fidList) gone.add(fid)
+                },
+                uploadBuffer: async () => {
+                    const fid = `fid-try-${uploads.length}`
+                    uploads.push(fid)
+                    return { fid, fileName: DEFAULT_VAULT_FILE_NAME, size: 1 }
+                },
+                getFileInfo: async (fid: string) => {
+                    if (gone.has(fid)) throw new Error("文件找不到")
+                    // 首传残留旧名未释放被改名，第二传精确命中
+                    return { fid, filename: fid === "fid-try-0" ? "密码(1).zip" : DEFAULT_VAULT_FILE_NAME, full_path: "", pdir_fid: "0" }
+                },
+            } as unknown as QuarkClient
+            const { status } = await rotateVault(fakeClient, statePath)
+            expect(uploads).toEqual(["fid-try-0", "fid-try-1"])
+            expect(deleted).toEqual([["fid-try-0"]])
+            expect(status.fid).toBe("fid-try-1")
+            expect((await readVaultState(statePath))?.fid).toBe("fid-try-1")
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+
+    it("并发轮换串行执行，不交错上传", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "vault-lock-"))
+        try {
+            let active = 0
+            let maxActive = 0
+            const fakeClient = {
+                searchFiles: async () => [],
+                deleteFilesAndWait: async () => {},
+                uploadBuffer: async () => {
+                    active++
+                    maxActive = Math.max(maxActive, active)
+                    await new Promise(resolve => setTimeout(resolve, 50))
+                    active--
+                    return { fid: `fid-${Math.random()}`, fileName: DEFAULT_VAULT_FILE_NAME, size: 1 }
+                },
+            } as unknown as QuarkClient
+            await Promise.all([rotateVault(fakeClient, join(dir, "a.json")), rotateVault(fakeClient, join(dir, "b.json"))])
+            expect(maxActive).toBe(1)
+        } finally {
+            await rm(dir, { recursive: true, force: true })
+        }
+    })
+})
+
+describe("checkVaultConsistency 改名副本兜底", () => {
+    it("在 (N) 改名副本中找到密码一致的包并修正指向", async () => {
+        const DIR_FID = "23833d7b215c492ab1091964d031100c"
+        const DIR_NAME = "Duet Night Abyss Builder"
+        process.env.SAFE_MODE_PASSWORD_DIR = DIR_FID
+        const dir = await mkdtemp(join(tmpdir(), "vault-fallback-n-"))
+        const statePath = join(dir, "safe-mode-vault.json")
+        try {
+            let goodBytes: Uint8Array | null = null
+            const dirEntry = { fid: "~1dir|0vBue1-M240", filename: DIR_NAME, parent_fid: "~1r|RRRR", file_type: 0, size: 0 }
+            const seedClient = {
+                getFileInfo: async (fid: string) => {
+                    if (fid === DIR_FID) return { fid, filename: DIR_NAME, full_path: "", pdir_fid: "0" }
+                    throw new Error("文件找不到")
+                },
+                searchFiles: async (keyword: string) => (keyword === DIR_NAME ? [dirEntry] : []),
+                deleteFilesAndWait: async () => {},
+                uploadBuffer: async (_name: string, data: Uint8Array) => {
+                    goodBytes = data
+                    return { fid: "fid-gone", fileName: "pw.zip", size: data.length }
+                },
+            } as unknown as QuarkClient
+            await rotateVault(seedClient, statePath)
+            if (!goodBytes) throw new Error("未上传")
+            const current: Uint8Array = goodBytes
+            const staleZip = buildVaultZip("AAAAAAAAAAAAAAAA", Date.now())
+            const checkClient = {
+                getFileInfo: async (fid: string) => {
+                    if (fid === DIR_FID) return { fid, filename: DIR_NAME, full_path: "", pdir_fid: "0" }
+                    throw new Error("文件找不到")
+                },
+                searchFiles: async (keyword: string) => {
+                    if (keyword === DIR_NAME) return [dirEntry]
+                    return [
+                        {
+                            fid: "~1s|SSSS",
+                            filename: DEFAULT_VAULT_FILE_NAME,
+                            parent_fid: "~1p|XXXXXXXX",
+                            file_type: 1,
+                            size: staleZip.length,
+                            full_path: [{ missing: "别处" }],
+                        },
+                        {
+                            fid: "~1g|GGGG",
+                            filename: "密码(3).zip",
+                            parent_fid: "~1p|0vBue1-M240",
+                            file_type: 1,
+                            size: current.length,
+                            full_path: [{ missing: DIR_NAME }],
+                        },
+                    ]
+                },
+                downloadFile: async (fid: string) => {
+                    if (fid === "fid-gone") throw new Error("文件已删除")
+                    if (fid === "~1g|GGGG") return current
+                    return staleZip
+                },
+            } as unknown as QuarkClient
+            const result = await checkVaultConsistency(checkClient, statePath)
+            expect(result).toMatchObject({ ok: true, reason: "ok" })
+            expect((await readVaultState(statePath))?.fid).toBe("~1g|GGGG")
         } finally {
             await rm(dir, { recursive: true, force: true })
         }

@@ -538,12 +538,12 @@ export class QuarkClient {
     }
 
     /**
-     * 删除文件（移入回收站）。
-     * @param fidList 文件 fid 列表（≤100）
+     * 删除文件（移入回收站）。实测 open 接口要求 `action_type: 1`，缺失报 14001 actionType is null。
+     * @param fidList 文件 fid 列表（≤100，32-hex 与 open `xxx|stable` 形态均可）
      * @returns finish=1 即完成，否则用 task_id 轮询任务
      */
     async deleteFiles(fidList: string[]): Promise<{ finish: number; task_id: string }> {
-        return this.request("POST", "/open/v1/file/delete", { fid_list: fidList })
+        return this.request("POST", "/open/v1/file/delete", { fid_list: fidList, action_type: 1 })
     }
 
     /**

@@ -255,7 +255,7 @@ describe("QuarkClient 删除接口", () => {
             }
         }) as unknown as typeof fetch
         await expect(deleteClient(fetchFn).deleteFiles(["f-old"])).resolves.toEqual({ finish: 1, task_id: "t1" })
-        expect(JSON.parse(seenBody)).toEqual({ fid_list: ["f-old"] })
+        expect(JSON.parse(seenBody)).toEqual({ fid_list: ["f-old"], action_type: 1 })
         await expect(deleteClient(fetchFn).deleteFilesAndWait(["f-old"])).resolves.toBeUndefined()
     })
 
