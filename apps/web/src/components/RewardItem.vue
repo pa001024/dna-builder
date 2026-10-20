@@ -123,6 +123,65 @@ function shouldShowRewardItem(item: RewardItemType): boolean {
 }
 
 /**
+ * 获取奖励项所在的父组掉落模式。
+ * 普通奖励项继承父组模式（存在 m 上），奖励组节点则单独记录父组模式。
+ * @param item 奖励项
+ * @returns 父组掉落模式
+ */
+function getParentDropMode(item: RewardItemType): string {
+    return (item.t === "Reward" ? item.parentM : item.m) || ""
+}
+
+/**
+ * 获取奖励项在父组中的原始权重。
+ * 奖励组节点只有父组给出过权重时才有值，普通奖励项直接取 p。
+ * @param item 奖励项
+ * @returns 权重；无权重时为 0
+ */
+function getParentWeight(item: RewardItemType): number {
+    return item.t === "Reward" ? (item.parentP ?? 0) : item.p
+}
+
+/**
+ * 获取奖励项在父组中的掉落说明：容量 / 权重 + 比例 + 期望次数，独立掉落则给出单独概率。
+ * @param item 奖励项
+ * @returns 展示文本；无权重时返回空串
+ */
+function getParentShareText(item: RewardItemType): string {
+    const mode = getParentDropMode(item)
+    const weight = getParentWeight(item)
+
+    if (!weight) {
+        return ""
+    }
+
+    if (mode === "Independent") {
+        return `${t("reward-item.independent_drop")} ${t("reward-item.probability", { value: +(weight / 100).toFixed(2) })}`
+    }
+
+    const parts = [
+        mode === "Sequence" ? t("reward-item.capacity", { value: weight }) : t("reward-item.weight_ratio", { value: weight }),
+    ]
+    if (item.pp) {
+        parts.push(t("reward-item.ratio", { value: +(item.pp * 100).toFixed(2) }))
+    }
+    if (item.times) {
+        parts.push(t("reward-item.expect_times", { value: +item.times.toFixed(2) }))
+    }
+
+    return `(${parts.join(" ")})`
+}
+
+/**
+ * 判断奖励组节点是否是固定发放（父组为 Fixed 且没有数量）。
+ * @param item 奖励项
+ * @returns 是否标记为固定
+ */
+function isFixedRewardGroup(item: RewardItemType): boolean {
+    return item.t === "Reward" && item.c === undefined && getParentDropMode(item) === "Fixed"
+}
+
+/**
  * 获取奖励树中实际会显示的子节点。
  * @param item 奖励项
  * @returns 过滤 typeFilter 后仍然可渲染的子节点
@@ -197,23 +256,8 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
                                 <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                             </span>
                             <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
-                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70">{{
-                                $t("reward-item.fixed")
-                            }}</span>
-                            <span v-else-if="item.t !== 'Reward' && item.p && item.m !== 'Independent'" class="text-base-content/70">
-                                ({{
-                                    item.m === "Sequence"
-                                        ? $t("reward-item.capacity", { value: item.p })
-                                        : $t("reward-item.weight_ratio", { value: item.p })
-                                }}
-                                {{ item.pp ? $t("reward-item.ratio", { value: +(item.pp * 100).toFixed(2) }) : "" }}
-                                {{ item.times ? $t("reward-item.expect_times", { value: +item.times.toFixed(2) }) : "" }}
-                                )
-                            </span>
-                            <span v-if="item.t !== 'Reward' && item.m === 'Independent'"
-                                >{{ $t("reward-item.independent_drop") }}
-                                {{ $t("reward-item.probability", { value: +(item.p / 100).toFixed(2) }) }}</span
-                            >
+                            <span v-if="isFixedRewardGroup(item)" class="text-base-content/70">{{ $t("reward-item.fixed") }}</span>
+                            <span v-if="getParentShareText(item)" class="text-base-content/70">{{ getParentShareText(item) }}</span>
                             <!-- 显示掉落模式 -->
                             <span
                                 v-if="item.t === 'Reward'"

@@ -96,14 +96,14 @@ const LATEST_GROUPS = [
                                     class="col-span-1"
                                     :class="group.span === 2 ? 'md:col-span-2' : 'md:col-span-3'"
                                 >
-                                    <!-- 组头行：高度对齐真实标题行的行盒（17px），hairline 与两侧文字同轴 -->
-                                    <div class="flex min-h-4.25 flex-wrap items-center gap-x-6 gap-y-2">
-                                        <div class="flex items-baseline gap-3">
-                                            <span class="db-skeleton-bar h-2.5 w-12" />
-                                            <span class="db-skeleton-bar h-2.5 w-14" />
-                                        </div>
+                                    <!-- 组头行：高度对齐真实标题行的行盒（17px），hairline 与两侧文字同轴且不换行 -->
+                                    <div class="flex min-h-4.25 flex-wrap items-center gap-x-4 gap-y-2">
+                                        <div class="flex min-w-0 flex-1 items-center gap-3">
+                                            <span class="db-skeleton-bar h-2.5 w-12 shrink-0" />
+                                            <span class="db-skeleton-bar h-2.5 w-14 shrink-0" />
 
-                                        <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
+                                            <span class="h-px min-w-0 flex-1 bg-base-content/10" aria-hidden="true" />
+                                        </div>
                                     </div>
 
                                     <ul

@@ -48,6 +48,11 @@ export function getRewardDetails(
             const childReward = getRewardDetails(item.id, visited, newParentProbability, false)
             if (childReward) {
                 childReward.c = item.c
+                // 奖励组节点自身在父组内也有权重，口径由父组的掉落模式决定
+                childReward.parentM = currentDropMode
+                if (item.p !== undefined) {
+                    childReward.parentP = item.p
+                }
                 if (item.n) {
                     childReward.n = item.n
                 }
@@ -81,9 +86,11 @@ export function getRewardDetails(
         const totalP = result.child?.reduce((sum, child) => sum + child.p, 0) || 0
         if (currentDropMode === "Sequence") result.totalP = totalP
         const calculatePP = (item: RewardItem, parentPP: number): void => {
+            item.times = parentPP > 0 ? 1 / parentPP : undefined
             if (item.child && item.child.length > 0) {
                 const childTotalP = item.child.reduce((sum, child) => sum + child.p, 0)
-                if (currentDropMode === "Sequence") item.totalP = childTotalP
+                // 组内权重口径取该组自身的掉落模式（父组模式只在父组内有效）
+                if (item.m === "Sequence") item.totalP = childTotalP
                 if (childTotalP <= 0) {
                     const fallbackPP = currentDropMode === "Fixed" ? parentPP : 0
                     item.child.forEach(child => {
@@ -96,8 +103,6 @@ export function getRewardDetails(
                     child.pp = parentPP * (child.p / childTotalP)
                     calculatePP(child, child.pp!)
                 })
-            } else {
-                item.times = parentPP > 0 ? 1 / parentPP : undefined
             }
         }
         if (result.child) {

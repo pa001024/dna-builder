@@ -1186,7 +1186,7 @@ onBeforeUnmount(() => {
                                     class="grid gap-x-6 gap-y-5"
                                     :style="{ gridTemplateColumns: `repeat(${latestRowColumns}, minmax(0, 1fr))` }"
                                 >
-                                    <div v-for="group in latestRowLayout" :key="group.kind" :style="{ gridColumn: `span ${group.span}` }">
+                                    <div v-for="group in latestRowLayout" :key="group.kind" class="flex" :style="{ gridColumn: `span ${group.span}` }">
                                         <DBLatestGroup
                                             :label="group.label"
                                             :version="group.version"

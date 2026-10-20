@@ -804,6 +804,10 @@ function getRewardDetails(
         if (itemType === "Reward" && Number.isFinite(itemId)) {
             const nested = getRewardDetails(itemId, visited, Number(item.p ?? 1), false)
             if (nested) {
+                // 奖励组节点自身在父组内也有权重，口径由父组掉落模式决定
+                nested.parentMode = currentDropMode
+                nested.parentModeText = getDropModeText(currentDropMode)
+                if (item.p !== undefined) nested.parentWeight = item.p
                 childRewards.push(nested)
             }
             return
@@ -844,14 +848,15 @@ function getRewardDetails(
          * @param parentPP 父级概率
          */
         function calculatePP(node: Record<string, unknown>, parentPP: number): void {
+            node.times = parentPP > 0 ? 1 / parentPP : null
             const nodeChild = Array.isArray(node.child) ? (node.child as Array<Record<string, unknown>>) : []
             if (nodeChild.length === 0) {
-                node.times = parentPP > 0 ? 1 / parentPP : null
                 return
             }
 
             const childTotalP = nodeChild.reduce((sum, child) => sum + Number(child.p || 0), 0)
-            if (currentDropMode === "Sequence") node.totalP = childTotalP
+            // 组内权重口径取该组自身掉落模式（父组模式只在父组内有效）
+            if (toSimpleString(node.m) === "Sequence") node.totalP = childTotalP
             nodeChild.forEach(child => {
                 const currentPP = childTotalP > 0 ? parentPP * (Number(child.p || 0) / childTotalP) : 0
                 child.pp = currentPP

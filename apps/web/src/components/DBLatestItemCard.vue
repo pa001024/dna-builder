@@ -125,10 +125,10 @@ const targetPath = computed(() => {
     <!-- 外层卡片语言：直角细边框 + 半透明毛玻璃底，hover 主色描边轻浮起 -->
     <button
         type="button"
-        class="group flex w-full cursor-pointer flex-col overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+        class="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
         @click="router.push(targetPath)"
     >
-        <div class="relative aspect-4/3 w-full overflow-hidden" :class="imageBgClass">
+        <div class="relative aspect-4/3 w-full flex-1 overflow-hidden" :class="imageBgClass">
             <img
                 :src="iconUrl"
                 :alt="name"
@@ -149,7 +149,7 @@ const targetPath = computed(() => {
             </span>
         </div>
 
-        <div class="flex flex-1 flex-col gap-1 p-2.5">
+        <div class="flex flex-none flex-col gap-1 p-2.5">
             <h4 class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
                 {{ $t(name) }}
             </h4>

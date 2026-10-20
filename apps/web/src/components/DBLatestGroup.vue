@@ -485,22 +485,33 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div ref="groupEl" class="relative" @mouseenter="onGroupMouseEnter" @mouseleave="onGroupMouseLeave" @mousemove="onGroupMouseMove">
-        <!-- 分组标题行：kicker 徽记 + 元信息 + hairline -->
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <div class="flex items-baseline gap-3">
-                <p class="inline-flex items-center gap-2 text-[10px] font-semibold text-base-content/60 uppercase">
+    <div
+        ref="groupEl"
+        class="relative flex min-w-0 flex-1 flex-col"
+        @mouseenter="onGroupMouseEnter"
+        @mouseleave="onGroupMouseLeave"
+        @mousemove="onGroupMouseMove"
+    >
+        <!--
+            分组标题行：kicker 徽记 + 元信息 + hairline。
+            窄栏（分组只占少数格）下 hairline 必须留在标题同一行收缩，不能换行成第二行的长横线。
+        -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div class="flex min-w-0 flex-1 items-center gap-3">
+                <p class="inline-flex shrink-0 items-center gap-2 text-[10px] font-semibold text-base-content/60 uppercase">
                     {{ label }}
                 </p>
-                <span class="font-mono text-xs tabular-nums text-base-content/40">v{{ version }} · {{ entries.length }}</span>
-            </div>
+                <span class="shrink-0 whitespace-nowrap font-mono text-xs tabular-nums text-base-content/40">
+                    v{{ version }} · {{ entries.length }}
+                </span>
 
-            <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
+                <span class="h-px min-w-0 flex-1 bg-base-content/10" aria-hidden="true" />
+            </div>
 
             <button
                 v-if="!canHover && hasStack"
                 type="button"
-                class="cursor-pointer rounded-xs border border-base-content/25 px-3 py-1 text-[10px] text-base-content/60 transition-colors duration-200 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
+                class="shrink-0 cursor-pointer rounded-xs border border-base-content/25 px-3 py-1 text-[10px] text-base-content/60 transition-colors duration-200 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
                 @click="toggle"
             >
                 {{ isExpanded ? $t("view.collapse") : `${$t("view.expand")} +${stackedEntries.length}` }}
@@ -510,14 +521,14 @@ onBeforeUnmount(() => {
         <!-- 卡片网格（收起态仅第一行；列数翻倍，卡片等比例缩小） -->
         <ul
             ref="gridEl"
-            class="mt-3 grid gap-2"
+            class="mt-3 flex-1 grid gap-2"
             :class="props.columns ? '' : 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10'"
             :style="props.columns ? { gridTemplateColumns: `repeat(${props.columns}, minmax(0, 1fr))` } : undefined"
         >
             <li
                 v-for="(entry, index) in gridEntries"
                 :key="entryKey(entry)"
-                class="relative"
+                class="relative flex"
                 :data-stack-index="index >= visibleCount ? index - visibleCount : undefined"
             >
                 <DBLatestItemCard :entry="entry" />

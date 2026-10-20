@@ -33,6 +33,8 @@ export interface RewardItem {
     times?: number // 期望次数
     m?: string
     n?: string
+    parentM?: string // 父奖励组的掉落模式（判断父组内权重口径：容量/权重/独立概率）
+    parentP?: number // 父奖励组给出的原始权重（未给出时为 undefined，避免与 p 的默认值混淆）
     child?: RewardItem[]
 }
 

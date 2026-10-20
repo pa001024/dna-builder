@@ -3661,7 +3661,7 @@
         "fixed": "Fixed",
         "independent_drop": "Independent Drop",
         "probability": "Chance:{{value}}%",
-        "ratio": "Ratio:{{value}}",
+        "ratio": "Ratio:{{value}}%",
         "reward_group": "Reward Group",
         "reward_group_id": "Reward Group {{id}}",
         "total_capacity": "Total Capacity {{count}}",

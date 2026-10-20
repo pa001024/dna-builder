@@ -167,6 +167,34 @@ describe("getRewardDetails", () => {
         expect(result?.child?.[0].child?.[0].p).toBe(100)
     })
 
+    it("应该记录奖励组节点自身在父组内的权重与父组掉落模式", () => {
+        const result = getRewardDetails(300171)
+        expect(result).not.toBeNull()
+        expect(result!.totalP).toBe(12)
+
+        const firstGroup = result!.child![0]
+        expect(firstGroup.t).toBe("Reward")
+        expect(firstGroup.m).toBe("Sequence")
+        expect(firstGroup.parentM).toBe("Sequence")
+        expect(firstGroup.parentP).toBe(6)
+        expect(firstGroup.pp).toBeCloseTo(6 / 12, 6)
+        expect(firstGroup.times).toBeCloseTo(2, 6)
+        expect(firstGroup.totalP).toBe(30)
+    })
+
+    it("父组非Sequence时仍应计算Sequence子组的总容量", () => {
+        const result = getRewardDetails(50301)
+        expect(result).not.toBeNull()
+        expect(result!.m).toBe("Fixed")
+
+        const sequenceGroup = result!.child!.find(child => child.t === "Reward" && child.m === "Sequence")
+        expect(sequenceGroup).toBeDefined()
+        expect(sequenceGroup!.parentM).toBe("Fixed")
+        expect(sequenceGroup!.parentP).toBeUndefined()
+        expect(sequenceGroup!.totalP).toBe(60)
+        expect(sequenceGroup!.times).toBeCloseTo(2, 6)
+    })
+
     it("应该正确处理Sequence模式的递归计算", () => {
         const result = getRewardDetails(50)
         expect(result).not.toBeNull()

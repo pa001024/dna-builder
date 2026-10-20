@@ -3678,7 +3678,7 @@
         "fixed": "Fixe",
         "independent_drop": "Butin indépendant",
         "probability": "Probabilité : {{value}} %",
-        "ratio": "Proportion : {{value}}",
+        "ratio": "Proportion : {{value}} %",
         "reward_group": "Groupe de récompenses",
         "reward_group_id": "Groupe de récompenses {{id}}",
         "total_capacity": "Capacité totale {{count}}",

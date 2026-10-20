@@ -3637,7 +3637,7 @@
         "fixed": "固定",
         "independent_drop": "獨立掉落",
         "probability": "機率:{{value}}%",
-        "ratio": "比例:{{value}}",
+        "ratio": "比例:{{value}}%",
         "reward_group": "獎勵組",
         "reward_group_id": "獎勵組 {{id}}",
         "total_capacity": "總容量 {{count}}",

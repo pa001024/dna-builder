@@ -3640,7 +3640,7 @@
         "fixed": "고정",
         "independent_drop": "개별 드롭",
         "probability": "확률:{{value}}%",
-        "ratio": "비율:{{value}}",
+        "ratio": "비율:{{value}}%",
         "reward_group": "보상 그룹",
         "reward_group_id": "보상 그룹 {{id}}",
         "total_capacity": "총 용량 {{count}}",

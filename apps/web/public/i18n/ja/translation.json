@@ -3639,7 +3639,7 @@
         "fixed": "固定",
         "independent_drop": "個別ドロップ",
         "probability": "確率:{{value}}%",
-        "ratio": "比率:{{value}}",
+        "ratio": "比率:{{value}}%",
         "reward_group": "報酬グループ",
         "reward_group_id": "報酬グループ {{id}}",
         "total_capacity": "総容量 {{count}}",
