@@ -163,12 +163,6 @@ export const questData: QuestStory[] = [
                         name: "noise - state 0 - start",
                         resource: "cine/OBT0100/SC002",
                     },
-                    {
-                        id: "quest_16940691773581109",
-                        type: "PlayOrStopBGMNode",
-                        name: "noise - state 2 - start",
-                        resource: "cine/Cine00_SC002",
-                    },
                 ],
             },
             {
@@ -813,6 +807,14 @@ export const questData: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "quest_16940703816133006",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- start",
+                        resource: "bgm/chaper_prologue_temp/07",
+                        srId: 100102,
+                        pos: [16281, 8965],
+                    },
                 ],
             },
         ],
@@ -1245,25 +1247,28 @@ export const questData: QuestStory[] = [
                 name: "探索遗迹，寻找飞艇",
                 nodes: [
                     {
-                        id: "17468608271436328",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17467774050433073",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "bgm/chaper_prologue_temp/07",
                         srId: 100102,
                         pos: [19977, 11262],
-                        dialogues: [
-                            {
-                                id: 10010101,
-                                content: "贝蕾，我……",
-                                voice: "story/1001/100101/190F2A32",
-                                npc: 100001,
-                            },
-                        ],
                     },
                 ],
             },
             {
                 id: 10010312,
                 name: "探索遗迹，寻找飞艇",
+                nodes: [
+                    {
+                        id: "17468601216233220",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "bgm/chaper_prologue_temp/07",
+                        srId: 100102,
+                        pos: [22410, 15735],
+                    },
+                ],
             },
         ],
     },
@@ -96217,6 +96222,16 @@ export const questData: QuestStory[] = [
                 id: 12020517,
                 name: "大乱将起",
                 desc: "止流弑神的布局已经开启。太皓、烛阴交战的余波将整个皓京城都卷入其中。",
+                nodes: [
+                    {
+                        id: "177418639623522762896",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_3/0145_cs_two_lonng_bite",
+                        srId: 104503,
+                        pos: [31470, -43630],
+                    },
+                ],
             },
         ],
     },
@@ -97263,6 +97278,16 @@ export const questData: QuestStory[] = [
                 id: 12020612,
                 name: "进入太虚陵",
                 desc: "在静渊的帮助下，你们得知了止流的完整计划，也找到了破局的方法。\n现在还来得及阻止她。在一切成为定局之前，赶紧前往太虚陵的尽头吧。",
+                nodes: [
+                    {
+                        id: "17741870269413801488",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_3/0146_enter_zhilvge",
+                        srId: 104506,
+                        pos: [31495, -109835],
+                    },
+                ],
             },
             {
                 id: 12020613,
@@ -105930,6 +105955,14 @@ export const questData: QuestStory[] = [
                 desc: "苏乙为小安赶制了某份“礼物”。前往小安家，送上这份沉甸甸的心意吧。",
                 nodes: [
                     {
+                        id: "177450673281013999337",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_3/0153_cs_juque_on_stage",
+                        srId: 104503,
+                        pos: [22541, -77131],
+                    },
+                    {
                         id: "17738247162919129334",
                         type: "TalkNode",
                         name: "对话节点",
@@ -107457,7 +107490,7 @@ export const questData: QuestStory[] = [
                         id: "17872280407927899427",
                         type: "TalkNode",
                         name: "回到冰湖城",
-                        next: ["17872282021667900956"],
+                        next: ["17919646449901005", "17872282021667900956"],
                         dialogues: [
                             {
                                 id: 12070210,
@@ -107465,6 +107498,12 @@ export const questData: QuestStory[] = [
                                 npc: 260001,
                             },
                         ],
+                    },
+                    {
+                        id: "17919646449901005",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_7/0195_cs_lise_past",
                     },
                     {
                         id: "17872282021667900956",
@@ -109240,7 +109279,7 @@ export const questData: QuestStory[] = [
                         id: "178738792599718109208",
                         type: "TalkNode",
                         name: "揭开蕾伊目的",
-                        next: ["178738803476318110081"],
+                        next: ["179178478348111408879", "178738803476318110081"],
                         dialogues: [
                             {
                                 id: 12070490,
@@ -109670,6 +109709,12 @@ export const questData: QuestStory[] = [
                                 npc: 260017,
                             },
                         ],
+                    },
+                    {
+                        id: "179178478348111408879",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_7/0188_story_talk_with_fuerweisi_cut",
                     },
                     {
                         id: "178738803476318110081",
