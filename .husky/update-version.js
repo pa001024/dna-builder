@@ -36,11 +36,17 @@ if (packageJsonVersionChanged) {
     packageJson.version = newVersion
     fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
     // 同步 workspace 成员版本（apps/web/package.json 与 tauri.conf / Cargo.toml 保持一致）
-    const webPackageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", "apps", "web", "package.json")
-    const webPackageJson = JSON.parse(fs.readFileSync(webPackageJsonPath, "utf8"))
-    if (webPackageJson.version !== newVersion) {
-        webPackageJson.version = newVersion
-        fs.writeFileSync(webPackageJsonPath, `${JSON.stringify(webPackageJson, null, 4)}\n`)
+    const workspacePackages = [
+        ["apps", "web", "package.json"],
+        ["packages", "data", "package.json"],
+    ]
+    for (const segments of workspacePackages) {
+        const workspacePackageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", ...segments)
+        const workspacePackageJson = JSON.parse(fs.readFileSync(workspacePackageJsonPath, "utf8"))
+        if (workspacePackageJson.version !== newVersion) {
+            workspacePackageJson.version = newVersion
+            fs.writeFileSync(workspacePackageJsonPath, `${JSON.stringify(workspacePackageJson, null, 4)}\n`)
+        }
     }
 }
 if (tauriConfVersionChanged) {
