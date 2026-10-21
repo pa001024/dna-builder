@@ -5,6 +5,7 @@ import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
+import { useForgeIconSync } from "./composables/useForgeIconSync"
 import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { env } from "./env"
@@ -38,6 +39,11 @@ const isMainWindow = env.isApp ? getCurrentWindow().label === "main" : true
  * 也不重复拉起主程序的后台任务(密函推送轮询、技能 CD 浮窗恢复等)。
  */
 const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
+
+// 铸造产物图片缓存：浮窗不加载数据包,图片由主窗口解析好写入,供「最近完成」条目出图
+if (!isScreenBarWindow) {
+    useForgeIconSync()
+}
 
 /**
  * 当前窗口生效的主题 id。

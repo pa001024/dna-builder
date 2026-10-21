@@ -86,7 +86,7 @@ function createMihanNotify() {
      * 四类来源都需要定时刷新委托数据:
      * 1. 订阅开关 `mihanNotify`(来自委托面板)打开;
      * 2. 屏幕信息条已开启,且配置里含有至少一个委托(mihan)条目——这是此前缺失的触发路径。
-     * 3. 屏幕信息条里有"全量摘要"铸造条目:同一批请求顺带刷新的游戏信息就是它的数据源。
+     * 3. 屏幕信息条里有"摘要"/"最近完成"铸造条目:同一批请求顺带刷新的游戏信息就是它的数据源。
      * 4. 管理员上传钩子已安装:整点验真通过后由本轮询推送服务端,不再单开一条循环。
      * 以上任一成立即需要轮询(逻辑或)。
      * @returns 是否应持续轮询
@@ -94,9 +94,9 @@ function createMihanNotify() {
     function shouldKeepWatch() {
         if (getHourAdminPushHandler()) return true
         const hasScreenBarMihan = setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan")
-        const hasScreenBarForgeSummary =
-            setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "forge" && item.mode === "summary")
-        return mihanEnableNotify.value || hasScreenBarMihan || hasScreenBarForgeSummary
+        const hasScreenBarForgeQueue =
+            setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "forge" && item.mode !== "alarm")
+        return mihanEnableNotify.value || hasScreenBarMihan || hasScreenBarForgeQueue
     }
 
     /**
@@ -109,11 +109,11 @@ function createMihanNotify() {
 
     watch(mihanEnableNotify, () => syncWatch())
 
-    // 屏幕信息条配置(总开关 + 条目列表)变化即重算,保证加了委托条目或改成铸造摘要后自动开始每小时更新
+    // 屏幕信息条配置(总开关 + 条目列表)变化即重算,保证加了委托条目或把铸造改成摘要/最近完成后自动开始每小时更新
     watch(
         () =>
             setting.screenBar.enabled &&
-            setting.screenBar.items.some(item => item.type === "mihan" || (item.type === "forge" && item.mode === "summary")),
+            setting.screenBar.items.some(item => item.type === "mihan" || (item.type === "forge" && item.mode !== "alarm")),
         () => syncWatch(),
         { deep: true }
     )

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useGameText } from "@/composables/useGameText"
 import { MIHAN_TYPES } from "@/store/mihan"
 import { MIHAN_TYPE_META } from "@/utils/mihan-meta"
 import type { ResolvedScreenBarItem, ScreenBarMihanEmptyReason } from "@/utils/screen-bar"
@@ -26,6 +27,9 @@ const MIHAN_EMPTY_KEYS: Record<Exclude<ScreenBarMihanEmptyReason, "filtered">, s
     noSelection: "screenBar.mihanNoSelection",
     noData: "screenBar.mihanEmpty",
 }
+
+// 铸造队列里的产物名是游戏原文,必须过 gt 才能按当前语言显示
+const { gt } = useGameText()
 </script>
 
 <template>
@@ -79,6 +83,23 @@ const MIHAN_EMPTY_KEYS: Record<Exclude<ScreenBarMihanEmptyReason, "filtered">, s
                 <span class="font-mono font-semibold" :class="item.completed > 0 ? 'text-success' : 'text-primary'">
                     {{ item.completed }}/{{ item.total }}
                 </span>
+            </span>
+
+            <!-- 最近完成:队列里最先完工的那一条,未完工出倒计时,已完工标为铸造完成;无可算条目时整颗隐藏 -->
+            <span
+                v-else-if="item.type === 'forge' && item.mode === 'nearest' && item.status !== 'unset'"
+                class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
+            >
+                <img v-if="item.icon" :src="item.icon" alt="" class="size-3.5 shrink-0 rounded-xs object-cover" />
+                <Icon
+                    v-else
+                    :icon="item.status === 'expired' ? 'ri:checkbox-circle-line' : 'ri:hammer-line'"
+                    class="size-3 shrink-0"
+                    :class="item.status === 'expired' ? 'text-success' : 'opacity-70'"
+                />
+                <span v-if="item.title" class="font-medium text-base-content/85">{{ gt(item.title) }}</span>
+                <span v-if="item.status === 'expired'" class="text-success">{{ $t("screenBar.forge") }}</span>
+                <span v-else class="font-mono font-semibold text-primary">{{ item.text }}</span>
             </span>
 
             <!-- 委托信息:按类型分组,关注中的任务高亮;过滤后为空时整颗隐藏,留个空胶囊反而突兀 -->

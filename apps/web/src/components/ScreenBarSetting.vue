@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
 import DragNumberInput from "@/components/DragNumberInput.vue"
 import ScreenBarContent from "@/components/ScreenBarContent.vue"
@@ -11,6 +12,7 @@ import { useSettingStore } from "@/store/setting"
 import { MIHAN_MISSIONS } from "@/utils/mihan-meta"
 import {
     createScreenBarItem,
+    FORGE_ICON_STORAGE_KEY,
     normalizeForgeDrafts,
     SCREEN_BAR_CLOCK_PRESETS,
     SCREEN_BAR_FORGE_MODES,
@@ -40,10 +42,12 @@ const { busy, error, setEnabled } = useScreenBar()
 const config = computed(() => setting.screenBar)
 // 预览用主窗口的提醒单例:与浮窗一样只展示时间与标题,但这里已经存在单例,不必再额外读存储
 const { alarm: forgeAlarm } = useForgeAlarm()
-// 预览用主窗口的铸造队列:随密函同批刷新,改摘要模式后马上能看到真实数据
+// 预览用主窗口的铸造队列:随密函同批刷新,切模式后马上能看到真实数据
 const { shortNoteInfo } = useMihanNotify()
 const forgeDrafts = computed(() => normalizeForgeDrafts(shortNoteInfo.value))
-const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts)
+// 产物图片由主窗口解析后缓存(浮窗与预览都只读这份缓存),切到「最近完成」后能直接看到图
+const forgeIcons = useLocalStorage<Record<string, string>>(FORGE_ICON_STORAGE_KEY, {})
+const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons)
 
 /** 条目上限已满时禁止继续添加。 */
 const addDisabled = computed(() => config.value.items.length >= SCREEN_BAR_MAX_ITEMS)
@@ -73,6 +77,15 @@ function itemTypeKey(type: ScreenBarItemType): string {
  */
 function forgeModeKey(mode: ScreenBarForgeMode): string {
     return `screenBar.forgeMode${mode[0].toUpperCase()}${mode.slice(1)}`
+}
+
+/**
+ * 铸造条目模式的说明文案 i18n key。
+ * @param mode 模式
+ * @returns i18n key
+ */
+function forgeModeHintKey(mode: ScreenBarForgeMode): string {
+    return `screenBar.forge${mode[0].toUpperCase()}${mode.slice(1)}Hint`
 }
 
 /**
@@ -351,7 +364,7 @@ function itemParams(item: ScreenBarItem) {
                                 </button>
                             </div>
                             <div class="text-[10px] leading-relaxed text-base-content/45">
-                                {{ itemParams(item).forgeMode === "summary" ? $t("screenBar.forgeSummaryHint") : $t("screenBar.forgeHint") }}
+                                {{ $t(forgeModeHintKey(itemParams(item).forgeMode)) }}
                             </div>
                         </div>
 
@@ -409,7 +422,7 @@ function itemParams(item: ScreenBarItem) {
                         v-for="type in SCREEN_BAR_ITEM_TYPES"
                         :key="type"
                         type="button"
-                        class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/70 transition-colors hover:border-primary/50 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                        class="btn btn-xs gap-1 disabled:pointer-events-none disabled:opacity-40"
                         :disabled="addDisabled"
                         @click="addItem(type)"
                     >

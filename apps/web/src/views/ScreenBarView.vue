@@ -16,8 +16,10 @@ import { MIHAN_DATA_KEY, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
 import { type CustomTheme, DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
 import {
+    FORGE_ICON_STORAGE_KEY,
     normalizeForgeAlarm,
     normalizeForgeDrafts,
+    normalizeForgeIcons,
     parseScreenBarConfig,
     readStoredJson,
     SCREEN_BAR_STORAGE_KEY,
@@ -48,10 +50,12 @@ const setting = useSettingStore()
 const mihanNotify = useMihanNotify()
 /** 铸造完成提醒:只在本页读存储展示,不取 `useForgeAlarm` 单例(那会在浮窗里再排一个通知定时器)。 */
 const forgeAlarm = ref<ScreenBarForgeAlarm | null>(null)
-/** 游戏信息里的铸造队列,摘要模式用。 */
+/** 游戏信息里的铸造队列,摘要 / 最近完成模式用。 */
 const forgeDrafts = ref<ScreenBarForgeDraft[]>([])
+/** 铸造产物图片缓存(主窗口用数据包解析好写入),浮窗只读。 */
+const forgeIcons = ref<Record<string, string>>({})
 const config = computed(() => setting.screenBar)
-const { items } = useScreenBarContent(config, forgeAlarm, forgeDrafts)
+const { items } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons)
 
 const rootRef = ref<HTMLElement | null>(null)
 let appWindow: ReturnType<typeof getCurrentWebviewWindow> | null = null
@@ -75,6 +79,7 @@ function syncFromStorage() {
         localStorage.getItem(MIHAN_DATA_KEY) ?? "",
         localStorage.getItem(FORGE_ALARM_KEY) ?? "",
         localStorage.getItem(SHORT_NOTE_STORAGE_KEY) ?? "",
+        localStorage.getItem(FORGE_ICON_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_THEME_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_CUSTOM_THEME_STORAGE_KEY) ?? "",
     ].join("|")
@@ -91,6 +96,7 @@ function syncFromStorage() {
     }
     forgeAlarm.value = normalizeForgeAlarm(readStoredJson(FORGE_ALARM_KEY))
     forgeDrafts.value = normalizeForgeDrafts(readStoredJson(SHORT_NOTE_STORAGE_KEY))
+    forgeIcons.value = normalizeForgeIcons(readStoredJson(FORGE_ICON_STORAGE_KEY))
     const rawTheme = localStorage.getItem(MAIN_THEME_STORAGE_KEY)
     if (rawTheme !== null) {
         setting.theme = rawTheme

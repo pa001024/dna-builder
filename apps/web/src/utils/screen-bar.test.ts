@@ -9,12 +9,14 @@ import {
     formatClock,
     formatCountdown,
     formatCountdownDays,
+    formatForgeCountdown,
     getDayRefreshRemaining,
     getMihanRefreshRemaining,
     normalizeClockFormat,
     normalizeCountdownTarget,
     normalizeForgeAlarm,
     normalizeForgeDrafts,
+    normalizeForgeIcons,
     normalizeItemTitle,
     normalizeMihanMissions,
     normalizeMihanTypes,
@@ -256,11 +258,13 @@ describe("条目归一化", () => {
             { id: "f", type: "forge", time: 1, title: "x" },
             { id: "g", type: "forge", mode: "summary" },
             { id: "h", type: "forge", mode: "nope" },
+            { id: "i", type: "forge", mode: "nearest" },
         ])
         expect(items).toEqual([
             { id: "f", type: "forge", mode: "alarm" },
             { id: "g", type: "forge", mode: "summary" },
             { id: "h", type: "forge", mode: "alarm" },
+            { id: "i", type: "forge", mode: "nearest" },
         ])
     })
 
@@ -433,6 +437,7 @@ describe("resolveScreenBarItem", () => {
             type: "forge",
             mode: "alarm",
             title: "",
+            icon: "",
             text: "",
             status: "unset",
         })
@@ -445,6 +450,7 @@ describe("resolveScreenBarItem", () => {
             type: "forge",
             mode: "alarm",
             title: "危机合约",
+            icon: "",
             text: "1天 01:00:00",
             status: "running",
         })
@@ -457,6 +463,7 @@ describe("resolveScreenBarItem", () => {
             type: "forge",
             mode: "alarm",
             title: "危机合约",
+            icon: "",
             text: "",
             status: "expired",
         })
@@ -464,8 +471,8 @@ describe("resolveScreenBarItem", () => {
 
     it("摘要模式按条目数统计,不看指定提醒", () => {
         const drafts = [
-            { name: "危机合约", done: true },
-            { name: "调停", done: false },
+            { name: "危机合约", productId: null, endTime: null, done: true },
+            { name: "调停", productId: null, endTime: null, done: false },
         ]
         const alarm = { time: SAMPLE.getTime() + 60_000, title: "不参与汇总" }
         expect(resolveScreenBarItem({ id: "s1", type: "forge", mode: "summary" }, SAMPLE, mihanData, alarm, drafts)).toEqual({
@@ -486,6 +493,68 @@ describe("resolveScreenBarItem", () => {
             total: 0,
         })
     })
+
+    it("最近完成模式只取最先完工的那一条,并给一天内的精确倒计时", () => {
+        const drafts = [
+            { name: "调停", productId: 20027, endTime: SAMPLE.getTime() + 7_200_000, done: false },
+            { name: "危机合约", productId: 20023, endTime: SAMPLE.getTime() + 3_600_000, done: false },
+            { name: "已做完", productId: null, endTime: SAMPLE.getTime() - 60_000, done: true },
+        ]
+        const icons = { "20027": "/imgs/res/T_Walnut_Avatar.webp", "20023": "/imgs/res/T_Resource_Coin.webp" }
+        expect(resolveScreenBarItem({ id: "n1", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts, icons)).toEqual({
+            id: "n1",
+            type: "forge",
+            mode: "nearest",
+            title: "危机合约",
+            icon: "/imgs/res/T_Resource_Coin.webp",
+            text: "1:00:00",
+            status: "running",
+        })
+    })
+
+    it("最近完成模式超过一天只给 >Nd 的粗粒度文本", () => {
+        const drafts = [{ name: "危机合约", productId: null, endTime: SAMPLE.getTime() + 3 * 86_400_000 + 60_000, done: false }]
+        expect(resolveScreenBarItem({ id: "n2", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts)).toMatchObject({
+            title: "危机合约",
+            icon: "",
+            text: ">3d",
+            status: "running",
+        })
+        expect(formatForgeCountdown(86_400_000 - 1000)).toBe("23:59:59")
+        expect(formatForgeCountdown(86_400_000)).toBe(">1d")
+    })
+
+    it("最近完成模式:全部做完时取最晚完工的那条并标为完成", () => {
+        const drafts = [
+            { name: "早做完", productId: null, endTime: SAMPLE.getTime() - 7_200_000, done: true },
+            { name: "刚做完", productId: null, endTime: SAMPLE.getTime() - 60_000, done: true },
+        ]
+        expect(resolveScreenBarItem({ id: "n3", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts)).toEqual({
+            id: "n3",
+            type: "forge",
+            mode: "nearest",
+            title: "刚做完",
+            icon: "",
+            text: "",
+            status: "expired",
+        })
+    })
+
+    it("最近完成模式:没有可算完工时刻的条目时给 unset,由组件整条隐藏", () => {
+        const drafts = [{ name: "没有时间", productId: null, endTime: null, done: false }]
+        expect(resolveScreenBarItem({ id: "n4", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts)).toEqual({
+            id: "n4",
+            type: "forge",
+            mode: "nearest",
+            title: "",
+            icon: "",
+            text: "",
+            status: "unset",
+        })
+        expect(resolveScreenBarItem({ id: "n5", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, [])).toMatchObject({
+            status: "unset",
+        })
+    })
 })
 
 describe("normalizeForgeDrafts", () => {
@@ -501,8 +570,8 @@ describe("normalizeForgeDrafts", () => {
             },
         }
         expect(normalizeForgeDrafts(raw)).toEqual([
-            { name: "危机合约", done: false },
-            { name: "调停", done: true },
+            { name: "危机合约", productId: 1, endTime: 2000, done: false },
+            { name: "调停", productId: 2, endTime: 2000, done: true },
         ])
     })
 
@@ -516,11 +585,47 @@ describe("normalizeForgeDrafts", () => {
 
     it("份数字段是字符串时按数值解析,负数与非法值按 0 处理", () => {
         expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [{ draftCompleteNum: "3", draftDoingNum: 0 }] } })).toEqual([
-            { name: "", done: true },
+            { name: "", productId: null, endTime: null, done: true },
         ])
         expect(normalizeForgeDrafts({ draftInfo: { draftDoingInfo: [{ draftCompleteNum: -5, draftDoingNum: 2 }] } })).toEqual([
-            { name: "", done: false },
+            { name: "", productId: null, endTime: null, done: false },
         ])
+    })
+
+    it("endTime 秒/毫秒都认,缺失或非法时为 null", () => {
+        const drafts = normalizeForgeDrafts({
+            draftInfo: {
+                draftDoingInfo: [
+                    { productName: "A", draftCompleteNum: 1, draftDoingNum: 1, endTime: "1792721283" },
+                    { productName: "B", draftCompleteNum: 1, draftDoingNum: 1, endTime: "1792721283000" },
+                    { productName: "C", draftCompleteNum: 1, draftDoingNum: 1, endTime: "abc" },
+                    { productName: "D", draftCompleteNum: 1, draftDoingNum: 1 },
+                ],
+            },
+        })
+        expect(drafts.map(draft => draft.endTime)).toEqual([1792721283000, 1792721283000, null, null])
+    })
+
+    it("产物 id 是数值时保留,非数值时为 null", () => {
+        const drafts = normalizeForgeDrafts({
+            draftInfo: {
+                draftDoingInfo: [
+                    { productId: 20023, draftCompleteNum: 1, draftDoingNum: 0 },
+                    { productId: "20027", draftCompleteNum: 1, draftDoingNum: 0 },
+                    { draftCompleteNum: 1, draftDoingNum: 0 },
+                ],
+            },
+        })
+        expect(drafts.map(draft => draft.productId)).toEqual([20023, 20027, null])
+    })
+})
+
+describe("normalizeForgeIcons", () => {
+    it("只保留字符串值,形状不对时返回空对象", () => {
+        expect(normalizeForgeIcons({ "20023": "/imgs/res/a.webp", "20027": "" })).toEqual({ "20023": "/imgs/res/a.webp" })
+        expect(normalizeForgeIcons(null)).toEqual({})
+        expect(normalizeForgeIcons([1, 2])).toEqual({})
+        expect(normalizeForgeIcons("x")).toEqual({})
     })
 })
 

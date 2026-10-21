@@ -92,18 +92,19 @@ export type ScreenBarCountdownItem = ScreenBarItemBase & {
     target: string
 }
 
-/** 铸造完成条目的两种取数方式。 */
-export type ScreenBarForgeMode = "alarm" | "summary"
+/** 铸造完成条目的三种取数方式。 */
+export type ScreenBarForgeMode = "alarm" | "summary" | "nearest"
 
 /** 铸造条目模式的选择顺序(设置页)。 */
-export const SCREEN_BAR_FORGE_MODES: ScreenBarForgeMode[] = ["alarm", "summary"]
+export const SCREEN_BAR_FORGE_MODES: ScreenBarForgeMode[] = ["alarm", "summary", "nearest"]
 
-/** 铸造完成条目:按模式展示指定的那条完成提醒,或整条铸造队列的已完成条目/总条目数。 */
+/** 铸造完成条目:按模式展示指定的那条完成提醒、整条队列的已完成条目/总条目数,或队列里最先完工的那一条。 */
 export type ScreenBarForgeItem = ScreenBarItemBase & {
     type: "forge"
     /**
      * `alarm` 只显示用户指定的那一条完成提醒(未设时整条隐藏);
-     * `summary` 显示游戏信息里全部铸造条目,已完成条目 / 总条目数(队列为空时整条隐藏)。
+     * `summary` 显示游戏信息里全部铸造条目,已完成条目 / 总条目数(队列为空时整条隐藏);
+     * `nearest` 只显示队列里最先完工的那一条:未完工出倒计时,已完工标「铸造完成」。
      */
     mode: ScreenBarForgeMode
 }
@@ -185,14 +186,34 @@ export type ScreenBarForgeAlarm = {
 export type ScreenBarForgeDraft = {
     /** 产物名 */
     name: string
-    /** 这一条是否已经整条走完;跑到一半(还有进行中的份数)仍算未完成 */
+    /** 产物 id(服务器给的 productId),用于查产物图片 */
+    productId: number | null
+    /** 整条铸造全部份数走完的时刻(毫秒);数据里没有可用的 endTime 时为 null */
+    endTime: number | null
+    /** 这一条是否已经没有待做的份数;跑到一半(还有进行中的份数)仍算未完成 */
     done: boolean
+}
+
+/** 铸造产物图片缓存在 localStorage 中的键:主窗口算好、信息条窗口直接读。 */
+export const FORGE_ICON_STORAGE_KEY = "dna.forgeIcon"
+
+/**
+ * 解析服务器给的时间戳(秒级或毫秒级字符串)。
+ * @param value 原始值
+ * @returns 毫秒时间戳;非法或非正数时返回 null
+ */
+function parseTimeMs(value: unknown): number | null {
+    const time = Number(value)
+    if (!Number.isFinite(time) || time <= 0) return null
+    return time >= 1e11 ? time : time * 1000
 }
 
 /**
  * 从游戏信息数据里取出铸造队列。
  *
  * 输入是 `dna.shortNoteInfo` 的原始结构(`draftInfo.draftDoingInfo`),形状不可信。
+ * `endTime` 是服务器给出的**整条完工**时刻(已包含全部份数,与按单份耗时逐份累加的结果一致),
+ * 因此直接取用,不必为一个浮窗去加载游戏数据包。
  * 摘要按**条目数**统计:一条队列里可能有多份产物,只要还有一份在进行就算未完成(见 `done`)。
  * @param raw 游戏信息数据(已解析的对象)
  * @returns 规范化后的铸造条目列表;没有数据时为空数组
@@ -210,10 +231,27 @@ export function normalizeForgeDrafts(raw: unknown): ScreenBarForgeDraft[] {
         const completed = Math.max(0, Math.floor(Number(record.draftCompleteNum) || 0))
         const doing = Math.max(0, Math.floor(Number(record.draftDoingNum) || 0))
         if (completed + doing <= 0) continue
+        const productId = Number(record.productId)
         result.push({
             name: typeof record.productName === "string" ? record.productName : "",
+            productId: Number.isFinite(productId) ? productId : null,
+            endTime: parseTimeMs(record.endTime),
             done: doing <= 0,
         })
+    }
+    return result
+}
+
+/**
+ * 归一化铸造产物图片缓存(产物 id → 图片路径)。
+ * @param raw 原始值
+ * @returns 可用的映射;形状不对时返回空对象
+ */
+export function normalizeForgeIcons(raw: unknown): Record<string, string> {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {}
+    const result: Record<string, string> = {}
+    for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+        if (typeof value === "string" && value) result[key] = value
     }
     return result
 }
@@ -234,6 +272,19 @@ export function readStoredJson(key: string): unknown {
 }
 
 /**
+ * 把值以 JSON 写入 localStorage。
+ * @param key 存储键
+ * @param value 可序列化的值
+ */
+export function writeStoredJson(key: string, value: unknown): void {
+    try {
+        localStorage.setItem(key, JSON.stringify(value))
+    } catch (cause) {
+        console.error(`写入本地存储失败: ${key}`, cause)
+    }
+}
+
+/**
  * 委托条目没有内容可展示的原因。
  *
  * `noTypeSelection` 是类型全被取消勾选,`noSelection` 是"只看关注"但一条任务都没选,
@@ -246,7 +297,17 @@ export type ScreenBarMihanEmptyReason = "noData" | "noSelection" | "noTypeSelect
 export type ResolvedScreenBarItem =
     | { id: string; type: "clock"; text: string }
     | { id: string; type: "countdown"; title: string; text: string; status: ScreenBarCountdownStatus }
-    | { id: string; type: "forge"; mode: "alarm"; title: string; text: string; status: ScreenBarCountdownStatus }
+    | {
+          id: string
+          type: "forge"
+          mode: "alarm" | "nearest"
+          title: string
+          /** 产物图片路径(来自 `dna.forgeIcon` 缓存);没有时为空串 */
+          icon: string
+          /** 显示用的倒计时文本 */
+          text: string
+          status: ScreenBarCountdownStatus
+      }
     | { id: string; type: "forge"; mode: "summary"; completed: number; total: number }
     | { id: string; type: "mihan"; entries: ScreenBarMihanEntry[] /** 仅在 entries 为空时有意义 */; emptyReason: ScreenBarMihanEmptyReason }
     | { id: string; type: ScreenBarRefreshType; text: string }
@@ -403,6 +464,19 @@ export function formatCountdownDays(ms: number): string {
 }
 
 /**
+ * 把剩余毫秒格式化为铸造倒计时文本。
+ *
+ * 一天以内与委托刷新一致(`mm:ss` / `H:mm:ss`);超过一天只给 `>1d` `>2d` 这样的粗粒度文本 ——
+ * 此时再精确到秒既没有意义,还会把整条撑得很宽。
+ * @param ms 剩余毫秒(负数按 0 处理)
+ * @returns 倒计时文本
+ */
+export function formatForgeCountdown(ms: number): string {
+    const days = Math.floor(Math.max(0, ms) / 86_400_000)
+    return days > 0 ? `>${days}d` : formatCountdown(ms)
+}
+
+/**
  * 计算距下一个整点的剩余毫秒。密函数据按整点刷新,与 `store/mihan` 的 `getNextUpdateTime` 使用同一条规则。
  * @param now 参考时间戳,缺省取当前时间
  * @returns 剩余毫秒
@@ -521,6 +595,41 @@ function hasMihanMissions(typeIndexes: number[], mihanData: string[][] | undefin
 }
 
 /**
+ * 挑出「最近完成」模式要展示的那条铸造。
+ *
+ * 优先取完工时刻最早的未完工条目;全部已完工时取完工最晚的那条(刚做完的那件),
+ * 由调用方渲染完成态。没有可算出完工时刻的条目时返回 null,由组件整条隐藏。
+ * @param drafts 铸造队列(已归一化)
+ * @param now 当前时间戳(毫秒)
+ * @param icons 产物 id → 图片路径的缓存
+ * @returns 产物名、图片路径与距完工的剩余毫秒(已完成为非正数);无可展示条目时返回 null
+ */
+function pickNearestForgeDraft(
+    drafts: ScreenBarForgeDraft[],
+    now: number,
+    icons: Record<string, string>
+): { name: string; icon: string; remaining: number } | null {
+    let upcoming: ScreenBarForgeDraft | null = null
+    let finished: ScreenBarForgeDraft | null = null
+    for (const draft of drafts) {
+        const endTime = draft.endTime
+        if (endTime === null) continue
+        if (endTime > now) {
+            if (!upcoming || endTime < (upcoming.endTime as number)) upcoming = draft
+        } else if (!finished || endTime > (finished.endTime as number)) {
+            finished = draft
+        }
+    }
+    const picked = upcoming ?? finished
+    if (!picked || picked.endTime === null) return null
+    return {
+        name: picked.name,
+        icon: picked.productId === null ? "" : (icons[String(picked.productId)] ?? ""),
+        remaining: picked.endTime - now,
+    }
+}
+
+/**
  * 把一个条目解析成渲染就绪的数据。
  *
  * 密函数据与铸造提醒由调用方注入(本模块不依赖 Pinia,也不读 localStorage),因此同一条解析逻辑
@@ -530,6 +639,7 @@ function hasMihanMissions(typeIndexes: number[], mihanData: string[][] | undefin
  * @param mihanData 密函分组数据
  * @param forgeAlarm 当前铸造完成提醒;null 表示没设
  * @param forgeDrafts 游戏信息里的铸造队列(已归一化)
+ * @param forgeIcons 铸造产物图片缓存(产物 id → 图片路径)
  * @returns 渲染就绪的条目
  */
 export function resolveScreenBarItem(
@@ -537,7 +647,8 @@ export function resolveScreenBarItem(
     now: Date,
     mihanData: string[][] | undefined,
     forgeAlarm: ScreenBarForgeAlarm | null = null,
-    forgeDrafts: ScreenBarForgeDraft[] = []
+    forgeDrafts: ScreenBarForgeDraft[] = [],
+    forgeIcons: Record<string, string> = {}
 ): ResolvedScreenBarItem {
     switch (item.type) {
         case "clock":
@@ -572,18 +683,53 @@ export function resolveScreenBarItem(
                     total: forgeDrafts.length,
                 }
             }
+            if (item.mode === "nearest") {
+                const nearest = pickNearestForgeDraft(forgeDrafts, now.getTime(), forgeIcons)
+                if (!nearest) {
+                    return { id: item.id, type: "forge", mode: "nearest", title: "", icon: "", text: "", status: "unset" }
+                }
+                if (nearest.remaining <= 0) {
+                    return {
+                        id: item.id,
+                        type: "forge",
+                        mode: "nearest",
+                        title: nearest.name,
+                        icon: nearest.icon,
+                        text: "",
+                        status: "expired",
+                    }
+                }
+                return {
+                    id: item.id,
+                    type: "forge",
+                    mode: "nearest",
+                    title: nearest.name,
+                    icon: nearest.icon,
+                    text: formatForgeCountdown(nearest.remaining),
+                    status: "running",
+                }
+            }
             if (!forgeAlarm) {
-                return { id: item.id, type: "forge", mode: "alarm", title: "", text: "", status: "unset" }
+                return { id: item.id, type: "forge", mode: "alarm", title: "", icon: "", text: "", status: "unset" }
             }
             const remaining = forgeAlarm.time - now.getTime()
             if (!Number.isFinite(remaining) || remaining <= 0) {
-                return { id: item.id, type: "forge", mode: "alarm", title: forgeAlarm.title, text: "", status: "expired" }
+                return {
+                    id: item.id,
+                    type: "forge",
+                    mode: "alarm",
+                    title: forgeAlarm.title,
+                    icon: "",
+                    text: "",
+                    status: "expired",
+                }
             }
             return {
                 id: item.id,
                 type: "forge",
                 mode: "alarm",
                 title: forgeAlarm.title,
+                icon: "",
                 text: formatCountdownDays(remaining),
                 status: "running",
             }
@@ -638,7 +784,11 @@ function normalizeScreenBarItem(raw: unknown): ScreenBarItem | null {
             return { id, type: "countdown", title: normalizeItemTitle(record.title), target: normalizeCountdownTarget(record.target) }
         case "forge":
             // 旧配置没有 mode 字段:默认取"指定",与加模式之前的展示一致
-            return { id, type: "forge", mode: record.mode === "summary" ? "summary" : "alarm" }
+            return {
+                id,
+                type: "forge",
+                mode: record.mode === "summary" || record.mode === "nearest" ? record.mode : "alarm",
+            }
         case "mihan": {
             // 字段整个缺失时兜底全选;显式空数组是用户把类型全取消了,必须原样保留,
             // 否则读一次存储就把"未选择"变回"全选",勾选框看起来会自己跳回选中。
