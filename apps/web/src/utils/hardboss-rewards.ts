@@ -43,6 +43,25 @@ export interface WeeklyHardbossRewardSection {
     slots: WeeklyHardbossRewardSlot[]
 }
 
+/**
+ * 周本奖励分组中的 Boss 简项。
+ */
+export interface WeeklyHardbossRewardBoss {
+    bossId: number
+    bossName: string
+    bossIcon: string
+}
+
+/**
+ * 奖励相同的多个 Boss 合并后的周本奖励分组。
+ */
+export interface WeeklyHardbossRewardGroup {
+    key: string
+    bosses: WeeklyHardbossRewardBoss[]
+    nextRotationTime: number | null
+    slots: WeeklyHardbossRewardSlot[]
+}
+
 interface HardbossDynamicReward {
     DynamicRewardId: number
     EndTime: number
@@ -254,4 +273,58 @@ export function buildWeeklyHardbossSections(timestamp: number): WeeklyHardbossRe
     })
 
     return sections
+}
+
+/**
+ * 计算奖励内容签名，用于把奖励完全一致的 Boss 合并。
+ * @param section 单个 Boss 的分组
+ * @returns 签名
+ */
+function getWeeklyHardbossSectionSignature(section: WeeklyHardbossRewardSection): string {
+    const slotSignature = section.slots
+        .map(slot => `${slot.currentItem?.value.join("/") ?? ""}>${slot.nextItem?.value.join("/") ?? ""}`)
+        .join("|")
+
+    return `${section.nextRotationTime ?? "-"}|${slotSignature}`
+}
+
+/**
+ * 收集某个时间点生效的周本奖励，并把奖励相同的 Boss 合并为一组。
+ * @param timestamp 秒级时间戳
+ * @returns 合并后的周本奖励分组（保持首次出现顺序）
+ */
+export function buildWeeklyHardbossGroups(timestamp: number): WeeklyHardbossRewardGroup[] {
+    const groups: WeeklyHardbossRewardGroup[] = []
+    const groupBySignature = new Map<string, WeeklyHardbossRewardGroup>()
+
+    buildWeeklyHardbossSections(timestamp).forEach(section => {
+        const signature = getWeeklyHardbossSectionSignature(section)
+        const existing = groupBySignature.get(signature)
+
+        if (existing) {
+            existing.bosses.push({
+                bossId: section.bossId,
+                bossName: section.bossName,
+                bossIcon: section.bossIcon,
+            })
+            return
+        }
+
+        const group: WeeklyHardbossRewardGroup = {
+            key: signature,
+            bosses: [
+                {
+                    bossId: section.bossId,
+                    bossName: section.bossName,
+                    bossIcon: section.bossIcon,
+                },
+            ],
+            nextRotationTime: section.nextRotationTime,
+            slots: section.slots,
+        }
+        groupBySignature.set(signature, group)
+        groups.push(group)
+    })
+
+    return groups
 }

@@ -3,18 +3,18 @@ import { ref } from "vue"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { timeStr, useGameTimer } from "@/util"
-import { buildWeeklyHardbossSections, getHardbossIcon, type WeeklyHardbossRewardSection } from "@/utils/hardboss-rewards"
+import { buildWeeklyHardbossGroups, getHardbossIcon, type WeeklyHardbossRewardGroup } from "@/utils/hardboss-rewards"
 
 const ui = useUIStore()
 const showWeeklyHardbossModal = ref(false)
-const weeklyCurrentSections = ref<WeeklyHardbossRewardSection[]>([])
+const weeklyGroups = ref<WeeklyHardbossRewardGroup[]>([])
 
 /**
  * 打开周本奖励弹窗并刷新内容。
  */
 function openWeeklyHardbossModal() {
     const nowTimestamp = Math.floor(Date.now() / 1000)
-    weeklyCurrentSections.value = buildWeeklyHardbossSections(nowTimestamp)
+    weeklyGroups.value = buildWeeklyHardbossGroups(nowTimestamp)
     showWeeklyHardbossModal.value = true
 }
 
@@ -70,30 +70,30 @@ const { mihan, moling, zhouben } = useGameTimer()
             <div class="flex items-center justify-between gap-3 border-b border-base-content/10 pb-3">
                 <h3 class="text-lg font-medium">{{ $t("resizeableWindow.zhouben") }}</h3>
             </div>
-            <div v-if="weeklyCurrentSections.length" class="space-y-3">
+            <div v-if="weeklyGroups.length" class="space-y-3">
                 <div class="space-y-3">
                     <div
-                        v-for="section in weeklyCurrentSections"
-                        :key="section.key"
+                        v-for="group in weeklyGroups"
+                        :key="group.key"
                         class="space-y-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                     >
-                        <div class="flex items-start gap-3">
-                            <img :src="getHardbossIcon(section.bossIcon)" :alt="section.bossName" class="size-10 shrink-0 rounded-xs" />
-                            <div class="min-w-0">
-                                <SRouterLink
-                                    :to="`/db/hardboss/${section.bossId}`"
-                                    class="text-sm font-medium transition-colors duration-150 hover:text-primary"
-                                >
-                                    {{ section.bossName }}
-                                </SRouterLink>
-                                <div v-if="section.nextRotationTime" class="text-xs text-base-content/50">
-                                    下次轮换：{{ new Date(section.nextRotationTime * 1000).toLocaleString("zh-CN") }}
-                                </div>
-                                <div v-else class="text-xs text-base-content/45">{{ $t("resizeable-window-timers.no_rotation_time") }}</div>
-                            </div>
+                        <div class="flex flex-wrap items-start gap-2">
+                            <SRouterLink
+                                v-for="boss in group.bosses"
+                                :key="boss.bossId"
+                                :to="`/db/hardboss/${boss.bossId}`"
+                                class="flex min-w-0 items-center gap-1.5 rounded-xs border border-base-content/10 bg-base-100/50 px-1.5 py-1 transition-colors duration-150 hover:border-primary/40 hover:text-primary"
+                            >
+                                <img :src="getHardbossIcon(boss.bossIcon)" :alt="boss.bossName" class="size-6 shrink-0 rounded-xs" />
+                                <span class="truncate text-sm font-medium">{{ boss.bossName }}</span>
+                            </SRouterLink>
                         </div>
+                        <div v-if="group.nextRotationTime" class="text-xs text-base-content/50">
+                            下次轮换：{{ new Date(group.nextRotationTime * 1000).toLocaleString("zh-CN") }}
+                        </div>
+                        <div v-else class="text-xs text-base-content/45">{{ $t("resizeable-window-timers.no_rotation_time") }}</div>
                         <div class="flex flex-wrap gap-2">
-                            <div v-for="slot in section.slots" :key="slot.key" class="flex w-16 shrink-0 flex-col items-center gap-1">
+                            <div v-for="slot in group.slots" :key="slot.key" class="flex w-16 shrink-0 flex-col items-center gap-1">
                                 <div class="relative">
                                     <ResourceCostItem
                                         v-if="slot.currentItem"
@@ -104,7 +104,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                                     <div v-else class="h-8 w-8" />
                                 </div>
                                 <div
-                                    v-if="section.nextRotationTime && slot.nextItem && slot.nextItem.key !== slot.currentItem?.key"
+                                    v-if="group.nextRotationTime && slot.nextItem && slot.nextItem.key !== slot.currentItem?.key"
                                     class="relative"
                                 >
                                     <span
@@ -121,7 +121,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                 </div>
             </div>
             <div
-                v-if="!weeklyCurrentSections.length"
+                v-if="!weeklyGroups.length"
                 class="rounded-xs border border-dashed border-base-content/15 p-6 text-center text-sm text-base-content/45"
             >
                 {{ $t("common.no_data") }}
