@@ -14,6 +14,7 @@ import {
 } from "@/data/d/raid.data"
 import { getDropModeText } from "@/utils/i18n-utils"
 import {
+    getDefaultRaidSeason,
     getHighestFloor,
     getInitialUnlockFloor,
     getJumpTiers,
@@ -102,11 +103,8 @@ const calculateRemainingTimeByScore = (baseRaidPoint: number, targetScore: numbe
 
 // 状态管理
 const raidDungeons = Object.values(RaidDungeon)
-const defaultSeason =
-    Object.values(RaidSeason)
-        .filter(season => raidDungeons.some(dungeon => dungeon.RaidSeason === season.RaidSeason))
-        .sort((a, b) => a.RaidSeason - b.RaidSeason)
-        .at(-1)?.RaidSeason ?? 0
+/** 默认赛季取安全模式允许的最新赛季（爬塔制赛季的数据在 RaidFloor 里，不能按 RaidDungeon 有无数据来选） */
+const defaultSeason = getDefaultRaidSeason()
 const defaultDungeon =
     raidDungeons
         .filter(dungeon => dungeon.RaidSeason === defaultSeason)
@@ -590,11 +588,11 @@ function onRankImgError(key: string): void {
                             v-for="season in seasonTabs"
                             :key="season.RaidSeason"
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                             :class="
                                 selectedSeason === season.RaidSeason
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="handleSeasonChange(season.RaidSeason)"
                         >
@@ -608,11 +606,11 @@ function onRankImgError(key: string): void {
                             v-for="dungeon in dungeonTabs"
                             :key="dungeon.DungeonId"
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap"
                             :class="
                                 selectedDungeon === dungeon.DungeonId
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectedDungeon = dungeon.DungeonId"
                         >
@@ -628,11 +626,11 @@ function onRankImgError(key: string): void {
                             v-for="period in [{ value: true }, { value: false }]"
                             :key="String(period.value)"
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap"
                             :class="
                                 isFloorPreRaid === period.value
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="isFloorPreRaid = period.value"
                         >
@@ -785,7 +783,7 @@ function onRankImgError(key: string): void {
                         </span>
                         <button
                             type="button"
-                            class="cursor-pointer rounded-xs border border-primary/50 px-2 py-0.5 text-[11px] text-primary transition-colors duration-150 hover:bg-primary hover:text-primary-content active:scale-[0.97]"
+                            class="btn btn-xs border-primary/50 text-primary hover:bg-primary hover:text-primary-content"
                             @click="gotoHighestUnlocked"
                         >
                             {{ $t("db-raid-rank.goto_unlock") }}

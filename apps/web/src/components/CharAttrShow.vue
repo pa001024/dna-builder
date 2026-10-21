@@ -363,8 +363,8 @@ function formatDynamicSource(key: string, value: number): string {
     if (key === "魔灵CD") {
         return `${value >= 0 ? "+" : ""}${+value.toFixed(1)}s`
     }
-    if (["攻击", "生命", "护盾", "防御", "神智", "有效生命", "神智回复"].includes(key)) {
-        return `${value >= 0 ? "+" : ""}${+value.toFixed(key === "攻击" ? 2 : 0)}`
+    if (["神智回复"].includes(key)) {
+        return `${value >= 0 ? "+" : ""}${+value.toFixed(0)}`
     }
     return format100r(value)
 }
@@ -580,10 +580,9 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
             <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
             <div class="text-primary font-bold text-sm font-orbitron">
                 <template v-if="key === '魔灵CD'">{{ +val.toFixed(1) }}s</template>
-                <template v-else-if="['攻击', '生命', '护盾', '防御', '神智', '有效生命'].includes(key)">
+                <template v-else-if="['攻击', '生命', '护盾', '防御', '神智', '有效生命', '神智回复'].includes(key)">
                     {{ +val.toFixed(key === "攻击" ? 2 : 0) }}
                 </template>
-                <template v-else-if="key === '神智回复'">+{{ +val.toFixed(0) }}</template>
                 <template v-else>{{ +(val * 100).toFixed(2) }}%</template>
             </div>
         </div>

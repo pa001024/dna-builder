@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest"
 import { RaidSeason } from "@/data/d/raid.data"
+import { DNA_SAFE_VERSION_LIMIT, getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
 import {
     formatRankTime,
+    getDefaultRaidSeason,
     getHighestFloor,
     getInitialUnlockFloor,
     getJumpTiers,
     getRaidFloorFullList,
     getRaidFloorList,
+    getRaidSeasonVersion,
     getUnlockFloorCount,
     isFloorSeason,
     isKeyFloor,
@@ -92,5 +95,30 @@ describe("raid-floor-utils", () => {
         expect(full[0].Floor).toBe(1)
         expect(full[179].Floor).toBe(180)
         expect(getRaidFloorFullList(1007, 1)).toHaveLength(180)
+    })
+})
+
+describe("赛季默认选中与安全模式版本门限一致", () => {
+    it("赛季号换算版本号：1001 → 1.1，1007 → 1.7", () => {
+        expect(getRaidSeasonVersion(1001)).toBeCloseTo(1.1)
+        expect(getRaidSeasonVersion(1006)).toBeCloseTo(1.6)
+        expect(getRaidSeasonVersion(1007)).toBeCloseTo(1.7)
+    })
+
+    it("安全模式开启时默认选中版本门限内的最新赛季", () => {
+        const limit = getCurrentVersionLimit()
+        const season = getDefaultRaidSeason()
+        expect(getRaidSeasonVersion(season)).toBeLessThanOrEqual(limit)
+        expect(getRaidSeasonVersion(season)).toBeCloseTo(DNA_SAFE_VERSION_LIMIT)
+    })
+
+    it("关闭安全模式后默认选中最新赛季", () => {
+        const previousLimit = getCurrentVersionLimit()
+        setCurrentVersionLimit(Number.POSITIVE_INFINITY)
+        try {
+            expect(getDefaultRaidSeason()).toBe(Math.max(...Object.values(RaidSeason).map(item => item.RaidSeason)))
+        } finally {
+            setCurrentVersionLimit(previousLimit)
+        }
     })
 })

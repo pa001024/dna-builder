@@ -6,18 +6,29 @@ describe("walnut-utils", () => {
         expect(WalnutSequenceSimulator.expectedCycleOpens([1, 7, 10, 13, 13, 13])).toBeCloseTo(10, 10)
     })
 
-    it("各档位单件期望开函次数符合长期平均口径", () => {
+    it("各档位单件期望开函次数符合「批次只结算最高档」口径", () => {
         const parameter = [1, 7, 10, 13, 13, 13]
         expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 0, 1)).toBeCloseTo(10, 10)
-        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 1, 1)).toBeCloseTo(10 / 3.5, 10)
-        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 2, 1)).toBeCloseTo(10 / 5, 10)
-        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 3, 1)).toBeCloseTo(10 / 6.5, 10)
+        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 1, 1)).toBeCloseTo(3.4539, 4)
+        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 2, 1)).toBeCloseTo(3.4589, 4)
+        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 3, 1)).toBeCloseTo(4.663, 3)
+    })
+
+    it("高档次顶掉低档次：单轮各档产出数之和等于可结算的批次槽位", () => {
+        const parameter = [1, 7, 10, 13, 13, 13]
+        let copies = 0
+        for (let rewardIndex = 1; rewardIndex <= 5; rewardIndex++) {
+            copies += WalnutSequenceSimulator.expectedCycleCopies(parameter, rewardIndex)
+        }
+        // 非金奖均值 M=28，最后一槽被金顶掉，可结算批次数 E[floor(M/3)] = 9
+        expect(copies).toBeCloseTo(9, 6)
     })
 
     it("羽蛇背水密函参数下期望值正确", () => {
         const parameter = [1, 5, 36, 36, 36, 36]
         expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 0, 1)).toBeCloseTo(25.5, 10)
-        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 1, 1)).toBeCloseTo(10.2, 10)
+        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 1, 1)).toBeCloseTo(10.7684, 4)
+        expect(WalnutSequenceSimulator.expectedOpensForRewardIndex(parameter, 2, 1)).toBeCloseTo(2.1171, 4)
     })
 
     it("无法产出的档位返回 Infinity", () => {

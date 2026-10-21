@@ -98,7 +98,7 @@ describe("resource-source", () => {
         expect(draft?.walnutId).toBe(151735)
         expect(draft?.tierKey).toBe("walnut-source.tier_big_silver")
         expect(draft?.isDraft).toBe(true)
-        expect(draft?.expectedOpens).toBeCloseTo(10.2, 10)
+        expect(draft?.expectedOpens).toBeCloseTo(10.7684, 4)
     })
 
     it("未知魔之楔没有密函来源", () => {

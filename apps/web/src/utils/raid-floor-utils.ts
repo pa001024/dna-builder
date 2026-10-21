@@ -1,4 +1,5 @@
 import { RaidFloor, type RaidFloorItem, RaidSeason, RaidSeasonFloorMax, type RaidSeasonItem } from "@/data/d/raid.data"
+import { getCurrentVersionLimit } from "@/data/versionGate"
 
 /**
  * 爬塔制（RaidSeasonType 2）赛季的资料库逻辑层。
@@ -248,4 +249,31 @@ export function getFloorIdByNumber(seasonId: number | string, floor: number, flo
  */
 export function getRankingColumnKind(season: RaidSeasonItem | number | string): "floor" | "score" {
     return isFloorSeason(season) ? "floor" : "score"
+}
+
+/**
+ * 赛季号换算版本号：1007 → 1.7（赛季号编码了版本，与界面赛季方章同一口径）。
+ * @param seasonId 赛季ID
+ * @returns 版本号，非法赛季号返回 NaN
+ */
+export function getRaidSeasonVersion(seasonId: number | string): number {
+    const id = Number(seasonId)
+    if (!Number.isFinite(id)) return Number.NaN
+    return Math.floor(id / 1000) + (id % 1000) / 10
+}
+
+/**
+ * 当前安全模式下允许展示的最大赛季：版本不超过版本门限的最新赛季。
+ * 关闭安全模式（门限 Infinity）时即最新赛季；无赛季满足时回退到最早赛季。
+ * @returns 默认赛季ID，无任何赛季时 0
+ */
+export function getDefaultRaidSeason(): number {
+    const seasonIds = Object.values(RaidSeason)
+        .map(item => item.RaidSeason)
+        .sort((a, b) => a - b)
+    if (seasonIds.length === 0) return 0
+
+    const limit = getCurrentVersionLimit()
+    const allowed = seasonIds.filter(seasonId => getRaidSeasonVersion(seasonId) <= limit)
+    return allowed.at(-1) ?? seasonIds[0]
 }

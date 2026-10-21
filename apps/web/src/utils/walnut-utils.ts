@@ -139,6 +139,61 @@ export class WalnutSequenceSimulator {
     }
 
     /**
+     * 指定档位单轮序列的期望产出数。
+     *
+     * 每次开函取 3 张、只结算其中**档位最高**的一张（金 > 大银 > 小银 > 铜1 > 铜2 > 铜3），
+     * 所以高档次会顶掉低档次的结算名额，不能用「上限/2」这种无竞争的均值。
+     * 一轮序列共 M 个非金奖 + 1 个金奖，批次在序列上连续平铺：
+     * - 前 floor(M/3) 个满批，每批 3 张互不竞争地在一起，其中档位 i 胜出的概率为
+     *   `[C(s,3) - C(低于 i 的个数,3)] / C(M,3)`（s = 档位 i 及其以下的数量）；
+     * - 剩下 M mod 3 个非金 + 金奖挤在最后一批，金奖必胜，非金奖一张都拿不到。
+     * @param parameter 密函参数（walnut.参数）
+     * @param rewardIndex 奖励在密函奖励数组中的索引（0=金，1=大银，2=小银，3+=铜），非金奖档位映射到 parameter 同索引
+     * @returns 该档位单轮期望产出数
+     */
+    static expectedCycleCopies(parameter: number[], rewardIndex: number): number {
+        if (rewardIndex <= 0 || rewardIndex > 5) {
+            return 1 // 金奖每轮恰 1 个；越界索引按 1 处理
+        }
+        // 高档次各档数量之和 H、本档数量 c、低档次各档数量之和 L
+        const distHigher = WalnutSequenceSimulator.convolveUniform(parameter, 1, rewardIndex - 1)
+        const distSelf = WalnutSequenceSimulator.uniformDistribution(parameter[rewardIndex] ?? 0)
+        const distLower = WalnutSequenceSimulator.convolveUniform(parameter, rewardIndex + 1, 5)
+
+        let expected = 0
+        for (let s = 0; s < distSelf.length + distLower.length - 1; s++) {
+            // s 个「本档及以下」的奖励中，至少 1 个是本档的概率（抵掉全是更低档的组合）
+            let joint = 0
+            let lowerOnly = 0
+            for (let l = 0; l < distLower.length && l <= s; l++) {
+                const c = s - l
+                if (c >= distSelf.length) {
+                    continue
+                }
+                const weight = distSelf[c] * distLower[l]
+                joint += weight
+                lowerOnly += weight * WalnutSequenceSimulator.choose3(l)
+            }
+            const winCount = joint * WalnutSequenceSimulator.choose3(s) - lowerOnly
+            if (winCount === 0) {
+                continue
+            }
+            // 满批次数的条件期望：前 floor((H+s)/3) 批都落在本档及以下之内
+            let fullBatches = 0
+            for (let h = 0; h < distHigher.length; h++) {
+                const p = distHigher[h]
+                const m = h + s
+                if (!p || m < 3) {
+                    continue
+                }
+                fullBatches += p * (Math.floor(m / 3) / WalnutSequenceSimulator.choose3(m))
+            }
+            expected += winCount * fullBatches
+        }
+        return expected
+    }
+
+    /**
      * 指定奖励档位的单件期望开函次数（长期平均口径：单轮期望开函 ÷ 单轮期望产出数）。
      * 参数必须从外面传入（walnut.参数），不可写死——不同密函的参数不同。
      * @param parameter 密函参数（walnut.参数）
@@ -147,13 +202,57 @@ export class WalnutSequenceSimulator {
      * @returns 单件期望开函次数；档位无法产出时返回 Infinity
      */
     static expectedOpensForRewardIndex(parameter: number[], rewardIndex: number, count = 1): number {
-        const cycleOpens = WalnutSequenceSimulator.expectedCycleOpens(parameter)
-        if (rewardIndex === 0) {
-            return count > 0 ? cycleOpens / count : Number.POSITIVE_INFINITY
+        if (count <= 0) {
+            return Number.POSITIVE_INFINITY
         }
-        const max = parameter[rewardIndex] ?? 0
-        const expectedCopies = (max / 2) * count
+        const cycleOpens = WalnutSequenceSimulator.expectedCycleOpens(parameter)
+        const expectedCopies = WalnutSequenceSimulator.expectedCycleCopies(parameter, rewardIndex) * count
         return expectedCopies > 0 ? cycleOpens / expectedCopies : Number.POSITIVE_INFINITY
+    }
+
+    /**
+     * 组合数 C(n, 3)，n < 3 时为 0。
+     * @param n 总数
+     * @returns 组合数
+     */
+    private static choose3(n: number): number {
+        return n >= 3 ? (n * (n - 1) * (n - 2)) / 6 : 0
+    }
+
+    /**
+     * 单个档位数量的均匀分布（0~上限）。
+     * @param max 上限
+     * @returns 概率数组，下标为数量
+     */
+    private static uniformDistribution(max: number): Float64Array {
+        const limit = Math.max(0, Math.floor(max))
+        return new Float64Array(limit + 1).fill(1 / (limit + 1))
+    }
+
+    /**
+     * 把 [fromTier, toTier] 各档的均匀分布卷积成「这些档数量之和」的分布。
+     * @param parameter 密函参数（walnut.参数）
+     * @param fromTier 起始档位（含）
+     * @param toTier 结束档位（含）
+     * @returns 概率数组，下标为数量之和
+     */
+    private static convolveUniform(parameter: number[], fromTier: number, toTier: number): Float64Array {
+        let result = Float64Array.from([1])
+        for (let tier = fromTier; tier <= toTier; tier++) {
+            const next = new Float64Array(result.length + Math.max(0, Math.floor(parameter[tier] ?? 0)))
+            const dist = WalnutSequenceSimulator.uniformDistribution(parameter[tier] ?? 0)
+            for (let i = 0; i < result.length; i++) {
+                const ps = result[i]
+                if (!ps) {
+                    continue
+                }
+                for (let j = 0; j < dist.length; j++) {
+                    next[i + j] += ps * dist[j]
+                }
+            }
+            result = next
+        }
+        return result
     }
 
     /**
