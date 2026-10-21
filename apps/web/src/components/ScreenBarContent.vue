@@ -85,7 +85,7 @@ const { gt } = useGameText()
                 </span>
             </span>
 
-            <!-- 最近完成:队列里最先完工的那一条,未完工出倒计时,已完工标为铸造完成;无可算条目时整颗隐藏 -->
+            <!-- 最近完成:有已完工时显示刚做完的那条(标为铸造完成),否则显示最先完工那条的倒计时;无可展示条目时整颗隐藏 -->
             <span
                 v-else-if="item.type === 'forge' && item.mode === 'nearest' && item.status !== 'unset'"
                 class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"

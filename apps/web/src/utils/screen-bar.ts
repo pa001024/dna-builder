@@ -104,7 +104,7 @@ export type ScreenBarForgeItem = ScreenBarItemBase & {
     /**
      * `alarm` 只显示用户指定的那一条完成提醒(未设时整条隐藏);
      * `summary` 显示游戏信息里全部铸造条目,已完成条目 / 总条目数(队列为空时整条隐藏);
-     * `nearest` 只显示队列里最先完工的那一条:未完工出倒计时,已完工标「铸造完成」。
+     * `nearest` 显示队列里最需要关注的一条:有已完工时显示刚做完的那条(标「铸造完成」),否则显示最先完工那条的倒计时。
      */
     mode: ScreenBarForgeMode
 }
@@ -597,8 +597,10 @@ function hasMihanMissions(typeIndexes: number[], mihanData: string[][] | undefin
 /**
  * 挑出「最近完成」模式要展示的那条铸造。
  *
- * 优先取完工时刻最早的未完工条目;全部已完工时取完工最晚的那条(刚做完的那件),
- * 由调用方渲染完成态。没有可算出完工时刻的条目时返回 null,由组件整条隐藏。
+ * 已完工优先:有完工(整条走完,或完工时刻已到)的条目时取完工最晚的那条(刚做完的那件),
+ * 由调用方渲染完成态;没有已完工时才取完工时刻最早的未完工条目出倒计时。
+ * 整条走完但算不出完工时刻的条目也视为已完工(剩余按 0 处理),避免已完成的被整条隐藏。
+ * 都没有时返回 null,由组件整条隐藏。
  * @param drafts 铸造队列(已归一化)
  * @param now 当前时间戳(毫秒)
  * @param icons 产物 id → 图片路径的缓存
@@ -611,17 +613,32 @@ function pickNearestForgeDraft(
 ): { name: string; icon: string; remaining: number } | null {
     let upcoming: ScreenBarForgeDraft | null = null
     let finished: ScreenBarForgeDraft | null = null
+    /** 完工时刻缺失时按最小处理:有明确时刻的已完工条目排在前面。 */
+    const endOrMin = (draft: ScreenBarForgeDraft): number => draft.endTime ?? Number.NEGATIVE_INFINITY
     for (const draft of drafts) {
+        // 整条走完即视为已完工:即使完工时刻缺失或因数据延迟仍在未来,剩余也按 0 处理
+        if (draft.done) {
+            if (!finished || endOrMin(draft) > endOrMin(finished)) finished = draft
+            continue
+        }
         const endTime = draft.endTime
         if (endTime === null) continue
         if (endTime > now) {
             if (!upcoming || endTime < (upcoming.endTime as number)) upcoming = draft
-        } else if (!finished || endTime > (finished.endTime as number)) {
+        } else if (!finished || endTime > endOrMin(finished)) {
             finished = draft
         }
     }
-    const picked = upcoming ?? finished
-    if (!picked || picked.endTime === null) return null
+    const picked = finished ?? upcoming
+    if (!picked) return null
+    if (picked.done) {
+        return {
+            name: picked.name,
+            icon: picked.productId === null ? "" : (icons[String(picked.productId)] ?? ""),
+            remaining: Math.min(0, (picked.endTime ?? now) - now),
+        }
+    }
+    if (picked.endTime === null) return null
     return {
         name: picked.name,
         icon: picked.productId === null ? "" : (icons[String(picked.productId)] ?? ""),

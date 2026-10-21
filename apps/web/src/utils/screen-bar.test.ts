@@ -494,7 +494,7 @@ describe("resolveScreenBarItem", () => {
         })
     })
 
-    it("最近完成模式只取最先完工的那一条,并给一天内的精确倒计时", () => {
+    it("最近完成模式有已完工时优先显示刚做完的那条(剩余按 0 标为完成)", () => {
         const drafts = [
             { name: "调停", productId: 20027, endTime: SAMPLE.getTime() + 7_200_000, done: false },
             { name: "危机合约", productId: 20023, endTime: SAMPLE.getTime() + 3_600_000, done: false },
@@ -505,10 +505,40 @@ describe("resolveScreenBarItem", () => {
             id: "n1",
             type: "forge",
             mode: "nearest",
+            title: "已做完",
+            icon: "",
+            text: "",
+            status: "expired",
+        })
+    })
+
+    it("最近完成模式没有已完工时取最先完工的未完工条目,并给一天内的精确倒计时", () => {
+        const drafts = [
+            { name: "调停", productId: 20027, endTime: SAMPLE.getTime() + 7_200_000, done: false },
+            { name: "危机合约", productId: 20023, endTime: SAMPLE.getTime() + 3_600_000, done: false },
+        ]
+        const icons = { "20027": "/imgs/res/T_Walnut_Avatar.webp", "20023": "/imgs/res/T_Resource_Coin.webp" }
+        expect(resolveScreenBarItem({ id: "n1b", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts, icons)).toEqual({
+            id: "n1b",
+            type: "forge",
+            mode: "nearest",
             title: "危机合约",
             icon: "/imgs/res/T_Resource_Coin.webp",
             text: "1:00:00",
             status: "running",
+        })
+    })
+
+    it("最近完成模式:整条走完但算不出完工时刻也视为已完工,而不是整颗隐藏", () => {
+        const drafts = [{ name: "已做完", productId: null, endTime: null, done: true }]
+        expect(resolveScreenBarItem({ id: "n1c", type: "forge", mode: "nearest" }, SAMPLE, mihanData, null, drafts)).toEqual({
+            id: "n1c",
+            type: "forge",
+            mode: "nearest",
+            title: "已做完",
+            icon: "",
+            text: "",
+            status: "expired",
         })
     })
 

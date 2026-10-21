@@ -88,7 +88,8 @@ export const RICH_COMPONENT_NAMES: string[] = Object.keys(RICH_COMPONENTS)
 const RICH_COMPONENT_RE = /<([A-Z][A-Za-z0-9]*)\b([^<>]*?)\/?>(?:\s*<\/\1\s*>)?/g
 
 /** 属性匹配：`:name="expr"`（绑定）或 `name="text"`（字面量），外层引号支持双/单引号与无引号裸值 */
-const ATTRIBUTE_RE = /:([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))|([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))/g
+const ATTRIBUTE_RE =
+    /:([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))|([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))/g
 
 /** 允许作为绑定值的简单字面量：字符串 / 数字 / true / false / null */
 const LITERAL_VALUE_RE = /^(?:'([^']*)'|"([^"]*)"|(-?\d+(?:\.\d+)?)|(true|false|null))$/
