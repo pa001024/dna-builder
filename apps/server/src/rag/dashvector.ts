@@ -3,7 +3,11 @@
  *
  * 契约按真机验证（在 `dbagent` 集合上实测过插入 / 检索 / 删除 / 统计与过滤语法）：
  * - 鉴权用 **`dashvector-auth-token`** 头（不是 `Authorization: Bearer`，用错头网关会报 apikey 为空）；
- * - 写：`POST /v1/collections/{集合}/docs`，体 `{ docs: [{ id, vector, fields }] }`；
+ * - 写：`POST /v1/collections/{集合}/docs/upsert`，体 `{ docs: [{ id, vector, fields }] }`；
+ *   必须是 upsert 语义——纯插入（`/docs`）遇到已存在的 id 会按条报 `Duplicate Key`（-2027，
+ *   HTTP 仍是 200），而增量构建（内容变更、锚点不变）与全量重建（同批 id 已在远端）必然重写
+ *   已存在的键，用纯插入每次都会把构建整体打失败。upsert 对新 id 为 `insert`、旧 id 为
+ *   `update`（真机均已验证），重跑安全。
  * - 查：`POST /v1/collections/{集合}/query`，体 `{ vector, topk, filter, output_fields, include_vector }`
  *   → `output: [{ id, fields, score }]`（**无命中时没有 `output` 字段**）。
  *   注意 `score` 是**距离**不是相似度：cosine 度量下同向 = 0、正交 = 1（真机实测：拿 unit(0) 查
@@ -273,7 +277,11 @@ async function runBatches<T>(batches: ReadonlyArray<() => Promise<T>>, concurren
 }
 
 /**
- * 写入（或覆盖）一批文档。
+ * 写入（或覆盖）一批文档（upsert 语义：新 id 插入、已存在的 id 覆盖）。
+ *
+ * 必须走 `/docs/upsert` 而不是 `/docs`：纯插入遇到已存在的 id 按条报 `Duplicate Key`（-2027），
+ * 而增量构建（变更的锚点要重写向量）、全量重建（整批 id 已在远端）、中断后重跑都会写已存在的键——
+ * 用纯插入这些场景每次都会整体失败。upsert 返回的 `doc_op` 为 `insert` / `update`，都是 code 0 即成功。
  *
  * 先序列化每条文档，再按「条数 ≤ {@link WRITE_BATCH_DOCS}、请求体 ≤ {@link WRITE_BODY_BUDGET_BYTES}」装箱，
  * {@link WRITE_CONCURRENCY} 路并发；每批里逐条判断结果码——远端对「部分失败」也返回 HTTP 200，
@@ -313,7 +321,7 @@ export async function insertDocuments(config: DashVectorConfig, docs: readonly D
 
         batches.push(async () => {
             const payload = await request<Array<{ doc_op?: string; id?: string; code?: number; message?: string }>>(config, {
-                path: "/docs",
+                path: "/docs/upsert",
                 method: "POST",
                 bodyText: `{"docs":[${sliceTexts.join(",")}]}`,
             })
