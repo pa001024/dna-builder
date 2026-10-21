@@ -1819,11 +1819,11 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                 v-for="level in levels"
                 :key="level.id"
                 type="button"
-                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                class="btn btn-xs whitespace-nowrap"
                 :class="
                     selectedLevelId === level.id
-                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        ? 'btn-primary'
+                        : ''
                 "
                 @click="selectedLevelId = level.id"
             >
@@ -1838,11 +1838,11 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                            class="btn btn-xs whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40"
                             :class="
                                 isSolving
                                     ? 'border-base-content/20 text-base-content/60'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    : ''
                             "
                             :disabled="isSolving"
                             @click="solveCurrentBoard"
@@ -1852,7 +1852,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                         <button
                             v-if="manualPlacements.length"
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-error/40 px-2 py-0.5 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap border-error/40 text-error/80 hover:border-error hover:bg-error/10 hover:text-error"
                             @click="clearAllManualPlacements"
                         >
                             {{ $t("backpack-puzzle.clear_manual_placement") }}
@@ -2014,7 +2014,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                             <div class="flex-1"></div>
                             <button
                                 type="button"
-                                class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 font-mono text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                class="btn btn-xs font-mono"
                                 @click.stop="rotateItemDraft(entry.itemIndexes[0])"
                             >
                                 {{ getRotationLabel(getDraftRotationIndex(entry.itemIndexes[0])) }}

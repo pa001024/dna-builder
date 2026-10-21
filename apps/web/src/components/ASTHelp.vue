@@ -685,7 +685,7 @@ const badgeColors: Record<string, string> = {
                                 v-for="item in group.items"
                                 :key="item"
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 @click="insertTemporaryAttribute(item)"
                             >
                                 {{ item }}

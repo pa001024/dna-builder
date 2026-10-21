@@ -286,9 +286,9 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
 </script>
 
 <template>
-    <div class="isolate relative flex h-full w-full flex-col overflow-hidden bg-base-100 text-base-content">
+    <div class="isolate relative flex h-full w-full flex-col overflow-hidden bg-transparent text-base-content">
         <!-- 顶栏 -->
-        <div class="flex items-center gap-3 border-b border-base-300 bg-base-200/50 py-2 pl-2 pr-4">
+        <div class="flex items-center gap-3 border-b border-base-content/10 bg-base-100/60 py-2 pl-2 pr-4">
             <button
                 type="button"
                 class="btn btn-ghost btn-xs"
@@ -357,16 +357,16 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
         </div>
 
         <!-- 距离标尺 -->
-        <div class="relative mx-8 h-5 shrink-0 border-t border-base-300/60 text-[0.6rem] text-base-content/40">
+        <div class="relative mx-8 h-5 shrink-0 border-t border-base-content/10 text-[0.6rem] text-base-content/40">
             <span class="absolute left-0 top-0.5">0m</span>
             <span class="absolute left-1/2 top-0.5 -translate-x-1/2">50m</span>
             <span class="absolute right-0 top-0.5">100m</span>
         </div>
 
         <!-- 底部信息区 -->
-        <div class="flex h-36 shrink-0 border-t border-base-300 bg-base-200/30">
-            <div class="flex w-80 max-w-[55%] flex-col border-r border-base-300">
-                <div class="flex items-center gap-2 border-b border-base-300/60 px-3 py-1 text-xs font-semibold text-base-content/60">
+        <div class="flex h-36 shrink-0 border-t border-base-content/10 bg-base-100/60">
+            <div class="flex w-80 max-w-[55%] flex-col border-r border-base-content/10">
+                <div class="flex items-center gap-2 border-b border-base-content/10 px-3 py-1 text-xs font-semibold text-base-content/60">
                     <Icon icon="ri:chat-3-line" class="text-sm text-primary" />
                     LOG
                 </div>
@@ -384,7 +384,7 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
                 </div>
             </div>
             <div class="flex min-w-0 flex-1 flex-col">
-                <div class="flex items-center gap-2 border-b border-base-300/60 px-3 py-1 text-xs font-semibold text-base-content/60">
+                <div class="flex items-center gap-2 border-b border-base-content/10 px-3 py-1 text-xs font-semibold text-base-content/60">
                     <Icon icon="ri:bar-chart-line" class="text-sm text-primary" />
                     RANK
                 </div>
@@ -407,9 +407,9 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
         </div>
 
         <!-- 完赛结果覆盖层 -->
-        <div v-if="state === 'done'" class="absolute inset-0 z-10 flex items-center justify-center bg-base-100/75 backdrop-blur-sm">
-            <div class="w-96 max-w-[92%] rounded-xl border border-primary/30 bg-base-100 shadow-2xl">
-                <div class="flex items-center justify-between border-b border-base-200 px-4 py-3">
+        <div v-if="state === 'done'" class="absolute inset-0 z-10 flex items-center justify-center bg-base-100/85 backdrop-blur-md">
+            <div class="w-96 max-w-[92%] rounded-xs border border-base-content/15 bg-base-100/85 shadow-lg backdrop-blur-md">
+                <div class="flex items-center justify-between border-b border-base-content/10 px-4 py-3">
                     <h3 class="flex items-center gap-2 text-sm font-bold">
                         <Icon icon="ri:trophy-line" class="text-lg text-warning" />
                         比赛结束 · 前 6 名
@@ -422,9 +422,9 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
                     <div
                         v-for="item in top6"
                         :key="item.player.playerId"
-                        class="flex items-center gap-2 rounded-md px-2 py-1"
+                        class="flex items-center gap-2 rounded-xs px-2 py-1"
                         :class="
-                            item.rank === 1 ? 'bg-warning/10' : item.rank === 2 ? 'bg-base-200/60' : item.rank === 3 ? 'bg-primary/5' : ''
+                            item.rank === 1 ? 'bg-warning/10' : item.rank === 2 ? 'bg-base-content/3' : item.rank === 3 ? 'bg-primary/5' : ''
                         "
                     >
                         <span
@@ -436,7 +436,7 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
                                       ? 'bg-base-300 text-base-content'
                                       : item.rank === 3
                                         ? 'bg-primary text-primary-content'
-                                        : 'bg-base-200 text-base-content/60'
+                                        : 'bg-base-content/10 text-base-content/60'
                             "
                         >
                             {{ item.rank }}
@@ -446,7 +446,7 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
                         <span class="shrink-0 text-xs tabular-nums text-base-content/50">{{ item.finishTime?.toFixed(1) }}s</span>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 border-t border-base-200 px-4 py-3">
+                <div class="flex justify-end gap-2 border-t border-base-content/10 px-4 py-3">
                     <button type="button" class="btn btn-ghost btn-sm" @click="emit('close')">关闭</button>
                     <button type="button" class="btn btn-primary btn-sm gap-1" @click="resetAndStart">
                         <Icon icon="ri:refresh-line" />

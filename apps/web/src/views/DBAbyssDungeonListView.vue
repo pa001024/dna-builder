@@ -146,11 +146,11 @@ useInitialScrollToSelectedItem({
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                         <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.season') }}</span>
                         <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap"
                             :class="
                                 selectedDungeonGroup === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectedDungeonGroup = ''"
                         >
@@ -159,11 +159,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="group in allDungeonGroups"
                             :key="group"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap"
                             :class="
                                 selectedDungeonGroup === group
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectedDungeonGroup = group"
                         >
@@ -175,11 +175,11 @@ useInitialScrollToSelectedItem({
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                         <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.version') }}</span>
                         <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap tabular-nums"
                             :class="
                                 selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectedVersion = ''"
                         >
@@ -188,11 +188,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="version in versions"
                             :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                             :class="
                                 selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectedVersion = version"
                         >
@@ -272,11 +272,11 @@ useInitialScrollToSelectedItem({
                                             v-for="dungeon in group.dungeons"
                                             :key="dungeon.id"
                                             type="button"
-                                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                            class="btn btn-xs font-mono tabular-nums"
                                             :class="
                                                 selectedDungeon?.id === dungeon.id
-                                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                                    ? 'btn-primary'
+                                                    : ''
                                             "
                                             @click.stop="selectDungeon(dungeon)"
                                         >

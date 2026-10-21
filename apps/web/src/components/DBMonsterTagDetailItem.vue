@@ -233,11 +233,11 @@ function formatBonusValue(value: number): string {
                     v-for="tag in currentTags"
                     :key="tag.id"
                     :to="`/db/monstertag/${tag.id}`"
-                    class="inline-flex cursor-pointer items-center whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                     :class="
                         tag.id === monsterTag.id
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                 >
                     {{ tag.id }}

@@ -574,21 +574,21 @@ function clearHistory() {
                                 <div class="mt-2 grid grid-cols-3 gap-2">
                                     <button
                                         type="button"
-                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary px-2 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                                        class="btn btn-xs justify-center btn-primary"
                                         @click="fishOnce"
                                     >
                                         {{ $t("db-fish-spot.fish_once") }}
                                     </button>
                                     <button
                                         type="button"
-                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary/50 px-2 text-[11px] text-primary transition-colors duration-150 hover:bg-primary/10 active:scale-[0.97]"
+                                        class="btn btn-xs justify-center border-primary/50 text-primary hover:bg-primary/10"
                                         @click="fishMultiple(100)"
                                     >
                                         {{ $t("db-fish-spot.fish_100") }}
                                     </button>
                                     <button
                                         type="button"
-                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                        class="btn btn-xs justify-center border-base-content/20 text-base-content/60 hover:border-error/60 hover:text-error"
                                         @click="clearHistory"
                                     >
                                         {{ $t("db-fish-spot.clear_records") }}

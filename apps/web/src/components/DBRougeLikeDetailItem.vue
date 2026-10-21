@@ -293,12 +293,8 @@ const roomConditions = computed(() => {
                             v-for="level in (item as RougeLikeContract).maxLevel"
                             :key="level"
                             type="button"
-                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-orbitron text-[11px] font-semibold transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                currentContractLevel === level
-                                    ? 'border-primary bg-primary text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
+                            class="btn btn-xs font-orbitron"
+                            :class="currentContractLevel === level ? 'btn-primary' : ''"
                             @click="contractLevel = level"
                         >
                             {{ level }}

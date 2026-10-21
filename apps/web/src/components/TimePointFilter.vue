@@ -106,11 +106,11 @@ function resetToCurrent(): void {
                 />
                 <button
                     type="button"
-                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40"
+                    class="btn btn-xs disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                         selectedIndex === currentIndex
                             ? 'border-base-content/15 text-base-content/40'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            : ''
                     "
                     :disabled="selectedIndex === currentIndex"
                     @click="resetToCurrent"

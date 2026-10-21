@@ -341,11 +341,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                             <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">TYPE</span>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedType === 'all'
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedType = 'all'"
                             >
@@ -354,11 +354,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                             <button
                                 v-for="accessoryType in accessoryTypes"
                                 :key="accessoryType"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedType === accessoryType
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedType = accessoryType"
                             >
@@ -370,11 +370,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                             <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">RARITY</span>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedRarity === -1
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedRarity = -1"
                             >
@@ -400,11 +400,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                             <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">UNLOCK</span>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedUnlock === 'all'
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedUnlock = 'all'"
                             >
@@ -413,11 +413,11 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                             <button
                                 v-for="unlockMethod in allUnlockMethods"
                                 :key="unlockMethod"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedUnlock === unlockMethod
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedUnlock = unlockMethod"
                             >

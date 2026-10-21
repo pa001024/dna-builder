@@ -503,12 +503,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 v-for="tab in modeTabs"
                                 :key="tab.key"
                                 type="button"
-                                class="flex-1 cursor-pointer rounded-xs border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 active:scale-[0.99]"
-                                :class="
-                                mode === tab.key
-                                    ? 'border-primary bg-primary text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
+                                class="btn flex-1"
+                                :class="mode === tab.key ? 'btn-primary' : ''"
                                 @click="switchMode(tab.key)"
                             >
                                 {{ $t(tab.label) }}
@@ -520,12 +516,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 v-for="tab in activeTabs"
                                 :key="tab.key"
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                kind === tab.key
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
+                                class="btn btn-xs whitespace-nowrap"
+                                :class="kind === tab.key ? 'btn-primary' : ''"
                                 @click="switchKind(tab.key)"
                             >
                                 {{ $t(tab.label) }}
@@ -544,12 +536,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                             <div v-if="groupFilterOptions.length" class="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterGroup === 0
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterGroup === 0 ? 'btn-primary' : ''"
                                     @click="filterGroup = 0"
                                 >
                                     {{ $t("common.all") }}
@@ -558,12 +546,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                     v-for="option in groupFilterOptions"
                                     :key="option.id"
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterGroup === option.id
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterGroup === option.id ? 'btn-primary' : ''"
                                     @click="filterGroup = option.id"
                                 >
                                     {{ gt(option.name) }}
@@ -572,12 +556,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                             <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterBranch === 0
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterBranch === 0 ? 'btn-primary' : ''"
                                     @click="filterBranch = 0"
                                 >
                                     {{ $t("common.all") }}
@@ -586,12 +566,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                     v-for="branch in branchFilterOptions"
                                     :key="branch.id"
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterBranch === branch.id
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterBranch === branch.id ? 'btn-primary' : ''"
                                     @click="filterBranch = branch.id"
                                 >
                                     {{ gt(branch.name) }}
@@ -600,12 +576,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                             <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterRoomType === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterRoomType === '' ? 'btn-primary' : ''"
                                     @click="filterRoomType = ''"
                                 >
                                     {{ $t("common.all") }}
@@ -614,12 +586,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                     v-for="option in roomTypeFilterOptions"
                                     :key="option.name"
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterRoomType === option.name
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterRoomType === option.name ? 'btn-primary' : ''"
                                     @click="filterRoomType = option.name"
                                 >
                                     {{ option.name }}
@@ -628,12 +596,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                             <div v-if="showRarityFilter" class="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterRarity === 0
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterRarity === 0 ? 'btn-primary' : ''"
                                     @click="filterRarity = 0"
                                 >
                                     {{ $t("common.all") }}
@@ -642,12 +606,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                     v-for="rarity in [1, 2, 3]"
                                     :key="rarity"
                                     type="button"
-                                    class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterRarity === rarity
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs"
+                                    :class="filterRarity === rarity ? 'btn-primary' : ''"
                                     :title="getRarityName(rarity + 2)"
                                     @click="filterRarity = rarity"
                                 >
@@ -657,24 +617,16 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                             <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterUpgradable === 0
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterUpgradable === 0 ? 'btn-primary' : ''"
                                     @click="filterUpgradable = 0"
                                 >
                                     {{ $t("common.all") }}
                                 </button>
                                 <button
                                     type="button"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                    :class="
-                                    filterUpgradable === 1
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
+                                    class="btn btn-xs whitespace-nowrap"
+                                    :class="filterUpgradable === 1 ? 'btn-primary' : ''"
                                     @click="filterUpgradable = 1"
                                 >
                                     {{ $t("db-rouge.upgradable") }}

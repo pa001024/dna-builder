@@ -965,10 +965,10 @@ const dungeonTimeFields = [
                                             v-for="option in charExtraMasteryOptions(char.id)"
                                             :key="option.id"
                                             type="button"
-                                            class="cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                            class="btn btn-xs whitespace-nowrap"
                                             :class="
                                                 char.config.extraMastery?.includes(option.名称)
-                                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                                    ? 'btn-primary'
                                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/60 hover:text-primary'
                                             "
                                             :aria-label="`勾选额外精通：${option.名称}`"
@@ -1300,7 +1300,7 @@ const dungeonTimeFields = [
                         </span>
                         <button
                             type="button"
-                            class="ml-auto inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/55 transition-colors duration-150 hover:border-error/50 hover:text-error"
+                            class="btn btn-xs ml-auto gap-1 border-base-content/20 text-base-content/55 hover:border-error/50 hover:text-error"
                             @click="clearResourceFilters"
                         >
                             清除全部

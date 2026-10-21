@@ -242,11 +242,11 @@ watch(
                         v-for="gamePlay in gamePlayList"
                         :key="gamePlay.id"
                         type="button"
-                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        class="btn btn-xs whitespace-nowrap"
                         :class="
                             gamePlayTab === gamePlay.id
-                                ? 'border-primary bg-primary font-semibold text-primary-content'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                ? 'btn-primary'
+                                : ''
                         "
                         @click="gamePlayTab = gamePlay.id"
                     >

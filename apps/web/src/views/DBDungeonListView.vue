@@ -143,11 +143,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                         <div class="mt-3 flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 onlyNightHandbook
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="toggleNightHandbook"
                             >
@@ -155,11 +155,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             </button>
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 onlyCalamity
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="toggleCalamity"
                             >

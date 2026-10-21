@@ -812,11 +812,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                         <div class="mt-3 flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showImprCheckOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showImprCheckOnly = !showImprCheckOnly"
                             >
@@ -824,11 +824,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             </button>
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showImprIncreaseOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showImprIncreaseOnly = !showImprIncreaseOnly"
                             >
@@ -836,11 +836,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             </button>
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showFullTextSearch
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showFullTextSearch = !showFullTextSearch"
                             >

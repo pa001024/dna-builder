@@ -453,7 +453,7 @@ async function startNameEdit() {
                             <div class="flex items-center justify-between">
                                 <div class="text-xs text-base-content/60">{{ $t("ai-recharge.balance") }}</div>
                                 <button
-                                    class="shrink-0 cursor-pointer rounded-xs border border-primary/50 px-2 py-0.5 text-[11px] whitespace-nowrap text-primary transition-colors duration-150 hover:bg-primary hover:text-primary-content active:scale-[0.97]"
+                                    class="btn btn-xs border-primary/50 whitespace-nowrap text-primary hover:bg-primary hover:text-primary-content"
                                     @click="rechargeOpen = true"
                                 >
                                     {{ $t("ai-recharge.title") }}

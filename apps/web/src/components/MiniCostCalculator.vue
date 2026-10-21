@@ -263,7 +263,7 @@ const dungeonTimeFields = [
             <div class="ml-auto flex items-center gap-1.5">
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] text-base-content/55 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                    class="btn btn-xs gap-1"
                     :aria-expanded="isConfigOpen"
                     @click="isConfigOpen = !isConfigOpen"
                 >
@@ -272,7 +272,7 @@ const dungeonTimeFields = [
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-2 text-[11px] font-medium text-primary transition-colors duration-150 hover:bg-primary/20"
+                    class="btn btn-xs gap-1 border-primary/40 bg-primary/10 font-medium text-primary hover:bg-primary/20"
                     @click="jumpToFullCalculator"
                 >
                     <Icon icon="ri:arrow-right-up-line" />

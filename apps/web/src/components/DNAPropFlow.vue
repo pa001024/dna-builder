@@ -871,7 +871,7 @@ defineExpose({
                             <button
                                 v-if="selectedVerifyRole?.is_verified === 0"
                                 type="button"
-                                class="absolute top-1 right-1 cursor-pointer rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs absolute top-1 right-1 btn-primary"
                                 @click="openVerifyModal()"
                             >
                                 验证

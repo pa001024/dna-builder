@@ -100,11 +100,11 @@ const commitPercent = () => {
                         v-for="p in [100, 75, 50, 25]"
                         :key="p"
                         type="button"
-                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        class="btn btn-xs whitespace-nowrap"
                         :class="
                             coveragePercent === p
-                                ? 'border-primary bg-primary font-semibold text-primary-content'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                ? 'btn-primary'
+                                : ''
                         "
                         @click="setCoverage(p)"
                     >

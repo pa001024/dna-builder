@@ -213,11 +213,11 @@ function handleCompact() {
                 <div v-if="props.canCompact || props.compacting" class="mt-2.5">
                     <button
                         type="button"
-                        class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xs border px-2 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                        class="btn btn-xs flex w-full justify-center gap-1.5 disabled:cursor-not-allowed disabled:opacity-40"
                         :class="
                             props.compacting
                                 ? 'border-base-content/10 text-base-content/40'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                : ''
                         "
                         :disabled="props.compacting"
                         @click="handleCompact"

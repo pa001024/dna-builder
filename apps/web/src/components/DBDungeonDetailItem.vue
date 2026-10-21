@@ -1142,11 +1142,11 @@ watch(
                 <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
                     <button
                         v-if="asyncCombatFreeRooms.length"
-                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        class="btn btn-xs whitespace-nowrap"
                         :class="
                             asyncCombatIsFree
-                                ? 'border-primary bg-primary font-semibold text-primary-content'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                ? 'btn-primary'
+                                : ''
                         "
                         @click="asyncCombatIsFree = !asyncCombatIsFree"
                     >
@@ -1159,11 +1159,11 @@ watch(
                         <button
                             v-for="rate in ASYNC_COMBAT_MULTIPLIERS"
                             :key="rate"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap tabular-nums"
                             :class="
                                 asyncCombatMultiplier === rate
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="asyncCombatMultiplier = rate"
                         >

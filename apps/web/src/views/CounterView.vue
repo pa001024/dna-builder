@@ -270,7 +270,7 @@ onUnmounted(() => {
                         <div class="mt-4 flex items-center justify-between gap-2">
                             <div class="text-sm font-medium tracking-wide">{{ $t("counter.triggers") }}</div>
                             <button
-                                class="shrink-0 cursor-pointer rounded-xs border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                class="btn btn-xs"
                                 @click="counterStore.addTrigger(counter.id)"
                             >
                                 {{ $t("counter.addTrigger") }}

@@ -183,11 +183,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                 >CATEGORY</span
                             >
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                     selectedMainTypeId === 0
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedMainTypeId = 0"
                             >
@@ -196,11 +196,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             <button
                                 v-for="tab in mainTypeOptions"
                                 :key="tab.id"
-                                class="flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs flex gap-1.5 whitespace-nowrap"
                                 :class="
                                     selectedMainTypeId === tab.id
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="selectedMainTypeId = tab.id"
                             >

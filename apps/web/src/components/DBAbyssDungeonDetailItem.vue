@@ -375,11 +375,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
             <div class="mt-2 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                     :class="
                         currentActMode === '12'
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="setActMode('12')"
                 >
@@ -387,11 +387,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                     :class="
                         currentActMode === '36'
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="setActMode('36')"
                 >
@@ -399,11 +399,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                     :class="
                         currentActMode === '50'
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="setActMode('50')"
                 >
@@ -411,11 +411,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap"
                     :class="
                         currentActMode === 'custom'
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="setActMode('custom')"
                 >

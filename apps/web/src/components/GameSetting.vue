@@ -945,35 +945,35 @@ function openConfigDir() {
             <div class="flex flex-wrap gap-1.5">
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    class="btn btn-xs whitespace-nowrap px-2.5"
                     @click="resetToDefault"
                 >
                     {{ $t('game-setting.preset_none') }}
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    class="btn btn-xs whitespace-nowrap px-2.5"
                     @click="applyPreset('low')"
                 >
                     {{ $t('game-setting.preset_very_low') }}
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    class="btn btn-xs whitespace-nowrap px-2.5"
                     @click="applyPreset('medium')"
                 >
                     {{ $t('game-setting.preset_low') }}
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    class="btn btn-xs whitespace-nowrap px-2.5"
                     @click="applyPreset('high')"
                 >
                     {{ $t('game-setting.preset_medium') }}
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    class="btn btn-xs whitespace-nowrap px-2.5"
                     @click="applyPreset('ultra')"
                 >
                     {{ $t('game-setting.preset_high') }}
@@ -997,11 +997,11 @@ function openConfigDir() {
                             v-for="res in commonResolutions"
                             :key="res.label"
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap px-2.5 tabular-nums"
                             :class="
                                 !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="selectResolution(res.width, res.height)"
                         >
@@ -1009,11 +1009,11 @@ function openConfigDir() {
                         </button>
                         <button
                             type="button"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs whitespace-nowrap px-2.5"
                             :class="
                                 isCustomResolution
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="isCustomResolution = true"
                         >

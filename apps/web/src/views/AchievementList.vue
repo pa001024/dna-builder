@@ -405,11 +405,11 @@ function getAchievementIcon(category: string) {
                         <!-- 开关方章：未完成优先 -->
                         <button
                             type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            class="btn btn-xs"
                             :class="
                                 prioritizeUnfinished
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                             @click="prioritizeUnfinished = !prioritizeUnfinished"
                         >
@@ -418,11 +418,11 @@ function getAchievementIcon(category: string) {
                         <!-- 开关方章：隐藏已完成 -->
                         <button
                             type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            class="btn btn-xs"
                             :class="
                                 hideCompleted
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                             @click="hideCompleted = !hideCompleted"
                         >
@@ -431,11 +431,11 @@ function getAchievementIcon(category: string) {
                         <!-- 开关方章：全选当前筛选 -->
                         <button
                             type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            class="btn btn-xs"
                             :class="
                                 selectAllCurrentPage
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                             @click="selectAllCurrentPage = !selectAllCurrentPage"
                         >

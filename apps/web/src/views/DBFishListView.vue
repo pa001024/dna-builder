@@ -121,11 +121,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                         <div class="mt-3 flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 selectedType === 0
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectFishListType(0)"
                             >
@@ -133,11 +133,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                             </button>
                             <button
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 selectedType === 1
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectFishListType(1)"
                             >

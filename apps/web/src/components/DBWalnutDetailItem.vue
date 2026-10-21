@@ -791,11 +791,11 @@ function getRewardTypeColor(index: number): string {
             <div class="mb-3 flex flex-wrap justify-center gap-2">
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    class="btn btn-xs disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                         isAutoOpening
                             ? 'border-base-content/20 text-base-content/40'
-                            : 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'btn-primary'
                     "
                     :disabled="isAutoOpening"
                     @click="openOnce"
@@ -804,11 +804,11 @@ function getRewardTypeColor(index: number): string {
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    class="btn btn-xs disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                         isAutoOpening
                             ? 'border-base-content/20 text-base-content/40'
-                            : 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'btn-primary'
                     "
                     :disabled="isAutoOpening"
                     @click="openWalnut(65)"
@@ -817,11 +817,11 @@ function getRewardTypeColor(index: number): string {
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs"
                     :class="
                         isAutoOpening
                             ? 'border-error bg-error/10 font-semibold text-error'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            : ''
                     "
                     @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()"
                 >
@@ -829,7 +829,7 @@ function getRewardTypeColor(index: number): string {
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error"
+                    class="btn btn-xs border-error/40 text-error/80 hover:border-error hover:bg-error/10 hover:text-error"
                     @click="resetSimulation"
                 >
                     {{ $t("db-walnut-detail.reset_data") }}

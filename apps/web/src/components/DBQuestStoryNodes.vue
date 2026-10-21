@@ -1103,11 +1103,11 @@ watch(flattenedDialogueChain, () => {
         <div v-if="hasPlayableDialogue" class="flex items-center justify-end">
             <button
                 type="button"
-                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                class="btn btn-xs"
                 :class="
                     autoPlayEnabled
                         ? 'border-primary bg-primary/10 font-semibold text-primary'
-                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                        : ''
                 "
                 @click="toggleAutoPlay()"
             >

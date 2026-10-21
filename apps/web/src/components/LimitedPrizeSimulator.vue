@@ -387,11 +387,11 @@ watch(
                     v-for="(poolId, index) in poolIds"
                     :key="poolId"
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap"
                     :class="
                         selectedPoolIndex === index
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="selectedPoolIndex = index"
                 >
@@ -400,11 +400,11 @@ watch(
                 <span class="h-4 w-px shrink-0 bg-base-content/15" aria-hidden="true" />
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    class="btn btn-xs whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                         isAutoDrawing
                             ? 'border-base-content/20 text-base-content/60'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            : ''
                     "
                     :disabled="isAutoDrawing"
                     @click="drawOnce"
@@ -413,11 +413,11 @@ watch(
                 </button>
                 <button
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    class="btn btn-xs whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40"
                     :class="
                         isAutoDrawing
                             ? 'border-base-content/15 text-base-content/40'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            : ''
                     "
                     :disabled="isAutoDrawing"
                     @click="drawMany(8)"
@@ -426,11 +426,11 @@ watch(
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                    class="btn btn-xs"
                     :class="
                         isAutoDrawing
                             ? 'border-error bg-error/10 font-semibold text-error'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            : ''
                     "
                     @click="isAutoDrawing ? stopAutoDraw() : startAutoDraw()"
                 >
@@ -438,7 +438,7 @@ watch(
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error"
+                    class="btn btn-xs border-error/40 text-error/80 hover:border-error hover:bg-error/10 hover:text-error"
                     @click="resetSimulation"
                 >
                     重置

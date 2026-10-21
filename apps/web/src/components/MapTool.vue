@@ -3690,7 +3690,7 @@ onUnmounted(() => {
                             <div class="flex items-center justify-between gap-2">
                                 <div class="font-medium text-base-content">{{ $t("map-tool.current_marker") }}</div>
                                 <button
-                                    class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                                    class="btn btn-xs gap-1 font-medium"
                                     type="button"
                                     @click="clearRouteMapPoint"
                                 >

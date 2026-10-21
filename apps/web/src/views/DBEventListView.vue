@@ -1225,11 +1225,11 @@ onUnmounted(() => {
                         <div class="mt-3 flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showTimeFilter
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showTimeFilter = !showTimeFilter"
                             >
@@ -1237,11 +1237,11 @@ onUnmounted(() => {
                             </button>
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showFullTextSearch
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showFullTextSearch = !showFullTextSearch"
                             >
@@ -1249,11 +1249,11 @@ onUnmounted(() => {
                             </button>
                             <button
                                 type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs"
                                 :class="
                                 showTimeLine
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                    : ''
                             "
                                 @click="showTimeLine = !showTimeLine"
                             >
@@ -1283,11 +1283,11 @@ onUnmounted(() => {
                                 </button>
                                 <button
                                     type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                    class="btn btn-xs"
                                     :class="
                                     diffOnlyEnabled
                                         ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                        : ''
                                 "
                                     @click="diffOnlyEnabled = !diffOnlyEnabled"
                                 >

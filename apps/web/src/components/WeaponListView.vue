@@ -261,11 +261,11 @@ function unequipCurrentWeapon() {
                             <!-- 收益排序开关方章 -->
                             <button
                                 type="button"
-                                class="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                class="btn btn-xs gap-1.5"
                                 :class="
                                     sortByIncome
                                         ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                        : ''
                                 "
                                 @click="sortByIncome = !sortByIncome"
                             >
@@ -277,7 +277,7 @@ function unequipCurrentWeapon() {
                             <button
                                 v-if="canUnequipCurrentWeapon"
                                 type="button"
-                                class="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/55 transition-colors duration-150 hover:border-error/60 hover:bg-error/10 hover:text-error"
+                                class="btn btn-xs gap-1.5 border-base-content/20 text-base-content/55 hover:border-error/60 hover:bg-error/10 hover:text-error"
                                 @click="unequipCurrentWeapon"
                             >
                                 <Icon icon="ri:close-line" class="h-3.5 w-3.5" />

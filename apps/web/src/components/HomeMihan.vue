@@ -195,7 +195,7 @@ onUnmounted(() => {
                 </label>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/70 transition-colors hover:border-primary/50 hover:text-primary"
+                    class="btn btn-xs gap-1"
                     @click="mihanNotify.showMihanNotification()"
                 >
                     <Icon icon="ri:notification-3-line" class="h-3 w-3" />
@@ -210,7 +210,7 @@ onUnmounted(() => {
                         <label
                             v-for="(type, val) in MIHAN_TYPES"
                             :key="type"
-                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2 py-1 text-[11px] text-base-content/75 transition-colors has-checked:border-primary/50 has-checked:bg-primary/10 has-checked:text-primary"
+                            class="btn btn-xs gap-1.5 border-base-content/15 text-base-content/75 has-checked:border-primary/50 has-checked:bg-primary/10 has-checked:text-primary"
                         >
                             <input
                                 v-model="mihanNotifyTypes"
@@ -229,7 +229,7 @@ onUnmounted(() => {
                         <label
                             v-for="mission in MIHAN_MISSIONS"
                             :key="mission"
-                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2 py-1 text-[11px] text-base-content/75 transition-colors has-checked:border-secondary/40 has-checked:bg-secondary/10 has-checked:text-secondary"
+                            class="btn btn-xs gap-1.5 border-base-content/15 text-base-content/75 has-checked:border-secondary/40 has-checked:bg-secondary/10 has-checked:text-secondary"
                         >
                             <input
                                 v-model="mihanNotifyMissions"

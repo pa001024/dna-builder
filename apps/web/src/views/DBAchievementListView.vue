@@ -126,11 +126,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                             <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.category") }}</div>
                             <div class="flex flex-wrap gap-1.5">
                                 <button
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap"
                                     :class="
                                     selectedCategory === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedCategory = ''"
                                 >
@@ -139,11 +139,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 <button
                                     v-for="category in categoryOptions"
                                     :key="category"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap"
                                     :class="
                                     selectedCategory === category
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedCategory = category"
                                 >
@@ -156,11 +156,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                             <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.version") }}</div>
                             <div class="flex flex-wrap gap-1.5">
                                 <button
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap tabular-nums"
                                     :class="
                                     selectedVersion === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedVersion = ''"
                                 >
@@ -169,11 +169,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 <button
                                     v-for="version in versionOptions"
                                     :key="version"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
                                     :class="
                                     selectedVersion === version
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedVersion = version"
                                 >
@@ -186,11 +186,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                             <div class="mb-1 text-[10px] text-base-content/40">{{ $t("common.quality") }}</div>
                             <div class="flex flex-wrap gap-1.5">
                                 <button
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap"
                                     :class="
                                     selectedQuality === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedQuality = ''"
                                 >
@@ -199,11 +199,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 <button
                                     v-for="quality in qualityOptions"
                                     :key="quality"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap"
                                     :class="
                                     selectedQuality === quality
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                     @click="selectedQuality = quality"
                                 >

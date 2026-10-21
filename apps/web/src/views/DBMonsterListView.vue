@@ -194,44 +194,44 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                         <!-- 资料类型筛选方章 -->
                         <div class="mt-3 flex flex-wrap gap-1.5">
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 normalizedSelectedType === 'allMonster'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedType = 'allMonster'"
                             >
                                 {{ $t("common.all") }}
                             </button>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 normalizedSelectedType === 'normalMonster'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedType = 'normalMonster'"
                             >
                                 {{ $t("db-monster-list.normal") }}
                             </button>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 normalizedSelectedType === 'commanderMonster'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedType = 'commanderMonster'"
                             >
                                 {{ $t("db-monster-list.commander") }}
                             </button>
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 normalizedSelectedType === 'monsterTag'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedType = 'monsterTag'"
                             >
@@ -242,11 +242,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                         <!-- 阵营筛选方章 -->
                         <div v-if="normalizedSelectedType !== 'monsterTag'" class="mt-1.5 flex flex-wrap gap-1.5">
                             <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 selectedFaction === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedFaction = ''"
                             >
@@ -255,11 +255,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             <button
                                 v-for="faction in factions"
                                 :key="faction"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap"
                                 :class="
                                 selectedFaction === faction
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                                 @click="selectedFaction = faction"
                             >

@@ -455,7 +455,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                         <!-- 属性筛选下拉框 -->
                         <Combobox
                             v-model="selectedProperty"
-                            class="ml-auto w-40 mr-4"
+                            class="w-40 mx-4"
                             placeholder="搜索属性/描述"
                             :options="
                                 ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map(prop => ({

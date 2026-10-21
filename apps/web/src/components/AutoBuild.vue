@@ -472,11 +472,11 @@ async function copyDiagnostics() {
             <div class="flex flex-wrap items-center gap-1.5">
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                    class="btn btn-xs"
                     :class="
                         autoBuildSetting.useInv
                             ? 'border-primary bg-primary/10 font-semibold text-primary'
-                            : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            : ''
                     "
                     @click="autoBuildSetting.useInv = !autoBuildSetting.useInv"
                 >
@@ -484,11 +484,11 @@ async function copyDiagnostics() {
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                    class="btn btn-xs"
                     :class="
                         autoBuildSetting.includeMelee
                             ? 'border-primary bg-primary/10 font-semibold text-primary'
-                            : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            : ''
                     "
                     @click="autoBuildSetting.includeMelee = !autoBuildSetting.includeMelee"
                 >
@@ -496,11 +496,11 @@ async function copyDiagnostics() {
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                    class="btn btn-xs"
                     :class="
                         autoBuildSetting.includeRanged
                             ? 'border-primary bg-primary/10 font-semibold text-primary'
-                            : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            : ''
                     "
                     @click="autoBuildSetting.includeRanged = !autoBuildSetting.includeRanged"
                 >
@@ -513,11 +513,11 @@ async function copyDiagnostics() {
                     v-for="option in [{ label: $t('角色'), value: 'charMods' }, { label: $t('近战'), value: 'meleeMods' }, { label: $t('远程'), value: 'rangedMods' }, ...(hasStandaloneSkillWeapon ? [{ label: $t('同律'), value: 'skillMods' }] : [])]"
                     :key="option.value"
                     type="button"
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap"
                     :class="
                         autoBuildSetting.includeTypes.includes(option.value as ModTypeKey)
-                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            ? 'btn-primary'
+                            : ''
                     "
                     @click="toggleArrayValue(autoBuildSetting.includeTypes, option.value as ModTypeKey)"
                 >

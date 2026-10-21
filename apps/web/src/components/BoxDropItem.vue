@@ -294,19 +294,19 @@ watch(
             <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">{{ t("box-drop.simulation") }}</div>
             <div class="mb-3 flex flex-wrap justify-center gap-2">
                 <button
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap btn-primary"
                     @click="openOnce"
                 >
                     {{ t("box-drop.draw1") }}
                 </button>
                 <button
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap btn-primary"
                     @click="openMany(10)"
                 >
                     {{ t("box-drop.draw10") }}
                 </button>
                 <button
-                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                    class="btn btn-xs whitespace-nowrap border-base-content/20 text-base-content/60 hover:border-error/60 hover:text-error"
                     @click="resetSimulation"
                 >
                     {{ t("setting.reset") }}

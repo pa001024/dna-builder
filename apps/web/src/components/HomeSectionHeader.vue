@@ -75,7 +75,7 @@ const emit = defineEmits<{
         <button
             v-else-if="actionLabel"
             type="button"
-            class="inline-flex h-7 whitespace-nowrap cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2.5 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+            class="btn btn-xs h-7 whitespace-nowrap gap-1.5 px-2.5 font-medium"
             @click="emit('action')"
         >
             <Icon icon="ri:settings-3-line" class="h-3.5 w-3.5" />

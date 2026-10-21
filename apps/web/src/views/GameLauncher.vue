@@ -302,7 +302,7 @@ onMounted(async () => {
                                         class="w-full min-w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
                                     />
                                     <div
-                                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-base-content/20 px-2 py-1 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs whitespace-nowrap"
                                         @click="selectPath(key)"
                                     >
                                         {{ $t("game-launcher.select") }}

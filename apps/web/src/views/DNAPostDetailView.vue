@@ -271,11 +271,11 @@ async function uploadPostAbyssUsage() {
                         </div>
                         <button
                             type="button"
-                            class="relative shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            class="btn btn-xs relative whitespace-nowrap"
                             :class="
                                 postRes.isFollow
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    ? 'btn-primary'
+                                    : ''
                             "
                             @click="follow(postRes.postDetail.postUserId, !!postRes.isFollow)"
                         >

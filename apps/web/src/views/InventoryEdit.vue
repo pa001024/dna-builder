@@ -480,11 +480,11 @@ const showExpCalculator = ref(false)
                                 </div>
                                 <button
                                     type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40"
+                                    class="btn btn-xs font-medium disabled:pointer-events-none disabled:opacity-40"
                                     :class="
                                         filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
-                                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            ? 'btn-primary'
+                                            : ''
                                     "
                                     :disabled="!filteredWeapons.length"
                                     @click="handleSelectAllWeapons"
@@ -547,11 +547,11 @@ const showExpCalculator = ref(false)
                                 </div>
                                 <button
                                     type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40"
+                                    class="btn btn-xs font-medium disabled:pointer-events-none disabled:opacity-40"
                                     :class="
                                         filteredMods.length && filteredSelectedMods.length === filteredMods.length
-                                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            ? 'btn-primary'
+                                            : ''
                                     "
                                     :disabled="!filteredMods.length"
                                     @click="handleSelectAllMods"
@@ -607,14 +607,14 @@ const showExpCalculator = ref(false)
                             <div class="flex flex-wrap items-center gap-2">
                                 <button
                                     type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-primary/40 bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
+                                    class="btn btn-xs border-primary/40 bg-primary/10 font-semibold text-primary hover:bg-primary/20"
                                     @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))"
                                 >
                                     全部最大
                                 </button>
                                 <button
                                     type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-error/50 hover:text-error"
+                                    class="btn btn-xs border-base-content/20 font-medium text-base-content/60 hover:border-error/50 hover:text-error"
                                     @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))"
                                 >
                                     全部关闭

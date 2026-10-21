@@ -570,7 +570,7 @@ async function generateScreenshot() {
                     <template #trailing>
                         <button
                             type="button"
-                            class="inline-flex cursor-pointer items-center gap-1 rounded-xs border border-base-content/20 px-2 py-1 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
+                            class="btn btn-xs gap-1"
                             @click="ui.mihanVisible = true"
                         >
                             <Icon icon="ri:settings-3-line" class="size-3.5" />
@@ -592,11 +592,11 @@ async function generateScreenshot() {
                         <div class="flex items-center gap-1.5">
                             <button
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap px-2.5"
                                 :class="
                                     weeklyReportType === 1
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="switchWeeklyReport(1)"
                             >
@@ -604,11 +604,11 @@ async function generateScreenshot() {
                             </button>
                             <button
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs whitespace-nowrap px-2.5"
                                 :class="
                                     weeklyReportType === 2
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 @click="switchWeeklyReport(2)"
                             >

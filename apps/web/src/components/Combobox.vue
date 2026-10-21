@@ -39,10 +39,12 @@ const filteredOptions = computed(() => {
 </script>
 
 <template>
-    <ComboboxRoot v-model="model" class="relative" ignore-filter @update:open="open => open && emit('open')">
+    <!-- root 是 flex 项或普通块：统一 flex items-center，避免放进 tabs-box 这类 flex 行时
+         根节点被拉高、而 anchor 顶对齐（高度看起来"塌掉"、下划线贴顶） -->
+    <ComboboxRoot v-model="model" class="relative flex items-center" ignore-filter @update:open="open => open && emit('open')">
         <ComboboxAnchor
             v-bind="$attrs"
-            class="flex items-center gap-1.5 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 focus-within:border-primary"
+            class="input input-sm"
         >
             <ComboboxInput as-child class="h-full min-w-0 grow bg-transparent! outline-none" :placeholder="placeholder">
                 <input v-model="model" type="text" />
@@ -53,20 +55,20 @@ const filteredOptions = computed(() => {
         </ComboboxAnchor>
 
         <ComboboxContent
-            class="absolute z-100 w-full mt-2 min-w-40 bg-base-100 overflow-hidden rounded shadow-xl will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
+            class="absolute z-100 mt-1 w-full min-w-40 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/95 p-1 shadow-lg backdrop-blur-md will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
         >
-            <ComboboxViewport class="p-1.25">
-                <ComboboxEmpty class="text-neutral-500 text-xs font-medium text-center py-2">
+            <ComboboxViewport>
+                <ComboboxEmpty class="py-2 text-center text-xs text-base-content/45">
                     {{ emptyMessage }}
                 </ComboboxEmpty>
                 <ComboboxItem
                     v-for="(option, index) in filteredOptions"
                     :key="index"
-                    class="p-2 pl-7.5 text-sm leading-none rounded-sm flex items-center relative select-none data-disabled:text-neutral-400 data-disabled:pointer-events-none data-highlighted:outline-none data-highlighted:bg-base-300"
+                    class="relative flex select-none items-center rounded-xs py-1.5 pl-7 pr-2 text-[13px] leading-none data-disabled:pointer-events-none data-disabled:text-base-content/35 data-highlighted:bg-base-content/5 data-highlighted:outline-none"
                     :value="option.value"
                 >
-                    <ComboboxItemIndicator class="absolute left-0 w-6.25 inline-flex items-center justify-center">
-                        <Icon icon="radix-icons:check" />
+                    <ComboboxItemIndicator class="absolute left-1.5 inline-flex items-center justify-center text-primary">
+                        <Icon icon="radix-icons:check" class="size-3.5" />
                     </ComboboxItemIndicator>
                     <span>
                         {{ option.label }}

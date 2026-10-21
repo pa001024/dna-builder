@@ -185,7 +185,7 @@ onBeforeUnmount(() => {
                                 @click="targetHex = rgbToHex(color)"
                             />
                             <button
-                                class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                class="btn btn-xs"
                                 type="button"
                                 @click="fileInputRef?.click()"
                             >
@@ -193,7 +193,7 @@ onBeforeUnmount(() => {
                             </button>
                             <button
                                 v-if="refImageUrl"
-                                class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                class="btn btn-xs border-base-content/20 text-base-content/60 hover:border-error/60 hover:text-error"
                                 type="button"
                                 @click="clearReferenceImage"
                             >

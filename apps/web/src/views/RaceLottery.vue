@@ -361,12 +361,12 @@ const expectedRewardRate = computed(() => topSixHitStats.value.reduce((total, st
  */
 function getPlayerHighlightClass(playerId: number): string {
     if (topWinRatePlayerIds.value.has(playerId)) {
-        return showTopWinRateHighlight.value ? "border-success bg-success/10" : "border-base-300"
+        return showTopWinRateHighlight.value ? "border-success bg-success/10" : "border-base-content/15"
     }
     if (showOtherWinRateHighlight.value && hasComputedWinRates.value && getPlayerWinRate(playerId) > 0.01) {
         return "border-info bg-info/10"
     }
-    return "border-base-300"
+    return "border-base-content/15"
 }
 
 /**
@@ -698,7 +698,7 @@ onMounted(async () => {
         <div class="h-full overflow-auto">
             <main class="mx-auto max-w-375 space-y-3 p-3 sm:p-5">
                 <header
-                    class="flex flex-col gap-3 rounded-lg border border-base-300 bg-base-100/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                    class="flex flex-col gap-3 rounded-xs border border-base-content/10 bg-base-100/60 px-4 py-3 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                     <div class="min-w-0">
                         <div class="flex items-baseline gap-3">
@@ -742,15 +742,12 @@ onMounted(async () => {
                     </div>
                 </header>
 
-                <section class="rounded-lg border border-warning/40 bg-warning/5 p-3 shadow-sm sm:p-4">
-                    <div class="mb-2 flex items-center justify-between gap-3">
-                        <div>
-                            <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.expected_win_rank") }}</h2>
-                            <p class="text-xs text-base-content/55 py-1">{{ $t("race-lottery.top6_probability_desc") }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-right font-bold uppercase tracking-[0.16em] text-warning">Top 6</p>
-                            <CopyID
+                <section class="rounded-xs border border-warning/40 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                    <SectionHeader no-animate compact kicker="TOP 6" :title="$t('race-lottery.expected_win_rank')">
+                        <template #trailing>
+                            <div class="text-right">
+                                <p class="text-xs font-bold uppercase tracking-[0.16em] text-warning">Top 6</p>
+                                <CopyID
                                 name="助记码"
                                 :id="
                                     topWinRatePlayers
@@ -759,14 +756,16 @@ onMounted(async () => {
                                         .join(' ')
                                 "
                             />
-                        </div>
-                    </div>
+                            </div>
+                        </template>
+                    </SectionHeader>
+                    <p class="mb-2 text-xs text-base-content/55">{{ $t("race-lottery.top6_probability_desc") }}</p>
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                         <button
                             v-for="(item, index) in topWinRatePlayers"
                             :key="item.player.playerId"
                             type="button"
-                            class="flex min-w-0 items-center gap-2 rounded-md border border-base-300 bg-base-100/80 p-2 text-left transition hover:border-warning/70 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+                            class="group flex min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/60 p-2 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-warning/70 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
                             @click="selectedPlayerId = item.player.playerId"
                         >
                             <span class="flex w-10 shrink-0 flex-col items-center justify-center leading-none">
@@ -802,15 +801,11 @@ onMounted(async () => {
 
                 <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,25rem)]">
                     <div class="min-w-0 space-y-4">
-                        <section class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
-                            <div class="mb-2 flex items-center justify-between gap-3 px-1">
-                                <div>
-                                    <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.roster") }}</h2>
-                                    <p class="text-xs text-base-content/55">{{ $t("race-lottery.click_card_hint") }}</p>
-                                </div>
-                                <div class="flex shrink-0 flex-wrap justify-end gap-x-2 gap-y-1 text-[0.65rem] text-base-content/60">
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-2 backdrop-blur-sm sm:p-3">
+                            <SectionHeader no-animate compact kicker="ROSTER" :title="$t('race-lottery.roster')">
+                                <template #trailing>
                                     <button
-                                        class="inline-flex cursor-pointer items-center gap-1 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-success"
+                                        class="btn btn-xs btn-ghost gap-1"
                                         :class="showTopWinRateHighlight ? '' : 'opacity-40'"
                                         type="button"
                                         :aria-pressed="showTopWinRateHighlight"
@@ -822,7 +817,7 @@ onMounted(async () => {
                                         {{ $t("race-lottery.top6") }}
                                     </button>
                                     <button
-                                        class="inline-flex cursor-pointer items-center gap-1 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-info"
+                                        class="btn btn-xs btn-ghost gap-1"
                                         :class="showOtherWinRateHighlight ? '' : 'opacity-40'"
                                         type="button"
                                         :aria-pressed="showOtherWinRateHighlight"
@@ -833,20 +828,18 @@ onMounted(async () => {
                                         <span class="size-2 rounded-full bg-info" />
                                         {{ $t("race-lottery.other_possible_winners") }}
                                     </button>
-                                </div>
-                                <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
-                            </div>
+                                    <span v-if="loading" class="loading loading-spinner loading-sm text-primary" />
+                                </template>
+                            </SectionHeader>
+                            <p class="mb-2 px-1 text-xs text-base-content/55">{{ $t("race-lottery.click_card_hint") }}</p>
 
                             <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                                 <button
                                     v-for="(player, index) in orderedPlayers"
                                     :key="player.playerId"
                                     type="button"
-                                    class="group relative aspect-3/4 min-w-0 overflow-hidden rounded-sm border-2 bg-base-100 p-1 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-warning/70 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
-                                    :class="[
-                                        getPlayerHighlightClass(player.playerId),
-                                        selectedPlayerId === player.playerId ? 'ring-1 ring-warning/70 shadow-md' : '',
-                                    ]"
+                                    class="group relative aspect-3/4 min-w-0 cursor-pointer overflow-hidden rounded-xs border bg-base-100/60 p-1 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-warning/70 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+                                    :class="selectedPlayerId === player.playerId ? 'border-warning/70 bg-warning/10' : getPlayerHighlightClass(player.playerId)"
                                     :aria-label="`${player.name}，编号 ${index + 1}`"
                                     @click="selectedPlayerId = player.playerId"
                                 >
@@ -884,7 +877,7 @@ onMounted(async () => {
                                             />
                                         </div>
                                         <div
-                                            class="flex shrink-0 items-center justify-center gap-1 rounded-sm bg-neutral px-1 py-1 text-neutral-content"
+                                            class="flex shrink-0 items-center justify-center gap-1 rounded-xs bg-neutral px-1 py-1 text-neutral-content"
                                         >
                                             <span class="text-[0.68rem]">↗</span>
                                             <span class="text-xs font-bold tabular-nums sm:text-sm">
@@ -915,23 +908,20 @@ onMounted(async () => {
                             </div>
                         </section>
 
-                        <section v-if="hasComputedWinRates" class="rounded-lg border border-base-300 bg-base-200/40 p-2 sm:p-3">
-                            <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <h2 class="text-sm font-bold sm:text-base">{{ $t("race-lottery.expected_return") }}</h2>
-                                    <p class="text-xs text-base-content/55">{{ $t("race-lottery.avg_odds_top6") }}</p>
-                                </div>
-                                <div class="text-right">
+                        <section v-if="hasComputedWinRates" class="rounded-xs border border-base-content/10 bg-base-100/60 p-2 backdrop-blur-sm sm:p-3">
+                            <SectionHeader no-animate compact kicker="EXPECTED RETURN" :title="$t('race-lottery.expected_return')">
+                                <template #trailing>
                                     <div class="text-2xl font-black tabular-nums text-primary">
                                         ×{{ formatRewardRate(expectedRewardRate) }}
                                     </div>
-                                </div>
-                            </div>
+                                </template>
+                            </SectionHeader>
+                            <p class="mb-3 text-xs text-base-content/55">{{ $t("race-lottery.avg_odds_top6") }}</p>
                             <div class="grid grid-cols-4 gap-2 sm:grid-cols-7">
                                 <div
                                     v-for="stat in topSixHitStats"
                                     :key="stat.hitCount"
-                                    class="rounded-md border border-base-300 bg-base-100/70 px-1.5 py-2 text-center"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-1.5 py-2 text-center"
                                 >
                                     <div class="text-xs font-semibold text-base-content/70">
                                         {{ $t("race-lottery.hit_count", { count: stat.hitCount }) }}
@@ -948,8 +938,8 @@ onMounted(async () => {
                     </div>
 
                     <aside class="min-w-0 space-y-3 lg:sticky lg:top-3">
-                        <section v-if="selectedPlayer" class="overflow-hidden rounded-lg border-2 border-base-300 bg-base-100 shadow-md">
-                            <div class="relative aspect-2/3 overflow-hidden bg-base-200/45">
+                        <section v-if="selectedPlayer" class="overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm">
+                            <div class="relative aspect-2/3 overflow-hidden">
                                 <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between p-3">
                                     <div class="leading-none">
                                         <div class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-base-content/50">No.</div>
@@ -987,7 +977,7 @@ onMounted(async () => {
                                         <div
                                             v-for="(statusLine, statusIndex) in selectedPlayerStatusLines"
                                             :key="`status-${statusIndex}`"
-                                            class="flex min-h-9 min-w-0 items-center justify-between gap-2 rounded-sm border border-base-content/10 bg-neutral-content/10 px-2 py-1.5 text-sm"
+                                            class="flex min-h-9 min-w-0 items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5 text-sm"
                                             :title="statusLine.submissionCount ? `${statusLine.submissionCount} 条社区提交` : undefined"
                                         >
                                             <span class="min-w-0 flex-1 truncate font-medium text-base-content/85">
@@ -1022,16 +1012,15 @@ onMounted(async () => {
                             </div>
                         </section>
 
-                        <section v-if="env.isApp" class="rounded-lg border border-secondary/30 bg-secondary/5 p-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <div>
-                                    <h2 class="text-sm font-bold">截图识别上传</h2>
-                                    <p class="mt-1 text-xs text-base-content/60">
-                                        {{ captureRegion ? "已保存区域" : "首次识别需要框选区域" }}
-                                    </p>
-                                </div>
-                                <Icon icon="ri:screenshot-2-line" class="size-5 shrink-0 text-secondary" />
-                            </div>
+                        <section v-if="env.isApp" class="rounded-xs border border-secondary/30 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="OCR" title="截图识别上传">
+                                <template #trailing>
+                                    <Icon icon="ri:screenshot-2-line" class="size-5 shrink-0 text-secondary" />
+                                </template>
+                            </SectionHeader>
+                            <p class="mb-3 mt-1 text-xs text-base-content/60">
+                                {{ captureRegion ? "已保存区域" : "首次识别需要框选区域" }}
+                            </p>
                             <div class="mt-3 flex gap-2">
                                 <button
                                     class="btn btn-secondary btn-sm min-w-0 flex-1"
@@ -1054,7 +1043,7 @@ onMounted(async () => {
                                     <Icon icon="ri:refresh-line" />
                                 </button>
                             </div>
-                            <div v-if="ocrResultText" class="mt-2 rounded-md bg-base-200/70 p-2">
+                            <div v-if="ocrResultText" class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2">
                                 <div class="text-xs text-base-content/50">最近一次 OCR</div>
                                 <div class="mt-1 max-h-20 overflow-auto whitespace-pre-wrap wrap-break-word text-xs">
                                     {{ ocrResultText }}
@@ -1062,8 +1051,8 @@ onMounted(async () => {
                             </div>
                         </section>
 
-                        <section class="rounded-lg border border-primary/30 bg-primary/5 p-3">
-                            <h2 class="text-sm font-bold">提交词条</h2>
+                        <section class="rounded-xs border border-primary/30 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="SUBMIT" title="提交词条" />
                             <form class="mt-3 space-y-3" @submit.prevent="submitManualEntry">
                                 <label class="form-control">
                                     <span class="label-text mb-1 text-xs">选手</span>
@@ -1104,27 +1093,26 @@ onMounted(async () => {
                             </form>
                         </section>
 
-                        <section v-if="user.isAdmin" class="rounded-lg border border-error/30 bg-error/5 p-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <div>
-                                    <h2 class="text-sm font-bold">最终速度</h2>
-                                    <p class="mt-1 text-xs text-base-content/60">
-                                        {{ selectedDate }} 的比赛结果，将作为次日基础速度
-                                        <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
-                                        <template v-else-if="finalSpeedsUpdatedBy">
-                                            · {{ $t("race-lottery.updated_by", { name: finalSpeedsUpdatedBy }) }}</template
-                                        >
-                                    </p>
-                                </div>
-                                <button
-                                    v-if="!adminSpeedEditing"
-                                    class="btn btn-error btn-ghost btn-sm"
-                                    type="button"
-                                    @click="startAdminSpeedEdit"
+                        <section v-if="user.isAdmin" class="rounded-xs border border-error/30 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="ADMIN" title="最终速度">
+                                <template #trailing>
+                                    <button
+                                        v-if="!adminSpeedEditing"
+                                        class="btn btn-error btn-ghost btn-sm"
+                                        type="button"
+                                        @click="startAdminSpeedEdit"
+                                    >
+                                        编辑
+                                    </button>
+                                </template>
+                            </SectionHeader>
+                            <p class="mb-3 mt-1 text-xs text-base-content/60">
+                                {{ selectedDate }} 的比赛结果，将作为次日基础速度
+                                <template v-if="finalSpeedsIsAuto"> · 自动计算（未手动记录）</template>
+                                <template v-else-if="finalSpeedsUpdatedBy">
+                                    · {{ $t("race-lottery.updated_by", { name: finalSpeedsUpdatedBy }) }}</template
                                 >
-                                    编辑
-                                </button>
-                            </div>
+                            </p>
                             <div v-if="adminSpeedEditing" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                                 <label v-for="player in orderedPlayers" :key="player.playerId" class="form-control">
                                     <span class="label-text mb-0.5 text-[0.7rem]">{{ player.name }}</span>
@@ -1170,17 +1158,17 @@ onMounted(async () => {
                             </div>
                         </section>
 
-                        <section class="rounded-lg border border-base-300 bg-base-200/40 p-3">
-                            <h2 class="text-sm font-bold">每日最高投注</h2>
-                            <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                <div v-for="item in raceLotteryData.maxStakes" :key="item.EventDay" class="flex justify-between gap-2">
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="STAKES" title="每日最高投注" />
+                            <div class="mt-3 grid grid-cols-2 gap-1.5 text-sm">
+                                <div v-for="item in raceLotteryData.maxStakes" :key="item.EventDay" class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                                     <span class="text-base-content/60">{{ $t("common.count_days", { day: item.EventDay }) }}</span>
                                     <span class="font-medium">{{ item.MaxStake.toLocaleString() }}</span>
                                 </div>
                             </div>
                         </section>
 
-                        <details class="rounded-lg border border-base-300 bg-base-200/40 p-3">
+                        <details class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                             <summary class="cursor-pointer text-sm font-bold">活动词条参考</summary>
                             <div class="mt-3 space-y-3 text-sm">
                                 <div v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" class="flex justify-between gap-3">
@@ -1219,7 +1207,7 @@ onMounted(async () => {
         </div>
 
         <!-- 赛跑模拟全屏覆盖层 -->
-        <div v-if="isSimulatorOpen" class="absolute inset-0 z-50 bg-base-100">
+        <div v-if="isSimulatorOpen" class="absolute inset-0 z-50 bg-base-100/85 backdrop-blur-md">
             <RaceLotterySimulator :players="simulatorPlayers" @close="isSimulatorOpen = false" />
         </div>
     </div>

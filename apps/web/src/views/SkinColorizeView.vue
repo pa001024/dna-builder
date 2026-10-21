@@ -722,7 +722,7 @@ onBeforeUnmount(() => {
                                 <LoginButton v-if="!user.id" size="xs" variant="outline" />
                                 <button
                                     v-if="loadedPlan && (loadedPlan.userId === user.id || user.isAdmin)"
-                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error transition-colors duration-150 hover:border-error hover:bg-error/10 active:scale-[0.97]"
+                                    class="btn btn-xs border-error/40 text-error hover:border-error hover:bg-error/10"
                                     type="button"
                                     @click="removePlan"
                                 >
@@ -830,7 +830,7 @@ onBeforeUnmount(() => {
                             <template #trailing>
                                 <div v-if="canEdit" class="flex shrink-0 items-center gap-1.5">
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         @click="fileInputRef?.click()"
                                     >
@@ -838,7 +838,7 @@ onBeforeUnmount(() => {
                                     </button>
                                     <button
                                         v-if="previewImage"
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                        class="btn btn-xs border-base-content/20 text-base-content/60 hover:border-error/60 hover:text-error"
                                         type="button"
                                         @click="clearPreviewImage"
                                     >
@@ -859,7 +859,7 @@ onBeforeUnmount(() => {
                                 <span>以游戏内截图作为预览图</span>
                                 <span class="text-xs">支持拖拽、粘贴（截图）或点击选择</span>
                                 <button
-                                    class="mt-1 inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    class="btn btn-xs mt-1"
                                     type="button"
                                     @click="fileInputRef?.click()"
                                 >
@@ -895,7 +895,7 @@ onBeforeUnmount(() => {
                                         复制
                                     </button>
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         title="读取剪贴板内容"
                                         @click="importCode"
@@ -918,14 +918,14 @@ onBeforeUnmount(() => {
                                 <span class="text-xs text-base-content/55">发型染色码</span>
                                 <div class="flex shrink-0 items-center gap-1.5">
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         @click="copyHairCode"
                                     >
                                         复制
                                     </button>
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         title="读取剪贴板内容"
                                         @click="importHairCode"
@@ -1047,11 +1047,11 @@ onBeforeUnmount(() => {
                                 <button
                                     v-for="character in characters"
                                     :key="character.id"
-                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs whitespace-nowrap"
                                     :class="
                                         character.id === selectedCharacterId
-                                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            ? 'btn-primary'
+                                            : ''
                                     "
                                     type="button"
                                     @click="selectCharacter(character.id)"
@@ -1073,14 +1073,14 @@ onBeforeUnmount(() => {
                             <span class="text-[11px] tracking-wide text-base-content/55">当前部位</span>
                             <div class="flex shrink-0 items-center gap-1.5">
                                 <button
-                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    class="btn btn-xs"
                                     type="button"
                                     @click="skinFinderShow = true"
                                 >
                                     相似色
                                 </button>
                                 <button
-                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    class="btn btn-xs"
                                     type="button"
                                     @click="resetActivePartColor"
                                 >
@@ -1092,11 +1092,11 @@ onBeforeUnmount(() => {
                             <button
                                 v-for="part in skinColorizeParts"
                                 :key="part.id"
-                                class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="btn btn-xs gap-1.5 whitespace-nowrap"
                                 :class="
                                     activePartId === part.id
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                        ? 'btn-primary'
+                                        : ''
                                 "
                                 type="button"
                                 @click="activePartId = part.id"
@@ -1158,14 +1158,14 @@ onBeforeUnmount(() => {
                                 <span class="text-[11px] tracking-wide text-base-content/55">发型色位</span>
                                 <div class="flex shrink-0 items-center gap-1.5">
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         @click="hairFinderShow = true"
                                     >
                                         相似色
                                     </button>
                                     <button
-                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        class="btn btn-xs"
                                         type="button"
                                         @click="resetActiveHairPartColor"
                                     >
@@ -1177,11 +1177,11 @@ onBeforeUnmount(() => {
                                 <button
                                     v-for="partId in hairParts"
                                     :key="partId"
-                                    class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    class="btn btn-xs gap-1.5 whitespace-nowrap"
                                     :class="
                                         activeHairPartId === partId
-                                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            ? 'btn-primary'
+                                            : ''
                                     "
                                     type="button"
                                     @click="activeHairPartId = partId"
