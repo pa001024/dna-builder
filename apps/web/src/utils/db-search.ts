@@ -2920,6 +2920,10 @@ function readEventDetailFields(id: string, lang: DBAgentLang): DBEntryFields | u
         fields.宝箱玩法 = `每日上限 ${event.boxDrop.boxPerDay} 个、单箱 ${event.boxDrop.coinPerBox} 代币，奖励组 ${event.boxDrop.rewardId.join("、")}`
     }
 
+    if (event.asyncCombat?.dungeons.length) {
+        fields.异步战斗副本 = event.asyncCombat.dungeons.join("、")
+    }
+
     return fields
 }
 

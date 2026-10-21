@@ -354,6 +354,8 @@ const topUpRanks = computed(() => {
 
         <HardBossEventItem v-if="event.hardBossEvent" :event="event" />
 
+        <AsyncCombatEventItem v-if="event.asyncCombat" :event="event" />
+
         <LimitedPrizeSimulator v-if="event.id in limitedPrizePools" :event-id="event.id" />
 
         <WeaponVerifyEvent v-if="event.name === '且试锋芒'" />

@@ -18,7 +18,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 2. **半透明分层**：页面不设实底背景色（去掉根节点 `bg-base-100` 等），靠窗口本体 `bg-base-100/30`、内容区 `bg-base-200/50` 透出透明窗体或自定义底图。
 3. **主色克制强调**：primary 只用于选中态、序号块、数值、kicker 徽记、下划线指示条。
 4. **子页面无页头**：/db 下所有页面都是 ResizeableWindow 的子页面，**禁止**添加 hero/header 大标题区。
-5. **等宽徽记**：装饰性**纯英文/数字**小标才可用 `font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40`；含中文的文本禁止 font-mono（见禁则清单）。
+5. **等宽对齐**：`font-mono` 本身就是等宽，不再叠加 `tabular-nums`；只有时间显示用 `font-orbitron`＋`tabular-nums`，纯数值（计数、分数、等级）只用 `font-orbitron`。装饰性**纯英文**小标用 `font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40`（kicker 专用）；含中文的文本禁止 font-mono（见禁则清单）。
 6. **动画不进祖先**：任何 opacity/transform 入场动画（含 `animate-ef-rise`）只能加在「自身带 backdrop-filter」或「无 blur 后代」的元素上；需要容器级交错入场用 `.stagger-rise`（详见动效章节）。
 
 ## 卡片分层体系（严格两级，不得混用）
@@ -108,7 +108,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 
 - 未选态不用再写边框/文字/hover（plain `btn` 默认透明底 + 细边框 + 主色悬停）；
 - 选中态只加 `btn-primary`（实底主色 + primary-content 文字，与旧 `border-primary bg-primary …` 等价）；
-- 等宽数字 chip 追加 `font-mono tabular-nums`；禁用追加 `disabled:cursor-not-allowed disabled:opacity-40`；
+- 数字 chip 追加 `font-mono`（本身等宽，不叠 `tabular-nums`）；禁用追加 `disabled:cursor-not-allowed disabled:opacity-40`；
 - 变体 tone（危险/描边主色）保留自己的颜色 token 覆写 `btn`，只删底座部分，例如：
   `class="btn btn-xs whitespace-nowrap border-error/40 text-error/80 hover:border-error hover:bg-error/10 hover:text-error"`；
 - 静态常选按钮（如抽卡/连抽）直接 `class="btn btn-xs whitespace-nowrap btn-primary"`。
@@ -132,7 +132,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
         placeholder="..."
         class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
     />
-    <span class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+    <span class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] text-base-content/40"
         >{{ list.length }}</span
     >
 </div>
@@ -151,7 +151,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 ```
 
 - 除「宽度/栅格/禁用/等宽数字」外，**其余类不得增删**：`w-full` / `w-24` / `col-span-*` 按布局补。
-- 数值输入追加 `font-mono tabular-nums`（编辑态对齐）；**展示态**数值仍用 `font-orbitron text-[13px] font-semibold text-primary`。
+- 数值输入追加 `font-mono`（本身等宽，编辑态对齐）；**展示态**数值用 `font-orbitron text-[13px] font-semibold text-primary`。
 - 只读/禁用：追加 `disabled:border-base-content/10 disabled:opacity-50`。
 - 百分比输入（`usePercentInput` / `toInputDisplayValue`）只换 class，`step`、label 后缀与换算逻辑保持不变。
 - 搜索框仍用上面的「下划线搜索框」配方（带图标与计数），不要混用。
@@ -185,7 +185,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 | 旧写法                                              | 新写法                                            |
 | --------------------------------------------------- | ------------------------------------------------- |
 | `input input-sm input-bordered w-full`              | 下划线输入框配方（+ 布局宽度类）                  |
-| `input input-xs input-bordered w-24 font-mono`      | 下划线输入框 + `w-24 font-mono tabular-nums`      |
+| `input input-xs input-bordered w-24 font-mono`      | 下划线输入框 + `w-24 font-mono`                     |
 | `input input-primary` / `input-ghost`（提交、内联） | 下划线输入框配方；提交动作交给方章按钮            |
 | `<select class="select select-sm">…</select>`       | `<Select>` + `<SelectItem>`（禁止原生下拉）       |
 | `<textarea class="textarea textarea-bordered">`     | 下划线输入框配方 + `resize-none`（多行加 `py-1`） |
@@ -261,7 +261,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 - ❌ 页面级 header / hero 区
 - ❌ 新增 scoped CSS、!important hack
 - ❌ 改动业务逻辑：script 中仅允许 ① 滚动定位选择器参数 ② 抽取重复属性行为 computed/函数（带中文 JSDoc）。所有 `$t()` 调用、数据流、事件处理保持不变。
-- ❌ **font-mono 用于可能含中文的文本**：mono 字体栈无中文字形，配套 `uppercase` 与大字距对中文是灾难。移除 mono 时一并移除配套 uppercase/大字距（tracking-[0.1em~0.3em]）。**允许保留**：纯数字/ASCII（ID、版本号 v1.2、Lv.55、CD: 5s、时间戳、百分比）、纯英文徽记 kicker。
+- ❌ **font-mono 用于可能含中文的文本**：mono 字体栈无中文字形，配套 `uppercase` 与大字距对中文是灾难。移除 mono 时一并移除配套 uppercase/大字距（tracking-[0.1em~0.3em]）。**允许保留**：纯英文大写徽记 kicker、纯数字/ASCII 小字（ID、版本号、Lv、CD、百分比）。**禁止 `font-mono`＋`tabular-nums` 叠写**（mono 本身等宽）；只有时间显示用 `font-orbitron`＋`tabular-nums`，纯数值不加。
 - ❌ 动画祖先包 blur 后代（见动效章节）——`animate-ef-rise` 与 `backdrop-blur-*` 必须同元素或无嵌套关系
 - ❌ **`leading-none` 用在标题 / 可能换行或被 `truncate` 的文本上**：CJK 字形墨迹会被 `overflow:hidden` 切掉 0.5~1px，改 `leading-tight`。**允许保留**：徽章方章内部——`getRarityBadgeClass` 与 `CopyID` 自身就用 `leading-none`。
 - ❌ `#{{ xxx.id }}` 纯文本实体 ID（改 CopyID）

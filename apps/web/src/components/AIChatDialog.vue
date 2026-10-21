@@ -14,6 +14,7 @@ import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
 import { formatCost } from "@/utils/ai-log-format"
 import { createBuildApi, setBuildApi } from "@/utils/build-api"
 import type { ChatSubmitPayload } from "@/utils/chat-image"
+import { warmupBuildSandbox } from "@/utils/code-sandbox"
 import type { AskUserResponse } from "@/utils/db-ask-user"
 
 /**
@@ -131,6 +132,8 @@ const hint = computed(() => (pendingAsk.value ? t("ai-chat.askHint") : t("ai-cha
 async function open() {
     isOpen.value = true
     await loadMessages()
+    // 提前建好沙箱线程：首次 run_code 不再为冷启动付费
+    warmupBuildSandbox()
     await nextTick()
     askBoxRef.value?.focus()
     void refreshQuotaBalance()
@@ -145,9 +148,12 @@ function close() {
 
 /**
  * 提交一次提问：正文与附图都交给会话中枢（配装面板截图直接粘贴即可）。
+ *
+ * 提交即清空输入框：DBAskBox 只负责 emit，清空要靠宿主回写 v-model（对齐 DBView 的 resetSearchKeyword）。
  * @param payload 输入框提交的正文与附图
  */
 function handleSubmit(payload: ChatSubmitPayload) {
+    inputText.value = ""
     void send(payload.text, payload.images)
 }
 

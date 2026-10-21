@@ -12,14 +12,15 @@ import {
     RaidDungeon,
     RaidSeason,
 } from "@/data/d/raid.data"
-import { getDropModeText } from "@/utils/i18n-utils"
 import {
+    formatRaidDateTime,
     getDefaultRaidSeason,
     getHighestFloor,
     getInitialUnlockFloor,
     getJumpTiers,
     getRaidFloorFullList,
     getRaidFloorList,
+    getRaidSeasonPeriod,
     getUnlockFloorCount,
     isFloorSeason,
     isKeyFloor,
@@ -172,6 +173,14 @@ const currentDungeonData = computed(() => RaidDungeon[selectedDungeon.value])
 // 当前赛季是否为爬塔制（RaidSeasonType 2），决定页面走打分分支还是爬塔分支
 const currentSeasonIsFloor = computed(() => isFloorSeason(selectedSeason.value))
 const currentSeasonData = computed(() => RaidSeason[selectedSeason.value])
+/** 当前赛季时间线：活动开始 / 分组赛结束·巅峰赛开始 / 巅峰赛结束 / 活动结束（秒级时间戳，页面按北京时间展示） */
+const seasonPeriod = computed(() => getRaidSeasonPeriod(selectedSeason.value))
+/** 当前赛季全部副本（老赛季 RaidDungeon 逐日错开，按 UnlockDate 排序展示开启时间） */
+const seasonDungeonsSorted = computed(() =>
+    Object.values(RaidDungeon)
+        .filter(dungeon => dungeon.RaidSeason === selectedSeason.value)
+        .sort((a, b) => a.UnlockDate - b.UnlockDate || a.DifficultyLevel - b.DifficultyLevel)
+)
 /** 楼层类型：1 分组赛，2 巅峰排名（对应打分制的 RaidDungeonType 口径） */
 const floorType = computed(() => (isFloorPreRaid.value ? 1 : 2))
 /**
@@ -434,11 +443,27 @@ const currentScore = computed(() => {
     return calculateScore(dungeon.BaseRaidPoint, actualTime, dungeon.FomulaId)
 })
 
+/**
+ * 当前选中副本的计分公式（RaidTimeZone/RaidTimeRate 按下标配对，供分段时间表展示）。
+ */
 const currentFormula = computed(() => {
     const formulaId = currentDungeonData.value?.FomulaId
     if (!formulaId) return undefined
 
     return RaidCalculation.find(item => item.FomulaId === formulaId)
+})
+
+/**
+ * 当前公式的分段时间表：起止秒与每秒加成（百分比），供页面直接展示。
+ */
+const formulaSegments = computed(() => {
+    const zones = currentFormula.value?.RaidTimeZone ?? []
+    const rates = currentFormula.value?.RaidTimeRate ?? []
+    return zones.map((end, index) => ({
+        start: index === 0 ? 0 : (zones[index - 1] ?? 0),
+        end,
+        rate: Math.round((rates[index] ?? 0) * 1000) / 10,
+    }))
 })
 
 /**
@@ -588,7 +613,7 @@ function onRankImgError(key: string): void {
                             v-for="season in seasonTabs"
                             :key="season.RaidSeason"
                             type="button"
-                            class="btn btn-xs whitespace-nowrap font-mono tabular-nums"
+                            class="btn btn-xs whitespace-nowrap font-orbitron"
                             :class="
                                 selectedSeason === season.RaidSeason
                                     ? 'btn-primary'
@@ -654,6 +679,49 @@ function onRankImgError(key: string): void {
                 {{ currentFloorData?.RaidBuffID.map(id => $t(RaidBuff[id].RaidBuffDes)).join("、") }}
             </p>
 
+            <!-- 赛季时间线：活动开始 / 分组赛结束·巅峰赛开始 / 巅峰赛结束 / 活动结束（北京时间） -->
+            <section v-if="seasonPeriod" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="TIMELINE" :title="$t('db-raid-rank.season_timeline')" />
+                <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.period_event_start") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            formatRaidDateTime(seasonPeriod.eventStart)
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.period_peak_start") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            formatRaidDateTime(seasonPeriod.peakStart)
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.period_raid_end") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            formatRaidDateTime(seasonPeriod.raidEnd)
+                        }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.period_event_end") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            formatRaidDateTime(seasonPeriod.eventEnd)
+                        }}</span>
+                    </div>
+                </div>
+                <p class="mt-1 text-[11px] tabular-nums text-base-content/45">
+                    {{ $t("db-raid-rank.period_beijing") }}
+                </p>
+                <p class="mt-1 text-[11px] leading-relaxed text-base-content/55">{{ $t("db-raid-rank.settle_period_note") }}</p>
+            </section>
+
             <!-- 信息分页 -->
             <AniTabs v-model="activeInfoTab" :tabs="infoTabs" />
 
@@ -665,7 +733,7 @@ function onRankImgError(key: string): void {
                     <!-- 当前分数 -->
                     <div class="flex items-baseline gap-2">
                         <span class="text-sm text-base-content/60">{{ $t("common.score") }}</span>
-                        <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">{{ currentScore }}</span>
+                        <span class="font-orbitron text-2xl font-bold text-primary">{{ currentScore }}</span>
                     </div>
                     <!-- 分数 / 剩余时间输入 -->
                     <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
@@ -679,7 +747,7 @@ function onRankImgError(key: string): void {
                                 :min="minScore"
                                 :max="maxScore"
                                 :placeholder="$t('db-raid-rank.input_score')"
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
                             <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">{{
                                 t("db-raid-rank.max_score", { value: maxScore })
@@ -695,7 +763,7 @@ function onRankImgError(key: string): void {
                                 :max="maxAllowedTime"
                                 step="0.1"
                                 :placeholder="$t('db-raid-rank.input_remaining_time')"
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
                             <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">
                                 {{ t("db-raid-rank.max_allowed_time", { value: maxAllowedTime }) }}
@@ -722,23 +790,45 @@ function onRankImgError(key: string): void {
                         {{ $t("db-raid-rank.formula") }}
                         <span class="ml-1 text-xs opacity-80">{{ $t("db-raid-rank.formula_note") }}</span>
                     </p>
-                    <p class="mt-2 text-[11px] leading-relaxed tabular-nums text-base-content/55">
-                        {{ t("db-raid-rank.current_dungeon", { id: RaidDungeon[selectedDungeon]?.DungeonId }) }} | BaseRaidPoint:
-                        {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} |
-                        {{ t("db-raid-rank.formula_id", { id: RaidDungeon[selectedDungeon]?.FomulaId }) }} |
-                        {{ t("db-raid-rank.time_zone") }}:
-                        {{ currentFormula?.RaidTimeZone }} | {{ t("db-raid-rank.rate") }}:
-                        {{ currentFormula?.RaidTimeRate }}
-                    </p>
+                    <div class="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+                        <div
+                            v-for="(seg, index) in formulaSegments"
+                            :key="index"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{
+                                t("db-raid-rank.segment_range", { start: seg.start, end: seg.end })
+                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary"
+                                >+{{ seg.rate }}%</span
+                            >
+                        </div>
+                    </div>
+                    <div class="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.base_score") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                                RaidDungeon[selectedDungeon]?.BaseRaidPoint ?? 0
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.bonus_full_time") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ maxAllowedTime }}s</span>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- 奖励数量展示 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-raid-rank.score_reward_calc')" />
                     <p class="text-sm leading-relaxed text-base-content/90">
-                        {{ $t("db-raid-rank.per_1000_points") }} <b class="font-orbitron tabular-nums text-primary">1</b>
+                        {{ $t("db-raid-rank.per_1000_points") }} <b class="font-orbitron text-primary">1</b>
                         {{ $t("db-raid-rank.rewards_max") }}
-                        <b class="font-orbitron tabular-nums text-primary">{{ rewardConfig.maxTime ?? 0 }}</b>
+                        <b class="font-orbitron text-primary">{{ rewardConfig.maxTime ?? 0 }}</b>
                         {{ $t("common.times") }}
                     </p>
                     <div class="mt-3">
@@ -748,23 +838,8 @@ function onRankImgError(key: string): void {
                             <span class="text-sm text-base-content/55">{{ $t("common.times") }}</span>
                         </div>
 
-                        <!-- 奖励组（内层小卡） -->
+                        <!-- 奖励组（内层小卡，只展示奖励内容） -->
                         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                            <div class="mb-1 flex items-center justify-between gap-2">
-                                <span class="text-sm font-medium text-base-content/85">{{
-                                    t("reward-item.reward_group_id", { id: rewardId })
-                                }}</span>
-                                <span
-                                    class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
-                                    :class="
-                                        currentReward?.m === 'Independent'
-                                            ? 'bg-success text-success-content'
-                                            : 'bg-warning text-warning-content'
-                                    "
-                                >
-                                    {{ getDropModeText(currentReward?.m || "") }}
-                                </span>
-                            </div>
                             <RewardItem :reward="currentReward!" />
                         </div>
                     </div>
@@ -778,7 +853,7 @@ function onRankImgError(key: string): void {
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-raid-rank.jump_simulator')" />
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                        <span class="font-orbitron text-xl font-bold tabular-nums text-primary">
+                        <span class="font-orbitron text-xl font-bold text-primary">
                             {{ t("db-raid-rank.simulated_unlock_x", { value: floorHighestUnlocked }) }}
                         </span>
                         <button
@@ -809,12 +884,13 @@ function onRankImgError(key: string): void {
                         <span
                             v-for="tier in floorJumpTiers"
                             :key="tier.jumpTime"
-                            class="rounded-xs border border-base-content/25 bg-base-content/5 px-2 py-0.5 font-mono text-[11px] tabular-nums text-base-content/85"
+                            class="rounded-xs border border-base-content/25 bg-base-content/5 px-2 py-0.5 font-orbitron text-[11px] text-base-content/85"
                         >
                             ≥{{ tier.jumpTime }}s → +{{ tier.jumpFloor }}
                         </span>
                     </div>
                     <p class="mt-2 text-[11px] leading-relaxed text-base-content/55">{{ $t("db-raid-rank.progress_note") }}</p>
+                    <p class="mt-1 text-[11px] leading-relaxed text-base-content/45">{{ $t("db-raid-rank.floor_no_time_note") }}</p>
                 </section>
 
                 <div class="grid grid-cols-1 items-start gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -839,7 +915,7 @@ function onRankImgError(key: string): void {
                             "
                                         @click="selectFloor(item.Floor)"
                                     >
-                                        <span class="font-orbitron text-sm font-bold tabular-nums">{{
+                                        <span class="font-orbitron text-sm font-bold">{{
                                             t("db-raid-rank.floor_name", { value: item.Floor })
                                         }}</span>
                                         <span class="mt-0.5 block text-[10px] tabular-nums opacity-70">Lv.{{ item.RecLevel }}</span>
@@ -873,7 +949,7 @@ function onRankImgError(key: string): void {
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                             <SectionHeader no-animate compact kicker="FLOOR" :title="$t('db-raid-rank.floor_detail')" />
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">
+                                <span class="font-orbitron text-2xl font-bold text-primary">
                                     {{ t("db-raid-rank.floor_name", { value: currentFloorData.Floor }) }}
                                 </span>
                                 <span
@@ -889,12 +965,32 @@ function onRankImgError(key: string): void {
                             >
                                 {{ $t("db-raid-rank.locked_preview") }}
                             </p>
-                            <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm tabular-nums text-base-content/80 sm:grid-cols-4">
-                                <span>{{ t("db-raid-rank.monster_level_x", { value: currentFloorData.MonsterLevel }) }}</span>
-                                <span>{{ t("db-raid-rank.rec_level_x", { value: currentFloorData.RecLevel }) }}</span>
-                                <span class="col-span-2">{{
-                                    t("db-raid-rank.min_damage_x", { value: currentFloorData.MinCompleteDamage })
-                                }}</span>
+                            <div class="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+                                <div
+                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.monster_level") }}</span>
+                                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary"
+                                        >Lv.{{ currentFloorData.MonsterLevel }}</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="text-xs text-base-content/60">{{ $t("db-raid-rank.rec_level") }}</span>
+                                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary"
+                                        >Lv.{{ currentFloorData.RecLevel }}</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("db-raid-rank.min_damage") }}</span>
+                                    <span
+                                        class="min-w-0 break-all text-right font-orbitron text-[13px] font-semibold text-primary"
+                                        >{{ currentFloorData.MinCompleteDamage }}</span
+                                    >
+                                </div>
                             </div>
                             <!-- 通关操作：用时与结算放同一块，填完即点 -->
                             <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
@@ -910,7 +1006,7 @@ function onRankImgError(key: string): void {
                                             min="0"
                                             :max="FLOOR_TIME_LIMIT"
                                             step="0.1"
-                                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
+                                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm outline-none transition-colors duration-200 focus:border-primary"
                                         />
                                     </label>
                                     <button
@@ -962,18 +1058,36 @@ function onRankImgError(key: string): void {
                             />
                         </div>
                         <p v-else class="text-[11px] text-base-content/45">
-                            {{ t("db-raid-rank.dungeon_missing", { id: currentFloorData.DungeonId }) }}
+                            {{ $t("db-raid-rank.dungeon_missing") }}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- 副本信息（打分制） -->
-            <div
-                v-if="activeInfoTab === 'dungeon' && !currentSeasonIsFloor && currentDungeon"
-                class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm"
-            >
-                <DBDungeonDetailItem :dungeon="currentDungeon" />
+            <!-- 副本信息（打分制）：老赛季 RaidDungeon 逐日错开，先列本赛季副本开启时间 -->
+            <div v-if="activeInfoTab === 'dungeon' && !currentSeasonIsFloor && currentDungeon" class="space-y-3">
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SCHEDULE" :title="$t('db-raid-rank.season_dungeon_schedule')" />
+                    <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                        <div
+                            v-for="dungeon in seasonDungeonsSorted"
+                            :key="dungeon.DungeonId"
+                            :title="$t(getDungeonName(dungeon.DungeonId))"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="min-w-0 truncate text-xs text-base-content/60"
+                                >{{ $t(getDungeonName(dungeon.DungeonId)) }} ·
+                                {{ t("db-raid-rank.difficulty_label", { level: dungeon.DifficultyLevel }) }}</span
+                            >
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                formatRaidDateTime(dungeon.UnlockDate)
+                            }}</span>
+                        </div>
+                    </div>
+                </section>
+                <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm">
+                    <DBDungeonDetailItem :dungeon="currentDungeon" />
+                </div>
             </div>
 
             <!-- 排名信息：榜单行（前三档主色强调） -->
@@ -1002,7 +1116,7 @@ function onRankImgError(key: string): void {
                             <img class="h-12 shrink-0" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
                             <div class="min-w-0">
                                 <p
-                                    class="font-orbitron text-lg font-bold tabular-nums"
+                                    class="font-orbitron text-lg font-bold"
                                     :class="isTopThreeRank(index) ? 'text-primary' : ''"
                                 >
                                     {{ item.rank }}

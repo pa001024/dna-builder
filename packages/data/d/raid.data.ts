@@ -5521,6 +5521,64 @@ export const RaidSeasonFloorMax: Record<number, number[]> = {
     "1007": [180, 180],
 }
 
+export interface EventId2RaidSeasonItem {
+    EventEndTime: number
+    EventId: number
+    EventStartTime: number
+    RaidSeasonId: number
+}
+
+/**
+ * 赛季活动起止时间：活动ID → 赛季ID 与活动起止（秒级时间戳）。
+ * 分组赛/巅峰赛节点由活动开始 + RaidSeason.PreRaidTime/RaidTime（小时）推导：
+ * 分组赛 [Start, Start+PreRaidTime*3600)，巅峰赛 [Start+PreRaidTime*3600, +RaidTime*3600)。
+ * 数据来源：Script/Datas/EventId2RaidSeason.lua（与 EventMain.lua 的起止一致）。
+ */
+export const EventId2RaidSeason: Record<string | number, EventId2RaidSeasonItem> = {
+    "111001": {
+        EventEndTime: 1770584400,
+        EventId: 111001,
+        EventStartTime: 1769133600,
+        RaidSeasonId: 1001,
+    },
+    "111002": {
+        EventEndTime: 1775768400,
+        EventId: 111002,
+        EventStartTime: 1774317600,
+        RaidSeasonId: 1002,
+    },
+    "111003": {
+        EventEndTime: 1780606800,
+        EventId: 111003,
+        EventStartTime: 1779156000,
+        RaidSeasonId: 1003,
+    },
+    "111004": {
+        EventEndTime: 1785445200,
+        EventId: 111004,
+        EventStartTime: 1783994400,
+        RaidSeasonId: 1004,
+    },
+    "111005": {
+        EventEndTime: 1785142800,
+        EventId: 111005,
+        EventStartTime: 1780279200,
+        RaidSeasonId: 1005,
+    },
+    "111006": {
+        EventEndTime: 1792789200,
+        EventId: 111006,
+        EventStartTime: 1791338400,
+        RaidSeasonId: 1006,
+    },
+    "111007": {
+        EventEndTime: 1796418000,
+        EventId: 111007,
+        EventStartTime: 1794967200,
+        RaidSeasonId: 1007,
+    },
+}
+
 /**
  * 手动维护的排位奖励版本表（含各赛季称号框与命名）。
  * 新赛季（如 1006）缺少条目时，由 importdata 脚本按奖励表自动补齐。

@@ -3,6 +3,7 @@ import { createDefaultCharSettings, normalizeCharSettings } from "@/composables/
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { createSandboxRuntime, type SandboxInbound, type SandboxOutbound } from "@/utils/build-sandbox-runtime"
+import { isSandboxWorkerResident, SANDBOX_TIMEOUT_MS, warmupBuildSandbox } from "@/utils/code-sandbox"
 
 interface RunResult {
     ok: boolean
@@ -53,6 +54,11 @@ function run(code: string, api: Record<string, unknown>): Promise<RunResult> {
                         })
                     }
                 })()
+                return
+            }
+
+            // 常驻握手包不属于任何一次执行（与生产侧 runInWorker 的忽略逻辑一致）
+            if (message.type === "ready") {
                 return
             }
 
@@ -119,5 +125,17 @@ describe("createSandboxRuntime", () => {
         expect(result.ok).toBe(true)
         expect(JSON.parse(result.value ?? "[]")[0]).toBe(build.calculate())
         expect(JSON.parse(result.value ?? "[]")[1]).toBe(build.meleeWeapon.名称)
+    })
+})
+
+describe("沙箱预算与预热", () => {
+    it("总预算保持 30 秒：覆盖线程冷启动与批量试装的页面重算，改小前先确认真实构筑耗时", () => {
+        expect(SANDBOX_TIMEOUT_MS).toBe(30000)
+    })
+
+    it("没有 Worker 的环境下预热直接返回，不抛错且无常驻实例", () => {
+        expect(typeof Worker).toBe("undefined")
+        expect(() => warmupBuildSandbox()).not.toThrow()
+        expect(isSandboxWorkerResident()).toBe(false)
     })
 })

@@ -2,6 +2,7 @@ import { createBuildFromSnapshot } from "@/data/CharBuildSnapshot"
 
 /** 沙箱（worker 侧）发给主线程的消息 */
 export type SandboxOutbound =
+    | { type: "ready" }
     | { type: "log"; level: "log" | "warn" | "error"; text: string }
     | { type: "rpc"; id: number; path: string[]; args: unknown[] }
     | { type: "done"; ok: boolean; value?: string; error?: string }

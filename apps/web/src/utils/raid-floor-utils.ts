@@ -1,4 +1,4 @@
-import { RaidFloor, type RaidFloorItem, RaidSeason, RaidSeasonFloorMax, type RaidSeasonItem } from "@/data/d/raid.data"
+import { EventId2RaidSeason, RaidFloor, type RaidFloorItem, RaidSeason, RaidSeasonFloorMax, type RaidSeasonItem } from "@/data/d/raid.data"
 import { getCurrentVersionLimit } from "@/data/versionGate"
 
 /**
@@ -260,6 +260,60 @@ export function getRaidSeasonVersion(seasonId: number | string): number {
     const id = Number(seasonId)
     if (!Number.isFinite(id)) return Number.NaN
     return Math.floor(id / 1000) + (id % 1000) / 10
+}
+
+/**
+ * 赛季时间线（秒级时间戳，北京时间 UTC+8 展示）。
+ * 与游戏 GuildWarUtils.lua 的对应关系：
+ * - IsPreRaidTime = [eventStart, eventStart+PreRaidTime*3600) → 分组赛
+ * - IsOfficalRaidTime = [eventStart+PreRaidTime*3600, +RaidTime*3600) → 巅峰赛
+ * - IsRaidEnded = 可玩结束之后；IsEventTime = 到 eventEnd 为止（结算/领奖展示期）。
+ */
+export interface RaidSeasonPeriod {
+    /** 活动开始 EventStartTime */
+    eventStart: number
+    /** 分组赛结束 = 巅峰赛开始（Start + PreRaidTime*3600） */
+    peakStart: number
+    /** 巅峰赛结束（不可再进本，Start + PreRaidTime*3600 + RaidTime*3600） */
+    raidEnd: number
+    /** 活动结束 EventEndTime（赛季结束后的结算/领奖展示期终点） */
+    eventEnd: number
+}
+
+/**
+ * 取赛季时间线：活动开始 / 分组赛结束·巅峰赛开始 / 巅峰赛结束 / 活动结束。
+ * 事件起止取 EventId2RaidSeason（与 EventMain.lua 一致），阶段时长取 RaidSeason.PreRaidTime/RaidTime（小时）。
+ * @param seasonId 赛季ID
+ * @returns 时间线，赛季或事件时间缺失时 undefined
+ */
+export function getRaidSeasonPeriod(seasonId: number | string): RaidSeasonPeriod | undefined {
+    const season = RaidSeason[seasonId]
+    if (!season) return undefined
+    const event = EventId2RaidSeason[season.EventId]
+    if (!event) return undefined
+    const eventStart = event.EventStartTime
+    const peakStart = eventStart + season.PreRaidTime * 3600
+    const raidEnd = peakStart + season.RaidTime * 3600
+    return { eventStart, peakStart, raidEnd, eventEnd: event.EventEndTime }
+}
+
+/** 北京时区时间戳格式化（秒级时间戳 → YYYY-MM-DD HH:mm:ss，UTC+8）。
+ * @param timestamp 秒级时间戳
+ * @returns 北京时间文本
+ */
+export function formatRaidDateTime(timestamp: number): string {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    }).formatToParts(new Date(timestamp * 1000))
+    const get = (type: string) => parts.find(part => part.type === type)?.value ?? ""
+    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`
 }
 
 /**

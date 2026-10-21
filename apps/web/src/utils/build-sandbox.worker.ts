@@ -43,3 +43,7 @@ const runtime = createSandboxRuntime((message: SandboxOutbound) => {
 self.onmessage = (event: MessageEvent<SandboxInbound>) => {
     runtime.onMessage(event.data)
 }
+
+// 常驻握手：模块加载完成即告知主线程，主线程只给就绪 worker 投递执行请求，
+// 加载耗时不再计入单次执行预算（先赋值 onmessage 再报 ready，无竞态）。
+self.postMessage({ type: "ready" } satisfies SandboxOutbound)

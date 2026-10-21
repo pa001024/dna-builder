@@ -570,7 +570,7 @@ watch(
                                 </div>
                             </div>
                             <div v-if="item.mod.效果" class="mb-2 text-xs leading-relaxed text-base-content/70">
-                                {{ gpt(item.mod.效果, item.mod.等级 - 1) }}
+                                {{ gpt(item.mod.效果, item.mod.等级) }}
                             </div>
                             <SkillDetailBlock :skill="item.replaceSkill" />
                         </div>

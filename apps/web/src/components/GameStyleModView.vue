@@ -320,7 +320,7 @@ const cardLayout = {
                 :cost="mods[cardLayout.center]!.耐受"
                 :type="`${$t(mods[cardLayout.center]!.类型)}${mods[cardLayout.center]!.属性 ? `,${$t(mods[cardLayout.center]!.属性 + '属性')}` : ''}${mods[cardLayout.center]!.限定 ? `,${$t(mods[cardLayout.center]!.限定)}` : ''}`"
                 :effdesc="mods[cardLayout.center]!.效果"
-                :effindex="mods[cardLayout.center]!.等级 - 1"
+                :effindex="mods[cardLayout.center]!.等级"
                 :eff="getModEff(mods[cardLayout.center]!)"
             >
                 <div class="transform transition-all duration-300 hover:scale-105 hover:border-white/70">

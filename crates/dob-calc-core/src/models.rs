@@ -856,7 +856,8 @@ impl LeveledSkill {
     ///
     /// 规则（注意每条的边界）：技能倍率赋值优先；`技能范围` 只乘 1 次；
     /// `技能效益` 与 `技能耐久` 同时影响时按 `max(0.25, (2 - 效益) / 耐久)`；
-    /// 只有效益时按 `2 - 效益`；`神智消耗` 最后 `ceil`；
+    /// 只有效益时按 `2 - 效益`；`技能速度` 影响时按 `值 / 技能速度`（不取整）；
+    /// `神智消耗` 最后 `ceil`；
     /// `多重` 影响读远程武器多重射击（1 开始，无远程武器时为 1）。
     /// `conditional_props` 是条件BUFF（技能/tag限定）的字段级增量：字段命中时
     /// 把增量合并进该字段的独立求值上下文，`技能倍率` 三项从合并后的视图读取。
@@ -871,6 +872,7 @@ impl LeveledSkill {
         let durability = attrs.get("技能耐久").copied().unwrap_or(1.0);
         let efficiency = attrs.get("技能效益").copied().unwrap_or(1.0);
         let range = attrs.get("技能范围").copied().unwrap_or(1.0);
+        let speed = attrs.get("技能速度").copied().unwrap_or(1.0);
         let no_conditionals = conditional_props.is_empty();
         let shared_multipliers = if no_conditionals {
             (
@@ -918,6 +920,7 @@ impl LeveledSkill {
                 let mut has_power = false;
                 let mut has_durability = false;
                 let mut has_efficiency = false;
+                let mut has_speed = false;
                 let mut has_multi = false;
                 for part in field.influence.split(',') {
                     match part {
@@ -925,6 +928,7 @@ impl LeveledSkill {
                         "技能威力" => has_power = true,
                         "技能耐久" => has_durability = true,
                         "技能效益" => has_efficiency = true,
+                        "技能速度" => has_speed = true,
                         "多重" => has_multi = true,
                         _ => {}
                     }
@@ -950,6 +954,9 @@ impl LeveledSkill {
                     } else {
                         value = field.value * (2.0 - efficiency);
                     }
+                }
+                if has_speed {
+                    value /= speed;
                 }
                 if has_multi {
                     // 多重影响：读取远程武器多重射击属性（1 开始，无远程武器时为 1，即无加成）

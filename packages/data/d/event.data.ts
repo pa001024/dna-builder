@@ -76,6 +76,11 @@ export interface EventHardBossEvent {
     bosses: EventHardBossEntry[]
 }
 
+/** 异步战斗（联袂演绎）配置：关联的 AsyncCombat 副本 id 列表 */
+export interface EventAsyncCombat {
+    dungeons: number[]
+}
+
 export interface EventItem {
     id: number
     name: string
@@ -87,6 +92,7 @@ export interface EventItem {
     signIn?: EventSignIn
     onlineTime?: EventOnlineTimeEntry[]
     hardBossEvent?: EventHardBossEvent
+    asyncCombat?: EventAsyncCombat
     boxDrop?: {
         boxCoinId: number
         boxMaximum: number
@@ -344,7 +350,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 102001,
-        name: "华胥香识记",
+        name: "华胥香识记·烟津渺渺",
         desc: "华胥，一片香气氤氲的安宁土地。\n你受邀而来，期待着止流为你描绘的，那前所未见，却亘古已有的缥缈风景。",
         startTime: 1766408400,
         endTime: 1775509200,
@@ -379,14 +385,14 @@ export const eventData: EventItem[] = [
     },
     {
         id: 103001,
-        name: "迷津",
+        name: "迷津·乐土之国的深渊 卷一",
         desc: "经由我，步入无始无终的时间歧路。",
         startTime: 1761523200,
         endTime: null,
     },
     {
         id: 103002,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1761512400,
         endTime: 1764018000,
@@ -982,7 +988,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 105001,
-        name: "「致明日测试」充值返还",
+        name: "「致明日测试」充值返还·~ 最高返还<ReRebate>200%</> ~",
         desc: "",
         startTime: 1704081600,
         endTime: 1751446800,
@@ -1495,42 +1501,54 @@ export const eventData: EventItem[] = [
     },
     {
         id: 121001,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·联袂演绎",
         desc: "我们将决定剧中故事的走向，沉浸于我们的剧目，共同迎接故事的完美终局。",
         startTime: 1781748000,
         endTime: 1785142800,
+        asyncCombat: {
+            dungeons: [40601, 40602, 40603, 40604],
+        },
     },
     {
         id: 121002,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·联袂演绎",
         desc: "我们将决定剧中故事的走向，沉浸于我们的剧目，共同迎接故事的完美终局。",
         startTime: 1785981600,
         endTime: 1788685200,
+        asyncCombat: {
+            dungeons: [40601, 40602, 40603, 40604],
+        },
     },
     {
         id: 121003,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·联袂演绎",
         desc: "我们将决定剧中故事的走向，沉浸于我们的剧目，共同迎接故事的完美终局。",
         startTime: 1789610400,
         endTime: 1792314000,
+        asyncCombat: {
+            dungeons: [40601, 40602, 40603, 40604],
+        },
     },
     {
         id: 121004,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·联袂演绎",
         desc: "我们将决定剧中故事的走向，沉浸于我们的剧目，共同迎接故事的完美终局。",
         startTime: 1793930400,
         endTime: 1796288400,
+        asyncCombat: {
+            dungeons: [40601, 40602, 40603, 40604],
+        },
     },
     {
         id: 1020012,
-        name: "华胥香识记·贰",
+        name: "华胥香识记·贰·烟津渺渺",
         desc: "华胥，一片香气氤氲的安宁土地。\n你受邀而来，期待着止流为你描绘的，那前所未见，却亘古已有的缥缈风景。",
         startTime: 1775440800,
         endTime: 1780304400,
     },
     {
         id: 1030022,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1764018000,
         endTime: 1766437200,
@@ -1538,7 +1556,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030023,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1766437200,
         endTime: 1768874400,
@@ -1546,7 +1564,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030024,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1768874400,
         endTime: 1770688800,
@@ -1554,7 +1572,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030025,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1770688800,
         endTime: 1773108000,
@@ -1562,7 +1580,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030026,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1773108000,
         endTime: 1775466000,
@@ -1570,7 +1588,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030027,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1775527200,
         endTime: 1777946400,
@@ -1578,7 +1596,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030028,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1777946400,
         endTime: 1780304400,
@@ -1586,7 +1604,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030029,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1780365600,
         endTime: 1782784800,
@@ -1594,7 +1612,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030030,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1782784800,
         endTime: 1785142800,
@@ -1602,7 +1620,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030031,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1785142800,
         endTime: null,
@@ -1610,7 +1628,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030032,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1785204000,
         endTime: 1787018400,
@@ -1618,7 +1636,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030033,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1787018400,
         endTime: 1788771600,
@@ -1626,7 +1644,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030034,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1788832800,
         endTime: 1790647200,
@@ -1634,7 +1652,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030035,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1790647200,
         endTime: 1792400400,
@@ -1642,7 +1660,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030036,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1792400400,
         endTime: 1794276000,
@@ -1650,7 +1668,7 @@ export const eventData: EventItem[] = [
     },
     {
         id: 1030037,
-        name: "沉浸式戏剧",
+        name: "沉浸式戏剧·勇者们的传说",
         desc: "你是观众，亦是决定故事走向的剧中人。走入你的剧目，沉浸于直面强敌的勇气和迎接完美终局的喜悦。",
         startTime: 1794276000,
         endTime: 1796029200,

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { RaidSeason } from "@/data/d/raid.data"
 import { DNA_SAFE_VERSION_LIMIT, getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
 import {
+    formatRaidDateTime,
     formatRankTime,
     getDefaultRaidSeason,
     getHighestFloor,
@@ -9,6 +10,7 @@ import {
     getJumpTiers,
     getRaidFloorFullList,
     getRaidFloorList,
+    getRaidSeasonPeriod,
     getRaidSeasonVersion,
     getUnlockFloorCount,
     isFloorSeason,
@@ -95,6 +97,32 @@ describe("raid-floor-utils", () => {
         expect(full[0].Floor).toBe(1)
         expect(full[179].Floor).toBe(180)
         expect(getRaidFloorFullList(1007, 1)).toHaveLength(180)
+    })
+
+    it("赛季时间线：1007 分组赛/巅峰赛节点按 Start+62h/+168h 推导", () => {
+        const period = getRaidSeasonPeriod(1007)
+        expect(period).toBeDefined()
+        // 活动开始 2026-11-18 10:00:00（北京时间）= 1794967200
+        expect(period!.eventStart).toBe(1794967200)
+        // 分组赛结束 / 巅峰赛开始 = Start + 62h → 2026-11-21 00:00:00
+        expect(period!.peakStart).toBe(1794967200 + 62 * 3600)
+        // 巅峰赛结束 = +168h → 2026-11-28 00:00:00
+        expect(period!.raidEnd).toBe(1794967200 + (62 + 168) * 3600)
+        // 活动结束 2026-12-05 05:00:00 = 1796418000
+        expect(period!.eventEnd).toBe(1796418000)
+        expect(formatRaidDateTime(period!.eventStart)).toBe("2026-11-18 10:00:00")
+        expect(formatRaidDateTime(period!.peakStart)).toBe("2026-11-21 00:00:00")
+        expect(formatRaidDateTime(period!.raidEnd)).toBe("2026-11-28 00:00:00")
+        expect(formatRaidDateTime(period!.eventEnd)).toBe("2026-12-05 05:00:00")
+    })
+
+    it("赛季时间线：老赛季同样可推导，未知赛季返回 undefined", () => {
+        const period = getRaidSeasonPeriod(1001)
+        expect(period).toBeDefined()
+        expect(period!.eventStart).toBe(1769133600)
+        expect(period!.peakStart).toBe(1769133600 + 62 * 3600)
+        expect(period!.raidEnd).toBe(1769133600 + (62 + 173) * 3600)
+        expect(getRaidSeasonPeriod(9999)).toBeUndefined()
     })
 })
 

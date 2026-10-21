@@ -1043,15 +1043,17 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async context => {
-            const [raidCalculation, raidDungeon, raidSeason, preRaidRank, reward, raidFloor, raidSeasonFloorMax] = await Promise.all([
-                readLuaTable("RaidCalculation"),
-                readLuaTable("RaidDungeon"),
-                readLuaTable("RaidSeason"),
-                readLuaTable("PreRaidRank"),
-                readLuaTable("Reward"),
-                readLuaTable("RaidFloor"),
-                readLuaTable("RaidSeasonFloorMax"),
-            ])
+            const [raidCalculation, raidDungeon, raidSeason, preRaidRank, reward, raidFloor, raidSeasonFloorMax, eventId2RaidSeason] =
+                await Promise.all([
+                    readLuaTable("RaidCalculation"),
+                    readLuaTable("RaidDungeon"),
+                    readLuaTable("RaidSeason"),
+                    readLuaTable("PreRaidRank"),
+                    readLuaTable("Reward"),
+                    readLuaTable("RaidFloor"),
+                    readLuaTable("RaidSeasonFloorMax"),
+                    readLuaTable("EventId2RaidSeason"),
+                ])
 
             const preRaidRanks = preRaidRank as PreRaidRankRow[]
             const seasons = raidSeason as Record<string, { PreRaidRank?: number }>
@@ -1101,6 +1103,10 @@ const MAPPINGS: Mapping[] = [
                 {
                     targetVar: "RaidSeasonFloorMax",
                     value: raidSeasonFloorMax,
+                },
+                {
+                    targetVar: "EventId2RaidSeason",
+                    value: eventId2RaidSeason,
                 },
                 {
                     targetVar: "PreRaidRank",

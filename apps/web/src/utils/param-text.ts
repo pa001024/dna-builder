@@ -65,7 +65,7 @@ export function getParamTemplate(value: ParamText | null | undefined): string {
  * 求值顺序固定为「**先翻译模板、再代入数值**」：翻译对照表里收录的是模板键
  * （如「角色攻击+#1。」），若先代入数值得到「角色攻击+60.0%。」再去翻译就查不到了。
  * @param value 待求值的字段
- * @param index 档位下标（武器的精炼等级、MOD 的 `等级 - 1`）
+ * @param index 档位下标（武器的精炼等级、MOD 的 `等级`）
  * @param translate 模板翻译函数，默认不翻译
  * @returns 求值后的文本；无内容返回空串
  */

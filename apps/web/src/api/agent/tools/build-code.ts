@@ -1,6 +1,6 @@
 import type { AgentTool } from "@/api/agent/tool"
 import { getBuildApi, setBuildDeadline } from "@/utils/build-api"
-import { runInBuildSandbox } from "@/utils/code-sandbox"
+import { runInBuildSandbox, SANDBOX_TIMEOUT_MS } from "@/utils/code-sandbox"
 
 const MAX_CODE_LENGTH = 8000
 
@@ -12,6 +12,7 @@ const DESCRIPTION = [
     "一次调用就能完成多步改动：把「换武器 → 换魔之楔 → 比伤害 → 挑最优」写在一段代码里，不必逐次对话。",
     "用 console.log 输出中间过程，用 return 返回要交给用户看的最终结论（返回值与日志都会回传）。",
     "改动立刻生效，await build.damage() 重算，可在循环里连续比较多种方案；别写无限循环——超时会直接终止线程。",
+    "单次执行预算约 30 秒（含线程冷启动）：批量比对优先用 compute.build / simulate 在本地算，只把最优方案写回页面。",
     "典型用法：await build.data.mods({keyword:'炽灼'}) 查名字 → await build.mod({type:'角色',slot:0,name:'...'}) 装上 → await build.damage() 看结果。",
 ].join("\n")
 
@@ -56,7 +57,7 @@ export function createRunCodeTool(): AgentTool<never> {
             }
 
             const result = await runInBuildSandbox(code, api, {
-                timeoutMs: 8000,
+                timeoutMs: SANDBOX_TIMEOUT_MS,
                 onDeadline: setBuildDeadline,
             })
 
@@ -76,5 +77,32 @@ export function createRunCodeTool(): AgentTool<never> {
                 ...(result.ok ? {} : { isError: true }),
             }
         },
+    }
+}
+
+/**
+ * 控制台调试入口：`await runcode("return await build.damage()")`。
+ *
+ * 与 Agent 工具走同一条执行链（同一预算、同一配装接口、同一常驻线程），方便在 console 里复现超时的代码。
+ * 用法：`await runcode("const s = await build.state(); return s.damage")`，返回 { ok, value, logs, error, ms }。
+ * 随配装助手 chunk 载入而挂载（打开一次 Build Agent 即可用）。
+ */
+if (typeof window !== "undefined") {
+    const scope = window as unknown as Record<string, unknown>
+    scope.runcode = async (code: string) => {
+        const api = getBuildApi()
+
+        if (!api) {
+            throw new Error("配装页尚未就绪（buildApi 未注册），请先打开角色构筑页")
+        }
+
+        try {
+            return await runInBuildSandbox(code, api, {
+                timeoutMs: SANDBOX_TIMEOUT_MS,
+                onDeadline: setBuildDeadline,
+            })
+        } finally {
+            setBuildDeadline(0)
+        }
     }
 }

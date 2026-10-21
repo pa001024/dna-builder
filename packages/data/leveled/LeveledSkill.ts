@@ -484,6 +484,7 @@ export class LeveledSkill {
             技能耐久: attrs?.技能耐久 || 1,
             技能效益: attrs?.技能效益 || 1,
             技能范围: attrs?.技能范围 || 1,
+            技能速度: attrs?.技能速度 || 1,
             // 多重（远程武器多重射击，1 开始）：显式参数优先，其次读远程武器面板，最后回退到当前武器面板（兼容无 CharBuild 参与的单机调用）
             多重: rangedMulti ?? attrs?.rangedWeapon?.多重 ?? attrs?.weapon?.多重 ?? 1,
         }
@@ -530,6 +531,9 @@ export class LeveledSkill {
                     } else {
                         val = field.值 * (2 - tt.技能效益)
                     }
+                }
+                if (propSet.has("技能速度")) {
+                    val = val / tt.技能速度
                 }
                 if (propSet.has("多重")) {
                     // 多重影响：读取远程武器多重射击属性（1 开始，无远程武器时为 1，即无加成）

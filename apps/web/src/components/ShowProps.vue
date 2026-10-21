@@ -24,7 +24,7 @@ const componentProps = withDefaults(
         note?: string
         /** 效果文案原文（参数化文本） */
         effdesc?: ParamText
-        /** 效果档位下标（武器为精炼等级，MOD 为 `等级 - 1`） */
+        /** 效果档位下标（武器为精炼等级，MOD 为 `等级`） */
         effindex?: number
         /** 是否去掉首句（武器熔炼文案首句是属性摘要，数值已在属性区展示） */
         effstrip?: boolean

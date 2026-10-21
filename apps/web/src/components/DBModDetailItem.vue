@@ -48,7 +48,7 @@ watch(() => props.mod, newMod => {
 
 // 处理效果描述中的极性
 /** 当前等级下已求值并翻译的效果文案 */
-const effectText = computed(() => gpt(leveledMod.value.效果, currentLevel.value - 1))
+const effectText = computed(() => gpt(leveledMod.value.效果, currentLevel.value))
 
 /**
  * 把效果描述按极性标记切成三段，供模板渲染极性图标。

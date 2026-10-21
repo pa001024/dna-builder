@@ -70,6 +70,29 @@ export interface CharBuildWorkerSnapshot {
 }
 
 /**
+ * 快照跨线程前先过一遍 JSON，把响应式代理读成裸数据。
+ *
+ * 构筑实例里嵌着配装页设置的引用（customVariables 等按引用存入），深层代理的数组
+ * 直接 structuredClone 会抛 DataCloneError；JSON 读取能穿透代理，回来的是保证可克隆的
+ * 纯数据。undefined 字段会被丢弃，重建侧一律按缺省处理，与之前保持一致。
+ * @param snapshot 快照原文
+ * @returns 可安全跨线程的纯数据快照
+ */
+function toCloneableSnapshot(snapshot: CharBuildWorkerSnapshot): CharBuildWorkerSnapshot {
+    return JSON.parse(
+        JSON.stringify(snapshot, (_key, value) => {
+            if (typeof value === "function" || typeof value === "symbol") {
+                return undefined
+            }
+            if (typeof value === "bigint") {
+                return Number(value)
+            }
+            return value
+        })
+    ) as CharBuildWorkerSnapshot
+}
+
+/**
  * 将构筑实例转换为 worker 可结构化克隆的快照。
  * @param charBuild 构筑实例
  * @returns worker 构筑快照
@@ -93,7 +116,7 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         forgeEffective: weapon.forgeEffective,
     })
 
-    return {
+    const snapshot: CharBuildWorkerSnapshot = {
         char: {
             data: charBuild.char._originalCharData,
             level: charBuild.char.等级,
@@ -133,6 +156,8 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         dotSettings: { ...charBuild.dotSettings },
         petBaseCd: charBuild.petBaseCd,
     }
+
+    return toCloneableSnapshot(snapshot)
 }
 
 /**

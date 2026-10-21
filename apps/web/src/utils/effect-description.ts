@@ -18,5 +18,5 @@ export function describeEffectItem(item: LeveledMod | LeveledWeapon, gpt: Effect
         // 武器熔炼首句是属性摘要（已在属性区展示），正文才是特效说明；单句文案（灾厄通用语）则保留全文兜底
         return gpt(item.效果, item.精炼, { stripFirstSentence: true }) || gpt(item.效果, item.精炼)
     }
-    return gpt(item.效果, item.等级 - 1)
+    return gpt(item.效果, item.等级)
 }
