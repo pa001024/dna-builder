@@ -53,6 +53,7 @@ import {
     toI18nLanguage,
     translateDBAgentParts,
     translateDBAgentText,
+    translateTagText,
 } from "@/utils/db-locale"
 import { type DBMapGroup, resolveDBMapGroups } from "@/utils/db-map-utils"
 import { collectResourceDraftSources } from "@/utils/draft-source"
@@ -2327,7 +2328,7 @@ function formatSkillFieldLine(field: SkillField, lang: DBAgentLang): string | un
     }
 
     if (field.tag?.length) {
-        extras.push(`${skillLabel("tag", lang)}：${field.tag.map(tag => translateDBAgentText(tag, lang) ?? tag).join("/")}`)
+        extras.push(`${skillLabel("tag", lang)}：${field.tag.map(tag => translateTagText(tag, lang) ?? tag).join("/")}`)
     }
 
     for (const key of SKILL_FIELD_EXTRA_KEYS) {

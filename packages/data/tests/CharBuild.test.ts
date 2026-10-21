@@ -3476,7 +3476,10 @@ describe("条件BUFF（tag限定）- 莉莉蔻2溯(充盈)/4溯", () => {
                 attrBuff: new LeveledBuff(buffMap.get("黎瑟·浴火被动2")!, 1),
                 sharedBuffs: [],
                 rangedMods: [new LeveledMod(53009, 10), new LeveledMod(53010, 10)],
-                spotCheck: build => build.getConditionalBuffPropsList().find(entry => entry.技能 === "狙击子弹|^伤害$")?.props.技能独立增伤,
+                spotCheck: build =>
+                    build
+                        .getConditionalBuffPropsList()
+                        .find(entry => entry.技能 === "狙击子弹|^伤害$" || entry.tag?.includes("SPliseGun01"))?.props.技能独立增伤,
             },
         ]
         for (const testCase of cases) {

@@ -193,6 +193,29 @@ export function translateDBAgentText(text: string | undefined, lang: DBAgentLang
 }
 
 /**
+ * 翻译招式字段 tag（如 `SPliseGun01` / `技能` / `充盈`）。
+ *
+ * 与 `translateDBAgentText` 唯一区别：中文（zh）也走 bundle 查表。
+ * 中文没有游戏文本对照表，英文 tag 在中文界面会原样裸奔（如 `SPliseGun01`）；
+ * 这类 tag 的中文展示名收在 `public/i18n/zh-CN/translation.json`（`bun i18n add` 维护），
+ * bundle 未收录时回退原文，其它 tag 的中文显示与原来逐字一致。
+ * @param tag tag 原文
+ * @param lang 目标语言
+ * @returns 译文或原文
+ */
+export function translateTagText(tag: string | undefined, lang: DBAgentLang): string | undefined {
+    if (!tag) {
+        return tag
+    }
+    if (lang !== "zh") {
+        return translateDBAgentText(tag, lang) ?? tag
+    }
+    // getResource 不抛异常：bundle 未加载 / 未收录时返回 undefined，回退原文
+    const hit = i18next.getResource("zh-CN", "translation", tag, { keySeparator: false })
+    return typeof hit === "string" && hit ? hit : tag
+}
+
+/**
  * 翻译逗号分隔说明里的名称，整体未收录时逐段翻译再拼回。
  *
  * 条目副信息由多段原文拼成（如「火 · 单手剑」），整串通常不在词条表里，

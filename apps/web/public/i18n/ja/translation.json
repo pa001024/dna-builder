@@ -101,6 +101,7 @@
     "主线任务": "メインクエスト",
     "资源": "資源",
     "子技能": "サブスキル",
+    "最大神智": "最大SP",
     "abyss-dungeon-detail": {
         "notFound": "アビスダンジョンが見つかりません",
         "title": "アビスダンジョン詳細"
@@ -2150,7 +2151,7 @@
         "char_trace": "キャラ溯源",
         "hp": "HP",
         "load_failed": "キャラ詳細を取得できません",
-        "max_sanity": "最大神智",
+        "max_sanity": "最大SP",
         "no_avatar": "アイコンなし",
         "no_splash": "立ち絵なし",
         "retry": "再試行",
@@ -2931,6 +2932,7 @@
     "iron-ticket-list": {
         "title": "鉄チケット一覧"
     },
+    "KamiCrack": "クリムゾン・ワウンド",
     "levelup": {
         "desc": "キャラクター、武器、マジックウェッジの育成資源要件を計算",
         "title": "育成計算"
@@ -3230,6 +3232,8 @@
         "play_failed": "音声を再生できません",
         "playback_progress": "再生位置"
     },
+    "NifuDark": "月食",
+    "NifuLight": "日食",
     "node-editor": {
         "addCalc": {
             "description": "入力値の合計を計算します",
@@ -4235,6 +4239,7 @@
         "title": "万華",
         "total_spent": "累計消費"
     },
+    "SPliseGun01": "狙撃銃",
     "split-view": {
         "resize_hint": "リストと詳細領域のサイズを調整",
         "resize_tip": "ドラッグでサイズ変更、クリックで詳細を折りたたみ"
@@ -4600,5 +4605,6 @@
         "emptyResult": "条件に合う項目がありません",
         "searchPlaceholder": "項目を検索",
         "totalCount": "全 {{count}} 項目"
-    }
+    },
+    "YumingExtra": "酣戦"
 }

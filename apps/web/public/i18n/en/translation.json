@@ -104,6 +104,7 @@
     "主线任务": "Main Quest",
     "资源": "Resource",
     "子技能": "Sub Skill",
+    "最大神智": "Max Sanity",
     "abyss-dungeon-detail": {
         "notFound": "Abyss dungeon not found",
         "title": "Abyss Dungeon Detail"
@@ -2953,6 +2954,7 @@
     "iron-ticket-list": {
         "title": "Iron Ticket List"
     },
+    "KamiCrack": "Crimson Wound",
     "levelup": {
         "desc": "Calculate character, weapon and magic wedge cultivation resource requirements",
         "title": "Cultivation Calculation"
@@ -3252,6 +3254,8 @@
         "play_failed": "Audio cannot be played",
         "playback_progress": "Playback progress"
     },
+    "NifuDark": "Lunar Hunt",
+    "NifuLight": "Solar Eclipse",
     "node-editor": {
         "addCalc": {
             "description": "Calculate the sum of input values",
@@ -4257,6 +4261,7 @@
         "title": "Wanhua",
         "total_spent": "Total Spent"
     },
+    "SPliseGun01": "Arcshot",
     "split-view": {
         "resize_hint": "Resize the list and detail panes",
         "resize_tip": "Drag to resize; click to collapse the details"
@@ -4628,5 +4633,6 @@
         "emptyResult": "No matching entries",
         "searchPlaceholder": "Search entries",
         "totalCount": "{{count}} entries"
-    }
+    },
+    "YumingExtra": "Thunderous Onslaught"
 }

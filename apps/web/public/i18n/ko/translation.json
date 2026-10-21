@@ -102,6 +102,7 @@
     "主线任务": "메인 퀘스트",
     "资源": "자원",
     "子技能": "하위 스킬",
+    "最大神智": "최대 정신력",
     "abyss-dungeon-detail": {
         "notFound": "심연 던전을 찾을 수 없습니다",
         "title": "심연 던전 상세"
@@ -2151,7 +2152,7 @@
         "char_trace": "캐릭터 연원",
         "hp": "HP",
         "load_failed": "캐릭터 상세 정보를 가져오지 못했습니다",
-        "max_sanity": "최대 신지",
+        "max_sanity": "최대 정신력",
         "no_avatar": "아바타 없음",
         "no_splash": "일러스트 없음",
         "retry": "다시 시도",
@@ -2932,6 +2933,7 @@
     "iron-ticket-list": {
         "title": "철 티켓 목록"
     },
+    "KamiCrack": "와인빛 상처",
     "levelup": {
         "desc": "캐릭터、무기、마법 쐐기 육성 자원 요구 사항 계산",
         "title": "육성 계산"
@@ -3231,6 +3233,8 @@
         "play_failed": "오디오를 재생할 수 없습니다",
         "playback_progress": "재생 진행률"
     },
+    "NifuDark": "달 사냥",
+    "NifuLight": "일식",
     "node-editor": {
         "addCalc": {
             "description": "입력값의 합계를 계산합니다",
@@ -4236,6 +4240,7 @@
         "title": "만화",
         "total_spent": "누적 소비"
     },
+    "SPliseGun01": "저격총",
     "split-view": {
         "resize_hint": "목록과 상세 영역 크기 조절",
         "resize_tip": "끌어서 크기 조절, 클릭하면 상세가 접힙니다"
@@ -4601,5 +4606,6 @@
         "emptyResult": "조건에 맞는 항목이 없습니다",
         "searchPlaceholder": "항목 검색",
         "totalCount": "총 {{count}}개 항목"
-    }
+    },
+    "YumingExtra": "열전"
 }

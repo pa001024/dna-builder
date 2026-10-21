@@ -102,6 +102,7 @@
     "主线任务": "Quête principale",
     "资源": "Ressource",
     "子技能": "Sous-compétence",
+    "最大神智": "Lucidité max",
     "abyss-dungeon-detail": {
         "notFound": "Donjon de l’abîme introuvable",
         "title": "Détail du donjon des Abysses"
@@ -2189,7 +2190,7 @@
         "char_trace": "Origine du personnage",
         "hp": "PV",
         "load_failed": "Impossible de charger les détails du personnage",
-        "max_sanity": "Santé mentale max",
+        "max_sanity": "Lucidité max",
         "no_avatar": "Pas d'avatar",
         "no_splash": "Pas d'illustration",
         "retry": "Réessayer",
@@ -2970,6 +2971,7 @@
     "iron-ticket-list": {
         "title": "Liste des tickets de fer"
     },
+    "KamiCrack": "Blessure écarlate",
     "levelup": {
         "desc": "Calculer les besoins en ressources pour la culture des personnages, armes et wedges magiques",
         "title": "Calcul de culture"
@@ -3269,6 +3271,8 @@
         "play_failed": "Impossible de lire l'audio",
         "playback_progress": "Progression de lecture"
     },
+    "NifuDark": "Chasse lunaire",
+    "NifuLight": "Éclipse solaire",
     "node-editor": {
         "addCalc": {
             "description": "Calcule la somme des valeurs d’entrée",
@@ -4274,6 +4278,7 @@
         "title": "Wanhua",
         "total_spent": "Total dépensé"
     },
+    "SPliseGun01": "Fusil de précision",
     "split-view": {
         "resize_hint": "Redimensionner la liste et le panneau de détail",
         "resize_tip": "Glissez pour redimensionner ; cliquez pour réduire les détails"
@@ -4645,5 +4650,6 @@
         "emptyResult": "Aucune entrée correspondante",
         "searchPlaceholder": "Rechercher une entrée",
         "totalCount": "{{count}} entrées"
-    }
+    },
+    "YumingExtra": "Fureur foudroyante"
 }

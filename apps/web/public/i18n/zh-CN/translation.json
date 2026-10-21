@@ -138,6 +138,7 @@
     "资源": "资源",
     "子技能": "子技能",
     "总伤": "总计伤害",
+    "最大神智": "最大神智",
     "abyss-dungeon-detail": {
         "notFound": "未找到该深渊副本",
         "title": "深渊详情"
@@ -2979,6 +2980,7 @@
     "iron-ticket-list": {
         "title": "深境罗盘列表"
     },
+    "KamiCrack": "酒红伤",
     "levelup": {
         "desc": "计算角色、武器和魔之楔的养成资源需求",
         "title": "养成计算"
@@ -3278,6 +3280,8 @@
         "play_failed": "音频无法播放",
         "playback_progress": "播放进度"
     },
+    "NifuDark": "月猎",
+    "NifuLight": "日食",
     "node-editor": {
         "addCalc": {
             "description": "计算输入值的总和",
@@ -4283,6 +4287,7 @@
         "title": "万华",
         "total_spent": "累计花费"
     },
+    "SPliseGun01": "狙击枪",
     "split-view": {
         "resize_hint": "调整列表与详情区域大小",
         "resize_tip": "拖动调整大小，单击收起详情"
@@ -4648,5 +4653,6 @@
         "emptyResult": "没有符合条件的词条",
         "searchPlaceholder": "搜索词条",
         "totalCount": "共 {{count}} 个词条"
-    }
+    },
+    "YumingExtra": "酣战"
 }

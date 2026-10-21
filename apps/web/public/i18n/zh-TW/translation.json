@@ -100,6 +100,7 @@
     "主线任务": "主線任務",
     "资源": "資源",
     "子技能": "子技能",
+    "最大神智": "最大神智",
     "abyss-dungeon-detail": {
         "notFound": "未找到該深淵副本",
         "title": "深淵詳情"
@@ -2929,6 +2930,7 @@
     "iron-ticket-list": {
         "title": "深境羅盤列表"
     },
+    "KamiCrack": "酒紅傷",
     "levelup": {
         "desc": "計算角色、武器和魔之楔的養成資源需求",
         "title": "養成計算"
@@ -3228,6 +3230,8 @@
         "play_failed": "音訊無法播放",
         "playback_progress": "播放進度"
     },
+    "NifuDark": "月獵",
+    "NifuLight": "日食",
     "node-editor": {
         "addCalc": {
             "description": "計算輸入值的總和",
@@ -4233,6 +4237,7 @@
         "title": "萬華",
         "total_spent": "累計花費"
     },
+    "SPliseGun01": "狙擊槍",
     "split-view": {
         "resize_hint": "調整列表與詳情區域大小",
         "resize_tip": "拖曳調整大小，點擊收合詳情"
@@ -4598,5 +4603,6 @@
         "emptyResult": "沒有符合條件的詞條",
         "searchPlaceholder": "搜尋詞條",
         "totalCount": "共 {{count}} 個詞條"
-    }
+    },
+    "YumingExtra": "酣戰"
 }
