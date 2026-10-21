@@ -1234,6 +1234,8 @@
         "fish_desc": "钓鱼点详细收益计算",
         "forge": "灾厄武器",
         "forge_desc": "灾厄武器熔炼等级与任务",
+        "guildwar": "协会战",
+        "guildwar_desc": "查看协会战信息和奖励",
         "hard_boss": "梦魇残声",
         "hardboss": "梦魇残声",
         "hardboss_desc": "查看梦魇残声信息和奖励",
@@ -1288,6 +1290,10 @@
         "weapon_desc": "查看武器信息和属性",
         "wiki": "百科",
         "wiki_desc": "游戏内百科词条，按势力、人物、风土、文明分类"
+    },
+    "datetimepicker": {
+        "now": "回到当前",
+        "placeholder": "选择日期时间"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深渊ID",
@@ -1483,6 +1489,37 @@
     "db-forge-list": {
         "forge_level_count": "个熔炼等级",
         "search_placeholder": "搜索商店ID/名称/商品..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "基础系数",
+        "buffs": "增益",
+        "current_rotation": "本期轮换",
+        "hp": "血量",
+        "info": "基本信息",
+        "monsters": "怪物",
+        "not_found": "未找到协会战",
+        "per_boss_note": "试炼、血量进度、阶段解锁、最高分、挑战次数与排行均按 Boss 独立结算",
+        "point_rewards": "点数奖励",
+        "points_unit": "分",
+        "rule_threshold": "规则门限",
+        "score_capped": "单项满分{{score}}",
+        "score_factor": "计分系数",
+        "stage": "阶段",
+        "state": "状态",
+        "state_active": "进行中",
+        "state_ended": "已结束",
+        "state_not_started": "暂未开启",
+        "state_unopened": "占位未开",
+        "tests": "试炼",
+        "time_limit": "限时",
+        "week_progress": "第{{current}}周 / 共{{total}}周",
+        "week_rewards": "周阶段奖励",
+        "weekly_points_note": "个人周点数跨局累加，每周清零，按80万×档领取点数奖励"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "个协会战",
+        "no_match": "未找到匹配的协会战",
+        "search_placeholder": "搜索协会战ID/名称/描述..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "生效奖励 {{count}} 组",
@@ -2839,6 +2876,12 @@
         "upload_images": "上传图片",
         "view_build": "查看配装",
         "views": "浏览"
+    },
+    "guildwar-detail": {
+        "title": "协会战详情"
+    },
+    "guildwar-list": {
+        "title": "协会战列表"
     },
     "hardboss-detail": {
         "title": "梦魇残声详情"

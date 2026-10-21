@@ -1200,6 +1200,8 @@
         "fish_desc": "Detailed fishing spot yield calculation",
         "forge": "Calamity Weapons",
         "forge_desc": "Calamity weapon smelting levels and quests",
+        "guildwar": "Guild War",
+        "guildwar_desc": "View Guild War bosses and rewards",
         "hard_boss": "Nightmare Echo",
         "hardboss": "Nightmare Remnants",
         "hardboss_desc": "View nightmare remnant information and rewards",
@@ -1254,6 +1256,10 @@
         "weapon_desc": "View weapon information and attributes",
         "wiki": "Encyclopedia",
         "wiki_desc": "In-game encyclopedia entries grouped by faction, character, culture and civilization"
+    },
+    "datetimepicker": {
+        "now": "Now",
+        "placeholder": "Select date & time"
     },
     "db-abyss-dungeon": {
         "abyss_id": "Abyss ID",
@@ -1451,6 +1457,37 @@
     "db-forge-list": {
         "forge_level_count": "forge levels",
         "search_placeholder": "Search forge level, quest or reward ID..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "Base rate",
+        "buffs": "Buffs",
+        "current_rotation": "Current rotation",
+        "hp": "HP",
+        "info": "Basic info",
+        "monsters": "Monsters",
+        "not_found": "Guild War boss not found",
+        "per_boss_note": "Trials, HP progress, stage unlocks, best scores, challenge counts and rankings are tracked per boss",
+        "point_rewards": "Point rewards",
+        "points_unit": "pts",
+        "rule_threshold": "Rule threshold",
+        "score_capped": "Capped {{score}} per trial",
+        "score_factor": "Score factor",
+        "stage": "Stage",
+        "state": "Status",
+        "state_active": "Active",
+        "state_ended": "Ended",
+        "state_not_started": "Not started",
+        "state_unopened": "Not yet available",
+        "tests": "Trials",
+        "time_limit": "Time limit",
+        "week_progress": "Week {{current}} / {{total}}",
+        "week_rewards": "Weekly stage rewards",
+        "weekly_points_note": "Personal weekly points accumulate across runs, reset weekly, and unlock point-tier rewards every 800k"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "Guild War bosses",
+        "no_match": "No matching Guild War bosses",
+        "search_placeholder": "Search Guild War ID / name / description (pinyin supported)..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "{{count}} active reward groups",
@@ -2813,6 +2850,12 @@
         "upload_images": "Upload Images",
         "view_build": "View Build",
         "views": "Views"
+    },
+    "guildwar-detail": {
+        "title": "Guild War Details"
+    },
+    "guildwar-list": {
+        "title": "Guild War List"
     },
     "hardboss-detail": {
         "title": "Nightmare Remnants Detail"

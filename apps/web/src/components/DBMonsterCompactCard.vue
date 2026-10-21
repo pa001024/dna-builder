@@ -251,7 +251,7 @@ function handleClickMonsterCard(): void {
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
-                    <CopyID :id="displayMonster.id" compact class="ml-auto shrink-0" />
+                    <CopyID :id="displayMonster.id" compact />
                 </div>
 
                 <div class="mt-1 flex flex-wrap items-center gap-1">

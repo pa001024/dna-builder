@@ -68,6 +68,8 @@ const props = defineProps<{
               ),
           ]
     mini?: boolean
+    /** 行内模式：只显示图标+数量，悬停弹出 ResourceTooltip（用于周阶段建设点这类单资源计数） */
+    inline?: boolean
 }>()
 
 const nameString = computed(() => {
@@ -453,6 +455,28 @@ function handleCardClick() {
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
+    <FullTooltip
+        v-else-if="inline && Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])"
+        side="top"
+    >
+        <template #tooltip>
+            <div class="-mx-3.75 -my-2.5">
+                <ResourceTooltip :resource="getResourceById(value[1])!" bare />
+            </div>
+        </template>
+        <SRouterLink
+            :to="getRewardDetailLink('Resource', value[1])"
+            class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+        >
+            <img
+                :src="getResourceIconById(value[1])"
+                alt=""
+                class="size-5 rounded-xs"
+                :class="getResourceBackgroundById(value[1])"
+            />
+            <span class="text-xs">{{ value[0] }}</span>
+        </SRouterLink>
+    </FullTooltip>
     <div
         v-else-if="
             Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])

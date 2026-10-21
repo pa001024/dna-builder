@@ -17,6 +17,7 @@ export function getDungeonType(type: string): { t: string; label: string; color:
         Excavation: { t: "Excavation", label: "勘察", color: "bg-green-500" },
         ExtermPro: { t: "ExtermPro", label: "驱离", color: "bg-orange-600" },
         Exterminate: { t: "Exterminate", label: "驱逐", color: "bg-red-600" },
+        GuildBoss: { t: "GuildBoss", label: "协会战", color: "bg-rose-600" },
         Hijack: { t: "Hijack", label: "迁移", color: "bg-pink-500" },
         Rescue: { t: "Rescue", label: "护送", color: "bg-cyan-500" },
         Sabotage: { t: "Sabotage", label: "调停", color: "bg-teal-500" },

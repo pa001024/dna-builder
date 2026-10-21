@@ -1182,6 +1182,8 @@
         "fish_desc": "釣り場の詳細収益計算",
         "forge": "災厄武器",
         "forge_desc": "災厄武器の熔錬レベルと任務",
+        "guildwar": "ギルド戦",
+        "guildwar_desc": "ギルド戦の情報と報酬を確認",
         "hard_boss": "ナイトメア残響",
         "hardboss": "ナイトメアレムナント",
         "hardboss_desc": "ナイトメアレムナント情報とダイナ報酬を確認",
@@ -1236,6 +1238,10 @@
         "weapon_desc": "武器情報と属性を確認",
         "wiki": "事典",
         "wiki_desc": "ゲーム内百科事典の項目。勢力・人物・風土・文明で分類"
+    },
+    "datetimepicker": {
+        "now": "現在",
+        "placeholder": "日時を選択"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深淵 ID",
@@ -1433,6 +1439,37 @@
     "db-forge-list": {
         "forge_level_count": "件の精錬レベル",
         "search_placeholder": "精錬レベル、クエスト、報酬 ID を検索..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "基礎係数",
+        "buffs": "バフ",
+        "current_rotation": "今期ローテーション",
+        "hp": "HP",
+        "info": "基本情報",
+        "monsters": "モンスター",
+        "not_found": "ギルド戦が見つかりません",
+        "per_boss_note": "試練・HP進捗・ステージ解放・最高スコア・挑戦回数・ランキングはBossごとに独立して集計される",
+        "point_rewards": "ポイント報酬",
+        "points_unit": "pt",
+        "rule_threshold": "ルール閾値",
+        "score_capped": "単体上限{{score}}",
+        "score_factor": "スコア係数",
+        "stage": "ステージ",
+        "state": "ステータス",
+        "state_active": "進行中",
+        "state_ended": "終了",
+        "state_not_started": "未開始",
+        "state_unopened": "未開放",
+        "tests": "試練",
+        "time_limit": "制限時間",
+        "week_progress": "第{{current}}週 / 全{{total}}週",
+        "week_rewards": "週間ステージ報酬",
+        "weekly_points_note": "個人週間ポイントは対戦をまたいで累積し、毎週リセットされる。80万ごとに段階報酬を受け取れる"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "件のギルド戦",
+        "no_match": "一致するギルド戦がありません",
+        "search_placeholder": "ギルド戦ID / 名前 / 説明を検索（ピンイン対応）..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "有効な報酬 {{count}} 組",
@@ -2791,6 +2828,12 @@
         "upload_images": "画像をアップロード",
         "view_build": "ビルドを見る",
         "views": "閲覧"
+    },
+    "guildwar-detail": {
+        "title": "ギルド戦詳細"
+    },
+    "guildwar-list": {
+        "title": "ギルド戦一覧"
     },
     "hardboss-detail": {
         "title": "ナイトメアレムナント詳細"

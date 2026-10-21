@@ -31,6 +31,7 @@
         "@codemirror/state": "^6.7.6",
         "@codemirror/view": "^6.43.13",
         "@globalhive/vuejs-tour": "^3.0.1",
+        "@internationalized/date": "3.12.4",
         "@lexical/history": "^0.42.0",
         "@lexical/plain-text": "^0.42.0",
         "@lezer/highlight": "^1.2.5",

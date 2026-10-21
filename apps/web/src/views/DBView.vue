@@ -310,6 +310,7 @@ const databaseItems = [
     { name: "database.dynquest", path: "/db/dynquest", desc: "database.dynquest_desc", icon: "ri:task-line" },
     { name: "database.rouge", path: "/db/rouge", desc: "database.rouge_desc", icon: "ri:dice-5-line" },
     { name: "database.hardboss", path: "/db/hardboss", desc: "database.hardboss_desc", icon: "ri:ghost-2-line" },
+    { name: "database.guildwar", path: "/db/guildwar", desc: "database.guildwar_desc", icon: "ri:team-line" },
     { name: "database.questchain", path: "/db/questchain", desc: "database.questchain_desc", icon: "ri:quill-pen-line" },
     { name: "database.partytopic", path: "/db/partytopic", desc: "database.partytopic_desc", icon: "ri:chat-thread-line" },
     { name: "database.achievement", path: "/db/achievement", desc: "database.achievement_desc", icon: "ri:award-line" },
@@ -370,7 +371,7 @@ const databaseSectionMeta = [
             "/db/wiki",
         ],
     },
-    { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"] },
+    { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/guildwar", "/db/solotreasure", "/db/iron-ticket"] },
     { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory", "/db/archive"] },
 ] as const
 

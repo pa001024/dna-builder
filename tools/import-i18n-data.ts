@@ -624,6 +624,7 @@ export const TRANSLATION_SOURCE_FILES = [
     "Fish.json",
     "FishingSpot.json",
     "ForgeLevelQuest.json",
+    "GuildBoss.json",
     "Hair.json",
     "HardBoss.json",
     "HeadFrame.json",
@@ -941,6 +942,78 @@ const MAPPINGS: Mapping[] = [
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossData", locales: ["cn"] },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarBosses",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.bosses)) {
+                throw new Error("GuildBoss 后处理只支持对象源（bosses）")
+            }
+            return value.bosses
+        },
+    },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarBuffs",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.buffs)) {
+                throw new Error("GuildBoss 后处理只支持对象源（buffs）")
+            }
+            return value.buffs
+        },
+    },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarTests",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.tests)) {
+                throw new Error("GuildBoss 后处理只支持对象源（tests）")
+            }
+            return value.tests
+        },
+    },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarRefresh",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.refresh)) {
+                throw new Error("GuildBoss 后处理只支持对象源（refresh）")
+            }
+            return value.refresh
+        },
+    },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarPointRewards",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.pointRewards)) {
+                throw new Error("GuildBoss 后处理只支持对象源（pointRewards）")
+            }
+            return value.pointRewards
+        },
+    },
+    {
+        source: "GuildBoss",
+        targetStem: "guildwar",
+        targetVar: "guildWarWeekRewards",
+        locales: ["cn"],
+        postProcess: value => {
+            if (!isRecord(value) || !Array.isArray(value.weekRewards)) {
+                throw new Error("GuildBoss 后处理只支持对象源（weekRewards）")
+            }
+            return value.weekRewards
+        },
+    },
     { source: "Hair", targetStem: "accessory", targetVar: "hairData", locales: ["cn"] },
     { source: "IronTicket", targetStem: "iconticket", targetVar: "iconticketData", locales: ["cn"] },
     { source: "HeadSculpture", targetStem: "headsculpture", targetVar: "headSculptureData", locales: ["cn"] },

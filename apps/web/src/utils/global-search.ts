@@ -1,6 +1,6 @@
 import Fuse from "fuse.js"
 import { t } from "i18next"
-import { charMap, hardBossMap, regionMap, subRegionMap } from "@/data/d"
+import { charMap, guildWarBossMap, hardBossMap, regionMap, subRegionMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import achievementData from "@/data/d/achievement.data"
@@ -754,6 +754,21 @@ export class GlobalSearchService {
                         subtitle: `梦魇残声 ID: ${boss.id}`,
                         typeLabel: t("database.hard_boss"),
                         path: `/db/hardboss/${boss.id}`,
+                    },
+                    [boss.id, boss.desc]
+                )
+            )
+        )
+
+        entries.push(
+            ...Array.from(guildWarBossMap.values()).map(boss =>
+                this.buildSearchEntry(
+                    {
+                        id: `guildwar:${boss.id}`,
+                        title: boss.name,
+                        subtitle: `协会战 ID: ${boss.id}`,
+                        typeLabel: t("database.guildwar"),
+                        path: `/db/guildwar/${boss.id}`,
                     },
                     [boss.id, boss.desc]
                 )

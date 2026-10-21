@@ -1183,6 +1183,8 @@
         "fish_desc": "낚시터 상세 수익 계산",
         "forge": "재앙 무기",
         "forge_desc": "재앙 무기 융해 레벨과 임무",
+        "guildwar": "길드전",
+        "guildwar_desc": "길드전 정보와 보상 보기",
         "hard_boss": "나이트메어 잔향",
         "hardboss": "나이트메어 잔재",
         "hardboss_desc": "나이트메어 잔재 정보 및 보상 확인",
@@ -1237,6 +1239,10 @@
         "weapon_desc": "무기 정보와 속성 확인",
         "wiki": "백과사전",
         "wiki_desc": "세력·인물·풍토·문명으로 분류된 게임 내 백과사전 항목"
+    },
+    "datetimepicker": {
+        "now": "지금",
+        "placeholder": "날짜 및 시간 선택"
     },
     "db-abyss-dungeon": {
         "abyss_id": "심연 ID",
@@ -1434,6 +1440,37 @@
     "db-forge-list": {
         "forge_level_count": "개 제련 레벨",
         "search_placeholder": "제련 레벨, 퀘스트 또는 보상 ID 검색..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "기본 계수",
+        "buffs": "버프",
+        "current_rotation": "이번 로테이션",
+        "hp": "HP",
+        "info": "기본 정보",
+        "monsters": "몬스터",
+        "not_found": "길드전을 찾을 수 없습니다",
+        "per_boss_note": "시련, HP 진행도, 스테이지 해금, 최고 점수, 도전 횟수 및 랭킹은 Boss별로 독립 집계된다",
+        "point_rewards": "포인트 보상",
+        "points_unit": "점",
+        "rule_threshold": "규칙 임계값",
+        "score_capped": "단일 만점{{score}}",
+        "score_factor": "점수 계수",
+        "stage": "스테이지",
+        "state": "상태",
+        "state_active": "진행 중",
+        "state_ended": "종료",
+        "state_not_started": "시작 전",
+        "state_unopened": "미개방",
+        "tests": "시련",
+        "time_limit": "제한 시간",
+        "week_progress": "{{current}}주차 / 총 {{total}}주",
+        "week_rewards": "주간 스테이지 보상",
+        "weekly_points_note": "개인 주간 포인트는 대전을 넘나들며 누적되고 매주 초기화되며, 80만 단위로 단계 보상을 받는다"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "개 길드전",
+        "no_match": "일치하는 길드전이 없습니다",
+        "search_placeholder": "길드전 ID / 이름 / 설명 검색(병음 지원)..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "적용 중 보상 {{count}} 그룹",
@@ -2792,6 +2829,12 @@
         "upload_images": "이미지 업로드",
         "view_build": "빌드 보기",
         "views": "조회"
+    },
+    "guildwar-detail": {
+        "title": "길드전 상세"
+    },
+    "guildwar-list": {
+        "title": "길드전 목록"
     },
     "hardboss-detail": {
         "title": "나이트메어 잔재 상세"

@@ -6,6 +6,7 @@ import {
     charMap,
     dungeonMap,
     fishMap,
+    guildWarBossMap,
     modDungeonMap,
     modMap,
     monsterMap,
@@ -26,6 +27,7 @@ import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/
 import dungeonsData from "@/data/d/dungeon.data"
 import { eventData } from "@/data/d/event.data"
 import { fishs } from "@/data/d/fish.data"
+import { guildWarBosses, guildWarBuffs, guildWarPointRewards, guildWarTests, guildWarWeekRewards } from "@/data/d/guildwar.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
 import { musicData, musicScoreData } from "@/data/d/music.data"
@@ -59,6 +61,7 @@ import { type DBMapGroup, resolveDBMapGroups } from "@/utils/db-map-utils"
 import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { getGlobalSearchService } from "@/utils/global-search"
+import { type GuildWarSlotState, getGuildWarBossState, getGuildWarCurrentPeriod, getGuildWarSlotState } from "@/utils/guildwar"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getMonsterTagGroupsByMonster } from "@/utils/monster-tag-utils"
 import { getNpcDisplayText, hasNpcDialogue, hasNpcImprCheck, hasNpcImprIncrease } from "@/utils/npc-utils"
@@ -670,6 +673,21 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 facets: {
                     type: [facetValue(item.t ? MONSTER_TYPE_LABELS[item.t] || item.t : "普通")],
                 },
+            })),
+    },
+    {
+        id: "guildwar",
+        labelKey: "database.guildwar",
+        path: "/db/guildwar",
+        versioned: false,
+        /** 与协会战列表页一致：副信息带当前开放状态（查询时刻实时计算） */
+        list: lang =>
+            guildWarBosses.map(item => ({
+                id: item.id,
+                name: item.name,
+                subtitle: guildWarStateLabel(getGuildWarBossState(item.id, Math.floor(Date.now() / 1000)), lang ?? "zh"),
+                path: `/db/guildwar/${item.id}`,
+                searchText: item.desc,
             })),
     },
     {
@@ -3004,6 +3022,88 @@ function readMonsterDetailFields(id: string, lang: DBAgentLang): DBEntryFields |
     return fields
 }
 
+/** 协会战开放状态的界面文案键（与详情页共用 db-guildwar-detail.state_*） */
+const GUILD_WAR_STATE_KEYS: Record<GuildWarSlotState, string> = {
+    Active: "db-guildwar-detail.state_active",
+    NotStarted: "db-guildwar-detail.state_not_started",
+    Ended: "db-guildwar-detail.state_ended",
+    Unopened: "db-guildwar-detail.state_unopened",
+}
+
+/**
+ * 取协会战开放状态的本地化文案。
+ * @param state 开放状态
+ * @param lang 目标语言
+ * @returns 状态文案
+ */
+function guildWarStateLabel(state: GuildWarSlotState, lang: DBAgentLang): string {
+    return i18next.t(GUILD_WAR_STATE_KEYS[state], { lng: toI18nLanguage(lang), defaultValue: state })
+}
+
+/**
+ * 协会战详情字段：描述、开放状态、限时/血量/基础系数、增益、试炼、点数与周阶段奖励、本期轮换。
+ * @param id Boss id
+ * @param lang 数据语言
+ * @returns 字段表；Boss 不存在时返回 undefined
+ */
+function readGuildWarDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
+    const boss = guildWarBossMap.get(Number(id))
+
+    if (!boss) {
+        return undefined
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+    const fields = pickFields(
+        boss,
+        [
+            ["描述", "desc"],
+            ["限时", "timeLimit"],
+            ["血量", "hp"],
+            ["基础系数", "baseRate"],
+        ],
+        lang
+    )
+
+    fields.状态 = guildWarStateLabel(getGuildWarBossState(boss.id, now), lang)
+
+    const buffs = boss.buffs
+        .map(buffId => guildWarBuffs.find(buff => buff.id === buffId)?.desc)
+        .filter((desc): desc is string => Boolean(desc))
+        .map(desc => facetLabel(desc, lang))
+    if (buffs.length) {
+        fields.增益 = buffs
+    }
+
+    const testTypes = new Set(boss.testTypes)
+    const tests = guildWarTests.filter(test => testTypes.has(test.type)).map(test => facetLabel(test.desc, lang))
+    if (tests.length) {
+        fields.试炼 = tests
+    }
+
+    if (guildWarPointRewards.length) {
+        fields.点数奖励档位 = guildWarPointRewards.map(tier => `Lv.${tier.lv}`)
+        fields.每档分数 = [...new Set(guildWarPointRewards.map(tier => tier.eachPoints))]
+    }
+
+    if (guildWarWeekRewards.length) {
+        fields.周阶段奖励 = guildWarWeekRewards.map(
+            stage => `${stage.stage}%（${facetLabel("协会资金", lang)}×${stage.constructionPoint}）`
+        )
+    }
+
+    const period = getGuildWarCurrentPeriod(now)
+    if (period) {
+        fields.本期轮换 = period.bossIds.map((bossId, index) => {
+            const name = guildWarBossMap.get(bossId)?.name ?? `#${bossId}`
+            const state = getGuildWarSlotState(period, index + 1, now)
+            return `${translateDBAgentText(name, lang) ?? name}（${guildWarStateLabel(state, lang)}）`
+        })
+    }
+
+    return fields
+}
+
 /**
  * NPC 详情字段：阵营、类型、关联角色、分支对话数与所在坐标。
  *
@@ -3461,6 +3561,7 @@ const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
     event: readEventDetailFields,
     dungeon: readDungeonDetailFields,
     monster: readMonsterDetailFields,
+    guildwar: readGuildWarDetailFields,
     npc: readNpcDetailFields,
     resource: readResourceDetailFields,
     pet: readPetDetailFields,

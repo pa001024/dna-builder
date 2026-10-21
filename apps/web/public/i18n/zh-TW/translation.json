@@ -1181,6 +1181,8 @@
         "fish_desc": "釣魚點詳細收益計算",
         "forge": "災厄武器",
         "forge_desc": "災厄武器熔煉等級與任務",
+        "guildwar": "協會戰",
+        "guildwar_desc": "查看協會戰資訊和獎勵",
         "hard_boss": "夢魘殘聲",
         "hardboss": "夢魘殘聲",
         "hardboss_desc": "查看夢魘殘聲信息和獎勵",
@@ -1235,6 +1237,10 @@
         "weapon_desc": "查看武器資訊和屬性",
         "wiki": "百科",
         "wiki_desc": "遊戲內百科詞條，按勢力、人物、風土、文明分類"
+    },
+    "datetimepicker": {
+        "now": "回到當前",
+        "placeholder": "選擇日期時間"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深淵 ID",
@@ -1432,6 +1438,37 @@
     "db-forge-list": {
         "forge_level_count": "個熔煉等級",
         "search_placeholder": "搜尋熔煉等級、任務或獎勵 ID..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "基礎係數",
+        "buffs": "增益",
+        "current_rotation": "本期輪換",
+        "hp": "血量",
+        "info": "基本資訊",
+        "monsters": "怪物",
+        "not_found": "找不到協會戰",
+        "per_boss_note": "試煉、血量進度、階段解鎖、最高分、挑戰次數與排行均按 Boss 獨立結算",
+        "point_rewards": "點數獎勵",
+        "points_unit": "分",
+        "rule_threshold": "規則門限",
+        "score_capped": "單項滿分{{score}}",
+        "score_factor": "計分係數",
+        "stage": "階段",
+        "state": "狀態",
+        "state_active": "進行中",
+        "state_ended": "已結束",
+        "state_not_started": "暫未開啟",
+        "state_unopened": "佔位未開",
+        "tests": "試煉",
+        "time_limit": "限時",
+        "week_progress": "第{{current}}週 / 共{{total}}週",
+        "week_rewards": "週階段獎勵",
+        "weekly_points_note": "個人週點數跨局累加，每週清零，按80萬×檔領取點數獎勵"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "個協會戰",
+        "no_match": "找不到符合的協會戰",
+        "search_placeholder": "搜尋協會戰ID/名稱/描述..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "生效獎勵 {{count}} 組",
@@ -2789,6 +2826,12 @@
         "upload_images": "上傳圖片",
         "view_build": "查看配裝",
         "views": "瀏覽"
+    },
+    "guildwar-detail": {
+        "title": "協會戰詳情"
+    },
+    "guildwar-list": {
+        "title": "協會戰列表"
     },
     "hardboss-detail": {
         "title": "夢魘殘聲詳情"

@@ -1215,6 +1215,8 @@
         "fish_desc": "Calcul détaillé du rendement des points de pêche",
         "forge": "Armes de calamité",
         "forge_desc": "Niveaux et quêtes de fusion des armes de calamité",
+        "guildwar": "Guerre de guilde",
+        "guildwar_desc": "Voir les boss et les récompenses de la guerre de guilde",
         "hard_boss": "Écho cauchemar",
         "hardboss": "Restes du Cauchemar",
         "hardboss_desc": "Voir les informations sur les restes du Cauchemar et les récompenses",
@@ -1269,6 +1271,10 @@
         "weapon_desc": "Voir les informations et attributs de l'arme",
         "wiki": "Encyclopédie",
         "wiki_desc": "Entrées de l'encyclopédie du jeu classées par faction, personnage, culture et civilisation"
+    },
+    "datetimepicker": {
+        "now": "Maintenant",
+        "placeholder": "Choisir date et heure"
     },
     "db-abyss-dungeon": {
         "abyss_id": "ID d'abîme",
@@ -1466,6 +1472,37 @@
     "db-forge-list": {
         "forge_level_count": "niveaux de forge",
         "search_placeholder": "Rechercher niveau de forge, quête ou ID de récompense..."
+    },
+    "db-guildwar-detail": {
+        "base_rate": "Taux de base",
+        "buffs": "Buffs",
+        "current_rotation": "Rotation actuelle",
+        "hp": "PV",
+        "info": "Infos de base",
+        "monsters": "Monstres",
+        "not_found": "Boss de guerre de guilde introuvable",
+        "per_boss_note": "Épreuves, progression des PV, paliers débloqués, meilleurs scores, tentatives et classements sont suivis par boss",
+        "point_rewards": "Récompenses de points",
+        "points_unit": "pts",
+        "rule_threshold": "Seuil de règle",
+        "score_capped": "Plafond {{score}} par épreuve",
+        "score_factor": "Coeff. de score",
+        "stage": "Étape",
+        "state": "Statut",
+        "state_active": "En cours",
+        "state_ended": "Terminé",
+        "state_not_started": "Pas encore ouvert",
+        "state_unopened": "Pas encore disponible",
+        "tests": "Épreuves",
+        "time_limit": "Temps limite",
+        "week_progress": "Semaine {{current}} / {{total}}",
+        "week_rewards": "Récompenses d'étape hebdomadaires",
+        "weekly_points_note": "Les points hebdo personnels s'accumulent entre les parties, sont réinitialisés chaque semaine et débloquent un palier tous les 800k"
+    },
+    "db-guildwar-list": {
+        "guildwar_count": "Boss de guerre de guilde",
+        "no_match": "Aucun boss de guerre de guilde correspondant",
+        "search_placeholder": "Rechercher ID / nom / description de guerre de guilde (pinyin pris en charge)..."
     },
     "db-hardboss-detail": {
         "active_reward_count": "{{count}} groupes de récompenses actifs",
@@ -2830,6 +2867,12 @@
         "upload_images": "Télécharger des images",
         "view_build": "Voir l'équipement",
         "views": "Vues"
+    },
+    "guildwar-detail": {
+        "title": "Détails de guerre de guilde"
+    },
+    "guildwar-list": {
+        "title": "Liste de guerre de guilde"
     },
     "hardboss-detail": {
         "title": "Détails des Réminiscences du Cauchemar"

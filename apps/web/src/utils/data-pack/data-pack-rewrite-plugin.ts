@@ -40,6 +40,7 @@ const DATA_PACK_MODULES = new Set([
     "abyss.data.ts",
     "fish.data.ts",
     "forge.data.ts",
+    "guildwar.data.ts",
     "headsculpture.data.ts",
     "iconticket.data.ts",
     "ironsurvival.data.ts",
