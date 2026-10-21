@@ -872,7 +872,18 @@
     "char-detail": {
         "companio_char": "偶遇角色",
         "companio_char_absent": "{{name}}未實裝",
-        "title": "角色詳情"
+        "cv_unknown": "暫無",
+        "inherit_melee": "繼承近戰武器屬性",
+        "inherit_ranged": "繼承遠程武器屬性",
+        "profile_empty": "暫無角色檔案資料",
+        "skin_bust": "立繪",
+        "skin_default_rewards": "預設獎勵",
+        "skin_empty": "暫無外觀資料",
+        "skin_no_version": "未標註版本",
+        "skin_upgrade_cost": "升級消耗",
+        "title": "角色詳情",
+        "voice_empty": "暫無角色語音資料",
+        "voice_no_icon": "當前角色缺少 icon，無法組合語音資源位址"
     },
     "char-list": {
         "empty": "沒有找到符合的角色",

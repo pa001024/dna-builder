@@ -25,7 +25,7 @@ const props = defineProps<{
     char: Char
 }>()
 
-const { gt, gpt } = useGameText()
+const { gpt } = useGameText()
 const setting = useSettingStore()
 const { t } = useTranslation()
 
@@ -48,11 +48,11 @@ const isVoicePlaying = ref(false)
 const voiceAudioRef = ref<HTMLAudioElement | null>(null)
 type VoiceLocale = CharVoiceLocale
 const selectedVoiceLocale = ref<VoiceLocale>("zh")
-const voiceLocaleOptions: { key: VoiceLocale; label: string; cvLabel: string }[] = [
-    { key: "zh", label: "汉语", cvLabel: "中文CV" },
-    { key: "en", label: "EN", cvLabel: "英文CV" },
-    { key: "jp", label: "日本語", cvLabel: "日文CV" },
-    { key: "kr", label: "한국어", cvLabel: "韩文CV" },
+const voiceLocaleOptions: { key: VoiceLocale; label: string }[] = [
+    { key: "zh", label: "汉语" },
+    { key: "en", label: "EN" },
+    { key: "jp", label: "日本語" },
+    { key: "kr", label: "한국어" },
 ]
 
 const VOICE_DATASET_BASE_URL = "https://modelscope.cn/datasets/pa001024/dna-voice-dataset/resolve/master"
@@ -317,8 +317,8 @@ function getSkillWeaponMaskUrl(weapon: LeveledSkillWeapon): string {
  * @returns 继承描述文本
  */
 function getSkillWeaponInheritDescription(weapon: LeveledSkillWeapon): string {
-    if (weapon.inherit === "melee") return "继承近战武器属性"
-    if (weapon.inherit === "ranged") return "继承远程武器属性"
+    if (weapon.inherit === "melee") return "char-detail.inherit_melee"
+    if (weapon.inherit === "ranged") return "char-detail.inherit_ranged"
     return ""
 }
 const localizedCharExtData = ref<CharExt[]>(getCachedCharExtData("zh"))
@@ -500,15 +500,15 @@ const charFragmentResource = computed<Resource | null>(() => {
  */
 function getCvNameByLocale(locale: VoiceLocale): string {
     if (locale === "en") {
-        return props.char.英文CV || "暂无"
+        return props.char.英文CV ? t(props.char.英文CV) : t("char-detail.cv_unknown")
     }
     if (locale === "jp") {
-        return props.char.日文CV || "暂无"
+        return props.char.日文CV ? t(props.char.日文CV) : t("char-detail.cv_unknown")
     }
     if (locale === "kr") {
-        return props.char.韩文CV || "暂无"
+        return props.char.韩文CV ? t(props.char.韩文CV) : t("char-detail.cv_unknown")
     }
-    return props.char.中文CV || "暂无"
+    return props.char.中文CV ? t(props.char.中文CV) : t("char-detail.cv_unknown")
 }
 
 /**
@@ -983,7 +983,7 @@ onBeforeUnmount(() => {
                         v-if="leveledWeapon.inherit"
                         class="mt-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm text-base-content/85"
                     >
-                        {{ gt(getSkillWeaponInheritDescription(leveledWeapon)) }}
+                        {{ $t(getSkillWeaponInheritDescription(leveledWeapon)) }}
                     </div>
                     <template v-else>
                         <div class="mt-2.5 grid grid-cols-2 gap-1.5 md:grid-cols-4">
@@ -1020,7 +1020,7 @@ onBeforeUnmount(() => {
             />
 
             <div v-if="activeBottomTab === 'profile'" class="mt-2 space-y-2">
-                <div v-if="charExtList.length === 0" class="text-sm text-base-content/60">暂无角色档案数据</div>
+                <div v-if="charExtList.length === 0" class="text-sm text-base-content/60">{{ $t("char-detail.profile_empty") }}</div>
                 <div
                     v-for="item in charExtList"
                     :key="item.id"
@@ -1035,7 +1035,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-else-if="activeBottomTab === 'skin'" class="mt-2 space-y-2">
-                <div v-if="charSkinList.length === 0" class="text-sm text-base-content/60">暂无皮肤数据</div>
+                <div v-if="charSkinList.length === 0" class="text-sm text-base-content/60">{{ $t("char-detail.skin_empty") }}</div>
                 <div v-else class="space-y-2">
                     <div
                         v-for="skin in charSkinList"
@@ -1054,7 +1054,7 @@ onBeforeUnmount(() => {
                                     <div class="min-w-0">
                                         <div class="text-sm font-medium">{{ $t(skin.name) }}</div>
                                         <div class="mt-1 text-[10px] text-base-content/45">
-                                            {{ skin.release ? `v${skin.release}` : "未标注版本" }}
+                                            {{ skin.release ? `v${skin.release}` : $t("char-detail.skin_no_version") }}
                                         </div>
                                     </div>
                                 </div>
@@ -1063,12 +1063,12 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div v-if="skin.bust" class="space-y-2">
-                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">立绘</div>
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("char-detail.skin_bust") }}</div>
                             <ImagePreview :thumb-url="`/imgs/bust/${skin.bust}.webp`" :full-url="buildBustUrl(skin.bust)" />
                         </div>
 
                         <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">
-                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">默认奖励</div>
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("char-detail.skin_default_rewards") }}</div>
                             <div class="space-y-2">
                                 <div v-for="groupName in Object.keys(skin.defaultItem)" :key="`${skin.id}-${groupName}`" class="space-y-1">
                                     <div class="text-xs text-base-content/55">{{ $t(getRewardTypeText(groupName)) }}</div>
@@ -1087,7 +1087,7 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div v-if="skin.upgrade && skin.upgrade.length > 0" class="space-y-2">
-                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">升级消耗</div>
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("char-detail.skin_upgrade_cost") }}</div>
                             <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                                 <div
                                     v-for="entry in skinUpgradeCostItems.filter(entry => entry.skinId === skin.id)"
@@ -1121,11 +1121,11 @@ onBeforeUnmount(() => {
                         <div class="text-sm font-medium" :class="selectedVoiceLocale === option.key ? 'text-primary' : ''">
                             {{ option.label }}
                         </div>
-                        <div class="mt-0.5 text-[11px] text-base-content/50">CV：{{ getCvNameByLocale(option.key) }}</div>
+                        <div class="mt-0.5 text-[11px] text-base-content/50">CV: {{ getCvNameByLocale(option.key) }}</div>
                     </button>
                 </div>
-                <div v-if="charVoiceList.length === 0" class="text-sm text-base-content/60">暂无角色语音数据</div>
-                <div v-else-if="!char.icon" class="text-sm text-warning">当前角色缺少 icon，无法拼接语音资源地址</div>
+                <div v-if="charVoiceList.length === 0" class="text-sm text-base-content/60">{{ $t("char-detail.voice_empty") }}</div>
+                <div v-else-if="!char.icon" class="text-sm text-warning">{{ $t("char-detail.voice_no_icon") }}</div>
                 <div v-else class="space-y-2">
                     <div
                         v-for="entry in charVoiceList"

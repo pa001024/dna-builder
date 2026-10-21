@@ -77,15 +77,60 @@ export function getPackTranslationTable(locale: PackTranslationLocale): Record<s
     }
 }
 
+/** 等待主应用真实初始化的最长毫秒数：import 阶段的水合重注只比 initI18n 早几毫秒 */
+const INIT_WAIT_TIMEOUT_MS = 10000
+
 /**
- * 确保 i18next 已初始化；未初始化时等待初始化完成。
+ * 等待 i18next 的 initialized 事件。
+ * @param timeoutMs 超时毫秒数
+ * @returns 是否等到（或等待期间已就绪）
+ */
+function waitForI18nInitialized(timeoutMs: number): Promise<boolean> {
+    if (i18next.isInitialized) {
+        return Promise.resolve(true)
+    }
+
+    if (typeof i18next.on !== "function" || typeof i18next.off !== "function") {
+        return Promise.resolve(false)
+    }
+
+    return new Promise<boolean>(resolve => {
+        const timer = setTimeout(() => {
+            i18next.off("initialized", onInitialized)
+            resolve(i18next.isInitialized === true)
+        }, timeoutMs)
+        // Node 侧（SSR/单测）别让这个兜底计时器拖住进程退出
+        const maybeUnref = timer as unknown as { unref?: () => void }
+        maybeUnref.unref?.()
+
+        function onInitialized(): void {
+            clearTimeout(timer)
+            i18next.off("initialized", onInitialized)
+            resolve(true)
+        }
+
+        i18next.on("initialized", onInitialized)
+    })
+}
+
+/**
+ * 确保 i18next 已初始化；未初始化时等待主应用的真实初始化完成。
  *
  * 数据包初始化与 i18next 初始化是两条独立启动路径，注入资源前必须保证语言包已就绪，
  * 否则 addResourceBundle 会落到一个尚未 init 的实例上被丢弃。
+ *
+ * 注意：这里绝不能抢在主应用的 initI18n() 之前 bare init()——真实初始化会新建
+ * ResourceStore 并清空之前注入的对照表，而 injectedLocales 却还记着“已注入”，
+ * 之后就再也不会重注，数据包翻译彻底失效（rewrite 下水合发生在 import 阶段时必现）。
+ * 因此只等主应用的 initialized 事件；等不到（无 init 的旁路场景）才退回 bare init。
  * @returns 是否已就绪
  */
 async function ensureI18nReady(): Promise<boolean> {
     if (i18next.isInitialized) {
+        return true
+    }
+
+    if (await waitForI18nInitialized(INIT_WAIT_TIMEOUT_MS)) {
         return true
     }
 
@@ -155,3 +200,12 @@ function reapplyAfterHydration(): void {
 
 // 数据包完成水合时重注入，把壳模块里新回填的对照表换上
 registerDataPackHydrationCallback(reapplyAfterHydration)
+
+// 真实（重）初始化会新建 ResourceStore 并清空已注入的对照表，而注入标记还记着旧状态。
+// 每次 initialized 都清标记强制重注：水合先于页面初始化完成时翻译也不会丢失。
+if (typeof i18next.on === "function") {
+    i18next.on("initialized", () => {
+        injectedLocales.clear()
+        void applyAllPackTranslations(true)
+    })
+}

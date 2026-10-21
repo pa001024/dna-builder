@@ -891,7 +891,18 @@
     "char-detail": {
         "companio_char": "Encounter Character",
         "companio_char_absent": "{{name}} Not Yet Released",
-        "title": "Character Details"
+        "cv_unknown": "N/A",
+        "inherit_melee": "Inherits melee weapon stats",
+        "inherit_ranged": "Inherits ranged weapon stats",
+        "profile_empty": "No archive data",
+        "skin_bust": "Artwork",
+        "skin_default_rewards": "Default Rewards",
+        "skin_empty": "No skins available",
+        "skin_no_version": "Unversioned",
+        "skin_upgrade_cost": "Upgrade Cost",
+        "title": "Character Details",
+        "voice_empty": "No voice lines available",
+        "voice_no_icon": "Current character has no icon; voice URLs cannot be built"
     },
     "char-list": {
         "empty": "No matching characters found",

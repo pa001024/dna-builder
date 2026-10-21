@@ -874,7 +874,18 @@
     "char-detail": {
         "companio_char": "우연히 만난 캐릭터",
         "companio_char_absent": "{{name}} 미출시",
-        "title": "캐릭터 상세"
+        "cv_unknown": "없음",
+        "inherit_melee": "근접 무기 스탯 계승",
+        "inherit_ranged": "원거리 무기 스탯 계승",
+        "profile_empty": "아카이브 데이터가 없습니다",
+        "skin_bust": "일러스트",
+        "skin_default_rewards": "기본 보상",
+        "skin_empty": "스킨 데이터가 없습니다",
+        "skin_no_version": "버전 미표기",
+        "skin_upgrade_cost": "육성 비용",
+        "title": "캐릭터 상세",
+        "voice_empty": "음성 데이터가 없습니다",
+        "voice_no_icon": "현재 캐릭터에 icon이 없어 음성 URL을 생성할 수 없습니다"
     },
     "char-list": {
         "empty": "일치하는 캐릭터를 찾을 수 없습니다",

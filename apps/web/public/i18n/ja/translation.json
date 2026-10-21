@@ -873,7 +873,18 @@
     "char-detail": {
         "companio_char": "出会いキャラ",
         "companio_char_absent": "{{name}}は未実装",
-        "title": "キャラクター詳細"
+        "cv_unknown": "なし",
+        "inherit_melee": "近接武器のステータスを継承",
+        "inherit_ranged": "遠距離武器のステータスを継承",
+        "profile_empty": "アーカイブデータがありません",
+        "skin_bust": "立ち絵",
+        "skin_default_rewards": "デフォルト報酬",
+        "skin_empty": "スキンデータがありません",
+        "skin_no_version": "バージョン未表記",
+        "skin_upgrade_cost": "育成コスト",
+        "title": "キャラクター詳細",
+        "voice_empty": "ボイスデータがありません",
+        "voice_no_icon": "現在のキャラクターにはiconがないため、ボイスURLを生成できません"
     },
     "char-list": {
         "empty": "一致するキャラクターが見つかりません",

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import { LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
 import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
@@ -11,6 +12,20 @@ import { getRewardDetailLink } from "@/utils/reward-link"
 
 /** 称号 id → 称号数据 */
 const titleMap = new Map(titleData.map(title => [title.id, title]))
+
+const { t } = useTranslation()
+
+/**
+ * 奖励展示名国际化（单个名或斜杠拼接的多个名统一处理）。
+ * @param name 奖励名或奖励名数组
+ * @returns 翻译后的展示文本
+ */
+function tName(name: string | string[]): string {
+    if (Array.isArray(name)) {
+        return name.map(item => t(item)).join(" / ")
+    }
+    return t(name)
+}
 
 /**
  * 获取称号条目信息。
@@ -195,13 +210,13 @@ type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Ski
 function getSkinDisplayName(id: number | string, fallback: string): string {
     const normalizedId = Number(id)
     if (!Number.isFinite(normalizedId)) {
-        return fallback
+        return t(fallback)
     }
 
     const skin = skinMap.get(normalizedId)
     const charName = skin?.charId ? charMap.get(skin.charId)?.名称 : ""
     const skinName = skin?.name || fallback
-    return charName ? `${charName} · ${skinName}` : skinName
+    return charName ? `${t(charName)} · ${t(skinName)}` : t(skinName)
 }
 
 /**
@@ -410,7 +425,7 @@ function handleCardClick() {
                 :class="getDraftBackgroundColor(value[1])"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink('Draft', value[1])" stop class="hover:underline">
-                {{ `设计稿: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
+                {{ $t("设计稿") }}: {{ tName(Array.isArray(name) ? name : getDraftByIdOrProductId(value[1])!.n) }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
@@ -433,7 +448,7 @@ function handleCardClick() {
                 :class="getWalnutBackgroundColor(value[1])"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink('Walnut', value[1])" stop class="hover:underline">
-                {{ getWalnutReward(value[1]).walnut?.名称 || value[1] }}
+                {{ tName(getWalnutReward(value[1]).walnut?.名称 || String(value[1])) }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
@@ -458,7 +473,7 @@ function handleCardClick() {
                 :class="getResourceBackgroundById(value[1])"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink('Resource', value[1])" stop class="hover:underline">
-                {{ getResourceById(value[1])!.name }}
+                {{ tName(getResourceById(value[1])!.name) }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
@@ -485,7 +500,7 @@ function handleCardClick() {
                 :class="getIronTicketBackgroundById(value[1])"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink('IronTicket', value[1])" stop class="hover:underline">
-                {{ iconticketMap.get(Number(value[1]))?.name || name }}
+                {{ tName(iconticketMap.get(Number(value[1]))?.name || name) }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
@@ -508,9 +523,9 @@ function handleCardClick() {
                 :class="getRarityGradientClass(4)"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink('Title', value[1])" stop class="hover:underline">
-                {{ getTitleById(value[1])?.name }}
+                {{ tName(getTitleById(value[1])?.name ?? "") }}
             </SRouterLink>
-            <span v-else>{{ getTitleById(value[1])?.name }}</span>
+            <span v-else>{{ tName(getTitleById(value[1])?.name ?? "") }}</span>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
@@ -537,9 +552,9 @@ function handleCardClick() {
                 stop
                 class="hover:underline"
             >
-                {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : nameString }}
+                {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : tName(nameString) }}
             </SRouterLink>
-            <span v-else-if="!mini">{{ name }}</span>
+            <span v-else-if="!mini">{{ tName(name) }}</span>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
@@ -561,7 +576,7 @@ function handleCardClick() {
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink v-if="!mini" :to="getRewardDetailLink(value[2], value[1])" stop class="hover:underline">
-                {{ getAccessoryByType(value[2], value[1])?.name || name }}
+                {{ tName(getAccessoryByType(value[2], value[1])?.name || name) }}
             </SRouterLink>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>

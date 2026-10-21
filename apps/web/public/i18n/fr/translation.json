@@ -906,7 +906,18 @@
     "char-detail": {
         "companio_char": "Personnage rencontré",
         "companio_char_absent": "{{name}} non disponible",
-        "title": "Détails du personnage"
+        "cv_unknown": "N/A",
+        "inherit_melee": "Hérite des stats de l'arme de mêlée",
+        "inherit_ranged": "Hérite des stats de l'arme à distance",
+        "profile_empty": "Aucune archive disponible",
+        "skin_bust": "Illustration",
+        "skin_default_rewards": "Récompenses par défaut",
+        "skin_empty": "Aucune apparence disponible",
+        "skin_no_version": "Sans version",
+        "skin_upgrade_cost": "Coût d'amélioration",
+        "title": "Détails du personnage",
+        "voice_empty": "Aucune voix disponible",
+        "voice_no_icon": "Ce personnage n'a pas d'icône, impossible de générer l'URL de la voix"
     },
     "char-list": {
         "empty": "Aucun personnage correspondant trouvé",

@@ -925,7 +925,18 @@
     "char-detail": {
         "companio_char": "偶遇角色",
         "companio_char_absent": "{{name}}未实装",
-        "title": "角色详情"
+        "cv_unknown": "暂无",
+        "inherit_melee": "继承近战武器属性",
+        "inherit_ranged": "继承远程武器属性",
+        "profile_empty": "暂无角色档案数据",
+        "skin_bust": "立绘",
+        "skin_default_rewards": "默认奖励",
+        "skin_empty": "暂无皮肤数据",
+        "skin_no_version": "未标注版本",
+        "skin_upgrade_cost": "升级消耗",
+        "title": "角色详情",
+        "voice_empty": "暂无角色语音数据",
+        "voice_no_icon": "当前角色缺少 icon，无法拼接语音资源地址"
     },
     "char-list": {
         "empty": "没有找到匹配的角色",
