@@ -1,0 +1,1 @@
+export default {":root":{"--page-scroll-lock":"initial","--page-overflow":"var(--page-scroll-lock) hidden"},":root:not(span)":{"overflow":"var(--page-overflow)"}};

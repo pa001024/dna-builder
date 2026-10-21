@@ -2009,6 +2009,9 @@
             "userImage": "사용자가 첨부한 이미지"
         }
     },
+    "dev-components": {
+        "title": "컴포넌트"
+    },
     "dialog-model": {
         "ok": "확인"
     },

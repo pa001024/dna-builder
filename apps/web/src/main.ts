@@ -2,6 +2,7 @@ import { createApp, type VNode } from "vue"
 import "./style.css"
 import * as Sentry from "@sentry/vue"
 import { getCurrentWindow } from "@tauri-apps/api/window"
+import { initRangeProgress } from "dob-ui/runtime/range"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import { getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
@@ -10,7 +11,6 @@ import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImg
 import { mountImgsToVirtualPath } from "@/utils/data-pack/imgs-runtime"
 import { applyAllPackTranslations } from "@/utils/data-pack/translations-pack"
 import packageJson from "../package.json"
-
 import { env } from "./env"
 import { applyLanguageFontClass, initI18n } from "./i18n"
 import "@globalhive/vuejs-tour/dist/style.css"
@@ -145,6 +145,8 @@ async function bootstrap() {
 
     dataPackBootstrapLoading.value = true
     app.mount("#app")
+    // dob-ui：滑杆进度由运行时把 value 同步到 --range-progress（纯 CSS 无法读取 value）
+    initRangeProgress()
 
     // CDN 选源测速：尽早发起并与数据包初始化并行，让后续所有资源请求都走实测更快的一端。
     // 不 await：测速完成前资源按主源取，避免为了测速把首屏拖住。

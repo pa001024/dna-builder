@@ -111,7 +111,7 @@
         "@vue/language-core": "3.3.11",
         "bun-types": "^1.4.2",
         "cross-env": "^10.1.0",
-        "daisyui": "^5.7.47",
+        "dob-ui": "file:../../packages/dob-ui",
         "eslint": "^10.12.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.6",

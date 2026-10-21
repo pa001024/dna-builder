@@ -2007,6 +2007,9 @@
             "userImage": "使用者附帶的圖片"
         }
     },
+    "dev-components": {
+        "title": "元件除錯"
+    },
     "dialog-model": {
         "ok": "確定"
     },

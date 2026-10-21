@@ -2058,6 +2058,9 @@
             "userImage": "用户附带的图片"
         }
     },
+    "dev-components": {
+        "title": "组件调试"
+    },
     "dialog-model": {
         "ok": "确定"
     },

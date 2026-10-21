@@ -2032,6 +2032,9 @@
             "userImage": "Image attached by user"
         }
     },
+    "dev-components": {
+        "title": "Component Lab"
+    },
     "dialog-model": {
         "ok": "OK"
     },

@@ -34,6 +34,14 @@ export const routes: readonly RouteRecordRaw[] = [
     { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(320, 360), meta: { requireData: false } },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(320, 360) },
     {
+        // 组件调试页：dob-ui 全部组件 + 常用组合场景，不依赖游戏数据
+        name: "dev-components",
+        path: "/dev/components",
+        component: () => import("./views/DevComponentsView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
+    {
         // APP 下载页：不依赖游戏数据包；PC 端展示二维码，移动端倒计时直接下载，参与 SSG 预渲染
         name: "download",
         path: "/download",

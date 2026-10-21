@@ -13,12 +13,19 @@
     font-display: swap;
 }
 
-@plugin "daisyui" {
+/*
+ * 组件库：packages/dob-ui —— daisyUI 的 db-style 分支（直角纸面 / 细边框 / 半透明分层）。
+ * 类名与 daisyUI 完全一致（无前缀），因此替换插件即可整体切换视觉；差异只在 db/ 覆写层。
+ */
+/* 用相对路径而不是包名：Tailwind 对 `@plugin "包名"` 会缓存 ESM 模块直到进程重启，
+ * 相对路径每次编译都会带 ?id 缓存戳，改 packages/dob-ui 后 dev server 能直接热更新。 */
+@plugin "../../../packages/dob-ui/index.js" {
     themes: all;
-    exclude: properties;
+    /* 不要 exclude: properties —— 那两条 @property（--aura-angle / --radialprogress）
+       是 aura 旋转与 radial-progress 动画的注册前提，缺了它们 conic-gradient 会失效。 */
 }
 
-@plugin "daisyui/theme" {
+@plugin "../../../packages/dob-ui/theme/index.js" {
     name: "ez";
     prefersdark: false;
     color-scheme: "light";
@@ -42,9 +49,10 @@
     --color-warning-content: oklch(0% 0 0);
     --color-error: oklch(70% 0.191 22.216);
     --color-error-content: oklch(0% 0 0);
-    --radius-selector: 0.25rem;
-    --radius-field: 0.25rem;
-    --radius-box: 0.25rem;
+    /* db-style：纸面直角（与 rounded-xs 同档） */
+    --radius-selector: 0.125rem;
+    --radius-field: 0.125rem;
+    --radius-box: 0.125rem;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
     --border: 1px;

@@ -2008,6 +2008,9 @@
             "userImage": "ユーザーが添付した画像"
         }
     },
+    "dev-components": {
+        "title": "コンポーネント"
+    },
     "dialog-model": {
         "ok": "OK"
     },

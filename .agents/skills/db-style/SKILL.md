@@ -7,6 +7,11 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 
 以 `apps/web/src/views/DBCharListView.vue`、`apps/web/src/components/DBCharDetailItem.vue`、`apps/web/src/components/CharSkillShow.vue` 为**唯一权威参考实现**。改造前先通读这三个文件。
 
+> 组件库已替换为 `packages/dob-ui`（daisyUI 的 db-style 分支，类名与 daisyUI 完全一致、**无前缀**）：
+> `input` / `select` / `textarea` 默认即下划线，`btn` 默认即方章，`card` 默认即半透明纸面，
+> `badge` 默认即直角半透明底。本文的工具类配方仍然有效（显式工具类优先级高于组件层），
+> 需要精确控制时用配方，通用控件直接用组件类。详见 `.agents/docs/dob-ui.md`。
+
 ## 设计原则
 
 1. **纸面直角美学**：直角（`rounded-xs` 或无圆角）、细边框、hairline 分隔线；禁止 `rounded` / `rounded-full` / `rounded-lg` 药丸胶囊。
@@ -95,30 +100,23 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 
 ## 方章（chip / toggle）
 
-筛选值 chip：
+筛选值 chip 直接用 dob-ui 的 `btn`（默认即方章，见 `.agents/docs/dob-ui.md` 映射表）：
 
 ```html
-<button
-    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-    :class="
-        active
-            ? 'border-primary bg-primary font-semibold text-primary-content'
-            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-    "
-></button>
+<button type="button" class="btn btn-xs whitespace-nowrap" :class="active ? 'btn-primary' : ''"></button>
 ```
 
-过滤器开关方章：
+- 未选态不用再写边框/文字/hover（plain `btn` 默认透明底 + 细边框 + 主色悬停）；
+- 选中态只加 `btn-primary`（实底主色 + primary-content 文字，与旧 `border-primary bg-primary …` 等价）；
+- 等宽数字 chip 追加 `font-mono tabular-nums`；禁用追加 `disabled:cursor-not-allowed disabled:opacity-40`；
+- 变体 tone（危险/描边主色）保留自己的颜色 token 覆写 `btn`，只删底座部分，例如：
+  `class="btn btn-xs whitespace-nowrap border-error/40 text-error/80 hover:border-error hover:bg-error/10 hover:text-error"`；
+- 静态常选按钮（如抽卡/连抽）直接 `class="btn btn-xs whitespace-nowrap btn-primary"`。
+
+过滤器开关方章（tint 选中，dob-ui 暂无等价组件，保留手写；底座已统一为 `btn btn-xs`，tint 分支原样保留在 `:class` 里）：
 
 ```html
-<button
-    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-    :class="
-        on
-            ? 'border-primary bg-primary/10 font-semibold text-primary'
-            : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-    "
-></button>
+<button type="button" class="btn btn-xs" :class="on ? 'border-primary bg-primary/10 font-semibold text-primary' : ''"></button>
 ```
 
 筛选组标签（**纯英文**才配 mono/大写）：`mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40`；中文组标签用普通字体：`mr-1 shrink-0 text-[11px] tracking-wide text-base-content/55`。
@@ -258,8 +256,8 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 - ❌ 实底背景卡：`bg-base-200` / `bg-base-300` 作为卡片底色（图标稀有度渐变 `bg-linear-*` 除外）；页面根节点/详情包装页不得有实底（`bg-base-300` 等）
 - ❌ `rounded-full` / `rounded-md` / `rounded-lg` 卡片与按钮（头像图片内 `rounded-xs` 可用）
 - ❌ `text-white`（用 `text-primary-content`；数据驱动实色徽记如稀有度色表、副本类型色除外）
-- ❌ daisyUI `input` / `select` / `textarea` / `input-bordered` 类（改用「输入框与选择框」章节配方）；daisyUI 仅保留 `modal` / `btn-ghost` 图标按钮 / `toggle` / `checkbox` 等非列表控件
-- ❌ daisyUI `btn` 做筛选 chip（保留 daisyUI 于 modal/btn-ghost 图标按钮/toggle 等非列表场景可以）
+- ❌ 旧 daisyUI 实底控件类（`input-bordered` / `input-primary` 等）；`dob-ui` 的 `input` / `select` / `textarea` 已是下划线配方，`modal` / `btn-ghost` 图标按钮 / `toggle` / `checkbox` 等非列表控件可继续使用
+- ❌ 手写方章底座（`shrink-0 cursor-pointer … rounded-xs border px-2 … active:scale`）：一律用 `btn btn-xs`，选中加 `btn-primary`；tint 开关只保留 `:class` 分支，底座同样走 `btn`（`btn-ghost` 图标按钮等非列表场景继续可用）
 - ❌ 页面级 header / hero 区
 - ❌ 新增 scoped CSS、!important hack
 - ❌ 改动业务逻辑：script 中仅允许 ① 滚动定位选择器参数 ② 抽取重复属性行为 computed/函数（带中文 JSDoc）。所有 `$t()` 调用、数据流、事件处理保持不变。
@@ -273,10 +271,9 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 apps/w
 - 注释一律中文 JSDoc（遵循 AGENTS.md）。
 - 图标只能用已注册的（见 `apps/web/src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
 - 不要运行 `pnpm lint` / `pnpm test` / `pnpm dev`，由主会话统一验证。
-- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBDamageView（输入/选择框标准落地范例）、DBView（db-rise 风格，可对照但不必改动）。
+- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBDamageView（输入/选择框标准落地范例）、DBView（db-rise 风格，可对照但不必改动）、RaceLottery + RaceLotterySimulator（整页 db 化：SectionHeader 标题行 / 外层卡 / 列表项卡 / 浮层配方，非 /db 页的整页改造范例）。
 - **全部 `DB*DetailItem.vue` 已按「档案头」章节统一**（25 个文件，2026-09）。新增详情组件一律照「档案头」四件套写；
   内嵌型（`DBIronSurvival` / `DBForge` / `DBFishSpot`）按内嵌标准，不加档案头。
 - 内嵌在已迁移页面里的小组件（活动页的模拟/解谜类）同样按「外层区块卡 + SectionHeader(no-animate compact) + 内层小卡/属性格」改造，
   根元素用 `<section>`，交给宿主的 `.stagger-rise` 做入场，自己不加 `animate-ef-rise`。
-- 动作按钮（抽卡/重置这类非筛选操作）也走方章，不要用 daisyUI `btn`；禁用态用 `disabled:cursor-not-allowed disabled:opacity-40`
-  并在 `:class` 里同时降级边框与文字色（原生 disabled 仍会命中 `:hover`）。
+- 动作按钮（抽卡/重置这类非筛选操作）同样用 `btn btn-xs`（dob 的 `btn` 即方章）；主要动作用 `btn btn-xs btn-primary`，禁用态追加 `disabled:cursor-not-allowed disabled:opacity-40`（dob 的 disabled 层已处理底色与 pointer-events）。

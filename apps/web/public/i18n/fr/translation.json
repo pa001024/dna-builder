@@ -2047,6 +2047,9 @@
             "userImage": "Image envoyée par l'utilisateur"
         }
     },
+    "dev-components": {
+        "title": "Composants"
+    },
     "dialog-model": {
         "ok": "OK"
     },

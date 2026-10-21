@@ -14,7 +14,9 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
-| Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
+| 后台管理（/admin）页面的设计约定、共享配方与加页流程 | [admin-ui.md](.agents/docs/admin-ui.md) |
+|Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具）|[agent-skills.md](.agents/docs/agent-skills.md)|
+|dob-ui 组件库（daisyUI fork、db-style 覆写层、类名无前缀）|[dob-ui.md](.agents/docs/dob-ui.md)|
 
 其他冷路径不列出 `.agents/docs/*.md`
 

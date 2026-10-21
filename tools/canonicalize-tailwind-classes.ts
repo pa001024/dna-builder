@@ -32,6 +32,8 @@ const DEFAULT_IGNORE_PATTERNS = [
 ]
 const ROOT_FONT_SIZE_PX = 16
 const STYLE_CSS_PATH = path.join(ROOT, "apps", "web", "src", "style.css")
+/** style.css 所在目录：`@plugin` / `@import` 的相对路径以它为准（不是仓库根） */
+const STYLE_CSS_BASE = path.dirname(STYLE_CSS_PATH)
 const MINIMAL_CSS_SOURCE = '@import "tailwindcss";'
 
 let designSystemPromise: Promise<any> | null = null
@@ -48,7 +50,7 @@ async function loadDesignSystem(): Promise<any> {
     designSystemPromise ??= (async () => {
         try {
             const styleCss = await readFile(STYLE_CSS_PATH, "utf8")
-            return await __unstable__loadDesignSystem(styleCss, { base: ROOT })
+            return await __unstable__loadDesignSystem(styleCss, { base: STYLE_CSS_BASE })
         } catch (error) {
             console.warn("failed to load src/style.css, fallback to minimal tailwind context", error)
             return __unstable__loadDesignSystem(MINIMAL_CSS_SOURCE, { base: ROOT })

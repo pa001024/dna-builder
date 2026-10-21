@@ -28,11 +28,14 @@ node .husky/update-version.js
 # 只格式化本次涉及的文件（已暂存 + 工作区修改 + 未跟踪新文件），避免全仓扫描；
 # biome 认识的扩展名才传，删掉/不存在的文件跳过
 FORMATTABLE_EXT='\.(ts|tsx|mts|cts|js|mjs|cjs|jsx|json|jsonc|css|html|vue)$'
+# dob-ui 上游原样目录：biome.json 里已 ignore，显式传路径时 biome 会以“无文件可处理”报错退出，
+# 这里提前剔除（与 biome.json 的 ignore 保持同口径），db/ 与 runtime/ 是自有代码仍要格式化
+DOB_UI_UPSTREAM='^packages/dob-ui/(base|components|utilities|functions|theme)/|^packages/dob-ui/(imports|index)\.js$'
 CHANGED_FILES="$({
     git diff --name-only --cached --diff-filter=ACMRTUXB
     git diff --name-only --diff-filter=ACMRTUXB
     git ls-files --others --exclude-standard
-} | sort -u | grep -E "$FORMATTABLE_EXT" || true)"
+} | sort -u | grep -E "$FORMATTABLE_EXT" | grep -v -E "$DOB_UI_UPSTREAM" || true)"
 
 EXISTING_FILES=""
 if [ -n "$CHANGED_FILES" ]; then
