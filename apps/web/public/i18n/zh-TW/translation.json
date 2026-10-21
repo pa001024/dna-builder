@@ -1700,6 +1700,8 @@
         "no_available_items": "目前時間點下沒有可購買商品",
         "no_diff_items": "與上一時間點相比沒有變化商品",
         "purchasable_count": "可購買 {{count}} 件",
+        "search_hit_count": "{{count}} 件商品命中搜尋",
+        "search_hit_none": "沒有命中搜尋的商品",
         "time_filter": "時間過濾",
         "time_point_count": "{{count}} 個時間點",
         "timeline_desc": "依離散時間點檢視可購買商品，也可只看相對上一時間點的變化。"
@@ -1708,8 +1710,13 @@
         "not_found": "找不到商店"
     },
     "db-shop-list": {
+        "field_cond": "解鎖條件",
+        "field_name": "名稱",
         "item_count": "商品總數：{{count}}",
+        "jump_to_item": "跳轉到該商品所在的標籤與時間點",
         "main_tabs": "{{count}}個主標籤",
+        "match_item_count": "{{count}} 件商品命中",
+        "more_match_items": "還有 {{count}} 件命中",
         "search_placeholder": "搜尋商店 ID/名稱/商品...",
         "shop_count": "個商店",
         "sub_tabs": "{{count}}個子標籤"

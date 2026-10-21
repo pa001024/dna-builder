@@ -1701,6 +1701,8 @@
         "no_available_items": "現在の時点で購入可能な商品はありません",
         "no_diff_items": "前の時点から変化した商品はありません",
         "purchasable_count": "購入可能 {{count}} 件",
+        "search_hit_count": "{{count}} 件の商品が検索に一致",
+        "search_hit_none": "検索に一致する商品はありません",
         "time_filter": "時間フィルター",
         "time_point_count": "{{count}} 個の時点",
         "timeline_desc": "離散的な時点で購入可能な商品を確認できます。前の時点からの変化だけを表示することもできます。"
@@ -1709,8 +1711,13 @@
         "not_found": "ショップが見つかりません"
     },
     "db-shop-list": {
+        "field_cond": "解放条件",
+        "field_name": "名前",
         "item_count": "商品数：{{count}}",
+        "jump_to_item": "この商品のタブと時間帯へ移動",
         "main_tabs": "メインタブ {{count}}",
+        "match_item_count": "{{count}} 件の商品が一致",
+        "more_match_items": "他 {{count}} 件一致",
         "search_placeholder": "ショップ ID / 名前 / 商品を検索...",
         "shop_count": "件のショップ",
         "sub_tabs": "サブタブ {{count}}"

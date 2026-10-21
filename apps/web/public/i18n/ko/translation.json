@@ -1702,6 +1702,8 @@
         "no_available_items": "현재 시점에 구매 가능한 상품이 없습니다",
         "no_diff_items": "이전 시점 대비 변화한 상품이 없습니다",
         "purchasable_count": "구매 가능 {{count}}개",
+        "search_hit_count": "{{count}}개 상품이 검색과 일치",
+        "search_hit_none": "검색과 일치하는 상품이 없습니다",
         "time_filter": "시간 필터",
         "time_point_count": "{{count}}개 시점",
         "timeline_desc": "이산 시점별로 구매 가능한 상품을 확인하거나 이전 시점 대비 변화만 볼 수 있습니다."
@@ -1710,8 +1712,13 @@
         "not_found": "상점을 찾을 수 없습니다"
     },
     "db-shop-list": {
+        "field_cond": "해금 조건",
+        "field_name": "이름",
         "item_count": "상품 수: {{count}}",
+        "jump_to_item": "이 상품의 탭과 시간대로 이동",
         "main_tabs": "메인 탭 {{count}}",
+        "match_item_count": "{{count}}개 상품 일치",
+        "more_match_items": "{{count}}개 더 일치",
         "search_placeholder": "상점 ID / 이름 / 상품 검색...",
         "shop_count": "개 상점",
         "sub_tabs": "하위 탭 {{count}}"

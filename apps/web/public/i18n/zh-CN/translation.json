@@ -1751,6 +1751,8 @@
         "no_available_items": "当前时间点下没有可购买商品",
         "no_diff_items": "与上一时间点相比没有变化商品",
         "purchasable_count": "可购买 {{count}} 件",
+        "search_hit_count": "{{count}} 件商品命中搜索",
+        "search_hit_none": "没有命中搜索的商品",
         "time_filter": "时间过滤",
         "time_point_count": "{{count}} 个时间点",
         "timeline_desc": "按离散时间点查看可购买商品，也可只看相对上一时间点的变化。"
@@ -1759,8 +1761,13 @@
         "not_found": "未找到密函"
     },
     "db-shop-list": {
+        "field_cond": "解锁条件",
+        "field_name": "名称",
         "item_count": "商品总数: {{count}}",
+        "jump_to_item": "跳转到该商品所在标签与时间点",
         "main_tabs": "{{count}}个主标签",
+        "match_item_count": "{{count}} 件商品命中",
+        "more_match_items": "还有 {{count}} 件命中",
         "search_placeholder": "搜索商店ID/名称/商品...",
         "shop_count": "个商店",
         "sub_tabs": "{{count}}个子标签"

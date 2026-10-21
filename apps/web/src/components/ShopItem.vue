@@ -22,6 +22,7 @@ import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardTypeText } from "@/utils/i18n-utils"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
+import { SHOP_MATCH_FIELD_LABEL_KEYS, type ShopItemSearchHit } from "@/utils/shop-search"
 import { formatDateTime } from "@/utils/time"
 
 // 定义带有子项的商品类型
@@ -32,7 +33,20 @@ interface ShopItemWithChildren extends ShopItem {
 
 const props = defineProps<{
     item: ShopItemWithChildren
+    /** 搜索关键词：命中名称 / 价格时原位高亮 */
+    keyword?: string
+    /** 搜索命中的商品（键为商品 ID）：命中的卡片加主色描边并展示命中字段 */
+    searchHits?: ReadonlyMap<number, ShopItemSearchHit>
+    /** 正在闪烁定位的商品 ID */
+    flashingItemId?: number
 }>()
+
+/** 当前商品在搜索中的命中信息 */
+const searchHit = computed<ShopItemSearchHit | null>(() => props.searchHits?.get(props.item.id) ?? null)
+/** 当前商品是否命中搜索 */
+const isSearchMatched = computed(() => Boolean(props.keyword?.trim()) && searchHit.value !== null)
+/** 当前商品是否为闪烁定位目标 */
+const isFlashing = computed(() => props.flashingItemId === props.item.id)
 
 /**
  * 反查当前商品对应的折扣配置。
@@ -321,10 +335,17 @@ function getPriceIcon(name: string) {
 </script>
 
 <template>
-    <div class="min-w-0 space-y-3">
+    <div :id="`shop-item-${item.id}`" class="min-w-0 space-y-3">
         <!-- 商品项内容 -->
         <div
-            class="group flex w-full min-w-0 items-center gap-2 border border-base-content/15 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/60 sm:gap-2.5"
+            class="group flex w-full min-w-0 items-center gap-2 border p-2 transition-colors duration-200 hover:border-primary/60 sm:gap-2.5"
+            :class="
+                isFlashing
+                    ? 'border-primary bg-primary/15 ring-2 ring-primary/40'
+                    : isSearchMatched
+                      ? 'border-primary/50 bg-primary/6'
+                      : 'border-base-content/15 bg-base-content/3'
+            "
         >
             <div class="relative size-11 shrink-0 overflow-hidden rounded bg-base-200/40">
                 <img
@@ -346,9 +367,9 @@ function getPriceIcon(name: string) {
                         class="order-first w-full min-w-0 shrink-0 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary sm:order-0 sm:w-auto sm:flex-1 sm:shrink"
                     >
                         <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline" :title="$t(itemDisplayName)">
-                            {{ $t(itemDisplayName) }}
+                            <HighlightKeywordText :text="$t(itemDisplayName)" :keyword="keyword" />
                         </SRouterLink>
-                        <span v-else>{{ $t(itemDisplayName) }}</span>
+                        <span v-else><HighlightKeywordText :text="$t(itemDisplayName)" :keyword="keyword" /></span>
                     </h4>
                     <span class="shrink-0 bg-base-content px-1 py-px text-[10px] uppercase text-base-100">
                         {{ $t(getRewardTypeText(item.itemType)) }}
@@ -412,8 +433,16 @@ function getPriceIcon(name: string) {
                         class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs wrap-break-word"
                     >
                         <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="$t(item.priceName)" />
-                        {{ $t(item.priceName) }} {{ currentPrice }}
+                        <HighlightKeywordText :text="$t(item.priceName)" :keyword="keyword" /> {{ currentPrice }}
                     </span>
+                </div>
+                <!-- 搜索命中但命中字段不是名称时，补充展示命中内容 -->
+                <div
+                    v-if="searchHit && searchHit.field !== 'name'"
+                    class="mt-1 flex min-w-0 items-center gap-1 text-[11px] text-base-content/55"
+                >
+                    <span class="shrink-0 text-base-content/40">{{ $t(SHOP_MATCH_FIELD_LABEL_KEYS[searchHit.field]) }}</span>
+                    <HighlightKeywordText :snippet="searchHit.snippet" class="min-w-0 truncate" />
                 </div>
                 <div class="flex flex-wrap gap-2 items-center mt-1">
                     <div v-if="item.lv || item.cond" class="flex gap-2 text-xs text-base-content/45">
@@ -450,7 +479,14 @@ function getPriceIcon(name: string) {
             v-if="item.children && item.children.length"
             class="ml-2 grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,400px),1fr))] gap-2 border-l border-base-content/10 pl-2 sm:ml-6 sm:pl-3"
         >
-            <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
+            <ShopItem
+                v-for="child in item.children"
+                :key="child.id"
+                :item="child"
+                :keyword="keyword"
+                :search-hits="searchHits"
+                :flashing-item-id="flashingItemId"
+            />
         </div>
     </div>
 </template>

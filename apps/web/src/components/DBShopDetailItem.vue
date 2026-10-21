@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
-import { computed, nextTick, onMounted, watch } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Shop, ShopItem as ShopItemType, ShopMainTab, ShopSubTab } from "@/data/d/shop.data"
+import { type ShopItemSearchHit, searchShopData } from "@/utils/shop-search"
 
 const props = defineProps<{
     shop: Shop
@@ -55,6 +56,102 @@ const selectedShop = useSearchParam("tab", props.shop.mainTabs[0].name || "")
 const timeFilterEnabled = useSearchParam("tf", true)
 const selectedTimePointIndex = useSearchParam("ti", 0)
 const diffOnlyEnabled = useSearchParam("td", false)
+const searchKeyword = useSearchParam<string>("kw", "")
+const focusedItemId = useSearchParam<number>("item", 0)
+
+/** 当前关键词（详情内用于高亮命中商品） */
+const normalizedKeyword = computed(() => searchKeyword.value.trim())
+
+/** 游戏原文里可能含 . 与 :，取译文时必须关掉键路径解析 */
+const translateGameText = (text: string) => t(text, { keySeparator: false, nsSeparator: false })
+
+/** 当前商店内命中关键词的商品，键为商品 ID */
+const searchHitMap = computed<Map<number, ShopItemSearchHit>>(() => {
+    if (!normalizedKeyword.value) {
+        return new Map()
+    }
+    return searchShopData([props.shop], normalizedKeyword.value, translateGameText)[0]?.itemHits ?? new Map()
+})
+
+/** 正在闪烁定位的商品 ID */
+const flashingItemId = ref(0)
+let flashingTimer: ReturnType<typeof setTimeout> | null = null
+/** 等待商品卡片渲染后滚动的 rAF 句柄与已重试帧数 */
+let scrollFrame = 0
+let scrollAttempts = 0
+/** 等待商品卡片渲染的最大重试帧数（时间点切换需等路由写入完成） */
+const SCROLL_MAX_ATTEMPTS = 40
+
+/**
+ * 触发商品卡片一次性闪烁高亮。
+ * @param itemId 商品 ID
+ */
+function flashItem(itemId: number): void {
+    if (flashingTimer) {
+        clearTimeout(flashingTimer)
+        flashingTimer = null
+    }
+    flashingItemId.value = 0
+    nextTick(() => {
+        flashingItemId.value = itemId
+        flashingTimer = setTimeout(() => {
+            flashingItemId.value = 0
+            flashingTimer = null
+        }, 1800)
+    })
+}
+
+/**
+ * 取消等待中的滚动。
+ */
+function cancelScrollToItem(): void {
+    if (scrollFrame) {
+        cancelAnimationFrame(scrollFrame)
+        scrollFrame = 0
+    }
+}
+
+/**
+ * 逐帧等待商品卡片渲染完成后滚到可视区（时间点写入路由是异步的，卡片可能晚一两帧出现）。
+ * @param itemId 商品 ID
+ */
+function scheduleScrollToItem(itemId: number): void {
+    cancelScrollToItem()
+    scrollAttempts = 0
+
+    const attempt = () => {
+        const element = document.getElementById(shopItemAnchorId(itemId))
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" })
+            scrollFrame = 0
+            return
+        }
+        if (scrollAttempts >= SCROLL_MAX_ATTEMPTS) {
+            scrollFrame = 0
+            return
+        }
+        scrollAttempts += 1
+        scrollFrame = requestAnimationFrame(attempt)
+    }
+    scrollFrame = requestAnimationFrame(attempt)
+}
+
+/**
+ * 商品卡片锚点 ID。
+ * @param itemId 商品 ID
+ * @returns 锚点 ID
+ */
+function shopItemAnchorId(itemId: number): string {
+    return `shop-item-${itemId}`
+}
+
+onBeforeUnmount(() => {
+    if (flashingTimer) {
+        clearTimeout(flashingTimer)
+        flashingTimer = null
+    }
+    cancelScrollToItem()
+})
 
 /**
  * 将路由中的子标签 ID 解析为数字。
@@ -123,14 +220,15 @@ const selectedMainTabItems = computed(() => {
 })
 
 /**
- * 生成当前主标签全部离散时间边界点。
+ * 收集一组商品的离散时间边界点。
+ * @param items 商品列表
  * @returns 按时间升序排列的离散时间戳
  */
-const shopTimeTimestamps = computed(() => {
+function collectTimePointTimestamps(items: ShopItemType[]): number[] {
     return Array.from(
         new Set(
-            selectedMainTabItems.value.flatMap(item => {
-                const points = [] as number[]
+            items.flatMap(item => {
+                const points: number[] = []
                 if (typeof item.startTime === "number") {
                     points.push(item.startTime)
                 }
@@ -141,26 +239,39 @@ const shopTimeTimestamps = computed(() => {
             })
         )
     ).sort((a, b) => a - b)
-})
+}
 
 /**
- * 计算默认应选中的当前时间点索引。
+ * 生成当前主标签全部离散时间边界点。
+ * @returns 按时间升序排列的离散时间戳
+ */
+const shopTimeTimestamps = computed(() => collectTimePointTimestamps(selectedMainTabItems.value))
+
+/**
+ * 计算时间戳列表下默认应选中的当前时间点索引。
+ * @param timestamps 离散时间戳列表
  * @returns 当前时间点索引
  */
-const currentTimePointIndex = computed(() => {
-    if (shopTimeTimestamps.value.length === 0) {
+function resolveCurrentTimePointIndex(timestamps: number[]): number {
+    if (timestamps.length === 0) {
         return 0
     }
 
-    const firstFutureIndex = shopTimeTimestamps.value.findIndex(timestamp => timestamp > nowTimestamp)
+    const firstFutureIndex = timestamps.findIndex(timestamp => timestamp > nowTimestamp)
     if (firstFutureIndex === -1) {
-        return shopTimeTimestamps.value.length - 1
+        return timestamps.length - 1
     }
     if (firstFutureIndex === 0) {
         return 0
     }
     return firstFutureIndex - 1
-})
+}
+
+/**
+ * 计算默认应选中的当前时间点索引。
+ * @returns 当前时间点索引
+ */
+const currentTimePointIndex = computed(() => resolveCurrentTimePointIndex(shopTimeTimestamps.value))
 
 /**
  * 当前时间所在的离散时间点时间戳。
@@ -246,6 +357,100 @@ const filteredMainTabs = computed<FilteredShopMainTab[]>(() => {
         .filter(mainTab => mainTab.subTabs.length > 0)
 })
 
+/** 商品所属子标签 ID：用于高亮搜索命中的子标签分区 */
+const focusedSubTabId = ref(0)
+/** 待定位商品 ID：主标签重置时间点时优先落到该商品所属时间点 */
+const pendingFocusItemId = ref(0)
+
+/**
+ * 定位商品所在的主标签 / 子标签。
+ * @param itemId 商品 ID
+ * @returns 主标签、子标签与商品；未找到时返回 null
+ */
+function locateItem(itemId: number): { mainTab: ShopMainTab; subTab: ShopSubTab; item: ShopItemType } | null {
+    for (const mainTab of props.shop.mainTabs) {
+        for (const subTab of mainTab.subTabs) {
+            const item = subTab.items.find(candidate => candidate.id === itemId)
+            if (item) {
+                return { mainTab, subTab, item }
+            }
+        }
+    }
+    return null
+}
+
+/**
+ * 计算商品所属的离散时间点索引：当前时间点可购买就保持当前，否则取最近的可购买时间点。
+ * @param mainTab 商品所属主标签
+ * @param item 商品
+ * @returns 时间点索引
+ */
+function resolveItemTimePointIndex(mainTab: ShopMainTab, item: ShopItemType): number {
+    const timestamps = collectTimePointTimestamps(mainTab.subTabs.flatMap(subTab => subTab.items))
+    if (timestamps.length === 0) {
+        return 0
+    }
+
+    const currentIndex = resolveCurrentTimePointIndex(timestamps)
+    if (isItemAvailableAtTime(item, timestamps[currentIndex])) {
+        return currentIndex
+    }
+
+    let nearestIndex = -1
+    let nearestDistance = Number.POSITIVE_INFINITY
+    for (let index = 0; index < timestamps.length; index++) {
+        if (!isItemAvailableAtTime(item, timestamps[index])) {
+            continue
+        }
+        const distance = Math.abs(index - currentIndex)
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestIndex = index
+        }
+    }
+    return nearestIndex >= 0 ? nearestIndex : currentIndex
+}
+
+/**
+ * 定位搜索命中的商品：切到所属主标签，打开时间过滤并落到商品可购买的时间点。
+ */
+function applyFocusedItem(): void {
+    const itemId = focusedItemId.value
+    if (!itemId) {
+        return
+    }
+
+    const located = locateItem(itemId)
+    if (!located) {
+        pendingFocusItemId.value = 0
+        return
+    }
+
+    pendingFocusItemId.value = itemId
+    focusedSubTabId.value = located.subTab.id
+    diffOnlyEnabled.value = false
+    timeFilterEnabled.value = collectTimePointTimestamps(located.mainTab.subTabs.flatMap(subTab => subTab.items)).length > 0
+    selectedShop.value = located.mainTab.name
+    selectedTimePointIndex.value = resolveItemTimePointIndex(located.mainTab, located.item)
+
+    void nextTick(() => {
+        scheduleScrollToItem(itemId)
+        flashItem(itemId)
+    })
+}
+
+/**
+ * 从详情内命中列表定位某个商品；与当前目标相同时直接重新滚动高亮。
+ * @param hit 命中商品
+ */
+function focusSearchHit(hit: ShopItemSearchHit): void {
+    if (focusedItemId.value === hit.itemId) {
+        applyFocusedItem()
+        return
+    }
+    focusedItemId.value = hit.itemId
+}
+
 watch(
     () => props.shop.id,
     (newVal, oldVal) => {
@@ -255,7 +460,10 @@ watch(
         timeFilterEnabled.value = shopTimePoints.value.length > 0
         selectedTimePointIndex.value = currentTimePointIndex.value
         diffOnlyEnabled.value = false
+        pendingFocusItemId.value = 0
+        focusedSubTabId.value = 0
         applyRouteSubTab()
+        applyFocusedItem()
         if (!shopTabs.value.some(v => v.value === selectedShop.value)) {
             selectedShop.value = shopTabs.value[0].value
         }
@@ -273,6 +481,11 @@ watch(routeSubTabId, () => {
 watch(selectedShop, async () => {
     await nextTick()
     resetToCurrentTimePoint()
+})
+
+/** 搜索命中的目标商品变化时重新定位。 */
+watch(focusedItemId, () => {
+    applyFocusedItem()
 })
 
 watch(
@@ -476,12 +689,21 @@ function countChangedItemsByTimestamp(items: ShopItemType[], timestamp: number |
 }
 
 /**
- * 将滑块重置到当前时间点。
+ * 将滑块重置到当前时间点；若正处于搜索定位流程，则落到目标商品所属时间点。
  */
 function resetToCurrentTimePoint(): void {
     if (props.shop.mainTabs.every(v => v.name !== selectedShop.value)) {
         selectedShop.value = props.shop.mainTabs[0].name
     }
+
+    const pendingTarget = pendingFocusItemId.value ? locateItem(pendingFocusItemId.value) : null
+    if (pendingTarget && pendingTarget.mainTab.name === selectedShop.value) {
+        selectedTimePointIndex.value = resolveItemTimePointIndex(pendingTarget.mainTab, pendingTarget.item)
+        return
+    }
+
+    pendingFocusItemId.value = 0
+    focusedSubTabId.value = 0
     selectedTimePointIndex.value = currentTimePointIndex.value
 }
 
@@ -551,6 +773,32 @@ function formatShopTimeShort(timestamp: number): string {
 
         <AniTabs v-model="selectedShop" :tabs="shopTabs" />
 
+        <!-- 搜索命中：点击直接定位到对应商品 -->
+        <div
+            v-if="normalizedKeyword"
+            class="flex flex-wrap items-center gap-1.5 rounded-xs border border-primary/25 bg-primary/6 px-3 py-2"
+        >
+            <span class="inline-flex shrink-0 items-center gap-1 text-[11px] text-base-content/55">
+                <Icon icon="ri:search-line" class="size-3.5 text-primary/70" />
+                {{ $t("db-shop-detail.search_hit_count", { count: searchHitMap.size }) }}
+            </span>
+            <template v-if="searchHitMap.size">
+                <button
+                    v-for="hit in Array.from(searchHitMap.values()).slice(0, 8)"
+                    :key="hit.itemId"
+                    type="button"
+                    class="inline-flex max-w-44 items-center gap-1 rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 text-[11px] text-base-content/65 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
+                    :title="$t('db-shop-list.jump_to_item')"
+                    :data-shop-detail-hit-item="hit.itemId"
+                    @click="focusSearchHit(hit)"
+                >
+                    <span class="truncate"><HighlightKeywordText :text="translateGameText(hit.itemName)" :keyword="normalizedKeyword" /></span>
+                </button>
+                <span v-if="searchHitMap.size > 8" class="text-[11px] text-base-content/40">+{{ searchHitMap.size - 8 }}</span>
+            </template>
+            <span v-else class="text-[11px] text-base-content/40">{{ $t("db-shop-detail.search_hit_none") }}</span>
+        </div>
+
         <!-- 时间过滤：工具条，不进滚动目录 -->
         <TimePointFilter
             v-if="shopTimePoints.length > 0"
@@ -577,7 +825,11 @@ function formatShopTimeShort(timestamp: number): string {
                 :key="subTab.id"
                 :id="subTabAnchorId(subTab.id)"
                 class="scroll-mt-3 rounded-xs border p-3 backdrop-blur-sm"
-                :class="isRouteSubTab(subTab.id) ? 'border-primary/70 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
+                :class="
+                    isRouteSubTab(subTab.id) || focusedSubTabId === subTab.id
+                        ? 'border-primary/70 bg-primary/6'
+                        : 'border-base-content/10 bg-base-100/60'
+                "
             >
                 <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="truncate text-sm font-semibold">{{ $t(subTab.name) }}</h2>
@@ -610,7 +862,14 @@ function formatShopTimeShort(timestamp: number): string {
                     class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,400px),1fr))] gap-2"
                 >
                     <!-- 使用 ShopItem 组件递归渲染商品树 -->
-                    <ShopItem v-for="item in buildItemTree(subTab.visibleItems)" :key="item.id" :item="item" />
+                    <ShopItem
+                        v-for="item in buildItemTree(subTab.visibleItems)"
+                        :key="item.id"
+                        :item="item"
+                        :keyword="normalizedKeyword"
+                        :search-hits="searchHitMap"
+                        :flashing-item-id="flashingItemId"
+                    />
                 </div>
                 <div
                     v-else
