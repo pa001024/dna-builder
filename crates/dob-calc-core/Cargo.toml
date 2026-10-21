@@ -1,6 +1,6 @@
 [package]
 name = "dob-calc-core"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Duet Night Abyss build calculator core: builds attribute tables from game data, evaluates build expressions, and exposes a C ABI for wasm/cdylib."
