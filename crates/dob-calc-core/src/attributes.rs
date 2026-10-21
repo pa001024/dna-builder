@@ -208,8 +208,8 @@ impl<'a> BuildContext<'a> {
         let mut skill_damage = self.total_bonus("技能伤害", "角色", true);
         // 技能追伤（0 起始）：技能伤害的独立乘区，效果与武器的追加伤害类似
         let mut skill_additional_damage = self.total_bonus("技能追伤", "角色", true);
-        // 技能速度（1 起始的倍率）：直接作为攻速/伤害公式的乘区使用
-        let skill_speed = 1.0 + self.total_bonus("技能速度", "角色", true);
+        // 技能速度（1 起始的倍率）：直接作为攻速/伤害公式的乘区使用，上限 2.8（280%）
+        let mut skill_speed = 1.0 + self.total_bonus("技能速度", "角色", true);
         let mut penetration = self.total_bonus("属性穿透", "角色", true);
         let mut imbalance_damage = self.total_bonus("失衡易伤", "角色", true);
         let mut skill_add = self.total_bonus("技能倍率加数", "角色", true);
@@ -280,6 +280,7 @@ impl<'a> BuildContext<'a> {
             weapon_damage += mod_attribute_bonus * weighted("武器伤害");
             skill_damage += mod_attribute_bonus * weighted("技能伤害");
             skill_additional_damage += mod_attribute_bonus * weighted("技能追伤");
+            skill_speed += mod_attribute_bonus * weighted("技能速度");
             penetration += mod_attribute_bonus * weighted("属性穿透");
             imbalance_damage += mod_attribute_bonus * weighted("失衡易伤");
             skill_add += mod_attribute_bonus * weighted("技能倍率加数");
@@ -311,6 +312,7 @@ impl<'a> BuildContext<'a> {
         efficiency = efficiency.min(1.75);
         range = range.min(2.8);
         durability = durability.min(4.0);
+        skill_speed = skill_speed.min(2.8);
 
         let damage_reduce = damage_reduce.clamp(0.0, 1.0);
         let ignore_defense = ignore_defense.clamp(0.0, 1.0);

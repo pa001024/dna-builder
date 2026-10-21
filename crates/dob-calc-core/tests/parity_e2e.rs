@@ -30,14 +30,15 @@ fn full_tables() -> Option<BuildTables> {
 
 #[test]
 fn dobapp_second_corpus_archived() {
-    // 4 份 dob-app 第二语料：当前 TS 重算 total 与 dob 旧 total 一致（冲突检查全绿）。
+    // 4 份 dob-app 第二语料：当前 TS 重算 total 与 dob 旧 total 一致（冲突检查全绿），
+    // 唯 lieseBathfire1 例外：dob 旧 total 未做技速 280% 上限，当前 TS 赢（冲突见 fixtures README）。
     let cases = [
-        ("dobapp_shardBuild1", 5823675267.58358),
-        ("dobapp_vy", 1767082952.0447142),
-        ("dobapp_lieseBathfire1", 27281810428.826473),
-        ("dobapp_OkdnBN3OlC", 1123660945.245696),
+        ("dobapp_shardBuild1", 5823675267.58358, 5823675267.58358),
+        ("dobapp_vy", 1767082952.0447142, 1767082952.0447142),
+        ("dobapp_lieseBathfire1", 27281810428.826473, 21978258684.30798),
+        ("dobapp_OkdnBN3OlC", 1123660945.245696, 1123660945.245696),
     ];
-    for (name, dob_total) in cases {
+    for (name, dob_total, ts_calculate) in cases {
         let fixture = load_fixture(name);
         assert_close(
             fixture["expected"]["dobTotal"].as_f64().unwrap_or(f64::NAN),
@@ -48,7 +49,7 @@ fn dobapp_second_corpus_archived() {
             fixture["expected"]["calculate"]
                 .as_f64()
                 .unwrap_or(f64::NAN),
-            dob_total,
+            ts_calculate,
             "{name} 当前TS重算",
         );
         assert!(

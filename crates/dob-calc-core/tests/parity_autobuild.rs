@@ -1,7 +1,7 @@
 //! 自动配装对齐回归：与 TS `benchmark-autobuild.ts` 同输入同结果。
 //!
 //! 起始 lise_fire 推荐构筑 + 全量 510 候选 + 三槽全搜 + 武器固定。
-//! TS 基线（`bun tools/benchmark-autobuild.ts`）：`target=33801165992.460503 slots=8/8/8`。
+//! TS 基线（`bun tools/benchmark-autobuild.ts`）：`target=27230213718.39851 slots=8/8/8`（技速 280% 上限后）。
 //! Rust 曾因条件预热/排序逻辑与上游失配给出 8556M（错误结果），此处锁定：
 //! 1. 目标值逐位一致；2. 三槽 id 集合一致（顺序是收益序，允许不同）。
 
@@ -71,7 +71,7 @@ fn autobuild_matches_ts_baseline() {
     .target_value;
     assert_eq!(
         target.to_bits(),
-        33801165992.460503f64.to_bits(),
+        27230213718.39851f64.to_bits(),
         "autobuild 目标值与 TS 基线逐位一致"
     );
     assert_eq!(

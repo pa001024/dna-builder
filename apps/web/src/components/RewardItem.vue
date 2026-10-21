@@ -20,11 +20,24 @@ const titleMap = new Map(titleData.map(title => [title.id, title]))
 // 定义组件接收的Props
 interface Props {
     reward: RewardItemType | null
+    /** 原始奖励组 id：reward 解析失败时的降级提示用 */
+    rewardId?: number | string
     typeFilter?: string[]
     header?: boolean | string
 }
 
 const props = defineProps<Props>()
+
+/** 降级提示里回显的奖励组标识 */
+function fallbackRewardLabel(): string {
+    const id = props.rewardId ?? props.reward?.id
+
+    if (id === undefined || id === null || `${id}`.trim() === "") {
+        return ""
+    }
+
+    return t("reward-item.reward_group_id", { id })
+}
 
 /**
  * 获取奖励项的链接地址（收敛到公共 util，见 reward-link.ts）。
@@ -215,7 +228,15 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
 </script>
 
 <template>
-    <div class="space-y-1">
+    <!-- reward 解析失败（模型编造了不存在的奖励组 id）的降级提示，与 DBAICard / DBMapLink 口径一致 -->
+    <div
+        v-if="!reward"
+        class="inline-flex max-w-full flex-col gap-1 rounded-xs border border-dashed border-base-content/20 p-2.5 text-left text-[11px] leading-5 text-base-content/45"
+    >
+        <span>{{ $t("dbAgent.card.notFound") }}</span>
+        <span v-if="fallbackRewardLabel()" class="truncate text-[10px] text-base-content/35">{{ fallbackRewardLabel() }}</span>
+    </div>
+    <div v-else class="space-y-1">
         <div class="flex items-center gap-2 mb-1" v-if="reward && header">
             <span class="text-xs font-medium"
                 >{{ typeof header === "string" ? header : $t("reward-item.reward_group") }} <CopyID :id="reward.id" /></span

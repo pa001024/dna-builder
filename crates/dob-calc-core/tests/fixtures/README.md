@@ -9,12 +9,13 @@
 |---|---|---|---|---|
 | `dobapp_shardBuild1.json` | `fixture_shardBuild1.json` | 1501 莉兹贝尔 | `[若华纯蓄]DPS` | 一致：`dobTotal=5823675267.58358`，当前 TS 重算相对差 0 |
 | `dobapp_vy.json` | `fixture_vy.json` | 2102 薇 | `总和DPS` | 一致：`dobTotal=1767082952.0447142`，相对差 0（含 26 probes，settings 46 键全解析） |
-| `dobapp_lieseBathfire1.json` | `fixture_lieseBathfire1.json` | 4103 黎瑟 | `综合DPS` | 一致：`dobTotal=27281810428.826473`，相对差 0（settings 为 JSON 字符串，已解析；无 tables，本仓库以当前 TS 重算为准） |
+| `dobapp_lieseBathfire1.json` | `fixture_lieseBathfire1.json` | 4103 黎瑟 | `综合DPS` | **冲突**：`dobTotal=27281810428.826473`（未做技速上限），当前 TS 重算 `21978258684.30798`（技速 280% 上限后，以 TS 为准） |
 | `dobapp_OkdnBN3OlC.json` | `fixture_OkdnBN3OlC.json` | 1504 | `[取消剑]DPS` | 一致：`dobTotal=1123660945.245696`，相对差 0 |
 
 ## 冲突记录
 
-无冲突（2026-10-19 `bun tools/check-dob-conflicts.ts` 全绿，4/4 相对差 0）。
+- 2026-10-22 `dobapp_lieseBathfire1`：dob 旧 total `27281810428.826473` vs 当前 TS `21978258684.30798`，原因：技速 280% 上限（`技能速度=min(1+bonus,2.8)`）此前未实现，旧 total 按 uncapped `3.214` 结算（含 `技能独立增伤 0.4821=3.214×0.15`），上限后为 `2.8`（独立增伤 `0.42`）。以本仓库 `expected.calculate`（当前 TS 值）为准。
+- 2026-10-19 `bun tools/check-dob-conflicts.ts` 全绿（4/4 相对差 0）为上限实现前的基线，见上条。
 若日后 dob-app 夹具过期：以本仓库 `expected.calculate`（当前 TS 值）为准，
 在此追加「日期 + 夹具 + 旧值 + 新值 + 原因」条目。
 

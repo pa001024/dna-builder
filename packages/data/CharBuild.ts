@@ -1516,7 +1516,7 @@ export class CharBuild {
             属性穿透: penetration,
             无视防御: ignoreDefense,
             技能无视防御: skillIgnoreDefense,
-            技能速度: 1 + skillSpeed,
+            技能速度: Math.min(1 + skillSpeed, 2.8), // 技速上限 280%
             失衡易伤: imbalanceDamageBonus,
             技能倍率加数: skillAdd,
             技能倍率乘数: skillMultiplier,

@@ -43,12 +43,25 @@ describe("parseRichComponents", () => {
         expect(reward.child.length).toBeGreaterThan(0)
     })
 
-    it("RewardItem 遇到不存在的 id 时应整条失效", () => {
+    it("RewardItem 遇到不存在的 id 时应挂载降级卡而不是透出原始标签", () => {
         const source = '<RewardItem :reward="999999999" />'
         const { markdown, components } = parseRichComponents(source)
 
-        expect(components).toHaveLength(0)
-        expect(markdown).toBe(source)
+        expect(components).toHaveLength(1)
+        expect(components[0].props.reward).toBeNull()
+        expect(components[0].props.rewardId).toBe(999999999)
+        expect(markdown).toContain("<!--rich:0-->")
+        expect(markdown).not.toContain("<RewardItem")
+    })
+
+    it("RewardItem 参数写错时也不透出原始标签", () => {
+        const source = '<RewardItem :reward="foo()" />'
+        const { markdown, components } = parseRichComponents(source)
+
+        expect(components).toHaveLength(1)
+        expect(components[0].props.reward).toBeNull()
+        expect(markdown).toContain("<!--rich:0-->")
+        expect(markdown).not.toContain("<RewardItem")
     })
 
     it("无法解析的绑定表达式应使整条标签失效而不是传错参数", () => {

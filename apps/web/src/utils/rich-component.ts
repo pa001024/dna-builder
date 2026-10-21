@@ -60,7 +60,7 @@ const RICH_COMPONENTS: Record<string, RichComponentDefinition> = {
     /** 奖励组条目：需要完整的 RewardItem 结构，允许只给 id 或 id 数组 */
     RewardItem: {
         component: defineAsyncComponent(() => import("@/components/RewardItem.vue")),
-        props: ["reward", "typeFilter", "header"],
+        props: ["reward", "rewardId", "typeFilter", "header"],
         normalize: resolveRewardProp,
     },
     /**
@@ -87,8 +87,8 @@ export const RICH_COMPONENT_NAMES: string[] = Object.keys(RICH_COMPONENTS)
 /** 特殊组件标签的匹配规则：`<组件名 属性... />` 或 `<组件名 属性...></组件名>` */
 const RICH_COMPONENT_RE = /<([A-Z][A-Za-z0-9]*)\b([^<>]*?)\/?>(?:\s*<\/\1\s*>)?/g
 
-/** 属性匹配：`:name="expr"`（绑定）或 `name="text"`（字面量），expr 里允许 `>` 之外的内容 */
-const ATTRIBUTE_RE = /:([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"|([A-Za-z_][\w-]*)\s*=\s*"([^"]*)"/g
+/** 属性匹配：`:name="expr"`（绑定）或 `name="text"`（字面量），外层引号支持双/单引号与无引号裸值 */
+const ATTRIBUTE_RE = /:([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))|([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`<>]+))/g
 
 /** 允许作为绑定值的简单字面量：字符串 / 数字 / true / false / null */
 const LITERAL_VALUE_RE = /^(?:'([^']*)'|"([^"]*)"|(-?\d+(?:\.\d+)?)|(true|false|null))$/
@@ -255,8 +255,11 @@ function parseRichComponentProps(name: string, definition: RichComponentDefiniti
     const matcher = new RegExp(ATTRIBUTE_RE.source, "g")
 
     for (let match = matcher.exec(rawAttributes); match !== null; match = matcher.exec(rawAttributes)) {
-        const propName = match[1] ?? match[3] ?? ""
-        const rawValue = match[2] ?? match[4] ?? ""
+        const isBound = match[1] !== undefined
+        const rawName = (isBound ? match[1] : match[5]) ?? ""
+        const rawValue = (isBound ? (match[2] ?? match[3] ?? match[4]) : (match[6] ?? match[7] ?? match[8])) ?? ""
+        // kebab-case 归一成 camelCase：模板里 `:type-filter` 与 `:typeFilter` 指向同一个 prop
+        const propName = rawName.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 
         // 属性名必须在白名单里，且不能是事件/指令等危险属性
         if (!definition.props.includes(propName) || FORBIDDEN_PROP_RE.test(propName)) {
@@ -264,7 +267,6 @@ function parseRichComponentProps(name: string, definition: RichComponentDefiniti
         }
 
         // 绑定属性（:name="x"）走字面量/JSON 解析；字面量属性按纯文本处理
-        const isBound = match[1] !== undefined
         const value = isBound ? parseBindingValue(rawValue) : rawValue
 
         if (value === undefined) {
@@ -337,6 +339,17 @@ export function parseRichComponents(text: string): ParsedRichText {
         const props = parseRichComponentProps(name, definition, rawAttributes)
 
         if (!props) {
+            // RewardItem 即使参数写错也不透出原始标签：降级成“资料库中没有这条数据”卡。
+            // 典型是模型编了不存在的 id，或写了无法解析的表达式，页面上都不该留一串尖括号。
+            if (name === "RewardItem") {
+                const fallbackId = extractRewardIdFallback(rawAttributes)
+                const fallbackProps: Record<string, unknown> = { reward: null }
+                if (fallbackId !== undefined) {
+                    fallbackProps.rewardId = fallbackId
+                }
+                components.push({ name, component: definition.component, props: fallbackProps, raw, start: offset })
+                return `<!--rich:${components.length - 1}-->`
+            }
             return raw
         }
 
@@ -357,6 +370,34 @@ export function parseRichComponents(text: string): ParsedRichText {
 }
 
 /**
+ * 从写坏的 RewardItem 标签里尽力抠出奖励组 id，用于降级提示回显。
+ *
+ * 走到这里说明属性解析已失败（例如 `:reward="foo()"`），正常归一化拿不到 id；
+ * 用宽松正则直接扫原文，能抠出数字就回显数字，抠不出就返回 undefined（只显示通用提示）。
+ * @param rawAttributes 标签内的属性串原文
+ * @returns 抠到的 id；抠不到时返回 undefined
+ */
+function extractRewardIdFallback(rawAttributes: string): number | string | undefined {
+    const match = /reward\s*[:=]\s*["']?([^"'\s<>\]]+)/.exec(rawAttributes)
+    const candidate = match?.[1]?.trim().replace(/^[[{\s"']+|[\],\s"']+$/g, "")
+
+    if (!candidate) {
+        return undefined
+    }
+
+    const numeric = Number(candidate)
+    if (Number.isFinite(numeric)) {
+        return numeric
+    }
+    // 数组写法写坏时（如 `:reward="[abc"`）尽量抠出里面的数字
+    const digits = /\d+/.exec(candidate)
+    if (digits) {
+        return Number(digits[0])
+    }
+    return candidate
+}
+
+/**
  * 归一化 RewardItem 的入参。
  *
  * 组件的 `reward` 属性需要完整的奖励树结构，而模型通常只知道奖励 id，
@@ -364,14 +405,17 @@ export function parseRichComponents(text: string): ParsedRichText {
  * - `:reward="120301"` → 用 id 查完整奖励树
  * - `:reward="[120301]"` → 取数组第一项
  * - `:reward="{...}"` → 已是完整结构，原样使用
+ *
+ * id 查不到 / 缺参数时同样返回可挂载的降级属性（`reward: null` + `rewardId`），
+ * 由 RewardItem 渲染“资料库中没有这条数据”而不是把原始标签丢回正文。
  * @param props 已解析的属性
- * @returns 归一化后的属性；参数不可用时返回 null
+ * @returns 归一化后的属性；绑定表达式本身无法解析时返回 null
  */
 function resolveRewardProp(props: Record<string, unknown>): Record<string, unknown> | null {
     const raw = props.reward
 
-    if (raw === undefined || raw === null) {
-        return null
+    if (raw === undefined || raw === null || (typeof raw === "string" && !`${raw}`.trim())) {
+        return { ...props, reward: null, rewardId: undefined }
     }
 
     // 已经是完整结构（含 child 数组）时直接放行
@@ -383,12 +427,16 @@ function resolveRewardProp(props: Record<string, unknown>): Record<string, unkno
     const rewardId = Number(target)
 
     if (!Number.isFinite(rewardId)) {
-        return null
+        return { ...props, reward: null, rewardId: `${target ?? ""}`.trim() || undefined }
     }
 
     const resolved = resolveRewardTree(rewardId)
 
-    return resolved ? { ...props, reward: resolved } : null
+    if (!resolved) {
+        return { ...props, reward: null, rewardId }
+    }
+
+    return { ...props, reward: resolved }
 }
 
 /**
