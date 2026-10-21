@@ -2,6 +2,7 @@
 import { createRoomMutation, deleteRoomMutation, type Room, roomsWithCountQuery, updateRoomMutation } from "@/api/graphql"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 /**
@@ -15,14 +16,14 @@ const config: AdminCrudConfig<Room> = {
         {
             key: "name",
             title: "房间名称",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium",
+            cellClass: "font-medium",
         },
         {
             key: "type",
             title: "类型",
             type: "badge",
             formatter: value => String(value || "-"),
-            badgeClass: "badge-ghost",
+            badgeClass: ADMIN_BADGE_NEUTRAL,
         },
         {
             key: "maxUsers",
@@ -38,7 +39,7 @@ const config: AdminCrudConfig<Room> = {
         {
             key: "createdAt",
             title: "创建时间",
-            cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
+            cellClass: "whitespace-nowrap",
             formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],

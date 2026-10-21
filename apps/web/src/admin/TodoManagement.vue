@@ -37,12 +37,12 @@ const config: AdminCrudConfig<Todo> = {
         {
             key: "title",
             title: "标题",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate",
+            cellClass: "font-medium max-w-xs truncate",
         },
         {
             key: "description",
             title: "描述",
-            cellClass: "px-8 py-5 text-sm text-base-content/85 max-w-sm truncate",
+            cellClass: "max-w-sm truncate",
             formatter: value => String(value || "-"),
         },
         {
@@ -66,7 +66,7 @@ const config: AdminCrudConfig<Todo> = {
         {
             key: "createdAt",
             title: "创建时间",
-            cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
+            cellClass: "whitespace-nowrap text-base-content/70",
             formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],

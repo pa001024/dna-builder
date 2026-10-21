@@ -533,3 +533,52 @@ body {
 :hover::-webkit-scrollbar {
     opacity: 1;
 }
+
+/*
+ * 后台管理（/admin）专用：表格勾选框外观与页面入场节奏。
+ * 勾选框是原生 input，不受 daisyUI 主题控制，这里显式给一套与纸面直角一致的外观。
+ */
+.admin-check {
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid color-mix(in oklab, var(--color-base-content) 26%, transparent);
+    border-radius: 2px;
+    background-color: transparent;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.admin-check:hover {
+    border-color: color-mix(in oklab, var(--color-primary) 60%, transparent);
+}
+
+.admin-check:checked {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+}
+
+.admin-check:checked::after {
+    content: "";
+    width: 7px;
+    height: 4px;
+    border-left: 1.5px solid var(--color-primary-content);
+    border-bottom: 1.5px solid var(--color-primary-content);
+    transform: translateY(-1px) rotate(-45deg);
+}
+
+/* 页面内容区入场：只给页面根容器一条上浮，列表行不再各自跳动 */
+.admin-page {
+    animation: ef-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-page {
+        animation: none;
+    }
+}

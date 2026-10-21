@@ -1,7 +1,35 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue"
 import { useUIStore } from "@/store/ui"
-import type { AdminCrudColumnConfig, AdminCrudConfig, AdminCrudFieldConfig } from "./crud-config"
+import AdminPageHeader from "./AdminPageHeader.vue"
+import {
+    ADMIN_BADGE,
+    ADMIN_BADGE_ERROR,
+    ADMIN_BADGE_NEUTRAL,
+    ADMIN_BADGE_PRIMARY,
+    ADMIN_BADGE_SUCCESS,
+    ADMIN_BADGE_WARNING,
+    ADMIN_BTN,
+    ADMIN_BTN_PRIMARY,
+    ADMIN_CHIP,
+    ADMIN_CHIP_OFF,
+    ADMIN_CHIP_ON,
+    ADMIN_EMPTY,
+    ADMIN_INPUT,
+    ADMIN_INPUT_NUM,
+    ADMIN_NUM,
+    ADMIN_ROW,
+    ADMIN_ROW_ACTION,
+    ADMIN_ROW_TONE_ERROR,
+    ADMIN_ROW_TONE_NEUTRAL,
+    ADMIN_ROW_TONE_PRIMARY,
+    ADMIN_STAT_CELL,
+    ADMIN_STAT_LABEL,
+    ADMIN_STAT_VALUE,
+    ADMIN_TD,
+    ADMIN_TH,
+} from "./admin-ui"
+import type { AdminCrudColumnConfig, AdminCrudConfig, AdminCrudFieldConfig, AdminCrudFilterConfig } from "./crud-config"
 
 /**
  * 组件参数定义
@@ -33,37 +61,14 @@ const editForm = reactive<Record<string, any>>({})
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / props.config.pageSize)))
 
 /**
- * 获取列头样式
- * @param column 列配置
- */
-function getHeaderClass(column: AdminCrudColumnConfig) {
-    return column.headerClass || "px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider"
-}
-
-/**
  * 获取单元格样式
  * @param column 列配置
  * @param item 行数据
  * @param value 单元格值
  */
 function getCellClass(column: AdminCrudColumnConfig, item: any, value: unknown) {
-    if (typeof column.cellClass === "function") {
-        return column.cellClass(item, value)
-    }
-    return column.cellClass || "px-8 py-5 whitespace-nowrap text-sm text-base-content/85"
-}
-
-/**
- * 获取标记样式
- * @param column 列配置
- * @param item 行数据
- * @param value 单元格值
- */
-function getBadgeClass(column: AdminCrudColumnConfig, item: any, value: unknown) {
-    if (typeof column.badgeClass === "function") {
-        return column.badgeClass(item, value)
-    }
-    return column.badgeClass || "badge badge-sm badge-ghost"
+    const extra = typeof column.cellClass === "function" ? column.cellClass(item, value) : column.cellClass
+    return [ADMIN_TD, extra].filter(Boolean).join(" ")
 }
 
 /**
@@ -95,21 +100,48 @@ function renderCellText(column: AdminCrudColumnConfig, item: any): string {
 }
 
 /**
+ * 方章配色：按列名语义给三种色，未命中一律中性
+ * @param column 列配置
+ * @param item 行数据
+ */
+function badgeClassOf(column: AdminCrudColumnConfig, item: any) {
+    const extra = typeof column.badgeClass === "function" ? column.badgeClass(item, getCellValue(column, item)) : column.badgeClass
+    return [ADMIN_BADGE, sanitizeBadgeClass(extra)].filter(Boolean).join(" ")
+}
+
+/**
+ * 兼容历史配置里遗留的 daisyUI 徽章类：颜色用 admin 方章令牌替代，其余（badge / badge-sm 等）丢弃，
+ * 避免组件库的徽章配色把文字压成深色、在深色主题下读不清。
+ * @param raw 列配置给的类名
+ */
+function sanitizeBadgeClass(raw?: string) {
+    if (!raw) return ADMIN_BADGE_NEUTRAL
+    const tokens = raw.split(/\s+/).filter(Boolean)
+    const legacy = tokens.filter(token => token === "badge" || token.startsWith("badge-"))
+    if (legacy.length === 0) return raw
+    const toneMap: Record<string, string> = {
+        "badge-primary": ADMIN_BADGE_PRIMARY,
+        "badge-secondary": ADMIN_BADGE_PRIMARY,
+        "badge-accent": ADMIN_BADGE_PRIMARY,
+        "badge-info": ADMIN_BADGE_SUCCESS,
+        "badge-success": ADMIN_BADGE_SUCCESS,
+        "badge-warning": ADMIN_BADGE_WARNING,
+        "badge-error": ADMIN_BADGE_ERROR,
+        "badge-ghost": ADMIN_BADGE_NEUTRAL,
+        "badge-neutral": ADMIN_BADGE_NEUTRAL,
+    }
+    const rest = tokens.filter(token => !legacy.includes(token))
+    const tone = legacy.map(token => toneMap[token]).find(Boolean) || ADMIN_BADGE_NEUTRAL
+    return [...rest, tone].join(" ")
+}
+
+/**
  * 初始化筛选参数
  */
 function initFilters() {
     for (const filter of props.config.filters || []) {
         filters[filter.key] = filter.defaultValue ?? ""
     }
-}
-
-/**
- * 判断筛选配置是否已经显式提供“全部/空值”选项。
- * @param filter 筛选配置
- * @returns 是否已包含空值选项
- */
-function hasEmptyFilterOption(filter: { options?: Array<{ value: string | number }> }) {
-    return (filter.options || []).some(option => option.value === "")
 }
 
 /**
@@ -224,6 +256,23 @@ function handleFilterChange() {
 }
 
 /**
+ * 当前是否有任何检索条件（用于空态文案区分「没数据」与「没匹配」）
+ */
+const hasQuery = computed(() => {
+    if (search.value.trim()) return true
+    return Object.values(filters).some(value => value !== "" && value !== null && value !== undefined)
+})
+
+/**
+ * 清空所有检索条件
+ */
+function resetQuery() {
+    search.value = ""
+    initFilters()
+    handleSearch()
+}
+
+/**
  * 切换分页
  * @param newPage 页码
  */
@@ -324,7 +373,7 @@ async function submitEdit() {
 }
 
 /**
- * 处理删除
+ * 删除行数据
  * @param item 行数据
  */
 async function handleDelete(item: any) {
@@ -372,19 +421,19 @@ async function handleRowAction(actionKey: string, item: any) {
 }
 
 /**
- * 获取操作按钮样式
+ * 行操作按钮语义色
  * @param tone 按钮语义
  */
 function getActionClass(tone: "primary" | "error" | "neutral" = "neutral") {
     if (tone === "primary") {
-        return "text-primary hover:text-primary/80"
+        return ADMIN_ROW_TONE_PRIMARY
     }
 
     if (tone === "error") {
-        return "text-error hover:text-error/80"
+        return ADMIN_ROW_TONE_ERROR
     }
 
-    return "text-base-content/80 hover:text-base-content"
+    return ADMIN_ROW_TONE_NEUTRAL
 }
 
 /**
@@ -401,6 +450,18 @@ const canEdit = computed(() => Boolean(props.config.form?.update))
  * 判断是否支持删除
  */
 const canDelete = computed(() => Boolean(props.config.delete))
+
+/**
+ * 是否显示操作列
+ */
+const hasRowActions = computed(() => canEdit.value || canDelete.value || (props.config.rowActions || []).length > 0)
+
+/**
+ * 表格总列数（用于空态跨列）
+ */
+const columnSpan = computed(
+    () => props.config.columns.length + (props.config.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0)
+)
 
 /**
  * 获取创建按钮文字
@@ -421,7 +482,9 @@ const selectedItems = computed(() => {
 /**
  * 判断是否全选
  */
-const selectedAll = computed(() => props.config.selectable && items.value.length > 0 && selectedKeys.value.length === items.value.length)
+const selectedAll = computed(
+    () => props.config.selectable && items.value.length > 0 && selectedKeys.value.length === items.value.length
+)
 
 /**
  * 切换单项选择
@@ -461,6 +524,24 @@ async function handleBulkAction(actionKey: string) {
     await fetchList()
 }
 
+/** 下拉型筛选的可选项：显式给了空值选项就用配置的，否则补一个「全部」 */
+function filterOptions(filter: AdminCrudFilterConfig) {
+    const options = filter.options || []
+    if (options.some(option => option.value === "")) {
+        return options
+    }
+    return [{ label: "全部", value: "" }, ...options]
+}
+
+/** 文本型筛选是否填了值（决定方章是否高亮） */
+function hasFilterValue(filter: AdminCrudFilterConfig) {
+    const value = filters[filter.key]
+    return value !== "" && value !== null && value !== undefined
+}
+
+/** 当前页数量（统计开本里可诚实推导的量） */
+const pageCount = computed(() => items.value.length)
+
 /**
  * 初始化页面
  */
@@ -471,112 +552,170 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="animate-fadeIn p-6 bg-base-200/50 min-h-screen">
-        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-semibold text-base-content">{{ config.title }}</h2>
-                <p v-if="config.description" class="text-sm text-base-content/70 mt-1">{{ config.description }}</p>
+    <div class="admin-page mx-auto flex min-h-full w-full max-w-390 flex-col px-5 pb-5">
+        <AdminPageHeader kicker="Records" :title="config.title" :description="config.description">
+            <template #actions>
+                <button v-if="canCreate" :class="ADMIN_BTN_PRIMARY" @click="openCreateDialog">
+                    <Icon icon="ri:add-line" class="h-3.5 w-3.5" />
+                    <span>{{ createButtonText }}</span>
+                </button>
+            </template>
+        </AdminPageHeader>
+
+        <!-- 统计开本：只放接口能给口径的量（总数 + 本页条数 + 页码），不做推算 -->
+        <div class="flex border-b border-base-content/10">
+            <div :class="ADMIN_STAT_CELL" class="pl-0">
+                <p :class="ADMIN_STAT_LABEL">Total</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ total.toLocaleString() }}</span>
+                    <span class="text-[10.5px] text-base-content/40">条</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">On Page</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ pageCount }}</span>
+                    <span class="text-[10.5px] text-base-content/40">条</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">Page</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ page }}</span>
+                    <span class="text-[10.5px] text-base-content/40">/ {{ totalPages }}</span>
+                </p>
             </div>
             <button
-                v-if="canCreate"
-                class="btn btn-primary px-6 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-medium"
-                @click="openCreateDialog"
+                v-if="config.selectable"
+                :class="ADMIN_STAT_CELL"
+                class="cursor-pointer text-left transition-colors duration-150 hover:bg-base-content/4"
+                @click="toggleSelectAll"
             >
-                <Icon icon="ri:add-line" />
-                <span>{{ createButtonText }}</span>
+                <p :class="ADMIN_STAT_LABEL">Selected</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="[ADMIN_NUM, selectedItems.length ? 'text-primary' : '']">{{ selectedItems.length }}</span>
+                    <span class="text-[10.5px] text-base-content/40">项</span>
+                </p>
             </button>
+            <div class="ml-auto flex items-center pr-0.5 text-[10.5px] text-base-content/35">
+                {{ loading ? "同步中…" : "已同步" }}
+            </div>
         </div>
 
+        <!-- 检索条：下划线输入 + 方章筛选 + 方章按钮 -->
         <div
             v-if="config.searchPlaceholder || (config.filters && config.filters.length > 0)"
-            class="card bg-base-100 shadow-sm border border-base-300 p-6 mb-6 hover:shadow-md transition-all duration-300"
+            class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-base-content/10 py-2.5"
         >
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <div v-if="config.searchPlaceholder" class="flex-1">
+            <div v-if="config.searchPlaceholder" class="relative w-full max-w-72">
+                <Icon icon="ri:search-line" class="absolute top-1/2 left-0 h-3.5 w-3.5 -translate-y-1/2 text-base-content/35" />
+                <input
+                    v-model="search"
+                    type="text"
+                    :placeholder="config.searchPlaceholder"
+                    :class="ADMIN_INPUT"
+                    class="pr-10 pl-5"
+                    @keyup.enter="handleSearch"
+                />
+                <kbd
+                    class="pointer-events-none absolute right-0 bottom-1.5 border border-base-content/15 px-1 text-[9px] tracking-[0.08em] text-base-content/30"
+                >
+                    ENTER
+                </kbd>
+            </div>
+
+            <template v-for="filter in config.filters || []" :key="filter.key">
+                <!-- 下拉型筛选用方章组，避免引入第二套表单控件 -->
+                <div v-if="filter.type === 'select'" class="flex flex-wrap items-center gap-1">
+                    <span v-if="filter.label" class="mr-0.5 shrink-0 text-[10.5px] tracking-wide text-base-content/40">{{ filter.label }}</span>
+                    <button
+                        v-for="option in filterOptions(filter)"
+                        :key="String(option.value)"
+                        :class="[ADMIN_CHIP, filters[filter.key] === option.value ? ADMIN_CHIP_ON : ADMIN_CHIP_OFF]"
+                        @click="
+                            filters[filter.key] = option.value;
+                            handleFilterChange()
+                        "
+                    >
+                        {{ option.label }}
+                    </button>
+                </div>
+                <div v-else class="relative w-36">
                     <input
-                        v-model="search"
+                        v-model="filters[filter.key]"
                         type="text"
-                        :placeholder="config.searchPlaceholder"
-                        class="input input-bordered w-full"
+                        :placeholder="filter.placeholder || filter.label || ''"
+                        :class="[ADMIN_INPUT, 'pr-3', hasFilterValue(filter) ? 'border-primary/60' : '']"
                         @keyup.enter="handleSearch"
                     />
                 </div>
+            </template>
 
-                <template v-for="filter in config.filters || []" :key="filter.key">
-                    <div v-if="filter.type === 'select'" class="w-full md:w-48">
-                        <select v-model="filters[filter.key]" class="select select-bordered w-full" @change="handleFilterChange">
-                            <option v-if="!hasEmptyFilterOption(filter)" value="">全部</option>
-                            <option v-for="option in filter.options || []" :key="String(option.value)" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </div>
+            <button :class="ADMIN_BTN" @click="handleSearch">
+                <Icon icon="ri:search-line" class="h-3.25 w-3.25" />
+                <span>查询</span>
+            </button>
+            <button v-if="hasQuery" :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL]" @click="resetQuery">重置</button>
 
-                    <div v-else class="w-full md:w-48">
-                        <input
-                            v-model="filters[filter.key]"
-                            type="text"
-                            :placeholder="filter.placeholder || filter.label || ''"
-                            class="input input-bordered w-full"
-                            @keyup.enter="handleSearch"
-                        />
-                    </div>
-                </template>
-
-                <button class="btn btn-primary px-8" @click="handleSearch">
-                    <Icon icon="ri:search-line" />
-                    <span>搜索</span>
-                </button>
-            </div>
-
-            <div v-if="config.selectable && selectedItems.length > 0" class="mt-4 flex items-center gap-2">
-                <button class="btn btn-sm btn-ghost" @click="toggleSelectAll">
-                    {{ selectedAll ? "取消全选" : "全选" }}
-                </button>
-                <button
-                    v-for="bulkAction in config.bulkActions || []"
-                    :key="bulkAction.key"
-                    class="btn btn-sm"
-                    :class="{
-                        'btn-primary': (bulkAction.tone || 'neutral') === 'primary',
-                        'btn-error': (bulkAction.tone || 'neutral') === 'error',
-                    }"
-                    :disabled="selectedItems.length < (bulkAction.minSelected || 1)"
-                    @click="handleBulkAction(bulkAction.key)"
-                >
-                    {{ bulkAction.label }}
-                </button>
-            </div>
+            <span class="ml-auto font-orbitron text-[11px] tabular-nums text-base-content/40">{{ total }} 条</span>
         </div>
 
-        <div class="card bg-base-100 shadow-sm border border-base-300 overflow-hidden hover:shadow-md transition-all duration-300">
+        <!-- 批量操作条 -->
+        <div
+            v-if="config.selectable && selectedItems.length > 0"
+            class="flex flex-wrap items-center gap-2 border-b border-base-content/10 bg-primary/5 px-1 py-1.5"
+        >
+            <span class="font-orbitron text-[11px] tabular-nums text-primary">已选 {{ selectedItems.length }}</span>
+            <button :class="ADMIN_BTN" @click="toggleSelectAll">{{ selectedAll ? "取消全选" : "全选本页" }}</button>
+            <button
+                v-for="bulkAction in config.bulkActions || []"
+                :key="bulkAction.key"
+                :class="[
+                    ADMIN_BTN,
+                    bulkAction.tone === 'error' ? 'border-error/50 text-error hover:border-error' : '',
+                    bulkAction.tone === 'primary' ? 'border-primary/60 text-primary' : '',
+                ]"
+                :disabled="selectedItems.length < (bulkAction.minSelected || 1)"
+                @click="handleBulkAction(bulkAction.key)"
+            >
+                {{ bulkAction.label }}
+            </button>
+            <button :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL]" class="ml-auto" @click="selectedKeys = []">清空选择</button>
+        </div>
+
+        <div class="relative min-w-0 flex-1">
+            <div v-if="loading" class="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/15">
+                <div class="h-full w-1/3 animate-pulse bg-primary" />
+            </div>
+
             <ScrollArea horizontal>
-                <table class="table w-full">
-                    <thead class="bg-base-200">
-                        <tr>
-                            <th v-if="config.selectable" class="px-4 py-4 text-left w-12">
-                                <input type="checkbox" class="checkbox checkbox-sm" :checked="selectedAll" @click="toggleSelectAll" />
+                <table class="w-full min-w-170 border-collapse text-left">
+                    <thead>
+                        <tr class="bg-base-content/3">
+                            <th v-if="config.selectable" class="w-9" :class="ADMIN_TH">
+                                <input
+                                    type="checkbox"
+                                    class="admin-check"
+                                    :checked="selectedAll"
+                                    @click="toggleSelectAll"
+                                />
                             </th>
-                            <th v-for="column in config.columns" :key="column.key" :class="getHeaderClass(column)">{{ column.title }}</th>
-                            <th
-                                v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)"
-                                class="px-8 py-4 text-left text-xs font-semibold text-base-content/70 uppercase tracking-wider"
-                            >
-                                操作
+                            <th v-for="column in config.columns" :key="column.key" :class="[ADMIN_TH, column.headerClass]">
+                                {{ column.title }}
                             </th>
+                            <th v-if="hasRowActions" class="text-right" :class="ADMIN_TH">操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
                             v-for="(item, index) in items"
                             :key="String(config.rowKey(item, index))"
-                            class="hover:bg-base-200/50 transition-colors duration-200"
-                            :class="{ 'bg-base-200/30': index % 2 === 0 }"
+                            :class="[ADMIN_ROW, selectedKeys.includes(config.rowKey(item, index)) ? 'bg-primary/8' : '']"
                         >
-                            <td v-if="config.selectable" class="px-4 py-5">
+                            <td v-if="config.selectable" :class="ADMIN_TD">
                                 <input
                                     type="checkbox"
-                                    class="checkbox checkbox-sm checkbox-primary"
+                                    class="admin-check"
                                     :checked="selectedKeys.includes(config.rowKey(item, index))"
                                     @click.stop="toggleSelectItem(item, index)"
                                 />
@@ -586,65 +725,56 @@ onMounted(() => {
                                 :key="column.key"
                                 :class="getCellClass(column, item, getCellValue(column, item))"
                             >
-                                <span
-                                    v-if="column.type === 'badge'"
-                                    class="badge badge-sm"
-                                    :class="getBadgeClass(column, item, getCellValue(column, item))"
-                                >
+                                <span v-if="column.type === 'badge'" :class="badgeClassOf(column, item)">
                                     {{ renderCellText(column, item) }}
                                 </span>
                                 <span v-else>{{ renderCellText(column, item) }}</span>
                             </td>
-                            <td
-                                v-if="canEdit || canDelete || (config.rowActions && config.rowActions.length > 0)"
-                                class="px-8 py-5 whitespace-nowrap text-sm font-medium"
-                            >
-                                <div class="flex items-center gap-4">
+                            <td v-if="hasRowActions" class="text-right" :class="ADMIN_TD">
+                                <div class="flex items-center justify-end gap-2.5 whitespace-nowrap">
                                     <button
                                         v-if="canEdit"
-                                        class="transition-colors duration-200 flex items-center gap-1.5 group font-medium text-sm"
-                                        :class="getActionClass('primary')"
+                                        :class="[ADMIN_ROW_ACTION, getActionClass('primary')]"
                                         @click="handleRowAction('edit', item)"
                                     >
-                                        <Icon icon="ri:edit-line" class="group-hover:scale-110 transition-transform duration-200" />
-                                        <span class="group-hover:underline">编辑</span>
+                                        编辑
                                     </button>
                                     <button
                                         v-if="canDelete"
-                                        class="transition-colors duration-200 flex items-center gap-1.5 group font-medium text-sm"
-                                        :class="getActionClass('error')"
+                                        :class="[ADMIN_ROW_ACTION, getActionClass('error')]"
                                         @click="handleRowAction('delete', item)"
                                     >
-                                        <Icon icon="ri:delete-bin-line" class="group-hover:scale-110 transition-transform duration-200" />
-                                        <span class="group-hover:underline">删除</span>
+                                        删除
                                     </button>
-
                                     <button
                                         v-for="action in config.rowActions || []"
                                         v-show="action.visible ? action.visible(item) : true"
                                         :key="action.key"
-                                        class="transition-colors duration-200 flex items-center gap-1.5 group font-medium text-sm"
-                                        :class="getActionClass(action.tone || 'neutral')"
+                                        :class="[ADMIN_ROW_ACTION, getActionClass(action.tone || 'neutral')]"
                                         :disabled="action.disabled ? action.disabled(item) : false"
                                         @click="handleRowAction(action.key, item)"
                                     >
-                                        <Icon
-                                            v-if="action.icon"
-                                            :icon="action.icon"
-                                            class="group-hover:scale-110 transition-transform duration-200"
-                                        />
-                                        <span class="group-hover:underline">{{ action.label }}</span>
+                                        {{ action.label }}
                                     </button>
                                 </div>
                             </td>
                         </tr>
 
                         <tr v-if="!loading && items.length === 0">
-                            <td
-                                :colspan="config.columns.length + (config.selectable ? 2 : 1)"
-                                class="px-8 py-10 text-center text-sm text-base-content/70"
-                            >
-                                {{ config.emptyText || "暂无数据" }}
+                            <td :colspan="columnSpan" class="border-b border-base-content/10">
+                                <div :class="ADMIN_EMPTY">
+                                    <Icon icon="ri:inbox-line" class="h-6.5 w-6.5 text-base-content/20" />
+                                    <p class="text-[12.5px] text-base-content/55">
+                                        {{ hasQuery ? "没有符合条件的结果" : config.emptyText || "暂无数据" }}
+                                    </p>
+                                    <button v-if="hasQuery" :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_PRIMARY]" class="mt-1" @click="resetQuery">
+                                        清空检索条件
+                                    </button>
+                                    <button v-else-if="canCreate" :class="ADMIN_BTN" class="mt-1" @click="openCreateDialog">
+                                        <Icon icon="ri:add-line" class="h-3.25 w-3.25" />
+                                        <span>{{ createButtonText }}</span>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -654,34 +784,26 @@ onMounted(() => {
             <PageFoot :page="page" :pageSize="config.pageSize" :totalPages="totalPages" :count="total" @update:page="handlePageChange" />
         </div>
 
-        <div v-if="loading" class="absolute inset-0 bg-base-200/60 flex items-center justify-center z-50">
-            <span class="loading loading-spinner loading-lg"></span>
-        </div>
-
         <Dialog v-if="canCreate && config.form" v-model:open="createDialogOpen" :title="config.form.createTitle || `创建${config.title}`">
             <template #content>
-                <div class="space-y-4 py-4">
-                    <div v-for="field in config.form.fields" :key="field.key" class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">
+                <div class="space-y-4 py-1">
+                    <div v-for="field in config.form.fields" :key="field.key" class="space-y-1.5">
+                        <label class="block text-[11px] tracking-wide text-base-content/55">
                             {{ field.label }}
                             <span v-if="field.required" class="text-error">*</span>
                         </label>
 
-                        <select
-                            v-if="field.type === 'select'"
-                            v-model="createForm[field.key]"
-                            class="select select-bordered w-full"
-                            :disabled="submitting"
-                        >
-                            <option v-for="option in field.options || []" :key="String(option.value)" :value="option.value">
+                        <Select v-if="field.type === 'select'" v-model="createForm[field.key]" class="w-full" :disabled="submitting">
+                            <SelectItem v-for="option in field.options || []" :key="String(option.value)" :value="option.value">
                                 {{ option.label }}
-                            </option>
-                        </select>
+                            </SelectItem>
+                        </Select>
 
                         <textarea
                             v-else-if="field.type === 'textarea'"
                             v-model="createForm[field.key]"
-                            class="textarea textarea-bordered w-full h-32"
+                            :class="ADMIN_INPUT"
+                            class="h-24 resize-none py-1"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                         ></textarea>
@@ -690,7 +812,7 @@ onMounted(() => {
                             v-else-if="field.type === 'number'"
                             v-model.number="createForm[field.key]"
                             type="number"
-                            class="input input-bordered w-full"
+                            :class="ADMIN_INPUT_NUM"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                             :min="field.min"
@@ -702,7 +824,7 @@ onMounted(() => {
                             v-else
                             v-model="createForm[field.key]"
                             :type="field.type"
-                            class="input input-bordered w-full"
+                            :class="ADMIN_INPUT"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                         />
@@ -710,11 +832,12 @@ onMounted(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="submitting" @click="closeCreateDialog">取消</button>
-                <button class="btn btn-primary" :disabled="submitting" @click="submitCreate">
-                    <span v-if="submitting" class="loading loading-spinner loading-sm mr-2"></span>
-                    创建
-                </button>
+                <div class="flex justify-end gap-2">
+                    <button :class="ADMIN_BTN" :disabled="submitting" @click="closeCreateDialog">取消</button>
+                    <button :class="ADMIN_BTN_PRIMARY" :disabled="submitting" @click="submitCreate">
+                        {{ submitting ? "创建中…" : "创建" }}
+                    </button>
+                </div>
             </template>
         </Dialog>
 
@@ -722,31 +845,27 @@ onMounted(() => {
             v-if="canEdit && config.form"
             v-model:open="editDialogOpen"
             :title="config.form.editTitle || `编辑${config.title}`"
-            :description="editingItem ? `编辑记录` : ''"
+            :description="editingItem ? '编辑记录' : ''"
         >
             <template #content>
-                <div class="space-y-4 py-4">
-                    <div v-for="field in config.form.fields" :key="field.key" class="space-y-2">
-                        <label class="text-sm font-medium text-base-content">
+                <div class="space-y-4 py-1">
+                    <div v-for="field in config.form.fields" :key="field.key" class="space-y-1.5">
+                        <label class="block text-[11px] tracking-wide text-base-content/55">
                             {{ field.label }}
                             <span v-if="field.required" class="text-error">*</span>
                         </label>
 
-                        <select
-                            v-if="field.type === 'select'"
-                            v-model="editForm[field.key]"
-                            class="select select-bordered w-full"
-                            :disabled="submitting"
-                        >
-                            <option v-for="option in field.options || []" :key="String(option.value)" :value="option.value">
+                        <Select v-if="field.type === 'select'" v-model="editForm[field.key]" class="w-full" :disabled="submitting">
+                            <SelectItem v-for="option in field.options || []" :key="String(option.value)" :value="option.value">
                                 {{ option.label }}
-                            </option>
-                        </select>
+                            </SelectItem>
+                        </Select>
 
                         <textarea
                             v-else-if="field.type === 'textarea'"
                             v-model="editForm[field.key]"
-                            class="textarea textarea-bordered w-full h-32"
+                            :class="ADMIN_INPUT"
+                            class="h-24 resize-none py-1"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                         ></textarea>
@@ -755,7 +874,7 @@ onMounted(() => {
                             v-else-if="field.type === 'number'"
                             v-model.number="editForm[field.key]"
                             type="number"
-                            class="input input-bordered w-full"
+                            :class="ADMIN_INPUT_NUM"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                             :min="field.min"
@@ -767,7 +886,7 @@ onMounted(() => {
                             v-else
                             v-model="editForm[field.key]"
                             :type="field.type"
-                            class="input input-bordered w-full"
+                            :class="ADMIN_INPUT"
                             :placeholder="field.placeholder"
                             :disabled="submitting"
                         />
@@ -775,11 +894,12 @@ onMounted(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="submitting" @click="closeEditDialog">取消</button>
-                <button class="btn btn-primary" :disabled="submitting" @click="submitEdit">
-                    <span v-if="submitting" class="loading loading-spinner loading-sm mr-2"></span>
-                    保存
-                </button>
+                <div class="flex justify-end gap-2">
+                    <button :class="ADMIN_BTN" :disabled="submitting" @click="closeEditDialog">取消</button>
+                    <button :class="ADMIN_BTN_PRIMARY" :disabled="submitting" @click="submitEdit">
+                        {{ submitting ? "保存中…" : "保存" }}
+                    </button>
+                </div>
             </template>
         </Dialog>
     </div>

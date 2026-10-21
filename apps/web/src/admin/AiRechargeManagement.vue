@@ -13,6 +13,35 @@ import {
 import { useUIStore } from "@/store/ui"
 import { formatCost } from "@/utils/ai-log-format"
 import { formatDateTime } from "@/utils/time"
+import AdminPageHeader from "./AdminPageHeader.vue"
+import {
+    ADMIN_BADGE,
+    ADMIN_BADGE_ERROR,
+    ADMIN_BADGE_PRIMARY,
+    ADMIN_BADGE_SUCCESS,
+    ADMIN_BTN,
+    ADMIN_BTN_PRIMARY,
+    ADMIN_CHIP,
+    ADMIN_CHIP_OFF,
+    ADMIN_CHIP_ON,
+    ADMIN_EMPTY,
+    ADMIN_INPUT,
+    ADMIN_LABEL,
+    ADMIN_MONO,
+    ADMIN_NUM,
+    ADMIN_NUM_UNIT,
+    ADMIN_PROGRESS_TRACK,
+    ADMIN_ROW,
+    ADMIN_ROW_ACTION,
+    ADMIN_ROW_TONE_ERROR,
+    ADMIN_ROW_TONE_NEUTRAL,
+    ADMIN_STAT_CELL,
+    ADMIN_STAT_LABEL,
+    ADMIN_STAT_VALUE,
+    ADMIN_TABLE,
+    ADMIN_TD,
+    ADMIN_TH,
+} from "./admin-ui"
 
 /**
  * AI 充值兑换码管理页（管理员）：批量生成面额码、查看批次与单码状态、作废未用码。
@@ -35,6 +64,14 @@ const codesLoading = ref(false)
 const codesPage = ref(1)
 const CODES_PAGE_SIZE = 20
 const codeFilter = reactive({ batchId: "", status: "", search: "" })
+
+/** 状态筛选：选项不超过 5 个，用方章而不是下拉 */
+const STATUS_OPTIONS = [
+    { label: "全部", value: "" },
+    { label: "未使用", value: "unused" },
+    { label: "已兑换", value: "redeemed" },
+    { label: "已作废", value: "revoked" },
+]
 
 /**
  * @description 刷新批次列表。
@@ -162,6 +199,25 @@ async function viewBatch(batchId: string) {
 }
 
 /**
+ * @description 切换状态方章后立即重查（口径同筛选变更）。
+ * @param status 状态值
+ */
+async function changeStatus(status: string) {
+    codeFilter.status = status
+    codesPage.value = 1
+    await loadCodes()
+}
+
+/**
+ * @description 切换页码后重查。
+ * @param page 目标页码
+ */
+async function changeCodesPage(page: number) {
+    codesPage.value = Math.min(Math.max(1, page), totalPages())
+    await loadCodes()
+}
+
+/**
  * @description 兑换码状态中文名。
  * @param status 状态值
  */
@@ -169,6 +225,16 @@ function statusLabel(status: string): string {
     if (status === "redeemed") return "已兑换"
     if (status === "revoked") return "已作废"
     return "未使用"
+}
+
+/**
+ * @description 状态方章配色。
+ * @param status 状态值
+ */
+function statusBadgeClass(status: string): string {
+    if (status === "redeemed") return ADMIN_BADGE_PRIMARY
+    if (status === "revoked") return ADMIN_BADGE_ERROR
+    return ADMIN_BADGE_SUCCESS
 }
 
 /**
@@ -188,194 +254,309 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-base-200/50 p-6">
-        <div class="mb-6">
-            <h2 class="text-2xl font-semibold text-base-content">AI 充值兑换码</h2>
-            <p class="mt-1 text-sm text-base-content/70">批量生成面额兑换码，用户在前端输入兑换后额度永久到账；免费额度仍每日重置</p>
+    <div class="admin-page mx-auto flex min-h-full w-full max-w-390 flex-col px-5 pb-5">
+        <AdminPageHeader
+            kicker="Recharge"
+            title="AI 充值兑换码"
+            description="批量生成面额兑换码，用户在前端输入兑换后额度永久到账；免费额度仍每日重置"
+        >
+            <template #actions>
+                <span class="font-orbitron text-[10px] tabular-nums text-base-content/30">
+                    {{ generating ? "GENERATING" : "READY" }}
+                </span>
+            </template>
+        </AdminPageHeader>
+
+        <!-- 统计开本 -->
+        <div class="flex flex-wrap border-b border-base-content/10">
+            <div :class="[ADMIN_STAT_CELL, 'pl-0']">
+                <p :class="ADMIN_STAT_LABEL">Batches</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ batches.length }}</span>
+                    <span :class="ADMIN_NUM_UNIT">批（最近 50）</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">Codes</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ codesTotal }}</span>
+                    <span :class="ADMIN_NUM_UNIT">张（当前筛选）</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">On Page</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ codes.length }}</span>
+                    <span :class="ADMIN_NUM_UNIT">张</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">Last Batch</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ lastCodes.length }}</span>
+                    <span :class="ADMIN_NUM_UNIT">{{ lastCodes.length ? "张待复制" : "尚未生成" }}</span>
+                </p>
+            </div>
+            <div class="ml-auto flex items-center pr-0.5 text-[10.5px] text-base-content/35">
+                {{ codesLoading || batchesLoading ? "同步中…" : "已同步" }}
+            </div>
         </div>
 
-        <!-- 生成表单 -->
-        <div class="card mb-6 border border-base-300 bg-base-100 p-5 shadow-sm">
-            <h3 class="mb-3 text-sm font-semibold">批量生成</h3>
-            <div class="flex flex-wrap items-end gap-3">
-                <label class="form-control w-36">
-                    <span class="label-text text-xs">单张面额（元）</span>
-                    <input v-model="form.amountYuan" type="number" min="0.1" max="500" step="0.1" class="input input-sm input-bordered" />
+        <!-- 批量生成 -->
+        <section class="border-b border-base-content/10 py-3">
+            <div class="mb-2 flex items-center gap-2">
+                <h2 class="text-[15px] font-semibold text-base-content">批量生成</h2>
+                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+            </div>
+
+            <div class="flex flex-wrap items-end gap-x-5 gap-y-3">
+                <label class="block w-36">
+                    <span :class="ADMIN_LABEL">单张面额（元）</span>
+                    <input
+                        v-model="form.amountYuan"
+                        type="number"
+                        min="0.1"
+                        max="500"
+                        step="0.1"
+                        :class="[ADMIN_INPUT, 'mt-1 tabular-nums']"
+                    />
                 </label>
-                <label class="form-control w-32">
-                    <span class="label-text text-xs">数量（≤500）</span>
-                    <input v-model="form.count" type="number" min="1" max="500" step="1" class="input input-sm input-bordered" />
+                <label class="block w-32">
+                    <span :class="ADMIN_LABEL">数量（≤500）</span>
+                    <input v-model="form.count" type="number" min="1" max="500" step="1" :class="[ADMIN_INPUT, 'mt-1 tabular-nums']" />
                 </label>
-                <label class="form-control w-40">
-                    <span class="label-text text-xs">有效期（天，空=永久）</span>
-                    <input v-model="form.expiresInDays" type="number" min="1" max="3650" step="1" class="input input-sm input-bordered" />
+                <label class="block w-40">
+                    <span :class="ADMIN_LABEL">有效期（天，空=永久）</span>
+                    <input
+                        v-model="form.expiresInDays"
+                        type="number"
+                        min="1"
+                        max="3650"
+                        step="1"
+                        :class="[ADMIN_INPUT, 'mt-1 tabular-nums']"
+                    />
                 </label>
-                <button class="btn btn-sm btn-primary" :disabled="generating" @click="generate">
-                    <span v-if="generating" class="loading loading-spinner loading-xs" />
-                    生成兑换码
+                <button :class="ADMIN_BTN_PRIMARY" :disabled="generating" @click="generate">
+                    <Icon icon="ri:coupon-line" class="h-3.25 w-3.25" />
+                    <span>{{ generating ? "生成中…" : "生成兑换码" }}</span>
                 </button>
             </div>
-            <div v-if="lastCodes.length > 0" class="mt-3 border-t border-base-300 pt-3">
-                <div class="mb-2 flex items-center gap-2">
-                    <span class="text-xs text-base-content/60">本批 {{ lastCodes.length }} 张（批次 {{ lastBatchId }}）</span>
-                    <button class="btn btn-xs btn-outline" @click="copyText(lastCodes.join('\n'), '本批兑换码')">
-                        复制全部
+
+            <div v-if="lastCodes.length > 0" class="mt-3 border-t border-base-content/10 pt-3">
+                <div class="mb-2 flex flex-wrap items-center gap-3">
+                    <span class="text-[11.5px] text-base-content/60">
+                        本批 <b class="font-orbitron tabular-nums text-base-content/85">{{ lastCodes.length }}</b> 张（批次
+                        <span :class="[ADMIN_MONO, 'text-base-content/70']">{{ lastBatchId }}</span>）
+                    </span>
+                    <button :class="ADMIN_BTN" @click="copyText(lastCodes.join('\n'), '本批兑换码')">
+                        <Icon icon="ri:file-copy-line" class="h-3.25 w-3.25" />
+                        <span>复制全部</span>
                     </button>
                 </div>
-                <div class="grid max-h-40 grid-cols-2 gap-1 overflow-y-auto font-mono text-xs md:grid-cols-4">
-                    <span v-for="code in lastCodes" :key="code" class="border border-base-300 px-2 py-1">{{ code }}</span>
+                <div
+                    class="grid max-h-40 grid-cols-2 gap-x-4 overflow-y-auto border-t border-base-content/10 md:grid-cols-4"
+                >
+                    <span
+                        v-for="code in lastCodes"
+                        :key="code"
+                        :class="[ADMIN_MONO, 'border-b border-base-content/[0.07] py-1 text-base-content/75']"
+                    >
+                        {{ code }}
+                    </span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 批次列表 -->
-        <div class="card mb-6 border border-base-300 bg-base-100 p-5 shadow-sm">
-            <div class="mb-3 flex items-center justify-between">
-                <h3 class="text-sm font-semibold">批次</h3>
-                <button class="btn btn-xs btn-ghost" :disabled="batchesLoading" @click="loadBatches">
-                    <span v-if="batchesLoading" class="loading loading-spinner loading-xs" />
-                    刷新
+        <!-- 批次 -->
+        <section class="border-b border-base-content/10 py-3">
+            <div class="mb-2 flex items-center gap-2">
+                <h2 class="text-[15px] font-semibold text-base-content">批次</h2>
+                <span class="font-orbitron text-[11px] tabular-nums text-base-content/40">{{ batches.length }}</span>
+                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+                <button :class="ADMIN_BTN" :disabled="batchesLoading" @click="loadBatches">
+                    <Icon icon="ri:refresh-line" :class="['h-3.25 w-3.25', batchesLoading ? 'animate-spin' : '']" />
+                    <span>刷新</span>
                 </button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>批次</th>
-                            <th>面额</th>
-                            <th>总数</th>
-                            <th>已兑换</th>
-                            <th>已作废</th>
-                            <th>未使用</th>
-                            <th>有效期</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="batch in batches" :key="batch.id">
-                            <td class="font-mono text-xs">{{ batch.id }}</td>
-                            <td class="tabular-nums">{{ formatCost(batch.amountMicros) }}</td>
-                            <td>{{ batch.total }}</td>
-                            <td>{{ batch.redeemed }}</td>
-                            <td>{{ batch.revoked }}</td>
-                            <td>{{ batch.unused }}</td>
-                            <td class="text-xs">{{ expireLabel(batch.expiresAt) }}</td>
-                            <td class="flex gap-1">
-                                <button class="btn btn-xs btn-ghost" @click="viewBatch(batch.id)">查看</button>
-                                <button class="btn btn-xs btn-ghost text-error" :disabled="batch.unused === 0" @click="revokeBatch(batch.id)">
-                                    作废未用
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p v-if="batches.length === 0 && !batchesLoading" class="py-4 text-center text-sm text-base-content/50">暂无批次</p>
-            </div>
-        </div>
 
-        <!-- 码明细 -->
-        <div class="card border border-base-300 bg-base-100 p-5 shadow-sm">
-            <h3 class="mb-3 text-sm font-semibold">兑换码明细</h3>
-            <div class="mb-3 flex flex-wrap items-end gap-2">
-                <label class="form-control w-44">
-                    <span class="label-text text-xs">批次 ID</span>
-                    <input v-model="codeFilter.batchId" type="text" placeholder="全部" class="input input-sm input-bordered" />
+            <div class="relative min-w-0">
+                <div v-if="batchesLoading" :class="ADMIN_PROGRESS_TRACK">
+                    <div class="h-full w-1/3 animate-pulse bg-primary" />
+                </div>
+                <ScrollArea horizontal>
+                    <table :class="ADMIN_TABLE">
+                        <thead>
+                            <tr class="bg-base-content/3">
+                                <th :class="ADMIN_TH">批次</th>
+                                <th :class="ADMIN_TH">面额</th>
+                                <th :class="ADMIN_TH">总数</th>
+                                <th :class="ADMIN_TH">已兑换</th>
+                                <th :class="ADMIN_TH">已作废</th>
+                                <th :class="ADMIN_TH">未使用</th>
+                                <th :class="ADMIN_TH">有效期</th>
+                                <th :class="[ADMIN_TH, 'text-right']">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="batch in batches" :key="batch.id" :class="ADMIN_ROW">
+                                <td :class="[ADMIN_TD, ADMIN_MONO]">{{ batch.id }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ formatCost(batch.amountMicros) }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ batch.total }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ batch.redeemed }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ batch.revoked }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ batch.unused }}</td>
+                                <td :class="[ADMIN_TD, 'whitespace-nowrap text-base-content/70']">{{ expireLabel(batch.expiresAt) }}</td>
+                                <td :class="[ADMIN_TD, 'text-right']">
+                                    <div class="flex items-center justify-end gap-2.5 whitespace-nowrap">
+                                        <button :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL]" @click="viewBatch(batch.id)">
+                                            查看
+                                        </button>
+                                        <button
+                                            :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_ERROR]"
+                                            :disabled="batch.unused === 0"
+                                            @click="revokeBatch(batch.id)"
+                                        >
+                                            作废未用
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr v-if="batches.length === 0 && !batchesLoading">
+                                <td colspan="8" class="border-b border-base-content/10">
+                                    <div :class="ADMIN_EMPTY">
+                                        <Icon icon="ri:inbox-line" class="h-5.5 w-5.5 text-base-content/20" />
+                                        <p class="text-[12px] text-base-content/50">暂无批次</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ScrollArea>
+            </div>
+        </section>
+
+        <!-- 兑换码明细 -->
+        <section class="flex min-h-0 flex-1 flex-col py-3">
+            <div class="mb-2 flex items-center gap-2">
+                <h2 class="text-[15px] font-semibold text-base-content">兑换码明细</h2>
+                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+            </div>
+
+            <div class="flex flex-wrap items-end gap-x-5 gap-y-3 border-b border-base-content/10 pb-2.5">
+                <label class="block w-44">
+                    <span :class="ADMIN_LABEL">批次 ID</span>
+                    <input v-model="codeFilter.batchId" type="text" placeholder="全部" :class="[ADMIN_INPUT, 'mt-1']" />
                 </label>
-                <label class="form-control w-32">
-                    <span class="label-text text-xs">状态</span>
-                    <select v-model="codeFilter.status" class="select select-sm select-bordered">
-                        <option value="">全部</option>
-                        <option value="unused">未使用</option>
-                        <option value="redeemed">已兑换</option>
-                        <option value="revoked">已作废</option>
-                    </select>
-                </label>
-                <label class="form-control w-56">
-                    <span class="label-text text-xs">兑换码搜索</span>
-                    <input v-model="codeFilter.search" type="text" placeholder="输入完整或部分码" class="input input-sm input-bordered" />
+                <div class="flex flex-col gap-1">
+                    <span :class="ADMIN_LABEL">状态</span>
+                    <div class="flex flex-wrap items-center gap-1">
+                        <button
+                            v-for="option in STATUS_OPTIONS"
+                            :key="option.value"
+                            :class="[ADMIN_CHIP, codeFilter.status === option.value ? ADMIN_CHIP_ON : ADMIN_CHIP_OFF]"
+                            @click="changeStatus(option.value)"
+                        >
+                            {{ option.label }}
+                        </button>
+                    </div>
+                </div>
+                <label class="block w-56">
+                    <span :class="ADMIN_LABEL">兑换码搜索</span>
+                    <input
+                        v-model="codeFilter.search"
+                        type="text"
+                        placeholder="输入完整或部分码"
+                        :class="[ADMIN_INPUT, 'mt-1']"
+                        @keyup.enter="
+                            codesPage = 1;
+                            loadCodes();
+                        "
+                    />
                 </label>
                 <button
-                    class="btn btn-sm btn-outline"
+                    :class="ADMIN_BTN"
                     @click="
                         codesPage = 1;
                         loadCodes();
                     "
                 >
-                    查询
+                    <Icon icon="ri:search-line" class="h-3.25 w-3.25" />
+                    <span>查询</span>
                 </button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>兑换码</th>
-                            <th>面额</th>
-                            <th>状态</th>
-                            <th>兑换时间</th>
-                            <th>有效期</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in codes" :key="item.code">
-                            <td class="font-mono text-xs">{{ item.code }}</td>
-                            <td class="tabular-nums">{{ formatCost(item.amountMicros) }}</td>
-                            <td>
-                                <span
-                                    class="badge badge-sm"
-                                    :class="item.status === 'unused' ? 'badge-success' : item.status === 'redeemed' ? 'badge-info' : 'badge-error'"
-                                >
-                                    {{ statusLabel(item.status) }}
-                                </span>
-                            </td>
-                            <td class="text-xs">{{ item.redeemedAt ? formatDateTime(item.redeemedAt) : "-" }}</td>
-                            <td
-                                class="text-xs"
-                                :class="item.expiresAt && item.expiresAt < Date.now() && item.status === 'unused' ? 'text-error' : ''"
-                            >
-                                {{ expireLabel(item.expiresAt) }}
-                            </td>
-                            <td>
-                                <button
-                                    v-if="item.status === 'unused'"
-                                    class="btn btn-xs btn-ghost text-error"
-                                    @click="revokeCode(item.code)"
-                                >
-                                    作废
-                                </button>
-                                <span v-else class="text-xs text-base-content/40">-</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p v-if="codes.length === 0 && !codesLoading" class="py-4 text-center text-sm text-base-content/50">暂无数据</p>
-            </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-base-content/60">
-                <span>共 {{ codesTotal }} 条</span>
-                <div class="flex items-center gap-2">
-                    <button
-                        class="btn btn-xs"
-                        :disabled="codesPage <= 1"
-                        @click="
-                            codesPage--;
-                            loadCodes();
-                        "
-                    >
-                        上一页
-                    </button>
-                    <span>{{ codesPage }} / {{ totalPages() }}</span>
-                    <button
-                        class="btn btn-xs"
-                        :disabled="codesPage >= totalPages()"
-                        @click="
-                            codesPage++;
-                            loadCodes();
-                        "
-                    >
-                        下一页
-                    </button>
+
+            <div class="relative min-w-0 flex-1">
+                <div v-if="codesLoading" :class="ADMIN_PROGRESS_TRACK">
+                    <div class="h-full w-1/3 animate-pulse bg-primary" />
                 </div>
+                <ScrollArea horizontal>
+                    <table :class="ADMIN_TABLE">
+                        <thead>
+                            <tr class="bg-base-content/3">
+                                <th :class="ADMIN_TH">兑换码</th>
+                                <th :class="ADMIN_TH">面额</th>
+                                <th :class="ADMIN_TH">状态</th>
+                                <th :class="ADMIN_TH">兑换时间</th>
+                                <th :class="ADMIN_TH">有效期</th>
+                                <th :class="[ADMIN_TH, 'text-right']">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in codes" :key="item.code" :class="ADMIN_ROW">
+                                <td :class="[ADMIN_TD, ADMIN_MONO]">{{ item.code }}</td>
+                                <td :class="[ADMIN_TD, 'tabular-nums']">{{ formatCost(item.amountMicros) }}</td>
+                                <td :class="[ADMIN_TD, 'whitespace-nowrap']">
+                                    <span :class="[ADMIN_BADGE, statusBadgeClass(item.status)]">{{ statusLabel(item.status) }}</span>
+                                </td>
+                                <td :class="[ADMIN_TD, 'whitespace-nowrap text-base-content/70']">
+                                    {{ item.redeemedAt ? formatDateTime(item.redeemedAt) : "-" }}
+                                </td>
+                                <td
+                                    :class="[
+                                        ADMIN_TD,
+                                        'whitespace-nowrap',
+                                        item.expiresAt && item.expiresAt < Date.now() && item.status === 'unused'
+                                            ? 'text-error'
+                                            : 'text-base-content/70',
+                                    ]"
+                                >
+                                    {{ expireLabel(item.expiresAt) }}
+                                </td>
+                                <td :class="[ADMIN_TD, 'text-right']">
+                                    <div class="flex items-center justify-end whitespace-nowrap">
+                                        <button
+                                            v-if="item.status === 'unused'"
+                                            :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_ERROR]"
+                                            @click="revokeCode(item.code)"
+                                        >
+                                            作废
+                                        </button>
+                                        <span v-else class="text-[11.5px] text-base-content/30">-</span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr v-if="codes.length === 0 && !codesLoading">
+                                <td colspan="6" class="border-b border-base-content/10">
+                                    <div :class="ADMIN_EMPTY">
+                                        <Icon icon="ri:inbox-line" class="h-5.5 w-5.5 text-base-content/20" />
+                                        <p class="text-[12px] text-base-content/50">暂无数据</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ScrollArea>
+
+                <PageFoot
+                    :page="codesPage"
+                    :pageSize="CODES_PAGE_SIZE"
+                    :totalPages="totalPages()"
+                    :count="codesTotal"
+                    @update:page="changeCodesPage"
+                />
             </div>
-        </div>
+        </section>
     </div>
 </template>

@@ -12,6 +12,7 @@ import {
     updateScriptMutation,
 } from "@/api/graphql"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 const scriptCategories = ref<ScriptCategory[]>([])
@@ -62,7 +63,7 @@ const config = computed<AdminCrudConfig<Script>>(() => ({
         {
             key: "title",
             title: "标题",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate",
+            cellClass: "font-medium max-w-xs truncate",
         },
         {
             key: "category",
@@ -72,7 +73,7 @@ const config = computed<AdminCrudConfig<Script>>(() => ({
                 const category = String(value || "")
                 return category || "-"
             },
-            badgeClass: "badge-ghost",
+            badgeClass: ADMIN_BADGE_NEUTRAL,
         },
         {
             key: "user",

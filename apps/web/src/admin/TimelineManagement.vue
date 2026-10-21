@@ -40,12 +40,12 @@ const config: AdminCrudConfig<Timeline> = {
         {
             key: "title",
             title: "标题",
-            cellClass: "px-2 text-sm font-semibold",
+            cellClass: "font-semibold",
         },
         {
             key: "charId",
             title: "角色",
-            cellClass: "px-2",
+            
             formatter: value => charName(Number(value || 0)),
         },
         {
@@ -76,14 +76,14 @@ const config: AdminCrudConfig<Timeline> = {
         {
             key: "user",
             title: "作者",
-            cellClass: "px-2",
+            
             accessor: item => item.user?.name,
             formatter: value => String(value || "-"),
         },
         {
             key: "createdAt",
             title: "创建日期",
-            cellClass: "px-2 text-xs",
+            cellClass: "text-base-content/70",
             formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],

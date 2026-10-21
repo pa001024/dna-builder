@@ -13,6 +13,7 @@ import type { GameMod } from "@/api/gen/api-types"
 import { typedQuery } from "@/api/query"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_ERROR, ADMIN_BADGE_NEUTRAL, ADMIN_BADGE_PRIMARY, ADMIN_BADGE_SUCCESS, ADMIN_BADGE_WARNING } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 /** 管理页列表查询参数。 */
@@ -121,7 +122,7 @@ const config: AdminCrudConfig<GameMod> = {
         {
             key: "name",
             title: "名称",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate",
+            cellClass: "font-medium max-w-xs truncate",
         },
         {
             key: "category",
@@ -131,12 +132,12 @@ const config: AdminCrudConfig<GameMod> = {
             formatter: value => categoryLabel(String(value)),
             badgeClass: (_, value) => {
                 const map: Record<string, string> = {
-                    char: "badge-primary",
-                    weapon: "badge-secondary",
-                    other: "badge-info",
-                    standalone: "badge-warning",
+                    char: ADMIN_BADGE_PRIMARY,
+                    weapon: ADMIN_BADGE_SUCCESS,
+                    other: ADMIN_BADGE_NEUTRAL,
+                    standalone: ADMIN_BADGE_WARNING,
                 }
-                return map[String(value)] || "badge-ghost"
+                return map[String(value)] || ADMIN_BADGE_NEUTRAL
             },
         },
         {
@@ -144,7 +145,7 @@ const config: AdminCrudConfig<GameMod> = {
             title: "适用实体",
             accessor: item => item.entity || "—",
             formatter: value => String(value || "—"),
-            cellClass: "px-8 py-5 text-sm text-base-content/85 max-w-[8rem] truncate",
+            cellClass: "max-w-[8rem] truncate",
         },
         {
             key: "user",
@@ -169,11 +170,11 @@ const config: AdminCrudConfig<GameMod> = {
             formatter: value => statusLabel(String(value)),
             badgeClass: (_, value) => {
                 const map: Record<string, string> = {
-                    pending: "badge-warning",
-                    approved: "badge-success",
-                    rejected: "badge-error",
+                    pending: ADMIN_BADGE_WARNING,
+                    approved: ADMIN_BADGE_SUCCESS,
+                    rejected: ADMIN_BADGE_ERROR,
                 }
-                return map[String(value)] || "badge-ghost"
+                return map[String(value)] || ADMIN_BADGE_NEUTRAL
             },
         },
         {

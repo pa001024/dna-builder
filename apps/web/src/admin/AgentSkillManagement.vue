@@ -1,6 +1,29 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue"
 import { type AgentSkillMeta, listAgentSkills } from "@/api/agentSkill"
+import AdminPageHeader from "./AdminPageHeader.vue"
+import {
+    ADMIN_BADGE,
+    ADMIN_BADGE_ERROR,
+    ADMIN_BADGE_SUCCESS,
+    ADMIN_BTN,
+    ADMIN_EMPTY,
+    ADMIN_INPUT,
+    ADMIN_LABEL,
+    ADMIN_MONO,
+    ADMIN_NUM,
+    ADMIN_NUM_UNIT,
+    ADMIN_PROGRESS_TRACK,
+    ADMIN_ROW,
+    ADMIN_ROW_ACTION,
+    ADMIN_ROW_TONE_NEUTRAL,
+    ADMIN_STAT_CELL,
+    ADMIN_STAT_LABEL,
+    ADMIN_STAT_VALUE,
+    ADMIN_TABLE,
+    ADMIN_TD,
+    ADMIN_TH,
+} from "./admin-ui"
 
 /**
  * Agent 技能浏览页：技能库是服务端 `server/skills/<技能名>/` 下的普通目录，由 git 管理版本。
@@ -32,7 +55,7 @@ const filteredSkills = computed(() =>
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredSkills.value.length / PAGE_SIZE)))
 const visibleSkills = computed(() => filteredSkills.value.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE))
 
-/** 统计卡数据（全量口径，不受筛选影响） */
+/** 统计开本数据（全量口径，不受筛选影响） */
 const stats = computed(() => ({
     total: skills.value.length,
     files: skills.value.reduce((sum, skill) => sum + skill.fileCount, 0),
@@ -84,114 +107,137 @@ onMounted(loadSkills)
 </script>
 
 <template>
-    <div class="animate-fadeIn relative min-h-screen bg-base-200/50 p-6">
-        <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-                <h2 class="text-2xl font-semibold text-base-content">Agent 技能</h2>
-                <p class="mt-1 text-sm text-base-content/70">
-                    技能库位于服务端 <span class="font-mono">server/skills/&lt;技能名&gt;/</span>，由 git 管理版本；本页只读展示清单
+    <div class="admin-page mx-auto flex min-h-full w-full max-w-390 flex-col px-5 pb-5">
+        <AdminPageHeader kicker="Skills" title="Agent 技能" description="技能库位于服务端，由 git 管理版本；本页只读展示清单">
+            <template #actions>
+                <button :class="ADMIN_BTN" :disabled="loading" @click="loadSkills">
+                    <Icon icon="ri:refresh-line" :class="['h-3.25 w-3.25', loading ? 'animate-spin' : '']" />
+                    <span>{{ loading ? "刷新中" : "刷新" }}</span>
+                </button>
+            </template>
+        </AdminPageHeader>
+
+        <!-- 技能库路径：数据放正文，不进副标题 -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-base-content/10 py-2">
+            <span :class="ADMIN_LABEL">Skill Dir</span>
+            <span :class="[ADMIN_MONO, 'text-base-content/70']">server/skills/&lt;技能名&gt;/</span>
+            <span class="text-[10.5px] text-base-content/35">版本由 git 管理</span>
+        </div>
+
+        <!-- 统计开本：技能总数 / 文件总数 / 包总体积 -->
+        <div class="flex border-b border-base-content/10">
+            <div :class="[ADMIN_STAT_CELL, 'pl-0']">
+                <p :class="ADMIN_STAT_LABEL">Skills</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ stats.total }}</span>
+                    <span :class="ADMIN_NUM_UNIT">个技能</span>
                 </p>
             </div>
-            <div class="flex items-center gap-2">
-                <button class="btn btn-sm btn-ghost" :disabled="loading" @click="loadSkills">
-                    <span v-if="loading" class="loading loading-spinner loading-xs"></span>
-                    <Icon v-else icon="ri:refresh-line" />
-                    <span>刷新</span>
-                </button>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">Files</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ stats.files }}</span>
+                    <span :class="ADMIN_NUM_UNIT">个文件</span>
+                </p>
+            </div>
+            <div :class="ADMIN_STAT_CELL">
+                <p :class="ADMIN_STAT_LABEL">Package</p>
+                <p :class="ADMIN_STAT_VALUE">
+                    <span :class="ADMIN_NUM">{{ formatSize(stats.size) }}</span>
+                    <span :class="ADMIN_NUM_UNIT">下发时打包</span>
+                </p>
+            </div>
+            <div class="ml-auto flex items-center pr-0.5 text-[10.5px] text-base-content/35">
+                {{ loading ? "同步中…" : "已同步" }}
             </div>
         </div>
 
-        <!-- 统计 -->
-        <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div class="card border border-base-300 bg-base-100 p-5 shadow-sm">
-                <p class="text-xs text-base-content/60">技能总数</p>
-                <p class="mt-1 font-mono text-lg font-semibold text-base-content">{{ stats.total }}</p>
+        <!-- 检索条：下划线输入 + 方章按钮 -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-base-content/10 py-2.5">
+            <div class="relative w-full max-w-72">
+                <Icon icon="ri:search-line" class="absolute top-1/2 left-0 h-3.5 w-3.5 -translate-y-1/2 text-base-content/35" />
+                <input
+                    v-model="filters.keyword"
+                    type="text"
+                    placeholder="关键词（名称 / 描述）"
+                    :class="[ADMIN_INPUT, 'pr-10 pl-5']"
+                    @input="page = 1"
+                />
+                <kbd
+                    class="pointer-events-none absolute right-0 bottom-1.5 border border-base-content/15 px-1 text-[9px] tracking-[0.08em] text-base-content/30"
+                >
+                    FILTER
+                </kbd>
             </div>
-            <div class="card border border-base-300 bg-base-100 p-5 shadow-sm">
-                <p class="text-xs text-base-content/60">技能文件总数</p>
-                <p class="mt-1 font-mono text-lg font-semibold text-base-content">{{ stats.files }}</p>
-            </div>
-            <div class="card border border-base-300 bg-base-100 p-5 shadow-sm">
-                <p class="text-xs text-base-content/60">包总体积（下发时打包）</p>
-                <p class="mt-1 font-mono text-lg font-semibold text-base-content">{{ formatSize(stats.size) }}</p>
-            </div>
+            <button :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL]" @click="resetFilters">重置</button>
+            <span class="ml-auto font-orbitron text-[11px] tabular-nums text-base-content/40">
+                {{ filteredSkills.length }} / {{ stats.total }} 条
+            </span>
         </div>
 
-        <!-- 筛选 -->
-        <div class="card mb-6 border border-base-300 bg-base-100 p-6 shadow-sm">
-            <div class="flex flex-col gap-4 md:flex-row md:items-end md:flex-wrap">
-                <div class="w-full md:w-64">
-                    <label class="mb-1 block text-xs text-base-content/60">关键词（名称 / 描述）</label>
-                    <input
-                        v-model="filters.keyword"
-                        type="text"
-                        placeholder="如 build / 伤害"
-                        class="input input-bordered w-full"
-                        @input="page = 1"
-                    />
-                </div>
-                <button class="btn btn-ghost" @click="resetFilters">重置</button>
-            </div>
-        </div>
-
-        <div v-if="queryError" class="alert alert-error mb-6 text-sm">
-            <Icon icon="ri:error-warning-line" class="text-lg" />
+        <p v-if="queryError" class="flex items-center gap-1.5 border-l-2 border-error py-1.5 pl-2.5 text-[11.5px] text-error">
+            <Icon icon="ri:error-warning-line" class="h-3.25 w-3.25" />
             <span>{{ queryError }}</span>
-        </div>
+        </p>
 
-        <!-- 列表 -->
-        <div class="card overflow-hidden border border-base-300 bg-base-100 shadow-sm">
+        <div class="relative min-w-0 flex-1">
+            <div v-if="loading" :class="ADMIN_PROGRESS_TRACK">
+                <div class="h-full w-1/3 animate-pulse bg-primary" />
+            </div>
+
             <ScrollArea horizontal>
-                <table class="table w-full">
-                    <thead class="bg-base-200">
-                        <tr>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">技能名</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">描述</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">状态</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">
-                                包（大小 / 文件 / sha）
-                            </th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">
-                                目录更新时间
-                            </th>
+                <table :class="ADMIN_TABLE">
+                    <thead>
+                        <tr class="bg-base-content/3">
+                            <th :class="ADMIN_TH">技能名</th>
+                            <th :class="[ADMIN_TH, 'w-135']">描述</th>
+                            <th :class="[ADMIN_TH, 'w-24']">状态</th>
+                            <th :class="ADMIN_TH">包（大小 / 文件 / sha）</th>
+                            <th :class="ADMIN_TH">目录更新时间</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr
-                            v-for="(skill, index) in visibleSkills"
-                            :key="skill.name"
-                            class="transition-colors duration-200 hover:bg-base-200/50"
-                            :class="{ 'bg-base-200/30': index % 2 === 0 }"
-                        >
-                            <td class="px-4 py-4 text-xs whitespace-nowrap">
-                                <div class="font-mono font-semibold text-base-content/85">{{ skill.name }}</div>
-                                <div v-if="skill.version" class="text-base-content/50">v{{ skill.version }}</div>
+                        <tr v-for="skill in visibleSkills" :key="skill.name" :class="ADMIN_ROW">
+                            <td :class="ADMIN_TD">
+                                <div :class="[ADMIN_MONO, 'font-semibold text-base-content/85']">{{ skill.name }}</div>
+                                <div v-if="skill.version" class="text-[10.5px] text-base-content/45">v{{ skill.version }}</div>
                             </td>
-                            <td class="max-w-72 px-4 py-4 text-xs">
-                                <div class="text-base-content/85">{{ skill.description }}</div>
-                                <div v-if="skill.whenToUse" class="mt-0.5 text-base-content/50">时机：{{ skill.whenToUse }}</div>
+                            <td :class="ADMIN_TD">
+                                <div class="max-w-130">
+                                    <div class="text-base-content/85">{{ skill.description }}</div>
+                                    <div v-if="skill.whenToUse" class="mt-0.5 text-[11px] text-base-content/45">
+                                        时机：{{ skill.whenToUse }}
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-4 py-4 text-xs whitespace-nowrap">
-                                <span class="badge badge-sm" :class="skill.enabled ? 'badge-success' : 'badge-error'">
+                            <td :class="[ADMIN_TD, 'w-24 whitespace-nowrap']">
+                                <span :class="[ADMIN_BADGE, skill.enabled ? ADMIN_BADGE_SUCCESS : ADMIN_BADGE_ERROR]">
                                     {{ skill.enabled ? "启用" : "停用" }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-xs whitespace-nowrap font-mono text-base-content/85">
-                                {{ formatSize(skill.packageSize) }} / {{ skill.fileCount }}
+                            <td :class="[ADMIN_TD, 'whitespace-nowrap text-base-content/85']">
+                                <span class="tabular-nums">{{ formatSize(skill.packageSize) }}</span>
+                                <span class="text-base-content/40"> / </span>
+                                <span class="tabular-nums">{{ skill.fileCount }}</span>
                                 <button
-                                    class="ml-1 text-base-content/75 hover:text-primary hover:underline"
+                                    :class="[ADMIN_MONO, 'ml-2 cursor-pointer text-base-content/55 transition-colors duration-150 hover:text-primary']"
                                     :title="`sha256: ${skill.packageSha}`"
                                     @click="copyText(skill.packageSha)"
                                 >
                                     {{ shortSha(skill.packageSha) }}
                                 </button>
                             </td>
-                            <td class="px-4 py-4 text-xs whitespace-nowrap text-base-content/85">{{ formatTime(skill.updateAt) }}</td>
+                            <td :class="[ADMIN_TD, 'whitespace-nowrap text-base-content/70']">{{ formatTime(skill.updateAt) }}</td>
                         </tr>
 
                         <tr v-if="!loading && filteredSkills.length === 0">
-                            <td colspan="5" class="px-8 py-10 text-center text-sm text-base-content/70">
-                                {{ queryError ? "加载失败" : "服务端 skills 目录下还没有技能，把技能目录放进去即可" }}
+                            <td colspan="5" class="border-b border-base-content/10">
+                                <div :class="ADMIN_EMPTY">
+                                    <Icon icon="ri:magic-line" class="h-6.5 w-6.5 text-base-content/20" />
+                                    <p class="text-[12.5px] text-base-content/55">
+                                        {{ queryError ? "加载失败" : "服务端 skills 目录下还没有技能，把技能目录放进去即可" }}
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -199,10 +245,6 @@ onMounted(loadSkills)
             </ScrollArea>
 
             <PageFoot v-model:page="page" :pageSize="PAGE_SIZE" :totalPages="totalPages" :count="filteredSkills.length" />
-        </div>
-
-        <div v-if="loading" class="absolute inset-0 z-50 flex items-center justify-center bg-base-200/60">
-            <span class="loading loading-spinner loading-lg"></span>
         </div>
     </div>
 </template>

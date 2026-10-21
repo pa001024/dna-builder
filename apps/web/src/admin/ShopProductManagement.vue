@@ -10,6 +10,7 @@ import {
 import { useUIStore } from "@/store/ui"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL, ADMIN_BADGE_PRIMARY, ADMIN_BADGE_SUCCESS, ADMIN_BADGE_WARNING } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 const ui = useUIStore()
@@ -123,14 +124,14 @@ const config: AdminCrudConfig<ShopProduct> = {
         {
             key: "name",
             title: "商品名",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium",
+            cellClass: "font-medium",
         },
         {
             key: "rewardType",
             title: "类型",
             type: "badge",
             formatter: value => (String(value) === "title" ? "称号" : "名字特效"),
-            badgeClass: (_, value) => (String(value) === "title" ? "badge badge-sm badge-secondary" : "badge badge-sm badge-info"),
+            badgeClass: (_, value) => (String(value) === "title" ? ADMIN_BADGE_PRIMARY : ADMIN_BADGE_WARNING),
         },
         {
             key: "rewardName",
@@ -146,7 +147,7 @@ const config: AdminCrudConfig<ShopProduct> = {
             title: "状态",
             type: "badge",
             formatter: value => (value ? "上架" : "下架"),
-            badgeClass: (_, value) => (value ? "badge badge-sm badge-success" : "badge badge-sm badge-ghost"),
+            badgeClass: (_, value) => (value ? ADMIN_BADGE_SUCCESS : ADMIN_BADGE_NEUTRAL),
         },
         {
             key: "timeRange",

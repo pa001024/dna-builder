@@ -4,6 +4,7 @@ import { type AiLogTurnRecord, readAiLogSession } from "@/api/aiLog"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { turnsToChatMessages } from "@/utils/ai-log-replay"
+import { ADMIN_BTN, ADMIN_KICKER, ADMIN_MONO, ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL } from "./admin-ui"
 
 /**
  * AI 会话回放弹窗：按会话 id 拉取全部轮次，用前端对话流组件（`AgentChatMessages`）回放。
@@ -83,35 +84,40 @@ watch(
 
 <template>
     <div v-if="open" class="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4" @click.self="open = false">
-        <div class="card w-full max-w-6xl max-h-[88vh] flex flex-col overflow-hidden bg-base-100 shadow-lg">
-            <header class="shrink-0 flex items-start justify-between gap-4 border-b border-base-300 px-6 py-4">
+        <div class="flex max-h-[88vh] w-full max-w-6xl flex-col overflow-hidden border border-base-content/15 bg-base-100">
+            <header class="flex shrink-0 items-start justify-between gap-4 border-b border-base-content/10 px-5 py-3.5">
                 <div class="min-w-0">
-                    <h3 class="text-lg font-semibold text-base-content">会话回放</h3>
-                    <p class="mt-1 font-mono text-xs text-base-content/60 break-all">{{ sessionId }}</p>
-                    <p class="mt-1 text-xs text-base-content/50">{{ summary }}</p>
+                    <p :class="ADMIN_KICKER">Session Replay</p>
+                    <h3 class="mt-1.5 text-[17px] font-semibold leading-tight text-base-content">会话回放</h3>
+                    <p :class="[ADMIN_MONO, 'mt-1 break-all text-base-content/55']">{{ sessionId }}</p>
+                    <p class="mt-1 text-[11px] text-base-content/45">{{ summary }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
-                    <button class="btn btn-sm btn-ghost" @click="copyText(sessionId, '会话 ID')">
-                        <Icon icon="ri:file-copy-line" />
+                    <button :class="ADMIN_BTN" @click="copyText(sessionId, '会话 ID')">
+                        <Icon icon="ri:file-copy-line" class="h-3.25 w-3.25" />
                         <span>复制 ID</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost" aria-label="关闭" @click="open = false">
-                        <Icon icon="ri:close-line" class="text-lg" />
+                    <button
+                        :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_NEUTRAL, 'px-1.5 text-[15px] leading-none']"
+                        aria-label="关闭"
+                        @click="open = false"
+                    >
+                        <Icon icon="ri:close-line" class="h-3.75 w-3.75" />
                     </button>
                 </div>
             </header>
 
             <div class="flex min-h-0 flex-1 flex-col">
-                <div v-if="loading" class="flex flex-1 items-center justify-center gap-2 py-16 text-sm text-base-content/70">
-                    <span class="loading loading-spinner loading-md"></span>
+                <div v-if="loading" class="flex flex-1 items-center justify-center gap-2 py-16 text-[12px] text-base-content/50">
+                    <Icon icon="ri:refresh-line" class="h-3.5 w-3.5 animate-spin" />
                     <span>加载会话…</span>
                 </div>
 
-                <div v-else-if="error" class="flex-1 overflow-y-auto p-6">
-                    <div class="alert alert-error text-sm">
-                        <Icon icon="ri:error-warning-line" class="text-lg" />
+                <div v-else-if="error" class="flex-1 overflow-y-auto p-5">
+                    <p class="flex items-center gap-1.5 border-l-2 border-error py-1.5 pl-2.5 text-[11.5px] text-error">
+                        <Icon icon="ri:error-warning-line" class="h-3.25 w-3.25" />
                         <span>{{ error }}</span>
-                    </div>
+                    </p>
                 </div>
 
                 <!-- 前端同款对话流：user 提问右对齐气泡、assistant markdown 正文、过程折叠、meta 小字 -->

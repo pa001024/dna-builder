@@ -8,6 +8,7 @@ import {
     updateGuideMutation,
 } from "@/api/graphql"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL, ADMIN_BADGE_PRIMARY, ADMIN_BADGE_SUCCESS } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 /**
@@ -34,7 +35,7 @@ const config: AdminCrudConfig<Guide> = {
         {
             key: "title",
             title: "标题",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate",
+            cellClass: "font-medium max-w-xs truncate",
         },
         {
             key: "type",
@@ -51,9 +52,9 @@ const config: AdminCrudConfig<Guide> = {
             },
             badgeClass: (_, value) => {
                 const type = String(value || "")
-                if (type === "char" || type === "text") return "badge-primary"
-                if (type === "mission" || type === "image") return "badge-secondary"
-                return "badge-ghost"
+                if (type === "char" || type === "text") return ADMIN_BADGE_PRIMARY
+                if (type === "mission" || type === "image") return ADMIN_BADGE_SUCCESS
+                return ADMIN_BADGE_NEUTRAL
             },
         },
         {

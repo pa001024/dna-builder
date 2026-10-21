@@ -11,6 +11,7 @@ import {
 import { skinData } from "@/data/d/accessory.data"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL, ADMIN_BADGE_PRIMARY } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 /**
@@ -46,7 +47,7 @@ const config: AdminCrudConfig<DyePlan> = {
         {
             key: "title",
             title: "标题",
-            cellClass: "px-8 py-5 text-sm text-base-content font-medium max-w-xs truncate",
+            cellClass: "font-medium max-w-xs truncate",
         },
         {
             key: "user",
@@ -58,7 +59,7 @@ const config: AdminCrudConfig<DyePlan> = {
             key: "skin",
             title: "皮肤",
             accessor: item => skinData.find(skin => skin.id === item.skinId)?.name || `皮肤 #${item.skinId}`,
-            cellClass: "px-8 py-5 text-sm text-base-content/85 max-w-xs truncate",
+            cellClass: "max-w-xs truncate",
         },
         {
             key: "hair",
@@ -66,14 +67,14 @@ const config: AdminCrudConfig<DyePlan> = {
             type: "badge",
             accessor: item => item.hairCode,
             formatter: value => (value ? "含发型" : "无"),
-            badgeClass: (_, value) => (value ? "badge-primary" : "badge-ghost"),
+            badgeClass: (_, value) => (value ? ADMIN_BADGE_PRIMARY : ADMIN_BADGE_NEUTRAL),
         },
         {
             key: "hairCode",
             title: "发型染色码",
             accessor: item => item.hairCode,
             formatter: value => String(value || "-"),
-            cellClass: "px-8 py-5 text-sm font-mono text-base-content/70 max-w-[9rem] truncate",
+            cellClass: "font-mono max-w-[9rem] truncate text-base-content/70",
         },
         {
             key: "colorIds",

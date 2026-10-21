@@ -3,6 +3,7 @@ import { deleteUserMutation, type User, updateUserMutation, usersWithCountQuery 
 import { useUIStore } from "@/store/ui"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_NEUTRAL, ADMIN_BADGE_PRIMARY } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 const ui = useUIStore()
@@ -28,7 +29,7 @@ const config: AdminCrudConfig<User> = {
         {
             key: "id",
             title: "ID",
-            cellClass: "px-8 py-5 whitespace-nowrap text-sm font-medium text-base-content font-mono",
+            cellClass: "whitespace-nowrap font-mono font-medium",
         },
         {
             key: "email",
@@ -38,7 +39,7 @@ const config: AdminCrudConfig<User> = {
         {
             key: "name",
             title: "用户名",
-            cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/85 font-medium",
+            cellClass: "whitespace-nowrap font-medium",
             formatter: value => String(value || "-"),
         },
         {
@@ -51,7 +52,7 @@ const config: AdminCrudConfig<User> = {
             title: "角色",
             type: "badge",
             formatter: value => String(value || "user"),
-            badgeClass: (_, value) => (value === "admin" ? "badge-primary" : "badge-ghost"),
+            badgeClass: (_, value) => (value === "admin" ? ADMIN_BADGE_PRIMARY : ADMIN_BADGE_NEUTRAL),
         },
         {
             key: "level",
@@ -66,7 +67,7 @@ const config: AdminCrudConfig<User> = {
         {
             key: "createdAt",
             title: "创建时间",
-            cellClass: "px-8 py-5 whitespace-nowrap text-sm text-base-content/70",
+            cellClass: "whitespace-nowrap text-base-content/70",
             formatter: value => (value ? formatDateTime(Number(value)) : "-"),
         },
     ],

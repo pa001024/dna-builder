@@ -1,193 +1,145 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 /**
- * 后台管理布局组件
- * 实现页内菜单控制，显示admin下其他页面
+ * 后台管理布局：编号索引轨 + 内容区。
+ * 菜单定义在 admin-menu.ts（与首页模块总览共用），编号即压平顺序；
+ * 主色只用于当前项：左侧竖条 + 编号 + 文字。
  */
 import { computed, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { IconTypes } from "@/components/Icon.vue"
-
-// 定义菜单选项
-const menuItems: {
-    name: string
-    path: string
-    icon: IconTypes
-}[] = [
-    {
-        name: "首页",
-        path: "/admin",
-        icon: "ri:line-chart-line",
-    },
-    {
-        name: "用户管理",
-        path: "/admin/user",
-        icon: "ri:team-line",
-    },
-    {
-        name: "攻略管理",
-        path: "/admin/guide",
-        icon: "ri:book-line",
-    },
-    {
-        name: "房间管理",
-        path: "/admin/room",
-        icon: "ri:home-line",
-    },
-    {
-        name: "待办管理",
-        path: "/admin/todo",
-        icon: "ri:checkbox-circle-line",
-    },
-    {
-        name: "构筑管理",
-        path: "/admin/build",
-        icon: "ri:hammer-line",
-    },
-    {
-        name: "时间线管理",
-        path: "/admin/timeline",
-        icon: "ri:timeline-view",
-    },
-    {
-        name: "脚本管理",
-        path: "/admin/script",
-        icon: "ri:code-s-slash-line",
-    },
-    {
-        name: "商城商品",
-        path: "/admin/shop-product",
-        icon: "ri:shopping-bag-4-line",
-    },
-    {
-        name: "兑换记录",
-        path: "/admin/shop-redemption",
-        icon: "ri:exchange-funds-line",
-    },
-    {
-        name: "榜单管理",
-        path: "/admin/ranking",
-        icon: "ri:bar-chart-line",
-    },
-    {
-        name: "染色方案管理",
-        path: "/admin/dyeplan",
-        icon: "ri:palette-line",
-    },
-    {
-        name: "MOD 分享管理",
-        path: "/admin/game-mod",
-        icon: "ri:puzzle-line",
-    },
-    {
-        name: "AI 调用日志",
-        path: "/admin/ai-log",
-        icon: "ri:robot-2-line",
-    },
-    {
-        name: "Agent 技能",
-        path: "/admin/agent-skill",
-        icon: "ri:magic-line",
-    },
-    {
-        name: "充值兑换码",
-        path: "/admin/ai-recharge",
-        icon: "ri:coupon-line",
-    },
-]
+import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
+import { ADMIN_MENU_FLAT, ADMIN_MENU_GROUPS, adminMenuNo } from "./admin-menu"
 
 const route = useRoute()
 const router = useRouter()
+const user = useUserStore()
+const ui = useUIStore()
 const collapsed = ref(false)
 
-// 计算当前激活的菜单
-const activeMenu = computed(() => {
-    return menuItems.find(item => route.path === item.path)?.path || "/admin"
+/** 当前路由对应的菜单项（子路径也归属到所属模块） */
+const activeItem = computed(() => {
+    const matched = [...ADMIN_MENU_FLAT].filter(item => item.path !== "/admin").sort((a, b) => b.path.length - a.path.length)
+    return matched.find(item => route.path === item.path || route.path.startsWith(`${item.path}/`)) ?? ADMIN_MENU_FLAT[0]
 })
 
-// 切换菜单折叠状态
-const toggleCollapse = () => {
-    collapsed.value = !collapsed.value
+/** 当前管理员展示名（未登录时显示占位） */
+const adminName = computed(() => user.name || user.email || "未登录")
+
+function navigateTo(path: string) {
+    router.push(path)
 }
 
-// 导航到指定路由
-const navigateTo = (path: string) => {
-    router.push(path)
+/**
+ * @description 复制当前管理员 ID：后台按 ID 发货 / 排查时最常用的一次复制。
+ */
+async function copyAdminId() {
+    const id = user.id || ""
+    if (!id) {
+        ui.showErrorMessage("当前登录信息里没有用户 ID")
+        return
+    }
+    try {
+        await navigator.clipboard.writeText(id)
+        ui.showSuccessMessage("已复制用户 ID")
+    } catch {
+        ui.showErrorMessage("复制失败，请手动选中复制")
+    }
 }
 </script>
 
 <template>
-    <div class="h-full w-full bg-base-200 flex flex-col">
-        <!-- 顶部导航栏 -->
-        <header class="bg-base-100 border-b border-base-300 px-4 py-3 flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-3">
-                <button class="btn btn-circle btn-ghost" aria-label="切换菜单" @click="toggleCollapse">
-                    <Icon :icon="collapsed ? 'ri:menu-unfold-line' : 'ri:menu-fold-line'" />
+    <div class="flex h-full w-full flex-col bg-base-300">
+        <header class="flex h-12 shrink-0 items-center gap-3 border-b border-base-content/10 bg-base-100 px-4">
+            <button
+                class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary"
+                aria-label="切换菜单"
+                @click="collapsed = !collapsed"
+            >
+                <Icon :icon="collapsed ? 'ri:menu-unfold-line' : 'ri:menu-fold-line'" class="h-4.25 w-4.25" />
+            </button>
+            <span class="h-4 w-px bg-base-content/15" aria-hidden="true" />
+            <span class="flex items-center gap-1 font-orbitron text-[12px] font-semibold leading-none text-primary">
+                ADMIN
+                <span class="text-[9.5px] text-primary/50">/</span>
+            </span>
+            <nav class="flex min-w-0 items-center gap-2 text-[12.5px]">
+                <button class="shrink-0 cursor-pointer text-base-content/45 transition-colors duration-150 hover:text-primary" @click="navigateTo('/admin')">
+                    后台
                 </button>
-                <h1 class="text-xl font-bold text-base-content">后台管理</h1>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-base-content/70">管理员</span>
-                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Icon icon="ri:admin-line" class="text-primary" />
-                </div>
+                <Icon icon="ri:arrow-right-s-line" class="h-3.5 w-3.5 shrink-0 text-base-content/20" />
+                <span class="truncate font-semibold text-base-content">{{ activeItem?.name || "后台管理" }}</span>
+                <span class="hidden shrink-0 font-orbitron text-[10px] tabular-nums text-base-content/30 sm:inline">
+                    {{ activeItem ? adminMenuNo(activeItem.path) : "--" }}
+                </span>
+            </nav>
+            <div class="ml-auto flex items-center gap-2 text-[11px] text-base-content/45">
+                <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+                <span class="max-w-40 truncate">{{ adminName }}</span>
+                <span class="h-4 w-px bg-base-content/15" aria-hidden="true" />
+                <button
+                    class="inline-flex cursor-pointer items-center gap-1 rounded-xs px-1 py-0.5 text-base-content/45 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary"
+                    title="复制用户 ID"
+                    @click="copyAdminId"
+                >
+                    <Icon icon="ri:file-copy-line" class="h-3.25 w-3.25" />
+                    <span class="hidden font-orbitron text-[10px] tabular-nums md:inline">{{ user.id ? user.id.slice(0, 8) : "—" }}</span>
+                </button>
             </div>
         </header>
 
-        <!-- 主内容区域 -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- 侧边菜单 -->
-            <aside :class="['bg-base-100 border-r border-base-300 transition-all duration-300 ease-in-out', collapsed ? 'w-12' : 'w-56']">
+        <div class="flex min-h-0 flex-1">
+            <aside
+                class="flex shrink-0 flex-col border-r border-base-content/10 bg-base-100 transition-[width] duration-200 ease-out"
+                :class="collapsed ? 'w-14' : 'w-56'"
+            >
                 <ScrollArea class="h-full">
-                    <nav class="py-4">
-                        <ul>
-                            <li v-for="item in menuItems" :key="item.path" class="group">
-                                <button
-                                    :class="[
-                                        'flex items-center gap-3 px-3 py-2 w-full transition-all duration-200 truncate',
-                                        'text-left font-medium',
-                                        activeMenu === item.path
-                                            ? 'bg-primary/10 text-primary border-r-4 border-primary'
-                                            : 'text-base-content/70 hover:bg-base-200 hover:text-base-content',
-                                    ]"
-                                    @click="navigateTo(item.path)"
+                    <nav class="py-2">
+                        <template v-for="group in ADMIN_MENU_GROUPS" :key="group.name">
+                            <p
+                                v-if="!collapsed"
+                                class="mt-3 mb-1 flex items-center gap-2 px-3 text-[9.5px] font-semibold tracking-[0.24em] text-base-content/30 uppercase first:mt-0"
+                            >
+                                {{ group.name }}
+                                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+                            </p>
+                            <span v-else class="mx-3 my-2 block h-px bg-base-content/10" aria-hidden="true" />
+                            <button
+                                v-for="item in group.items"
+                                :key="item.path"
+                                :title="collapsed ? item.name : undefined"
+                                class="relative flex w-full cursor-pointer items-center gap-2.5 py-1.5 pr-3 pl-3 text-left text-[12.5px] transition-colors duration-150"
+                                :class="
+                                    activeItem?.path === item.path
+                                        ? 'bg-primary/8 font-semibold text-base-content'
+                                        : 'text-base-content/65 hover:bg-base-content/5 hover:text-base-content'
+                                "
+                                @click="navigateTo(item.path)"
+                            >
+                                <span
+                                    v-if="activeItem?.path === item.path"
+                                    class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+                                    aria-hidden="true"
+                                />
+                                <span
+                                    class="w-4 shrink-0 font-orbitron text-[9.5px] tabular-nums"
+                                    :class="activeItem?.path === item.path ? 'text-primary' : 'text-base-content/30'"
                                 >
-                                    <div class="flex items-center justify-center w-6 h-6">
-                                        <Icon :icon="item.icon" :size="18" />
-                                    </div>
-                                    <span v-if="!collapsed" class="transition-opacity duration-200">
-                                        {{ item.name }}
-                                    </span>
-                                </button>
-                            </li>
-                        </ul>
+                                    {{ adminMenuNo(item.path) }}
+                                </span>
+                                <Icon :icon="item.icon" class="h-3.75 w-3.75 shrink-0 opacity-80" />
+                                <span v-if="!collapsed" class="min-w-0 flex-1 truncate">{{ item.name }}</span>
+                            </button>
+                        </template>
                     </nav>
                 </ScrollArea>
+                <div v-if="!collapsed" class="shrink-0 border-t border-base-content/10 px-3 py-2 text-[10px] tracking-wide text-base-content/30">
+                    {{ ADMIN_MENU_FLAT.length }} 个模块 · {{ ADMIN_MENU_GROUPS.length }} 组
+                </div>
             </aside>
 
-            <!-- 内容区域 -->
-            <ScrollArea class="flex-1">
+            <ScrollArea class="min-w-0 flex-1">
                 <router-view />
             </ScrollArea>
         </div>
     </div>
 </template>
-
-<style scoped>
-/* 自定义滚动条样式 */
-main::-webkit-scrollbar {
-    width: 8px;
-}
-
-main::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-main::-webkit-scrollbar-thumb {
-    background: rgb(var(--primary) / 0.2);
-    border-radius: 4px;
-}
-
-main::-webkit-scrollbar-thumb:hover {
-    background: rgb(var(--primary) / 0.3);
-}
-</style>

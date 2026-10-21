@@ -9,6 +9,7 @@ import {
 } from "@/api/graphql"
 import { formatDateTime } from "@/utils/time"
 import AdminCrudPage from "./AdminCrudPage.vue"
+import { ADMIN_BADGE_PRIMARY, ADMIN_BADGE_WARNING } from "./admin-ui"
 import type { AdminCrudConfig } from "./crud-config"
 
 const DIRECT_GRANT_LOOKUP_LIMIT = 500
@@ -132,7 +133,7 @@ const config: AdminCrudConfig<ShopRedemption> = {
             type: "badge",
             accessor: item => item.product?.rewardType || "",
             formatter: value => (String(value) === "title" ? "称号" : "名字特效"),
-            badgeClass: (_, value) => (String(value) === "title" ? "badge badge-sm badge-secondary" : "badge badge-sm badge-info"),
+            badgeClass: (_, value) => (String(value) === "title" ? ADMIN_BADGE_PRIMARY : ADMIN_BADGE_WARNING),
         },
         {
             key: "pointsCost",
