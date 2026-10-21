@@ -37,16 +37,16 @@ jobs:
             LIBCLANG_PATH: C:\Program Files\LLVM\bin
             OPENCV_BIN_PATHS: C:\opencv\build\x64\vc16\bin
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   fetch-depth: 0
 
             - name: setup node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: lts/*
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v5
               name: Install pnpm
 
             - name: install Rust stable

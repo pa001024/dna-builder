@@ -42,20 +42,20 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Use Node.js LTS
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v6
               with:
                   node-version: lts/*
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v5
               name: Install pnpm
               with:
                   cache: true
 
             - name: Cache vcpkg
-              uses: actions/cache@v3
+              uses: actions/cache@v5
               with:
                   path: |
                       ./vcpkg/installed
@@ -101,7 +101,7 @@ jobs:
 
             - name: Upload artifact
               if: success() && github.event_name != 'pull_request'
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               with:
                   name: dna-builder-alpha-${{ github.sha }}
                   path: ${{ github.workspace }}/apps/web/src-tauri/target/release/dna-builder.exe
