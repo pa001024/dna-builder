@@ -35,18 +35,18 @@ const cargoTomlVersionChanged = updatedCargoTomlContent !== cargoTomlContent
 if (packageJsonVersionChanged) {
     packageJson.version = newVersion
     fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`)
-    // 同步 workspace 成员版本（apps/web/package.json 与 tauri.conf / Cargo.toml 保持一致）
-    const workspacePackages = [
-        ["apps", "web", "package.json"],
-        ["packages", "data", "package.json"],
-    ]
-    for (const segments of workspacePackages) {
-        const workspacePackageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", ...segments)
-        const workspacePackageJson = JSON.parse(fs.readFileSync(workspacePackageJsonPath, "utf8"))
-        if (workspacePackageJson.version !== newVersion) {
-            workspacePackageJson.version = newVersion
-            fs.writeFileSync(workspacePackageJsonPath, `${JSON.stringify(workspacePackageJson, null, 4)}\n`)
-        }
+}
+// 同步 workspace 成员版本：与根版本是否变化无关，根版本手工改过（钩子内 root 未变）时同样要对齐
+const workspacePackages = [
+    ["apps", "web", "package.json"],
+    ["packages", "data", "package.json"],
+]
+for (const segments of workspacePackages) {
+    const workspacePackageJsonPath = path.join(import.meta.url.replace("file:///", ""), "..", "..", ...segments)
+    const workspacePackageJson = JSON.parse(fs.readFileSync(workspacePackageJsonPath, "utf8"))
+    if (workspacePackageJson.version !== newVersion) {
+        workspacePackageJson.version = newVersion
+        fs.writeFileSync(workspacePackageJsonPath, `${JSON.stringify(workspacePackageJson, null, 4)}\n`)
     }
 }
 if (tauriConfVersionChanged) {

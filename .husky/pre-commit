@@ -57,7 +57,7 @@ if git diff --cached --name-only --diff-filter=ACM | rg -n "\\.rs$" >/dev/null; 
 fi
 
 # 暂存修改的版本文件
-git_add_retry -- package.json apps/web/package.json apps/web/src-tauri/tauri.conf.json apps/web/src-tauri/Cargo.lock apps/web/src-tauri/Cargo.toml
+git_add_retry -- package.json apps/web/package.json packages/data/package.json apps/web/src-tauri/tauri.conf.json apps/web/src-tauri/Cargo.lock apps/web/src-tauri/Cargo.toml
 
 # 格式化前已全部暂存时，把钩子引入的改动（biome 格式化 / cargo fmt / 版本号与 i18n 排序）补回暂存区。
 # 直接取格式化后的 worktree 差异走 pathspec-from-file：不拼长命令行（本仓库一次变更可达上千文件），
