@@ -4,7 +4,8 @@ import type { AfkEvent } from "@/api/afkSupport"
 import { dungeonMap } from "@/data/d"
 import { env } from "@/env"
 import { formatAfkEvent, useAfkSupportStore } from "@/store/afkSupport"
-import { AFK_DUNGEON_ALIASES } from "@/utils/afk-ledger"
+import { AFK_DUNGEON_ALIASES, afkDungeonName } from "@/utils/afk-ledger"
+import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 /**
@@ -32,6 +33,17 @@ function eventLink(event: AfkEvent) {
     if (event.id in AFK_DUNGEON_ALIASES) return "/db/rouge"
     const numericId = Number(event.id)
     return Number.isFinite(numericId) && dungeonMap.has(numericId) ? `/db/dungeon/${numericId}` : ""
+}
+
+/**
+ * 副本事件用带括号的完整副本名，其余事件沿用摘要。
+ * @param event 协议事件
+ * @returns 展示文本
+ */
+function eventText(event: AfkEvent) {
+    if (event.kind !== "dungeon") return formatAfkEvent(event)
+    const label = dungeonDisplayName(event.id, afkDungeonName(event.id, event.name))
+    return formatAfkEvent(event).replace(afkDungeonName(event.id, event.name), label)
 }
 
 /**
@@ -140,9 +152,9 @@ function timeLabel(ms: number) {
                             :to="eventLink(event)"
                             class="truncate text-[11px] text-base-content/75 hover:text-primary hover:underline"
                         >
-                            {{ formatAfkEvent(event) }}
+                            {{ eventText(event) }}
                         </SRouterLink>
-                        <span v-else class="truncate text-[11px] text-base-content/75">{{ formatAfkEvent(event) }}</span>
+                        <span v-else class="truncate text-[11px] text-base-content/75">{{ eventText(event) }}</span>
                     </div>
                 </div>
             </div>

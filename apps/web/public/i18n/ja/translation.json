@@ -342,6 +342,8 @@
         "import_done": "{{runs}} 戦闘・{{drops}} ドロップを読み込み（重複 {{skipped}} 件をスキップ）",
         "import_failed": "読み込みに失敗: {{error}}",
         "import_hint": "バックアップを読み込み、既存の記録と統合",
+        "item_source_craft": "製作アイテム",
+        "item_source_loot": "ダンジョン産出",
         "kpi_avg": "平均ドロップ",
         "kpi_drops": "ドロップ合計",
         "kpi_gold": "金ドロップ",

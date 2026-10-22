@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { type AbyssDungeon, abyssDungeonMap, type Dungeon, monsterMap } from "@/data"
+import { type AbyssDungeon, abyssDungeonMap, type Dungeon, dungeonMap, monsterMap } from "@/data"
 import { getRewardDetails } from "./reward-utils"
 
 export const ABYSS_DUNGEON_ELEMENT_KEYS = ["暗", "水", "火", "雷", "风", "光"] as const
@@ -116,6 +116,18 @@ export function getDungeonName(dungeon: Dungeon) {
         return `${t(dungeon.n)}(${t(["角色", "武器", "魔之楔"][walnutType - 1])}${t("委托密函")})`
     }
     return t(dungeon.n)
+}
+
+/**
+ * 按副本 ID 取 `getDungeonName()` 口径的展示名（带「(厄兽 夜航手册)」这类括号）。
+ * @param id 副本 ID（字符串或数字）
+ * @param fallback 数据包里查不到时的回退名
+ * @returns 展示名
+ */
+export function dungeonDisplayName(id: string | number, fallback = ""): string {
+    const numericId = Number(id)
+    const dungeon = Number.isFinite(numericId) ? dungeonMap.get(numericId) : undefined
+    return dungeon ? getDungeonName(dungeon) : fallback || String(id)
 }
 
 /**

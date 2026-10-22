@@ -343,6 +343,8 @@
         "import_done": "전투 {{runs}}개, 드롭 {{drops}}개를 가져왔습니다 (중복 {{skipped}}개 건너뜀)",
         "import_failed": "가져오기 실패: {{error}}",
         "import_hint": "백업을 가져와 기존 기록과 병합",
+        "item_source_craft": "제작 아이템",
+        "item_source_loot": "던전 산출",
         "kpi_avg": "회당 드롭",
         "kpi_drops": "총 드롭",
         "kpi_gold": "황금 드롭",

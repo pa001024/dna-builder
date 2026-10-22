@@ -379,6 +379,8 @@
         "import_done": "已导入 {{runs}} 场、{{drops}} 条掉落（跳过 {{skipped}} 条重复）",
         "import_failed": "导入失败：{{error}}",
         "import_hint": "导入备份并与现有记录合并",
+        "item_source_craft": "铸造产物",
+        "item_source_loot": "副本掉落",
         "kpi_avg": "场均掉落",
         "kpi_drops": "总掉落",
         "kpi_gold": "金色掉落",

@@ -343,6 +343,8 @@
         "import_done": "{{runs}} sessions et {{drops}} objets importés ({{skipped}} doublons ignorés)",
         "import_failed": "Échec de l'import : {{error}}",
         "import_hint": "Importer une sauvegarde et la fusionner",
+        "item_source_craft": "Fabriqué",
+        "item_source_loot": "Butin de donjon",
         "kpi_avg": "Drops / donjon",
         "kpi_drops": "Drops",
         "kpi_gold": "Drops dorés",

@@ -26,10 +26,13 @@ export const AFK_DUNGEON_ALIASES: Record<string, string> = {
 }
 
 /**
- * 取副本的展示名：已知的非副本玩法用别名，其余沿用游戏下发的名字。
+ * 取副本在数据里的名字：已知的非副本玩法用别名，其余沿用游戏下发的名字。
+ *
+ * 这是纯函数，供聚合与单测使用；展示层要「带括号的完整名」请用
+ * `dungeonDisplayName()`（依赖 i18n 与数据包索引）。
  * @param id 副本 ID
  * @param name 游戏下发的名字
- * @returns 展示名
+ * @returns 名字
  */
 export function afkDungeonName(id: string, name: string): string {
     return AFK_DUNGEON_ALIASES[id] ?? (name || id)

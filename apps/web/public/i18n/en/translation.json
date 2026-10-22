@@ -345,6 +345,8 @@
         "import_done": "Imported {{runs}} runs and {{drops}} drops ({{skipped}} duplicates skipped)",
         "import_failed": "Import failed: {{error}}",
         "import_hint": "Import a backup and merge it with existing records",
+        "item_source_craft": "Crafted",
+        "item_source_loot": "Dungeon loot",
         "kpi_avg": "Drops / run",
         "kpi_drops": "Drops",
         "kpi_gold": "Gold drops",

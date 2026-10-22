@@ -147,7 +147,7 @@ const launchTitle = computed(() => {
         case "downloading":
             return "热更下载中"
         case "ready":
-            return "启动游戏"
+            return game.running ? "运行中" : "启动游戏"
     }
 })
 
@@ -163,7 +163,7 @@ const primaryLabel = computed(() => {
         case "downloading":
             return `${gameUpdateStore.displayOverallProgressPercent}%`
         case "ready":
-            return t("game-launcher.launch")
+            return game.running ? "运行中" : t("game-launcher.launch")
     }
 })
 
@@ -189,8 +189,13 @@ const versionInfo = computed(() => {
     return launcherState.value === "needs-update" ? `最新 v${latest}` : `v${latest}`
 })
 
-// 检测中 / 下载中 / 游戏运行中时禁用主按钮
-const isBusy = computed(() => launcherState.value === "checking" || launcherState.value === "downloading" || game.running)
+// 检测中 / 下载中时禁用主按钮；游戏运行中仅禁用「启动游戏」（避免重复拉起），更新操作仍允许点击
+const isBusy = computed(
+    () =>
+        launcherState.value === "checking" ||
+        launcherState.value === "downloading" ||
+        (launcherState.value === "ready" && game.running)
+)
 
 /**
  * 主按钮点击：按当前状态分发到对应动作。

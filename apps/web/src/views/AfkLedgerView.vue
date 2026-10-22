@@ -35,6 +35,7 @@ import {
     startOfDay,
     trendBuckets,
 } from "@/utils/afk-ledger"
+import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRarityColor, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 type RangeKey = "today" | "7d" | "30d" | "all"
@@ -49,10 +50,10 @@ type MixDimension = "rarity" | "dungeon" | "item" | "craft"
 const mixPalette = ["#60a5fa", "#f2c14e", "#a78bfa", "#34d399", "#f472b6", "#38bdf8", "#fb923c", "#94a3b8"]
 
 const MIX_DIMENSIONS: { key: MixDimension; labelKey: string }[] = [
-    { key: "rarity", labelKey: "afk-ledger.mix_rarity" },
-    { key: "dungeon", labelKey: "afk-ledger.mix_dungeon" },
     { key: "item", labelKey: "afk-ledger.mix_item" },
+    { key: "dungeon", labelKey: "afk-ledger.mix_dungeon" },
     { key: "craft", labelKey: "afk-ledger.mix_craft" },
+    { key: "rarity", labelKey: "afk-ledger.mix_rarity" },
 ]
 
 const { t, i18next } = useTranslation()
@@ -82,7 +83,7 @@ const range = ref<RangeKey>("today")
 const dungeon = ref("")
 const rarity = ref<number | null>(null)
 /** 品质分布卡片的分组维度。 */
-const mixDimension = ref<MixDimension>("rarity")
+const mixDimension = ref<MixDimension>("item")
 const itemKey = ref("")
 const period = ref<Period | null>(null)
 const runs = ref<AfkRun[]>([])
@@ -284,6 +285,27 @@ watch([sortedRuns, () => runPageCount.value], () => {
     if (runPage.value > runPageCount.value - 1) runPage.value = 0
 })
 
+/** 物品排行展示来源。 */
+type ItemSource = "loot" | "craft"
+
+const ITEM_SOURCES: { key: ItemSource; labelKey: string }[] = [
+    { key: "loot", labelKey: "afk-ledger.item_source_loot" },
+    { key: "craft", labelKey: "afk-ledger.item_source_craft" },
+]
+
+/** 物品排行当前来源：默认副本掉落。 */
+const itemSource = ref<ItemSource>("loot")
+/** 当前来源下的排行行。 */
+const itemSourceRows = computed(() => (itemSource.value === "craft" ? craftRows.value.slice(0, 10) : itemRows.value))
+/** 当前来源下的总件数。 */
+const itemSourceTotal = computed(() =>
+    itemSource.value === "craft" ? craftTotal.value : lootDrops.value.reduce((sum, drop) => sum + drop.count, 0)
+)
+/** 当前来源下的金色件数。 */
+const itemSourceGold = computed(() =>
+    itemSource.value === "craft" ? craftGold.value : lootDrops.value.reduce((sum, drop) => sum + (drop.rarity >= 5 ? drop.count : 0), 0)
+)
+
 /** 物品筛选项：按当前时间范围/副本的副本掉落聚合，时段与品质筛选不影响可选范围。 */
 const itemOptions = computed(() => {
     const seen = new Map<string, string>()
@@ -296,9 +318,19 @@ const itemOptions = computed(() => {
 
 const dungeonOptions = computed(() =>
     Object.entries(ledger.snapshot.dungeons)
-        .map(([id, entry]) => ({ value: id, label: entry.name }))
+        .map(([id, entry]) => ({ value: id, label: afkDungeonLabel(id, entry.name) }))
         .sort((a, b) => a.label.localeCompare(b.label))
 )
+
+/**
+ * 副本的展示名：与 /db/dungeon 列表同一套规则（带括号后缀）。
+ * @param id 副本 ID
+ * @param fallback 数据包里查不到时的名字
+ * @returns 展示名
+ */
+function afkDungeonLabel(id: string, fallback: string) {
+    return dungeonDisplayName(id, afkDungeonName(id, fallback))
+}
 
 /**
  * 副本详情页链接：数据包里有这个副本才给链接。
@@ -369,7 +401,12 @@ const dungeonMixRows = computed<MixRow[]>(() => {
         const key = drop.dungeonId || "unknown"
         const row =
             counts.get(key) ??
-            { name: drop.dungeonId ? afkDungeonName(drop.dungeonId, drop.dungeonName) : t("afk-ledger.mix_unassigned"), count: 0 }
+            {
+                name: drop.dungeonId
+                    ? afkDungeonLabel(drop.dungeonId, drop.dungeonName)
+                    : t("afk-ledger.mix_unassigned"),
+                count: 0,
+            }
         row.count += drop.count
         counts.set(key, row)
     }
@@ -1162,44 +1199,58 @@ function clearAll() {
             <section :data-scroll-title="$t('afk-ledger.nav_rank')">
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <div class="min-w-0 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-                    <div class="mb-1 flex flex-wrap items-baseline gap-x-2">
+                    <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
                         <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.top_items") }}</span>
-                        <span class="text-[10px] text-base-content/35">{{ $t("afk-ledger.loot_only") }}</span>
+                        <!-- 来源切换：副本掉落 / 铸造产物；两边的统计口径互不混算 -->
+                        <div class="flex flex-wrap items-center gap-1">
+                            <button
+                                v-for="option in ITEM_SOURCES"
+                                :key="option.key"
+                                type="button"
+                                class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] font-normal"
+                                :class="
+                                    itemSource === option.key
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-transparent'
+                                "
+                                :aria-pressed="itemSource === option.key"
+                                @click="itemSource = option.key"
+                            >
+                                {{ $t(option.labelKey) }}
+                            </button>
+                        </div>
+                        <span class="text-[10px] text-base-content/35">
+                            {{ itemSource === "loot" ? $t("afk-ledger.loot_only") : $t("afk-ledger.craft_hint") }}
+                        </span>
+                    </div>
+                    <div class="mb-2 flex flex-wrap items-center gap-x-3 text-[11px] text-base-content/50">
+                        <span>
+                            {{ $t("afk-ledger.craft_total") }}
+                            <span class="font-mono text-base-content/80">{{ formatNumber(itemSourceTotal) }}</span>
+                        </span>
+                        <span>
+                            {{ $t("afk-ledger.craft_gold") }}
+                            <span class="font-mono" :style="{ color: getRarityColor(5) }">{{ formatNumber(itemSourceGold) }}</span>
+                        </span>
                     </div>
                     <!-- 物品列表统一用 inline：图标 + 名称 + 件数，品质由图标底色体现 -->
                     <div class="flex flex-wrap gap-x-4 gap-y-2">
                         <ResourceCostItem
-                            v-for="row in itemRows"
+                            v-for="row in itemSourceRows"
                             :key="row.key"
                             inline
                             :name="row.name"
                             :value="[row.count, row.itemId ?? row.name, row.type]"
                         />
                     </div>
-                    <div v-if="itemRows.length === 0" class="py-4 text-center text-xs text-base-content/40">{{ $t("afk-ledger.no_drops") }}</div>
-                </div>
-
-                <!-- 铸造产物：与副本掉落分开统计，避免混进副本产出 -->
-                <div class="min-w-0 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-                    <div class="mb-1 flex flex-wrap items-baseline gap-x-2">
-                        <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.craft_items") }}</span>
-                        <span class="text-[10px] text-base-content/35">{{ $t("afk-ledger.craft_hint") }}</span>
-                    </div>
-                    <div class="mb-2 flex flex-wrap items-center gap-x-3 text-[11px] text-base-content/50">
-                        <span>{{ $t("afk-ledger.craft_total") }} <span class="font-mono text-base-content/80">{{ formatNumber(craftTotal) }}</span></span>
-                        <span>{{ $t("afk-ledger.craft_gold") }} <span class="font-mono" :style="{ color: getRarityColor(5) }">{{ formatNumber(craftGold) }}</span></span>
-                    </div>
-                    <div class="flex flex-wrap gap-x-4 gap-y-2">
-                        <ResourceCostItem
-                            v-for="row in craftRows"
-                            :key="row.key"
-                            inline
-                            :name="row.name"
-                            :value="[row.count, row.itemId ?? row.name, row.type]"
-                        />
-                    </div>
-                    <div v-if="craftRows.length === 0" class="py-4 text-center text-xs text-base-content/40">
-                        {{ dungeon ? $t("afk-ledger.craft_dungeon_hint") : $t("afk-ledger.no_craft") }}
+                    <div v-if="itemSourceRows.length === 0" class="py-4 text-center text-xs text-base-content/40">
+                        {{
+                            itemSource === "loot"
+                                ? $t("afk-ledger.no_drops")
+                                : dungeon
+                                  ? $t("afk-ledger.craft_dungeon_hint")
+                                  : $t("afk-ledger.no_craft")
+                        }}
                     </div>
                 </div>
 
@@ -1219,9 +1270,9 @@ function clearAll() {
                             <tr v-for="row in dungeonRows" :key="row.id">
                                 <td class="max-w-40 truncate">
                                     <RouterLink v-if="dungeonLink(row.id)" :to="dungeonLink(row.id)" class="hover:text-primary hover:underline">
-                                        {{ row.name }}
+                                        {{ afkDungeonLabel(row.id, row.name) }}
                                     </RouterLink>
-                                    <span v-else>{{ row.name }}</span>
+                                    <span v-else>{{ afkDungeonLabel(row.id, row.name) }}</span>
                                 </td>
                                 <td class="text-right font-mono tabular-nums">{{ formatNumber(row.runs) }}</td>
                                 <td class="text-right font-mono tabular-nums">{{ formatNumber(row.drops) }}</td>
@@ -1266,9 +1317,11 @@ function clearAll() {
                                         :to="dungeonLink(entry.run.dungeonId)"
                                         class="hover:text-primary hover:underline"
                                     >
-                                        {{ afkDungeonName(entry.run.dungeonId, entry.run.dungeonName) }}
+                                        {{ afkDungeonLabel(entry.run.dungeonId, entry.run.dungeonName) }}
                                     </RouterLink>
-                                    <span v-else>{{ afkDungeonName(entry.run.dungeonId, entry.run.dungeonName) }}</span>
+                                    <span v-else>{{
+                                        afkDungeonLabel(entry.run.dungeonId, entry.run.dungeonName)
+                                    }}</span>
                                 </td>
                                 <td class="text-right font-mono tabular-nums">
                                     <span v-if="entry.run.status === 'running'" class="text-primary">{{ $t("afk-ledger.running") }}</span>
