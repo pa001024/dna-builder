@@ -24,6 +24,7 @@ import { useAfkLedgerStore } from "@/store/afkLedger"
 import { useAfkSupportStore } from "@/store/afkSupport"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { patchAfkAnimState, useAfkAnimState } from "@/utils/afk-anim-state"
 import {
     AFK_DUNGEON_ALIASES,
     type AfkDrop,
@@ -69,6 +70,15 @@ const {
 } = useAfkWidget()
 const afkSupport = useAfkSupportStore()
 const ui = useUIStore()
+const afkAnimState = useAfkAnimState()
+
+/** 当前是否 BAD APPLE 剪影风格。 */
+const afkSilhouette = computed(() => afkAnimState.value.style === "badapple")
+
+/** 蘑菇图标按钮：在普通 / BAD APPLE 两种画面风格之间切换。 */
+function cycleAfkStyle() {
+    patchAfkAnimState({ style: afkSilhouette.value ? "normal" : "badapple" })
+}
 
 const RANGE_OPTIONS: { key: RangeKey; labelKey: string }[] = [
     { key: "today", labelKey: "afk-ledger.range_today" },
@@ -983,6 +993,23 @@ function clearAll() {
                 />
                 {{ $t("afk-widget.open") }}
             </label>
+            <!-- 纯图标方块按钮：切换画面风格（普通 / BAD APPLE 黑白剪影） -->
+            <button
+                type="button"
+                class="btn btn-xs btn-square h-6 min-h-0"
+                :class="afkSilhouette ? 'border-base-content/40 bg-base-content text-base-100' : 'border-base-content/15'"
+                :title="`${$t('afk-widget.style_toggle')} · ${$t(afkSilhouette ? 'afk-widget.style_badapple' : 'afk-widget.style_normal')}`"
+                :aria-label="`${$t('afk-widget.style_toggle')} · ${$t(afkSilhouette ? 'afk-widget.style_badapple' : 'afk-widget.style_normal')}`"
+                :aria-pressed="afkSilhouette"
+                @click="cycleAfkStyle"
+            >
+                <svg viewBox="0 0 16 16" class="size-4" fill="currentColor" fill-rule="evenodd" aria-hidden="true">
+                    <path
+                        d="M8 1.4c-3.6 0-6.4 2.5-6.4 5.5 0 .6.5 1.1 1.1 1.1h10.6c.6 0 1.1-.5 1.1-1.1 0-3-2.8-5.5-6.4-5.5Zm-2.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm5.1.3a.85.85 0 1 0 0 1.7.85.85 0 0 0 0-1.7Z"
+                    />
+                    <path d="M6.1 9.4h3.8v3c0 .9-.7 1.6-1.6 1.6h-.6c-.9 0-1.6-.7-1.6-1.6v-3Z" opacity=".6" />
+                </svg>
+            </button>
             <!-- 小窗开了鼠标穿透后自己也点不到，恢复入口放在这里 -->
             <button
                 v-if="env.isApp && widgetClickThrough"
@@ -994,7 +1021,7 @@ function clearAll() {
                 {{ $t("afk-widget.unlock") }}
             </button>
             <RouterLink
-                to="/setting"
+                :to="{ path: '/setting', query: { section: 'afk-support' } }"
                 class="text-[11px] text-primary/80 hover:text-primary"
                 :class="env.isApp ? '' : 'ml-auto'"
             >

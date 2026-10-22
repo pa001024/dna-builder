@@ -429,6 +429,9 @@
         "open_hint": "Show the animation in its own window (bottom-right of the screen)",
         "pin": "Always on top",
         "reset": "Reset",
+        "style_badapple": "BAD APPLE silhouette",
+        "style_normal": "Normal",
+        "style_toggle": "Visual style",
         "unlock": "Unlock widget",
         "unlock_hint": "The widget is click-through — restore control"
     },

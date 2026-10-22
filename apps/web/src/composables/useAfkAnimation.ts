@@ -258,7 +258,12 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
 
         const active = options.combat !== false && characterEvent.value?.state === "combat"
         const scene = manifest.value?.backgrounds[sceneId.value]
-        if (scene) {
+        // BAD APPLE：一律白底 + 纯黑剪影，背景层不画（彩色贴图会把剪影压掉）
+        const silhouette = animState.value.style === "badapple"
+        if (silhouette) {
+            context.fillStyle = "#ffffff"
+            context.fillRect(0, 0, cssWidth, options.height)
+        } else if (scene) {
             // 官方只在非战斗、以及战斗的接敌/复位阶段滚动，复位阶段 4 倍速
             const scrolling = !active || combat.value.phase === "approach" || combat.value.phase === "characterReset"
             const speedMultiplier = combat.value.phase === "characterReset" ? 4 : 1
@@ -318,7 +323,9 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
             const x = fighting
                 ? actorLeft + mapCombatX(combat.value.characterX, officialWidth, officialWidth) - entitySize / 2
                 : actorLeft + (officialWidth - entitySize) / 2 + officialWidth * (options.idleOffsetRatio ?? 0)
+            context.filter = silhouette ? "brightness(0)" : "none"
             context.drawImage(source, frame.x, frame.y, frame.width, frame.height, x, options.height - entitySize, entitySize, entitySize)
+            context.filter = "none"
         }
 
         if (monsterVisible.value) {
@@ -336,6 +343,7 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
                 // Death 只播一遍：播完停在最后一帧，否则刚好在冻结前回绕到首帧
                 const frame = afkSpriteFrame(monsterState, elapsed, combat.value.monsterAction === "Death")
                 const x = actorLeft + mapCombatX(combat.value.monsterX, officialWidth, officialWidth) - entitySize / 2
+                context.filter = silhouette ? "brightness(0)" : "none"
                 context.drawImage(
                     monsterSource,
                     frame.x,
@@ -347,6 +355,7 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
                     entitySize,
                     entitySize
                 )
+                context.filter = "none"
             }
         }
 
@@ -356,10 +365,16 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
             const source = dropImage(drop.icon)
             if (!source) continue
             context.save()
+            context.filter = silhouette ? "brightness(0)" : "none"
             context.translate(drop.x + drop.size / 2, drop.y + drop.size / 2)
             context.rotate((drop.rotation * Math.PI) / 180)
             context.drawImage(source, -drop.size / 2, -drop.size / 2, drop.size, drop.size)
             context.restore()
+        }
+        if (silhouette) {
+            // 极淡扫描线：黑白剪影的「老影像」质感
+            context.fillStyle = "rgba(0, 0, 0, 0.05)"
+            for (let y = 2; y < options.height; y += 4) context.fillRect(0, y, cssWidth, 1)
         }
 
         raf = requestAnimationFrame(draw)

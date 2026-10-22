@@ -426,6 +426,9 @@
         "open_hint": "アニメーションを独立ウィンドウで表示（画面右下）",
         "pin": "最前面に固定",
         "reset": "位置を戻す",
+        "style_badapple": "BAD APPLE シルエット",
+        "style_normal": "ノーマル",
+        "style_toggle": "画面スタイル",
         "unlock": "ウィジェットのロック解除",
         "unlock_hint": "ウィジェットはマウス透過中です。ここで操作を戻せます"
     },

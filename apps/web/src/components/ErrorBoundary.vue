@@ -85,12 +85,12 @@ function resetError() {
 }
 
 /**
- * 跳转到设置页并定位「重置所有设置」卡片：带 reset=1 参数，由设置页滚动并高亮该卡片。
+ * 跳转到设置页并定位到「其他」区块（重置卡片所在）：带 section 参数，由设置页滚过去。
  * 若出错时已在设置页，仅改 query 不会重新挂载设置页，因此额外清除错误态让其重新初始化。
  */
 async function gotoSettingReset() {
     try {
-        await router.push({ name: "setting", query: { reset: "1" } })
+        await router.push({ name: "setting", query: { section: "other" } })
     } catch (error) {
         console.error("跳转设置页失败", error)
     }

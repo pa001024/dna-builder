@@ -427,6 +427,9 @@
         "open_hint": "Afficher l'animation dans une fenêtre (en bas à droite)",
         "pin": "Toujours au-dessus",
         "reset": "Réinitialiser",
+        "style_badapple": "Silhouette BAD APPLE",
+        "style_normal": "Normal",
+        "style_toggle": "Style visuel",
         "unlock": "Déverrouiller le widget",
         "unlock_hint": "Le widget est en clic-à-travers — rétablir le contrôle"
     },

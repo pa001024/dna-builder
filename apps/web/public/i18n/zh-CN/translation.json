@@ -463,6 +463,9 @@
         "open_hint": "把动画作为独立小窗显示（屏幕右下角）",
         "pin": "置顶",
         "reset": "复位",
+        "style_badapple": "BAD APPLE 剪影",
+        "style_normal": "普通",
+        "style_toggle": "画面风格",
         "unlock": "解锁小窗",
         "unlock_hint": "小窗处于鼠标穿透状态，点这里恢复操作"
     },

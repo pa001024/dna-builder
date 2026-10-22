@@ -427,6 +427,9 @@
         "open_hint": "애니메이션을 별도 창으로 표시(화면 오른쪽 아래)",
         "pin": "맨 위 고정",
         "reset": "위치 초기화",
+        "style_badapple": "BAD APPLE 실루엣",
+        "style_normal": "일반",
+        "style_toggle": "화면 스타일",
         "unlock": "위젯 잠금 해제",
         "unlock_hint": "위젯이 마우스 통과 상태입니다. 여기서 조작을 복구하세요"
     },

@@ -30,6 +30,9 @@ export type AfkRunDrop = {
 /** 一条需要在小窗提示的消息。 */
 export type AfkAnimNotice = { text: string; at: number }
 
+/** 画面风格：普通彩色 / BAD APPLE 黑白剪影。 */
+export type AfkAnimStyle = "normal" | "badapple"
+
 /** 动画状态。 */
 export type AfkAnimState = {
     /** 最近一条角色事件 */
@@ -40,11 +43,13 @@ export type AfkAnimState = {
     scene: string
     /** 待提示的消息，最新的在后 */
     notices: AfkAnimNotice[]
+    /** 画面风格（主窗口改、小窗跟随） */
+    style: AfkAnimStyle
 }
 
 /** 空状态。 */
 function emptyState(): AfkAnimState {
-    return { character: null, runDrops: [], scene: "", notices: [] }
+    return { character: null, runDrops: [], scene: "", notices: [], style: "normal" }
 }
 
 /**
@@ -69,6 +74,7 @@ export function readAfkAnimState(): AfkAnimState {
                 : [],
             scene: typeof parsed.scene === "string" ? parsed.scene : "",
             notices: Array.isArray(parsed.notices) ? parsed.notices.slice(-NOTICE_KEEP) : [],
+            style: parsed.style === "badapple" ? "badapple" : "normal",
         }
     } catch {
         return emptyState()
@@ -88,6 +94,7 @@ export function writeAfkAnimState(state: AfkAnimState): void {
                 scene: state.scene ?? "",
                 runDrops: (state.runDrops ?? []).slice(-REWARD_KEEP),
                 notices: (state.notices ?? []).slice(-NOTICE_KEEP),
+                style: state.style ?? "normal",
             })
         )
     } catch (cause) {

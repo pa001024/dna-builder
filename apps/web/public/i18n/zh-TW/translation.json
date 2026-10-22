@@ -425,6 +425,9 @@
         "open_hint": "把動畫作為獨立小窗顯示（螢幕右下角）",
         "pin": "置頂",
         "reset": "復位",
+        "style_badapple": "BAD APPLE 剪影",
+        "style_normal": "普通",
+        "style_toggle": "畫面風格",
         "unlock": "解鎖小窗",
         "unlock_hint": "小窗處於滑鼠穿透狀態，點這裡恢復操作"
     },

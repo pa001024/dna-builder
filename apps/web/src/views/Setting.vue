@@ -89,93 +89,51 @@ const isClearingDataPackStorage = ref(false)
 const formatSize = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1 })
 const dataPackLoadingRemoteVersions = ref(false)
 
-/** 错误页跳转标记：带 reset=1 进入设置页时，滚动并高亮「重置所有设置」卡片 */
-const resetHighlightTarget = useSearchParam<boolean>("reset", false)
-/** 重置卡片是否处于高亮态（跳转后的短暂提示） */
-const resetHighlighted = ref(false)
-/** 「重置所有设置」卡片行的 DOM 引用，用于跳转后滚动定位 */
-const resetSectionRef = ref<HTMLElement | null>(null)
-/** 高亮态自动消退的定时器句柄 */
-let resetHighlightTimer: number | null = null
-/** 校正循环是否仍在运行（用户自行滚动或窗口结束即置否） */
-let resetFocusActive = false
-/** 平滑滚动阶段时长（ms）：这段时间内只等动画，不做位置校正 */
-const RESET_FOCUS_SMOOTH_MS = 600
-/** 校正窗口总时长（ms）：窗口内持续把卡片拉回内容区中央，应对异步内容把布局顶高 */
-const RESET_FOCUS_SETTLE_MS = 1800
-/** 卡片中心偏离内容区中心多少像素才重新校正（px） */
-const RESET_FOCUS_DRIFT_PX = 8
-/** 判定「用户接管滚动」的事件：出现任一即停止校正 */
-const RESET_FOCUS_ABORT_EVENTS = ["wheel", "touchstart", "keydown"] as const
+/** 跨页深链标记：带 section=<区块键> 进入时滚到对应区块（账本页「更多设置」、错误页「重置设置」等） */
+const sectionTarget = useSearchParam<string>("section", "")
+/** 深链对齐的补滚时刻（ms）：数据包版本列表、屏幕信息条预览等异步内容会把区块顶高 */
+const DEEP_LINK_REALIGN_DELAYS = [600, 1800] as const
+/** 判定「用户接管滚动」的事件：出现任一即停止补滚，避免跟用户抢滚动条 */
+const DEEP_LINK_ABORT_EVENTS = ["wheel", "touchstart", "keydown"] as const
+/** 深链补滚的定时器句柄 */
+let deepLinkTimers: number[] = []
 
 /**
- * 用户自行滚动时中止重置卡片的校正，避免跟用户抢滚动条。
+ * 用户自行滚动时中止深链补滚。
  */
-function abortResetFocus() {
-    resetFocusActive = false
+function abortDeepLinkFocus() {
+    for (const timer of deepLinkTimers) {
+        window.clearTimeout(timer)
+    }
+    deepLinkTimers = []
 }
 
 /**
- * 在布局稳定前持续把重置卡片拉回内容区中央。
- *
- * 卡片位置取决于它前面各个区块的高度，而数据包版本列表、屏幕信息条预览等都是异步补齐的：
- * 只滚一次会在内容变高后停在半路，卡片仍留在视口之外。
- * @param startAt 校正循环的起始时间戳（performance.now() 基准）
+ * 深链定位：其他页面带 section=<区块键> 跳过来时滚到对应区块，随后清掉参数，
+ * 只在本次进入生效；异步内容补齐后再对齐两次，防止区块被顶出视口。
  */
-function correctResetCardPosition(startAt: number) {
-    if (!resetFocusActive) {
-        return
-    }
-
-    const container = settingContentRef.value
-    const card = resetSectionRef.value
-    // 平滑滚动未走完时位置必然有偏差，此时校正会打断动画
-    if (performance.now() - startAt >= RESET_FOCUS_SMOOTH_MS && container && card) {
-        const containerCenter = container.getBoundingClientRect().top + container.clientHeight / 2
-        const cardCenter = card.getBoundingClientRect().top + card.clientHeight / 2
-        if (Math.abs(cardCenter - containerCenter) > RESET_FOCUS_DRIFT_PX) {
-            card.scrollIntoView({ block: "center" })
-        }
-    }
-
-    if (performance.now() - startAt < RESET_FOCUS_SETTLE_MS) {
-        window.requestAnimationFrame(() => correctResetCardPosition(startAt))
-    } else {
-        resetFocusActive = false
-    }
-}
-
-/**
- * 处理错误页带来的 reset=1 跳转：滚动到「重置所有设置」卡片并短暂高亮，
- * 随后清除该 URL 参数，避免刷新后重复触发。
- */
-async function focusResetSection() {
-    if (!resetHighlightTarget.value) {
+async function focusDeepLinkTarget() {
+    const key = sectionTarget.value
+    if (!key) {
         return
     }
 
     await nextTick()
-    resetSectionRef.value?.scrollIntoView({ behavior: "smooth", block: "center" })
-    resetHighlighted.value = true
-    resetHighlightTarget.value = false
-
-    if (resetHighlightTimer !== null) {
-        window.clearTimeout(resetHighlightTimer)
-    }
-    resetHighlightTimer = window.setTimeout(() => {
-        resetHighlighted.value = false
-        resetHighlightTimer = null
-    }, 3000)
-
-    resetFocusActive = true
-    window.requestAnimationFrame(() => correctResetCardPosition(performance.now()))
+    // 目录项与异步区块在首帧后才补齐，等两帧再滚，避免按旧高度定位
+    window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+            scrollLayoutRef.value?.scrollToKey(key)
+            sectionTarget.value = ""
+            abortDeepLinkFocus()
+            for (const delay of DEEP_LINK_REALIGN_DELAYS) {
+                deepLinkTimers.push(window.setTimeout(() => scrollLayoutRef.value?.scrollToKey(key), delay))
+            }
+        })
+    })
 }
 
 /** 滚动布局引用：目录高亮与点击跳转由 ScrollSpyLayout 内部接管 */
-const scrollLayoutRef = ref<{ contentEl: HTMLElement | null } | null>(null)
-/** 右侧内容区的滚动容器：重置卡片定位仍以它的滚动位置为准 */
-const settingContentRef = computed(() => scrollLayoutRef.value?.contentEl ?? null)
-
+const scrollLayoutRef = ref<{ contentEl: HTMLElement | null; scrollToKey: (key: string) => void } | null>(null)
 /**
  * 设置页目录。
  *
@@ -894,23 +852,19 @@ onMounted(() => {
     // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
     void setting.loadSystemFonts()
     void syncSkillCdOverlayOnMount()
-    // 用户自行滚动时把滚动控制权交还回去，别再校正重置卡片位置
-    for (const eventName of RESET_FOCUS_ABORT_EVENTS) {
-        window.addEventListener(eventName, abortResetFocus, { passive: true, capture: true })
+    // 用户自行滚动时停止深链补滚，别跟用户抢滚动条
+    for (const eventName of DEEP_LINK_ABORT_EVENTS) {
+        window.addEventListener(eventName, abortDeepLinkFocus, { passive: true, capture: true })
     }
-    // 错误页「前往设置重置」跳转过来时，定位并高亮重置卡片
-    void focusResetSection()
+    // 跨页深链（section=<键>）统一在这里定位
+    void focusDeepLinkTarget()
 })
 
 onUnmounted(() => {
-    // 清理高亮定时器与校正循环，避免组件销毁后回调仍触发
-    if (resetHighlightTimer !== null) {
-        window.clearTimeout(resetHighlightTimer)
-        resetHighlightTimer = null
-    }
-    resetFocusActive = false
-    for (const eventName of RESET_FOCUS_ABORT_EVENTS) {
-        window.removeEventListener(eventName, abortResetFocus, { capture: true })
+    // 清理补滚定时器，避免组件销毁后回调仍触发
+    abortDeepLinkFocus()
+    for (const eventName of DEEP_LINK_ABORT_EVENTS) {
+        window.removeEventListener(eventName, abortDeepLinkFocus, { capture: true })
     }
 })
 </script>
@@ -1831,11 +1785,7 @@ onUnmounted(() => {
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                     :style="{ animationDelay: '0.2s' }"
                 >
-                    <div
-                        ref="resetSectionRef"
-                        class="flex items-center justify-between gap-2 rounded-xs border px-2.5 py-2 transition-colors duration-300"
-                        :class="resetHighlighted ? 'border-primary/70 bg-primary/10' : 'border-base-content/10 bg-base-content/3'"
-                    >
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                         <span class="label-text">
                             {{ $t("setting.reset") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
