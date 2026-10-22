@@ -1,5 +1,6 @@
 //! Tauri 命令层：按领域拆分的 `#[tauri::command]` 实现，lib.rs 只保留组装与注册。
 
+pub mod afk_support;
 pub mod archive;
 pub mod cloudgame;
 pub mod download;

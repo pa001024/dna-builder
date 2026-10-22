@@ -679,3 +679,40 @@ describe("normalizeForgeAlarm", () => {
         expect(normalizeForgeAlarm({ time: 42 })).toEqual({ time: 42, title: "" })
     })
 })
+
+describe("狩月账本条目", () => {
+    const snapshot = {
+        updatedAt: 0,
+        sessionId: 1,
+        today: { runs: 4, drops: 42, gold: 12 },
+        session: { runs: 1, drops: 9, gold: 3 },
+        dungeons: {
+            "64102": { name: "扼守/无尽", today: { runs: 3, drops: 30, gold: 9 }, session: { runs: 1, drops: 9, gold: 3 } },
+        },
+    }
+
+    it("创建时默认展示今日掉落、全部来源", () => {
+        expect(createScreenBarItem("afk")).toMatchObject({ type: "afk", metric: "drops", period: "today", source: "" })
+    })
+
+    it("归一化非法指标与范围", () => {
+        const config = normalizeScreenBarConfig({
+            items: [{ id: "a", type: "afk", metric: "bad", period: "bad", source: 42 }],
+        })
+        expect(config.items[0]).toMatchObject({ type: "afk", metric: "drops", period: "today", source: "" })
+    })
+
+    it("按来源与范围取对应计数", () => {
+        const item = { ...createScreenBarItem("afk"), metric: "runs", period: "session", source: "64102" } as ReturnType<
+            typeof createScreenBarItem
+        >
+        const resolved = resolveScreenBarItem(item, SAMPLE, undefined, null, [], {}, snapshot)
+        expect(resolved).toMatchObject({ type: "afk", value: 1, sourceName: "扼守/无尽", metric: "runs" })
+    })
+
+    it("全部来源读总数", () => {
+        const item = { ...createScreenBarItem("afk"), metric: "gold" } as ReturnType<typeof createScreenBarItem>
+        const resolved = resolveScreenBarItem(item, SAMPLE, undefined, null, [], {}, snapshot)
+        expect(resolved).toMatchObject({ type: "afk", value: 12, sourceName: "" })
+    })
+})

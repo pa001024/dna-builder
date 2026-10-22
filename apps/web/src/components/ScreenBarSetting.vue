@@ -6,6 +6,7 @@ import ScreenBarContent from "@/components/ScreenBarContent.vue"
 import { useScreenBar } from "@/composables/useScreenBar"
 import { useScreenBarContent } from "@/composables/useScreenBarContent"
 import { env } from "@/env"
+import { useAfkLedgerStore } from "@/store/afkLedger"
 import { useForgeAlarm } from "@/store/forgeAlarm"
 import { MIHAN_TYPES, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
@@ -14,6 +15,8 @@ import {
     createScreenBarItem,
     FORGE_ICON_STORAGE_KEY,
     normalizeForgeDrafts,
+    SCREEN_BAR_AFK_METRICS,
+    SCREEN_BAR_AFK_PERIODS,
     SCREEN_BAR_CLOCK_PRESETS,
     SCREEN_BAR_FORGE_MODES,
     SCREEN_BAR_ITEM_TYPES,
@@ -24,6 +27,9 @@ import {
     SCREEN_BAR_MIN_OFFSET_Y,
     SCREEN_BAR_MIN_OPACITY,
     SCREEN_BAR_MIN_SCALE,
+    type ScreenBarAfkItem,
+    type ScreenBarAfkMetric,
+    type ScreenBarAfkPeriod,
     type ScreenBarCountdownItem,
     type ScreenBarForgeMode,
     type ScreenBarItem,
@@ -47,7 +53,26 @@ const { shortNoteInfo } = useMihanNotify()
 const forgeDrafts = computed(() => normalizeForgeDrafts(shortNoteInfo.value))
 // 产物图片由主窗口解析后缓存(浮窗与预览都只读这份缓存),切到「最近完成」后能直接看到图
 const forgeIcons = useLocalStorage<Record<string, string>>(FORGE_ICON_STORAGE_KEY, {})
-const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons)
+// 账本快照由主窗口的 store 维护;设置页预览与浮窗读同一份结构,只是来源不同
+const afkLedger = useAfkLedgerStore()
+const afkStats = computed(() => afkLedger.snapshot)
+const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons, afkStats)
+
+/** 可选来源副本:账本里记录过的副本(含今日为 0 的)。 */
+const afkDungeonOptions = computed(() =>
+    Object.entries(afkLedger.snapshot.dungeons).map(([id, entry]) => ({ id, name: entry.name }))
+)
+
+/** 指标与范围的按钮文案 key(静态表,避免在模板里拼 key)。 */
+const AFK_METRIC_KEYS: Record<ScreenBarAfkMetric, string> = {
+    runs: "screenBar.afkMetricRuns",
+    drops: "screenBar.afkMetricDrops",
+    gold: "screenBar.afkMetricGold",
+}
+const AFK_PERIOD_KEYS: Record<ScreenBarAfkPeriod, string> = {
+    today: "screenBar.afkPeriodToday",
+    session: "screenBar.afkPeriodSession",
+}
 
 /** 条目上限已满时禁止继续添加。 */
 const addDisabled = computed(() => config.value.items.length >= SCREEN_BAR_MAX_ITEMS)
@@ -195,6 +220,16 @@ function setOnlyMatched(item: ScreenBarItem, checked: boolean) {
 function setForgeMode(item: ScreenBarItem, mode: ScreenBarForgeMode) {
     if (item.type !== "forge") return
     replaceItem(item.id, { mode })
+}
+
+/**
+ * 修改狩月账本条目的指标 / 范围 / 来源。
+ * @param item 目标条目
+ * @param patch 覆盖字段
+ */
+function setAfk(item: ScreenBarItem, patch: Partial<Pick<ScreenBarAfkItem, "metric" | "period" | "source">>) {
+    if (item.type !== "afk") return
+    replaceItem(item.id, patch)
 }
 
 /**
@@ -365,6 +400,62 @@ function itemParams(item: ScreenBarItem) {
                             </div>
                             <div class="text-[10px] leading-relaxed text-base-content/45">
                                 {{ $t(forgeModeHintKey(itemParams(item).forgeMode)) }}
+                            </div>
+                        </div>
+
+                        <!-- 狩月账本:指标 / 范围 / 来源 -->
+                        <div v-else-if="item.type === 'afk'" class="mt-1.5 flex flex-col gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-[10px] text-base-content/45">{{ $t("screenBar.afkMetric") }}</span>
+                                <button
+                                    v-for="metric in SCREEN_BAR_AFK_METRICS"
+                                    :key="metric"
+                                    type="button"
+                                    class="inline-flex h-5 cursor-pointer items-center rounded-xs border px-1.5 text-[10px] transition-colors"
+                                    :class="
+                                        item.metric === metric
+                                            ? 'border-primary/50 bg-primary/10 text-primary'
+                                            : 'border-base-content/15 text-base-content/60 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    @click="setAfk(item, { metric })"
+                                >
+                                    {{ $t(AFK_METRIC_KEYS[metric]) }}
+                                </button>
+                                <span class="ml-2 text-[10px] text-base-content/45">{{ $t("screenBar.afkPeriod") }}</span>
+                                <button
+                                    v-for="period in SCREEN_BAR_AFK_PERIODS"
+                                    :key="period"
+                                    type="button"
+                                    class="inline-flex h-5 cursor-pointer items-center rounded-xs border px-1.5 text-[10px] transition-colors"
+                                    :class="
+                                        item.period === period
+                                            ? 'border-primary/50 bg-primary/10 text-primary'
+                                            : 'border-base-content/15 text-base-content/60 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    @click="setAfk(item, { period })"
+                                >
+                                    {{ $t(AFK_PERIOD_KEYS[period]) }}
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-[10px] text-base-content/45">{{ $t("screenBar.afkSource") }}</span>
+                                <select
+                                    class="h-6 rounded-xs border border-base-content/20 bg-base-100/60 px-1 text-xs text-base-content outline-none transition-colors duration-150 focus:border-primary"
+                                    :value="item.source"
+                                    @change="setAfk(item, { source: ($event.target as HTMLSelectElement).value })"
+                                >
+                                    <option value="">{{ $t("screenBar.afkSourceAll") }}</option>
+                                    <option
+                                        v-if="item.source && !afkDungeonOptions.some(dungeon => dungeon.id === item.source)"
+                                        :value="item.source"
+                                    >
+                                        {{ item.source }}
+                                    </option>
+                                    <option v-for="dungeon in afkDungeonOptions" :key="dungeon.id" :value="dungeon.id">
+                                        {{ dungeon.name }}
+                                    </option>
+                                </select>
+                                <span class="text-[10px] text-base-content/40">{{ $t("screenBar.afkSourceHint") }}</span>
                             </div>
                         </div>
 

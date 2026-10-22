@@ -30,6 +30,19 @@ const MIHAN_EMPTY_KEYS: Record<Exclude<ScreenBarMihanEmptyReason, "filtered">, s
 
 // 铸造队列里的产物名是游戏原文,必须过 gt 才能按当前语言显示
 const { gt } = useGameText()
+
+/** 狩月账本的统计范围 → 文案 key。 */
+const AFK_PERIOD_KEYS: Record<"today" | "session", string> = {
+    today: "screenBar.afkPeriodToday",
+    session: "screenBar.afkPeriodSession",
+}
+
+/** 狩月账本的指标 → 单位文案 key。 */
+const AFK_UNIT_KEYS: Record<"runs" | "drops" | "gold", string> = {
+    runs: "screenBar.afkUnitRuns",
+    drops: "screenBar.afkUnitDrops",
+    gold: "screenBar.afkUnitGold",
+}
 </script>
 
 <template>
@@ -131,6 +144,18 @@ const { gt } = useGameText()
                 <Icon icon="ri:refresh-line" class="size-3 shrink-0 text-primary" />
                 <span class="text-base-content/60">{{ $t(`screenBar.${item.type}`) }}</span>
                 <span class="font-mono font-semibold">{{ item.text }}</span>
+            </span>
+
+            <!-- 狩月账本:今日/本次的场次、掉落或金色件数,可按副本筛选 -->
+            <span
+                v-else-if="item.type === 'afk'"
+                class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
+            >
+                <Icon icon="ri:bar-chart-line" class="size-3 shrink-0 text-primary" />
+                <span v-if="item.sourceName" class="font-medium text-base-content/85">{{ item.sourceName }}</span>
+                <span class="text-base-content/55">{{ $t(AFK_PERIOD_KEYS[item.period]) }}</span>
+                <span class="font-mono font-semibold text-primary">{{ item.value }}</span>
+                <span class="text-base-content/55">{{ $t(AFK_UNIT_KEYS[item.metric]) }}</span>
             </span>
         </template>
     </div>

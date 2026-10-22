@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import gsap from "gsap"
 import { useTranslation } from "i18next-vue"
-import { ref, watchEffect } from "vue"
-import { useUIStore } from "@/store/ui"
+import { computed, ref, watchEffect } from "vue"
+import { useSettingStore } from "@/store/setting"
+import { type ITab as ITabUI, useUIStore } from "@/store/ui"
 import { useState } from "@/util"
+import { getMoreItems, resolveSidebarEntries } from "@/utils/entry-util"
 import SidebarButton from "./SidebarButton.vue"
 
 const { t } = useTranslation()
@@ -11,7 +13,17 @@ const target = ref<HTMLDivElement | null>(null)
 const mobileDrawerOpen = ref(false)
 
 const UI = useUIStore()
+const setting = useSettingStore()
 const [expand, setExpand] = useState(UI, "sidebarExpand")
+
+/**
+ * 侧边栏展示项：自定义布局（未自定义时回落基础 tabs 顺序）按当前环境解析，
+ * 不可用项（show === false，如桌面端专属或未登录）隐藏但保留在布局中，环境恢复后自动回来。
+ */
+const orderedTabs = computed<ITabUI[]>(() => {
+    const moreItems = getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: UI.scriptUnlocked })
+    return resolveSidebarEntries(UI.sidebarLayoutPaths, UI.tabs, moreItems).filter(tab => tab.show !== false)
+})
 
 watchEffect(() => {
     if (target.value) gsap.to(target.value, { duration: 0.3, width: expand.value ? "13rem" : "3.5rem", ease: "back" })
@@ -45,7 +57,7 @@ defineExpose({ closeMobileDrawer, openMobileDrawer })
                     {{ t("main.btn_collapse_menu") }}
                 </div>
             </button>
-            <template v-for="tab in UI.tabs" :key="tab.name">
+            <template v-for="tab in orderedTabs" :key="tab.name">
                 <SidebarButton v-if="tab.name && tab.show !== false" :to="tab.path" :tooltip="t(`${tab.name}.title`)">
                     <Icon v-if="tab.icon" :icon="tab.icon" />
                     <span v-else>{{ t(`${tab.name}.title`) }}</span>
@@ -77,7 +89,7 @@ defineExpose({ closeMobileDrawer, openMobileDrawer })
                 </li>
                 <li><div class="divider my-2" /></li>
                 <!-- 导航菜单 -->
-                <template v-for="tab in UI.tabs" :key="tab.name">
+                <template v-for="tab in orderedTabs" :key="tab.name">
                     <li v-if="tab.name && tab.show !== false && tab.path">
                         <RouterLink
                             :to="tab.path"

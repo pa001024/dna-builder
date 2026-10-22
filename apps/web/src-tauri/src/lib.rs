@@ -168,6 +168,10 @@ pub fn run() {
         commands::system::list_system_fonts,
         commands::system::is_launch_at_startup_enabled,
         commands::system::set_launch_at_startup_enabled,
+        // 小小狩月人奖励管道
+        commands::afk_support::afk_bridge_start,
+        commands::afk_support::afk_bridge_stop,
+        commands::afk_support::afk_bridge_status,
         // 游戏
         commands::game::get_game_install,
         commands::game::is_game_running,

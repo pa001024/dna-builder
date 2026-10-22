@@ -1129,7 +1129,7 @@ onBeforeUnmount(() => {
                                         <Tooltip :tooltip="$t(item.desc)" side="top">
                                             <button
                                                 type="button"
-                                                class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+                                                class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 backdrop-blur-xs px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
                                                 @click="navigateTo(item.path)"
                                             >
                                                 <Icon

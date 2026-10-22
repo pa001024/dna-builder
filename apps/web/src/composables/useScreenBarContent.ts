@@ -1,5 +1,6 @@
 import { computed, onMounted, onUnmounted, type Ref, ref } from "vue"
 import { useMihanNotify } from "@/store/mihan"
+import type { AfkLedgerSnapshot } from "@/utils/afk-ledger"
 import {
     type ResolvedScreenBarItem,
     resolveScreenBarItem,
@@ -20,6 +21,9 @@ const NO_FORGE_DRAFTS: Ref<ScreenBarForgeDraft[]> = ref([])
 /** 没有产物图片缓存时用的常量引用。 */
 const NO_FORGE_ICONS: Ref<Record<string, string>> = ref({})
 
+/** 没有账本快照时用的常量引用。 */
+const NO_AFK_STATS: Ref<AfkLedgerSnapshot | null> = ref(null)
+
 /**
  * 屏幕信息条的内容计算。
  *
@@ -34,13 +38,15 @@ const NO_FORGE_ICONS: Ref<Record<string, string>> = ref({})
  * @param forgeAlarm 当前铸造完成提醒(响应式);缺省表示没设
  * @param forgeDrafts 游戏信息里的铸造队列(已归一化);缺省表示没有进行中的铸造
  * @param forgeIcons 铸造产物图片缓存(产物 id → 图片路径);缺省表示还没解析过
+ * @param afkStats 狩月账本快照(主窗口写入 localStorage);缺省表示还没有统计
  * @returns 渲染就绪的条目列表
  */
 export function useScreenBarContent(
     config: Ref<ScreenBarConfig>,
     forgeAlarm: Ref<ScreenBarForgeAlarm | null> = NO_FORGE_ALARM,
     forgeDrafts: Ref<ScreenBarForgeDraft[]> = NO_FORGE_DRAFTS,
-    forgeIcons: Ref<Record<string, string>> = NO_FORGE_ICONS
+    forgeIcons: Ref<Record<string, string>> = NO_FORGE_ICONS,
+    afkStats: Ref<AfkLedgerSnapshot | null> = NO_AFK_STATS
 ) {
     const mihanNotify = useMihanNotify()
     const now = ref(new Date())
@@ -48,7 +54,15 @@ export function useScreenBarContent(
 
     const items = computed<ResolvedScreenBarItem[]>(() =>
         config.value.items.map(item =>
-            resolveScreenBarItem(item, now.value, mihanNotify.mihanData.value, forgeAlarm.value, forgeDrafts.value, forgeIcons.value)
+            resolveScreenBarItem(
+                item,
+                now.value,
+                mihanNotify.mihanData.value,
+                forgeAlarm.value,
+                forgeDrafts.value,
+                forgeIcons.value,
+                afkStats.value
+            )
         )
     )
 

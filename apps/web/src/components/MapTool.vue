@@ -3674,10 +3674,10 @@ onUnmounted(() => {
     <div class="relative h-full min-h-0">
         <!-- 悬浮控制组：侧栏毛玻璃浮层 + 左上角按钮列。
              absolute 覆盖画布、不占布局宽度；侧栏展开/收起时按钮列随侧栏右缘移动，保持原先的相对位置 -->
-        <div class="pointer-events-none absolute inset-y-3 left-0 z-10 flex items-start">
+        <div class="pointer-events-none absolute inset-y-3 left-2 z-10 flex items-start">
             <aside
                 ref="sidebarRef"
-                class="pointer-events-auto h-full shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/85 shadow-lg backdrop-blur-md transition-all duration-200 ease-in-out"
+                class="pointer-events-auto h-full shrink-0 overflow-hidden rounded-xs border border-base-content/5 bg-base-100/85 shadow-lg backdrop-blur-xs transition-all duration-200 ease-in-out"
                 :class="isSidebarCollapsed ? 'w-0 border-transparent opacity-0 pointer-events-none' : 'w-80 max-w-[46vw]'"
             >
                 <ScrollArea class="h-full">
@@ -3685,7 +3685,7 @@ onUnmounted(() => {
                         <!-- 当前地图点（路由传入） -->
                         <div
                             v-if="currentMapPointInfo"
-                            class="rounded-xs border border-base-content/15 bg-base-100 p-2.5 text-xs space-y-1.5"
+                            class="rounded-xs border border-base-content/5 bg-base-100 p-2.5 text-xs space-y-1.5"
                         >
                             <div class="flex items-center justify-between gap-2">
                                 <div class="font-medium text-base-content">{{ $t("map-tool.current_marker") }}</div>
@@ -4138,7 +4138,7 @@ onUnmounted(() => {
             </aside>
 
             <!-- 左上角：折叠侧栏 + 缩放控制（首页风格小按钮）；位于侧栏右缘，保持原先的相对位置 -->
-            <div class="pointer-events-auto ml-3 flex shrink-0 flex-col gap-1.5">
+            <div class="pointer-events-auto ml-1 flex shrink-0 flex-col gap-1.5">
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
                     :title="isSidebarCollapsed ? $t('map-tool.sidebar_expand') : $t('map-tool.sidebar_collapse')"

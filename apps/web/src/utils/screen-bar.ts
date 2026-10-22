@@ -1,3 +1,4 @@
+import type { AfkLedgerSnapshot } from "./afk-ledger"
 import { MIHAN_MISSIONS, MIHAN_TYPE_META } from "./mihan-meta"
 import { isKnownTheme } from "./themes"
 
@@ -24,13 +25,22 @@ export const SCREEN_BAR_STORAGE_KEY = "setting_screen_bar"
 export const SHORT_NOTE_STORAGE_KEY = "dna.shortNoteInfo"
 
 /** 条目类型。 */
-export type ScreenBarItemType = "clock" | "countdown" | "forge" | "mihan" | "mihanRefresh" | "moling" | "zhouben"
+export type ScreenBarItemType = "clock" | "countdown" | "forge" | "mihan" | "mihanRefresh" | "moling" | "zhouben" | "afk"
 
 /** 三种游戏定时刷新倒计时,渲染与解析共用同一套分支。 */
 export type ScreenBarRefreshType = "mihanRefresh" | "moling" | "zhouben"
 
 /** 条目类型的展示顺序(设置页"添加条目"下拉)。 */
-export const SCREEN_BAR_ITEM_TYPES: ScreenBarItemType[] = ["clock", "countdown", "forge", "mihan", "mihanRefresh", "moling", "zhouben"]
+export const SCREEN_BAR_ITEM_TYPES: ScreenBarItemType[] = [
+    "clock",
+    "countdown",
+    "forge",
+    "mihan",
+    "mihanRefresh",
+    "moling",
+    "zhouben",
+    "afk",
+]
 
 /** 时钟模板预设(模板语法见 `formatClock`)。 */
 export const SCREEN_BAR_CLOCK_PRESETS = ["HH:mm:ss", "HH:mm", "MM-DD ddd HH:mm", "M月D日 dddd", "YYYY-MM-DD HH:mm:ss"] as const
@@ -125,8 +135,37 @@ export type ScreenBarRefreshItem = ScreenBarItemBase & {
     type: ScreenBarRefreshType
 }
 
+/** 狩月账本的展示指标。 */
+export type ScreenBarAfkMetric = "runs" | "drops" | "gold"
+
+/** 狩月账本的统计范围。 */
+export type ScreenBarAfkPeriod = "today" | "session"
+
+/** 狩月账本指标的选择顺序(设置页)。 */
+export const SCREEN_BAR_AFK_METRICS: ScreenBarAfkMetric[] = ["runs", "drops", "gold"]
+
+/** 狩月账本统计范围的选择顺序(设置页)。 */
+export const SCREEN_BAR_AFK_PERIODS: ScreenBarAfkPeriod[] = ["today", "session"]
+
+/** 狩月账本条目:显示今日/本次的完成场次、掉落件数或金色件数,可按副本筛选。 */
+export type ScreenBarAfkItem = ScreenBarItemBase & {
+    type: "afk"
+    /** 展示指标 */
+    metric: ScreenBarAfkMetric
+    /** 统计范围 */
+    period: ScreenBarAfkPeriod
+    /** 副本 ID;空串表示全部副本 */
+    source: string
+}
+
 /** 信息条条目。 */
-export type ScreenBarItem = ScreenBarClockItem | ScreenBarCountdownItem | ScreenBarForgeItem | ScreenBarMihanItem | ScreenBarRefreshItem
+export type ScreenBarItem =
+    | ScreenBarClockItem
+    | ScreenBarCountdownItem
+    | ScreenBarForgeItem
+    | ScreenBarMihanItem
+    | ScreenBarRefreshItem
+    | ScreenBarAfkItem
 
 /** 信息条配置载荷。 */
 export type ScreenBarConfig = {
@@ -311,6 +350,16 @@ export type ResolvedScreenBarItem =
     | { id: string; type: "forge"; mode: "summary"; completed: number; total: number }
     | { id: string; type: "mihan"; entries: ScreenBarMihanEntry[] /** 仅在 entries 为空时有意义 */; emptyReason: ScreenBarMihanEmptyReason }
     | { id: string; type: ScreenBarRefreshType; text: string }
+    | {
+          id: string
+          type: "afk"
+          metric: ScreenBarAfkMetric
+          period: ScreenBarAfkPeriod
+          source: string
+          /** 来源副本名;全部副本时为空串 */
+          sourceName: string
+          value: number
+      }
 
 const WEEKDAY_SHORT = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] as const
 const WEEKDAY_FULL = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"] as const
@@ -665,7 +714,8 @@ export function resolveScreenBarItem(
     mihanData: string[][] | undefined,
     forgeAlarm: ScreenBarForgeAlarm | null = null,
     forgeDrafts: ScreenBarForgeDraft[] = [],
-    forgeIcons: Record<string, string> = {}
+    forgeIcons: Record<string, string> = {},
+    afkStats: AfkLedgerSnapshot | null = null
 ): ResolvedScreenBarItem {
     switch (item.type) {
         case "clock":
@@ -757,6 +807,20 @@ export function resolveScreenBarItem(
             return { id: item.id, type: "moling", text: formatCountdownDays(getDayRefreshRemaining("moling", now.getTime())) }
         case "zhouben":
             return { id: item.id, type: "zhouben", text: formatCountdownDays(getDayRefreshRemaining("zhouben", now.getTime())) }
+        case "afk": {
+            const period = item.period === "session" ? "session" : "today"
+            const scope = item.source ? afkStats?.dungeons[item.source] : undefined
+            const totals = scope ? scope[period] : afkStats?.[period]
+            return {
+                id: item.id,
+                type: "afk",
+                metric: item.metric,
+                period,
+                source: item.source,
+                sourceName: scope?.name ?? "",
+                value: totals ? totals[item.metric] : 0,
+            }
+        }
     }
 }
 
@@ -781,6 +845,8 @@ export function createScreenBarItem(type: ScreenBarItemType): ScreenBarItem {
         case "moling":
         case "zhouben":
             return { id, type }
+        case "afk":
+            return { id, type, metric: "drops", period: "today", source: "" }
     }
 }
 
@@ -824,6 +890,16 @@ function normalizeScreenBarItem(raw: unknown): ScreenBarItem | null {
             return { id, type: "moling" }
         case "zhouben":
             return { id, type: "zhouben" }
+        case "afk": {
+            const metric = record.metric === "runs" || record.metric === "gold" ? record.metric : "drops"
+            return {
+                id,
+                type: "afk",
+                metric,
+                period: record.period === "session" ? "session" : "today",
+                source: typeof record.source === "string" ? record.source : "",
+            }
+        }
         default:
             return null
     }

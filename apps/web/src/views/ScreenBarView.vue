@@ -14,6 +14,7 @@ import { env } from "@/env"
 import { FORGE_ALARM_KEY } from "@/store/forgeAlarm"
 import { MIHAN_DATA_KEY, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
+import { AFK_LEDGER_STORAGE_KEY, type AfkLedgerSnapshot, normalizeAfkSnapshot } from "@/utils/afk-ledger"
 import { type CustomTheme, DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
 import {
     FORGE_ICON_STORAGE_KEY,
@@ -54,8 +55,10 @@ const forgeAlarm = ref<ScreenBarForgeAlarm | null>(null)
 const forgeDrafts = ref<ScreenBarForgeDraft[]>([])
 /** 铸造产物图片缓存(主窗口用数据包解析好写入),浮窗只读。 */
 const forgeIcons = ref<Record<string, string>>({})
+/** 狩月账本统计快照(主窗口写入),浮窗只读。 */
+const afkStats = ref<AfkLedgerSnapshot | null>(null)
 const config = computed(() => setting.screenBar)
-const { items } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons)
+const { items } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons, afkStats)
 
 const rootRef = ref<HTMLElement | null>(null)
 let appWindow: ReturnType<typeof getCurrentWebviewWindow> | null = null
@@ -80,6 +83,7 @@ function syncFromStorage() {
         localStorage.getItem(FORGE_ALARM_KEY) ?? "",
         localStorage.getItem(SHORT_NOTE_STORAGE_KEY) ?? "",
         localStorage.getItem(FORGE_ICON_STORAGE_KEY) ?? "",
+        localStorage.getItem(AFK_LEDGER_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_THEME_STORAGE_KEY) ?? "",
         localStorage.getItem(MAIN_CUSTOM_THEME_STORAGE_KEY) ?? "",
     ].join("|")
@@ -97,6 +101,7 @@ function syncFromStorage() {
     forgeAlarm.value = normalizeForgeAlarm(readStoredJson(FORGE_ALARM_KEY))
     forgeDrafts.value = normalizeForgeDrafts(readStoredJson(SHORT_NOTE_STORAGE_KEY))
     forgeIcons.value = normalizeForgeIcons(readStoredJson(FORGE_ICON_STORAGE_KEY))
+    afkStats.value = normalizeAfkSnapshot(readStoredJson(AFK_LEDGER_STORAGE_KEY))
     const rawTheme = localStorage.getItem(MAIN_THEME_STORAGE_KEY)
     if (rawTheme !== null) {
         setting.theme = rawTheme

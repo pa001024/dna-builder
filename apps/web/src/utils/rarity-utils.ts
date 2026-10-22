@@ -24,6 +24,25 @@ export function getRarityValue(rarity: string): number {
     )
 }
 
+/** 稀有度对应的品质色（白绿蓝紫金），供图表与内联样式使用。 */
+const RARITY_COLORS: Record<number, string> = {
+    1: "#c3ccd9",
+    2: "#4bd07a",
+    3: "#4a9bff",
+    4: "#b06bff",
+    5: "#f2c14e",
+    6: "#ff5c5c",
+}
+
+/**
+ * 根据稀有度返回品质色（十六进制）。
+ * @param rarity 稀有度（1~6 或中文名）
+ * @returns 十六进制颜色
+ */
+export function getRarityColor(rarity: number | string): string {
+    return RARITY_COLORS[typeof rarity === "string" ? getRarityValue(rarity) : rarity] || RARITY_COLORS[1]
+}
+
 /**
  * 根据稀有度返回背景渐变色。
  * @param rarity 稀有度（1~6 或中文名）

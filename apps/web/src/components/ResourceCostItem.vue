@@ -93,6 +93,11 @@ function getIcon(name: string) {
  * @returns 资源数据
  */
 function getResourceById(id: number | string) {
+    // 铸造产物没有游戏 id，调用方会直接把资源名当 key 传进来
+    const direct = resourceMap.get(id as number)
+    if (direct) {
+        return direct
+    }
     const normalizedId = Number(id)
     if (!Number.isFinite(normalizedId)) {
         return undefined
@@ -319,6 +324,119 @@ function handleCardClick() {
 }
 </script>
 <template>
+    <template v-if="inline && Array.isArray(value)">
+        <FullTooltip
+            v-if="(value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])"
+            side="top"
+        >
+            <template #tooltip>
+                <div class="-mx-3.75 -my-2.5">
+                    <ResourceTooltip :resource="getResourceById(value[1])!" bare />
+                </div>
+            </template>
+            <SRouterLink
+                :to="getRewardDetailLink('Resource', value[1])"
+                class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+            >
+                <img
+                    :src="getResourceIconById(value[1])"
+                    alt=""
+                    class="size-5 rounded-xs"
+                    :class="getResourceBackgroundById(value[1])"
+                />
+                <span class="text-xs">{{ tName(getResourceById(value[1])!.name) }}</span>
+                <span class="text-xs">{{ value[0] }}</span>
+            </SRouterLink>
+        </FullTooltip>
+        <ShowProps
+            v-else-if="value[2] === 'Mod'"
+            v-for="mod in [createLeveledMod(value[1])]"
+            :key="mod.id"
+            :mod="mod"
+            :link="getRewardDetailLink('Mod', mod.id)"
+        >
+            <SRouterLink
+                :to="getRewardDetailLink('Mod', mod.id)"
+                class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+            >
+                <img
+                    :src="mod.url"
+                    alt=""
+                    class="size-5 rounded-xs"
+                    :class="getRewardIconBackground('Mod', value[1])"
+                />
+                <span class="text-xs">{{ $t(mod.名称) }}</span>
+                <span class="text-xs">{{ value[0] }}</span>
+            </SRouterLink>
+        </ShowProps>
+        <ShowProps
+            v-else-if="value[2] === 'Weapon'"
+            v-for="weapon in [createLeveledWeapon(value[1])]"
+            :key="weapon.id"
+            :weapon="weapon"
+            :link="getRewardDetailLink('Weapon', weapon.id)"
+        >
+            <SRouterLink
+                :to="getRewardDetailLink('Weapon', weapon.id)"
+                class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+            >
+                <img
+                    :src="weapon.url"
+                    alt=""
+                    class="size-5 rounded-xs"
+                    :class="getRewardIconBackground('Weapon', value[1])"
+                />
+                <span class="text-xs">{{ $t(weapon.名称) }}</span>
+                <span class="text-xs">{{ value[0] }}</span>
+            </SRouterLink>
+        </ShowProps>
+        <ShowProps
+            v-else-if="value[2] === 'Char'"
+            v-for="char in [createLeveledChar(value[1])]"
+            :key="char.id"
+            :char="char"
+            :link="getRewardDetailLink('Char', char.id)"
+        >
+            <SRouterLink
+                :to="getRewardDetailLink('Char', char.id)"
+                class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+            >
+                <img
+                    :src="char.url"
+                    alt=""
+                    class="size-5 rounded-xs"
+                    :class="getRewardIconBackground('Char', value[1])"
+                />
+                <span class="text-xs">{{ $t(char.名称) }}</span>
+                <span class="text-xs">{{ value[0] }}</span>
+            </SRouterLink>
+        </ShowProps>
+        <SRouterLink
+            v-else-if="getRewardDetailLink(value[2], value[1])"
+            :to="getRewardDetailLink(value[2], value[1])"
+            class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+        >
+            <img
+                :src="getRewardIconUrl(value[2], value[1])"
+                alt=""
+                class="size-5 rounded-xs"
+                :class="getRewardIconBackground(value[2], value[1])"
+            />
+            <span class="text-xs">{{ $t(nameString) }}</span>
+            <span class="text-xs">{{ value[0] }}</span>
+        </SRouterLink>
+        <span v-else class="inline-flex items-center gap-1">
+            <img
+                :src="getRewardIconUrl(value[2], value[1])"
+                alt=""
+                class="size-5 rounded-xs"
+                :class="getRewardIconBackground(value[2], value[1])"
+            />
+            <span class="text-xs">{{ $t(nameString) }}</span>
+            <span class="text-xs">{{ value[0] }}</span>
+        </span>
+    </template>
+    <template v-else>
     <ShowProps
         v-if="Array.isArray(value) && value[2] === 'Mod'"
         v-for="mod in [createLeveledMod(value[1])]"
@@ -455,28 +573,6 @@ function handleCardClick() {
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
     </div>
-    <FullTooltip
-        v-else-if="inline && Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])"
-        side="top"
-    >
-        <template #tooltip>
-            <div class="-mx-3.75 -my-2.5">
-                <ResourceTooltip :resource="getResourceById(value[1])!" bare />
-            </div>
-        </template>
-        <SRouterLink
-            :to="getRewardDetailLink('Resource', value[1])"
-            class="inline-flex cursor-pointer items-center gap-1 hover:underline"
-        >
-            <img
-                :src="getResourceIconById(value[1])"
-                alt=""
-                class="size-5 rounded-xs"
-                :class="getResourceBackgroundById(value[1])"
-            />
-            <span class="text-xs">{{ value[0] }}</span>
-        </SRouterLink>
-    </FullTooltip>
     <div
         v-else-if="
             Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])
@@ -628,4 +724,5 @@ function handleCardClick() {
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value }}</span>
     </div>
+    </template>
 </template>

@@ -23,7 +23,19 @@ import {
     getMergedDataPackVersions,
 } from "@/utils/data-pack/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/utils/data-pack/imgs-runtime"
+import {
+    getMoreItems,
+    mergeSidebarCatalog,
+    resolveSidebarEntries,
+    SIDEBAR_DOCKED_PATHS,
+    SIDEBAR_LOCKED_PATHS,
+    type SidebarEntry,
+} from "@/utils/entry-util"
 import { cssQuoteFamily, customFontCssFamily } from "@/utils/font-storage"
+
+/** 底部常驻路径集合：账号与设置已有底部按钮，可选列表中直接隐藏 */
+const SIDEBAR_DOCKED_PATH_SET = new Set<string>(SIDEBAR_DOCKED_PATHS)
+
 import { buildFloatWindowConfig } from "@/utils/skill-cd-overlay"
 import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"
 
@@ -174,16 +186,42 @@ const settingContentRef = computed(() => scrollLayoutRef.value?.contentEl ?? nul
 const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }[]>(() => {
     const items: { key: string; title: string; icon: IconTypes }[] = [
         { key: "appearance", title: t("setting.appearance"), icon: "ri:palette-line" },
+        { key: "sidebar", title: t("setting.sidebar"), icon: "ri:menu-line" },
         { key: "skill-cd", title: t("skill-cd-overlay.title"), icon: "ri:timer-flash-line" },
         { key: "screen-bar", title: t("screenBar.sectionTitle"), icon: "ri:broadcast-line" },
+        { key: "afk-support", title: t("afk-support.title"), icon: "ri:gamepad-line" },
         { key: "data-pack", title: t("setting.dataPackManagement"), icon: "ri:database-2-line" },
         { key: "account", title: t("setting.account"), icon: "ri:user-line" },
         { key: "story", title: t("setting.storyText"), icon: "ri:book-open-line" },
         { key: "ai", title: t("setting.ai"), icon: "ri:robot-2-line" },
         { key: "other", title: t("setting.other"), icon: "ri:settings-4-line" },
     ]
-    return env.isApp ? items : items.filter(item => item.key !== "skill-cd" && item.key !== "screen-bar")
+    return env.isApp ? items : items.filter(item => item.key !== "skill-cd" && item.key !== "screen-bar" && item.key !== "afk-support")
 })
+
+/** 当前环境的 More 入口（含 show 标记，解析时过滤） */
+const sidebarMoreItems = computed(() => getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: ui.scriptUnlocked }))
+/** 布局解析后的侧边栏项目：顺序即展示顺序，脏路径丢弃、锁定项缺失自动补回 */
+const sidebarLayoutEntries = computed(() => resolveSidebarEntries(ui.sidebarLayoutPaths, ui.tabs, sidebarMoreItems.value))
+/** 可选列表：全目录中不在布局里的可见项，底部常驻（账号/设置）直接隐藏，顺序与 More 页一致 */
+const sidebarCandidateEntries = computed(() => {
+    const inLayout = new Set(ui.sidebarLayoutPaths)
+    return mergeSidebarCatalog(ui.tabs, sidebarMoreItems.value).filter(
+        entry =>
+            entry.name &&
+            entry.show !== false &&
+            !inLayout.has(entry.path) &&
+            entry.path !== "/more" &&
+            !SIDEBAR_DOCKED_PATH_SET.has(entry.path)
+    )
+})
+/**
+ * 布局项是否锁定（主页/More）：不可移除，只能排序。
+ * @param entry 布局项
+ */
+function isSidebarLocked(entry: SidebarEntry) {
+    return (SIDEBAR_LOCKED_PATHS as readonly string[]).includes(entry.path)
+}
 
 const imgsDownloadSummary = computed(() => {
     const state = imgsDownloadState.value
@@ -1170,6 +1208,82 @@ onUnmounted(() => {
                 </div>
             </section>
 
+            <section data-scroll-section="sidebar" class="flex flex-col">
+                <SectionHeader no-animate compact :title="$t('setting.sidebar')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.02s' }"
+                >
+                    <div class="flex flex-col gap-2">
+                        <div class="text-xs text-base-content/50 px-0.5">{{ $t("setting.sidebarTip") }}</div>
+                        <div class="flex items-center justify-between gap-2 px-0.5">
+                            <span class="text-xs font-medium text-base-content/70"
+                                >{{ $t("setting.sidebarItems") }} · {{ sidebarLayoutEntries.length }}</span
+                            >
+                            <button v-if="ui.isSidebarLayoutCustomized" class="btn btn-ghost btn-xs" @click="ui.resetSidebarLayout()">
+                                {{ $t("setting.sidebarReset") }}
+                            </button>
+                        </div>
+                        <div
+                            v-for="(item, index) in sidebarLayoutEntries"
+                            :key="item.path"
+                            class="flex items-center justify-between gap-2 rounded-xs border px-2.5 py-2"
+                            :class="isSidebarLocked(item) ? 'border-base-content/10 bg-base-content/3' : 'border-primary/30 bg-primary/5'"
+                        >
+                            <span class="flex min-w-0 items-center gap-2">
+                                <Icon v-if="item.icon" :icon="item.icon" class="size-4 shrink-0 text-primary" />
+                                <span class="truncate text-sm font-medium">{{ $t(`${item.name}.title`) }}</span>
+                                <span v-if="isSidebarLocked(item)" class="badge badge-ghost badge-sm shrink-0">{{
+                                    $t("setting.sidebarLocked")
+                                }}</span>
+                            </span>
+                            <span class="flex shrink-0 items-center gap-1">
+                                <button
+                                    class="btn btn-ghost btn-xs btn-square"
+                                    :disabled="index === 0"
+                                    :title="'↑'"
+                                    @click="ui.moveSidebarPath(item.path, -1)"
+                                >
+                                    <Icon icon="ri:arrow-up-line" class="size-3.5" />
+                                </button>
+                                <button
+                                    class="btn btn-ghost btn-xs btn-square"
+                                    :disabled="index === sidebarLayoutEntries.length - 1"
+                                    :title="'↓'"
+                                    @click="ui.moveSidebarPath(item.path, 1)"
+                                >
+                                    <Icon icon="ri:arrow-down-line" class="size-3.5" />
+                                </button>
+                                <button
+                                    v-if="!isSidebarLocked(item)"
+                                    class="btn btn-ghost btn-xs btn-square text-error/70 hover:text-error"
+                                    @click="ui.removeSidebarPath(item.path)"
+                                >
+                                    <Icon icon="ri:close-line" class="size-3.5" />
+                                </button>
+                            </span>
+                        </div>
+                        <div class="mt-1 px-0.5 text-xs font-medium text-base-content/70">{{ $t("setting.sidebarAvailable") }}</div>
+                        <div
+                            v-for="item in sidebarCandidateEntries"
+                            :key="item.path"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="flex min-w-0 items-center gap-2">
+                                <Icon v-if="item.icon" :icon="item.icon" class="size-4 shrink-0 text-base-content/60" />
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm">{{ $t(`${item.name}.title`) }}</span>
+                                    <span class="block truncate text-[11px] text-base-content/50">{{ $t(`${item.name}.desc`) }}</span>
+                                </span>
+                            </span>
+                            <button class="btn btn-sm btn-outline shrink-0" @click="ui.addSidebarPath(item.path)">
+                                <Icon icon="ri:add-line" class="size-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section v-if="env.isApp" data-scroll-section="skill-cd" class="flex flex-col">
                 <SectionHeader no-animate compact :title="$t('skill-cd-overlay.title')" />
                 <div
@@ -1230,6 +1344,11 @@ onUnmounted(() => {
             <section v-if="env.isApp" data-scroll-section="screen-bar" class="flex flex-col">
                 <SectionHeader no-animate compact :title="$t('screenBar.sectionTitle')" />
                 <ScreenBarSetting />
+            </section>
+
+            <section v-if="env.isApp" data-scroll-section="afk-support" class="flex flex-col">
+                <SectionHeader no-animate compact :title="$t('afk-support.title')" />
+                <AfkSupportSetting />
             </section>
 
             <section v-if="env.isApp" data-scroll-section="lan-sync" class="flex flex-col">

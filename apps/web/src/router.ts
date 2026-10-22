@@ -114,6 +114,12 @@ export const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(320, 360),
     },
     {
+        name: "afk-ledger",
+        path: "/afk",
+        component: () => import("./views/AfkLedgerView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
         name: "mod-manager",
         path: "/mods",
         component: () => import("./views/ModManagerView.vue"),

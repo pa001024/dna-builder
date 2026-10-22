@@ -41,6 +41,24 @@ export function useForgeAlarm() {
 export type ForgeAlarmContext = ReturnType<typeof createForgeAlarm>
 
 /**
+ * 发一条系统通知（非 Tauri 环境或用户拒绝权限时静默跳过）。
+ *
+ * 铸造提醒与「小小狩月人」管道事件共用这一条路径，避免两处各写一遍权限申请。
+ * @param title 通知标题
+ * @param body 通知正文
+ */
+export async function notifySystem(title: string, body: string) {
+    if (!env.isApp) return
+    let granted = await isPermissionGranted()
+    if (!granted) {
+        granted = (await requestPermission()) === "granted"
+    }
+    if (granted) {
+        sendNotification({ title, body })
+    }
+}
+
+/**
  * 创建铸造完成提醒实例。
  * @returns 提醒状态与方法
  */
@@ -68,15 +86,7 @@ function createForgeAlarm() {
         if (!current) return
         clearTimer()
         alarm.value = null
-        if (env.isApp) {
-            let granted = await isPermissionGranted()
-            if (!granted) {
-                granted = (await requestPermission()) === "granted"
-            }
-            if (granted) {
-                sendNotification({ title: t(FORGE_ALARM_NOTIFY_TITLE_KEY), body: current.title })
-            }
-        }
+        await notifySystem(t(FORGE_ALARM_NOTIFY_TITLE_KEY), current.title)
         sfx.play()
         ui.showSuccessMessage(t("dna-game-info.forge_alarm_done", { name: current.title }))
     }

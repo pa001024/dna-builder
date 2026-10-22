@@ -7,12 +7,13 @@ import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import type { QuickNavItem } from "@/components/HomeQuickNav.vue"
 import type { POCardSize } from "@/components/POCard.vue"
 import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { isValidHex } from "@/utils/customTheme"
 import { getMoreItems, type MoreItem } from "@/utils/entry-util"
 import { sha256 } from "@/utils/sha256"
 
 const setting = useSettingStore()
-const scriptUnlocked = useLocalStorage("script-unlocked", false)
+const ui = useUIStore()
 
 /** 磁贴项：在入口基础上附加 Win10 磁贴的尺寸与纯色渐变主题。 */
 type TileItem = MoreItem & {
@@ -24,7 +25,7 @@ type TileItem = MoreItem & {
 /**
  * 全量入口列表：共享数据源 getMoreItems 按当前环境与解锁状态生成。
  */
-const items = computed<MoreItem[]>(() => getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: scriptUnlocked.value }))
+const items = computed<MoreItem[]>(() => getMoreItems({ safeMode: setting.safeMode, scriptUnlocked: ui.scriptUnlocked }))
 
 /** 当前环境下可见的入口（过滤 show 为 false 的项）。 */
 const visibleItems = computed(() => items.value.filter(item => item.show !== false))
@@ -52,6 +53,7 @@ const TILE_SIZES: Record<string, POCardSize> = {
     "abyss-usage": "wide",
     timeline: "wide",
     "game-launcher": "wide",
+    "afk-ledger": "wide",
     "skin-colorize": "wide",
     "script-list": "wide",
     ranking: "wide",
@@ -560,7 +562,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     const signature = buildSignature(history, input)
 
     if (signature === scriptSignature) {
-        scriptUnlocked.value = !scriptUnlocked.value
+        ui.scriptUnlocked = !ui.scriptUnlocked
         hh = []
         return
     }

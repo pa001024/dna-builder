@@ -107,7 +107,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbg-item-active" })
                                     @click="selectBoss(boss)"
                                 >
                                     <span
-                                        class="absolute inset-y-0 left-0 z-10 w-[3px] bg-primary transition-opacity duration-200"
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
                                         :class="selectedBossId === boss.id ? 'opacity-100' : 'opacity-0'"
                                         aria-hidden="true"
                                     />

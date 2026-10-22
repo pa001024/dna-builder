@@ -25,6 +25,79 @@ export type MoreItemEnv = {
     scriptUnlocked: boolean
 }
 
+/** 侧边栏锁定路径：主页与 More 本体，自定义布局中不可移除 */
+export const SIDEBAR_LOCKED_PATHS = ["/", "/more"]
+
+/** 侧边栏底部常驻路径：账号与设置已有底部按钮，不进入自定义列表，避免重复 */
+export const SIDEBAR_DOCKED_PATHS = ["/game-accounts", "/setting"]
+
+/** 侧边栏候选项形态：基础 tab 与 More 入口在此抽象上对齐 */
+export type SidebarEntryLike = {
+    name?: string
+    path?: string
+    icon?: IconTypes
+    show?: boolean
+}
+
+/** 侧边栏解析项：路径必定存在，可直接渲染 */
+export type SidebarEntry = {
+    name?: string
+    path: string
+    icon?: IconTypes
+    show?: boolean
+}
+
+/**
+ * 合并侧边栏全目录：基础 tabs 在前，More 入口追加，同路径只保留前者
+ * （如基础 map-local 与 More 的 map-tool 同为 /map-tool）。
+ * @param baseTabs 基础 tabs（ui store 的 tabs 原样传入即可）
+ * @param moreItems 当前环境可见的 More 入口
+ * @returns 去重后的全目录
+ */
+export function mergeSidebarCatalog(baseTabs: SidebarEntryLike[], moreItems: MoreItem[]): SidebarEntry[] {
+    const merged: SidebarEntry[] = []
+    const seen = new Set<string>()
+    for (const tab of baseTabs) {
+        if (!tab.path || seen.has(tab.path)) {
+            continue
+        }
+        seen.add(tab.path)
+        merged.push({ name: tab.name, path: tab.path, icon: tab.icon, show: tab.show })
+    }
+    for (const item of moreItems) {
+        if (seen.has(item.path)) {
+            continue
+        }
+        seen.add(item.path)
+        merged.push({ name: item.name, path: item.path, icon: item.icon, show: item.show })
+    }
+    return merged
+}
+
+/**
+ * 按布局路径解析侧边栏展示项：未知/下架路径自动丢弃，锁定路径缺失时强制补回
+ * （主页补首位、More 补末位），保证永远可导航。
+ * 环境不可用（show === false）的项予以保留，由调用方过滤显示。
+ * @param layout 布局路径数组，顺序即展示顺序
+ * @param baseTabs 基础 tabs
+ * @param moreItems 当前环境的 More 入口（含 show 标记）
+ * @returns 解析后的展示项
+ */
+export function resolveSidebarEntries(layout: string[], baseTabs: SidebarEntryLike[], moreItems: MoreItem[]): SidebarEntry[] {
+    const catalog = new Map(mergeSidebarCatalog(baseTabs, moreItems).map(entry => [entry.path, entry]))
+    const paths = [...layout]
+    for (const locked of SIDEBAR_LOCKED_PATHS) {
+        if (!paths.includes(locked)) {
+            if (locked === "/more") {
+                paths.push(locked)
+            } else {
+                paths.unshift(locked)
+            }
+        }
+    }
+    return paths.map(path => catalog.get(path)).filter((entry): entry is SidebarEntry => !!entry)
+}
+
 /**
  * 全量功能入口列表：基础入口 + 按解锁状态追加的脚本管理入口。
  * @param envs 运行期环境条件（安全模式、脚本解锁）
@@ -47,6 +120,8 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         // APP 下载页只服务网页端访客（Tauri 桌面端已经是完整客户端，不需要再装移动端）
         { name: "download", path: "/download", icon: "ri:download-2-line", show: !isApp },
         { name: "game-launcher", path: "/game-launcher", icon: "ri:rocket-2-line" },
+        // 狩月账本只消费桌面端的奖励管道，网页端没有数据源
+        { name: "afk-ledger", path: "/afk", icon: "ri:bar-chart-line", show: isApp },
         // 技能 CD 浮窗依赖 Tauri 后端（原生置顶浮窗），网页端不显示。
         { name: "skill-cd-overlay", path: "/skill-cd-overlay", icon: "ri:timer-flash-line", show: isApp },
         { name: "mod-manager", path: "/mods", icon: "ri:puzzle-line" },

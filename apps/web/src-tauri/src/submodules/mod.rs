@@ -36,6 +36,8 @@ pub use dob_script_runtime::capture as util;
 pub use dob_script_runtime::win;
 
 // —— 应用侧独有模块（窗口/托盘/同步/打包工具，与脚本运行时无关） ——
+pub mod afk_bridge;
+pub mod afk_protocol;
 pub mod float_window;
 pub mod hotkey;
 pub mod lan_sync;

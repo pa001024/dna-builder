@@ -9,6 +9,8 @@ import { useForgeIconSync } from "./composables/useForgeIconSync"
 import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { env } from "./env"
+import { useAfkLedgerStore } from "./store/afkLedger"
+import { useAfkSupportStore } from "./store/afkSupport"
 import { useForgeAlarm } from "./store/forgeAlarm"
 import { useLanSyncStore } from "./store/lanSync"
 import { useMihanNotify } from "./store/mihan"
@@ -26,6 +28,8 @@ const ui = useUIStore()
 const mihanNotify = useMihanNotify()
 const forgeAlarm = useForgeAlarm()
 const lanSync = useLanSyncStore()
+const afkSupport = useAfkSupportStore()
+const afkLedger = useAfkLedgerStore()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
@@ -387,6 +391,10 @@ onMounted(async () => {
     startScreenBarWatchdog()
     // 局域网设备同步：按持久化开关恢复服务（不阻塞启动）
     void lanSync.init()
+    // 狩月账本先初始化，保证快照与数据库在管道事件到达前就绪
+    void afkLedger.init()
+    // 小小狩月人奖励管道：按持久化开关恢复接收端（默认关闭，与官方工具互斥）
+    void afkSupport.init()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()
