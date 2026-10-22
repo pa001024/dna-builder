@@ -5,6 +5,7 @@ import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
+import { restoreAfkWidget } from "./composables/useAfkWidget"
 import { useForgeIconSync } from "./composables/useForgeIconSync"
 import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
@@ -43,6 +44,8 @@ const isMainWindow = env.isApp ? getCurrentWindow().label === "main" : true
  * 也不重复拉起主程序的后台任务(密函推送轮询、技能 CD 浮窗恢复等)。
  */
 const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
+/** 狩月动画独立小窗：与信息条一样是透明浮窗，不套主窗口外壳。 */
+const isAfkWidgetWindow = env.isApp && getCurrentWindow().label === "afk-widget"
 
 // 铸造产物图片缓存：浮窗不加载数据包,图片由主窗口解析好写入,供「最近完成」条目出图
 if (!isScreenBarWindow) {
@@ -190,7 +193,9 @@ watchEffect(() => {
     const themeName = effectiveTheme.value === "custom" ? CUSTOM_THEME_ID : effectiveTheme.value
     document.body.setAttribute("data-theme", themeName)
     // 信息条窗口是透明浮窗，body 必须保持透明，否则整条会顶着一块实色底板、看不到窗口后面的画面
-    document.body.style.background = isScreenBarWindow || setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
+    // 两个透明浮窗（信息条 / 狩月动画）的 body 都必须保持透明
+    document.body.style.background =
+        isScreenBarWindow || isAfkWidgetWindow || setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
 })
 
@@ -380,6 +385,8 @@ onMounted(async () => {
         void setting.initAppFont()
         return
     }
+    // 狩月动画小窗：只画本地素材，不加载数据包、不拉后台任务
+    if (isAfkWidgetWindow) return
     // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
     void setting.initCustomWallpaper()
     void setting.initAppFont()
@@ -387,6 +394,8 @@ onMounted(async () => {
     void restoreSkillCdOverlay()
     // 屏幕信息条同理：窗口由主窗口按需创建
     void restoreScreenBar()
+    // 狩月动画小窗也按持久化开关恢复
+    void restoreAfkWidget()
     // 任务栏模式看门狗：explorer 重启连带销毁嵌入的信息条窗口后自动重建
     startScreenBarWatchdog()
     // 局域网设备同步：按持久化开关恢复服务（不阻塞启动）
@@ -413,7 +422,7 @@ onBeforeUnmount(() => {
 
 <template>
     <!-- 屏幕信息条窗口：只渲染信息条本身，不套主窗口外壳（ResizeableWindow 会给窗口加亚克力材质，透明浮窗用不了） -->
-    <RouterView v-if="isScreenBarWindow" />
+    <RouterView v-if="isScreenBarWindow || isAfkWidgetWindow" />
     <template v-else>
         <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
         <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->

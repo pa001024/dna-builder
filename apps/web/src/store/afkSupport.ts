@@ -5,6 +5,7 @@ import { defineStore } from "pinia"
 import {
     AFK_PIPE_NAME,
     type AfkBridgeStatus,
+    type AfkCharacterEvent,
     type AfkEvent,
     afkBridgeStart,
     afkBridgeStatus,
@@ -15,7 +16,9 @@ import {
 import { env } from "@/env"
 import { useAfkLedgerStore } from "@/store/afkLedger"
 import { notifySystem, useForgeAlarm } from "@/store/forgeAlarm"
+import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { patchAfkAnimState, readAfkAnimState } from "@/utils/afk-anim-state"
 import { afkDungeonName } from "@/utils/afk-ledger"
 
 /** 最近事件在内存里保留的条数。 */
@@ -48,7 +51,8 @@ function dedupeKey(event: AfkEvent): string {
         case "dungeon":
             return `dungeon|${event.id}|${event.status}`
         case "character":
-            return `character|${event.id}|${event.state}`
+            // 场景也进键：同一角色同一状态换地图时，官方照样切背景
+            return `character|${event.id}|${event.state}|${event.scene ?? ""}`
         case "monster":
             return `monster|${event.id}`
         case "chat":
@@ -95,10 +99,14 @@ export const useAfkSupportStore = defineStore("afkSupport", {
             enabled: useLocalStorage("setting_afk_support_enabled", false),
             /** 副本完成桌面通知开关：与接收端总开关独立，默认开 */
             notifyDungeon: useLocalStorage("setting_afk_notify_dungeon", true),
+            /** 铸造完成桌面通知开关：与接收端总开关独立，默认开 */
+            notifyCraft: useLocalStorage("setting_afk_notify_craft", true),
             /** Rust 侧运行状态（会话内瞬态） */
             status: null as AfkBridgeStatus | null,
             /** 最近事件，最新的在后 */
             events: [] as AfkEvent[],
+            /** 最近一条角色状态事件：只驱动浮窗动画，不落库 */
+            lastCharacter: null as AfkCharacterEvent | null,
             /** 最近一次连接建立时刻（本地毫秒），用于判定回放窗口 */
             connectedAt: 0,
             busy: false,
@@ -196,6 +204,12 @@ export const useAfkSupportStore = defineStore("afkSupport", {
                 }
             }
 
+            if (event.kind === "character") {
+                this.lastCharacter = event
+                patchAfkAnimState({
+                    character: { id: event.id, state: event.state, name: event.name, scene: event.scene },
+                })
+            }
             this.events.push(event)
             if (this.events.length > AFK_EVENT_KEEP) {
                 this.events.splice(0, this.events.length - AFK_EVENT_KEEP)
@@ -208,6 +222,14 @@ export const useAfkSupportStore = defineStore("afkSupport", {
             this.announce(event)
         },
         /**
+         * 取事件接收时刻（缺省为当前时刻）。
+         * @param event 协议事件
+         * @returns 毫秒时间戳
+         */
+        receivedAtOf(event: AfkEvent) {
+            return event.receivedAt || Date.now()
+        },
+        /**
          * 对需要用户注意的事件弹提示。铸造完成事件优先于本地排期提醒，
          * 收到即撤销 `useForgeAlarm` 里的排期，避免同一件事提醒两次。
          * @param event 协议事件
@@ -218,13 +240,17 @@ export const useAfkSupportStore = defineStore("afkSupport", {
                 const forgeAlarm = useForgeAlarm()
                 // 只撤掉同一产物的本地排期；别的铸造提醒不能因为这条事件被误取消
                 if (forgeAlarm.alarm.value?.title === event.name) forgeAlarm.cancel()
-                void notifySystem(t("afk-support.notify_title"), formatAfkEvent(event))
+                if (this.notifyCraft) void notifySystem(t("afk-support.notify_title"), formatAfkEvent(event))
                 ui.showSuccessMessage(formatAfkEvent(event))
                 return
             }
             if (event.kind === "dungeon" && event.status === "complete") {
                 if (this.notifyDungeon) void notifySystem(t("afk-support.notify_title"), formatAfkEvent(event))
-                ui.showSuccessMessage(formatAfkEvent(event))
+                // 页内提示放到独立小窗里（主窗口只在没有小窗时才提示）
+                patchAfkAnimState({
+                    notices: [...readAfkAnimState().notices, { text: formatAfkEvent(event), at: this.receivedAtOf(event) }],
+                })
+                if (!useSettingStore().afkWidgetEnabled) ui.showSuccessMessage(formatAfkEvent(event))
             }
         },
         /**
@@ -235,10 +261,18 @@ export const useAfkSupportStore = defineStore("afkSupport", {
             this.notifyDungeon = enabled
         },
         /**
+         * 开关铸造完成的桌面通知；同样只影响系统通知。
+         * @param enabled 是否发送系统通知
+         */
+        setNotifyCraft(enabled: boolean) {
+            this.notifyCraft = enabled
+        },
+        /**
          * 清空内存里的事件列表（不影响 Rust 侧统计）。
          */
         clearEvents() {
             this.events = []
+            this.lastCharacter = null
             dedupeAt.clear()
         },
     },

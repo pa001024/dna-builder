@@ -66,6 +66,13 @@ export const routes: readonly RouteRecordRaw[] = [
         meta: { requireData: false },
     },
     {
+        // 狩月动画独立小窗：透明置顶，只画官方素材动画，不加载数据包
+        name: "afk-widget",
+        path: "/afk-widget",
+        component: () => import("./views/AfkWidgetView.vue"),
+        meta: { requireData: false },
+    },
+    {
         name: "points-mall",
         path: "/points-mall",
         component: () => import("./views/PointsMall.vue"),

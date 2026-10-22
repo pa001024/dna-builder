@@ -10,6 +10,7 @@ import Dexie, { type Table } from "dexie"
 import { defineStore } from "pinia"
 import type { AfkEvent } from "@/api/afkSupport"
 import { charMap, modMap, resourceMap, weaponMap } from "@/data/d"
+import { patchAfkAnimState } from "@/utils/afk-anim-state"
 import {
     AFK_LEDGER_DB_NAME,
     AFK_LEDGER_RETENTION_DAYS,
@@ -71,6 +72,10 @@ const STALE_RUN_MS = 6 * 3600_000
 let initPromise: Promise<void> | null = null
 /** 最近一条已处理的完成回调（游戏会重复发同一条）。 */
 let lastComplete: { id: string; at: number } | null = null
+/** 最近完成的一场：重开挑战补场次时用它取副本与结束时刻。 */
+let lastFinishedRun: { dungeonId: string; dungeonName: string; endedAt: number } | null = null
+/** 完成之后是否还没收到 idle 角色事件（收到说明已经离开副本）。 */
+let awaitingIdle = false
 
 /**
  * 取数据库实例。
@@ -84,6 +89,35 @@ function ledgerDb() {
 let writeQueue: Promise<void> = Promise.resolve()
 /** 快照刷新定时器（合并一次回放里的连续事件）。 */
 let snapshotTimer: number | null = null
+
+/**
+ * 把「当前进行中场次」的掉落整体写进动画状态。
+ *
+ * 供两类时机调用：账本收到事件时增量刷新，以及动画窗口打开时一次性读取已掉落的东西
+ * （不依赖之后还会不会来事件）。做成模块级函数：小窗只读，不该牵扯 Pinia store 的生命周期。
+ */
+export async function publishRunDrops(): Promise<void> {
+    const db = ledgerDb()
+    const running = await db.runs.where("status").equals("running").toArray()
+    const run = running.sort((a, b) => b.startedAt - a.startedAt)[0]
+    if (!run?.id) {
+        patchAfkAnimState({ runDrops: [] })
+        return
+    }
+    const drops = await db.drops.where("runId").equals(run.id).toArray()
+    patchAfkAnimState({
+        runDrops: drops
+            .filter(drop => drop.kind === "reward")
+            .sort((a, b) => a.at - b.at)
+            .map(drop => ({
+                id: drop.itemId,
+                name: drop.itemName,
+                rarity: drop.rarity,
+                count: drop.count,
+                at: drop.at,
+            })),
+    })
+}
 
 /** 当前进行中的场次（内存态，重启后由 init 收尾）。 */
 type ActiveRun = {
@@ -220,6 +254,13 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                         count: event.count,
                     })
                 } else {
+                    // 游戏在「同一副本重新挑战」时不会重发开始事件：完成之后没等到 idle
+                    // 就又掉落了，说明玩家已经重开，用上一场的结束时刻补一条开始事件，
+                    // 掉落才能归到这一场而不是挂起
+                    if (!this.activeRun && awaitingIdle && lastFinishedRun) {
+                        awaitingIdle = false
+                        await this.applyEnter(lastFinishedRun.dungeonId, lastFinishedRun.dungeonName, lastFinishedRun.endedAt)
+                    }
                     // 有正在进行的场次就直接归给它（开始/结束成对时这是准确归属）；
                     // 没在副本里掉出来的先挂起，作为「错过开始帧」时的兜底
                     const active = this.activeRun
@@ -236,7 +277,13 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                         rarity: event.rarity,
                         count: event.count,
                     })
+                    // 只有进行中的场次才进动画状态：动画画的永远是「这一场」的掉落
+                    if (active) await publishRunDrops()
                 }
+            } else if (event.kind === "character") {
+                // idle/death 等非战斗状态说明已经离开副本，重开挑战的补场次不再适用
+                if (event.state !== "combat") awaitingIdle = false
+                return
             } else {
                 return
             }
@@ -262,6 +309,8 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 status: "running",
             })
             this.activeRun = { id, dungeonId, dungeonName, startedAt: at }
+            // 动画只画这一场的掉落：进场先把上一场清空
+            await publishRunDrops()
         },
         /**
          * 处理场次完成。没有对应开始消息的完成帧直接忽略，避免把重复 complete 计成新场次。
@@ -278,6 +327,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 const name = active.dungeonName || dungeonName
                 await ledgerDb().runs.update(active.id, { endedAt: at, status: "done", dungeonName: name })
                 this.activeRun = null
+                lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: name, endedAt: at }
+                awaitingIdle = true
+                await publishRunDrops()
                 await this.attachPending({ ...active, dungeonName: name })
                 return
             }
@@ -292,6 +344,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 endedAt: at,
                 status: "done",
             })
+            lastFinishedRun = { dungeonId, dungeonName, endedAt: at }
+            awaitingIdle = true
+            await publishRunDrops()
             await this.attachPending({ id, dungeonId, dungeonName })
         },
         /**
@@ -315,6 +370,8 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             if (!active) return
             await ledgerDb().runs.update(active.id, { endedAt: at, status: "done" })
             this.activeRun = null
+            lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: active.dungeonName, endedAt: at }
+            await publishRunDrops()
             if (flush) await this.attachPending(active)
         },
         /**

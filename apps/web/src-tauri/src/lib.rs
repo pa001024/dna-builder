@@ -201,6 +201,7 @@ pub fn run() {
         // 文件系统
         commands::fs::list_script_files,
         commands::fs::read_text_file,
+        commands::fs::read_binary_file,
         commands::fs::write_text_file,
         commands::fs::export_binary_file,
         commands::fs::move_file,

@@ -47,7 +47,8 @@ import type { SomeType } from "./types"
 - 只用组合式 API（不用 Options API）
 - 状态用 Pinia `defineStore()`
 - `defineProps<>()` / `defineEmits<>()` 做类型安全
-- 组件由 `unplugin-vue-components/vite` 自动导入
+- 组件由 `unplugin-vue-components/vite` 自动导入 (仅components目录下组件)
+- 禁止使用 `useLocalStorage<SomeType|null>("key", null)` 因为null/undefined类型无法推断序列化方法 必须使用明确的类型（如 `useLocalStorage<SomeType>("key", {...defaultValue},{ writeDefault: false })`）
 
 **错误处理**：
 

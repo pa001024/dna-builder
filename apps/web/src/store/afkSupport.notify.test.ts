@@ -50,4 +50,18 @@ describe("afk dungeon notification toggle", () => {
         expect(notifySystem).toHaveBeenCalledTimes(1)
         expect(showSuccessMessage).toHaveBeenCalledTimes(2)
     })
+
+    it("铸造完成通知也是独立开关，关掉后仍保留页内提示", () => {
+        const store = useAfkSupportStore()
+        const craft: AfkEvent = { kind: "craft", name: "金羊毛", rarity: 4, count: 2, receivedAt: 1, raw: "" }
+
+        store.notifyCraft = true
+        store.announce(craft)
+        expect(notifySystem).toHaveBeenCalledTimes(1)
+
+        store.notifyCraft = false
+        store.announce(craft)
+        expect(notifySystem).toHaveBeenCalledTimes(1)
+        expect(showSuccessMessage).toHaveBeenCalledTimes(2)
+    })
 })

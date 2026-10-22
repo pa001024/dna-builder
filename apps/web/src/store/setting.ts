@@ -123,6 +123,8 @@ export const useSettingStore = defineStore("setting", {
                     write: value => JSON.stringify(value),
                 },
             }),
+            // 狩月动画独立小窗：窗口不随应用重启保留，但开关要持久化，启动时按它恢复
+            afkWidgetEnabled: useLocalStorage("setting_afk_widget", false),
         }
     },
     getters: {},

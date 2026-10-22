@@ -97,6 +97,21 @@ function timeLabel(ms: number) {
                 />
             </div>
 
+            <!-- 铸造完成桌面通知：与接收端总开关独立 -->
+            <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                <span class="label-text">
+                    {{ $t("afk-support.notify_craft") }}
+                    <div class="text-xs text-base-content/50">{{ $t("afk-support.notify_craft_hint") }}</div>
+                </span>
+                <input
+                    type="checkbox"
+                    class="toggle toggle-secondary"
+                    :checked="afk.notifyCraft"
+                    :disabled="!env.isApp"
+                    @change="afk.setNotifyCraft(($event.target as HTMLInputElement).checked)"
+                />
+            </div>
+
             <!-- 状态与计数 -->
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                 <div class="flex items-center gap-2">

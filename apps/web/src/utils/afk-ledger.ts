@@ -262,28 +262,32 @@ export type AfkTrendPoint = {
     at: number
     /** 掉落件数 */
     drops: number
-    /** 金色件数 */
-    gold: number
+    /** 副本场次数（按开始时刻归桶） */
+    runs: number
 }
 
 /**
  * 按固定宽度分桶，供趋势图使用。
  * @param drops 掉落
+ * @param runs 场次
  * @param from 起始时间
  * @param to 结束时间
  * @param bucketMs 桶宽
  * @returns 从 `from` 开始的连续桶
  */
-export function trendBuckets(drops: AfkDrop[], from: number, to: number, bucketMs: number): AfkTrendPoint[] {
+export function trendBuckets(drops: AfkDrop[], runs: AfkRun[], from: number, to: number, bucketMs: number): AfkTrendPoint[] {
     const width = Math.max(1, bucketMs)
     const count = Math.max(1, Math.ceil((to - from) / width))
-    const points: AfkTrendPoint[] = Array.from({ length: count }, (_, index) => ({ at: from + index * width, drops: 0, gold: 0 }))
+    const points: AfkTrendPoint[] = Array.from({ length: count }, (_, index) => ({ at: from + index * width, drops: 0, runs: 0 }))
     for (const drop of drops) {
         const index = Math.floor((drop.at - from) / width)
         if (index < 0 || index >= points.length) continue
-        const point = points[index]
-        point.drops += drop.count
-        if (drop.rarity >= AFK_GOLD_RARITY) point.gold += drop.count
+        points[index].drops += drop.count
+    }
+    for (const run of runs) {
+        const index = Math.floor((run.startedAt - from) / width)
+        if (index < 0 || index >= points.length) continue
+        points[index].runs += 1
     }
     return points
 }

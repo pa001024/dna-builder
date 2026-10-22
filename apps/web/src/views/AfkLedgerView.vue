@@ -11,11 +11,13 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import type { EChartsOption } from "echarts"
 import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { getAfkWidgetWindow, setAfkWidgetIgnoreCursorEvents } from "@/api/afk-widget-window"
 import { readTextFile, writeTextFile } from "@/api/app"
 import AfkLedgerChart from "@/components/AfkLedgerChart.vue"
+import AfkLedgerHero from "@/components/AfkLedgerHero.vue"
 import FilterSelect from "@/components/FilterSelect.vue"
 import ScrollSpyLayout from "@/components/ScrollSpyLayout.vue"
-import SectionHeader from "@/components/SectionHeader.vue"
+import { useAfkWidget } from "@/composables/useAfkWidget"
 import { dungeonMap } from "@/data/d"
 import { env } from "@/env"
 import { useAfkLedgerStore } from "@/store/afkLedger"
@@ -35,6 +37,7 @@ import {
     startOfDay,
     trendBuckets,
 } from "@/utils/afk-ledger"
+import { readAfkWidgetClickThrough, writeAfkWidgetClickThrough } from "@/utils/afk-widget"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRarityColor, getRaritySwatchClass } from "@/utils/rarity-utils"
 
@@ -59,6 +62,11 @@ const MIX_DIMENSIONS: { key: MixDimension; labelKey: string }[] = [
 const { t, i18next } = useTranslation()
 const ledger = useAfkLedgerStore()
 const setting = useSettingStore()
+const {
+    busy: afkWidgetBusy,
+    setEnabled: setAfkWidgetEnabled,
+    syncWindowWithSetting: syncAfkWidgetWindow,
+} = useAfkWidget()
 const afkSupport = useAfkSupportStore()
 const ui = useUIStore()
 
@@ -157,6 +165,8 @@ watch(
 onMounted(async () => {
     await ledger.init()
     await reload()
+    // 窗口不可持久化：把实际窗口拉回与开关一致（上一版程序可能留下孤儿窗口）
+    void syncAfkWidgetWindow()
 })
 
 onBeforeUnmount(() => {
@@ -371,6 +381,7 @@ const trend = computed(() => {
     }
     return trendBuckets(
         drops.value.filter(isDungeonDrop),
+        runs.value,
         from,
         now,
         bucketMs.value
@@ -509,6 +520,7 @@ const chartColors = computed(() => {
         muted: read("--color-base-content", "#71717a"),
         border: read("--color-base-300", "#3f3f46"),
         primary: read("--color-primary", "#60a5fa"),
+        secondary: read("--color-secondary", "#f472b6"),
     }
 })
 
@@ -608,7 +620,7 @@ const trendOption = computed<EChartsOption>(() => {
             top: 0,
             right: 0,
             textStyle: { color: color.muted, fontSize: 11 },
-            data: [t("afk-ledger.series_drops"), t("afk-ledger.series_gold")],
+            data: [t("afk-ledger.series_drops"), t("afk-ledger.series_runs")],
         },
         xAxis: {
             type: "category",
@@ -642,14 +654,15 @@ const trendOption = computed<EChartsOption>(() => {
                 barMaxWidth: 18,
             },
             {
-                name: t("afk-ledger.series_gold"),
+                name: t("afk-ledger.series_runs"),
                 type: "line",
-                data: trend.value.map(point => point.gold),
+                data: trend.value.map(point => point.runs),
                 smooth: true,
                 symbol: "none",
-                lineStyle: { color: getRarityColor(5), width: 2 },
-                itemStyle: { color: getRarityColor(5) },
+                lineStyle: { color: color.secondary ?? color.primary, width: 2 },
+                itemStyle: { color: color.secondary ?? color.primary },
                 emphasis: { lineStyle: { width: 2.5 }, scale: false },
+                // 场次与件数共用一个纵轴，量级差太大时按次轴读
             },
         ],
     }
@@ -765,6 +778,24 @@ function mixRowClickable(row: MixRow) {
     if (mixDimension.value === "dungeon") return row.key !== "dungeon-unknown"
     return mixDimension.value !== "craft"
 }
+
+/** 小窗是否处于鼠标穿透状态（跨窗口读 localStorage）。 */
+const widgetClickThrough = ref(readAfkWidgetClickThrough())
+
+/**
+ * 解除小窗的鼠标穿透：写回共享状态，小窗自己也会收到 storage 事件跟着恢复。
+ */
+async function unlockWidget() {
+    writeAfkWidgetClickThrough(false)
+    widgetClickThrough.value = false
+    const widget = await getAfkWidgetWindow()
+    if (widget) await setAfkWidgetIgnoreCursorEvents(widget, false)
+}
+
+// 穿透状态由小窗写入，主窗口这里跟着刷新按钮显隐
+window.addEventListener("storage", event => {
+    if (event.key?.startsWith("afk_widget_click_through")) widgetClickThrough.value = readAfkWidgetClickThrough()
+})
 
 /** 导入 / 导出进行中：按钮禁用，避免并发读写同一个库。 */
 const transferBusy = ref(false)
@@ -884,10 +915,11 @@ function clearAll() {
 <template>
     <ScrollSpyLayout auto nav-kicker="AFK LEDGER" class="h-full">
         <div class="flex flex-col gap-3 p-4">
-        <div>
-            <SectionHeader number="01" kicker="AFK LEDGER" :title="$t('afk-ledger.title')" />
-            <p class="-mt-2 text-xs text-base-content/50">{{ $t("afk-ledger.subtitle") }}</p>
-        </div>
+        <AfkLedgerHero
+            kicker="AFK LEDGER"
+            :title="$t('afk-ledger.title')"
+            :subtitle="$t('afk-ledger.subtitle')"
+        />
 
         <!-- 采集与筛选：没有接收端就没有新数据，开关直接放在这一页 -->
         <section :data-scroll-title="$t('afk-ledger.nav_capture')" class="flex flex-col gap-3">
@@ -912,6 +944,16 @@ function clearAll() {
                 />
                 {{ $t("afk-support.notify_dungeon") }}
             </label>
+            <label class="flex cursor-pointer items-center gap-2 text-xs text-base-content/75">
+                <input
+                    type="checkbox"
+                    class="toggle toggle-xs toggle-secondary"
+                    :checked="afkSupport.notifyCraft"
+                    :disabled="!env.isApp"
+                    @change="afkSupport.setNotifyCraft(($event.target as HTMLInputElement).checked)"
+                />
+                {{ $t("afk-support.notify_craft") }}
+            </label>
             <span class="inline-flex items-center gap-1.5 text-[11px] text-base-content/55">
                 <span
                     class="inline-block size-1.5 rounded-full"
@@ -927,7 +969,35 @@ function clearAll() {
             <span v-if="afkSupport.lastError" class="text-[11px] text-error">{{ afkSupport.lastError }}</span>
             <span v-else-if="!env.isApp" class="text-[11px] text-warning">{{ $t("afk-support.app_only") }}</span>
             <span v-else class="text-[11px] text-base-content/35">{{ $t("afk-support.enable_hint") }}</span>
-            <RouterLink to="/setting" class="ml-auto text-[11px] text-primary/80 hover:text-primary">
+            <label
+                v-if="env.isApp"
+                class="ml-auto flex cursor-pointer items-center gap-2 text-xs text-base-content/75"
+                :title="$t('afk-widget.open_hint')"
+            >
+                <input
+                    type="checkbox"
+                    class="toggle toggle-xs toggle-secondary"
+                    :checked="setting.afkWidgetEnabled"
+                    :disabled="afkWidgetBusy"
+                    @change="setAfkWidgetEnabled(($event.target as HTMLInputElement).checked)"
+                />
+                {{ $t("afk-widget.open") }}
+            </label>
+            <!-- 小窗开了鼠标穿透后自己也点不到，恢复入口放在这里 -->
+            <button
+                v-if="env.isApp && widgetClickThrough"
+                type="button"
+                class="btn btn-xs border-warning/50 text-warning"
+                :title="$t('afk-widget.unlock_hint')"
+                @click="unlockWidget"
+            >
+                {{ $t("afk-widget.unlock") }}
+            </button>
+            <RouterLink
+                to="/setting"
+                class="text-[11px] text-primary/80 hover:text-primary"
+                :class="env.isApp ? '' : 'ml-auto'"
+            >
                 {{ $t("afk-ledger.more_settings") }}
             </RouterLink>
         </div>
@@ -1184,8 +1254,9 @@ function clearAll() {
                                 class="inline-block size-2.5 shrink-0 rounded-xs"
                                 :style="{ background: row.color }"
                             />
-                            <span class="max-w-32 truncate text-base-content/55">{{ row.label }}</span>
-                            <span class="ml-auto font-mono tabular-nums text-base-content/40">{{ shareOf(row.count) }}</span>
+                            <!-- 标签吃掉剩余宽度（有空间就铺满，不再固定 128px 截断），数值不参与收缩 -->
+                            <span class="min-w-0 flex-1 truncate text-base-content/55">{{ row.label }}</span>
+                            <span class="shrink-0 font-mono tabular-nums text-base-content/40">{{ shareOf(row.count) }}</span>
                         </component>
                     </div>
                     <div v-if="mixRows.length === 0" class="py-4 text-center text-xs text-base-content/40">

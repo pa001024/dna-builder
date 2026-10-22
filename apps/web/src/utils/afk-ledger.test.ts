@@ -129,11 +129,40 @@ describe("normalizeAfkSnapshot", () => {
 })
 
 describe("trendBuckets", () => {
-    it("把掉落按小时分桶，金色单独累计", () => {
-        const points = trendBuckets(DROPS, DAY, DAY + 12 * 3600_000, 3600_000)
+    it("把掉落与场次按小时分桶", () => {
+        const runs = [
+            {
+                id: 1,
+                sessionId: 1,
+                dungeonId: "a",
+                dungeonName: "A",
+                startedAt: DAY + 8 * 3600_000 + 60_000,
+                endedAt: null,
+                status: "running" as const,
+            },
+            {
+                id: 2,
+                sessionId: 1,
+                dungeonId: "a",
+                dungeonName: "A",
+                startedAt: DAY + 8 * 3600_000 + 120_000,
+                endedAt: null,
+                status: "running" as const,
+            },
+            {
+                id: 3,
+                sessionId: 1,
+                dungeonId: "a",
+                dungeonName: "A",
+                startedAt: DAY + 11 * 3600_000,
+                endedAt: null,
+                status: "running" as const,
+            },
+        ]
+        const points = trendBuckets(DROPS, runs, DAY, DAY + 12 * 3600_000, 3600_000)
         expect(points).toHaveLength(12)
-        expect(points[8]).toMatchObject({ drops: 3, gold: 3 })
-        expect(points[11]).toMatchObject({ drops: 1, gold: 0 })
+        expect(points[8]).toMatchObject({ drops: 3, runs: 2 })
+        expect(points[11]).toMatchObject({ drops: 1, runs: 1 })
     })
 })
 

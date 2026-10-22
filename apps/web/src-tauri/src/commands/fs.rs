@@ -47,6 +47,17 @@ pub async fn export_binary_file(
     ))
 }
 
+/// 读取二进制文件内容（原样返回字节，供前端直接喂给 canvas / Blob）。
+#[tauri::command]
+pub async fn read_binary_file(file_path: String) -> Result<tauri::ipc::Response, String> {
+    let path = Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+    let bytes = fs::read(path).map_err(|e| format!("读取文件失败: {}", e))?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
 /// 读取文本文件内容
 #[tauri::command]
 pub async fn read_text_file(file_path: String) -> Result<String, String> {

@@ -169,6 +169,15 @@ export async function exportBinaryFile(filePath: string, binaryContent: Uint8Arr
 }
 
 /**
+ * 读取二进制文件（原样字节）。
+ * @param filePath 文件路径
+ * @returns ArrayBuffer；文件不存在时抛错
+ */
+export async function readBinaryFile(filePath: string) {
+    return await invoke<ArrayBuffer>("read_binary_file", { filePath })
+}
+
+/**
  * 读取文本文件内容
  * @param filePath 文件路径
  * @returns 文件内容
