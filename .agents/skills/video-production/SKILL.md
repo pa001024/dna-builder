@@ -7,7 +7,11 @@ description: 把文案做成带旁白与中英双语字幕的成片：TTS（Mode
 
 本技能只管**视频生产链路**：谁说哪句话（TTS）、说的到底对不对（ASR）、每句话落在第几秒（时间轴）、这句话以什么画面和双语字幕出现（HyperFrames + victor-design）、以及怎么在可接受时间内渲完（分段渲染 + 拼接）。
 
-HyperFrames 框架本身的作者规范在全局技能 `/hyperframes`、`/hyperframes-core`、`/hyperframes-cli`（写 composition HTML 前必读）；本技能只补**本仓固定口径**与**已验证的脚本**。
+HyperFrames 框架本身的作者规范在全局技能 `/general-video` `/hyperframes`、`/hyperframes-core`、`/hyperframes-cli`（写 composition HTML 前必读）；本技能只补**本仓固定口径**与**已验证的脚本**。
+
+画面设计走技能 `victor-design`
+
+动效规则走全局技能 `/onetake` (重要)
 
 ## 0. 工作空间：一切都在 `../videos`，一部片一个分支
 
@@ -69,7 +73,11 @@ bun $BUN/narrate.ts   --script script.tsv --out .tmp --ref refs/story_story_1002
 bun $BUN/asr-check.ts --dir .tmp
 bun $BUN/captions.ts  --dir .tmp
 cp .tmp/voice.wav assets/voice.wav          # index.html 与成片用的是这一份
+
+# 只重做改动过的句子：删掉它的 seg-XXX-*.wav 后
+bun $BUN/narrate.ts --script script.tsv --out .tmp --ref <ref> --only 5,33
 ```
+`script.tsv` 支持第三列「TTS 文本」：字幕用第一列，合成用第三列（顿号/冒号换成逗号，避免 v5 吞句）。
 
 产物：`.tmp/voice.wav`（整条旁白）+ `.tmp/subs.json`（句级时间）+ `.tmp/captions.html` / `captions.css` / `subs.srt` + `.tmp/asr.json`（验音明细）→ `captions.css` 覆盖仓库根的同名文件，`captions.html` 内容粘进 `index.html`。
 不通过的句子：删掉对应 `seg/seg-XXX-*.wav` 重跑（缓存按文本+参考+参数哈希命名，只重做改过的那句）。

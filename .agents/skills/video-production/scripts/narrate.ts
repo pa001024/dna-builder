@@ -15,10 +15,13 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { createHash } from "node:crypto"
 import { modelverseInferOnce, readModelverseConfig } from "../../../../tools/voice/modelverse-client"
+import { readGptSoVitsConfig, synthesizeOnce } from "../../../../tools/voice/gpt-sovits"
 
 interface Cue {
     zh: string
     en: string
+    /** 送 TTS 的文本（第三列）；省略时同 zh，用于把顿号等符号换成模型好读的写法 */
+    tts?: string
 }
 
 interface TimedCue extends Cue {
@@ -62,8 +65,8 @@ function parseArgs(): Record<string, string> {
 }
 
 /**
- * 读取文案表：每行 `中文<TAB>英文`，`#` 开头与空行跳过。
- * 一行 = 一条字幕 = 一次 TTS。
+ * 读取文案表：每行 `中文<TAB>英文[<TAB>TTS 文本]`，`#` 开头与空行跳过。
+ * 一行 = 一条字幕 = 一次 TTS；第三列只影响合成，字幕仍用第一列。
  * @param file 文案表路径
  * @returns 逐句文案
  */
@@ -73,9 +76,9 @@ async function readScript(file: string): Promise<Cue[]> {
     for (const line of text.split(/\r?\n/)) {
         const trimmed = line.trim()
         if (!trimmed || trimmed.startsWith("#")) continue
-        const [zh, en = ""] = trimmed.split(/\t+/)
+        const [zh, en = "", tts = ""] = trimmed.split(/\t+/)
         if (!zh.trim()) continue
-        cues.push({ zh: zh.trim(), en: en.trim() })
+        cues.push({ zh: zh.trim(), en: en.trim(), tts: tts.trim() || undefined })
     }
     if (!cues.length) throw new Error(`文案表为空: ${file}`)
     return cues
@@ -144,18 +147,40 @@ async function synthesizeCue(
     cue: Cue,
     rawPath: string,
     cachePath: string,
-    options: { ref: string; speed: number; sampleRate: number; emo?: string; emoAlpha?: number; force: boolean }
+    options: {
+        ref: string
+        speed: number
+        sampleRate: number
+        emo?: string
+        emoAlpha?: number
+        force: boolean
+        backend: "modelverse" | "gpts"
+        prompt?: string
+        promptLang: string
+    }
 ): Promise<void> {
     if (!options.force && existsSync(cachePath) && existsSync(rawPath)) return
-    console.log(`  TTS → ${path.basename(cachePath)}  ${cue.zh}`)
-    const audio = await modelverseInferOnce(readModelverseConfig(), {
-        text: cue.zh,
-        refAudioPath: options.ref,
-        emoAudioPath: options.emo,
-        emoAlpha: options.emoAlpha,
-        speed: options.speed,
-        sampleRate: options.sampleRate,
-    })
+    const spoken = cue.tts ?? cue.zh
+    console.log(`  TTS → ${path.basename(cachePath)}  ${spoken}`)
+    // GPT-SoVITS 需要参考音频的原文；不等长或内容不符会直接吐出短垃圾音频
+    const audio =
+        options.backend === "gpts"
+            ? await synthesizeOnce(readGptSoVitsConfig(), {
+                  text: spoken,
+                  textLang: "zh",
+                  refAudioPath: options.ref,
+                  promptText: options.prompt ?? "",
+                  promptLang: options.promptLang,
+                  speedFactor: options.speed,
+              })
+            : await modelverseInferOnce(readModelverseConfig(), {
+                  text: spoken,
+                  refAudioPath: options.ref,
+                  emoAudioPath: options.emo,
+                  emoAlpha: options.emoAlpha,
+                  speed: options.speed,
+                  sampleRate: options.sampleRate,
+              })
     await writeFile(rawPath, new Uint8Array(audio))
 }
 
@@ -175,33 +200,51 @@ async function main(): Promise<void> {
     const sampleRate = Number(args.rate ?? 32000)
     const force = args.force === "true"
     const trim = args.trim !== "false"
+    const backend = (args.backend ?? "modelverse") as "modelverse" | "gpts"
+    if (backend === "gpts" && !args.prompt) throw new Error("GPT-SoVITS 需要 --prompt（参考音频的原文）")
+    const promptLang = args["prompt-lang"] ?? "zh"
 
     const cues = await readScript(scriptPath)
     const segDir = path.join(outDir, "seg")
     await mkdir(segDir, { recursive: true })
-    console.log(`共 ${cues.length} 句 → ${outDir}（参考 ${path.basename(ref)}）`)
+    // --only 5,18：只合成指定序号，其余必须命中缓存；--tag 换模型时给缓存加盐
+    const only = args.only ? new Set(args.only.split(",").map(value => Number(value.trim()))) : null
+    console.log(`共 ${cues.length} 句 → ${outDir}（参考 ${path.basename(ref)}${only ? `，仅合成 ${[...only].join(",")}` : ""}）`)
 
     const timed: TimedCue[] = []
+    const missing: number[] = []
     for (const [offset, cue] of cues.entries()) {
         const index = offset + 1
         const tag = String(index).padStart(3, "0")
         const hash = createHash("sha1")
-            .update(`${cue.zh}|${ref}|${speed}|${sampleRate}|${args.emo ?? ""}|${args.emoAlpha ?? ""}`)
+            .update(
+                `${cue.tts ?? cue.zh}|${ref}|${speed}|${sampleRate}|${args.emo ?? ""}|${args.emoAlpha ?? ""}|${backend}|${args.prompt ?? ""}${args.tag ? `|${args.tag}` : ""}`
+            )
             .digest("hex")
             .slice(0, 8)
         const rawPath = path.join(segDir, `seg-${tag}-${hash}.raw.wav`)
         const segPath = path.join(segDir, `seg-${tag}-${hash}.wav`)
-        await synthesizeCue(cue, rawPath, segPath, {
-            ref,
-            speed,
-            sampleRate,
-            emo: args.emo ? path.resolve(args.emo) : undefined,
-            emoAlpha: args.emoAlpha ? Number(args.emoAlpha) : undefined,
-            force,
-        })
-        if (trim) await trimEdges(rawPath, segPath, args.threshold ?? "-50dB")
+        const needSynth = !only || only.has(index)
+        if (needSynth) {
+            await synthesizeCue(cue, rawPath, segPath, {
+                ref,
+                speed,
+                sampleRate,
+                emo: args.emo ? path.resolve(args.emo) : undefined,
+                emoAlpha: args.emoAlpha ? Number(args.emoAlpha) : undefined,
+                force,
+                backend,
+                prompt: args.prompt,
+                promptLang,
+            })
+            if (trim) await trimEdges(rawPath, segPath, args.threshold ?? "-50dB")
+        } else if (!existsSync(segPath)) {
+            // 未选中的句子只用现成缓存，缺了只记下来，不擅自重合成整片
+            missing.push(index)
+        }
         timed.push({ ...cue, index, start: 0, end: 0, duration: 0, wav: path.relative(outDir, segPath) })
     }
+    if (missing.length) throw new Error(`第 ${missing.join(",")} 句没有缓存；把它们一起加进 --only 再跑`)
 
     const gapPath = path.join(segDir, `gap-${Math.round(gap * 1000)}ms.wav`)
     const tailPath = path.join(segDir, `tail-${Math.round(tail * 1000)}ms.wav`)
@@ -215,11 +258,12 @@ async function main(): Promise<void> {
         cue.start = Number(cursor.toFixed(3))
         cue.end = Number((cursor + duration).toFixed(3))
         cue.duration = Number(duration.toFixed(3))
-        listLines.push(`file '${path.relative(outDir, path.join(outDir, cue.wav)).split(path.sep).join("/")}'`)
-        listLines.push(`file '${path.relative(outDir, gapPath).split(path.sep).join("/")}'`)
+        // concat 列表里的相对路径以列表文件所在目录（seg/）为基准，不能按 outDir 算
+        listLines.push(`file '${path.basename(cue.wav)}'`)
+        listLines.push(`file '${path.basename(gapPath)}'`)
         cursor = cue.end + gap
     }
-    listLines.push(`file '${path.relative(outDir, tailPath).split(path.sep).join("/")}'`)
+    listLines.push(`file '${path.basename(tailPath)}'`)
 
     const listPath = path.join(segDir, "concat.txt")
     await writeFile(listPath, `${listLines.join("\n")}\n`)

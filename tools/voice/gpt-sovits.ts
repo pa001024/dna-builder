@@ -12,6 +12,8 @@ export interface GptSoVitsSynthRequest {
     promptText: string
     promptLang: string
     seed?: number
+    /** 语速系数，1 为原速，<1 更慢（服务端 speed_factor） */
+    speedFactor?: number
 }
 
 /**
@@ -44,6 +46,7 @@ export async function synthesizeOnce(config: GptSoVitsConfig, request: GptSoVits
         streaming_mode: "false",
         seed: String(request.seed ?? -1),
     })
+    if (request.speedFactor !== undefined) params.set("speed_factor", String(request.speedFactor))
     let lastError: unknown = null
     for (let attempt = 0; attempt <= config.retries; attempt += 1) {
         try {
