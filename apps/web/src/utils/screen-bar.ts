@@ -1,4 +1,4 @@
-import type { AfkLedgerSnapshot } from "./afk-ledger"
+import type { AfkLastDrop, AfkLedgerSnapshot } from "./afk-ledger"
 import { MIHAN_MISSIONS, MIHAN_TYPE_META } from "./mihan-meta"
 import { isKnownTheme } from "./themes"
 
@@ -136,18 +136,18 @@ export type ScreenBarRefreshItem = ScreenBarItemBase & {
 }
 
 /** 狩月账本的展示指标。 */
-export type ScreenBarAfkMetric = "runs" | "drops" | "gold"
+export type ScreenBarAfkMetric = "runs" | "drops" | "item"
 
 /** 狩月账本的统计范围。 */
 export type ScreenBarAfkPeriod = "today" | "session"
 
 /** 狩月账本指标的选择顺序(设置页)。 */
-export const SCREEN_BAR_AFK_METRICS: ScreenBarAfkMetric[] = ["runs", "drops", "gold"]
+export const SCREEN_BAR_AFK_METRICS: ScreenBarAfkMetric[] = ["runs", "drops", "item"]
 
 /** 狩月账本统计范围的选择顺序(设置页)。 */
 export const SCREEN_BAR_AFK_PERIODS: ScreenBarAfkPeriod[] = ["today", "session"]
 
-/** 狩月账本条目:显示今日/本次的完成场次、掉落件数或金色件数,可按副本筛选。 */
+/** 狩月账本条目:显示今日/本次的完成场次、掉落件数或最后掉落的物品,可按副本筛选。 */
 export type ScreenBarAfkItem = ScreenBarItemBase & {
     type: "afk"
     /** 展示指标 */
@@ -358,7 +358,10 @@ export type ResolvedScreenBarItem =
           source: string
           /** 来源副本名;全部副本时为空串 */
           sourceName: string
+          /** 场次 / 掉落指标的数值;物品指标时为该物品数量(无掉落为 0) */
           value: number
+          /** 范围内最后掉落的物品;物品指标用,无掉落时为 null */
+          last: AfkLastDrop | null
       }
 
 const WEEKDAY_SHORT = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] as const
@@ -811,6 +814,19 @@ export function resolveScreenBarItem(
             const period = item.period === "session" ? "session" : "today"
             const scope = item.source ? afkStats?.dungeons[item.source] : undefined
             const totals = scope ? scope[period] : afkStats?.[period]
+            const last = scope ? (scope.last[period] ?? null) : (afkStats?.last[period] ?? null)
+            if (item.metric === "item") {
+                return {
+                    id: item.id,
+                    type: "afk",
+                    metric: item.metric,
+                    period,
+                    source: item.source,
+                    sourceName: scope?.name ?? "",
+                    value: last?.count ?? 0,
+                    last,
+                }
+            }
             return {
                 id: item.id,
                 type: "afk",
@@ -819,6 +835,7 @@ export function resolveScreenBarItem(
                 source: item.source,
                 sourceName: scope?.name ?? "",
                 value: totals ? totals[item.metric] : 0,
+                last,
             }
         }
     }
@@ -891,7 +908,8 @@ function normalizeScreenBarItem(raw: unknown): ScreenBarItem | null {
         case "zhouben":
             return { id, type: "zhouben" }
         case "afk": {
-            const metric = record.metric === "runs" || record.metric === "gold" ? record.metric : "drops"
+            // 旧配置的 gold 已改为物品指标,读到即迁移,保证老条目不断档
+            const metric = record.metric === "runs" ? "runs" : record.metric === "item" || record.metric === "gold" ? "item" : "drops"
             return {
                 id,
                 type: "afk",

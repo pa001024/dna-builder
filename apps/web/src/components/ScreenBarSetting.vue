@@ -10,6 +10,7 @@ import { useAfkLedgerStore } from "@/store/afkLedger"
 import { useForgeAlarm } from "@/store/forgeAlarm"
 import { MIHAN_TYPES, useMihanNotify } from "@/store/mihan"
 import { useSettingStore } from "@/store/setting"
+import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { MIHAN_MISSIONS } from "@/utils/mihan-meta"
 import {
     createScreenBarItem,
@@ -58,16 +59,32 @@ const afkLedger = useAfkLedgerStore()
 const afkStats = computed(() => afkLedger.snapshot)
 const { items: previewItems } = useScreenBarContent(config, forgeAlarm, forgeDrafts, forgeIcons, afkStats)
 
-/** 可选来源副本:账本里记录过的副本(含今日为 0 的)。 */
+/** 可选来源副本:账本里记录过的副本(含今日为 0 的),名称走带括号的完整名以便区分同名副本。 */
 const afkDungeonOptions = computed(() =>
-    Object.entries(afkLedger.snapshot.dungeons).map(([id, entry]) => ({ id, name: entry.name }))
+    Object.entries(afkLedger.snapshot.dungeons)
+        .map(([id, entry]) => ({ id, name: dungeonDisplayName(id, entry.name) }))
+        .sort((a, b) => a.name.localeCompare(b.name))
 )
+
+/** 来源下拉的「全部」哨兵:Select 的选项值不可为空,存量配置里的空串在这里映射。 */
+const AFK_SOURCE_ALL = "__all__"
+
+/** 主题下拉的「跟随主应用」哨兵,存量配置里的空串在这里映射。 */
+const THEME_FOLLOW_VALUE = "__follow__"
+
+/** 主题下拉的受控值:空串(跟随)与哨兵互转,主题 id 原样透传。 */
+const themeModel = computed({
+    get: () => setting.screenBar.theme || THEME_FOLLOW_VALUE,
+    set: value => {
+        setting.screenBar.theme = value === THEME_FOLLOW_VALUE ? "" : value
+    },
+})
 
 /** 指标与范围的按钮文案 key(静态表,避免在模板里拼 key)。 */
 const AFK_METRIC_KEYS: Record<ScreenBarAfkMetric, string> = {
     runs: "screenBar.afkMetricRuns",
     drops: "screenBar.afkMetricDrops",
-    gold: "screenBar.afkMetricGold",
+    item: "screenBar.afkMetricItem",
 }
 const AFK_PERIOD_KEYS: Record<ScreenBarAfkPeriod, string> = {
     today: "screenBar.afkPeriodToday",
@@ -439,22 +456,22 @@ function itemParams(item: ScreenBarItem) {
                             </div>
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="text-[10px] text-base-content/45">{{ $t("screenBar.afkSource") }}</span>
-                                <select
-                                    class="h-6 rounded-xs border border-base-content/20 bg-base-100/60 px-1 text-xs text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                                    :value="item.source"
-                                    @change="setAfk(item, { source: ($event.target as HTMLSelectElement).value })"
+                                <Select
+                                    :model-value="item.source || AFK_SOURCE_ALL"
+                                    class="w-44 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    @update:model-value="setAfk(item, { source: $event === AFK_SOURCE_ALL ? '' : String($event) })"
                                 >
-                                    <option value="">{{ $t("screenBar.afkSourceAll") }}</option>
-                                    <option
+                                    <SelectItem :value="AFK_SOURCE_ALL">{{ $t("screenBar.afkSourceAll") }}</SelectItem>
+                                    <SelectItem
                                         v-if="item.source && !afkDungeonOptions.some(dungeon => dungeon.id === item.source)"
                                         :value="item.source"
                                     >
                                         {{ item.source }}
-                                    </option>
-                                    <option v-for="dungeon in afkDungeonOptions" :key="dungeon.id" :value="dungeon.id">
+                                    </SelectItem>
+                                    <SelectItem v-for="dungeon in afkDungeonOptions" :key="dungeon.id" :value="dungeon.id">
                                         {{ dungeon.name }}
-                                    </option>
-                                </select>
+                                    </SelectItem>
+                                </Select>
                                 <span class="text-[10px] text-base-content/40">{{ $t("screenBar.afkSourceHint") }}</span>
                             </div>
                         </div>
@@ -580,20 +597,27 @@ function itemParams(item: ScreenBarItem) {
                 <!-- 独立主题:空值表示跟随主应用;自定义主题复用主应用的主题设计器数据 -->
                 <div class="mt-2 flex items-center gap-2 text-xs text-base-content/75" :title="$t('screenBar.themeTip')">
                     {{ $t("screenBar.theme") }}
-                    <select
-                        v-model="setting.screenBar.theme"
-                        class="h-6 rounded-xs border border-base-content/20 bg-base-100/60 px-1 text-xs text-base-content outline-none transition-colors duration-150 focus:border-primary"
+                    <Select
+                        v-model="themeModel"
+                        class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :aria-label="$t('screenBar.theme')"
                     >
-                        <option value="">{{ $t("screenBar.themeFollowMain") }}</option>
-                        <optgroup :label="$t('setting.lightTheme')">
-                            <option v-for="th in LIGHT_THEMES" :key="th" :value="th">{{ capitalize(th) }}</option>
-                        </optgroup>
-                        <optgroup :label="$t('setting.darkTheme')">
-                            <option v-for="th in DARK_THEMES" :key="th" :value="th">{{ capitalize(th) }}</option>
-                        </optgroup>
-                        <option value="custom">{{ $t("setting.customThemeOption") }}</option>
-                    </select>
+                        <SelectItem :value="THEME_FOLLOW_VALUE">{{ $t("screenBar.themeFollowMain") }}</SelectItem>
+                        <SelectSeparator />
+                        <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
+                        <SelectGroup>
+                            <SelectItem v-for="th in LIGHT_THEMES" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
+                        </SelectGroup>
+                        <SelectSeparator />
+                        <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.darkTheme") }}</SelectLabel>
+                        <SelectGroup>
+                            <SelectItem v-for="th in DARK_THEMES" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
+                        </SelectGroup>
+                        <SelectSeparator />
+                        <SelectGroup>
+                            <SelectItem value="custom">{{ $t("setting.customThemeOption") }}</SelectItem>
+                        </SelectGroup>
+                    </Select>
                 </div>
             </div>
         </div>

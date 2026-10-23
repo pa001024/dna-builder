@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import type { AfkEvent } from "@/api/afkSupport"
+import { useAfkWidget } from "@/composables/useAfkWidget"
 import { dungeonMap } from "@/data/d"
 import { env } from "@/env"
 import { formatAfkEvent, useAfkSupportStore } from "@/store/afkSupport"
+import { useSettingStore } from "@/store/setting"
 import { AFK_DUNGEON_ALIASES, afkDungeonName } from "@/utils/afk-ledger"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRaritySwatchClass } from "@/utils/rarity-utils"
@@ -15,6 +17,9 @@ import { getRaritySwatchClass } from "@/utils/rarity-utils"
  * 所以这里把互斥说明与实时状态放在一起，让用户能一眼看出当前是谁在收数据。
  */
 const afk = useAfkSupportStore()
+const setting = useSettingStore()
+/** 独立小窗开关：与账本页的开关同一来源，窗口只是投影 */
+const { busy: afkWidgetBusy, setEnabled: setAfkWidgetEnabled } = useAfkWidget()
 /** 最近事件倒序展示，列表长度受设置页空间限制。 */
 const recent = computed(() => afk.events.slice(-8).reverse())
 /** 状态文案的 i18n 键。 */
@@ -78,6 +83,24 @@ function timeLabel(ms: number) {
                         :checked="afk.running"
                         :disabled="afk.busy || !env.isApp"
                         @change="afk.setEnabled(($event.target as HTMLInputElement).checked)"
+                    />
+                </div>
+            </div>
+
+            <!-- 独立动画小窗：开关存在设置里，窗口只是投影；与账本页的开关同一来源 -->
+            <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                <span class="label-text">
+                    {{ $t("afk-widget.open") }}
+                    <div class="text-xs text-base-content/50">{{ $t("afk-widget.open_hint") }}</div>
+                </span>
+                <div class="flex shrink-0 items-center gap-2">
+                    <span v-if="afkWidgetBusy" class="loading loading-spinner loading-xs" />
+                    <input
+                        type="checkbox"
+                        class="toggle toggle-secondary"
+                        :checked="setting.afkWidgetEnabled"
+                        :disabled="afkWidgetBusy || !env.isApp"
+                        @change="setAfkWidgetEnabled(($event.target as HTMLInputElement).checked)"
                     />
                 </div>
             </div>

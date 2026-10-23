@@ -21,6 +21,7 @@ import {
     type AfkRun,
     buildSnapshot,
     emptySnapshot,
+    resolveCraftItem,
 } from "@/utils/afk-ledger"
 
 class AfkLedgerDatabase extends Dexie {
@@ -38,8 +39,8 @@ class AfkLedgerDatabase extends Dexie {
 }
 
 /**
- * 按掉落 id 与名称判断奖励类型。
- * @param id 游戏奖励 id
+ * 按掉落 id 与名称判断奖励类型。id 查不到时按名兜底（新物品/数据包滞后时不再错成资源）。
+ * @param id 游戏奖励 id；铸造消息没有 id，传 null 走按名解析
  * @param name 游戏奖励名
  * @returns 展示类型
  */
@@ -58,7 +59,8 @@ function resolveDropType(id: number | null, name: string): AfkDropType {
         if (weapon) return "Weapon"
         if (char) return "Char"
     }
-    return "Resource"
+    // 铸造消息没有 id，或 id 在数据包里查不到：按名反查（武器铸造成品走这里）
+    return resolveCraftItem(name).itemType
 }
 
 /** 当前打开的数据库实例；只在主窗口的动作里惰性创建。 */
@@ -238,8 +240,10 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 if (event.status === "enter") await this.applyEnter(event.id, event.name, at)
                 else await this.applyComplete(event.id, event.name, at)
             } else if (event.kind === "reward" || event.kind === "craft") {
-                // 铸造产物与副本无关：永远不挂场次，页面用独立维度统计
+                // 铸造产物与副本无关：永远不挂场次，页面用独立维度统计。
+                // 只有名字没有 id，武器等成品在这里按名反查回填 id，否则展示层拿不到图标与详情链
                 if (event.kind === "craft") {
+                    const crafted = resolveCraftItem(event.name)
                     await ledgerDb().drops.add({
                         sessionId: this.sessionId ?? 0,
                         runId: null,
@@ -247,9 +251,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                         dungeonName: "",
                         at,
                         kind: "craft",
-                        itemId: null,
+                        itemId: crafted.itemId,
                         itemName: event.name,
-                        itemType: resolveDropType(null, event.name),
+                        itemType: crafted.itemType,
                         rarity: event.rarity,
                         count: event.count,
                     })
@@ -336,18 +340,30 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             // 开始与结束成对到达，或错过了开始帧：补一条已完成的场次，不能丢。
             // 先收掉挂着的那一场（不抢掉落），再把挂起的掉落整批归给这次完成的副本
             if (active) await this.closeActive(at, false)
+            // 游戏「重新挑战」时不发开始信号：没收到 idle 就又来一条完成，说明上一场结束即重开，
+            // 用上一场的结束时刻补开始时刻，否则时长会被记成 0
+            const reopened =
+                !active &&
+                awaitingIdle &&
+                lastFinishedRun &&
+                (!dungeonId || !lastFinishedRun.dungeonId || dungeonId === lastFinishedRun.dungeonId)
+                    ? lastFinishedRun
+                    : null
+            const startedAt = reopened ? Math.min(reopened.endedAt, at) : at
+            const runDungeonId = dungeonId || reopened?.dungeonId || ""
+            const runDungeonName = dungeonName || reopened?.dungeonName || ""
             const id = await ledgerDb().runs.add({
                 sessionId: this.sessionId ?? 0,
-                dungeonId,
-                dungeonName,
-                startedAt: at,
+                dungeonId: runDungeonId,
+                dungeonName: runDungeonName,
+                startedAt,
                 endedAt: at,
                 status: "done",
             })
-            lastFinishedRun = { dungeonId, dungeonName, endedAt: at }
+            lastFinishedRun = { dungeonId: runDungeonId, dungeonName: runDungeonName, endedAt: at }
             awaitingIdle = true
             await publishRunDrops()
-            await this.attachPending({ id, dungeonId, dungeonName })
+            await this.attachPending({ id, dungeonId: runDungeonId, dungeonName: runDungeonName })
         },
         /**
          * 把当前所有未归属的掉落整批挂到场次上。
@@ -533,6 +549,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             const name = typeof drop.itemName === "string" ? drop.itemName : ""
             if (!Number.isFinite(at) || !Number.isFinite(count) || !name) return null
             const kind = drop.kind === "craft" ? "craft" : "reward"
+            // 旧备份里的铸造武器存的是 Resource + 空 id，导入时按名纠正，与实时写入口径一致
+            const parsedId = drop.itemId === null || drop.itemId === undefined ? null : Number(drop.itemId)
+            const fallback = parsedId === null ? resolveCraftItem(name) : null
             return {
                 id: Number.isFinite(Number(drop.id)) ? Number(drop.id) : undefined,
                 sessionId: Number(drop.sessionId) || 0,
@@ -541,9 +560,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 dungeonName: String(drop.dungeonName ?? ""),
                 at,
                 kind,
-                itemId: drop.itemId === null || drop.itemId === undefined ? null : Number(drop.itemId),
+                itemId: parsedId ?? fallback?.itemId ?? null,
                 itemName: name,
-                itemType: resolveDropType(drop.itemId === null || drop.itemId === undefined ? null : Number(drop.itemId), name),
+                itemType: resolveDropType(parsedId, name),
                 rarity: Math.min(5, Math.max(1, Number(drop.rarity) || 1)),
                 count,
             }

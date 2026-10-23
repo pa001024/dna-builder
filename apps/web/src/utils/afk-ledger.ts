@@ -4,6 +4,9 @@
  * 把「小小狩月人」奖励管道里的事件整理成两类持久化记录：场次（run）与掉落（drop），
  * 并给页面、屏幕信息条提供只读聚合。这里不依赖 Dexie / Vue，便于单测。
  */
+import { t } from "i18next"
+import { charMap, modMap, resourceMap, weaponNameMap } from "@/data/d"
+import { getRewardIconUrl } from "@/utils/reward-icon"
 
 /** 账本独立的 IndexedDB 名：与主库 `dna` 分开，互不影响。 */
 export const AFK_LEDGER_DB_NAME = "dna-afk"
@@ -20,6 +23,9 @@ export const AFK_LEDGER_RETENTION_DAYS = 90
 /**
  * 管道里会装扮成副本、但数据包副本表里没有的玩法。
  * 「迷津」的进入/完成事件用 id `20` 和占位名「测试场景」下发，必须在这里纠正展示名。
+ *
+ * 值为中文原文的 i18n 键（展示时经 `afkDungeonName()` 走 `t()` 翻译）；
+ * 仅做 `id in AFK_DUNGEON_ALIASES` 路由判断时直接用键，不受语言影响。
  */
 export const AFK_DUNGEON_ALIASES: Record<string, string> = {
     "20": "迷津",
@@ -35,7 +41,9 @@ export const AFK_DUNGEON_ALIASES: Record<string, string> = {
  * @returns 名字
  */
 export function afkDungeonName(id: string, name: string): string {
-    return AFK_DUNGEON_ALIASES[id] ?? (name || id)
+    const alias = AFK_DUNGEON_ALIASES[id]
+    if (alias) return t(alias)
+    return name || id
 }
 
 /** 一次挂机场次。 */
@@ -65,6 +73,43 @@ export type AfkRunStatus = "running" | "done"
 /** 掉落物品类型（决定图标与详情链接）。 */
 export type AfkDropType = "Mod" | "Resource" | "Weapon" | "Char"
 
+/** 魔之楔名 → id：modMap 只按 id 建索引，铸造按名解析时用这个反查。 */
+let modNameIndex: Map<string, number> | null = null
+
+/**
+ * 取魔之楔名到 id 的反查表（首次使用时由 modMap 构建）。
+ * @returns 名 → id
+ */
+function modIdIndex(): Map<string, number> {
+    if (!modNameIndex) {
+        modNameIndex = new Map<string, number>()
+        for (const mod of modMap.values()) {
+            if (!modNameIndex.has(mod.名称)) modNameIndex.set(mod.名称, mod.id)
+        }
+    }
+    return modNameIndex
+}
+
+/**
+ * 铸造产物只有名字没有 id，按名反查真实类型与数字 id。
+ *
+ * 武器 / 魔之楔 / 角色带回数字 id（展示层图标与详情页链接都要求数字 id）；
+ * 资源与未知物品保持 id 为空，调用方直接拿名字当 key（resourceMap 本来就按名建了索引）。
+ * 同名跨类型不存在（已核对武器/魔之楔/资源/角色四表无交集），顺序不影响结果。
+ * @param name 铸造产物名（游戏原文）
+ * @returns 类型与数字 id（资源/未知为 null）
+ */
+export function resolveCraftItem(name: string): { itemType: AfkDropType; itemId: number | null } {
+    const weapon = weaponNameMap.get(name)
+    if (weapon) return { itemType: "Weapon", itemId: weapon.id }
+    const modId = modIdIndex().get(name)
+    if (modId !== undefined) return { itemType: "Mod", itemId: modId }
+    const char = charMap.get(name)
+    if (char) return { itemType: "Char", itemId: char.id }
+    if (resourceMap.get(name)) return { itemType: "Resource", itemId: null }
+    return { itemType: "Resource", itemId: null }
+}
+
 /** 一条掉落。 */
 export type AfkDrop = {
     /** 自增主键 */
@@ -80,7 +125,7 @@ export type AfkDrop = {
     at: number
     /** 来源消息 */
     kind: "reward" | "craft"
-    /** 物品 ID；craft 消息没有 ID */
+    /** 物品 ID；武器等铸造成品在写入时按名反查回填，未知物品为 null */
     itemId: number | null
     /** 物品名（游戏原文） */
     itemName: string
@@ -102,11 +147,30 @@ export type AfkTotals = {
     gold: number
 }
 
+/** 最后掉落的物品（屏幕信息条「物品」指标用，图标由主窗口写快照时预解析，浮窗只读字符串不查数据包）。 */
+export type AfkLastDrop = {
+    itemId: number | null
+    itemName: string
+    itemType: AfkDropType
+    rarity: number
+    count: number
+    at: number
+    /** 预解析的图标路径，浮窗直接渲染 */
+    icon: string
+}
+
+/** 计数范围的最后掉落（今日 / 本次各一条，无掉落时为 null）。 */
+export type AfkLastPair = {
+    today: AfkLastDrop | null
+    session: AfkLastDrop | null
+}
+
 /** 单个副本在快照里的计数。 */
 export type AfkDungeonTotals = {
     name: string
     today: AfkTotals
     session: AfkTotals
+    last: AfkLastPair
 }
 
 /** 写给屏幕信息条的快照。 */
@@ -119,6 +183,8 @@ export type AfkLedgerSnapshot = {
     today: AfkTotals
     /** 本次连接计数 */
     session: AfkTotals
+    /** 最后掉落（今日 / 本次各一条，无掉落时为 null） */
+    last: AfkLastPair
     /** 已记录过的副本（含今日/本次为 0 的），供信息条选择来源 */
     dungeons: Record<string, AfkDungeonTotals>
 }
@@ -130,7 +196,14 @@ export function emptyTotals(): AfkTotals {
 
 /** 一份空快照。 */
 export function emptySnapshot(now = Date.now()): AfkLedgerSnapshot {
-    return { updatedAt: now, sessionId: null, today: emptyTotals(), session: emptyTotals(), dungeons: {} }
+    return {
+        updatedAt: now,
+        sessionId: null,
+        today: emptyTotals(),
+        session: emptyTotals(),
+        last: { today: null, session: null },
+        dungeons: {},
+    }
 }
 
 /**
@@ -162,13 +235,38 @@ export function buildSnapshot(runs: AfkRun[], drops: AfkDrop[], sessionId: numbe
         if (!id) return null
         let entry = dungeons[id]
         if (!entry) {
-            entry = { name: afkDungeonName(id, name), today: emptyTotals(), session: emptyTotals() }
+            entry = {
+                name: afkDungeonName(id, name),
+                today: emptyTotals(),
+                session: emptyTotals(),
+                last: { today: null, session: null },
+            }
             dungeons[id] = entry
         } else if (name) {
             entry.name = afkDungeonName(id, name)
         }
         return entry
     }
+
+    /**
+     * 把一条掉落转成快照里的最后掉落（含预解析图标，浮窗不查数据包）。
+     * @param drop 掉落
+     * @returns 最后掉落
+     */
+    const toLast = (drop: AfkDrop): AfkLastDrop => ({
+        itemId: drop.itemId,
+        itemName: drop.itemName,
+        itemType: drop.itemType,
+        rarity: drop.rarity,
+        count: drop.count,
+        at: drop.at,
+        icon: getRewardIconUrl(drop.itemType, drop.itemId ?? drop.itemName),
+    })
+
+    let lastTodayDrop: AfkDrop | null = null
+    let lastSessionDrop: AfkDrop | null = null
+    const lastTodayByDungeon = new Map<string, AfkDrop>()
+    const lastSessionByDungeon = new Map<string, AfkDrop>()
 
     for (const run of runs) {
         const entry = ensure(run.dungeonId, run.dungeonName)
@@ -194,22 +292,41 @@ export function buildSnapshot(runs: AfkRun[], drops: AfkDrop[], sessionId: numbe
         if (isToday) {
             today.drops += drop.count
             if (drop.rarity >= AFK_GOLD_RARITY) today.gold += drop.count
+            if (!lastTodayDrop || drop.at >= lastTodayDrop.at) lastTodayDrop = drop
             if (entry) {
                 entry.today.drops += drop.count
                 if (drop.rarity >= AFK_GOLD_RARITY) entry.today.gold += drop.count
+                const prevById = drop.dungeonId ? lastTodayByDungeon.get(drop.dungeonId) : undefined
+                if (drop.dungeonId && (!prevById || drop.at >= prevById.at)) lastTodayByDungeon.set(drop.dungeonId, drop)
             }
         }
         if (isSession) {
             session.drops += drop.count
             if (drop.rarity >= AFK_GOLD_RARITY) session.gold += drop.count
+            if (!lastSessionDrop || drop.at >= lastSessionDrop.at) lastSessionDrop = drop
             if (entry) {
                 entry.session.drops += drop.count
                 if (drop.rarity >= AFK_GOLD_RARITY) entry.session.gold += drop.count
+                const prevById = drop.dungeonId ? lastSessionByDungeon.get(drop.dungeonId) : undefined
+                if (drop.dungeonId && (!prevById || drop.at >= prevById.at)) lastSessionByDungeon.set(drop.dungeonId, drop)
             }
         }
     }
 
-    return { updatedAt: now, sessionId, today, session, dungeons }
+    for (const [id, entry] of Object.entries(dungeons)) {
+        const todayDrop = lastTodayByDungeon.get(id)
+        const sessionDrop = lastSessionByDungeon.get(id)
+        entry.last = { today: todayDrop ? toLast(todayDrop) : null, session: sessionDrop ? toLast(sessionDrop) : null }
+    }
+
+    return {
+        updatedAt: now,
+        sessionId,
+        today,
+        session,
+        last: { today: lastTodayDrop ? toLast(lastTodayDrop) : null, session: lastSessionDrop ? toLast(lastSessionDrop) : null },
+        dungeons,
+    }
 }
 
 /**
@@ -232,6 +349,31 @@ export function normalizeAfkSnapshot(raw: unknown): AfkLedgerSnapshot | null {
     const today = totals(record.today)
     const session = totals(record.session)
     if (!today || !session) return null
+    const lastDrop = (value: unknown): AfkLastDrop | null => {
+        if (!value || typeof value !== "object") return null
+        const item = value as Record<string, unknown>
+        const itemName = typeof item.itemName === "string" ? item.itemName : ""
+        const at = Number(item.at)
+        const count = Number(item.count)
+        const rarity = Number(item.rarity)
+        if (!itemName || !Number.isFinite(at) || !Number.isFinite(count) || !Number.isFinite(rarity)) return null
+        const itemType = item.itemType === "Mod" || item.itemType === "Weapon" || item.itemType === "Char" ? item.itemType : "Resource"
+        const rawId = item.itemId === null || item.itemId === undefined ? null : Number(item.itemId)
+        return {
+            itemId: rawId !== null && Number.isFinite(rawId) ? rawId : null,
+            itemName,
+            itemType,
+            rarity,
+            count,
+            at,
+            icon: typeof item.icon === "string" ? item.icon : "",
+        }
+    }
+    const lastPair = (value: unknown): AfkLastPair => {
+        if (!value || typeof value !== "object") return { today: null, session: null }
+        const item = value as Record<string, unknown>
+        return { today: lastDrop(item.today), session: lastDrop(item.session) }
+    }
     const dungeons: Record<string, AfkDungeonTotals> = {}
     if (record.dungeons && typeof record.dungeons === "object") {
         for (const [id, value] of Object.entries(record.dungeons as Record<string, unknown>)) {
@@ -244,6 +386,7 @@ export function normalizeAfkSnapshot(raw: unknown): AfkLedgerSnapshot | null {
                 name: typeof item.name === "string" ? item.name : id,
                 today: todayTotals,
                 session: sessionTotals,
+                last: lastPair(item.last),
             }
         }
     }
@@ -252,6 +395,7 @@ export function normalizeAfkSnapshot(raw: unknown): AfkLedgerSnapshot | null {
         sessionId: typeof record.sessionId === "number" ? record.sessionId : null,
         today,
         session,
+        last: lastPair(record.last),
         dungeons,
     }
 }

@@ -5,7 +5,7 @@ import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
-import { restoreAfkWidget } from "./composables/useAfkWidget"
+import { useAfkWidget } from "./composables/useAfkWidget"
 import { useForgeIconSync } from "./composables/useForgeIconSync"
 import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
@@ -31,6 +31,8 @@ const forgeAlarm = useForgeAlarm()
 const lanSync = useLanSyncStore()
 const afkSupport = useAfkSupportStore()
 const afkLedger = useAfkLedgerStore()
+/** 狩月动画小窗的双向同步：启动时即按开关对齐窗口，不必等进一次 /afk 页 */
+const { syncWindowWithSetting: syncAfkWidgetWindow } = useAfkWidget()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
@@ -394,8 +396,8 @@ onMounted(async () => {
     void restoreSkillCdOverlay()
     // 屏幕信息条同理：窗口由主窗口按需创建
     void restoreScreenBar()
-    // 狩月动画小窗也按持久化开关恢复
-    void restoreAfkWidget()
+    // 狩月动画小窗按开关双向对齐（开关开但窗不在就拉起，有孤儿窗但开关关就关闭）
+    void syncAfkWidgetWindow()
     // 任务栏模式看门狗：explorer 重启连带销毁嵌入的信息条窗口后自动重建
     startScreenBarWatchdog()
     // 局域网设备同步：按持久化开关恢复服务（不阻塞启动）

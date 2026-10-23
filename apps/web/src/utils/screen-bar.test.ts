@@ -686,8 +686,25 @@ describe("狩月账本条目", () => {
         sessionId: 1,
         today: { runs: 4, drops: 42, gold: 12 },
         session: { runs: 1, drops: 9, gold: 3 },
+        last: {
+            today: {
+                itemId: 30001,
+                itemName: "生物萃取物",
+                itemType: "Resource" as const,
+                rarity: 5,
+                count: 2,
+                at: 3,
+                icon: "/imgs/res/test.webp",
+            },
+            session: null,
+        },
         dungeons: {
-            "64102": { name: "扼守/无尽", today: { runs: 3, drops: 30, gold: 9 }, session: { runs: 1, drops: 9, gold: 3 } },
+            "64102": {
+                name: "扼守/无尽",
+                today: { runs: 3, drops: 30, gold: 9 },
+                session: { runs: 1, drops: 9, gold: 3 },
+                last: { today: null, session: null },
+            },
         },
     }
 
@@ -702,6 +719,13 @@ describe("狩月账本条目", () => {
         expect(config.items[0]).toMatchObject({ type: "afk", metric: "drops", period: "today", source: "" })
     })
 
+    it("旧金色指标迁移为物品", () => {
+        const config = normalizeScreenBarConfig({
+            items: [{ id: "a", type: "afk", metric: "gold", period: "today", source: "" }],
+        })
+        expect(config.items[0]).toMatchObject({ type: "afk", metric: "item" })
+    })
+
     it("按来源与范围取对应计数", () => {
         const item = { ...createScreenBarItem("afk"), metric: "runs", period: "session", source: "64102" } as ReturnType<
             typeof createScreenBarItem
@@ -711,8 +735,29 @@ describe("狩月账本条目", () => {
     })
 
     it("全部来源读总数", () => {
-        const item = { ...createScreenBarItem("afk"), metric: "gold" } as ReturnType<typeof createScreenBarItem>
+        const item = { ...createScreenBarItem("afk"), metric: "drops" } as ReturnType<typeof createScreenBarItem>
         const resolved = resolveScreenBarItem(item, SAMPLE, undefined, null, [], {}, snapshot)
-        expect(resolved).toMatchObject({ type: "afk", value: 12, sourceName: "" })
+        expect(resolved).toMatchObject({ type: "afk", value: 42, sourceName: "" })
+    })
+
+    it("物品指标返回最后掉落的物品", () => {
+        const item = { ...createScreenBarItem("afk"), metric: "item", period: "today", source: "" } as ReturnType<
+            typeof createScreenBarItem
+        >
+        const resolved = resolveScreenBarItem(item, SAMPLE, undefined, null, [], {}, snapshot)
+        expect(resolved).toMatchObject({
+            type: "afk",
+            metric: "item",
+            value: 2,
+            last: { itemName: "生物萃取物", count: 2 },
+        })
+    })
+
+    it("无掉落时物品指标给空", () => {
+        const item = { ...createScreenBarItem("afk"), metric: "item", period: "session", source: "" } as ReturnType<
+            typeof createScreenBarItem
+        >
+        const resolved = resolveScreenBarItem(item, SAMPLE, undefined, null, [], {}, snapshot)
+        expect(resolved).toMatchObject({ type: "afk", metric: "item", value: 0, last: null })
     })
 })

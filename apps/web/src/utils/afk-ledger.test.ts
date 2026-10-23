@@ -1,4 +1,14 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
+
+vi.mock("i18next", async importOriginal => {
+    const actual = await importOriginal<typeof import("i18next")>()
+    return {
+        ...actual,
+        /** 单测环境不初始化 i18n，按缺键回落口径直接返回原文 */
+        t: (key: string) => key,
+    }
+})
+
 import {
     AFK_DUNGEON_ALIASES,
     type AfkDrop,
@@ -8,6 +18,7 @@ import {
     groupDropsByItem,
     groupStatsByDungeon,
     normalizeAfkSnapshot,
+    resolveCraftItem,
     startOfDay,
     trendBuckets,
 } from "@/utils/afk-ledger"
@@ -117,6 +128,34 @@ describe("buildSnapshot", () => {
         })
         expect(snapshot.dungeons["616006"]).toMatchObject({ name: "避险", today: { runs: 0, drops: 0, gold: 0 } })
     })
+
+    it("记录范围内最后掉落的物品（整体与分副本）", () => {
+        const snapshot = buildSnapshot(RUNS, DROPS, SESSION, NOW)
+        expect(snapshot.last.today).toMatchObject({ itemName: "精工磁石", count: 1 })
+        expect(snapshot.last.session).toMatchObject({ itemName: "精工磁石", count: 1 })
+        expect(snapshot.last.today?.icon).toBeTruthy()
+        expect(snapshot.dungeons["64102"].last.today).toMatchObject({ itemName: "坚守", count: 1 })
+        expect(snapshot.dungeons["64102"].last.session).toMatchObject({ itemName: "坚守", count: 1 })
+    })
+
+    it("无掉落时最后掉落为 null", () => {
+        const snapshot = buildSnapshot(RUNS, [], SESSION, NOW)
+        expect(snapshot.last).toEqual({ today: null, session: null })
+        expect(snapshot.dungeons["64102"].last).toEqual({ today: null, session: null })
+    })
+})
+
+describe("resolveCraftItem", () => {
+    it("按名反查武器成品的类型与 id", () => {
+        expect(resolveCraftItem("圣裁日")).toEqual({ itemType: "Weapon", itemId: 20403 })
+        expect(resolveCraftItem("杯中的残火")).toEqual({ itemType: "Weapon", itemId: 20512 })
+    })
+    it("资源保持空 id（展示层直接拿名字当 key）", () => {
+        expect(resolveCraftItem("金砂")).toEqual({ itemType: "Resource", itemId: null })
+    })
+    it("未知物品按资源兜底，与历史行为一致", () => {
+        expect(resolveCraftItem("不存在的东西")).toEqual({ itemType: "Resource", itemId: null })
+    })
 })
 
 describe("normalizeAfkSnapshot", () => {
@@ -125,6 +164,17 @@ describe("normalizeAfkSnapshot", () => {
         expect(normalizeAfkSnapshot(JSON.parse(JSON.stringify(snapshot)))).toEqual(snapshot)
         expect(normalizeAfkSnapshot({ today: { runs: 1 } })).toBeNull()
         expect(normalizeAfkSnapshot(null)).toBeNull()
+    })
+
+    it("兼容没有最后掉落字段的老快照", () => {
+        const snapshot = buildSnapshot(RUNS, DROPS, SESSION, NOW)
+        const legacy = JSON.parse(JSON.stringify(snapshot)) as Record<string, unknown>
+        delete legacy.last
+        for (const entry of Object.values(legacy.dungeons as Record<string, Record<string, unknown>>)) delete entry.last
+        expect(normalizeAfkSnapshot(legacy)).toMatchObject({
+            today: snapshot.today,
+            last: { today: null, session: null },
+        })
     })
 })
 

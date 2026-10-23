@@ -34,6 +34,7 @@ import {
     groupDropsByItem,
     groupStatsByDungeon,
     isDungeonDrop,
+    resolveCraftItem,
     runDuration,
     startOfDay,
     trendBuckets,
@@ -215,7 +216,14 @@ const lootDrops = computed(() => visibleDrops.value.filter(isDungeonDrop))
 
 /** 铸造产物：与副本无关，走独立维度；选了副本筛选时为空。 */
 const craftDrops = computed(() => (dungeon.value ? [] : periodDrops.value.filter(drop => drop.kind === "craft")))
-const craftRows = computed(() => groupDropsByItem(craftDrops.value))
+/**
+ * 展示用铸造行：历史库里的武器成品存的是 `Resource` + 空 id（解析 bug 时代），
+ * 在分组前按名纠正回 `Weapon` + 数字 id，老数据与新数据合并为一行，图标与详情链恢复正常。
+ */
+const displayCraftDrops = computed(() =>
+    craftDrops.value.map(drop => (drop.itemId === null ? { ...drop, ...resolveCraftItem(drop.itemName) } : drop))
+)
+const craftRows = computed(() => groupDropsByItem(displayCraftDrops.value))
 const craftTotal = computed(() => craftDrops.value.reduce((sum, drop) => sum + drop.count, 0))
 const craftGold = computed(() => craftDrops.value.reduce((sum, drop) => sum + (drop.rarity >= 5 ? drop.count : 0), 0))
 
@@ -456,7 +464,7 @@ const itemMixRows = computed<MixRow[]>(() =>
 
 /** 铸造维度的行：独立的铸造成品统计。 */
 const craftMixRows = computed<MixRow[]>(() => {
-    const rows = groupDropsByItem(craftDrops.value).slice(0, 8)
+    const rows = groupDropsByItem(displayCraftDrops.value).slice(0, 8)
     return rows.map((row, index) => ({
         key: `craft-${row.key}`,
         label: row.name,

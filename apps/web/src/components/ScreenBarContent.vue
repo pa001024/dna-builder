@@ -37,11 +37,10 @@ const AFK_PERIOD_KEYS: Record<"today" | "session", string> = {
     session: "screenBar.afkPeriodSession",
 }
 
-/** 狩月账本的指标 → 单位文案 key。 */
-const AFK_UNIT_KEYS: Record<"runs" | "drops" | "gold", string> = {
+/** 狩月账本的指标 → 单位文案 key(物品指标直接展示物品名与数量,不用单位)。 */
+const AFK_UNIT_KEYS: Record<"runs" | "drops", string> = {
     runs: "screenBar.afkUnitRuns",
     drops: "screenBar.afkUnitDrops",
-    gold: "screenBar.afkUnitGold",
 }
 </script>
 
@@ -146,9 +145,9 @@ const AFK_UNIT_KEYS: Record<"runs" | "drops" | "gold", string> = {
                 <span class="font-mono font-semibold">{{ item.text }}</span>
             </span>
 
-            <!-- 狩月账本:今日/本次的场次、掉落或金色件数,可按副本筛选 -->
+            <!-- 狩月账本:今日/本次的场次、掉落件数或最后掉落的物品,可按副本筛选 -->
             <span
-                v-else-if="item.type === 'afk'"
+                v-else-if="item.type === 'afk' && item.metric !== 'item'"
                 class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
             >
                 <Icon icon="ri:bar-chart-line" class="size-3 shrink-0 text-primary" />
@@ -156,6 +155,19 @@ const AFK_UNIT_KEYS: Record<"runs" | "drops" | "gold", string> = {
                 <span class="text-base-content/55">{{ $t(AFK_PERIOD_KEYS[item.period]) }}</span>
                 <span class="font-mono font-semibold text-primary">{{ item.value }}</span>
                 <span class="text-base-content/55">{{ $t(AFK_UNIT_KEYS[item.metric]) }}</span>
+            </span>
+
+            <!-- 狩月账本物品:范围内最后掉落的物品(图标+名称+数量),无掉落时给占位不画空图 -->
+            <span
+                v-else-if="item.type === 'afk'"
+                class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
+            >
+                <img v-if="item.last?.icon" :src="item.last.icon" alt="" class="size-3.5 shrink-0 rounded-xs object-cover" />
+                <Icon v-else icon="ri:bar-chart-line" class="size-3 shrink-0 text-primary" />
+                <span v-if="item.sourceName" class="font-medium text-base-content/85">{{ item.sourceName }}</span>
+                <span v-if="item.last" class="max-w-32 truncate font-medium text-base-content/85">{{ gt(item.last.itemName) }}</span>
+                <span v-if="item.last" class="font-mono font-semibold text-primary">×{{ item.last.count }}</span>
+                <span v-else class="text-base-content/45">{{ $t("screenBar.afkNoDrop") }}</span>
             </span>
         </template>
     </div>

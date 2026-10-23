@@ -49,6 +49,9 @@ export function useAfkWidget() {
 
     /**
      * 对齐窗口与开关：窗口不可持久化，开关可能被上次会话改过，这里把窗口拉回一致。
+     *
+     * 双向对齐：开关开但窗不在就拉起，开关关但有孤儿窗就关闭。应用启动时调一次，
+     * 保证各窗口状态从一开始就与开关一致，不必等进一次 /afk 页才收敛。
      */
     async function syncWindowWithSetting() {
         if (!env.isApp) return
@@ -63,17 +66,4 @@ export function useAfkWidget() {
     }
 
     return { busy, error, setEnabled, syncWindowWithSetting }
-}
-
-/**
- * 应用启动时按持久化开关恢复小窗。
- *
- * 窗口不会随应用自启，上次开着就重新拉起，避免「必须先去账本页点一下」。
- */
-export async function restoreAfkWidget(): Promise<void> {
-    if (!env.isApp) return
-    const setting = useSettingStore()
-    if (!setting.afkWidgetEnabled) return
-    const widget = await openAfkWidgetWindow()
-    if (!widget) setting.afkWidgetEnabled = false
 }

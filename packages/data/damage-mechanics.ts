@@ -808,6 +808,29 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
         term: "生命类型系数",
         description: "按敌方当前生命类型取值的系数，只有伤害类型与该生命类型匹配时才计入触发倍率。",
     },
+    // 以下四条的属性上限口径与翻译文件 attrDesc 同源（上游 AttrConfig，经 tools/import-attr-i18n.ts 落盘到
+    // public/i18n/<locale>/translation.json），描述照抄 zh-CN 原文；改动时以那边为准，不要自行改写公式。
+    // 别名里带“上限”是为了让 keyword=“上限”能命中这几条（原文用的是“最大为”）。
+    {
+        term: "技能速度",
+        aliases: ["技速", "技能速度上限"],
+        description: "影响技能中的部分动作释放的速度，最大为280%。",
+    },
+    {
+        term: "技能效益",
+        aliases: ["效益", "技能效益上限"],
+        description: "影响技能的神智消耗大小，最大为175%。",
+    },
+    {
+        term: "技能范围",
+        aliases: ["范围", "技能范围上限"],
+        description: "影响技能中的部分效果作用范围的大小，最大为280%。",
+    },
+    {
+        term: "技能耐久",
+        aliases: ["耐久", "技能耐久上限"],
+        description: "影响技能中的部分效果持续时长的大小，最大为400%。",
+    },
 ]
 
 /** 模式 id → 机制定义 */
