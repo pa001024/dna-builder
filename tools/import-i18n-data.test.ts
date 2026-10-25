@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
-import { applyTranslationAliases, collectTitlePairs, collectTranslationPairs, TRANSLATION_ALIASES } from "./import-i18n-data"
+import { applyTranslationAliases, collectTitlePairs, collectTranslationPairs, parseVersion, TRANSLATION_ALIASES } from "./import-i18n-data"
 
 const TEXT_MAP = JSON.parse(readFileSync("E:/dev/DuetNightAbyssData2/out/TextMap_I18n.json", "utf8")) as Record<
     string,
@@ -125,5 +125,30 @@ describe("translations 对照表：全新生成 + 静态声明", () => {
             if (!ok) dead.push(`${key}=>${canonical}`)
         }
         expect(dead).toEqual([])
+    })
+})
+
+describe("-v 历史版本参数", () => {
+    it("-v / --version / --version= / -v 紧凑四种形态", () => {
+        expect(parseVersion(["bun", "import-i18n-data.ts", "-v", "1.1"])).toBe("1.1")
+        expect(parseVersion(["bun", "import-i18n-data.ts", "--version", "1.6"])).toBe("1.6")
+        expect(parseVersion(["bun", "import-i18n-data.ts", "--version=v1.2"])).toBe("v1.2")
+        expect(parseVersion(["bun", "import-i18n-data.ts", "-v1.6.4.1"])).toBe("1.6.4.1")
+    })
+
+    it("未携带返回 undefined（走最新数据，行为不变）", () => {
+        expect(parseVersion(["bun", "import-i18n-data.ts"])).toBeUndefined()
+        expect(parseVersion(["bun", "import-i18n-data.ts", "-f", "Weapon"])).toBeUndefined()
+    })
+
+    it("-v 与 -f 顺序无关，各扫各的 token", () => {
+        expect(parseVersion(["bun", "x", "-v", "1.1", "-f", "Weapon"])).toBe("1.1")
+        expect(parseVersion(["bun", "x", "-f", "Weapon", "-v", "1.1"])).toBe("1.1")
+    })
+
+    it("-v 缺值或值像 flag 时抛错", () => {
+        expect(() => parseVersion(["bun", "x", "-v"])).toThrow("-v 需要一个版本号")
+        expect(() => parseVersion(["bun", "x", "-v", "-f"])).toThrow("-v 需要一个版本号")
+        expect(() => parseVersion(["bun", "x", "--version="])).toThrow("-v 需要一个版本号")
     })
 })

@@ -16,7 +16,6 @@ import achievementData, { type Achievement } from "./achievement.data"
 import { type Book, type BookResource, booksData } from "./book.data"
 import dynQuestData, { type DynQuest } from "./dynquest.data"
 import { type ExtVoiceEntry, extVoiceData } from "./extvoice.data"
-import { type GuildWarBoss, type GuildWarBuff, type GuildWarTest, guildWarBosses, guildWarBuffs, guildWarTests } from "./guildwar.data"
 import { type HardBoss, hardBossData } from "./hardboss.data"
 import headSculptureData, { type HeadSculpture } from "./headsculpture.data"
 import iconticketData, { type IconTicket } from "./iconticket.data"
@@ -168,9 +167,6 @@ export const subRegionMap = new Map<number, SubRegion>()
 export const regionMap = new Map<number, Region>()
 export const dynQuestMap = new Map<number, DynQuest>()
 export const hardBossMap = new Map<number, HardBoss>()
-export const guildWarBossMap = new Map<number, GuildWarBoss>()
-export const guildWarBuffMap = new Map<number, GuildWarBuff>()
-export const guildWarTestMap = new Map<number, GuildWarTest>()
 export const monsterMap = new Map<number, Monster>()
 export const resourceMap = new Map<number | string, Resource>()
 export const walnutMap = new Map<number, Walnut>()
@@ -453,21 +449,6 @@ export function rebuildStaticIndexes(): void {
     hardBossMap.clear()
     for (const hardBoss of hardBossData) {
         hardBossMap.set(hardBoss.id, hardBoss)
-    }
-
-    guildWarBossMap.clear()
-    for (const boss of guildWarBosses) {
-        guildWarBossMap.set(boss.id, boss)
-    }
-
-    guildWarBuffMap.clear()
-    for (const buff of guildWarBuffs) {
-        guildWarBuffMap.set(buff.id, buff)
-    }
-
-    guildWarTestMap.clear()
-    for (const test of guildWarTests) {
-        guildWarTestMap.set(test.id, test)
     }
 
     monsterMap.clear()

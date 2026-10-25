@@ -1,4 +1,11 @@
 #!/usr/bin/env bun
+/**
+ * 用法：
+ *   bun importdata                    # 按默认上游路径导入最新数据
+ *   bun importdata -f Weapon Char     # 只导入指定模块
+ *   bun importdata -v 1.1             # 先在上游跑 `bun out -v 1.1`，再从同版本快照导入（final/i18n 与 Lua 同版本）
+ *   bun importdata --upstream <dir>   # 指定上游仓库根目录
+ */
 
 import { existsSync, readdirSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
@@ -17,6 +24,13 @@ const CLI_UPSTREAM = (() => {
     const index = args.indexOf("--upstream")
     return index >= 0 ? args[index + 1] : undefined
 })()
+
+/**
+ * 命令行 -v/--version（历史版本，与上游 `bun out -v` 同口径）；缺省走最新数据。
+ * 携带后 main 先在上游跑 `bun out -v <版本>` 重出 final/i18n，Lua 侧再切到同版本 git 快照，
+ * 两侧版本一致；不携带时行为不变。
+ */
+const CLI_VERSION = parseVersion(typeof Bun === "undefined" ? process.argv : Bun.argv)
 
 /**
  * 上游仓库根目录（Lua 数据层所在）：`--upstream` > `.env` 的 DNA_UPSTREAM > 同级 `../DuetNightAbyssData2`。
@@ -63,6 +77,8 @@ const TRANSLATION_VARS: Record<TranslationLocale, string> = {
  */
 type LuaDataManagerLike = {
     loadScriptValue(relativePath: string): { value?: unknown; error?: string }
+    /** 把 Lua 数据层切到历史快照目录（-v 模式，对齐上游 setDataRoot） */
+    setDataRoot(dir: string | null): void
 }
 
 type LuaLoader = {
@@ -80,12 +96,24 @@ async function getLuaLoader(): Promise<LuaLoader> {
         if (!existsSync(managerPath)) {
             throw new Error(`上游 Lua 取数模块不存在：${managerPath}（请检查 .env 的 DNA_UPSTREAM 是否指向 DuetNightAbyssData2 仓库根）`)
         }
-        luaLoaderPromise = Promise.all([import(pathToFileURL(managerPath).href), import(pathToFileURL(sortPath).href)]).then(
-            ([managerMod, sortMod]) => ({
-                manager: new managerMod.LuaDataManager(UPSTREAM_ROOT),
-                deepSortJson: sortMod.deepSortJson,
-            })
-        )
+        luaLoaderPromise = (async () => {
+            const [managerMod, sortMod] = await Promise.all([import(pathToFileURL(managerPath).href), import(pathToFileURL(sortPath).href)])
+            const manager = new managerMod.LuaDataManager(UPSTREAM_ROOT) as LuaDataManagerLike
+            if (CLI_VERSION !== undefined) {
+                // 历史版本：Lua 数据层切到与上游 `bun out -v` 同一版本的 git 快照，
+                // 否则旧版 final/i18n 会配上最新 Script/Datas，对不上。
+                const snapshotPath = path.join(UPSTREAM_ROOT, "src", "lua", "scriptSnapshot.ts")
+                if (!existsSync(snapshotPath)) {
+                    throw new Error(`上游版本快照模块不存在：${snapshotPath}（-v 需要新版上游流水线）`)
+                }
+                const snapshotMod = await import(pathToFileURL(snapshotPath).href)
+                const resolved = snapshotMod.resolveScriptVersion(UPSTREAM_ROOT, CLI_VERSION)
+                const snapshotDir = snapshotMod.snapshotScriptData(UPSTREAM_ROOT, resolved)
+                manager.setDataRoot(snapshotDir)
+                console.log(`[i18n] Lua 数据层使用历史版本 ${resolved.version}（来源 ${resolved.label}），快照：${snapshotDir}`)
+            }
+            return { manager, deepSortJson: sortMod.deepSortJson }
+        })()
     }
     return luaLoaderPromise
 }
@@ -624,7 +652,6 @@ export const TRANSLATION_SOURCE_FILES = [
     "Fish.json",
     "FishingSpot.json",
     "ForgeLevelQuest.json",
-    "GuildBoss.json",
     "Hair.json",
     "HardBoss.json",
     "HeadFrame.json",
@@ -942,78 +969,6 @@ const MAPPINGS: Mapping[] = [
     { source: "Fish", targetStem: "fish", targetVar: "fishs", locales: ["cn"] },
     { source: "FishingSpot", targetStem: "fish", targetVar: "fishingSpots", locales: ["cn"] },
     { source: "HardBoss", targetStem: "hardboss", targetVar: "hardBossData", locales: ["cn"] },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarBosses",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.bosses)) {
-                throw new Error("GuildBoss 后处理只支持对象源（bosses）")
-            }
-            return value.bosses
-        },
-    },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarBuffs",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.buffs)) {
-                throw new Error("GuildBoss 后处理只支持对象源（buffs）")
-            }
-            return value.buffs
-        },
-    },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarTests",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.tests)) {
-                throw new Error("GuildBoss 后处理只支持对象源（tests）")
-            }
-            return value.tests
-        },
-    },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarRefresh",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.refresh)) {
-                throw new Error("GuildBoss 后处理只支持对象源（refresh）")
-            }
-            return value.refresh
-        },
-    },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarPointRewards",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.pointRewards)) {
-                throw new Error("GuildBoss 后处理只支持对象源（pointRewards）")
-            }
-            return value.pointRewards
-        },
-    },
-    {
-        source: "GuildBoss",
-        targetStem: "guildwar",
-        targetVar: "guildWarWeekRewards",
-        locales: ["cn"],
-        postProcess: value => {
-            if (!isRecord(value) || !Array.isArray(value.weekRewards)) {
-                throw new Error("GuildBoss 后处理只支持对象源（weekRewards）")
-            }
-            return value.weekRewards
-        },
-    },
     { source: "Hair", targetStem: "accessory", targetVar: "hairData", locales: ["cn"] },
     { source: "IronTicket", targetStem: "iconticket", targetVar: "iconticketData", locales: ["cn"] },
     { source: "HeadSculpture", targetStem: "headsculpture", targetVar: "headSculptureData", locales: ["cn"] },
@@ -1665,6 +1620,55 @@ const MAPPINGS: Mapping[] = [
         targetVars: TRANSLATION_VARS,
     },
 ]
+
+/**
+ * 解析命令行 -v/--version（历史版本号，与上游 `bun out -v` 同口径：v1.2 / 1.6 / 1.6.4.1 / commit 哈希）。
+ * @param argv 命令行参数（含 bun 与脚本名前缀也无妨，按 token 扫描）。
+ * @returns 版本号原文；未携带返回 undefined。
+ */
+export function parseVersion(argv: string[]): string | undefined {
+    for (let index = 0; index < argv.length; index++) {
+        const arg = argv[index]
+        if (arg === "-v" || arg === "--version") {
+            const value = argv[index + 1]
+            if (!value || value.startsWith("-")) {
+                throw new Error("-v 需要一个版本号，例如：-v 1.1（与上游 bun out -v 同口径）")
+            }
+            return value
+        }
+        if (arg.startsWith("--version=")) {
+            const value = arg.slice("--version=".length)
+            if (!value) {
+                throw new Error("-v 需要一个版本号，例如：-v 1.1（与上游 bun out -v 同口径）")
+            }
+            return value
+        }
+        if (arg.startsWith("-v") && arg.length > 2 && !arg.startsWith("--")) {
+            return arg.slice(2)
+        }
+    }
+    return undefined
+}
+
+/**
+ * 在上游仓库执行 `bun out -v <版本>`，把 final/i18n 物化到该历史版本。
+ * 本工具的 SOURCE_ROOT 默认即上游 final/i18n，随后读到的就是同版本数据；
+ * Lua 侧由 getLuaLoader 按同一版本号切到 git 历史快照，两侧版本一致。
+ * @param version -v 版本号原文。
+ */
+async function runUpstreamOut(version: string): Promise<void> {
+    console.log(`[i18n] -v ${version}：正在上游生成历史版本数据（bun out -v ${version}），耗时较长请稍候…`)
+    const proc = Bun.spawn([process.execPath, "out", "-v", version], {
+        cwd: UPSTREAM_ROOT,
+        stdout: "inherit",
+        stderr: "inherit",
+        stdin: "inherit",
+    })
+    const exitCode = await proc.exited
+    if (exitCode !== 0) {
+        throw new Error(`上游 bun out -v ${version} 失败，退出码 ${exitCode}（请到 ${UPSTREAM_ROOT} 手工执行排查）`)
+    }
+}
 
 /**
  * 解析指定导出的 i18n 源模块。
@@ -2786,6 +2790,16 @@ async function formatWithBiome(files: string[]): Promise<void> {
  */
 async function main() {
     const fileTypes = parseFileTypes()
+    if (CLI_VERSION !== undefined) {
+        await runUpstreamOut(CLI_VERSION)
+        if (process.env.DNA_UPSTREAM_I18N) {
+            console.warn(
+                `[warn] -v 已重出上游 final/i18n，但 DNA_UPSTREAM_I18N 覆盖了读取目录（${SOURCE_ROOT}），请确认该目录也是 ${CLI_VERSION} 版本的产物`
+            )
+        } else {
+            console.log(`[i18n] 多语言数据集：${SOURCE_ROOT}`)
+        }
+    }
     const grouped = new Map<string, Mapping[]>()
     for (const mapping of MAPPINGS) {
         if (typeof mapping.source === "function" || !shouldProcessMapping(mapping, fileTypes)) {

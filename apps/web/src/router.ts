@@ -610,18 +610,6 @@ export const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
-                name: "guildwar-list",
-                path: "guildwar",
-                component: () => import("./views/DBGuildWarListView.vue"),
-                beforeEnter: () => setMinSize(320, 360),
-            },
-            {
-                name: "guildwar-detail",
-                path: "guildwar/:bossId",
-                component: () => import("./views/DBGuildWarDetailView.vue"),
-                beforeEnter: () => setMinSize(320, 360),
-            },
-            {
                 name: "dynquest-list",
                 path: "dynquest",
                 component: () => import("./views/DBDynQuestListView.vue"),

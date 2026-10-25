@@ -87,7 +87,6 @@ const DATA_PACK_MODULES = [
     "region.data",
     "dynquest.data",
     "hardboss.data",
-    "guildwar.data",
 ] as const
 
 export { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest }
