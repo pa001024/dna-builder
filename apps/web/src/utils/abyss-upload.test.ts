@@ -64,7 +64,7 @@ describe("buildAbyssUploadPayload", () => {
             stars: 160,
         })
         expect(payload?.ownedChars).toEqual([
-            { charId: 160101, gradeLevel: 6 },
+            { charId: 1601, gradeLevel: 6 },
             { charId: 4102, gradeLevel: 6 },
             { charId: 2401, gradeLevel: 5 },
             { charId: 4201, gradeLevel: 4 },

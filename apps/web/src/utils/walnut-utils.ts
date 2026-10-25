@@ -2,6 +2,16 @@
  * 密函(Walnut)SequenceCeiling 模拟类
  * 核心逻辑：生成奖励池→洗牌非金奖→金奖后置→每次抽3个→抽中金则重置
  */
+/** 一次开函的完整过程：结算结果 + 队首取走顺序，界面点阵图据此还原「从前往后抽」的动画 */
+export interface WalnutOpenDraw {
+    /** 结算的奖励索引（长度恒为 3，0=金，1=大银，2=小银，3=铜1，4=铜2，5=铜3） */
+    rewards: number[]
+    /** 本次从序列前端依次取走的奖励类型（1=金 …6=铜3），与 rewards 同序 */
+    taken: number[]
+    /** 是否因抽中金奖重置了序列（true 表示剩余序列已换成新生成的奖励池） */
+    reset: boolean
+}
+
 export class WalnutSequenceSimulator {
     /**
      * 模拟器默认参数：[占位, 大银上限, 小银上限, 铜1上限, 铜2上限, 铜3上限]。
@@ -64,8 +74,18 @@ export class WalnutSequenceSimulator {
      * @returns 长度为3的数组，元素为奖励在数组中的索引（0=金，1=大银，2=小银，3=铜1，4=铜2，5=铜3）
      */
     open(): number[] {
+        return this.openDetailed().rewards
+    }
+
+    /**
+     * 开一次密函，并带回「队前取了哪些」的过程信息，供界面把队首几项飞进当前奖励栏。
+     * @returns 结算索引 + 取走顺序 + 是否触金重置
+     */
+    openDetailed(): WalnutOpenDraw {
         const takeCount = 3
         const rewards: number[] = []
+        const taken: number[] = []
+        let reset = false
 
         // 确保凑够3个奖励
         while (rewards.length < takeCount) {
@@ -76,6 +96,7 @@ export class WalnutSequenceSimulator {
 
             // 抽取当前序列的第一个奖励类型
             const rewardType = this.currentSequence.shift()!
+            taken.push(rewardType)
             // 将奖励类型转换为索引（1→0，2→1，3→2，4→3，5→4，6→5）
             const rewardIndex = rewardType - 1
             rewards.push(rewardIndex)
@@ -84,10 +105,19 @@ export class WalnutSequenceSimulator {
             if (rewardType === 1) {
                 // 抽中金奖则重置序列，但继续抽取剩余奖励
                 this.resetSequence()
+                reset = true
             }
         }
 
-        return rewards
+        return { rewards, taken, reset }
+    }
+
+    /**
+     * 当前抽卡池剩余的奖励序列（队首 = 下一次开函会取走的位置，队尾恒为金奖）。
+     * @returns 奖励类型数组（1=金，2=大银，3=小银，4=铜1，5=铜2，6=铜3）的副本
+     */
+    getRemainingSequence(): number[] {
+        return [...this.currentSequence]
     }
 
     /**

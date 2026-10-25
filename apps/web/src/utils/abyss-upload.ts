@@ -188,9 +188,11 @@ export function buildAbyssOwnedIds(roleInfo: DNARoleEntity): AbyssUsageOwnedInpu
         if (!char.unLocked) {
             continue
         }
-        const current = charMap.get(char.charId)
+        // 与阵容 ID 统一归一（160101->1601、120101->1201），否则使用率分母对不上上场统计
+        const charId = normalizeAbyssCharId(char.charId)
+        const current = charMap.get(charId)
         if (current == null || char.gradeLevel > current) {
-            charMap.set(char.charId, char.gradeLevel)
+            charMap.set(charId, char.gradeLevel)
         }
     }
     const weaponMap = new Map<number, number>()

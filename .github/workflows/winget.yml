@@ -10,6 +10,14 @@ jobs:
     publish:
         runs-on: windows-latest
         steps:
+            # fork 落后太多时 komac sync-fork 会 422
+            # (Sorry, this diff is taking too long to generate)，
+            # 先用 --force 硬重置到上游 HEAD（不走 diff，比对再大也能同步），
+            # 之后 komac 的 sync-fork 就会变成 no-op 直接成功。
+            - name: Sync winget-pkgs fork
+              env:
+                  GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+              run: gh repo sync ${{ github.repository_owner }}/winget-pkgs --force
             - uses: vedantmgoyal9/winget-releaser@main
               with:
                   identifier: pa001024.dna-builder

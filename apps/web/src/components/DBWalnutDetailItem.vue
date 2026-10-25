@@ -1,13 +1,14 @@
 <script lang="ts" setup>
+import gsap from "gsap"
 import { useTranslation } from "i18next-vue"
-import { computed, ref, watch } from "vue"
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { formatModName, LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "@/data/d/walnut.data"
 import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getWalnutProduct, getWalnutProductName, getWalnutRewardName } from "@/utils/walnut-product"
-import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
+import { type WalnutOpenDraw, WalnutSequenceSimulator } from "@/utils/walnut-utils"
 
 const props = defineProps<{
     walnut: Walnut
@@ -64,13 +65,60 @@ const draft = computed(() => {
  */
 const product = computed(() => getWalnutProduct(props.walnut))
 
+/** 一条开函记录：结算后的奖励索引（按展示顺序排列） */
+interface OpenRecord {
+    uid: number
+    indices: number[]
+    /** 结果行等待飞行动画落地后才揭示 */
+    pending: boolean
+}
+
+/** 飞行动画里的一个队首点：起点矩形 + 奖励类型 */
+interface FlyingDot {
+    left: number
+    top: number
+    width: number
+    height: number
+    type: number
+}
+
 // 模拟开函相关状态：模拟器必须吃到当前密函的参数（walnut.参数），不可用默认参数
 let simulator = new WalnutSequenceSimulator(props.walnut.参数)
-const openResults = ref<number[][]>([])
+const openResults = ref<OpenRecord[]>([])
 const isAutoOpening = ref(false)
 const autoOpenTimer = ref<number | null>(null)
 const totalOpens = ref(0)
 const goldCount = ref(0)
+
+/** 抽卡池里的一个点：`id` 保证出队后其余点能用 FLIP 平滑前移 */
+interface PoolDot {
+    id: number
+    /** 奖励类型（1=金 …6=铜3） */
+    type: number
+}
+
+// 当前抽卡池剩余序列（队首在索引 0，队尾恒为金奖），与模拟器同步
+// 点阵图的稳定 key 计数器：换池时整批重新编号
+let dotUid = 0
+
+/**
+ * 给新生成的奖励序列编号，供点阵图做稳定 key。
+ * @param types 奖励类型数组
+ * @returns 带 id 的点列表
+ */
+function buildPoolDots(types: number[]): PoolDot[] {
+    return types.map(type => ({ id: ++dotUid, type }))
+}
+
+const pool = ref<PoolDot[]>(buildPoolDots(simulator.getRemainingSequence()))
+// 金奖触发的序列重置轮次，用作点阵图的重新挂载 key
+const poolEpoch = ref(0)
+const poolMatrixEl = ref<HTMLElement | null>(null)
+const openResultsEl = ref<HTMLElement | null>(null)
+const isFlying = ref(false)
+let recordUid = 0
+let flightToken = 0
+let ghostEls: HTMLElement[] = []
 
 // 奖励数量统计：键为 `图纸标记 + 展示名`，同名同类合并、成品与图纸分开
 const rewardCounts = ref<Record<string, { name: string; d: number; count: number }>>({})
@@ -346,60 +394,238 @@ function sortRewards(rewards: number[]): number[] {
 }
 
 /**
- * 手动开一次密函
+ * 结算一次开函并写入界面状态（结果列表、统计、剩余序列点阵）。
+ * @param draw 模拟器返回的开函过程
+ * @param pending 结果行是否需要等飞行动画落地才揭示
+ * @returns 新增的开函记录
  */
-function openOnce() {
-    let result = simulator.open()
-
+function applyDraw(draw: WalnutOpenDraw, pending: boolean): OpenRecord {
     // 对奖励进行排序
-    result = sortRewards(result)
+    const indices = sortRewards(draw.rewards)
 
     // 只统计第一个奖励（同名同类合并，成品与图纸分开）
-    const index = result[0]
+    const index = indices[0]
     const reward = props.walnut.奖励[index]
-    if (!reward) return
-    const rewardName = getWalnutRewardName(reward)
-    const statKey = `${reward.d ? "d:" : ""}${rewardName}`
-
-    // 更新奖励统计，乘以奖励数量
-    const stat = rewardCounts.value[statKey] ?? { name: rewardName, d: reward.d || 0, count: 0 }
-    stat.count += reward.count
-    rewardCounts.value[statKey] = stat
-
-    // 如果是武器部件，单独统计，乘以奖励数量
-    if (isWeaponPart(rewardName)) {
-        weaponPartCounts.value[rewardName] = (weaponPartCounts.value[rewardName] || 0) + reward.count
-    }
-
-    openResults.value.unshift(result)
+    const record: OpenRecord = { uid: ++recordUid, indices, pending }
+    openResults.value.unshift(record)
     totalOpens.value++
+    if (reward) {
+        const rewardName = getWalnutRewardName(reward)
+        const statKey = `${reward.d ? "d:" : ""}${rewardName}`
+
+        // 更新奖励统计，乘以奖励数量
+        const stat = rewardCounts.value[statKey] ?? { name: rewardName, d: reward.d || 0, count: 0 }
+        stat.count += reward.count
+        rewardCounts.value[statKey] = stat
+
+        // 如果是武器部件，单独统计，乘以奖励数量
+        if (isWeaponPart(rewardName)) {
+            weaponPartCounts.value[rewardName] = (weaponPartCounts.value[rewardName] || 0) + reward.count
+        }
+    }
 
     // 检查是否出金（索引为0的奖励为金）
     if (index === 0) {
         goldCount.value++
     }
 
-    // 最多保留50条记录
+    // 最多保留200条记录
     if (openResults.value.length > 200) {
         openResults.value.pop()
     }
+
+    // 同步剩余序列：未触金时队首几个点出队、其余前移；换池（触金重置 / 序列抽空）时整批重新编号并重进
+    const poolBefore = pool.value
+    const reusedPool = !draw.reset && draw.taken.length <= poolBefore.length
+    pool.value = reusedPool ? poolBefore.slice(draw.taken.length) : buildPoolDots(simulator.getRemainingSequence())
+    if (!reusedPool) {
+        poolEpoch.value++
+    }
+    return record
+}
+
+/** 立即开一次密函（连开 / 自动开：不播放动画） */
+function runOpenOnce() {
+    applyDraw(simulator.openDetailed(), false)
 }
 
 function openWalnut(n: number) {
+    if (isFlying.value) return
     for (let i = 0; i < n; i++) {
-        openOnce()
+        runOpenOnce()
     }
+}
+
+/** 出金前还要开几次：金奖恒在队尾，每次开函吃掉队首 3 个 */
+const opensToGold = computed(() => (pool.value.length > 0 ? Math.ceil(pool.value.length / 3) : 0))
+
+/**
+ * 把剩余序列按「一次开函 = 三个点」切成固定宽度的行内格子。
+ * 分组元素本身不参与点与点之间的让位动画（让位只发生在组之间），
+ * 从而保证换行后每行的列位置始终同宽同距，第二行不会跟第一行错位。
+ * 组 key 取组内首点 id：队首出队时只有边界组重挂，其余组的点保持原位平滑前移。
+ */
+const poolGroups = computed(() => {
+    const groups: { key: number; index: number; dots: PoolDot[] }[] = []
+    for (let start = 0; start < pool.value.length; start += 3) {
+        const dots = pool.value.slice(start, start + 3)
+        groups.push({ key: dots[0].id, index: start / 3, dots })
+    }
+    return groups
+})
+
+/**
+ * 读取点阵图队首 n 个点的位置与档位，必须在池子被 pop 之前调用。
+ * @param n 队列里可见的取走点数
+ * @param extraTypes 触金后来自新池、没有可见起点的点数（沿队首右侧补位）
+ * @returns 飞行动画的起点列表
+ */
+function captureHeadDots(n: number, extraTypes: number[] = []): FlyingDot[] {
+    const matrix = poolMatrixEl.value
+    if (!matrix) {
+        return []
+    }
+    // 点阵图可能在自身滚动容器里被滚过，队首记录要按滚动到顶部后的位置取
+    matrix.scrollTop = 0
+    const dots: FlyingDot[] = []
+    const cells = matrix.querySelectorAll<HTMLElement>("[data-pool-dot]")
+    for (let i = 0; i < n && i < cells.length; i++) {
+        const el = cells[i]
+        const rect = el.getBoundingClientRect()
+        dots.push({ left: rect.left, top: rect.top, width: rect.width, height: rect.height, type: Number(el.dataset.tier) || 6 })
+    }
+    const last = dots[dots.length - 1]
+    extraTypes.forEach((type, i) => {
+        if (!last) {
+            return
+        }
+        dots.push({ ...last, left: last.left + (i + 1) * 12, type })
+    })
+    return dots
+}
+
+/** 移除在途的飞行方块并作废当前动画 */
+function cancelFlight() {
+    flightToken++
+    for (const el of ghostEls) {
+        gsap.killTweensOf(el)
+        el.remove()
+    }
+    ghostEls = []
+    isFlying.value = false
+    for (const record of openResults.value) {
+        record.pending = false
+    }
+}
+
+/** 揭示等待落地的结果行 */
+async function revealPendingRecord(uid: number) {
+    const record = openResults.value.find(item => item.uid === uid)
+    if (!record) {
+        return
+    }
+    const el = openResultsEl.value?.querySelector<HTMLElement>(`[data-record-uid="${uid}"]`)
+    record.pending = false
+    await nextTick()
+    if (el) {
+        gsap.fromTo(el, { y: 4 }, { y: 0, duration: 0.22, ease: "power2.out", clearProps: "transform" })
+    }
+}
+
+/**
+ * 单次开函：把队首三个点从点阵图飞到当前奖励行，落地后才揭示结果。
+ * 只有手动单抽播放动画，连开与自动开直接结算。
+ */
+async function openOnceAnimated() {
+    if (isAutoOpening.value || isFlying.value) {
+        return
+    }
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    if (reduceMotion || !pool.value.length) {
+        runOpenOnce()
+        return
+    }
+
+    const draw = simulator.openDetailed()
+    // 触金时本轮序列会整池重生成，只有金奖（含）之前的队首点来自当前可见池
+    const cutCount = draw.reset ? draw.taken.indexOf(1) + 1 : draw.taken.length
+    const dots = captureHeadDots(cutCount, draw.taken.slice(cutCount))
+    const record = applyDraw(draw, dots.length > 0)
+    if (dots.length === 0) {
+        return
+    }
+
+    isFlying.value = true
+    const token = flightToken
+    await nextTick()
+    if (token !== flightToken) {
+        return
+    }
+    const row = openResultsEl.value?.querySelector<HTMLElement>(`[data-record-uid="${record.uid}"]`)
+    if (!row) {
+        cancelFlight()
+        return
+    }
+    // 结果列表可能已被滚到底部，先把最新一行带回视野，飞行目标才有有效位置
+    if (openResultsEl.value) {
+        openResultsEl.value.scrollTop = 0
+    }
+    await nextTick()
+
+    const chips = Array.from(row.querySelectorAll<HTMLElement>("[data-reward-chip]"))
+    // 结果行按稀有度重排过，飞行目标先认「同档位」的色点，同档位重复时再按取走顺序落位
+    const takenChips = new Set<HTMLElement>()
+    dots.forEach((dot, i) => {
+        const sameTier = chips.find(el => !takenChips.has(el) && el.dataset.rewardIndex === String(dot.type - 1))
+        const ordered = chips[i] && !takenChips.has(chips[i]) ? chips[i] : chips.find(el => !takenChips.has(el))
+        const chip = sameTier ?? ordered ?? row
+        takenChips.add(chip)
+        // inline 奖励条目的图标就是飞行落点，没有图标时退回整格
+        const marker = (chip.querySelector("img") ?? chip) as HTMLElement
+        const target = marker.getBoundingClientRect()
+        const ghost = document.createElement("span")
+        ghost.style.position = "fixed"
+        ghost.style.left = `${dot.left}px`
+        ghost.style.top = `${dot.top}px`
+        ghost.style.width = `${dot.width}px`
+        ghost.style.height = `${dot.height}px`
+        ghost.style.zIndex = "9999"
+        ghost.style.pointerEvents = "none"
+        ghost.className = `rounded-xs ${getRewardTierDot(dot.type - 1)}`
+        document.body.appendChild(ghost)
+        ghostEls.push(ghost)
+        gsap.to(ghost, {
+            x: target.left + target.width / 2 - (dot.left + dot.width / 2),
+            y: target.top + target.height / 2 - (dot.top + dot.height / 2),
+            scale: 2,
+            opacity: 0,
+            duration: 0.4,
+            delay: i * 0.07,
+            ease: "power2.inOut",
+            onComplete: () => {
+                ghost.remove()
+                ghostEls = ghostEls.filter(el => el !== ghost)
+            },
+        })
+    })
+    // 逐点延迟 0.07s、单点飞行 0.4s，最后一个落地即结束
+    await new Promise(resolve => setTimeout(resolve, (dots.length - 1) * 70 + 400))
+    if (token !== flightToken) {
+        return
+    }
+    isFlying.value = false
+    await revealPendingRecord(record.uid)
 }
 
 /**
  * 开始自动开密函
  */
 function startAutoOpen() {
-    if (isAutoOpening.value) return
+    if (isAutoOpening.value || isFlying.value) return
 
     isAutoOpening.value = true
     autoOpenTimer.value = setInterval(() => {
-        openOnce()
+        runOpenOnce()
     }, 100) as unknown as number
 }
 
@@ -421,28 +647,38 @@ function stopAutoOpen() {
  */
 function resetSimulation() {
     stopAutoOpen()
+    cancelFlight()
     // 密函切换时同步重建模拟器，保证序列按新密函的参数生成
     simulator = new WalnutSequenceSimulator(props.walnut.参数)
     openResults.value = []
     totalOpens.value = 0
     goldCount.value = 0
+    pool.value = buildPoolDots(simulator.getRemainingSequence())
+    poolEpoch.value++
     // 重置奖励统计
     rewardCounts.value = {}
     weaponPartCounts.value = {}
 }
 watch(() => props.walnut.奖励, resetSimulation)
+onBeforeUnmount(() => {
+    stopAutoOpen()
+    cancelFlight()
+})
 
 /**
  * 获取奖励索引对应的信息
  */
 function getRewardInfo(index: number) {
     const reward = props.walnut.奖励[index]
+    const type = reward?.d ? "Draft" : (reward?.type ?? "Resource")
     return {
         index,
         name: reward ? getWalnutRewardName(reward) : $t("db-walnut-detail.unknown"),
         count: reward?.count || 1,
         d: reward?.d || 0,
         links: reward ? getRewardLinks(reward) : [],
+        /** ResourceCostItem inline 用的 [数量, id, 类型] 元组（图纸走 Draft，图标与详情链接按产物反查设计稿） */
+        inlineValue: [reward?.count || 1, reward?.id ?? 0, type] as [number, number, "Draft" | "Mod" | "Resource" | "Weapon"],
     }
 }
 
@@ -461,6 +697,24 @@ function getRewardTierDot(index: number): string {
             return "bg-cyan-400"
         default: // 铜
             return "bg-gray-500"
+    }
+}
+
+/**
+ * 序列点阵里的奖励类型（1=金 …6=铜3）转档位名 i18n 键。
+ * @param type 序列里的奖励类型
+ * @returns `walnut-source.tier_*` 键名
+ */
+function getWalnutTierName(type: number): string {
+    switch (type) {
+        case 1:
+            return "walnut-source.tier_gold"
+        case 2:
+            return "walnut-source.tier_big_silver"
+        case 3:
+            return "walnut-source.tier_small_silver"
+        default:
+            return "walnut-source.tier_copper"
     }
 }
 
@@ -797,8 +1051,8 @@ function getRewardTypeColor(index: number): string {
                             ? 'border-base-content/20 text-base-content/40'
                             : 'btn-primary'
                     "
-                    :disabled="isAutoOpening"
-                    @click="openOnce"
+                    :disabled="isAutoOpening || isFlying"
+                    @click="openOnceAnimated"
                 >
                     {{ $t("db-walnut-detail.open_once") }}
                 </button>
@@ -810,7 +1064,7 @@ function getRewardTypeColor(index: number): string {
                             ? 'border-base-content/20 text-base-content/40'
                             : 'btn-primary'
                     "
-                    :disabled="isAutoOpening"
+                    :disabled="isAutoOpening || isFlying"
                     @click="openWalnut(65)"
                 >
                     {{ $t("db-walnut-detail.open_65") }}
@@ -823,6 +1077,7 @@ function getRewardTypeColor(index: number): string {
                             ? 'border-error bg-error/10 font-semibold text-error'
                             : ''
                     "
+                    :disabled="!isAutoOpening && isFlying"
                     @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()"
                 >
                     {{ isAutoOpening ? $t("db-walnut-detail.stop_auto") : $t("db-walnut-detail.start_auto") }}
@@ -836,43 +1091,81 @@ function getRewardTypeColor(index: number): string {
                 </button>
             </div>
 
+            <!-- 当前抽卡池剩余序列点阵图：队首在最左，单次开函时前三个点飞到当前奖励行 -->
+            <div class="mb-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] tracking-wide text-base-content/55">
+                    <span>{{ $t("db-walnut-detail.pool_sequence") }}</span>
+                    <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">{{ pool.length }}</span>
+                    <span>{{ $t("db-walnut-detail.pool_opens_to_gold", { n: opensToGold }) }}</span>
+                </div>
+                <div ref="poolMatrixEl" class="max-h-32 overflow-y-auto p-px">
+                    <!-- 每格恰是一次开函取走的三个点，格宽固定（3 点 + 2 内间隙），换行后各行列距始终一致 -->
+                    <TransitionGroup
+                        :key="poolEpoch"
+                        tag="div"
+                        class="flex flex-wrap content-start gap-x-1.5 gap-y-1 animate-ef-rise motion-reduce:animate-none"
+                        move-class="transition-transform duration-300 ease-out"
+                        leave-active-class="hidden"
+                    >
+                        <span v-for="group in poolGroups" :key="group.key" class="flex shrink-0 gap-0.5">
+                            <span
+                                v-for="(dot, dotIndex) in group.dots"
+                                :key="dot.id"
+                                :data-tier="dot.type"
+                                data-pool-dot
+                                class="size-2 shrink-0 rounded-xs"
+                                :class="[
+                                    getRewardTierDot(dot.type - 1),
+                                    group.index === 0 && dotIndex === 0 ? 'outline-1 outline-offset-1 outline-primary' : '',
+                                ]"
+                                :title="$t(getWalnutTierName(dot.type))"
+                            />
+                        </span>
+                    </TransitionGroup>
+                </div>
+                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-base-content/45">
+                    <span
+                        v-for="tier in [1, 2, 3, 4]"
+                        :key="tier"
+                        class="inline-flex items-center gap-1"
+                    >
+                        <span class="size-2 shrink-0 rounded-xs" :class="getRewardTierDot(tier - 1)" aria-hidden="true" />
+                        {{ $t(getWalnutTierName(tier)) }}
+                    </span>
+                    <span>{{ $t("db-walnut-detail.pool_head_hint") }}</span>
+                </div>
+            </div>
+
             <!-- 开函结果 -->
             <div class="mb-3">
                 <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("db-walnut-detail.open_results") }}</div>
-                <div class="max-h-48 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <div ref="openResultsEl" class="max-h-48 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <div v-if="openResults.length === 0" class="py-4 text-center text-base-content/55">
                         {{ $t("db-walnut-detail.no_open_records") }}
                     </div>
                     <div v-else class="grid grid-cols-1 gap-1">
                         <div
-                            v-for="(result, index) in openResults"
-                            :key="index"
+                            v-for="(record, index) in openResults"
+                            :key="record.uid"
+                            :data-record-uid="record.uid"
                             class="flex items-center gap-2 rounded-xs p-1 text-xs transition-colors duration-150 hover:bg-base-content/4"
                         >
                             <span class="w-8 shrink-0 font-mono tabular-nums text-base-content/40">{{ totalOpens - index }}</span>
-                            <div class="flex flex-1 gap-0.5">
+                            <!-- 飞行落地前先留出三格位置（opacity-0 不影响布局），点飞进来后再显字 -->
+                            <div class="flex flex-1 gap-0.5 transition-opacity duration-150" :class="record.pending ? 'opacity-0' : ''">
                                 <span
-                                    v-for="(reward, rIndex) in result.map(v => getRewardInfo(v))"
+                                    v-for="(reward, rIndex) in record.indices.map(v => getRewardInfo(v))"
                                     :key="rIndex"
-                                    class="rounded-xs px-1.5 py-0.5 text-xs font-medium"
+                                    :data-reward-index="reward.index"
+                                    data-reward-chip
+                                    class="inline-flex items-center gap-0.5 rounded-xs font-medium"
                                     :class="[getRewardTypeColor(reward.index), rIndex === 0 ? 'underline' : '']"
                                 >
-                                    <template v-if="reward.links.length > 0">
-                                        <span v-for="(link, linkIndex) in reward.links" :key="link.to" class="inline-flex items-center">
-                                            <SRouterLink
-                                                :to="link.to"
-                                                class="transition-colors duration-150 hover:text-primary hover:underline"
-                                            >
-                                                {{ link.text }}
-                                            </SRouterLink>
-                                            <span v-if="linkIndex < reward.links.length - 1" class="mx-1 text-base-content/50">/</span>
-                                        </span>
-                                    </template>
-                                    <span v-else>{{ $t(reward.name) }}</span>
-                                    {{ reward.count > 1 ? `*${reward.count}` : "" }}
+                                    <ResourceCostItem inline :name="reward.name" :value="reward.inlineValue" />
                                 </span>
                             </div>
-                            <span v-if="result.includes(0)" class="text-xs font-bold text-yellow-500"> ✨ </span>
+                            <span v-if="record.indices.includes(0)" class="text-xs font-bold text-yellow-500"> ✨ </span>
                         </div>
                     </div>
                 </div>

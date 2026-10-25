@@ -1,5 +1,6 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { abyssDungeons } from "dna-builder-data/d/abyss.data"
+import weaponData from "dna-builder-data/d/weapon.data"
 import { and, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
 import { db, schema } from ".."
@@ -67,6 +68,11 @@ type AbyssUsageSubmissionBundle = {
 
 const abyssUsageParticipantCache = new Map<string, Promise<AbyssUsageParticipantsBundle>>()
 const abyssUsageSubmissionCache = new Map<string, Promise<AbyssUsageSubmissionBundle>>()
+
+/**
+ * 灾厄武器 ID 集合。游戏接口不下发灾厄武器持有信息，上场即视为持有效果统计时持有率按 100% 计算。
+ */
+const CALAMITY_WEAPON_IDS: ReadonlySet<number> = new Set(weaponData.filter(item => item.伤害类型 === "灾厄").map(item => item.id))
 
 /**
  * 归一化深渊统计用角色 ID。
@@ -268,9 +274,11 @@ function normalizeOwnedCharIds(items?: Array<{ charId: number; gradeLevel: numbe
     for (const item of items || []) {
         if (!Number.isInteger(item.charId) || item.charId <= 0) continue
         if (!Number.isInteger(item.gradeLevel) || item.gradeLevel < 0) continue
-        const current = charMap.get(item.charId)
+        // 持有 ID 与阵容 ID 统一归一（160101->1601、120101->1201），避免查不到持有等级
+        const charId = normalizeAbyssCharId(item.charId)
+        const current = charMap.get(charId)
         if (current == null || item.gradeLevel > current) {
-            charMap.set(item.charId, item.gradeLevel)
+            charMap.set(charId, item.gradeLevel)
         }
     }
     return [...charMap.entries()].map(([charId, gradeLevel]) => ({ charId, gradeLevel }))
@@ -360,7 +368,7 @@ function buildOwnedWeaponParticipantRows(
  * @param lineup 阵容。
  * @param ownedChars 已持有角色。
  * @param ownedWeapons 已持有武器。
- * @returns 使用明细；若缺少对应持有信息则返回 null。
+ * @returns 使用明细；角色与武器各自独立匹配持有信息，两者皆无匹配时返回 null。
  */
 function buildUsageParticipantRows(
     submissionId: string,
@@ -368,6 +376,7 @@ function buildUsageParticipantRows(
     lineup: {
         charId: number
         meleeId: number
+        rangedId: number
         support1: number
         supportWeapon1: number
         support2: number
@@ -376,71 +385,68 @@ function buildUsageParticipantRows(
     ownedChars: Array<{ charId: number; gradeLevel: number }>,
     ownedWeapons: Array<{ weaponId: number; skillLevel: number }>
 ) {
-    const charMap = new Map(ownedChars.map(item => [item.charId, item.gradeLevel]))
+    // 持有表按归一化角色 ID 索引，兼容 160101/120101 这类旧形态上报
+    const charMap = new Map<number, number>()
+    for (const item of ownedChars) {
+        const charId = normalizeAbyssCharId(item.charId)
+        const current = charMap.get(charId)
+        if (current == null || item.gradeLevel > current) {
+            charMap.set(charId, item.gradeLevel)
+        }
+    }
     const weaponMap = new Map(ownedWeapons.map(item => [item.weaponId, item.skillLevel]))
     const roleParticipantMap = new Map<number, { roleType: "main" | "support"; charId: number; gradeLevel: number }>()
     const weaponParticipantMap = new Map<number, { roleType: "main" | "support"; weaponId: number; skillLevel: number }>()
-    const usageParticipants = [
-        {
-            roleType: "main" as const,
-            charId: lineup.charId,
-            gradeLevel: charMap.get(lineup.charId),
-            weaponId: lineup.meleeId,
-            skillLevel: weaponMap.get(lineup.meleeId),
-        },
-        {
-            roleType: "support" as const,
-            charId: lineup.support1,
-            gradeLevel: charMap.get(lineup.support1),
-            weaponId: lineup.supportWeapon1,
-            skillLevel: weaponMap.get(lineup.supportWeapon1),
-        },
-        {
-            roleType: "support" as const,
-            charId: lineup.support2,
-            gradeLevel: charMap.get(lineup.support2),
-            weaponId: lineup.supportWeapon2,
-            skillLevel: weaponMap.get(lineup.supportWeapon2),
-        },
+    // 角色上场只取决于角色持有不再被同槽武器持有情况连带丢弃
+    // （灾厄武器不在游戏下发的持有列表里，旧逻辑会导致整槽角色使用率归零）
+    const charSlots = [
+        { roleType: "main" as const, charId: normalizeAbyssCharId(lineup.charId) },
+        { roleType: "support" as const, charId: normalizeAbyssCharId(lineup.support1) },
+        { roleType: "support" as const, charId: normalizeAbyssCharId(lineup.support2) },
     ]
+    for (const slot of charSlots) {
+        if (!(slot.charId > 0)) continue
+        const gradeLevel = charMap.get(slot.charId)
+        if (gradeLevel == null) continue
+        const current = roleParticipantMap.get(slot.charId)
+        if (!current || gradeLevel > current.gradeLevel) {
+            roleParticipantMap.set(slot.charId, {
+                roleType: slot.roleType,
+                charId: slot.charId,
+                gradeLevel,
+            })
+        }
+    }
+    // 主控近战/远程两把武器都要计入武器使用（旧逻辑漏掉了远程武器）
+    const weaponSlots = [
+        { roleType: "main" as const, weaponId: lineup.meleeId },
+        { roleType: "main" as const, weaponId: lineup.rangedId },
+        { roleType: "support" as const, weaponId: lineup.supportWeapon1 },
+        { roleType: "support" as const, weaponId: lineup.supportWeapon2 },
+    ]
+    for (const slot of weaponSlots) {
+        if (!(slot.weaponId > 0)) continue
+        let skillLevel = weaponMap.get(slot.weaponId)
+        if (skillLevel == null) {
+            // 灾厄武器不在游戏下发的持有列表里上场即视为持有等级未知记为 0
+            if (!CALAMITY_WEAPON_IDS.has(slot.weaponId)) continue
+            skillLevel = 0
+        }
+        const current = weaponParticipantMap.get(slot.weaponId)
+        if (!current || skillLevel > current.skillLevel) {
+            weaponParticipantMap.set(slot.weaponId, {
+                roleType: slot.roleType,
+                weaponId: slot.weaponId,
+                skillLevel,
+            })
+        }
+    }
 
-    const validParticipants = usageParticipants.filter(
-        item => item.charId > 0 && item.weaponId > 0 && item.gradeLevel != null && item.skillLevel != null
-    )
-
-    if (validParticipants.length === 0) {
+    if (roleParticipantMap.size === 0 && weaponParticipantMap.size === 0) {
         return null
     }
 
-    for (const item of validParticipants) {
-        const roleCurrent = roleParticipantMap.get(item.charId)
-        if (!roleCurrent || item.gradeLevel! > roleCurrent.gradeLevel) {
-            roleParticipantMap.set(item.charId, {
-                roleType: item.roleType,
-                charId: item.charId,
-                gradeLevel: item.gradeLevel!,
-            })
-        }
-        const weaponCurrent = weaponParticipantMap.get(item.weaponId)
-        if (!weaponCurrent || item.skillLevel! > weaponCurrent.skillLevel) {
-            weaponParticipantMap.set(item.weaponId, {
-                roleType: item.roleType,
-                weaponId: item.weaponId,
-                skillLevel: item.skillLevel!,
-            })
-        }
-    }
-
     return {
-        usageParticipants: validParticipants.map(item => ({
-            submissionId,
-            seasonId,
-            roleType: item.roleType,
-            charId: item.charId,
-            gradeLevel: item.gradeLevel!,
-            weaponId: item.weaponId,
-            skillLevel: item.skillLevel!,
-        })),
         roleParticipants: [...roleParticipantMap.values()].map(item => ({
             submissionId,
             seasonId,
@@ -502,9 +508,10 @@ function buildRoleStats(rows: AbyssUsageRoleStatRow[]) {
 /**
  * 将武器统计行聚合为最终统计。
  * @param rows 武器统计行。
+ * @param calamityOwnedCount 灾厄武器持有数（持有率按 100% 计传入当前筛选范围内的提交总数）。
  * @returns 武器统计列表。
  */
-function buildWeaponStats(rows: AbyssUsageWeaponStatRow[]) {
+function buildWeaponStats(rows: AbyssUsageWeaponStatRow[], calamityOwnedCount = 0) {
     const grouped = new Map<
         number,
         {
@@ -533,7 +540,9 @@ function buildWeaponStats(rows: AbyssUsageWeaponStatRow[]) {
         .map(([weaponId, bucket]) => ({
             weaponId,
             submissionCount: bucket.submissionIds.size,
-            ownedCount: bucket.ownedSubmissionIds.size,
+            ownedCount: CALAMITY_WEAPON_IDS.has(weaponId)
+                ? Math.max(bucket.ownedSubmissionIds.size, calamityOwnedCount)
+                : bucket.ownedSubmissionIds.size,
             skillLevelDistribution: buildIndexedDistribution(bucket.skill),
         }))
         .sort((a, b) => b.submissionCount - a.submissionCount || a.weaponId - b.weaponId)
@@ -909,9 +918,12 @@ export const resolvers = {
             return buildRoleStats(roleRows)
         },
         abyssUsageWeaponStats: async (_parent, args) => {
-            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
+            const [{ weaponRows }, bundle] = await Promise.all([
+                loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel),
+                loadAbyssUsageSubmissionBundle(args?.seasonId, undefined, undefined, 20, args?.minLevel, args?.maxLevel),
+            ])
             if (weaponRows.length === 0) return []
-            return buildWeaponStats(weaponRows)
+            return buildWeaponStats(weaponRows, bundle.count)
         },
         abyssUsageLineupStats: async (_parent, args) => {
             const charId = args?.charId
@@ -947,9 +959,12 @@ export const resolvers = {
         },
         abyssUsageWeaponRank: async (_parent, args) => {
             const limit = args?.limit ?? 20
-            const { weaponRows } = await loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel)
+            const [{ weaponRows }, bundle] = await Promise.all([
+                loadAbyssParticipantRows(args?.seasonId, args?.minLevel, args?.maxLevel),
+                loadAbyssUsageSubmissionBundle(args?.seasonId, undefined, undefined, 20, args?.minLevel, args?.maxLevel),
+            ])
             if (weaponRows.length === 0) return []
-            return buildWeaponStats(weaponRows).slice(0, limit)
+            return buildWeaponStats(weaponRows, bundle.count).slice(0, limit)
         },
     },
     Mutation: {
@@ -1010,6 +1025,7 @@ export const resolvers = {
                     {
                         charId: input.charId,
                         meleeId: input.meleeId,
+                        rangedId: input.rangedId,
                         support1: input.support1,
                         supportWeapon1: input.supportWeapon1,
                         support2: input.support2,

@@ -552,7 +552,7 @@ function formatLevelDistribution(items?: number[]) {
         .filter(item => item.count > 0)
         .map(item => ({
             level: item.level,
-            label: formatRomanLevel(item.level),
+            label: item.level === 0 ? "未知" : formatRomanLevel(item.level),
             percent: `${((item.count / total) * 100).toFixed(1)}%`,
         }))
 }

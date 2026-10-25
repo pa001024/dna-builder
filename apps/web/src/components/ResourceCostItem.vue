@@ -412,6 +412,20 @@ function handleCardClick() {
             </SRouterLink>
         </ShowProps>
         <SRouterLink
+            v-else-if="value[2] === 'Draft' && getDraftByIdOrProductId(value[1])"
+            :to="getRewardDetailLink('Draft', value[1])"
+            class="inline-flex cursor-pointer items-center gap-1 hover:underline"
+        >
+            <img
+                :src="getDraftIcon(value[1])"
+                alt=""
+                class="size-5 rounded-xs"
+                :class="getDraftBackgroundColor(value[1])"
+            />
+            <span class="text-xs">{{ $t("设计稿") }}: {{ tName(getDraftByIdOrProductId(value[1])!.n) }}</span>
+            <span class="text-xs">{{ value[0] }}</span>
+        </SRouterLink>
+        <SRouterLink
             v-else-if="getRewardDetailLink(value[2], value[1])"
             :to="getRewardDetailLink(value[2], value[1])"
             class="inline-flex cursor-pointer items-center gap-1 hover:underline"

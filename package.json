@@ -55,7 +55,8 @@
         "bench:charbuild:real": "bun tools/benchmark-charbuild.ts"
     },
     "dependencies": {
-        "dna-builder-data": "file:packages/data"
+        "dna-builder-data": "file:packages/data",
+        "meshoptimizer": "^1.3.0"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.15",
@@ -80,5 +81,6 @@
         "typescript": "~5.9.3",
         "vitest": "^4.1.11",
         "wasm-opt": "2.0.1"
-    }
+    },
+    "workspaces": ["apps/web", "apps/server", "packages/*", "tools/data-mapper", "tools/vue-mapper"]
 }

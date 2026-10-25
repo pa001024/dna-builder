@@ -35,6 +35,36 @@ describe("walnut-utils", () => {
         expect(WalnutSequenceSimulator.expectedOpensForRewardIndex([1, 0, 0, 0, 0, 0], 1, 1)).toBe(Number.POSITIVE_INFINITY)
     })
 
+    it("剩余序列与开函取走顺序一致：队首即下一次开函的第一个点", () => {
+        const simulator = new WalnutSequenceSimulator([1, 7, 10, 13, 13, 13])
+        const before = simulator.getRemainingSequence()
+        // 队尾恒为金奖
+        expect(before[before.length - 1]).toBe(1)
+
+        const draw = simulator.openDetailed()
+        expect(draw.rewards).toHaveLength(3)
+        expect(draw.taken).toHaveLength(3)
+        expect(draw.taken.map(type => type - 1)).toEqual(draw.rewards)
+
+        // 未触金时，剩余序列就是原序列 pop 掉前三个的结果
+        if (!draw.reset) {
+            expect(simulator.getRemainingSequence()).toEqual(before.slice(3))
+        }
+    })
+
+    it("触金后重新生成奖励序列", () => {
+        // 只有金奖的池子：第一次开函必出金并重置
+        const simulator = new WalnutSequenceSimulator([1, 0, 0, 0, 0, 0])
+        expect(simulator.getRemainingSequence()).toEqual([1])
+        const draw = simulator.openDetailed()
+        expect(draw.reset).toBe(true)
+        expect(draw.taken).toHaveLength(3)
+        expect(draw.taken[0]).toBe(1)
+        // 重置后的池子仍是「若干非金 + 金奖」
+        const remaining = simulator.getRemainingSequence()
+        expect(remaining[remaining.length - 1]).toBe(1)
+    })
+
     it("参数化后出金概率与重构前一致", () => {
         expect(WalnutSequenceSimulator.calculateGoldProbability(1)).toBeCloseTo(0.000087, 6)
         expect(WalnutSequenceSimulator.calculateGoldProbability(5)).toBeCloseTo(0.045997, 6)
