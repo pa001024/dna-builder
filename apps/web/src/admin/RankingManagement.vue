@@ -48,9 +48,6 @@ const buildMap = ref<Record<number, { id: string; title: string }[]>>({})
 const inflightBuilds = new Map<number, Promise<void>>()
 let selectSeq = 0
 
-/** 角色 / 构筑选项过多，下拉不能退化成方章，统一套用下划线输入外观 */
-const SELECT_CLASS = [ADMIN_INPUT, "cursor-pointer appearance-none pr-5"].join(" ")
-
 const activeList = computed(() => lists.value.find(item => item.id === activeId.value) || null)
 const totalItems = computed(() => rows.value.length)
 
@@ -86,11 +83,17 @@ async function loadBuildOptions(charId: number, force = false) {
     await task
 }
 
-async function handleCharChange(index: number) {
+/**
+ * 角色下拉变更：标准 Select 直接透出原始类型值，无需 .number 修饰。
+ * @param index 条目下标
+ * @param value 新选中的角色 id
+ */
+function handleCharSelect(index: number, value: unknown) {
     const row = rows.value[index]
     if (!row) return
+    row.charId = Number(value)
     row.buildId = ""
-    await loadBuildOptions(row.charId)
+    void loadBuildOptions(row.charId)
 }
 
 async function loadLists() {
@@ -309,38 +312,28 @@ onMounted(loadLists)
                         </span>
                         <label class="block min-w-0">
                             <span :class="ADMIN_LABEL">角色</span>
-                            <span class="relative mt-1 block">
-                                <select
-                                    v-model.number="row.charId"
-                                    :class="[SELECT_CLASS, 'block']"
-                                    @change="handleCharChange(index)"
-                                >
-                                    <option v-for="char in charData" :key="char.id" :value="char.id">{{ char.名称 }}</option>
-                                </select>
-                                <Icon
-                                    icon="ri:arrow-down-s-line"
-                                    class="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-base-content/35"
-                                />
-                            </span>
+                            <Select
+                                :model-value="row.charId"
+                                :class="[ADMIN_INPUT, 'mt-1 cursor-pointer']"
+                                @update:model-value="handleCharSelect(index, $event)"
+                            >
+                                <SelectItem v-for="char in charData" :key="char.id" :value="char.id">
+                                    {{ char.名称 }}
+                                </SelectItem>
+                            </Select>
                         </label>
                         <label class="block min-w-0">
                             <span :class="ADMIN_LABEL">构筑</span>
-                            <span class="relative mt-1 block">
-                                <select
-                                    v-model="row.buildId"
-                                    :class="[SELECT_CLASS, 'block']"
-                                    @focus="loadBuildOptions(row.charId)"
-                                >
-                                    <option value="">请选择构筑</option>
-                                    <option v-for="build in buildMap[row.charId] || []" :key="build.id" :value="build.id">
-                                        {{ build.title }}
-                                    </option>
-                                </select>
-                                <Icon
-                                    icon="ri:arrow-down-s-line"
-                                    class="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-base-content/35"
-                                />
-                            </span>
+                            <Select
+                                v-model="row.buildId"
+                                placeholder="请选择构筑"
+                                :class="[ADMIN_INPUT, 'mt-1 cursor-pointer']"
+                                @update:open="open => open && loadBuildOptions(row.charId)"
+                            >
+                                <SelectItem v-for="build in buildMap[row.charId] || []" :key="build.id" :value="build.id">
+                                    {{ build.title }}
+                                </SelectItem>
+                            </Select>
                         </label>
                         <button
                             :class="[ADMIN_ROW_ACTION, ADMIN_ROW_TONE_ERROR, 'justify-self-end pb-2']"
