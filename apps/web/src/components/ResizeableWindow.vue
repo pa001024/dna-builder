@@ -34,6 +34,10 @@ const sidebarRef = ref<typeof import("@/components/Sidebar.vue").default>()
 const isDark = ref(setting.theme === "dark" || (setting.theme === "custom" && setting.customTheme.colorScheme === "dark"))
 const langDialogOpen = ref(false)
 const langDialogRef = ref<HTMLDialogElement | null>(null)
+// 主窗口关闭方式二次确认弹窗：closeRemember 勾选后把本次选择写入 setting.closeAction
+const closeDialogOpen = ref(false)
+const closeDialogRef = ref<HTMLDialogElement | null>(null)
+const closeRemember = ref(false)
 
 if (env.isApp) {
     appWindow = getCurrentWindow()
@@ -76,13 +80,52 @@ async function handleMaximize() {
     }
 }
 
+async function doMinimizeToTray() {
+    await getCurrentWindow().hide()
+}
+
+async function doExitApp() {
+    await invoke("app_close").catch(() => exit())
+}
+
 async function handleClose() {
     const win = getCurrentWindow()
 
-    if (win.label === "main") {
-        invoke("app_close").catch(() => exit())
-    } else {
+    if (win.label !== "main") {
         win.close()
+        return
+    }
+    if (setting.closeAction === "minimize") {
+        await doMinimizeToTray()
+        return
+    }
+    if (setting.closeAction === "exit") {
+        await doExitApp()
+        return
+    }
+    closeRemember.value = false
+    closeDialogOpen.value = true
+    closeDialogRef.value?.showModal()
+}
+
+function cancelCloseDialog() {
+    if (!closeDialogOpen.value) {
+        return
+    }
+    closeDialogOpen.value = false
+    closeDialogRef.value?.close()
+}
+
+async function chooseCloseAction(choice: "minimize" | "exit") {
+    if (closeRemember.value) {
+        setting.closeAction = choice
+    }
+    closeDialogOpen.value = false
+    closeDialogRef.value?.close()
+    if (choice === "minimize") {
+        await doMinimizeToTray()
+    } else {
+        await doExitApp()
     }
 }
 
@@ -112,16 +155,30 @@ function changeLanguage(lang: string) {
 }
 
 let unlisten: () => void
+let unlistenCloseRequested: (() => void) | undefined
 
 if (env.isApp) {
     onMounted(async () => {
         unlisten = await appWindow.listen("tauri://resize", async () => {
             maximized.value = await appWindow.isMaximized()
         })
+        // 拦截系统级关闭（Alt+F4 / 任务栏右键关闭），走与标题栏关闭按钮同一套二次确认逻辑；
+        // 真正退出走 Rust 侧 app_close 直接结束进程，不会再触发本回调
+        try {
+            if (appWindow.label === "main") {
+                unlistenCloseRequested = await appWindow.onCloseRequested(event => {
+                    event.preventDefault()
+                    void handleClose()
+                })
+            }
+        } catch {
+            // 非桌面窗口忽略
+        }
     })
 
     onUnmounted(() => {
         unlisten?.()
+        unlistenCloseRequested?.()
     })
 }
 
@@ -266,6 +323,48 @@ watchEffect(() => {
                             <Icon v-if="setting.lang === lang.code" icon="ri:checkbox-circle-fill" />
                         </button>
                     </div>
+                </div>
+            </dialog>
+            <!-- 主窗口关闭方式二次确认：最小化到托盘 / 退出程序 + 记住设置 -->
+            <dialog
+                ref="closeDialogRef"
+                class="modal"
+                :class="{ 'modal-open': closeDialogOpen }"
+                @close="closeDialogOpen = false"
+                @click="cancelCloseDialog"
+            >
+                <div class="modal-box bg-base-300" @click.stop>
+                    <div class="flex items-center justify-between pb-2">
+                        <div class="text-lg font-bold">
+                            {{ $t("setting.closeDialogTitle") }}
+                        </div>
+                        <button class="btn btn-ghost btn-sm btn-square" type="button" @click="cancelCloseDialog">
+                            <Icon bold icon="codicon:chrome-close" />
+                        </button>
+                    </div>
+                    <p class="pb-3 text-sm text-base-content/60">{{ $t("setting.closeDialogTip") }}</p>
+                    <div class="grid gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-ghost justify-start gap-2 hover:btn-primary"
+                            @click="chooseCloseAction('minimize')"
+                        >
+                            <Icon bold icon="codicon:chrome-minimize" />
+                            <span>{{ $t("setting.closeMinimize") }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-ghost justify-start gap-2 hover:btn-error"
+                            @click="chooseCloseAction('exit')"
+                        >
+                            <Icon icon="ri:logout-circle-r-line" />
+                            <span>{{ $t("setting.closeExit") }}</span>
+                        </button>
+                    </div>
+                    <label class="mt-3 flex cursor-pointer items-center gap-2 text-sm text-base-content/70">
+                        <input v-model="closeRemember" type="checkbox" class="checkbox checkbox-sm checkbox-secondary" />
+                        {{ $t("setting.closeRemember") }}
+                    </label>
                 </div>
             </dialog>
             <!-- Body -->

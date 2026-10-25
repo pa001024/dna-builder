@@ -125,6 +125,8 @@ export const useSettingStore = defineStore("setting", {
             }),
             // 狩月动画独立小窗：窗口不随应用重启保留，但开关要持久化，启动时按它恢复
             afkWidgetEnabled: useLocalStorage("setting_afk_widget", false),
+            // 主窗口关闭按钮行为：ask 每次弹窗询问，minimize 最小化到托盘，exit 直接退出
+            closeAction: useLocalStorage<"ask" | "minimize" | "exit">("setting_close_action", "ask"),
         }
     },
     getters: {},

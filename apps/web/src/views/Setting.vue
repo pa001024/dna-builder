@@ -1079,6 +1079,23 @@ onUnmounted(() => {
                             v-if="env.isApp"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
+                            <span class="label-text">
+                                {{ $t("setting.closeBehavior") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.closeBehaviorTip") }}</div>
+                            </span>
+                            <Select
+                                v-model="setting.closeAction"
+                                class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
+                                <SelectItem value="ask">{{ $t("setting.closeAsk") }}</SelectItem>
+                                <SelectItem value="minimize">{{ $t("setting.closeMinimize") }}</SelectItem>
+                                <SelectItem value="exit">{{ $t("setting.closeExit") }}</SelectItem>
+                            </Select>
+                        </div>
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
                             <span class="label-text">{{ $t("setting.winMaterial") }}</span>
                             <Select
                                 v-model="setting.winMaterial"
