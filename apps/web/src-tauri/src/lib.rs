@@ -10,7 +10,22 @@ use tauri::Manager;
 /// 应用主入口：注册插件、装配托盘并启动 Tauri 应用。
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut app = tauri::Builder::default()
+    let mut app = tauri::Builder::default();
+    // 单实例必须最先注册：插件按注册顺序运行，它要在 deep-link 插件就绪前接管二次启动
+    // （对应 dob-app 的 launchMode=singleTop；deep-link 特性把新实例的参数先喂给 deep-link 插件）
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        app = app.plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            // 热启深链：把已运行的主窗口拉到前台，前端 onOpenUrl 会收到链接并跳转
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }));
+    }
+    app = app
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())

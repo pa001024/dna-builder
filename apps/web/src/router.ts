@@ -1,5 +1,5 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window"
-import { createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router"
+import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router"
 import { env } from "./env"
 
 const AchievementList = () => import("./views/AchievementList.vue")
@@ -99,6 +99,14 @@ export const routes: readonly RouteRecordRaw[] = [
         ],
     },
     { name: "build-compare", path: "/char-build-compare", component: CharBuildCompare, beforeEnter: () => setMinSize(320, 360) },
+    {
+        // 深链中转：`dobapp://open-build/<id>` 与短链 `/build/<id>` 的落点，查到归属角色后 replace 到分享构筑页（与 dob-app 的 `/build/:id` 同构）
+        name: "build-detail",
+        path: "/build/:id",
+        component: () => import("./views/BuildRedirectView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
     {
         path: "/timeline",
         children: [
@@ -840,7 +848,7 @@ export const routes: readonly RouteRecordRaw[] = [
 ]
 
 export const router = createRouter({
-    // 应用内使用 hash 模式，其他环境使用 history 模式
-    history: env.isApp ? createWebHashHistory() : createWebHistory(),
+    // 应用内使用 hash 模式，其他环境使用 history 模式；无 window 时（单测 / 纯 Node 引用）退化为 memory 模式，避免模块加载直接抛错
+    history: env.isApp ? createWebHashHistory() : typeof window === "undefined" ? createMemoryHistory() : createWebHistory(),
     routes,
 })

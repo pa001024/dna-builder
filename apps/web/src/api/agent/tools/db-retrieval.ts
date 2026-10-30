@@ -676,7 +676,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                     "角色与武器技能的逐条倍率（`技能字段`：伤害倍率、属性影响、标签如充盈/远程/武器、削韧、连段/取消秒数）、" +
                     "技能术语解释（`技能术语解释`：`处决目标`、`羽化`、`充盈` 这类机制名词的官方定义）、" +
                     "武器的灾厄熔炼（`灾厄熔炼`：逐档潜能的解锁效果与加成，面板数值、熔炼文案、突破材料），" +
-                    "魔之楔的词条属性与效果、招式替换后的倍率（`技能替换字段`），成就奖励，怪物属性，" +
+                    "魔之楔的词条属性与效果、招式替换后的倍率（`技能替换字段`），成就奖励，怪物属性，任务链的解锁前置（`解锁条件`：条件表 id 与可读要求），" +
                     "魔之楔 / 武器 / 资源的获取来源（`来源` / `获取途径`：副本掉落、商店售卖、任务链、角色突破、道具箱、活动等），" +
                     "角色档案的整篇正文（module=charprofile），以及读物与资源的地图坐标（书页位置 / 宝藏位置 / 采集位置）等。" +
                     "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」「这个技能伤害倍率多少」「这把武器的灾厄熔炼有什么」" +
@@ -928,7 +928,8 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                         "剧情检索：在任务链与剧情对话正文中查找人名（含说话人名）、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”“某个人在哪些剧情里出场过”。" +
                         '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）、列出某个说话人出场过的任务链（filters 传 {"speaker":"说话人名"}，可用取值见 list_filter_options）。' +
                         "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。" +
-                        "有关键词时，每条命中都附带 summary（该任务链的整链 AI 剧情总结，中文）：问“这条剧情讲了什么”时直接用 summary 作答即可，不必再读原文。",
+                        "有关键词时，每条命中都附带 summary（该任务链的整链 AI 剧情总结，中文）：问“这条剧情讲了什么”时直接用 summary 作答即可，不必再读原文。" +
+                        "命中里带 unlock（解锁条件表 id）：问某条任务链的前置 / 解锁要求时，用 read_entry（module=questchain + chainId）取「解锁条件」字段作答。",
                     parameters: {
                         type: "object",
                         properties: {
@@ -973,6 +974,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                             questType: hit.questType,
                             imprCheck: hit.imprCheck || undefined,
                             imprIncrease: hit.imprIncrease || undefined,
+                            unlock: hit.unlock,
                             summary: hit.summary,
                             path: hit.path,
                             snippets: hit.snippets.map(snippet => ({

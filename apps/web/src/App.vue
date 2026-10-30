@@ -2,7 +2,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { provideClient } from "@urql/vue"
 import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { useAfkWidget } from "./composables/useAfkWidget"
@@ -21,6 +21,7 @@ import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
 import { installAdminUploadHook, uninstallAdminUploadHook } from "./utils/admin-data-sync"
 import { buildCustomThemeCss, CUSTOM_THEME_ID, captureCurrentThemeVars } from "./utils/customTheme"
+import { setupDeepLink } from "./utils/deep-link"
 import { SCREEN_BAR_WINDOW_LABEL } from "./utils/screen-bar"
 import { postVisitorCount } from "./vercount"
 
@@ -35,7 +36,10 @@ const afkLedger = useAfkLedgerStore()
 const { syncWindowWithSetting: syncAfkWidgetWindow } = useAfkWidget()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
+const vueRouter = useRouter()
 const user = useUserStore()
+/** 深链监听的取消函数（桌面端 `dobapp://` 协议，见 `utils/deep-link.ts`） */
+let deepLinkUnlisten: (() => void) | null = null
 const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
 const ONLINE_EXPERIENCE_RETRY_AT_KEY = "user_online_experience_retry_at"
 let onlineExperienceTimer: number | null = null
@@ -414,11 +418,23 @@ onMounted(async () => {
     if (mihanNotify.shouldKeepWatch()) {
         await mihanNotify.ensureWatch()
     }
+    // 深链：主窗口独占监听（浮窗不重复注册），冷启动链接与运行中收到的链接都打开
+    if (isMainWindow && env.isApp) {
+        void setupDeepLink(vueRouter)
+            .then(unlisten => {
+                deepLinkUnlisten = unlisten
+            })
+            .catch(error => {
+                console.error("深链监听注册失败", error)
+            })
+    }
 })
 
 onBeforeUnmount(() => {
     stopOnlineExperienceTimer()
     uninstallAdminUploadHook()
+    deepLinkUnlisten?.()
+    deepLinkUnlisten = null
 })
 </script>
 

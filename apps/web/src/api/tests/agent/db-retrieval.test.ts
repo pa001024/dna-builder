@@ -117,3 +117,49 @@ describe("资料检索工具集裁剪", () => {
         expect(invalid.isError).toBe(true)
     })
 })
+
+describe("任务链解锁条件（unlock，条件表 id）", () => {
+    it("read_entry 返回解锁条件 id 与可读文本", async () => {
+        const tools = createDbRetrievalTools({})
+        const readTool = tools.find(tool => tool.definition.name === "read_entry")
+
+        expect(readTool).toBeDefined()
+
+        const result = await callTool(readTool!, { module: "questchain", id: "100102", lang: "zh" })
+        const fields = (result.entry as { fields: Record<string, unknown> }).fields
+
+        expect(fields["解锁条件id"]).toBe(100101)
+        expect(fields["解锁条件"]).toContain("逃离净界岛")
+
+        // 无前置要求的任务链不带解锁字段
+        const noUnlock = await callTool(readTool!, { module: "questchain", id: "100101", lang: "zh" })
+        const noFields = (noUnlock.entry as { fields: Record<string, unknown> }).fields
+
+        expect(noFields["解锁条件id"]).toBeUndefined()
+        expect(noFields["解锁条件"]).toBeUndefined()
+    })
+
+    it("search_story 命中携带 unlock", async () => {
+        const tools = createDbRetrievalTools({})
+        const searchTool = tools.find(tool => tool.definition.name === "search_story")
+
+        expect(searchTool).toBeDefined()
+
+        const result = await callTool(searchTool!, { keyword: "时光掩埋之地", lang: "zh" })
+        const hits = result.hits as Array<{ chainId: number; unlock?: number }>
+        const hit = hits.find(item => item.chainId === 100102)
+
+        expect(hit?.unlock).toBe(100101)
+    })
+
+    it("read_story 的 chain 携带 unlock", async () => {
+        const tools = createDbRetrievalTools({})
+        const readStoryTool = tools.find(tool => tool.definition.name === "read_story")
+
+        expect(readStoryTool).toBeDefined()
+
+        const result = await callTool(readStoryTool!, { chain_id: 100102, lang: "zh", limit: 1 })
+
+        expect((result.chain as { unlock?: number }).unlock).toBe(100101)
+    })
+})

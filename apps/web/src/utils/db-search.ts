@@ -12,6 +12,7 @@ import {
     npcMap,
     petMap,
     questChainMap,
+    questMap,
     resourceMap,
     titleMap,
     walnutMap,
@@ -23,6 +24,8 @@ import { booksData } from "@/data/d/book.data"
 import { default as charData } from "@/data/d/char.data"
 import { getCachedCharExtData, resolveCharExtLocaleBySetting } from "@/data/d/charext-locale"
 import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
+import type { ConditionItem } from "@/data/d/condition.data"
+import { conditionsMap } from "@/data/d/condition.data"
 import dungeonsData from "@/data/d/dungeon.data"
 import { eventData } from "@/data/d/event.data"
 import { fishs } from "@/data/d/fish.data"
@@ -214,6 +217,12 @@ export interface DBStoryHit {
     imprCheck?: boolean
     /** 是否包含印象增加选项 */
     imprIncrease?: boolean
+    /**
+     * 解锁条件表 id（`questChain.unlock`）：要看具体解锁要求，用 read_entry（module=questchain + chainId）取「解锁条件」字段。
+     *
+     * 无前置要求的任务链不返回该字段。
+     */
+    unlock?: number
     /**
      * 整条任务链的 AI 剧情总结（`storysummary.data.ts`，只有中文；无总结时不返回）。
      *
@@ -2822,6 +2831,58 @@ function readAchievementDetailFields(id: string, lang: DBAgentLang): DBEntryFiel
 }
 
 /**
+ * 按任务 id 解析任务名（解锁条件里 Quest / TrueQuest 的取值是任务 id）。
+ * @param questId 任务 id
+ * @returns 任务名，查不到时回退为 id 字符串
+ */
+function getUnlockQuestName(questId: number): string {
+    for (const story of questMap.values()) {
+        const quest = story.quests.find(item => item.id === questId)
+        if (quest) {
+            return quest.name
+        }
+    }
+    return `${questId}`
+}
+
+/**
+ * 把解锁条件（条件表条目）转成一句可读文本，与详情页 ConditionItem 同口径。
+ * @param condition 条件表条目
+ * @returns 可读文本，如「序章任务完成：完成任务链《逃离净界岛》(100101)」；条目缺失时返回 undefined
+ */
+function describeUnlockCondition(condition: ConditionItem | undefined): string | undefined {
+    if (!condition) {
+        return undefined
+    }
+
+    const parts: string[] = []
+    for (const [key, value] of Object.entries(condition.map)) {
+        const items = Array.isArray(value) ? value : [value]
+        for (const item of items) {
+            const ids = (Array.isArray(item) ? item : [item]).map(Number)
+            if ((key === "QuestChain" || key === "TrueQuestChain") && ids.every(Number.isFinite)) {
+                parts.push(`完成任务链${ids.map(chainId => `《${questChainMap.get(chainId)?.name ?? chainId}》(${chainId})`).join(" / ")}`)
+            } else if ((key === "Quest" || key === "TrueQuest") && ids.every(Number.isFinite)) {
+                parts.push(`完成任务${ids.map(questId => `《${getUnlockQuestName(questId)}》(${questId})`).join(" / ")}`)
+            } else if (key === "PlayerLevelMin" && ids.length && Number.isFinite(ids[0])) {
+                parts.push(`等级≥${ids[0]}`)
+            } else if (key === "PlayerLevelMax" && ids.length && Number.isFinite(ids[0])) {
+                parts.push(`等级≤${ids[0]}`)
+            } else {
+                parts.push(`${key}=${JSON.stringify(item)}`)
+            }
+        }
+    }
+
+    if (!parts.length) {
+        return condition.remark || undefined
+    }
+
+    const body = parts.join(condition.logic === "OR" ? " 或 " : " 且 ")
+    return condition.remark ? `${condition.remark}：${body}` : body
+}
+
+/**
  * 任务链详情字段：篇章 / 章节 / 类型 / 版本等列表页字段，加上简介、详情与奖励组。
  *
  * 台词原文不在这一层：那部分由 read_story 提供。
@@ -2867,6 +2928,15 @@ function readQuestChainDetailFields(id: string, lang: DBAgentLang): DBEntryField
 
     if (chain.reward?.length) {
         fields.奖励组 = [...chain.reward]
+    }
+
+    // 解锁条件：unlock 存的是条件表 id，可读文本与详情页 ConditionItem 同口径
+    if (chain.unlock !== undefined) {
+        fields.解锁条件id = chain.unlock
+        const unlockText = describeUnlockCondition(conditionsMap[chain.unlock])
+        if (unlockText) {
+            fields.解锁条件 = unlockText
+        }
     }
 
     const npc = chain.npc === undefined ? undefined : npcMap.get(chain.npc)
@@ -4265,6 +4335,7 @@ function toStoryHit(entry: StoryChainIndex, keywords: string[], snippetLimit: nu
         questType: entry.questTypeName,
         imprCheck: entry.imprCheck,
         imprIncrease: entry.imprIncrease,
+        unlock: entry.chain.unlock,
         summary: withSummary ? entry.summary || undefined : undefined,
         snippets,
         path: entry.path,
@@ -4426,6 +4497,7 @@ export async function readStory(
             questType: entry.questTypeName,
             imprCheck: entry.imprCheck,
             imprIncrease: entry.imprIncrease,
+            unlock: entry.chain.unlock,
             summary: entry.summary || undefined,
             path: entry.path,
         },
