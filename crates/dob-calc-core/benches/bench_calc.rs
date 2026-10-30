@@ -114,6 +114,29 @@ fn bench_calc_stages() {
     let request = load_request();
     let mut samples = [0.0; 7];
 
+    // 建表（对应 buildhub 的 `load_pack`）：与 `load_modules` 同源，但只计 `TableBuilder::build`。
+    let modules = dob_calc_core::session::ModulesJson::from_json(
+        &std::fs::read_to_string({
+            let mut p = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+            p.push("tests");
+            p.push("fixtures");
+            p.push("modules.json");
+            p
+        })
+        .expect("modules.json"),
+    )
+    .expect("模块解析");
+    for _ in 0..3 {
+        std::hint::black_box(TableBuilder::build(&modules).expect("建表"));
+    }
+    for sample in &mut samples {
+        let (micros, _) = time_sum(5, || {
+            std::hint::black_box(TableBuilder::build(&modules).expect("建表").mods.len() as f64)
+        });
+        *sample = micros;
+    }
+    println!("stage TableBuilder::build best: {:.1}µs", best_of(&mut samples));
+
     // 装配
     for _ in 0..200 {
         std::hint::black_box(BuildContext::new(

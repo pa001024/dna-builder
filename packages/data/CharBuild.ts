@@ -50,6 +50,13 @@ export interface CharAttr {
     技能无视防御: number
     技能速度: number
     失衡易伤: number
+    /** 阵营增伤（0 开始）：泛化 `歧视`（旧口径兜底）+ 具体阵营口径；伤害结算时按敌方阵营取对应项 */
+    歧视?: number
+    秽兽增伤?: number
+    军团增伤?: number
+    神弃者增伤?: number
+    神使增伤?: number
+    华胥增伤?: number
     技能倍率加数: number
     技能倍率乘数: number
     技能倍率赋值: number
@@ -126,6 +133,13 @@ export interface WeaponAttr {
     召唤物攻击速度转化: number
     /** 召唤物范围转化（武器属性）：角色技能范围按该比例转化为召唤物范围，0 开始 */
     召唤物范围转化: number
+    /** 阵营增伤（武器面板，0 开始）：该武器槽 MOD 的阵营增伤，伤害结算时与角色侧叠加 */
+    歧视: number
+    秽兽增伤: number
+    军团增伤: number
+    神弃者增伤: number
+    神使增伤: number
+    华胥增伤: number
 }
 
 /** DOT 来源类型 */
@@ -264,6 +278,12 @@ const characterBonusAttributes = [
     "技能速度",
     "属性穿透",
     "失衡易伤",
+    "歧视",
+    "秽兽增伤",
+    "军团增伤",
+    "神弃者增伤",
+    "神使增伤",
+    "华胥增伤",
     "技能倍率加数",
     "召唤物属性继承比例",
     "召唤物攻击速度",
@@ -292,6 +312,32 @@ const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((att
 
 /** 转物理类型关键词：把物理+元素按比例转为对应物理子类（切割/贯穿/震荡/灾厄），按对应物理类型的触发/抗性规则结算 */
 const physicalConvertKeywords = ["转切割", "转贯穿", "转震荡", "转灾厄"] as const
+
+/** 阵营增伤口径：泛化 `歧视`（旧口径兜底）+ 具体阵营（mod.data 已从 `歧视` 迁移至此） */
+const factionBonusKeys = ["歧视", "秽兽增伤", "军团增伤", "神弃者增伤", "神使增伤", "华胥增伤"] as const
+
+/** 敌方阵营（monster.f，见 game-const Faction）→ 阵营增伤属性键 */
+function factionBonusKeyForEnemy(faction?: number): string | undefined {
+    switch (faction) {
+        case 1:
+            return "秽兽增伤"
+        case 2:
+            return "军团增伤"
+        case 3:
+            return "神弃者增伤"
+        case 4:
+            return "神使增伤"
+        case 5:
+            return "华胥增伤"
+        default:
+            return undefined
+    }
+}
+
+/** 是否阵营增伤属性（含泛化兜底）：武器作用域下不吃共享池（与 攻击/增伤 同口径，避免 BUFF 重复计入） */
+function isFactionBonusAttribute(attribute: string): boolean {
+    return (factionBonusKeys as readonly string[]).includes(attribute)
+}
 
 /**
  * 角色加成属性中按平值折叠进基础属性的映射（临时属性专用）：
@@ -1379,7 +1425,9 @@ export class CharBuild {
         let shieldBonus = bonuses[characterBonusIndex.护盾]
         let defenseBonus = bonuses[characterBonusIndex.防御]
         let sanityBonus = bonuses[characterBonusIndex.神智]
-        let elemDamageBonus = bonuses[characterBonusIndex.属性攻击]
+        // 属性攻击（角色攻击乘区）：泛化 `属性攻击` + 本角色元素对应的具体口径 `<元素>属性攻击` 双兼容；
+        // mod.data/buff.data 已迁移到具体口径（如 雷属性攻击），泛化兜底兼容旧档/旧包与动态 code（如 法露茜Q 的 `(1+属性攻击)`）
+        let elemDamageBonus = bonuses[characterBonusIndex.属性攻击] + this.getTotalBonus(`${this.char.属性}属性攻击`)
         // 计算基础值为1的属性
         let power = 1 + bonuses[characterBonusIndex.技能威力]
         let durability = 1 + bonuses[characterBonusIndex.技能耐久]
@@ -1399,6 +1447,13 @@ export class CharBuild {
         let skillSpeed = bonuses[characterBonusIndex.技能速度]
         let penetration = bonuses[characterBonusIndex.属性穿透]
         let imbalanceDamageBonus = bonuses[characterBonusIndex.失衡易伤]
+        // 阵营增伤（角色侧：角色槽 MOD + 全局 BUFF；武器槽部分由武器面板叠加，见 calculateWeaponAttributes/calculateDamage）
+        const discriminationBonus = bonuses[characterBonusIndex.歧视]
+        const beastBonus = bonuses[characterBonusIndex.秽兽增伤]
+        const legionBonus = bonuses[characterBonusIndex.军团增伤]
+        const forsakenBonus = bonuses[characterBonusIndex.神弃者增伤]
+        const heraldBonus = bonuses[characterBonusIndex.神使增伤]
+        const huaxuBonus = bonuses[characterBonusIndex.华胥增伤]
         let skillAdd = bonuses[characterBonusIndex.技能倍率加数]
         let summonAttrInheritRatio = 1 + bonuses[characterBonusIndex.召唤物属性继承比例]
         let summonAttackSpeed = bonuses[characterBonusIndex.召唤物攻击速度]
@@ -1443,7 +1498,10 @@ export class CharBuild {
             shieldBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "护盾")
             defenseBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "防御")
             sanityBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "神智")
-            elemDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "属性攻击")
+            // 狮鹫/百首/契约者 MOD属性加权：具体口径 `<元素>属性攻击`（新数据）+ 泛化 `属性攻击`（旧包兜底）
+            elemDamageBonus +=
+                modAttributeBonus *
+                (this.getModsBonus(modsBySeries, "属性攻击") + this.getModsBonus(modsBySeries, `${this.char.属性}属性攻击`))
             power += modAttributeBonus * this.getModsBonus(modsBySeries, "技能威力")
             durability += modAttributeBonus * this.getModsBonus(modsBySeries, "技能耐久")
             efficiency += modAttributeBonus * this.getModsBonus(modsBySeries, "技能效益")
@@ -1518,6 +1576,12 @@ export class CharBuild {
             技能无视防御: skillIgnoreDefense,
             技能速度: Math.min(1 + skillSpeed, 2.8), // 技速上限 280%
             失衡易伤: imbalanceDamageBonus,
+            歧视: discriminationBonus,
+            秽兽增伤: beastBonus,
+            军团增伤: legionBonus,
+            神弃者增伤: forsakenBonus,
+            神使增伤: heraldBonus,
+            华胥增伤: huaxuBonus,
             技能倍率加数: skillAdd,
             技能倍率乘数: skillMultiplier,
             召唤物属性继承比例: summonAttrInheritRatio,
@@ -1746,7 +1810,10 @@ export class CharBuild {
             const prefix = weapon.类型
             // 计算各种加成
             let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
-            const physicalBonus = this.getTotalBonus("物理", prefix)
+            // 武器物理加成：泛化 `物理`（旧口径兜底）+ 按武器伤害类型匹配的具体口径 `<切割|贯穿|震荡>攻击`；
+            // mod.data 已迁移到具体口径（如 切割攻击），限定与伤害类型一致时命中（见 isModSlotCompatible）
+            const damageTypeAttack = (weapon as LeveledWeapon).伤害类型 ? `${(weapon as LeveledWeapon).伤害类型}攻击` : undefined
+            const physicalBonus = this.getTotalBonus("物理", prefix) + (damageTypeAttack ? this.getTotalBonus(damageTypeAttack, prefix) : 0)
             let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
             let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
             let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
@@ -1844,6 +1911,13 @@ export class CharBuild {
                 // 召唤物转化（武器属性）：与充盈转化同理，该武器作用域（角色槽 + 该武器槽）转化词条之和
                 召唤物攻击速度转化: this.getTotalBonus("召唤物攻击速度转化", prefix),
                 召唤物范围转化: this.getTotalBonus("召唤物范围转化", prefix),
+                // 阵营增伤（武器面板：该武器槽 MOD，角色侧已计入 attrs；武器作用域下不吃共享池，见 getTotalBonus）
+                歧视: this.getTotalBonus("歧视", prefix),
+                秽兽增伤: this.getTotalBonus("秽兽增伤", prefix),
+                军团增伤: this.getTotalBonus("军团增伤", prefix),
+                神弃者增伤: this.getTotalBonus("神弃者增伤", prefix),
+                神使增伤: this.getTotalBonus("神使增伤", prefix),
+                华胥增伤: this.getTotalBonus("华胥增伤", prefix),
             }
             attrs.weapon = weaponAttrs
         }
@@ -2168,8 +2242,10 @@ export class CharBuild {
 
         // 作用域判定只与 (attribute, prefixScope) 有关，逐条加成重复判定会退化成每次遍历
         const buffInScope = this.isBuffAttributeInScope(attribute, prefixScope)
-        // 近战/远程作用域下 攻击/增伤 只取该作用域自身的加成，不叠加通用 BUFF / 效果层
-        const scopeAllowsSharedPool = prefixScope === "角色" || (attribute !== "攻击" && attribute !== "增伤")
+        // 近战/远程作用域下 攻击/增伤/阵营增伤 只取该作用域自身的加成，不叠加通用 BUFF / 效果层
+        // （阵营增伤与 增伤 同口径：角色侧已含 BUFF，武器面板只取本槽 MOD，避免 BUFF 重复计入）
+        const scopeAllowsSharedPool =
+            prefixScope === "角色" || (attribute !== "攻击" && attribute !== "增伤" && !isFactionBonusAttribute(attribute))
 
         // 添加BUFF加成
         if (buffInScope && scopeAllowsSharedPool) {
@@ -2429,11 +2505,21 @@ export class CharBuild {
         // 属性穿透对所有结算类型整体生效（与原两条路径一致）
         const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
 
-        // 增伤池（tag）：技能池吃技能伤害，武器池吃武器增伤 + 武器伤害；召唤物伤害按 tag 含召唤物叠进基座
+        // 阵营增伤与普通增伤同池加算：角色侧（attrs，含 BUFF）+ 武器侧（panel，本槽 MOD；技能池无面板只取角色侧）；
+        // 泛化 `歧视`（旧口径兜底，对全阵营生效）+ 按敌方阵营取具体口径（秽兽/军团/神弃者/神使/华胥增伤）
+        const factionKey = factionBonusKeyForEnemy(this.enemy?.f)
+        const factionBonus =
+            (attrs.歧视 || 0) +
+            (isSkillPool ? 0 : panel?.歧视 || 0) +
+            (factionKey
+                ? ((attrs[factionKey as keyof CharAttr] as number) || 0) +
+                  (isSkillPool ? 0 : (panel?.[factionKey as keyof WeaponAttr] as number) || 0)
+                : 0)
+        // 增伤池（tag）：技能池吃技能伤害，武器池吃武器增伤 + 武器伤害；召唤物伤害按 tag 含召唤物叠进基座；阵营增伤并入基座同池加算
         const damageIncreaseBase =
             (isSkillPool
-                ? 1 + attrs.增伤 + attrs.技能伤害 + (isSummon ? attrs.召唤物伤害 : 0)
-                : 1 + attrs.增伤 + (panel?.增伤 ?? 0) + attrs.武器伤害) + attackTypeDamageBonus
+                ? 1 + attrs.增伤 + attrs.技能伤害 + (isSummon ? attrs.召唤物伤害 : 0) + factionBonus
+                : 1 + attrs.增伤 + (panel?.增伤 ?? 0) + attrs.武器伤害 + factionBonus) + attackTypeDamageBonus
         const elementDamageIncrease = attrs.元素增伤 || 0
         const physicalDamageIncrease = attrs.物理增伤 || 0
         // 独立增伤：技能池吃角色侧 × 技能独立增伤；武器池为角色侧 × 武器侧（除惩罚因子，如箭雨降伤只作用于武器自身攻击）
@@ -2869,9 +2955,18 @@ export class CharBuild {
         // 昂扬/背水乘区与技能伤害共用同一结算（hpPercent 钳制规则一致）
         const hpMore = this.calculateBoostMultiplier(attrs) * this.calculateDesperateMultiplier(attrs)
         const fullnessMultiplier = 1 + (attrs.充盈威力 || 0)
-        const damageIncreaseMultiplier = 1 + (attrs.增伤 || 0)
+        // 阵营增伤与普通增伤同池加算：角色侧全局 + 各来源武器槽 MOD（技能来源仅角色侧）
+        const factionKey = factionBonusKeyForEnemy(this.enemy?.f)
+        const charFactionBonus = (attrs.歧视 || 0) + (factionKey ? (attrs[factionKey as keyof CharAttr] as number) || 0 : 0)
+        const modBonusForSource = (type: DotSourceType): number => {
+            if (type === "skill") return 0
+            const prefix = type === "melee" ? "近战" : type === "ranged" ? "远程" : (this.skillWeapon?.类型 ?? "同律")
+            const scope = this.getAttributePrefixScope(prefix)
+            return (this.getModsScopeBonus("歧视", scope) || 0) + (factionKey ? this.getModsScopeBonus(factionKey, scope) || 0 : 0)
+        }
         let total = 0
         for (const source of sources) {
+            const damageIncreaseMultiplier = 1 + (attrs.增伤 || 0) + charFactionBonus + modBonusForSource(source.type)
             const base = (attrs.攻击 + source.weaponAttack) * 0.2 * 6 * 4 * fullnessMultiplier * damageIncreaseMultiplier * hpMore
             total += base * (source.ownFreq * ownZone + source.otherFreq * otherZone)
         }

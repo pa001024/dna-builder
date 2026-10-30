@@ -342,13 +342,48 @@ const modAttributeBonusSources = computed(() => {
 })
 
 /**
- * 角色属性行的实际加成来源字段名：角色「攻击」属性由「属性攻击」百分比乘区贡献
+ * 本角色元素对应的属性攻击具体口径（mod.data/buff.data 已从泛化 `属性攻击` 迁移至此，如雷 → 雷属性攻击）。
+ */
+const elementAttackKey = computed(() => `${props.charBuild.char.属性}属性攻击`)
+
+/**
+ * 是否元素属性攻击来源字段（含泛化 `属性攻击` 旧口径兜底）：同属攻击乘区，展示时带 (*) 标识。
+ * @param field 来源字段名
+ */
+function isElementAttackSource(field: string): boolean {
+    return field === "属性攻击" || field === elementAttackKey.value
+}
+
+/**
+ * 角色属性行的实际加成来源字段名：角色「攻击」属性由本角色元素的属性攻击百分比乘区贡献
  * （角色攻击 = 角色基础攻击 × (1 + 角色攻击加成 + 和鸣增益) × (1 + 属性攻击) + 固定攻击）。
  * @param key 展示的属性键名
  * @returns 对应的加成来源字段名
  */
 function attrSourceKey(key: string): string {
-    return key === "攻击" ? "属性攻击" : key
+    return key === "攻击" ? elementAttackKey.value : key
+}
+
+/**
+ * MOD属性加权基数在 `key` 上的合计：攻击行同时计入泛化与具体口径，其余属性即自身。
+ * @param key 展示的属性键名
+ */
+function modAttrWeightedBase(key: string): number {
+    return modAttributeBonusSources.value.reduce((sum, mod) => {
+        sum += mod.addAttr[attrSourceKey(key)] ?? 0
+        if (key === "攻击" && attrSourceKey(key) !== "属性攻击") sum += mod.addAttr["属性攻击"] ?? 0
+        return sum
+    }, 0)
+}
+
+/**
+ * 是否存在 MOD属性加权基数来源：`modAttrWeightedBase` 非零即有。
+ * @param key 展示的属性键名
+ */
+function hasModAttrWeightedBase(key: string): boolean {
+    return modAttributeBonusSources.value.some(
+        mod => mod.addAttr[attrSourceKey(key)] || (key === "攻击" && attrSourceKey(key) !== "属性攻击" && mod.addAttr["属性攻击"])
+    )
 }
 
 /**
@@ -370,26 +405,27 @@ function formatDynamicSource(key: string, value: number): string {
 }
 
 /**
- * 角色属性行的附加来源字段：攻击 行额外展示「属性攻击」（百分比乘区）与「固定攻击」（平值），
+ * 角色属性行的附加来源字段：攻击 行额外展示泛化「属性攻击」（旧包）与本角色元素的具体口径
+ * （百分比乘区，均带 (*) 标识）及「固定攻击」（平值），
  * 生命 行额外展示「固定生命」（平值）。基础字段（攻击/生命等）由既有来源块处理。
  * @param key 展示的属性键名
  * @returns 附加来源字段名列表
  */
 function extraAttrSourceKeys(key: string): string[] {
-    if (key === "攻击") return ["属性攻击", "固定攻击"]
+    if (key === "攻击") return [...new Set(["属性攻击", elementAttackKey.value, "固定攻击"])]
     if (key === "生命") return ["固定生命"]
     return []
 }
 
 /**
- * 附加来源数值的展示格式：属性攻击 为百分比，固定攻击/固定生命 为带符号平值。
+ * 附加来源数值的展示格式：元素属性攻击（含泛化旧口径）为百分比，固定攻击/固定生命 为带符号平值。
  * @param key 展示的属性键名
  * @param sourceField 来源字段名
  * @param value 来源贡献值
  * @returns 展示字符串
  */
 function formatExtraSource(key: string, sourceField: string, value: number): string {
-    if (sourceField === "属性攻击") return format100r(value)
+    if (isElementAttackSource(sourceField)) return format100r(value)
     return formatDynamicSource(key, value)
 }
 </script>
@@ -497,7 +533,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                             <div class="text-base-content/80">
                                 {{ $t(mod.名称) }}
                             </div>
-                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, mod[sourceField]!) }}
+                            {{ isElementAttackSource(sourceField) ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, mod[sourceField]!) }}
                         </li>
                         <li
                             v-for="(buff, index) in charBuild.buffs.filter(b => typeof b.getAttrValue(sourceField) === 'number')"
@@ -507,7 +543,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                             <div class="text-base-content/80">
                                 {{ buff.名称 }}
                             </div>
-                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff.getAttrValue(sourceField)!) }}
+                            {{ isElementAttackSource(sourceField) ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff.getAttrValue(sourceField)!) }}
                         </li>
                     </template>
                     <li
@@ -546,8 +582,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                     </li>
                     <li
                         v-if="
-                            charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
-                            modAttributeBonusSources.some(v => v.addAttr[attrSourceKey(key)])
+                            charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 && hasModAttrWeightedBase(key)
                         "
                         v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(`${charBuild.char.属性}MOD属性`))"
                         :key="index"
@@ -556,11 +591,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         <div class="text-base-content/80">{{ buff.名称 }}</div>
                         {{
                             (key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "") +
-                            formatDynamicSource(
-                                key,
-                                modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[attrSourceKey(key)] ?? 0), 0) *
-                                    buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!
-                            )
+                            formatDynamicSource(key, modAttrWeightedBase(key) * buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!)
                         }}
                     </li>
                 </ul>

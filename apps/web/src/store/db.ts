@@ -329,6 +329,8 @@ export interface DNAUser {
     server: "cn" | "global"
     kf_token: string
     refreshToken: string
+    /** 上次续期/登录时间戳（毫秒），新增 / 登录 / 导入 / 续期成功时写入，登录即续期 */
+    lastAuthAt?: number
     pic: string
     status: number
     isComplete: number

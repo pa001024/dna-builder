@@ -5,7 +5,7 @@
  * 时把这个值加一。抓取侧只接受 major <= 当前值的包，新格式包由新版应用/SDK 消费，老版本自动
  * 跳过，从而向前兼容。加字段是纯 additive，老版本读包忽略未知字段，不受影响。
  */
-export const DATA_PACK_FORMAT_MAJOR = 2
+export const DATA_PACK_FORMAT_MAJOR = 3
 
 /**
  * 历史分割线：1.6.208.7 把 MOD 数值挪进 `加成`（dict），旧读包侧会把 dict 当数值除而崩溃。
@@ -29,7 +29,7 @@ export function compareDataPackVersions(a: string, b: string): number {
     return 0
 }
 
-/** 归一化 major：合法正整数直接采用；缺失/非法时按历史分割线推断（老包=1，新格式=2）。 */
+/** 归一化 major：合法正整数直接采用；缺失/非法时按历史分割线推断（老包=1，1.6.208.7+旧格式=2）。 */
 export function normalizeDataPackMajor(major: unknown, version?: string): number {
     if (typeof major === "number" && Number.isInteger(major) && major > 0) return major
     if (version && compareDataPackVersions(version, DATA_PACK_LEGACY_CUTOFF_VERSION) >= 0) return 2

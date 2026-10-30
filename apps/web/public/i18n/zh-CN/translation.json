@@ -4729,6 +4729,12 @@
         "add_account": "添加账号",
         "add_account_tip": "通过JSON添加皎皎角账号(登录后可复制)",
         "download_app": "下载APP",
+        "last_auth": "上次续期/登录",
+        "last_auth_never": "从未",
+        "no_refresh_token": "该账号缺少 refreshToken，无法续期",
+        "renew": "手动续期",
+        "renew_failed": "续期失败",
+        "renew_success": "续期成功",
         "web_unavailable": "网页端不可用"
     },
     "view": {

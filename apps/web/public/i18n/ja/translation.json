@@ -4681,6 +4681,12 @@
         "add_account": "アカウントを追加",
         "add_account_tip": "JSON で皎皎角アカウントを追加（ログイン後にコピー可能）",
         "download_app": "アプリをダウンロード",
+        "last_auth": "前回の更新/ログイン",
+        "last_auth_never": "なし",
+        "no_refresh_token": "このアカウントには refreshToken がなく更新できません",
+        "renew": "トークンを更新",
+        "renew_failed": "更新に失敗しました",
+        "renew_success": "更新に成功しました",
         "web_unavailable": "Web 版では利用できません"
     },
     "view": {

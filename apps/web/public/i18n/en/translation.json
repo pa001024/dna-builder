@@ -4709,6 +4709,12 @@
         "add_account": "Add Account",
         "add_account_tip": "Add a Jiaojiaojiao account via JSON (copyable after login)",
         "download_app": "Download App",
+        "last_auth": "Last renewal/login",
+        "last_auth_never": "Never",
+        "no_refresh_token": "This account has no refreshToken and cannot be renewed",
+        "renew": "Renew token",
+        "renew_failed": "Renewal failed",
+        "renew_success": "Token renewed",
         "web_unavailable": "Not available on web"
     },
     "view": {

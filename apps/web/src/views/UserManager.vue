@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import i18next from "i18next"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { env } from "@/env"
-import type { DNAUser, UDNAUser } from "@/store/db"
-import { db } from "@/store/db"
+import type { DNAUser } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
-import { parseDnaUserImportJson } from "@/utils/dna-user-import"
+import { formatDateTime, formatRelativeTime } from "@/utils/time"
 
 const ui = useUIStore()
 const setting = useSettingStore()
@@ -20,6 +20,8 @@ const isAddByTokenOpen = ref(false)
 const jsonInput = ref("")
 // 登录 iframe，用于同步 UI 缩放
 const iframeRef = ref<HTMLIFrameElement | null>(null)
+// 正在续期的账号 id（续期按钮转菊花，避免重复点击）
+const renewingId = ref<number | null>(null)
 
 // 将父页面 UI 缩放同步到 iframe 内部（iframe 是独立文档，不会继承 --uiscale）
 // 同时强制同步父文档字号：iframe 视口较窄会命中 style.css 的
@@ -38,40 +40,14 @@ watch(
     }
 )
 
-// 加载皎皎角账号列表
+// 加载皎皎角账号列表（db 读写收敛在 setting store 内）
 const loadUsers = async () => {
-    users.value = await db.dnaUsers.toArray()
-    if (users.value.length > 0 && !setting.dnaUserId) {
-        setting.dnaUserId = users.value[0].id
-    }
+    users.value = await setting.listDnaUsers()
 }
 
 // 添加皎皎角账号
 const addUser = async (data: { dev_code: string; user: import("dna-api").DNAUserDataBean }) => {
-    const userData: UDNAUser = {
-        uid: data.user.userId,
-        name: data.user.userName,
-        dev_code: data.dev_code,
-        token: data.user.token,
-        server: data.user.registerLang ? "global" : "cn",
-        kf_token: "",
-        refreshToken: data.user.refreshToken,
-        pic: data.user.headUrl,
-        status: data.user.status,
-        isComplete: data.user.isComplete,
-    }
-    if (data.user.isOfficial) userData.isOfficial = data.user.isOfficial
-    if (data.user.isRegister) userData.isRegister = data.user.isRegister
-    // 同一 uid 重新登录会拿到新 token：原地更新旧行而不是再插一行，否则旧 token 行继续被使用
-    const existing = await db.dnaUsers.where("uid").equals(userData.uid).filter(u => u.server === userData.server).first()
-    if (existing) {
-        await db.dnaUsers.update(existing.id, userData)
-    } else {
-        await db.dnaUsers.add(userData)
-    }
-    // 新凭证落库后吊销旧 DNAAPI 对象，下次 getDNAAPI 用新 token 重建
-    setting.invalidateDNAAPI()
-    await loadUsers()
+    users.value = await setting.addDnaUserFromLogin(data)
     isAddIframeOpen.value = false
 }
 
@@ -92,15 +68,7 @@ const jsonPlaceholder = `{
 // 通过 JSON 添加皎皎角账号
 const addUserByToken = async () => {
     try {
-        const userData = parseDnaUserImportJson(jsonInput.value)
-        const existing = await db.dnaUsers.where("uid").equals(userData.uid).filter(u => u.server === userData.server).first()
-        if (existing) {
-            await db.dnaUsers.update(existing.id, userData)
-        } else {
-            await db.dnaUsers.add(userData)
-        }
-        setting.invalidateDNAAPI()
-        await loadUsers()
+        users.value = await setting.addDnaUserFromJson(jsonInput.value)
         isAddByTokenOpen.value = false
         ui.showSuccessMessage("添加账号成功")
     } catch (error) {
@@ -112,20 +80,55 @@ const addUserByToken = async () => {
 // 删除皎皎角账号
 const deleteUser = async (id: number) => {
     if (await ui.showDialog("确认删除", "确定要删除这个用户吗？")) {
-        await db.dnaUsers.delete(id)
-        await loadUsers()
-        if (setting.dnaUserId === id) {
-            setting.dnaUserId = users.value.length > 0 ? users.value[0].id : 0
-            setting.invalidateDNAAPI()
-        }
+        users.value = await setting.removeDnaUser(id)
     }
 }
 
-// 切换皎皎角账号：旧 DNAAPI 对象持有旧账号 token，必须吊销，否则后续请求仍用旧身份
+// 切换皎皎角账号
 const switchUser = (id: number) => {
-    if (setting.dnaUserId === id) return
-    setting.dnaUserId = id
-    setting.invalidateDNAAPI()
+    setting.switchDnaUser(id)
+}
+
+/**
+ * 取账号上次续期/登录的相对时间文案（几天前），无记录时返回空串由模板展示兜底。
+ * @param user 皎皎角账号行
+ */
+function formatLastAuth(user: DNAUser): string {
+    if (!user.lastAuthAt) return ""
+    return formatRelativeTime(user.lastAuthAt, i18next.language)
+}
+
+/**
+ * 取账号上次续期/登录的绝对时间，用作相对时间的 hover 提示。
+ * @param user 皎皎角账号行
+ */
+function formatLastAuthFull(user: DNAUser): string {
+    if (!user.lastAuthAt) return ""
+    return formatDateTime(user.lastAuthAt)
+}
+
+/**
+ * 手动续期单个皎皎角账号，续期逻辑收敛在 setting store 内，页面只负责忙态与提示。
+ * @param target 要续期的账号行
+ */
+const renewAccount = async (target: DNAUser) => {
+    if (renewingId.value !== null) return
+    renewingId.value = target.id
+    try {
+        const result = await setting.renewDnaUser(target.id)
+        if (!result.success) {
+            if (result.detail === "missing_refresh_token") {
+                ui.showErrorMessage(i18next.t("user-manager.no_refresh_token"))
+            } else {
+                ui.showErrorMessage(`${i18next.t("user-manager.renew_failed")}：${result.detail || "未知错误"}`)
+            }
+            return
+        }
+        await loadUsers()
+        ui.showSuccessMessage(i18next.t("user-manager.renew_success"))
+    } finally {
+        renewingId.value = null
+    }
 }
 
 // 复制皎皎角账号JSON
@@ -287,6 +290,11 @@ onBeforeUnmount(() => {
                                         >
                                             官方
                                         </span>
+                                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                                        <!-- 上次续期/登录：登录即续期，用 time util 显示为相对时间 -->
+                                        <span :title="formatLastAuthFull(user)">
+                                            {{ $t("user-manager.last_auth") }}：{{ formatLastAuth(user) || $t("user-manager.last_auth_never") }}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -306,6 +314,18 @@ onBeforeUnmount(() => {
                                     >
                                         {{ user.id === setting.dnaUserId ? "当前" : "使用" }}
                                     </button>
+                                    <!-- 手动续期按钮 -->
+                                    <Tooltip :tooltip="$t('user-manager.renew')" side="bottom">
+                                        <button
+                                            type="button"
+                                            class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                                            :disabled="renewingId !== null || !user.refreshToken"
+                                            @click="renewAccount(user)"
+                                        >
+                                            <span v-if="renewingId === user.id" class="loading loading-spinner loading-xs" />
+                                            <Icon v-else icon="ri:refresh-line" class="size-3.5" />
+                                        </button>
+                                    </Tooltip>
                                     <!-- 复制按钮 -->
                                     <Tooltip tooltip="复制账号JSON" side="bottom">
                                         <button

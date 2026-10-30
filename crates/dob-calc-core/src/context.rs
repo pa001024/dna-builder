@@ -780,8 +780,10 @@ impl<'a> BuildContext<'a> {
         bonus += self.sum_mods(attribute, scope, include_mods);
 
         let buff_in_scope = is_buff_in_scope(attribute, scope);
-        // 近战/远程作用域下 攻击 / 增伤 只取该作用域自身的加成，不叠加通用池
-        let shared_pool = scope == "角色" || (attribute != "攻击" && attribute != "增伤");
+        // 近战/远程作用域下 攻击/增伤/阵营增伤 只取该作用域自身的加成，不叠加通用池
+        // （阵营增伤与 增伤 同口径：角色侧已含 BUFF，武器面板只取本槽 MOD，避免 BUFF 重复计入）
+        let shared_pool = scope == "角色"
+            || (attribute != "攻击" && attribute != "增伤" && !is_faction_bonus_attribute(attribute));
         if buff_in_scope && shared_pool {
             bonus += self
                 .source_table
@@ -2081,6 +2083,29 @@ pub fn is_buff_in_scope(attribute: &str, scope: &str) -> bool {
         return scope == attribute_scope;
     }
     true
+}
+
+/// 敌方阵营（monster.f，见 game-const Faction）→ 阵营增伤属性键。
+///
+/// 1=秽兽→秽兽增伤，2=海伯利亚帝国→军团增伤，3=神弃者同盟→神弃者增伤，
+/// 4=艾利西安传颂会→神使增伤，5=华胥→华胥增伤；未知阵营返回 `None`（仅泛化 `歧视` 生效）。
+pub fn faction_bonus_key_for_enemy(faction: i64) -> Option<&'static str> {
+    match faction {
+        1 => Some("秽兽增伤"),
+        2 => Some("军团增伤"),
+        3 => Some("神弃者增伤"),
+        4 => Some("神使增伤"),
+        5 => Some("华胥增伤"),
+        _ => None,
+    }
+}
+
+/// 是否阵营增伤属性（含泛化兜底 `歧视`）：武器作用域下不吃共享池（与 攻击/增伤 同口径）。
+pub fn is_faction_bonus_attribute(attribute: &str) -> bool {
+    matches!(
+        attribute,
+        "歧视" | "秽兽增伤" | "军团增伤" | "神弃者增伤" | "神使增伤" | "华胥增伤"
+    )
 }
 
 /// 同律技能的来源技能索引；对应上游 `skillIds.find(整数 && >= 0) ?? 2`。

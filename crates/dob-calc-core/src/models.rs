@@ -2157,6 +2157,8 @@ fn instance_skill_level(level: Option<f64>) -> f64 {
 pub struct LeveledMonster {
     pub id: i64,
     pub level: f64,
+    /// 阵营（monster.f，见 game-const Faction：1秽兽/2海伯利亚帝国/3神弃者同盟/4艾利西安传颂会/5华胥）。
+    pub faction: i64,
     /// 当前等级下的防御（**不随等级缩放**，直接取原始值）。
     pub defense: f64,
     /// 当前等级下的生命。
@@ -2179,6 +2181,7 @@ impl LeveledMonster {
         let mut instance = Self {
             id: raw.id("id").unwrap_or(0),
             level: 1.0,
+            faction: raw.num_or("f", 0.0) as i64,
             defense: raw.num_or("def", 0.0),
             hp: 0.0,
             shield: raw.num("es"),

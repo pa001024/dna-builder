@@ -642,7 +642,11 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     const masteryEnabled = !!(selectedWeapon && (build.char.精通.includes(selectedWeapon.类别) || build.char.精通.includes("全部类型")))
     // 同律武器精通倍率 1.4，普通武器 1.2
     const masteryMultiplier = selectedWeapon?.类型.startsWith("同律") ? 1.4 : 1.2
-    const physicalDamageBonus = selectedWeapon ? build.getTotalBonus("物理", weaponPrefix) : 0
+    // 武器物理加成：泛化 `物理`（旧口径兜底）+ 按武器伤害类型匹配的具体口径（新数据，如切割攻击）
+    const damageTypeAttackKey = selectedWeapon?.伤害类型 ? `${selectedWeapon.伤害类型}攻击` : undefined
+    const physicalDamageBonus = selectedWeapon
+        ? build.getTotalBonus("物理", weaponPrefix) + (damageTypeAttackKey ? build.getTotalBonus(damageTypeAttackKey, weaponPrefix) : 0)
+        : 0
     const weaponBaseAttack = selectedWeapon?.基础攻击 || 0
     const weaponAttackDenominator = weaponBaseAttack * (masteryEnabled ? masteryMultiplier : 1) * (1 + physicalDamageBonus)
     const weaponAttackBonus = weaponAttackDenominator > Number.EPSILON ? safeDivide(weaponAttrs?.攻击 || 0, weaponAttackDenominator) - 1 : 0
@@ -660,7 +664,8 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
     const charBaseAttack = build.char.基础攻击
     const resonanceGain = build.resonanceGain
-    const elementalDamageBonus = build.getTotalBonus("属性攻击")
+    // 属性攻击乘区：泛化 `属性攻击`（旧口径兜底）+ 本角色元素的具体口径（新数据）
+    const elementalDamageBonus = build.getTotalBonus("属性攻击") + build.getTotalBonus(`${build.char.属性}属性攻击`)
     const fixedAttackAdd = build.getTotalBonus("固定攻击")
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 
@@ -731,7 +736,8 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     const { rate: skillRate, flat: skillFlatDamage } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
     const charBaseAttack = build.char.基础攻击
     const resonanceGain = build.resonanceGain
-    const elementalDamageBonus = build.getTotalBonus("属性攻击")
+    // 属性攻击乘区：泛化 `属性攻击`（旧口径兜底）+ 本角色元素的具体口径（新数据）
+    const elementalDamageBonus = build.getTotalBonus("属性攻击") + build.getTotalBonus(`${build.char.属性}属性攻击`)
     const fixedAttackAdd = build.getTotalBonus("固定攻击")
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 

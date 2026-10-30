@@ -4679,6 +4679,12 @@
         "add_account": "新增帳號",
         "add_account_tip": "透過 JSON 新增皎皎角帳號（登入後可複製）",
         "download_app": "下載 APP",
+        "last_auth": "上次續期/登入",
+        "last_auth_never": "從未",
+        "no_refresh_token": "該帳號缺少 refreshToken，無法續期",
+        "renew": "手動續期",
+        "renew_failed": "續期失敗",
+        "renew_success": "續期成功",
         "web_unavailable": "網頁端不可用"
     },
     "view": {

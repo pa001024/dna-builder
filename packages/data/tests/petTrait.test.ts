@@ -199,7 +199,9 @@ describe("魔灵 BUFF 与技能等级", () => {
 
     it("被动物按生效技能等级取值，主动技额外按覆盖率缩放", () => {
         const [passive, active] = collectPetBuffs(HEIYAO_PET_ID, 4, 0.5)
-        expect(passive.getAttrValue("属性攻击")).toBeCloseTo(0.096)
+        // 黑曜艾尔芙被动为暗属性攻击（具体口径，mod.data/buff.data 已从泛化 `属性攻击` 迁移）
+        expect(passive.getAttrValue("暗属性攻击")).toBeCloseTo(0.096)
+        expect(passive.getAttrValue("属性攻击")).toBeUndefined()
         // 4 级主动昂扬为 24%，覆盖率 50% → 12%
         expect(active.getAttrValue("昂扬")).toBeCloseTo(0.12)
         expect(active.coverage).toBeCloseTo(0.5)
@@ -282,8 +284,17 @@ describe("魔灵 BUFF 与技能等级", () => {
         })
         expect(base.buffs.length).toBe(0)
         expect(withPet.buffs.length).toBe(2)
-        // 被动物提供暗属性攻击（按百分比乘区并入攻击），主动技提供昂扬
-        expect(withPet.calculateWeaponAttributes().攻击).toBeGreaterThan(base.calculateWeaponAttributes().攻击)
+        // 被动物提供暗属性攻击（具体口径，仅同元素角色生效）：苏乙为光属性，暗属性攻击不并入攻击，故攻击不变；主动技提供昂扬（泛化口径，全员生效）
+        expect(withPet.calculateWeaponAttributes().攻击).toBeCloseTo(base.calculateWeaponAttributes().攻击, 6)
         expect(withPet.calculateWeaponAttributes().昂扬).toBeGreaterThan(base.calculateWeaponAttributes().昂扬)
+        // 同元素验证：光属性角色 + 欧泊艾尔芙（光属性攻击）攻击提升
+        const withLightPet = createCharBuildFromSettings(1504, {
+            ...createDefaultCharSettings(),
+            baseName: "射击",
+            petId: 4261,
+            petLevel: 4,
+            petCoverage: 1,
+        })
+        expect(withLightPet.calculateWeaponAttributes().攻击).toBeGreaterThan(base.calculateWeaponAttributes().攻击)
     })
 })

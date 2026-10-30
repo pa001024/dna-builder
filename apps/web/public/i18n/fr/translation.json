@@ -4726,6 +4726,12 @@
         "add_account": "Ajouter un compte",
         "add_account_tip": "Ajouter un compte Jiaojiaojiao via JSON (copiable après connexion)",
         "download_app": "Télécharger l'application",
+        "last_auth": "Dernier renouvellement/connexion",
+        "last_auth_never": "Jamais",
+        "no_refresh_token": "Ce compte n'a pas de refreshToken, renouvellement impossible",
+        "renew": "Renouveler le jeton",
+        "renew_failed": "Échec du renouvellement",
+        "renew_success": "Jeton renouvelé",
         "web_unavailable": "Non disponible sur le web"
     },
     "view": {

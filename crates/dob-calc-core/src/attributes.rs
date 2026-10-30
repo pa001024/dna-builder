@@ -190,7 +190,11 @@ impl<'a> BuildContext<'a> {
         let mut shield_bonus = self.total_bonus("护盾", "角色", true);
         let mut defense_bonus = self.total_bonus("防御", "角色", true);
         let sanity_bonus = self.total_bonus("神智", "角色", true);
-        let mut elem_damage_bonus = self.total_bonus("属性攻击", "角色", true);
+        // 属性攻击（角色攻击乘区）：泛化 `属性攻击` + 本角色元素对应的具体口径 `<元素>属性攻击` 双兼容；
+        // mod.data/buff.data 已迁移到具体口径（如 雷属性攻击），泛化兜底兼容旧档/旧包与动态 code
+        let element_attack_key = format!("{}属性攻击", char.element);
+        let mut elem_damage_bonus = self.total_bonus("属性攻击", "角色", true)
+            + self.total_bonus(element_attack_key.as_str(), "角色", true);
 
         // 基础值为 1 的属性
         let mut power = 1.0 + self.total_bonus("技能威力", "角色", true);
@@ -212,6 +216,13 @@ impl<'a> BuildContext<'a> {
         let mut skill_speed = 1.0 + self.total_bonus("技能速度", "角色", true);
         let mut penetration = self.total_bonus("属性穿透", "角色", true);
         let mut imbalance_damage = self.total_bonus("失衡易伤", "角色", true);
+        // 阵营增伤（角色侧：角色槽 MOD + 全局 BUFF；武器槽部分由武器面板叠加）
+        let discrimination_bonus = self.total_bonus("歧视", "角色", true);
+        let beast_bonus = self.total_bonus("秽兽增伤", "角色", true);
+        let legion_bonus = self.total_bonus("军团增伤", "角色", true);
+        let forsaken_bonus = self.total_bonus("神弃者增伤", "角色", true);
+        let herald_bonus = self.total_bonus("神使增伤", "角色", true);
+        let huaxu_bonus = self.total_bonus("华胥增伤", "角色", true);
         let mut skill_add = self.total_bonus("技能倍率加数", "角色", true);
         let mut summon_inherit = 1.0 + self.total_bonus("召唤物属性继承比例", "角色", true);
         let mut summon_attack_speed = self.total_bonus("召唤物攻击速度", "角色", true);
@@ -268,7 +279,9 @@ impl<'a> BuildContext<'a> {
             health_bonus += mod_attribute_bonus * weighted("生命");
             shield_bonus += mod_attribute_bonus * weighted("护盾");
             defense_bonus += mod_attribute_bonus * weighted("防御");
-            elem_damage_bonus += mod_attribute_bonus * weighted("属性攻击");
+            // 狮鹫/百首/契约者 MOD属性加权：具体口径 `<元素>属性攻击`（新数据）+ 泛化 `属性攻击`（旧包兜底）
+            elem_damage_bonus += mod_attribute_bonus
+                * (weighted("属性攻击") + weighted(element_attack_key.as_str()));
             power += mod_attribute_bonus * weighted("技能威力");
             durability += mod_attribute_bonus * weighted("技能耐久");
             efficiency += mod_attribute_bonus * weighted("技能效益");
@@ -349,6 +362,12 @@ impl<'a> BuildContext<'a> {
         attrs.insert("技能无视防御", skill_ignore_defense);
         attrs.insert("技能速度", skill_speed);
         attrs.insert("失衡易伤", imbalance_damage);
+        attrs.insert("歧视", discrimination_bonus);
+        attrs.insert("秽兽增伤", beast_bonus);
+        attrs.insert("军团增伤", legion_bonus);
+        attrs.insert("神弃者增伤", forsaken_bonus);
+        attrs.insert("神使增伤", herald_bonus);
+        attrs.insert("华胥增伤", huaxu_bonus);
         attrs.insert("技能倍率加数", skill_add);
         attrs.insert("技能倍率乘数", skill_multiplier);
         attrs.insert("召唤物属性继承比例", summon_inherit);
@@ -1026,7 +1045,23 @@ impl<'a> BuildContext<'a> {
 
         let mut attack_bonus = self.total_bonus(&prefixed(prefix, "攻击"), prefix, true)
             + self.total_bonus("攻击", prefix, true);
-        let physical_bonus = self.total_bonus("物理", prefix, true);
+        // 武器物理加成：泛化 `物理`（旧口径兜底）+ 按武器伤害类型匹配的具体口径 `<切割|贯穿|震荡>攻击`；
+        // mod.data 已迁移到具体口径（如 切割攻击），限定与伤害类型一致时命中
+        let damage_type: String = match target {
+            WeaponRef::Ranged => self.ranged_weapon.damage_type.clone(),
+            WeaponRef::Skill => self
+                .skill_weapon
+                .as_ref()
+                .map(|w| w.damage_type.clone())
+                .unwrap_or_default(),
+            _ => self.melee_weapon.damage_type.clone(),
+        };
+        let physical_bonus = self.total_bonus("物理", prefix, true)
+            + if damage_type.is_empty() {
+                0.0
+            } else {
+                self.total_bonus(format!("{}攻击", damage_type).as_str(), prefix, true)
+            };
         let mut crit_bonus = self.total_bonus(&prefixed(prefix, "暴击"), prefix, true)
             + self.total_bonus("暴击", prefix, true);
         let mut crit_damage_bonus = self.total_bonus(&prefixed(prefix, "暴伤"), prefix, true)
@@ -1164,6 +1199,16 @@ impl<'a> BuildContext<'a> {
             "召唤物范围转化",
             self.total_bonus("召唤物范围转化", prefix, true),
         );
+        // 阵营增伤（武器面板：该武器槽 MOD，角色侧已计入 attrs；武器作用域下不吃共享池）
+        panel.insert("歧视", self.total_bonus("歧视", prefix, true));
+        panel.insert("秽兽增伤", self.total_bonus("秽兽增伤", prefix, true));
+        panel.insert("军团增伤", self.total_bonus("军团增伤", prefix, true));
+        panel.insert(
+            "神弃者增伤",
+            self.total_bonus("神弃者增伤", prefix, true),
+        );
+        panel.insert("神使增伤", self.total_bonus("神使增伤", prefix, true));
+        panel.insert("华胥增伤", self.total_bonus("华胥增伤", prefix, true));
         panel
     }
 

@@ -244,8 +244,26 @@ impl<'a> BuildContext<'a> {
         let resistance_penetration =
             (1.0 + char_attrs.get("属性穿透").copied().unwrap_or(0.0)).max(0.0);
 
-        // 增伤池（tag）：技能池吃技能伤害，武器池吃武器增伤 + 武器伤害；
-        // 召唤物伤害按 tag 含召唤物叠进基座
+        // 阵营增伤与普通增伤同池加算：角色侧（char_attrs，含 BUFF）+ 武器侧（panel，本槽 MOD；技能池无面板只取角色侧）；
+        // 泛化 `歧视`（旧口径兜底，对全阵营生效）+ 按敌方阵营取具体口径（秽兽/军团/神弃者/神使/华胥增伤）
+        let faction_key = crate::context::faction_bonus_key_for_enemy(self.enemy.faction);
+        let faction_bonus = char_attrs.get("歧视").copied().unwrap_or(0.0)
+            + if is_skill_pool {
+                0.0
+            } else {
+                panel.and_then(|item| item.get("歧视").copied()).unwrap_or(0.0)
+            }
+            + faction_key
+                .map(|key| {
+                    char_attrs.get(key).copied().unwrap_or(0.0)
+                        + if is_skill_pool {
+                            0.0
+                        } else {
+                            panel.and_then(|item| item.get(key).copied()).unwrap_or(0.0)
+                        }
+                })
+                .unwrap_or(0.0);
+        // 增伤池（tag）：技能池吃技能伤害，武器池吃武器增伤 + 武器伤害；召唤物伤害按 tag 含召唤物叠进基座；阵营增伤并入基座同池加算
         let damage_increase_base = (if is_skill_pool {
             1.0 + char_attrs.get("增伤").copied().unwrap_or(0.0)
                 + char_attrs.get("技能伤害").copied().unwrap_or(0.0)
@@ -254,12 +272,14 @@ impl<'a> BuildContext<'a> {
                 } else {
                     0.0
                 }
+                + faction_bonus
         } else {
             1.0 + char_attrs.get("增伤").copied().unwrap_or(0.0)
                 + panel
                     .and_then(|item| item.get("增伤").copied())
                     .unwrap_or(0.0)
                 + char_attrs.get("武器伤害").copied().unwrap_or(0.0)
+                + faction_bonus
         }) + attack_type_damage_bonus;
         let element_increase = char_attrs.get("元素增伤").copied().unwrap_or(0.0);
         let physical_increase = char_attrs.get("物理增伤").copied().unwrap_or(0.0);
@@ -878,10 +898,35 @@ impl<'a> BuildContext<'a> {
         // 昂扬/背水乘区与技能伤害共用同一结算。
         let hp_more = self.boost_multiplier(&attrs, None) * self.desperate_multiplier(&attrs, None);
         let fullness_multiplier = 1.0 + attrs.get("充盈威力").copied().unwrap_or(0.0);
-        let damage_increase = 1.0 + attrs.get("增伤").copied().unwrap_or(0.0);
         let attack = attrs.get("攻击").copied().unwrap_or(0.0);
+        // 阵营增伤与普通增伤同池加算：角色侧全局 + 各来源武器槽 MOD（技能来源仅角色侧）
+        let faction_key = crate::context::faction_bonus_key_for_enemy(self.enemy.faction);
+        let char_faction_bonus = attrs.get("歧视").copied().unwrap_or(0.0)
+            + faction_key
+                .map(|key| attrs.get(key).copied().unwrap_or(0.0))
+                .unwrap_or(0.0);
+        let base_increase = 1.0 + attrs.get("增伤").copied().unwrap_or(0.0) + char_faction_bonus;
         let mut total = 0.0;
         for source in selected {
+            let scope = match source.source {
+                DotSource::Melee => "近战",
+                DotSource::Ranged => "远程",
+                DotSource::SkillWeapon => self
+                    .skill_weapon
+                    .as_ref()
+                    .map(|w| w.kind.as_str())
+                    .unwrap_or("同律"),
+                DotSource::Skill => "",
+            };
+            let mod_bonus = if scope.is_empty() {
+                0.0
+            } else {
+                self.scoped_mods_bonus("歧视", scope)
+                    + faction_key
+                        .map(|key| self.scoped_mods_bonus(key, scope))
+                        .unwrap_or(0.0)
+            };
+            let damage_increase = base_increase + mod_bonus;
             let base = (attack + source.weapon_attack)
                 * 0.2
                 * 6.0

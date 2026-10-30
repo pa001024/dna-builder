@@ -4682,6 +4682,12 @@
         "add_account": "계정 추가",
         "add_account_tip": "JSON으로 교교각 계정 추가(로그인 후 복사 가능)",
         "download_app": "앱 다운로드",
+        "last_auth": "마지막 갱신/로그인",
+        "last_auth_never": "없음",
+        "no_refresh_token": "이 계정에는 refreshToken이 없어 갱신할 수 없습니다",
+        "renew": "토큰 갱신",
+        "renew_failed": "갱신 실패",
+        "renew_success": "갱신 성공",
         "web_unavailable": "웹에서는 사용할 수 없습니다"
     },
     "view": {

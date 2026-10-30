@@ -90,5 +90,7 @@ export function parseDnaUserImportJson(json: string): UDNAUser {
     const isRegister = readNumber(data, "isRegister")
     if (isOfficial !== undefined) userData.isOfficial = isOfficial
     if (isRegister !== undefined) userData.isRegister = isRegister
+    const lastAuthAt = readNumber(data, "lastAuthAt") ?? readNumber(data, "lastLoginAt") ?? readNumber(data, "lastRefreshAt")
+    if (lastAuthAt !== undefined) userData.lastAuthAt = lastAuthAt
     return userData
 }

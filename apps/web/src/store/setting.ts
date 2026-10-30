@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@vueuse/core"
-import { DNAAPI } from "dna-api"
+import { DNAAPI, type DNAUserDataBean } from "dna-api"
 import { defineStore } from "pinia"
 import {
     applyMaterial,
@@ -17,6 +17,7 @@ import { applyLanguageFontClass, changeLanguage } from "@/i18n"
 import { AI_CONTEXT_WINDOW_STORAGE_KEY, migrateLegacyAiMaxTokens, resolveAiContextWindow, resolveAiMaxTokens } from "@/utils/ai-config"
 import type { CustomTheme } from "@/utils/customTheme"
 import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
+import { parseDnaUserImportJson } from "@/utils/dna-user-import"
 import type { CustomFontMeta } from "@/utils/font-storage"
 import {
     customFontCssFamily,
@@ -35,7 +36,7 @@ import {
     type SkillCdOverlayStoredSettings,
 } from "@/utils/skill-cd-overlay"
 import { readCustomWallpaper, removeCustomWallpaper, writeCustomWallpaper } from "@/utils/wallpaper-storage"
-import { type DNAUser, db } from "./db"
+import { type DNAUser, db, type UDNAUser } from "./db"
 
 let apiCache: DNAAPI | null = null
 /** apiCache 对应的 dnaUsers 行主键（db id）：同一 uid 重新登录会产生新行，必须按行吊销旧对象 */
@@ -344,6 +345,133 @@ export const useSettingStore = defineStore("setting", {
             const user = await db.dnaUsers.get(this.dnaUserId)
             return user
         },
+        /**
+         * 列出全部皎皎角账号；未选中账号时默认选中第一个。
+         * @returns 账号列表
+         */
+        async listDnaUsers(): Promise<DNAUser[]> {
+            const users = await db.dnaUsers.toArray()
+            if (users.length > 0 && !this.dnaUserId) {
+                this.dnaUserId = users[0].id
+            }
+            return users
+        },
+        /**
+         * 按 uid + server 合并写入一条皎皎角账号（存在则更新，不存在则新增）。
+         * @param userData 账号数据
+         */
+        async upsertDnaUser(userData: UDNAUser): Promise<void> {
+            const existing = await db.dnaUsers
+                .where("uid")
+                .equals(userData.uid)
+                .filter(u => u.server === userData.server)
+                .first()
+            if (existing) {
+                await db.dnaUsers.update(existing.id, userData)
+            } else {
+                await db.dnaUsers.add(userData)
+            }
+            // 新凭证落库后吊销旧 DNAAPI 对象，下次 getDNAAPI 用新 token 重建
+            this.invalidateDNAAPI()
+        },
+        /**
+         * 保存 iframe 登录成功的皎皎角账号（登录即续期，记下本次登录时间）。
+         * @param data 登录消息载荷
+         * @returns 最新账号列表
+         */
+        async addDnaUserFromLogin(data: { dev_code: string; user: DNAUserDataBean }): Promise<DNAUser[]> {
+            const userData: UDNAUser = {
+                uid: data.user.userId,
+                name: data.user.userName,
+                dev_code: data.dev_code,
+                token: data.user.token,
+                server: data.user.registerLang ? "global" : "cn",
+                kf_token: "",
+                refreshToken: data.user.refreshToken,
+                pic: data.user.headUrl,
+                status: data.user.status,
+                isComplete: data.user.isComplete,
+                // 登录即续期：记下本次登录时间，供列表页「上次续期/登录」展示
+                lastAuthAt: Date.now(),
+            }
+            if (data.user.isOfficial) userData.isOfficial = data.user.isOfficial
+            if (data.user.isRegister) userData.isRegister = data.user.isRegister
+            // 同一 uid 重新登录会拿到新 token：原地更新旧行而不是再插一行，否则旧 token 行继续被使用
+            await this.upsertDnaUser(userData)
+            return this.listDnaUsers()
+        },
+        /**
+         * 通过 JSON 导入皎皎角账号（导入即一次登录，JSON 自带时间则保留，否则记为现在）。
+         * @param json 账号 JSON 文本
+         * @returns 最新账号列表，JSON 非法时抛出错误
+         */
+        async addDnaUserFromJson(json: string): Promise<DNAUser[]> {
+            const userData = parseDnaUserImportJson(json)
+            userData.lastAuthAt = userData.lastAuthAt ?? Date.now()
+            await this.upsertDnaUser(userData)
+            return this.listDnaUsers()
+        },
+        /**
+         * 删除皎皎角账号；删的是当前账号时顺延选中第一个并吊销缓存。
+         * @param id 账号行主键
+         * @returns 最新账号列表
+         */
+        async removeDnaUser(id: number): Promise<DNAUser[]> {
+            await db.dnaUsers.delete(id)
+            const users = await this.listDnaUsers()
+            if (this.dnaUserId === id) {
+                this.dnaUserId = users.length > 0 ? users[0].id : 0
+                this.invalidateDNAAPI()
+            }
+            return users
+        },
+        /**
+         * 切换当前皎皎角账号：旧 DNAAPI 对象持有旧账号 token，必须吊销，否则后续请求仍用旧身份。
+         * @param id 账号行主键
+         */
+        switchDnaUser(id: number) {
+            if (this.dnaUserId === id) return
+            this.dnaUserId = id
+            this.invalidateDNAAPI()
+        },
+        /**
+         * 手动续期单个皎皎角账号：用该账号自己的 dev_code/refreshToken 换新 token 并落库。
+         * 成功后若是当前使用中的账号则吊销 DNAAPI 缓存，下次 getDNAAPI 用新 token 重建。
+         * @param id 账号行主键
+         * @returns 续期结果，失败时带上服务端原始信息供页面展示
+         */
+        async renewDnaUser(id: number): Promise<{ success: boolean; detail?: string }> {
+            const target = await db.dnaUsers.get(id)
+            if (!target) {
+                return { success: false, detail: "账号不存在" }
+            }
+            if (!target.refreshToken) {
+                return { success: false, detail: "missing_refresh_token" }
+            }
+            try {
+                const lang = this.lang === "zh-CN" ? "zh-Hans" : this.lang === "zh-TW" ? "zh-Hant" : this.lang
+                const api = new DNAAPI({
+                    dev_code: target.dev_code,
+                    token: target.token,
+                    server: target.server || "cn",
+                    lang,
+                    mode: "android",
+                    fetchFn: tauriFetch,
+                })
+                const res = await api.refreshToken(target.refreshToken)
+                if (!res.is_success || !res.data?.token) {
+                    return { success: false, detail: res.msg || "未知错误" }
+                }
+                await db.dnaUsers.update(target.id, { token: res.data.token, lastAuthAt: Date.now() })
+                if (this.dnaUserId === target.id) {
+                    this.invalidateDNAAPI()
+                }
+                return { success: true }
+            } catch (error) {
+                console.error("续期皎皎角账号失败:", error)
+                return { success: false, detail: error instanceof Error ? error.message : String(error) }
+            }
+        },
         async getDNAAPI() {
             const user = await this.getCurrentUser()
             if (!user) {
@@ -400,7 +528,7 @@ export const useSettingStore = defineStore("setting", {
                         const refreshRes = await api.refreshToken(user.refreshToken)
                         if (refreshRes.is_success && refreshRes.data?.token) {
                             api.token = refreshRes.data.token
-                            await db.dnaUsers.update(user.id, { token: refreshRes.data.token })
+                            await db.dnaUsers.update(user.id, { token: refreshRes.data.token, lastAuthAt: Date.now() })
                             if (heartbeatReadyPromise) {
                                 void this.startHeartbeat(user.uid, refreshRes.data.token).catch(() => undefined)
                             }
