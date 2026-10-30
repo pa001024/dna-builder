@@ -2,6 +2,12 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
+import {
+    type CharPlanItem,
+    createDefaultCharConfig,
+    createDefaultWeaponConfig,
+    useLevelUpPlan,
+} from "@/composables/useLevelUpPlan"
 import { useSearchParam } from "@/composables/useSearchParam"
 import {
     charData,
@@ -22,46 +28,14 @@ import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
-import {
-    type CharLevelUpConfig,
-    LevelUpCalculator,
-    type LevelUpResult,
-    type ModLevelUpConfig,
-    type ResourceCost,
-    type TimeEstimateConfig,
-    type WeaponLevelUpConfig,
-} from "@/utils/LevelUpCalculator"
-
-// 角色数据类型
-interface CharItem {
-    id: number
-    config: CharLevelUpConfig
-}
-
-// 武器数据类型
-interface WeaponItem {
-    id: number
-    config: WeaponLevelUpConfig
-}
-
-// 魔之楔数据类型
-interface ModItem {
-    id: number
-    config: ModLevelUpConfig
-}
+import { LevelUpCalculator, type LevelUpResult, type ResourceCost, type TimeEstimateConfig } from "@/utils/LevelUpCalculator"
 
 const setting = useSettingStore()
 const ui = useUIStore()
 let api: DNAAPI
 
-// 初始角色列表
-const chars = useLocalStorage<CharItem[]>("lvup.chars", [])
-
-// 初始武器列表
-const weapons = useLocalStorage<WeaponItem[]>("lvup.weapons", [])
-
-// 初始魔之楔列表
-const mods = useLocalStorage<ModItem[]>("lvup.mods", [])
+// 养成计划：与 AddToLevelUpButton 共用单例，外部写入即时同步
+const { chars, mods, weapons } = useLevelUpPlan()
 
 // 同步状态
 const syncing = ref(false)
@@ -492,32 +466,6 @@ onMounted(() => {
     calculateResult()
 })
 
-/**
- * 创建角色的默认养成配置
- * @returns 角色默认配置
- */
-function createDefaultCharConfig(): CharLevelUpConfig {
-    return {
-        currentLevel: 1,
-        targetLevel: 80,
-        extraMastery: [],
-        skills: [
-            {
-                currentLevel: 1,
-                targetLevel: 10,
-            },
-            {
-                currentLevel: 1,
-                targetLevel: 10,
-            },
-            {
-                currentLevel: 1,
-                targetLevel: 10,
-            },
-        ],
-    }
-}
-
 // 移除角色
 const removeChar = (index: number) => {
     chars.value.splice(index, 1)
@@ -540,7 +488,7 @@ function charExtraMasteryOptions(charId: number) {
  * @param char 角色养成项
  * @param type 武器类型名称
  */
-function toggleCharExtraMastery(char: CharItem, type: string) {
+function toggleCharExtraMastery(char: CharPlanItem, type: string) {
     const list = char.config.extraMastery ?? (char.config.extraMastery = [])
     const index = list.indexOf(type)
     if (index >= 0) {
@@ -568,19 +516,6 @@ function computeExtraMasteryCost(): ResourceCost {
         }
     }
     return cost
-}
-
-/**
- * 创建武器的默认养成配置
- * @returns 武器默认配置
- */
-function createDefaultWeaponConfig(): WeaponLevelUpConfig {
-    return {
-        currentLevel: 1,
-        targetLevel: 80,
-        currentRefine: 0,
-        targetRefine: 5,
-    }
 }
 
 // 移除武器

@@ -284,6 +284,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                             {{ formatModName(mod.系列, mod.名称, $t) }}
                         </SRouterLink>
                         <CopyID :id="mod.id" />
+                        <span class="ml-auto inline-flex"><AddToLevelUpButton kind="mod" :id="mod.id" /></span>
                         <!-- 极性 / 耐受方章 -->
                         <div
                             v-if="mod.极性 || mod.耐受"

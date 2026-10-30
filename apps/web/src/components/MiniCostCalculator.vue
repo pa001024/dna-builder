@@ -2,10 +2,11 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { useRouter } from "vue-router"
+import { useLevelUpPlan } from "@/composables/useLevelUpPlan"
 import { type Dungeon, dungeonMap, LeveledChar, type LeveledMod, modMap } from "@/data"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
-import { LevelUpCalculator, type LevelUpResult, type ModLevelUpConfig, type TimeEstimateConfig } from "@/utils/LevelUpCalculator"
+import { LevelUpCalculator, type LevelUpResult, type TimeEstimateConfig } from "@/utils/LevelUpCalculator"
 
 const props = defineProps<{
     mods: (LeveledMod | null)[]
@@ -15,13 +16,8 @@ const router = useRouter()
 
 // ============ 与完整计算器互通的计划与估算配置（同一 localStorage key） ============
 
-/** 完整计算器的养成计划（lvup.mods），点击跳转时覆盖原计划 */
-interface LvupModItem {
-    id: number
-    config: ModLevelUpConfig
-}
-
-const lvupMods = useLocalStorage<LvupModItem[]>("lvup.mods", [])
+// 完整计算器的养成计划：共用单例，跳转覆盖后对方即时可见
+const { mods: planMods } = useLevelUpPlan()
 
 /** 时间估算配置，与完整计算器共享 */
 interface TimeEstimateUIConfig {
@@ -198,7 +194,7 @@ async function calculate() {
  * 先取消待执行计算并销毁 worker，再跳转并定位到魔之楔页签。
  */
 function jumpToFullCalculator() {
-    lvupMods.value = mods.value.map(item => ({
+    planMods.value = mods.value.map(item => ({
         id: item.id,
         config: {
             currentLevel: item.currentLevel,

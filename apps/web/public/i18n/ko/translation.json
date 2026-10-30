@@ -3100,6 +3100,15 @@
         "desc": "캐릭터、무기、마법 쐐기 육성 자원 요구 사항 계산",
         "title": "육성 계산"
     },
+    "levelup-plan": {
+        "add": "육성에 추가",
+        "added": "추가됨",
+        "empty": "아직 목표가 없음",
+        "more": "외 {{count}}개",
+        "removed": "제거됨",
+        "title": "육성 계획",
+        "view_calculator": "육성 계산기 열기"
+    },
     "limited-prize-simulator": {
         "title": "기간 한정 상자 시뮬레이션"
     },

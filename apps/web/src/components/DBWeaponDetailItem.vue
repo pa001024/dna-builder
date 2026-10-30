@@ -275,6 +275,7 @@ watch(
                             {{ $t(weapon.名称) }}
                         </SRouterLink>
                         <CopyID :id="weapon.id" />
+                        <span class="ml-auto inline-flex"><AddToLevelUpButton kind="weapon" :id="weapon.id" /></span>
                     </div>
 
                     <!-- 元信息行：类型 / 伤害类型 / 版本 -->

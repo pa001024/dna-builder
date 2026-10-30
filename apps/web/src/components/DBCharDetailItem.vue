@@ -722,6 +722,7 @@ onBeforeUnmount(() => {
                             {{ $t(char.名称) }}
                         </SRouterLink>
                         <CopyID :id="char.id" />
+                        <span class="ml-auto inline-flex"><AddToLevelUpButton kind="char" :id="char.id" /></span>
                     </div>
                     <p v-if="char.别名" class="mt-1.5 text-sm text-base-content/55">{{ $t(char.别名) }}</p>
 

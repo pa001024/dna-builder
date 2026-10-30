@@ -3121,6 +3121,15 @@
         "desc": "Calculate character, weapon and magic wedge cultivation resource requirements",
         "title": "Cultivation Calculation"
     },
+    "levelup-plan": {
+        "add": "Add to Level-Up Plan",
+        "added": "Added",
+        "empty": "No targets yet",
+        "more": "+{{count}} more",
+        "removed": "Removed",
+        "title": "Level-Up Plan",
+        "view_calculator": "Open Level-Up Calculator"
+    },
     "limited-prize-simulator": {
         "title": "Limited Prize Pool Simulation"
     },

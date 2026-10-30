@@ -3138,6 +3138,15 @@
         "desc": "Calculer les besoins en ressources pour la culture des personnages, armes et wedges magiques",
         "title": "Calcul de culture"
     },
+    "levelup-plan": {
+        "add": "Ajouter au plan",
+        "added": "Ajouté",
+        "empty": "Aucune cible pour le moment",
+        "more": "+{{count}} autres",
+        "removed": "Retiré",
+        "title": "Plan d'amélioration",
+        "view_calculator": "Ouvrir le calculateur"
+    },
     "limited-prize-simulator": {
         "title": "Simulation de bannière limitée"
     },

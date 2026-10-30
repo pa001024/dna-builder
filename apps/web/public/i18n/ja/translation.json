@@ -3099,6 +3099,15 @@
         "desc": "キャラクター、武器、マジックウェッジの育成資源要件を計算",
         "title": "育成計算"
     },
+    "levelup-plan": {
+        "add": "育成に追加",
+        "added": "追加済み",
+        "empty": "目標はまだありません",
+        "more": "他{{count}}件",
+        "removed": "削除しました",
+        "title": "育成計画",
+        "view_calculator": "育成計算機を開く"
+    },
     "limited-prize-simulator": {
         "title": "期間限定ガチャシミュレーション"
     },

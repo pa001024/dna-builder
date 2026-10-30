@@ -3097,6 +3097,15 @@
         "desc": "計算角色、武器和魔之楔的養成資源需求",
         "title": "養成計算"
     },
+    "levelup-plan": {
+        "add": "添加到養成",
+        "added": "已添加",
+        "empty": "暫無養成目標",
+        "more": "還有{{count}}項",
+        "removed": "已移除",
+        "title": "養成計畫",
+        "view_calculator": "前往養成計算器"
+    },
     "limited-prize-simulator": {
         "title": "限時獎池模擬"
     },

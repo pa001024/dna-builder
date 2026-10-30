@@ -3147,6 +3147,15 @@
         "desc": "计算角色、武器和魔之楔的养成资源需求",
         "title": "养成计算"
     },
+    "levelup-plan": {
+        "add": "添加到养成",
+        "added": "已添加",
+        "empty": "暂无养成目标",
+        "more": "还有{{count}}项",
+        "removed": "已移除",
+        "title": "养成计划",
+        "view_calculator": "前往养成计算器"
+    },
     "limited-prize-simulator": {
         "title": "限时奖池模拟"
     },

@@ -19,7 +19,9 @@ const forceOpen = ref(false)
                     :side-offset="5"
                     :side="side"
                 >
-                    <slot name="tooltip" />
+                    <div @pointermove.stop>
+                        <slot name="tooltip" />
+                    </div>
                     <TooltipArrow class="fill-base-100" :width="8" />
                 </TooltipContent>
             </TooltipPortal>
