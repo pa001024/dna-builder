@@ -1,0 +1,245 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "BHL",
+    "scopeName": "source.bhl",
+    "fileTypes": ["bhl"],
+    "patterns": [
+        { "include": "#comments" },
+        { "include": "#declarations" },
+        { "include": "#symbol-literals" },
+        { "include": "#strings" },
+        { "include": "#numbers" },
+        { "include": "#open-records" },
+        { "include": "#keywords" },
+        { "include": "#builtins" },
+        { "include": "#constants" },
+        { "include": "#field-access" },
+        { "include": "#keys" },
+        { "include": "#types" },
+        { "include": "#operators" },
+        { "include": "#punctuation" },
+        { "include": "#wildcard" },
+        { "include": "#identifiers" }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "match": "//.*$",
+                    "name": "comment.line.double-slash.bhl"
+                },
+                {
+                    "match": "#.*$",
+                    "name": "comment.line.number-sign.bhl"
+                }
+            ]
+        },
+        "declarations": {
+            "patterns": [
+                {
+                    "match": "\\b(schema)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "entity.name.type.bhl" }
+                    }
+                },
+                {
+                    "match": "\\b(type)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "entity.name.type.bhl" }
+                    }
+                },
+                {
+                    "match": "\\b(fn)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "entity.name.function.bhl" }
+                    }
+                },
+                {
+                    "match": "\\b(const)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "variable.other.constant.bhl" }
+                    }
+                },
+                {
+                    "match": "\\b(module)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "entity.name.namespace.bhl" }
+                    }
+                },
+                {
+                    "match": "\\b(import)([ \\t]+)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.declaration.bhl" },
+                        "3": { "name": "entity.name.namespace.bhl" }
+                    }
+                }
+            ]
+        },
+        "symbol-literals": {
+            "patterns": [
+                {
+                    "begin": "\\b(sym|named)(\")",
+                    "beginCaptures": {
+                        "1": { "name": "keyword.other.symbol-literal.bhl" },
+                        "2": { "name": "punctuation.definition.string.begin.bhl" }
+                    },
+                    "end": "\"",
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.string.end.bhl" }
+                    },
+                    "contentName": "string.quoted.symbol.bhl",
+                    "patterns": [
+                        {
+                            "match": "\\\\.",
+                            "name": "constant.character.escape.bhl"
+                        }
+                    ]
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "begin": "\"",
+                    "beginCaptures": {
+                        "0": { "name": "punctuation.definition.string.begin.bhl" }
+                    },
+                    "end": "\"",
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.string.end.bhl" }
+                    },
+                    "name": "string.quoted.double.bhl",
+                    "patterns": [
+                        {
+                            "match": "\\\\.",
+                            "name": "constant.character.escape.bhl"
+                        }
+                    ]
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "match": "(?<![A-Za-z0-9_])\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?",
+                    "name": "constant.numeric.bhl"
+                }
+            ]
+        },
+        "open-records": {
+            "patterns": [
+                {
+                    "match": "(\\.\\.)([ \\t]*)(open)\\b",
+                    "captures": {
+                        "1": { "name": "punctuation.definition.open-record.bhl" },
+                        "3": { "name": "keyword.other.open.bhl" }
+                    }
+                },
+                {
+                    "match": "\\.\\.",
+                    "name": "punctuation.definition.open-record.bhl"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "match": "\\b(?:if|then|else|match|let|in|not)\\b",
+                    "name": "keyword.control.bhl"
+                },
+                {
+                    "match": "\\b(?:schema|type|fn|const|module|import|from)\\b",
+                    "name": "keyword.other.declaration.bhl"
+                },
+                {
+                    "match": "\\b(?:some|ok|err)\\b",
+                    "name": "keyword.other.constructor.bhl"
+                },
+                {
+                    "match": "\\b(?:true|false|none)\\b",
+                    "name": "constant.language.bhl"
+                }
+            ]
+        },
+        "builtins": {
+            "patterns": [
+                {
+                    "match": "\\b(?:round_js|concat_map|safe_div|to_fixed|sort_by|dedup_by|group_sum|str_slice|str_len|str_at|str_eq|is_num|is_list|sym_of|num_of|get_or|min|max|clamp|abs|floor|ceil|round|trunc|sqrt|pow|log|len|at|slice|concat|map|filter|fold2|fold|take|drop|zip|find|any|all|count|field|has|update|keys|fix|choice|expected|trace)\\b",
+                    "name": "support.function.bhl"
+                }
+            ]
+        },
+        "constants": {
+            "patterns": [
+                {
+                    "match": "\\b(?:inf|nan)\\b",
+                    "name": "constant.language.bhl"
+                }
+            ]
+        },
+        "field-access": {
+            "patterns": [
+                {
+                    "match": "(\\.)([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)?",
+                    "captures": {
+                        "1": { "name": "punctuation.accessor.bhl" },
+                        "2": { "name": "variable.other.member.bhl" }
+                    }
+                }
+            ]
+        },
+        "keys": {
+            "patterns": [
+                {
+                    "match": "([A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*)(?=\\s*:)",
+                    "name": "variable.other.key.bhl"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "match": "(?<![A-Za-z0-9_\\p{L}])[A-Z][A-Za-z0-9_\\p{L}]*",
+                    "name": "entity.name.type.bhl"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "match": "->|=>|==|!=|<=|>=|&&|\\|\\||\\+|-|\\*|/|%|=|<|>|\\|",
+                    "name": "keyword.operator.bhl"
+                }
+            ]
+        },
+        "punctuation": {
+            "patterns": [
+                {
+                    "match": "[()\\[\\]{}.,;:@]",
+                    "name": "punctuation.bhl"
+                }
+            ]
+        },
+        "wildcard": {
+            "patterns": [
+                {
+                    "match": "(?<![A-Za-z0-9_\\p{L}])_(?![A-Za-z0-9_\\p{L}])",
+                    "name": "variable.language.wildcard.bhl"
+                }
+            ]
+        },
+        "identifiers": {
+            "patterns": [
+                {
+                    "match": "[A-Za-z_\\p{L}][A-Za-z0-9_\\p{L}]*",
+                    "name": "variable.other.bhl"
+                }
+            ]
+        }
+    }
+}

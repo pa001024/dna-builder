@@ -1,0 +1,38 @@
+{
+    "name": "bhl-language",
+    "displayName": "BHL Language",
+    "description": "Syntax highlighting and language configuration for BHL (BuildHub Language, .bhl)",
+    "version": "0.1.0",
+    "publisher": "dna-builder",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pa001024/dna-builder.git",
+        "directory": "packages/vscode-bhl"
+    },
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": ["Programming Languages"],
+    "keywords": ["bhl", "buildhub", "dna-builder", "syntax", "grammar"],
+    "contributes": {
+        "languages": [
+            {
+                "id": "bhl",
+                "aliases": ["BHL", "bhl"],
+                "extensions": [".bhl"],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "bhl",
+                "scopeName": "source.bhl",
+                "path": "./syntaxes/bhl.tmLanguage.json"
+            }
+        ]
+    },
+    "scripts": {
+        "package": "pnpm dlx @vscode/vsce package --no-dependencies"
+    }
+}

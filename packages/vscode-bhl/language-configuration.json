@@ -1,0 +1,14 @@
+{
+    "comments": {
+        "lineComment": "//"
+    },
+    "brackets": [["{", "}"], ["[", "]"], ["(", ")"]],
+    "autoClosingPairs": [
+        { "open": "{", "close": "}" },
+        { "open": "[", "close": "]" },
+        { "open": "(", "close": ")" },
+        { "open": "\"", "close": "\"", "notIn": ["string", "comment"] }
+    ],
+    "surroundingPairs": [["{", "}"], ["[", "]"], ["(", ")"], ["\"", "\""]],
+    "wordPattern": "[A-Za-z0-9_\\u4e00-\\u9fff]+"
+}

@@ -1,0 +1,38 @@
+// BHL syntax fixture — 用于检查高亮效果（不是可运行 pack）
+# `#` 也是行注释
+
+module sample
+
+import stack from "lib/stack.bhl" @1
+import num from "lib/num.bhl"
+
+schema Char {
+  id: Num
+  名称: Sym
+  精通: List<Sym>
+  加成: Record{ ..open }
+  ..open
+}
+
+type Handler = (Num, Num) -> Num
+
+const LIMIT: Num = 48.5e-2
+
+fn scalar_of(rec: Record{..open}, key: Sym) -> Num =
+  match field(rec, key) {
+    none => 0.0,
+    some(v) => if is_num(v) then num_of(v) else 0.0
+  }
+
+fn main(c: Char) -> Num =
+  let total = fold([1, 2, 3], 0.0, |acc, x| acc + x * 2.0) in
+  let ok = not(false) && c.名称 != sym"<none>" in
+  let (a, b) = (total, 3.0 / 2.0) in
+  if ok && a >= b || a != b then
+    Char { id: 1.0, 名称: sym"光", 精通: [], 加成: {} }
+      | scalar_of
+  else
+    inf + nan
+
+fn range(lo: Num, hi: Num) -> List<Num> =
+  fix(lo, |i| i + 1.0, |i| i >= hi, 1000.0)

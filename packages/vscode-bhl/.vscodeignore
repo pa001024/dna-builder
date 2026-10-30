@@ -1,0 +1,11 @@
+# 仅打包扩展本体。
+# 本目录位于 npm/pnpm workspace（根 package.json 的 workspaces 含 packages/*）内，
+# vsce 默认会执行 `npm list --production --parseable` 做依赖探测，在 workspace 成员里
+# 返回的是**仓库根目录**，进而把整个仓库收进 VSIX。打包时始终加 `--no-dependencies`
+# （见 package.json 的 package 脚本），这里再用「全排除 + 白名单」兜底。
+**
+!package.json
+!README.md
+!LICENSE
+!language-configuration.json
+!syntaxes/**

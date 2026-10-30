@@ -661,6 +661,8 @@ importers:
         specifier: ^5.1.6
         version: 5.9.3
 
+  packages/vscode-bhl: {}
+
   tools/data-mapper: {}
 
   tools/vue-mapper:
