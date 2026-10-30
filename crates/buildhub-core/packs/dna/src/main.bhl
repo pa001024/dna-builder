@@ -1,0 +1,2040 @@
+// src/main.bhl — Duet Night Abyss rules, entirely in pack code.
+//
+// 数据直接来自上游 datapack（`datapack/modules.json`，与 dob-calc-core 的 fixtures 同源）。
+// 上游已把「自然语言描述」解析成 **分量键**：不是 `属性增伤: {雷: x}`，而是 `雷属性攻击: x`；
+// 不是 `物理: x` + 限定，而是 `切割攻击: x`。因此本 pack 的解析层只做一件事：
+// 按分量键求和，再把这些分量装配成乘区。这里不发明任何嵌套的元素表。
+//
+// 乘区口径对齐 dob-calc-core（`damage.rs`）与 `damage-mechanics.ts`：
+//   抗性乘区 = (1 - 抗性) * (1 + 属性穿透)          —— 穿透与抗性同乘区
+//   增伤乘区 = 1 + 增伤 + 技能伤害（技能池）/ 武器伤害（武器池），元素/物理增伤同池加算
+//   追加伤害 = 1 + 追加伤害（独立乘区）
+//   防御乘区 = (1 - 减伤率) * 高等级减伤，最终钳制 0~1
+module dna
+
+import stack from "lib/stack.bhl"
+import lists from "lib/list.bhl"
+import num from "lib/num.bhl"
+
+// ---------------------------------------------------------------------------------------------
+// schemas — 字段名与上游 `*.data` 完全一致，不做重命名
+// ---------------------------------------------------------------------------------------------
+
+schema Char {
+  id: Num
+  名称: Sym
+  属性: Sym
+  基础攻击: Num
+  基础生命: Num
+  基础防御: Num
+  基础护盾: Num
+  基础神智: Num
+  精通: List<Sym>
+  额外精通: List<Sym>
+  加成: Record{ ..open }
+  ..open
+}
+
+// `加成` 是无条件属性；`生效` 是条件属性（`条件` 为全称合取）。
+// 同一个键在不同 mod 上可能是标量或 `[斜率, 上限]` 数组，取值走 `scalar_of` / `pair_of`。
+schema Mod {
+  id: Num
+  名称: Sym
+  类型: Sym                  // 角色 | 近战 | 远程 | 同律
+  属性: Option<Sym>          // 该 mod 绑定的元素（已体现在分量键里，仅作展示/条件）
+  极性: Option<Sym>
+  品质: Option<Sym>
+  系列: Option<Sym>
+  加成: Option<Record{ ..open }>
+  生效: Option<Record{ ..open }>
+  ..open
+}
+
+schema Weapon {
+  id: Num
+  名称: Sym
+  类型: List<Sym>            // 上游是数组：["近战","单手剑"]
+  伤害类型: Option<Sym>
+  攻击: Num
+  暴击: Num
+  暴伤: Num
+  触发: Num
+  射击间隔: Option<Num>
+  装填: Option<Num>
+  弹匣: Option<Num>
+  最大弹药: Option<Num>
+  加成: Option<Record{ ..open }>
+  熔炉: Option<List<Value>>
+  ..open
+}
+
+// 上游 `monster.data` 用短键：`es` 护盾、`tn` 韧性；等级不在表内（由 setting 给）。
+schema Monster {
+  id: Num
+  n: Sym
+  t: Option<Sym>
+  f: Option<Num>
+  hp: Num
+  def: Num
+  es: Option<Num>
+  atk: Num
+  tn: Option<Num>
+  tags: List<Sym>
+  ..open
+}
+
+// 上游 BUFF 按**名称**索引；属性在 `attr`，无条件部分可直接汇总。
+// `code` / `a` / `b` / `dx` 是条件与特殊效果，本 pack 暂不解释（见 README 的覆盖表）。
+// 特效表（`effect.data`）：按 id 精确挂到 MOD / 武器。`attr` 是特效提供的属性。
+// 潜质档位（`petTraits`）：`bid` 是基础潜质 id，`r` 是稀有度 3/4/5（对应等级 1/2/3）。
+schema PetTrait {
+  id: Num
+  bid: Num
+  name: Sym
+  r: Num
+  ..open
+}
+
+schema Pet {
+  id: Num
+  名称: Sym
+  品质: Num
+  最大等级: Num
+  ..open
+}
+
+schema Effect {
+  id: Num
+  名称: Sym
+  限定: Option<Sym>
+  a: Option<Num>
+  b: Option<Num>
+  lx: Option<Num>
+  mx: Option<Num>
+  dx: Option<Num>
+  attr: Option<Record{ ..open }>
+  ..open
+}
+
+schema Buff {
+  id: Option<Num>
+  名称: Sym
+  attr: Option<Record{ ..open }>
+  a: Option<Num>
+  b: Option<Num>
+  lx: Option<Num>
+  mx: Option<Num>
+  dx: Option<Num>
+  限定: Option<Num>
+  禁用: List<Num>
+  ..open
+}
+
+schema Slot {
+  key: Sym
+  kind: Sym                  // 与 Mod.类型 比对
+  mod: Num                   // 0 = 空槽
+  level: Num                 // MOD 等级：`加成` 里的数组按等级取值
+  ..open
+}
+
+schema Layout {
+  slots: List<Slot>
+  aura: Num
+  aura_level: Num
+  buffs: List<(Sym, Num)>   // (名称, 等级)
+  ..open
+}
+
+// setting —— 与 `CharSettings` 的等价子集（id + 等级，不内嵌数据）。
+schema Config {
+  char_id: Num
+  char_level: Num
+  resonance: Num             // 上游 `resonanceGain`（和鸣增益）
+  hp_percent: Num
+  layout: Layout
+  melee_weapon: Num
+  melee_level: Num
+  melee_refine: Num
+  ranged_weapon: Num
+  ranged_level: Num
+  ranged_refine: Num
+  monster_id: Num
+  enemy_level: Num
+  // 魔灵与潜质：都按「名字 → BUFF」挂载（上游 `collectPetBuffs` / `collectTraitBuffs`）
+  pet_id: Num
+  pet_level: Num
+  pet_coverage: Num
+  traits: List<(Num, Num)>
+  // 自定义 BUFF 的数值（上游 `customBuff: [[属性, 值]]`），挂在「自定义BUFF」上
+  custom_buff: List<(Sym, Num)>
+  enemy_resist: Num
+  // 目标函数与自定义变量：表达式由 pack 自己解析（`targetFunction` / `customVariables`）
+  target_function: Sym
+  skill_level: Num
+  custom_variables: List<(Sym, Sym)>
+  expressions: List<Sym>
+  crit_mode: Sym             // expected | lower | upper
+  // 宿主按面板算好的条件键取值（极性/重复次数由 pack 自己算）
+  condition_values: Option<Record{..open}>
+  ..open
+}
+
+schema Source {
+  kind: Sym                  // skill | weapon
+  element: Sym
+  multiplier: Num
+  ..open
+}
+
+schema DotSpec {
+  element: Sym
+  base: Num                  // 结算前的单跳基数
+  interval: Num
+  count: Num
+  ..open
+}
+
+// 条件求值上下文：极性/重复 id 用关联表（记录字面量不能带运行时键）。
+schema CondCtx {
+  values: List<(Sym, Num)>
+  polarities: List<(Sym, Num)>
+  max_id_count: Num
+  ..open
+}
+
+// ---------------------------------------------------------------------------------------------
+// 值形状：上游把条件属性写成标量或 `[斜率, 上限]`，这里按形状取值
+// ---------------------------------------------------------------------------------------------
+
+fn scalar_of(rec: Record{..open}, key: Sym) -> Num =
+  match field(rec, key) {
+    none => 0.0,
+    some(v) => if is_num(v) then num_of(v) else 0.0
+  }
+
+// `加成` 的取值口径（`LeveledMod.update_properties`）：
+//   数组 = 各档**绝对值**，下标 0 基（`index = min(level, len-1)`）
+//   标量 = `(值 / (满级 + 1)) × (等级 + 1)`；`神智回复`/`最大耐受` 向上取整
+// `生效` 里的 `[斜率, 上限]` 是另一种形状，由 `pair_of` 处理。
+fn mod_max_level(m: Mod) -> Num =
+  match m.品质 {
+    some(q) => if q == sym"金" then 10.0
+               else if q == sym"紫" || q == sym"蓝" then 5.0
+               else if q == sym"绿" || q == sym"白" then 3.0
+               else 1.0,
+    _ => 1.0
+  }
+
+// 架势 MOD 与「换生灵/海妖」的减伤不受等级影响（取满级）
+fn effective_level(m: Mod, key: Sym, level: Num) -> Num =
+  let is_stance = (m.id > 100000.0 && m.id < 150000.0) || (m.id > 200000.0 && m.id < 250000.0) in
+  let is_series = (m.系列 == some(sym"换生灵") || m.系列 == some(sym"海妖")) && key == sym"减伤" in
+  if is_stance || is_series then mod_max_level(m) else clamp(level, 0.0, mod_max_level(m))
+
+fn at_index(v: Value, level: Num) -> Num =
+  if not(is_list(v)) then 0.0
+  else if len(v) == 0.0 then 0.0
+  else num_of(at(v, clamp(level, 0.0, len(v) - 1.0)))
+
+fn scale_mod_scalar(m: Mod, key: Sym, value: Num, level: Num) -> Num =
+  let scaled = (value / (mod_max_level(m) + 1.0)) * (level + 1.0) in
+  if key == sym"神智回复" || key == sym"最大耐受" then ceil(scaled) else scaled
+
+fn at_level(v: Value, level: Num) -> Num =
+  if not(is_list(v)) then 0.0
+  else if len(v) == 0.0 then 0.0
+  else num_of(at(v, clamp(level, 1.0, len(v)) - 1.0))
+
+// 可选记录取值：缺失即 0
+fn opt_scalar(rec: Option<Record{..open}>, key: Sym) -> Num =
+  match rec {
+    some(r) => scalar_of(r, key),
+    _ => 0.0
+  }
+
+// 一条 `(mod, key)` 的取值：原路径 `opt_leveled → leveled_scalar → effective_level` 三层，
+// 展开成一层（`effective_level` 仍在键存在后才解析，短路顺序与原实现一致）。
+fn mod_base(m: Mod, rec: Option<Record{..open}>, key: Sym, level: Num) -> Num =
+  match rec {
+    some(r) => match field(r, key) {
+      none => 0.0,
+      some(v) => let lv = effective_level(m, key, level) in
+                 if is_num(v) then scale_mod_scalar(m, key, num_of(v), lv) else at_index(v, lv)
+    },
+    _ => 0.0
+  }
+
+fn record_of(rec: Option<Record{..open}>) -> Record{..open} =
+  match rec {
+    some(r) => r,
+    _ => {}
+  }
+
+fn pair_of(rec: Record{..open}, key: Sym) -> (Num, Num) =
+  match field(rec, key) {
+    none => (0.0, 0.0),
+    some(v) => if is_list(v) then (num_of(at(v, 0)), pair_second(v)) else (0.0, 0.0)
+  }
+
+fn pair_second(v: Value) -> Num =
+  if len(v) >= 2.0 then num_of(at(v, 1)) else 0.0
+
+// ---------------------------------------------------------------------------------------------
+// 分量键查询
+//
+// 引擎没有字符串拼接，所以「元素 → 键」的映射必须在 pack 里显式写出来。这不是重复造轮子，
+// 而是领域词表：游戏有哪几个元素、每个元素的分量键叫什么，本来就是 pack 的职责。
+// ---------------------------------------------------------------------------------------------
+
+
+fn physical_types() -> List<Sym> = [sym"切割", sym"贯穿", sym"震荡", sym"灾厄"]
+
+fn is_physical(el: Sym) -> Bool = any(physical_types(), |p| p == el)
+
+// 该元素的攻击加成键：元素用 `雷属性攻击`，物理子类用 `切割攻击`
+fn attack_key(el: Sym) -> Sym =
+  if el == sym"光" then sym"光属性攻击"
+  else if el == sym"暗" then sym"暗属性攻击"
+  else if el == sym"水" then sym"水属性攻击"
+  else if el == sym"火" then sym"火属性攻击"
+  else if el == sym"雷" then sym"雷属性攻击"
+  else if el == sym"风" then sym"风属性攻击"
+  else if el == sym"切割" then sym"切割攻击"
+  else if el == sym"贯穿" then sym"贯穿攻击"
+  else if el == sym"震荡" then sym"震荡攻击"
+  else if el == sym"灾厄" then sym"灾厄攻击"
+  else sym"<none>"
+
+// 该元素的增伤分量键（上游目前没有按元素的增伤，保留键位以便数据补齐后自动生效）
+fn element_bonus_key(el: Sym) -> Sym =
+  if el == sym"光" then sym"光属性增伤"
+  else if el == sym"暗" then sym"暗属性增伤"
+  else if el == sym"水" then sym"水属性增伤"
+  else if el == sym"火" then sym"火属性增伤"
+  else if el == sym"雷" then sym"雷属性增伤"
+  else if el == sym"风" then sym"风属性增伤"
+  else sym"<none>"
+
+// ---------------------------------------------------------------------------------------------
+// 装配：id → 记录，合法性 = 类型匹配 + 同一 mod 只认第一次
+// ---------------------------------------------------------------------------------------------
+
+fn mod_of(id: Num) -> Option<Mod> = data.mods.by_id(id)
+
+// 按槽位类别取 MOD；同一 MOD 重复放置时只认第一次占的槽。
+// `dedup_by(slots, |s| s.mod)` 先按 mod id 保留首次出现（一次线性遍历），
+// 取代原来「每个槽位都 find 一遍整张表」的 O(n²)。
+fn mods_of_kind(slots: List<Slot>, kind: Sym) -> List<(Mod, Num)> =
+  kind_bucket(kind_slots(dedup_by(slots, |s| s.mod), kind), kind)
+
+// 槽位过滤与 MOD 解析拆开：两者对 `kind` 的依赖不同，各自成函数后才能单独命中记忆化。
+fn kind_slots(slots: List<Slot>, kind: Sym) -> List<Slot> =
+  filter(slots, |s| s.mod > 0.0 && s.kind == kind)
+
+// 槽位 → `(Mod, 等级)`；MOD 的 `类型` 与槽位类别不符时丢弃。
+fn kind_bucket(slots: List<Slot>, kind: Sym) -> List<(Mod, Num)> =
+  concat_map(slots, |s| match mod_of(s.mod) {
+    some(m) => if m.类型 == kind then [(m, s.level)] else [],
+    _ => []
+  })
+
+fn aura_mods(id: Num, level: Num) -> List<(Mod, Num)> =
+  if id <= 0.0 then []
+  else match mod_of(id) {
+    some(m) => [(m, level)],
+    _ => []
+  }
+
+// 角色作用域只汇总**角色槽** MOD（`sum_mods(attr, "角色")` 取角色桶）；
+// 近战/远程/同律槽的词条只在各自武器作用域里生效。
+fn active_mods(c: Config) -> List<(Mod, Num)> =
+  concat(mods_of_kind(c.layout.slots, sym"角色"), aura_mods(c.layout.aura, c.layout.aura_level))
+
+fn scope_mods(c: Config, scope: Sym) -> List<(Mod, Num)> =
+  if scope == sym"角色" then active_mods(c) else mods_of_kind(c.layout.slots, scope)
+
+// ---------------------------------------------------------------------------------------------
+// 属性汇总：**扁平分量**求和
+//
+// 上游 `加成` 是唯一入口；条件属性 `生效` 在条件成立时并入。没有任何 per-element 表。
+// ---------------------------------------------------------------------------------------------
+
+fn sum_key(entries: List<(Mod, Num)>, key: Sym, ctx: CondCtx) -> Num =
+  fold2(entries, 0.0, |acc, m, lv| acc + mod_value(m, key, ctx, lv))
+
+fn mod_value(m: Mod, key: Sym, ctx: CondCtx, level: Num) -> Num =
+  let base = mod_base(m, m.加成, key, level) in
+  match m.生效 {
+    some(eff) => if not(has(eff, sym"条件")) then
+                   base + cond_scalar(m, eff, key, level)
+                 else if conditions_hold(m, ctx) then
+                   base + cond_scalar(m, eff, key, level) + ramp_value(m, key, ctx)
+                 else base,
+    _ => base
+  }
+
+// 条件属性的标量部分：与 `加成` 一样按等级取值
+fn cond_scalar(m: Mod, eff: Record{..open}, key: Sym, level: Num) -> Num =
+  match field(eff, key) {
+    none => 0.0,
+    some(v) => let lv = effective_level(m, key, level) in
+               if is_num(v) then scale_mod_scalar(m, key, num_of(v), lv) else at_index(v, lv)
+  }
+
+// `[斜率, 上限]` 形态：min(条件值 × 斜率, 上限)
+fn ramp_value(m: Mod, key: Sym, ctx: CondCtx) -> Num =
+  let (slope, cap) = pair_of(record_of(m.生效), key) in
+  if slope == 0.0 then 0.0 else min(cond_value(first_condition_key(m), ctx) * slope, cap)
+
+fn first_condition_key(m: Mod) -> Sym =
+  let conds = condition_list(m) in
+  if len(conds) == 0.0 then sym"*id" else at(at(conds, 0), 0)
+
+fn condition_list(m: Mod) -> List<(Sym, Sym, Num)> =
+  match field(record_of(m.生效), sym"条件") {
+    some(v) => if is_list(v) then map(v, |c| (sym_of(at(c, 0)), sym_of(at(c, 1)), cond_arg(c))) else [],
+    _ => []
+  }
+
+fn cond_arg(c: Value) -> Num =
+  if is_list(c) && len(c) >= 3.0 then num_of(at(c, 2)) else 0.0
+
+fn conditions_hold(m: Mod, ctx: CondCtx) -> Bool =
+  all(condition_list(m), |c| op_holds(at(c, 1), cond_value(at(c, 0), ctx), at(c, 2)))
+
+fn op_holds(op: Sym, lhs: Num, rhs: Num) -> Bool =
+  if op == sym"*" then true
+  else if op == sym">=" then lhs >= rhs
+  else if op == sym"<=" then lhs <= rhs
+  else if op == sym">" then lhs > rhs
+  else if op == sym"<" then lhs < rhs
+  else if op == sym"=" then lhs == rhs
+  else if op == sym"!=" then lhs != rhs
+  else false
+
+fn cond_value(key: Sym, ctx: CondCtx) -> Num =
+  if key == sym"*id" then ctx.max_id_count
+  else if is_polarity(key) then polarity_value(key, ctx)
+  else tbl_get(ctx.values, key)
+
+fn is_polarity(k: Sym) -> Bool =
+  k == sym"D" || k == sym"O" || k == sym"V" || k == sym"A"
+  || k == sym"D趋向" || k == sym"O趋向" || k == sym"V趋向" || k == sym"A趋向"
+
+fn polarity_of(k: Sym) -> Sym =
+  if k == sym"D" || k == sym"D趋向" then sym"D"
+  else if k == sym"O" || k == sym"O趋向" then sym"O"
+  else if k == sym"V" || k == sym"V趋向" then sym"V"
+  else if k == sym"A" || k == sym"A趋向" then sym"A"
+  else k
+
+fn polarity_value(k: Sym, ctx: CondCtx) -> Num =
+  let counted = tbl_get(ctx.polarities, polarity_of(k)) in
+  if counted > 0.0 then counted else tbl_get(ctx.values, k)
+
+fn context_of(c: Config, mods: List<(Mod, Num)>) -> CondCtx =
+  let polarities = map(filter(mods, |e| is_some_sym(at(e, 0).极性)), |e| polarity_of(option_sym(at(e, 0).极性))) in
+  let ids = map(mods, |e| at(e, 0).id) in
+  CondCtx {
+    values: values_of(c),
+    polarities: fold(polarities, [], |acc, p| bump(acc, p)),
+    // 同 id 出现次数：一遍扫描累加（原实现每个 id 都重扫整张表，是 O(n²)）。
+    max_id_count: fold(ids, 1.0, |acc, id| max(acc, id_count(ids, id)))
+  }
+
+fn id_count(ids: List<Num>, id: Num) -> Num =
+  fold(ids, 0.0, |acc, x| if x == id then acc + 1.0 else acc)
+
+fn all_context(c: Config) -> CondCtx =
+  context_of(c, concat(concat(active_mods(c), mods_of_kind(c.layout.slots, sym"近战")),
+    concat(mods_of_kind(c.layout.slots, sym"远程"), mods_of_kind(c.layout.slots, sym"同律"))))
+
+fn is_some_sym(v: Option<Sym>) -> Bool =
+  match v { some(x) => true, _ => false }
+
+fn option_sym(v: Option<Sym>) -> Sym =
+  match v { some(x) => x, _ => sym"<none>" }
+
+fn bump(tbl: List<(Sym, Num)>, k: Sym) -> List<(Sym, Num)> =
+  if any(tbl, |kv| at(kv, 0) == k)
+  then map(tbl, |kv| if at(kv, 0) == k then (k, at(kv, 1) + 1.0) else kv)
+  else concat(tbl, [(k, 1.0)])
+
+fn tbl_get(t: List<(Sym, Num)>, key: Sym) -> Num =
+  fold(t, 0.0, |acc, kv| if at(kv, 0) == key then at(kv, 1) else acc)
+
+
+
+
+
+
+// 数据里出现过的全部条件键（24 个）。写成常量避免每次求值都全表扫描 598 条 MOD。
+fn condition_keys() -> List<Sym> = [
+  sym"*id", sym"A趋向", sym"D趋向", sym"O趋向", sym"V趋向",
+  sym"充盈威力", sym"技能威力", sym"技能效益", sym"技能耐久", sym"技能范围",
+  sym"昂扬", sym"神智",
+  sym"单手剑", sym"双刀", sym"双枪", sym"太刀", sym"弓", sym"手枪",
+  sym"榴炮", sym"突击枪", sym"重剑", sym"长柄", sym"霰弹枪", sym"鞭刃"
+]
+
+fn uniq(xs: List<Sym>) -> List<Sym> =
+  fold(xs, [], |acc, x| if any(acc, |y| y == x) then acc else concat(acc, [x]))
+
+// ---------------------------------------------------------------------------------------------
+// 各来源
+// ---------------------------------------------------------------------------------------------
+
+fn char_bonus(id: Num, key: Sym) -> Num =
+  match char_of(id) {
+    some(ch) => scalar_of(ch.加成, key),
+    _ => 0.0
+  }
+
+fn buff_bonus(buffs: List<(Sym, Num)>, key: Sym) -> Num =
+  fold(buffs, 0.0, |acc, e| acc + buff_value(at(e, 0), at(e, 1), key))
+
+fn buff_value(name: Sym, level: Num, key: Sym) -> Num =
+  match data.buffs.by_key(name) {
+    some(b) => buff_attr(b, level, key),
+    _ => 0.0
+  }
+
+// 一条 BUFF 对全部属性的贡献：等级链与系数只解析一次，然后按该 BUFF 实际拥有的键产出。
+fn buff_contribs(b: Buff, level: Num) -> List<(Sym, Num)> =
+  match b.attr {
+    some(attr) => let lx = opt_num(b.lx, 1.0) in
+                  let raw = if level >= 0.0 then level else opt_num(b.dx, opt_num(b.mx, 1.0)) in
+                  let lv = min(max(raw, lx), opt_num(b.mx, 1.0)) in
+                  let a = opt_num(b.a, 1.0) in
+                  let bb = opt_num(b.b, 1.0) in
+                  map(keys(attr), |k| (k, match field(attr, k) {
+                    some(v) => if is_list(v) then at_level(v, lv - lx + 1.0)
+                               else (num_of(v) / a) * (1.0 + (lv - lx) / bb),
+                    _ => 0.0
+                  })),
+    _ => []
+  }
+
+// BUFF 池的贡献表：一遍遍历 BUFF，按键归并（与 `sum_key`/`mod_table_of` 同形）。
+fn buff_table_of(buffs: List<(Sym, Num)>) -> Record{..open} =
+  group_sum(concat_map(buffs, |e| match data.buffs.by_key(at(e, 0)) {
+    some(b) => buff_contribs(b, at(e, 1)),
+    _ => []
+  }))
+
+fn buff_bonus_of(tbl: Record{..open}, key: Sym) -> Num = rec_num(tbl, key)
+
+// 合并 `buff_level` + 三次 `opt_num` + `buff_scaled`：原路径每次取属性 6 次解释器调用，
+// 其中三次 `opt_num` 对同一 buff 反复解析同样的缺省值。
+fn buff_attr(b: Buff, level: Num, key: Sym) -> Num =
+  match b.attr {
+    some(attr) => match field(attr, key) {
+      some(v) => let lx = opt_num(b.lx, 1.0) in
+                 let raw = if level >= 0.0 then level else opt_num(b.dx, opt_num(b.mx, 1.0)) in
+                 let lv = min(max(raw, lx), opt_num(b.mx, 1.0)) in
+                 if is_list(v) then at_level(v, lv - lx + 1.0)
+                 else (num_of(v) / opt_num(b.a, 1.0)) * (1.0 + (lv - lx) / opt_num(b.b, 1.0)),
+      _ => 0.0
+    },
+    _ => 0.0
+  }
+
+fn opt_num(v: Option<Num>, d: Num) -> Num =
+  match v { some(x) => x, _ => d }
+
+fn weapon_bonus(id: Num, level: Num, refine: Num, key: Sym) -> Num =
+  if id <= 0.0 then 0.0
+  else match weapon_of(id) {
+    some(w) => weapon_scale(w, refine) * opt_scalar(w.加成, key),
+    _ => 0.0
+  }
+
+fn weapon_scale(w: Weapon, refine: Num) -> Num =
+  if has_forge(w) then 1.0 else (clamp(refine, 0.0, 5.0) + 5.0) / 5.0
+
+fn has_forge(w: Weapon) -> Bool =
+  match w.熔炉 { some(x) => len(x) > 0.0, _ => false }
+
+// 武器特效 = `LeveledBuff` 实例：`attr` 按 `(1 + (等级 - lx)/b) * ratio` 缩放，
+// 等级缺省取 `dx ?? mx ?? 1`（`最好的一天` 的 `mx=9` 因此放大 9 倍）。
+fn weapon_effect(id: Num, refine: Num, element: Sym, key: Sym) -> Num =
+  if id <= 0.0 then 0.0
+  else match data.effects.by_id(id) {
+    some(e) => if effect_applies(e, element) then
+                 opt_scalar(e.attr, key) * effect_level_scale(e) * effect_ratio(refine)
+               else 0.0,
+    _ => 0.0
+  }
+
+fn effect_level_scale(e: Effect) -> Num =
+  let lv = opt_num(e.dx, opt_num(e.mx, 1.0)) in
+  let lo = opt_num(e.lx, 1.0) in
+  1.0 + (lv - lo) / opt_num(e.a, 1.0)
+
+fn effect_applies(e: Effect, element: Sym) -> Bool =
+  match e.限定 { some(lim) => lim == element, _ => true }
+
+fn effect_ratio(refine: Num) -> Num = (clamp(refine, 0.0, 5.0) + 5.0) / 10.0
+
+fn custom_bonus(entries: List<(Sym, Num)>, key: Sym) -> Num =
+  fold(entries, 0.0, |acc, e| if at(e, 0) == key then acc + at(e, 1) else acc)
+
+// `<元素>MOD属性`：对元素系列 MOD（狮鹫/百首/契约者/换生灵）的词条加权
+fn mod_attr_boost(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx, key: Sym) -> Num =
+  let mt = mod_table_of(mods, ctx) in
+  mod_attr_ratio(c, mt) * rec_num(series_table(mods, ctx), key)
+
+fn element_series_mods(mods: List<(Mod, Num)>) -> List<(Mod, Num)> =
+  filter(mods, |e| element_series(at(e, 0)))
+
+// 元素系列 MOD 的贡献表：按键一次归并（原来每个属性都要重扫整个系列），
+// 逐键只剩一次记录取值 + 一次加权。
+fn series_table(mods: List<(Mod, Num)>, ctx: CondCtx) -> Record{..open} =
+  group_sum(concat_map(element_series_mods(mods), |e| mod_contribs(at(e, 0), at(e, 1), ctx)))
+
+// `mt` 已是全部 MOD 的按键归并（含 `加成` 与生效词条），该键直接取即可。
+fn mod_attr_ratio(c: Config, mt: Record{..open}) -> Num =
+  let k = mod_attr_key(char_element(c.char_id)) in
+  rec_num(mt, k) + buff_bonus(all_buffs(c), k)
+
+fn element_series(m: Mod) -> Bool =
+  match m.系列 {
+    some(s) => s == sym"狮鹫" || s == sym"百首" || s == sym"契约者" || s == sym"换生灵",
+    _ => false
+  }
+
+fn mod_attr_key(el: Sym) -> Sym =
+  if el == sym"光" then sym"光MOD属性"
+  else if el == sym"暗" then sym"暗MOD属性"
+  else if el == sym"水" then sym"水MOD属性"
+  else if el == sym"火" then sym"火MOD属性"
+  else if el == sym"雷" then sym"雷MOD属性"
+  else if el == sym"风" then sym"风MOD属性"
+  else sym"<none>"
+
+// 一个分量键的完整来源（角色面板口径）
+fn bonus_of(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx, key: Sym) -> Num =
+  let mt = mod_table_of(mods, ctx) in
+  bonus_of_b(c, series_table(mods, ctx), mt, key,
+             mod_attr_ratio(c, mt), buff_table_of(all_buffs(c)))
+
+// `attr_ratio` 与 `buffs` 由调用方预算：`panel_ctx` 的 40 个键共用同一份。
+// 一个 MOD 对全部属性的贡献（`加成` ∪ `生效` 的键，去掉 `条件`）。
+fn mod_keys(m: Mod) -> List<Sym> =
+  filter(uniq(concat(
+    match m.加成 { some(r) => keys(r), _ => [] },
+    match m.生效 { some(r) => keys(r), _ => [] }
+  )), |k| k != sym"条件")
+
+fn mod_contribs(m: Mod, level: Num, ctx: CondCtx) -> List<(Sym, Num)> =
+  map(mod_keys(m), |k| (k, mod_value(m, k, ctx, level)))
+
+// 全部 MOD 的贡献按键归并：一遍遍历 MOD，等价于「每个键各自 sum_key」，
+// 但把 40×24 次取值压成 Σ(每个 MOD 的词条数)。
+fn mod_table_of(mods: List<(Mod, Num)>, ctx: CondCtx) -> Record{..open} =
+  group_sum(concat_map(mods, |e| mod_contribs(at(e, 0), at(e, 1), ctx)))
+
+fn bonus_of_b(c: Config, st: Record{..open}, mt: Record{..open}, key: Sym,
+              attr_ratio: Num, btbl: Record{..open}) -> Num =
+  char_bonus(c.char_id, key)
+    + rec_num(mt, key)
+    + attr_ratio * rec_num(st, key)
+    + weapon_bonus(c.melee_weapon, c.melee_level, c.melee_refine, key)
+    + weapon_bonus(c.ranged_weapon, c.ranged_level, c.ranged_refine, key)
+    + weapon_effect(c.melee_weapon, c.melee_refine, char_element(c.char_id), key)
+    + weapon_effect(c.ranged_weapon, c.ranged_refine, char_element(c.char_id), key)
+    + buff_bonus_of(btbl, key)
+    + custom_bonus(c.custom_buff, key)
+
+// 构筑的完整 BUFF 列表：显式 BUFF + 潜质 BUFF + 魔灵被动/主动
+fn all_buffs(c: Config) -> List<(Sym, Num)> =
+  concat(concat(c.layout.buffs, trait_buffs(c.traits)), pet_buffs(c))
+
+fn trait_buffs(traits: List<(Num, Num)>) -> List<(Sym, Num)> =
+  concat_map(traits, |t|
+    match trait_buff_name(at(t, 0)) {
+      some(n) => [(n, at(t, 1))],
+      _ => []
+    })
+
+// 潜质 BUFF 名 = `魔灵潜质:` + 潜质名。引擎没有运行期符号拼接，因此显式列出数据里的 14 个名字。
+fn trait_buff_name(bid: Num) -> Option<Sym> =
+  let name = match find(data.petTraits.all(), |t| t.bid == bid && t.r == 5.0) {
+    some(t) => t.name,
+    _ => sym"<none>"
+  } in
+  if name == sym"倔强" then some(sym"魔灵潜质:倔强")
+  else if name == sym"凶猛" then some(sym"魔灵潜质:凶猛")
+  else if name == sym"壮实" then some(sym"魔灵潜质:壮实")
+  else if name == sym"幻影" then some(sym"魔灵潜质:幻影")
+  else if name == sym"振奋" then some(sym"魔灵潜质:振奋")
+  else if name == sym"敏锐" then some(sym"魔灵潜质:敏锐")
+  else if name == sym"激昂" then some(sym"魔灵潜质:激昂")
+  else if name == sym"激进" then some(sym"魔灵潜质:激进")
+  else if name == sym"甲胄" then some(sym"魔灵潜质:甲胄")
+  else if name == sym"耐劳" then some(sym"魔灵潜质:耐劳")
+  else if name == sym"胆小" then some(sym"魔灵潜质:胆小")
+  else if name == sym"蛮横" then some(sym"魔灵潜质:蛮横")
+  else if name == sym"贪心" then some(sym"魔灵潜质:贪心")
+  else if name == sym"高效" then some(sym"魔灵潜质:高效")
+  else none
+
+fn pet_buffs(c: Config) -> List<(Sym, Num)> =
+  if c.pet_id <= 0.0 then []
+  else match data.pets.by_id(c.pet_id) {
+    some(p) => concat([(p.名称, pet_effective_level(c))],
+                      pet_active_buff(p.名称, pet_effective_level(c), c.pet_coverage)),
+    _ => []
+  }
+
+fn pet_active_buff(name: Sym, level: Num, coverage: Num) -> List<(Sym, Num)> =
+  if coverage <= 0.0 then []
+  else if name == sym"堇青艾尔芙" then [(sym"堇青艾尔芙(主动)", level)]
+  else []
+
+fn pet_effective_level(c: Config) -> Num =
+  let bonus = fold(c.traits, 0.0, |acc, t| if at(t, 0) == 1030.0 then acc + 1.0 else acc) in
+  clamp((if c.pet_level >= 0.0 then c.pet_level else 3.0) + bonus, 0.0, 4.0)
+
+fn char_of(id: Num) -> Option<Char> = data.chars.by_id(id)
+
+fn char_element(id: Num) -> Sym =
+  match char_of(id) { some(ch) => ch.属性, _ => sym"<none>" }
+
+fn monster_of(id: Num) -> Option<Monster> = data.monsters.by_id(id)
+
+fn weapon_of(id: Num) -> Option<Weapon> = data.weapons.by_id(id)
+
+// ---------------------------------------------------------------------------------------------
+// 面板：全部是扁平分量
+// ---------------------------------------------------------------------------------------------
+
+fn panel(c: Config) -> Record{..open} =
+  panel_ctx(c, active_mods(c), all_context(c))
+
+fn panel_ctx(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx) -> Record{..open} =
+  let mt = mod_table_of(mods, ctx) in
+  let ratio = mod_attr_ratio(c, mt) in
+  let buffs = all_buffs(c) in
+  let btbl = buff_table_of(buffs) in
+  let series = series_table(mods, ctx) in
+  {
+    攻击: bonus_of_b(c, series, mt, sym"攻击", ratio, btbl),
+    固定攻击: bonus_of_b(c, series, mt, sym"固定攻击", ratio, btbl),
+    生命: bonus_of_b(c, series, mt, sym"生命", ratio, btbl),
+    防御: bonus_of_b(c, series, mt, sym"防御", ratio, btbl),
+    护盾: bonus_of_b(c, series, mt, sym"护盾", ratio, btbl),
+    神智: bonus_of_b(c, series, mt, sym"神智", ratio, btbl),
+    属性攻击: bonus_of_b(c, series, mt, sym"属性攻击", ratio, btbl),
+    元素增伤: bonus_of_b(c, series, mt, sym"元素增伤", ratio, btbl),
+    物理增伤: bonus_of_b(c, series, mt, sym"物理增伤", ratio, btbl),
+    增伤: bonus_of_b(c, series, mt, sym"增伤", ratio, btbl),
+    技能伤害: bonus_of_b(c, series, mt, sym"技能伤害", ratio, btbl),
+    武器伤害: bonus_of_b(c, series, mt, sym"武器伤害", ratio, btbl),
+    技能追伤: bonus_of_b(c, series, mt, sym"技能追伤", ratio, btbl),
+    追加伤害: bonus_of_b(c, series, mt, sym"追加伤害", ratio, btbl),
+    独立增伤: bonus_of_b(c, series, mt, sym"独立增伤", ratio, btbl),
+    技能独立增伤: bonus_of_b(c, series, mt, sym"技能独立增伤", ratio, btbl),
+    属性穿透: bonus_of_b(c, series, mt, sym"属性穿透", ratio, btbl),
+    无视防御: bonus_of_b(c, series, mt, sym"无视防御", ratio, btbl),
+    技能无视防御: bonus_of_b(c, series, mt, sym"技能无视防御", ratio, btbl),
+    暴击: bonus_of_b(c, series, mt, sym"暴击", ratio, btbl),
+    暴伤: bonus_of_b(c, series, mt, sym"暴伤", ratio, btbl),
+    触发: bonus_of_b(c, series, mt, sym"触发", ratio, btbl),
+    触发倍率: bonus_of_b(c, series, mt, sym"触发倍率", ratio, btbl),
+    充盈威力: bonus_of_b(c, series, mt, sym"充盈威力", ratio, btbl),
+    充盈转化: bonus_of_b(c, series, mt, sym"充盈转化", ratio, btbl),
+    技能威力: bonus_of_b(c, series, mt, sym"技能威力", ratio, btbl),
+    技能耐久: bonus_of_b(c, series, mt, sym"技能耐久", ratio, btbl),
+    技能效益: bonus_of_b(c, series, mt, sym"技能效益", ratio, btbl),
+    技能范围: bonus_of_b(c, series, mt, sym"技能范围", ratio, btbl),
+    技能速度: bonus_of_b(c, series, mt, sym"技能速度", ratio, btbl),
+    昂扬: bonus_of_b(c, series, mt, sym"昂扬", ratio, btbl),
+    背水: bonus_of_b(c, series, mt, sym"背水", ratio, btbl),
+    减伤: bonus_of_b(c, series, mt, sym"减伤", ratio, btbl),
+    失衡易伤: bonus_of_b(c, series, mt, sym"失衡易伤", ratio, btbl),
+    攻速: bonus_of_b(c, series, mt, sym"攻速", ratio, btbl),
+    多重: bonus_of_b(c, series, mt, sym"多重", ratio, btbl),
+    召唤物伤害: bonus_of_b(c, series, mt, sym"召唤物伤害", ratio, btbl),
+    召唤物属性继承比例: bonus_of_b(c, series, mt, sym"召唤物属性继承比例", ratio, btbl),
+    召唤物攻击速度: bonus_of_b(c, series, mt, sym"召唤物攻击速度", ratio, btbl),
+    召唤物攻击速度转化: bonus_of_b(c, series, mt, sym"召唤物攻击速度转化", ratio, btbl),
+    召唤物独立增伤: bonus_of_b(c, series, mt, sym"召唤物独立增伤", ratio, btbl),
+    召唤物范围: bonus_of_b(c, series, mt, sym"召唤物范围", ratio, btbl),
+    召唤物范围转化: bonus_of_b(c, series, mt, sym"召唤物范围转化", ratio, btbl)
+  }
+
+fn rec_num(rec: Record{..open}, key: Sym) -> Num = get_or(field(rec, key), 0.0)
+
+// 按作用域取一个分量。对应 `BuildContext::total_bonus` 的完整来源链：
+//   角色加成 → 近战武器 → 远程武器 → MOD 桶 → BUFF 池(+MOD 特效层) → 武器特效层
+// `共享池` 的口径：角色作用域全吃；武器作用域只吃 `攻击`/`增伤`/阵营增伤之外的键。
+fn scoped_value(c: Config, scope: Sym, key: Sym) -> Num =
+  scoped_sum(c, scope, key, all_context(c))
+
+fn scoped_sum(c: Config, scope: Sym, key: Sym, ctx: CondCtx) -> Num =
+  let mods = sum_key(scope_mods(c, scope), key, ctx) + mods_extra(c, scope, key, ctx) in
+  char_part(c, scope, key)
+    + weapon_part(c, scope, key)
+    + mods
+    + buff_part(c, scope, key)
+    + weapon_layer_part(c, scope, key)
+
+// 可从角色槽穿透到武器槽的属性（`sum_mods` 的 `penetrates` 分支）
+fn penetrating(key: Sym) -> Bool =
+  key == sym"暴击" || key == sym"暴伤" || key == sym"触发" || key == sym"攻速"
+  || key == sym"充盈转化" || key == sym"召唤物攻击速度转化" || key == sym"召唤物范围转化"
+
+// MOD 桶 = 主词条 + 特效层（`mods_buff_props` 与主词条同桶，按作用域过滤）
+fn mods_extra(c: Config, scope: Sym, key: Sym, ctx: CondCtx) -> Num =
+  let penetrate = if penetrating(key) && scope != sym"角色"
+                  then sum_key(active_mods(c), key, ctx) else 0.0 in
+  penetrate + effect_scalar_all(c, scope_prefixed_or_key(scope, key))
+
+fn scope_prefixed_or_key(scope: Sym, key: Sym) -> Sym =
+  if scope == sym"角色" then key else scope_prefix_key(scope, key)
+
+// 角色自带加成：角色作用域全吃；武器作用域只吃 `攻击` 以外的键
+fn char_part(c: Config, scope: Sym, key: Sym) -> Num =
+  if scope == sym"角色" || key != sym"攻击" then char_bonus(c.char_id, key) else 0.0
+
+// 两把武器：角色作用域全吃；武器作用域只吃自己且 `攻击` 以外的键
+fn weapon_part(c: Config, scope: Sym, key: Sym) -> Num =
+  let melee = scope == sym"角色" || (scope == sym"近战" && key != sym"攻击") in
+  let ranged = scope == sym"角色" || (scope == sym"远程" && key != sym"攻击") in
+  (if melee then weapon_bonus(c.melee_weapon, c.melee_level, c.melee_refine, key) else 0.0)
+    + (if ranged then weapon_bonus(c.ranged_weapon, c.ranged_level, c.ranged_refine, key) else 0.0)
+
+// 共享池：角色作用域全吃；武器作用域不吃 `攻击`/`增伤`/阵营增伤
+// 武器作用域下 `攻击` 与阵营增伤不吃共享池；其余（含 `增伤`/`多重`）走共享池
+fn shared_pool(scope: Sym, key: Sym) -> Bool =
+  scope == sym"角色" || (key != sym"攻击" && not(faction_bonus(key)))
+
+// BUFF 池：显式/潜质/魔灵 BUFF；武器作用域下只有共享键才吃
+fn buff_part(c: Config, scope: Sym, key: Sym) -> Num =
+  if buff_scope_ok(key, scope) && shared_pool(scope, key)
+  then buff_bonus(all_buffs(c), key) else 0.0
+
+// MOD 特效层（`mods_buff_props`）：`effect.data` 的属性**保留原始前缀**进全局池，
+// 由 `weapon_panel` 的 `<前缀><键>` 查询取到（如远程 MOD 的 `近战增伤` 只对近战武器生效）。
+fn mod_buff_part(c: Config, key: Sym) -> Num =
+  fold(all_slots(c), 0.0, |acc, e| acc + effect_scalar(at(e, 0), key))
+
+fn all_slots(c: Config) -> List<(Mod, Num)> =
+  concat(concat(active_mods(c), mods_of_kind(c.layout.slots, sym"近战")),
+    concat(mods_of_kind(c.layout.slots, sym"远程"), mods_of_kind(c.layout.slots, sym"同律")))
+
+// 特效属性键带 `@` 前缀（`@近战增伤`），对应「BUFF 层」；查表时两种写法都认。
+fn effect_scalar(m: Mod, key: Sym) -> Num =
+  match data.effects.by_id(m.id) {
+    some(e) => match e.attr {
+      some(attr) => scalar_of(attr, key) + at_prefixed(attr, key),
+      _ => 0.0
+    },
+    _ => 0.0
+  }
+
+// 数据里唯一带 `@` 前缀的特效键是 `@近战增伤`
+fn at_prefixed(attr: Record{..open}, key: Sym) -> Num =
+  if key == sym"近战增伤" then scalar_of(attr, sym"@近战增伤") else 0.0
+
+
+
+// 武器特效层属于武器自身，只在角色作用域并入（武器作用域由 `weapon_panel` 单独读取）
+fn weapon_layer_part(c: Config, scope: Sym, key: Sym) -> Num = 0.0
+
+// 武器特效层（`weapon_buff_props`）：两把武器的特效之和，按 `(精炼+5)/10` 缩放
+fn weapon_layer_of(id: Num) -> Num = 0.0
+
+
+fn faction_bonus(key: Sym) -> Bool =
+  key == sym"歧视" || key == sym"秽兽增伤" || key == sym"军团增伤"
+  || key == sym"神弃者增伤" || key == sym"神使增伤" || key == sym"华胥增伤"
+
+// `is_buff_in_scope`：带武器前缀的属性只在该作用域下计入
+fn buff_scope_ok(key: Sym, scope: Sym) -> Bool =
+  if is_melee_key(key) then scope == sym"近战"
+  else if is_ranged_key(key) then scope == sym"远程"
+  else if is_skill_key(key) then scope == sym"同律"
+  else true
+
+fn is_melee_key(k: Sym) -> Bool =
+  k == sym"近战攻击" || k == sym"近战暴击" || k == sym"近战暴伤" || k == sym"近战触发"
+  || k == sym"近战攻速" || k == sym"近战多重" || k == sym"近战增伤" || k == sym"近战独立增伤"
+  || k == sym"近战物理"
+
+fn is_ranged_key(k: Sym) -> Bool =
+  k == sym"远程攻击" || k == sym"远程暴击" || k == sym"远程暴伤" || k == sym"远程触发"
+  || k == sym"远程攻速" || k == sym"远程多重" || k == sym"远程增伤" || k == sym"远程独立增伤"
+  || k == sym"远程物理"
+
+fn is_skill_key(k: Sym) -> Bool = false
+
+// 武器作用域：面板由该武器自身的基础值 × 作用域词条得到（`weapon_panel`）；
+// 面板没有的键回落到角色属性。
+fn attr_value(c: Config, key: Sym, scope: Sym) -> Num =
+  attr_value_p(c, panel(c), key, scope)
+
+// 面板由调用方传入：表达式求值时复用同一份，避免反复重建（会耗尽求值预算）
+// 武器作用域只按**被问到的那个键**求值：整张武器面板有 12 个键，表达式通常只要一两个，
+// 逐键计算省掉其余键的 `scoped_value` 链。键集合与 `weapon_panel` 的面板键严格一致，
+// 公式逐字照搬，因此取值逐位相同；面板外落到角色口径。
+fn attr_value_p(c: Config, p: Record{..open}, key: Sym, scope: Sym) -> Num =
+  if scope == sym"角色" then attr_value_char_p(c, p, key)
+  else match weapon_for_scope(c, scope) {
+    some(wp) => if weapon_panel_key(key) then weapon_key_value(c, scope, wp, key)
+                else attr_value_char_p(c, p, key),
+    none => attr_value_char_p(c, p, key)
+  }
+
+fn weapon_panel_key(key: Sym) -> Bool =
+  key == sym"攻击" || key == sym"暴击" || key == sym"暴伤" || key == sym"触发"
+  || key == sym"攻速" || key == sym"多重" || key == sym"增伤" || key == sym"独立增伤"
+  || key == sym"追加伤害" || key == sym"充盈转化"
+  || key == sym"召唤物攻击速度转化" || key == sym"召唤物范围转化"
+
+// 武器面板（`attributes.rs::weapon_panel`）的**单键**取值。只有武器自身的基础值吃乘法，
+// 其余键是作用域词条（`近战X`）与通用词条之和；公式与整面板逐字一致。
+fn weapon_key_value(c: Config, scope: Sym, wp: Weapon, key: Sym) -> Num =
+  let pre = scope_prefix(scope) in
+  let bonus = |k| prefixed_value(c, scope, pre, k) in
+  if key == sym"攻击" then
+    let physical = prefixed_value(c, scope, pre, sym"物理") + damage_type_bonus(c, wp, scope) in
+    let atk_ratio = mastery_ratio(c, wp, scope) in
+    let base_atk = round2(wp.攻击 * level_multiplier(c.char_level)) in
+    round2(base_atk * (1.0 + bonus(sym"攻击")) * atk_ratio * (1.0 + physical))
+  else if key == sym"暴击" then round2(wp.暴击 * (1.0 + bonus(sym"暴击")))
+  else if key == sym"暴伤" then round2(wp.暴伤 * (1.0 + bonus(sym"暴伤")))
+  else if key == sym"触发" then round2(wp.触发 * (1.0 + bonus(sym"触发")))
+  else if key == sym"攻速" then round2(weapon_speed(wp) * (1.0 + min(2.0, bonus(sym"攻速"))))
+  else if key == sym"多重" then round2(1.0 + bonus(sym"多重"))
+  else if key == sym"增伤" then scoped_value(c, scope, sym"增伤")
+  else if key == sym"独立增伤" then scoped_value(c, scope, sym"独立增伤")
+  else if key == sym"追加伤害" then sum_key(active_mods(c), sym"追加伤害", all_context(c))
+  else if key == sym"充盈转化" then 1.0 + bonus(sym"充盈转化")
+  else if key == sym"召唤物攻击速度转化" then bonus(sym"召唤物攻击速度转化")
+  else bonus(sym"召唤物范围转化")
+
+fn scope_prefix(scope: Sym) -> Sym =
+  if scope == sym"近战" then sym"近战"
+  else if scope == sym"远程" then sym"远程"
+  else if scope == sym"同律" then sym"同律"
+  else sym"<none>"
+
+// `<前缀><键>` 形式的词条（如 `近战攻击`）
+// `total_bonus(prefixed(prefix, key))` + `total_bonus(key)`。
+// 后一项在武器作用域下仍走 `shared_pool`：`增伤` 不吃共享池，因此只取作用域桶。
+// `total_bonus(prefixed(prefix, key))` 与 `total_bonus(key)` 各取一次；两者都含 MOD 桶
+// （含特效层），因此这里把「前缀键」与「通用键」分别累加，不再重复加通用键。
+fn prefixed_value(c: Config, scope: Sym, pre: Sym, key: Sym) -> Num =
+  let p = scope_prefix_key(scope, key) in
+  if p == key then scoped_value(c, scope, key)
+  else scoped_value(c, scope, p) + scope_only(c, scope, key)
+
+// 武器作用域自身的桶（`shared_pool` 为 false 时 `total_bonus(key)` 的实际来源）
+fn scope_only(c: Config, scope: Sym, key: Sym) -> Num =
+  sum_key(scope_mods(c, scope), key, all_context(c))
+
+// `<作用域><键>`：如 近战+增伤 → `近战增伤`
+fn scope_prefix_key(scope: Sym, key: Sym) -> Sym =
+  if scope == sym"近战" then melee_prefixed(key)
+  else if scope == sym"远程" then ranged_prefixed(key)
+  else if scope == sym"同律" then skill_prefixed(key)
+  else key
+
+fn melee_prefixed(key: Sym) -> Sym =
+  if key == sym"攻击" then sym"近战攻击"
+  else if key == sym"暴击" then sym"近战暴击"
+  else if key == sym"暴伤" then sym"近战暴伤"
+  else if key == sym"触发" then sym"近战触发"
+  else if key == sym"攻速" then sym"近战攻速"
+  else if key == sym"多重" then sym"近战多重"
+  else if key == sym"增伤" then sym"近战增伤"
+  else if key == sym"独立增伤" then sym"近战独立增伤"
+  else key
+
+fn ranged_prefixed(key: Sym) -> Sym =
+  if key == sym"攻击" then sym"远程攻击"
+  else if key == sym"暴击" then sym"远程暴击"
+  else if key == sym"暴伤" then sym"远程暴伤"
+  else if key == sym"触发" then sym"远程触发"
+  else if key == sym"攻速" then sym"远程攻速"
+  else if key == sym"多重" then sym"远程多重"
+  else if key == sym"增伤" then sym"远程增伤"
+  else if key == sym"独立增伤" then sym"远程独立增伤"
+  else key
+
+fn skill_prefixed(key: Sym) -> Sym =
+  if key == sym"增伤" then sym"同律近战增伤"
+  else key
+
+fn effect_scalar_all(c: Config, key: Sym) -> Num =
+  fold(all_slots(c), 0.0, |acc, e| acc + effect_scalar(at(e, 0), key))
+
+// 武器伤害类型对应的攻击加成（`切割攻击` 等）
+fn damage_type_bonus(c: Config, wp: Weapon, scope: Sym) -> Num =
+  match wp.伤害类型 {
+    some(t) => scoped_value(c, scope, attack_key(t)),
+    _ => 0.0
+  }
+
+fn weapon_speed(wp: Weapon) -> Num =
+  match wp.射击间隔 {
+    some(x) => if x == 0.0 then 0.0 else round4(1.0 / x),
+    _ => 1.0
+  }
+
+
+fn round4(x: Num) -> Num = to_fixed(x, 4.0)
+
+// 精通倍率：同律 1.4，其余 1.2；未精通 1.0
+fn mastery_ratio(c: Config, wp: Weapon, scope: Sym) -> Num =
+  let category = weapon_category(wp) in
+  let mastered = match char_of(c.char_id) {
+    some(ch) => any(ch.精通, |x| x == category) || any(ch.额外精通, |x| x == category),
+    _ => false
+  } in
+  if mastered then if scope == sym"同律" then 1.4 else 1.2 else 1.0
+
+fn weapon_category(wp: Weapon) -> Sym =
+  if len(wp.类型) >= 2.0 then at(wp.类型, 1.0) else sym"<none>"
+
+fn weapon_for_scope(c: Config, scope: Sym) -> Option<Weapon> =
+  if scope == sym"远程" then weapon_of(c.ranged_weapon) else weapon_of(c.melee_weapon)
+
+// 这些键在引擎里以 `1 + 加成` 的形式出现（基础值 1 的属性）
+fn one_based(key: Sym) -> Bool =
+  key == sym"技能威力" || key == sym"技能耐久" || key == sym"技能效益" || key == sym"技能范围"
+  || key == sym"技能速度" || key == sym"攻速" || key == sym"多重" || key == sym"召唤物属性继承比例"
+
+
+fn attr_value_char_p(c: Config, p: Record{..open}, key: Sym) -> Num =
+  let b = |k| rec_num(p, k) in
+  if key == sym"攻击" then attack_of(c, p, char_element(c.char_id))
+  else if key == sym"固定攻击" then b(sym"固定攻击")
+  else if key == sym"生命" then round(base_stat(c, sym"基础生命") * (1.0 + b(sym"生命") + c.resonance))
+  else if key == sym"护盾" then round(base_stat(c, sym"基础护盾") * (1.0 + b(sym"护盾") + c.resonance))
+  else if key == sym"防御" then round(base_stat(c, sym"基础防御") * (1.0 + b(sym"防御") + c.resonance))
+  else if key == sym"神智" then round(base_stat(c, sym"基础神智") * (1.0 + b(sym"神智")))
+  else if key == sym"技能范围" then min(2.8, 1.0 + b(key))
+  else if key == sym"召唤物独立增伤" then summon_indep_of(c, p)
+  else if key == sym"充盈威力" then b(key) + fullness_from_weapons(c)
+  else if key == sym"召唤物攻击速度" then b(key) + summon_speed_from_weapons(c)
+  else if one_based(key) then b(key) + 1.0
+  else if key == sym"技能耐久" then min(4.0, 1.0 + b(key))
+  else if key == sym"技能效益" then min(1.75, 1.0 + b(key))
+  else if key == sym"技能范围" then min(2.8, 1.0 + b(key))
+  else if key == sym"技能速度" then min(2.8, 1.0 + b(key))
+  else if key == sym"属性穿透" then b(key)
+  else if key == sym"无视防御" then clamp(b(key), 0.0, 1.0)
+  else if key == sym"技能无视防御" then clamp(b(key), 0.0, 1.0)
+  else b(key)
+
+// 充盈威力：角色 MOD 加成 + Σ 武器(触发率 - 1).max(0) × 该武器充盈转化
+// 只用 MOD/BUFF 词条（不重建整个武器面板），避免 `weapon_panel → context → values_of` 成环。
+fn fullness_from_weapons(c: Config) -> Num =
+  fullness_ctx(c, all_context(c))
+
+fn fullness_ctx(c: Config, ctx: CondCtx) -> Num =
+  fold([sym"近战", sym"远程"], 0.0, |acc, s|
+    acc + max(0.0, weapon_trigger_rate(c, ctx, s) - 1.0) * weapon_conversion(c, ctx, s))
+
+// 武器触发率：`round2(base × (1 + 近战/远程触发 + 通用触发 + 武器特效层))`
+// （`total_bonus` 的共享池会并入武器特效层的 `触发`，如 `10299` 的 `1`）
+fn weapon_trigger_rate(c: Config, ctx: CondCtx, scope: Sym) -> Num =
+  let wp = weapon_for_scope(c, scope) in
+  match wp {
+    some(w) => round2(w.触发 * (1.0 + scoped_mods_ctx(c, ctx, scope, sym"触发")
+      + sum_key(active_mods(c), sym"触发", ctx)
+      + weapon_effect(c.melee_weapon, c.melee_refine, char_element(c.char_id), sym"触发")
+      + weapon_effect(c.ranged_weapon, c.ranged_refine, char_element(c.char_id), sym"触发"))),
+    _ => 0.0
+  }
+
+fn weapon_conversion(c: Config, ctx: CondCtx, scope: Sym) -> Num =
+  1.0 + scoped_mods_ctx(c, ctx, scope, sym"充盈转化")
+
+// 只取该作用域的 MOD 词条（含特效层），不碰角色/武器/BUFF 池
+fn scoped_mods_only(c: Config, scope: Sym, key: Sym) -> Num =
+  scoped_mods_ctx(c, all_context(c), scope, key)
+
+fn scoped_mods_ctx(c: Config, ctx: CondCtx, scope: Sym, key: Sym) -> Num =
+  sum_key(scope_mods(c, scope), key, ctx) + effect_scalar_all(c, scope_prefix_key(scope, key))
+
+// 召唤物攻速：近战武器攻速 × 召唤物攻击速度转化
+fn summon_speed_from_weapons(c: Config) -> Num =
+  summon_speed_ctx(c, all_context(c))
+
+fn summon_speed_ctx(c: Config, ctx: CondCtx) -> Num =
+  if c.melee_weapon <= 0.0 then 0.0
+  else
+    let speed = match weapon_for_scope(c, sym"近战") {
+      some(w) => round2(weapon_speed(w) * (1.0 + min(2.0, scoped_mods_ctx(c, ctx, sym"近战", sym"攻速")))),
+      _ => 0.0
+    } in
+    max(0.0, speed) * (scoped_mods_ctx(c, ctx, sym"近战", sym"召唤物攻击速度转化")
+      + scoped_mods_ctx(c, ctx, sym"角色", sym"召唤物攻击速度转化"))
+
+fn base_stat(c: Config, key: Sym) -> Num =
+  match char_of(c.char_id) {
+    some(ch) => leveled_stat(ch, c.char_level, key),
+    _ => 0.0
+  }
+
+// 防御与神智不随等级缩放（上游 `LeveledChar.update_by_level`）
+fn leveled_stat(ch: Char, level: Num, key: Sym) -> Num =
+  let m = level_multiplier(level) in
+  if key == sym"基础攻击" then round2(ch.基础攻击 * m)
+  else if key == sym"基础生命" then round(ch.基础生命 * m)
+  else if key == sym"基础护盾" then round(ch.基础护盾 * m)
+  else if key == sym"基础防御" then ch.基础防御
+  else if key == sym"基础神智" then ch.基础神智
+  else 0.0
+
+
+// 等级倍率表（上游 `LeveledChar` 用同一张 80 级表；数值来自 `dob-calc-core/src/const_tables.rs`）
+fn level_multiplier(level: Num) -> Num =
+  at(level_table(), clamp(level, 1.0, 80.0) - 1.0)
+
+fn level_table() -> List<Num> = [
+  1.0, 1.0422, 1.086, 1.1305, 1.1774, 1.3988, 1.4474, 1.5012,
+  1.5589, 1.6157, 1.8331, 1.8921, 1.9527, 2.0162, 2.0813, 2.3128,
+  2.3809, 2.4505, 2.5186, 2.5897, 2.8339, 2.9053, 2.9795, 3.0538,
+  3.1288, 3.3098, 3.5538, 3.6327, 3.7117, 3.7921, 4.1028, 4.1842,
+  4.2765, 4.3725, 4.4705, 4.8047, 4.9053, 5.0059, 5.1021, 5.1933,
+  5.5294, 5.621, 5.7141, 5.8079, 5.9032, 6.2508, 6.348, 6.4451,
+  6.5437, 6.6416, 6.8191, 7.1079, 7.2107, 7.3127, 7.4155, 7.7876,
+  7.8938, 7.9999, 8.1061, 8.5685, 8.6863, 8.803, 8.9214, 9.0424,
+  9.7101, 9.7488, 9.8684, 9.9916, 10.1107, 10.2122, 11.236, 11.3504,
+  11.459, 11.5667, 11.9809, 12.093, 12.2051, 12.3222, 12.4372, 12.5522
+]
+
+// ---------------------------------------------------------------------------------------------
+// 乘区（对齐 dob-calc-core `damage.rs`）
+// ---------------------------------------------------------------------------------------------
+
+fn attack_of(c: Config, p: Record{..open}, el: Sym) -> Num =
+  let scaled = base_attack(c) * (1.0 + rec_num(p, sym"攻击") + c.resonance)
+    * (1.0 + rec_num(p, sym"属性攻击") + rec_num(p, attack_key(el))) in
+  round2(scaled + rec_num(p, sym"固定攻击"))
+
+fn base_attack(c: Config) -> Num =
+  match char_of(c.char_id) {
+    some(ch) => round2(ch.基础攻击 * level_multiplier(c.char_level)),
+    _ => 0.0
+  }
+
+fn round2(x: Num) -> Num = to_fixed(x, 2.0)
+
+// 增伤池：**同池加算**（damage-mechanics「增伤池」）
+fn damage_pool(p: Record{..open}, src: Source, el: Sym) -> Num =
+  let base = if src.kind == sym"skill"
+             then 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"技能伤害")
+             else 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"武器伤害") in
+  base + part_damage_bonus(p, el)
+
+fn part_damage_bonus(p: Record{..open}, el: Sym) -> Num =
+  if is_physical(el) then rec_num(p, sym"物理增伤") + rec_num(p, element_bonus_key(el))
+  else rec_num(p, sym"元素增伤") + rec_num(p, element_bonus_key(el))
+
+// 追加伤害：独立乘区（技能池吃技能追伤）
+fn additional_zone(p: Record{..open}, src: Source) -> Num =
+  if src.kind == sym"skill"
+  then 1.0 + rec_num(p, sym"技能追伤")
+  else 1.0 + rec_num(p, sym"追加伤害")
+
+fn independent_zone(p: Record{..open}, src: Source) -> Num =
+  if src.kind == sym"skill"
+  then (1.0 + rec_num(p, sym"独立增伤")) * (1.0 + rec_num(p, sym"技能独立增伤"))
+  else 1.0 + rec_num(p, sym"独立增伤")
+
+fn crit_zone(p: Record{..open}, mode: Sym) -> Num =
+  let rate = rec_num(p, sym"暴击") in
+  let dmg = rec_num(p, sym"暴伤") in
+  if mode == sym"lower" then 1.0 + floor(rate) * (dmg - 1.0)
+  else if mode == sym"upper" then 1.0 + ceil(rate) * (dmg - 1.0)
+  else 1.0 + min(rate, 1.0) * (dmg - 1.0)
+
+// 抗性乘区 = (1 - 抗性) * (1 + 穿透)，下限 0。穿透不是独立乘区。
+fn resist_zone(c: Config, p: Record{..open}) -> Num =
+  max(0.0, (1.0 - c.enemy_resist) * (1.0 + rec_num(p, sym"属性穿透")))
+
+fn level_diff(c: Config) -> Num =
+  clamp(min(c.enemy_level, 80.0) - c.char_level, 0.0, 20.0)
+
+fn high_level_reduce(level: Num) -> Num =
+  if level >= 200.0 then 1.0 / (1.0 + (level - 190.0) * 0.05) else 1.0
+
+fn defense_zone(c: Config, p: Record{..open}, src: Source) -> Num =
+  let ignore = if src.kind == sym"skill"
+               then rec_num(p, sym"无视防御") + rec_num(p, sym"技能无视防御")
+               else rec_num(p, sym"无视防御") in
+  let def = enemy_def(c) * (1.0 - clamp(ignore, 0.0, 1.0)) in
+  let red = def / (300.0 + def - level_diff(c) * 10.0) in
+  clamp((1.0 - red) * high_level_reduce(c.enemy_level), 0.0, 1.0)
+
+fn enemy_def(c: Config) -> Num =
+  match monster_of(c.monster_id) {
+    some(m) => m.def,
+    _ => 0.0
+  }
+
+fn hp_zone(c: Config, p: Record{..open}) -> Num =
+  let hp = clamp(c.hp_percent, 0.0, 1.0) in
+  let hp_d = clamp(c.hp_percent, 0.25, 1.0) in
+  (1.0 + rec_num(p, sym"昂扬") * hp)
+    * (1.0 + 4.0 * rec_num(p, sym"背水") * (1.0 - hp_d) * (1.5 - hp_d))
+
+fn damage(c: Config, src: Source) -> Num =
+  let p = panel(c) in
+  attack_of(c, p, src.element) * src.multiplier
+    * damage_pool(p, src, src.element)
+    * additional_zone(p, src)
+    * crit_zone(p, c.crit_mode)
+    * independent_zone(p, src)
+    * resist_zone(c, p)
+    * hp_zone(c, p)
+    * defense_zone(c, p, src)
+
+fn breakdown(c: Config, src: Source) -> Record{..open} =
+  let p = panel(c) in
+  {
+    element: src.element,
+    attack: attack_of(c, p, src.element),
+    damage_pool: damage_pool(p, src, src.element),
+    additional: additional_zone(p, src),
+    crit: crit_zone(p, c.crit_mode),
+    independent: independent_zone(p, src),
+    resist_zone: resist_zone(c, p),
+    hp_zone: hp_zone(c, p),
+    defense_zone: defense_zone(c, p, src),
+    damage: damage(c, src)
+  }
+
+fn element_attack(c: Config, el: Sym) -> Num = attack_of(c, panel(c), el)
+
+fn element_bonus(c: Config, el: Sym) -> Num = part_damage_bonus(panel(c), el)
+
+// ---------------------------------------------------------------------------------------------
+// DoT：不吃暴击、不吃防御（damage-mechanics「DOT 伤害」）
+// ---------------------------------------------------------------------------------------------
+
+fn ticks_of(spec: DotSpec) -> List<(Num, Num)> =
+  map(num.range(0.0, spec.count, 1.0), |i| (spec.interval * (i + 1.0), spec.base))
+
+fn dot_damage(c: Config, spec: DotSpec) -> Num =
+  let p = panel(c) in
+  let src = { kind: sym"skill", element: spec.element, multiplier: 1.0 } in
+  spec.base * damage_pool(p, src, spec.element)
+    * independent_zone(p, src) * resist_zone(c, p) * hp_zone(c, p)
+
+fn dot_total_from(c: Config, specs: List<DotSpec>, horizon: Num) -> Num =
+  fold(specs, 0.0, |acc, s|
+    acc + fold(ticks_of(s), 0.0, |a, t| if at(t, 0) <= horizon then a + dot_damage(c, s) else a))
+
+// ---------------------------------------------------------------------------------------------
+// 暴击口径（纯函数，供引擎 parity 语料使用）
+// ---------------------------------------------------------------------------------------------
+
+fn crit_expected(rate: Num, dmg: Num) -> Num = 1.0 + min(rate, 1.0) * (dmg - 1.0)
+
+fn crit_lower(rate: Num, dmg: Num) -> Num = 1.0 + floor(rate) * (dmg - 1.0)
+
+fn crit_upper(rate: Num, dmg: Num) -> Num = 1.0 + ceil(rate) * (dmg - 1.0)
+
+fn crit_overflow(rate: Num, dmg: Num, conv: Num) -> Num =
+  let over = max(0.0, rate - 1.0) in
+  1.0 + min(rate, 1.0) * (dmg - 1.0) + over * conv
+
+// ---------------------------------------------------------------------------------------------
+// 目标函数表达式
+//
+// setting 里的 `targetFunction` 是一段文本（`10 + [攻击]`、`总和DPS`），由 pack 自己解析：
+// 词法 → 递归下降 → 求值。这里只认表达式语言本身；变量名如何落到属性/字段是 `lookup` 的事。
+// ---------------------------------------------------------------------------------------------
+
+schema Tok {
+  k: Num
+  n: Num
+  t: Value
+  ..open
+}
+
+fn scan_to(s: Sym, i: Num, n: Num, ch: Num) -> Num =
+  fix(i, |j| j + 1.0, |j| j >= n || str_at(s, j) == ch, n + 1.0)
+
+// 标识符扫描每字符一次判定，分类测试就地展开：少一次 `char_class` 调用与记忆化探测。
+fn char_class(ch: Num) -> Num =
+  if ch == 32.0 || ch == 9.0 || ch == 10.0 || ch == 13.0 then 0.0
+  else if (ch >= 48.0 && ch <= 57.0) || ch == 46.0 then 1.0
+  else if (ch >= 48.0 && ch <= 57.0) || (ch >= 65.0 && ch <= 90.0) || (ch >= 97.0 && ch <= 122.0)
+          || ch == 95.0 || ch > 127.0 then 2.0
+  else 3.0
+
+fn scan_ident(s: Sym, i: Num, n: Num) -> Num =
+  fix(i, |j| j + 1.0, |j| j >= n || char_class(str_at(s, j)) != 2.0, n + 1.0)
+
+// 数字字面量一次扫完：定位结尾与累积值同一遍，不再「先 scan_end 再逐字符重扫」。
+fn number_scan(s: Sym, k: Num, n: Num, int: Num, frac: Num, digits: Num, dot: Num) -> (Num, Num) =
+  if k >= n then (k, number_value(int, frac, digits))
+  else
+    let ch = str_at(s, k) in
+    if ch == 46.0 then number_scan(s, k + 1.0, n, int, frac, digits, 1.0)
+    else if ch < 48.0 || ch > 57.0 then (k, number_value(int, frac, digits))
+    else if dot == 0.0 then number_scan(s, k + 1.0, n, int * 10.0 + (ch - 48.0), frac, digits, 0.0)
+    else number_scan(s, k + 1.0, n, int, frac * 10.0 + (ch - 48.0), digits + 1.0, 1.0)
+
+// 整数位与小数位都按整数累积，最后一次除法，避免逐位加 `0.1`/`0.01` 的累积舍入
+// （`3.167` 曾得 `3.1670000000000003`）。
+fn number_value(int: Num, frac: Num, digits: Num) -> Num =
+  let scale = pow10(digits) in
+  if scale == 1.0 then int else int + frac / scale
+
+fn pow10(n: Num) -> Num =
+  if n <= 0.0 then 1.0 else 10.0 * pow10(n - 1.0)
+
+fn tokenize(s: Sym) -> List<Value> =
+  let n = str_len(s) in
+  at(fix((0.0, []), |st| step_token(s, n, at(st, 0), at(st, 1)),
+    |st| at(st, 0) >= n, n + 2.0), 1)
+
+// 令牌按两个槽位一组扁平存放（代码, 载荷）：代码 0 = 数字、1 = 名称、1000 + 字符 = 运算符。
+// 数字的载荷是数值，名称的载荷是文本，其余为 none。记录拆成扁平槽位后，一次 `at` 就能
+// 判断「第 i 个令牌是不是字符 ch」，不必再逐字段走记忆化调用。
+fn step_token(s: Sym, n: Num, i: Num, acc: List<Value>) -> (Num, List<Value>) =
+  let ch = str_at(s, i) in
+  let cls = char_class(ch) in
+  let space = cls == 0.0 in
+  let digit = cls == 1.0 in
+  let ident = cls == 2.0 in
+  // `[名称]后续` 是一个整体标识符（变量名可以带方括号前缀）
+  if ch == 91.0 && not(space) then
+    let close = scan_to(s, i + 1.0, n, 93.0) in
+    if close >= n then (i + 1.0, acc)
+    else
+      let end = scan_ident(s, close + 1.0, n) in
+      (end, concat(acc, [1.0, str_slice(s, i, end)]))
+  else if space then (i + 1.0, acc)
+  else if digit || ch == 46.0 then
+    let (e, v) = number_scan(s, i, n, 0.0, 0.0, 0.0, 0.0) in
+    (e, concat(acc, [0.0, v]))
+  else if ident then
+    let e = scan_ident(s, i, n) in
+    (e, concat(acc, [1.0, str_slice(s, i, e)]))
+  else
+    (i + 1.0, concat(acc, [1000.0 + ch, none]))
+
+fn tok_count(ts: List<Value>) -> Num = len(ts) / 2.0
+
+fn tok_code(ts: List<Value>, i: Num) -> Num =
+  let j = i * 2.0 in
+  if j < len(ts) then num_of(at(ts, j)) else -1.0
+
+fn tok_payload(ts: List<Value>, i: Num) -> Value =
+  let j = i * 2.0 + 1.0 in
+  if j < len(ts) then at(ts, j) else none
+
+fn tok_num(ts: List<Value>, i: Num) -> Num =
+  let j = i * 2.0 + 1.0 in
+  if j < len(ts) then num_of(at(ts, j)) else 0.0
+
+fn tok_is_op(ts: List<Value>, i: Num, ch: Num) -> Bool =
+  let j = i * 2.0 in
+  if j < len(ts) then num_of(at(ts, j)) == 1000.0 + ch else false
+
+fn parse_expr(ts: List<Value>, i: Num, c: Config, env: Tok) -> (Num, Num) =
+  let (v0, j0) = parse_term(ts, i, c, env) in
+  loop_add(ts, j0, c, env, v0)
+
+fn loop_add(ts: List<Value>, i: Num, c: Config, env: Tok, acc: Num) -> (Num, Num) =
+  let code = tok_code(ts, i) in
+  if code == 1043.0 then
+    let (v, j) = parse_term(ts, i + 1.0, c, env) in
+    loop_add(ts, j, c, env, acc + v)
+  else if code == 1045.0 then
+    let (v, j) = parse_term(ts, i + 1.0, c, env) in
+    loop_add(ts, j, c, env, acc - v)
+  else (acc, i)
+
+fn parse_term(ts: List<Value>, i: Num, c: Config, env: Tok) -> (Num, Num) =
+  let (v0, j0) = parse_unary(ts, i, c, env) in
+  loop_mul(ts, j0, c, env, v0)
+
+fn loop_mul(ts: List<Value>, i: Num, c: Config, env: Tok, acc: Num) -> (Num, Num) =
+  let code = tok_code(ts, i) in
+  if code == 1042.0 then
+    let (v, j) = parse_unary(ts, i + 1.0, c, env) in
+    loop_mul(ts, j, c, env, acc * v)
+  else if code == 1047.0 then
+    let (v, j) = parse_unary(ts, i + 1.0, c, env) in
+    loop_mul(ts, j, c, env, safe_div(acc, v))
+  else if code == 1037.0 then
+    let (v, j) = parse_unary(ts, i + 1.0, c, env) in
+    loop_mul(ts, j, c, env, acc - floor(acc / v) * v)
+  else (acc, i)
+
+fn parse_unary(ts: List<Value>, i: Num, c: Config, env: Tok) -> (Num, Num) =
+  if tok_code(ts, i) == 1045.0 then
+    let (v, j) = parse_unary(ts, i + 1.0, c, env) in
+    (-v, j)
+  else parse_postfix(ts, i, c, env)
+
+fn parse_postfix(ts: List<Value>, i: Num, c: Config, env: Tok) -> (Num, Num) =
+  let (v, j) = parse_primary(ts, i, c, env) in
+  // `角色::[攻击]{转属克:1}` 的主标识符在 `::` 之后
+  let subject = if tok_is_op(ts, i + 1.0, 58.0) then
+                  if tok_is_op(ts, i + 2.0, 58.0) then tok_payload(ts, i + 3.0) else tok_payload(ts, i)
+                else tok_payload(ts, i) in
+  skip_suffix(ts, j, v, c, subject, env)
+
+// `.成员` / `!` 后缀不改变值；`{转属X:比例}` 按转换池缩放（引擎 `damage.rs` 的分量重分配）。
+fn skip_suffix(ts: List<Value>, i: Num, v: Num, c: Config, subject: Value, env: Tok) -> (Num, Num) =
+  let code = tok_code(ts, i) in
+  if code == 1046.0 && tok_code(ts, i + 1.0) == 1.0 then
+    skip_suffix(ts, i + 2.0, v, c, subject, env)
+  else if code == 1033.0 then
+    skip_suffix(ts, i + 1.0, v, c, subject, env)
+  else if code == 1123.0 then
+    let close = skip_braces(ts, i + 1.0, 1.0) in
+    skip_suffix(ts, close, convert_scale(ts, i, v, c, subject, env), c, subject, env)
+  else (v, i)
+
+// `{转属克:1}` 这类临时属性会把伤害分量重分配，从而改变 `[攻击]` 的期望值。
+// 只对「字段式标识符」（`[攻击]` 等）生效；普通属性不受影响。
+fn convert_scale(ts: List<Value>, i: Num, v: Num, c: Config, subject: Value, env: Tok) -> Num =
+  let p = env_panel(c, env) in
+  if not(is_field_subject(subject)) then v
+  else if tok_is_op(ts, i + 1.0, 123.0) then v
+  else
+    let key = tok_payload(ts, i + 1.0) in
+    let ratio = tok_num(ts, i + 3.0) in
+    v * convert_ratio(c, p, key, ratio)
+
+fn is_field_subject(subject: Value) -> Bool =
+  str_len(subject) > 2.0 && str_at(subject, 0.0) == 91.0
+
+// 转换后 / 转换前的期望值比值（`enemy_resist < 0` 时 `转属逆` 才生效）
+fn convert_ratio(c: Config, p: Record{..open}, key: Value, ratio: Num) -> Num =
+  let elem_pool = 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"技能伤害")
+                  + rec_num(p, sym"元素增伤") in
+  let phys_pool = 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"技能伤害")
+                  + rec_num(p, sym"物理增伤") in
+  let res = max(0.0, 1.0 - c.enemy_resist) in
+  // 引擎按抗性符号选生效键：抗性 < 0 时只有 `转属逆` 参与，`转属克` 被忽略
+  if str_eq(key, sym"转属逆") then
+    if res == 0.0 || c.enemy_resist >= 0.0 then 1.0 else max(0.0, 1.0 - 0.5) / res
+  else if str_eq(key, sym"转属克") then
+    if res == 0.0 || c.enemy_resist < 0.0 then 1.0 else max(0.0, 1.0 - 0.5) / res
+  else if str_eq(key, sym"转震荡") || str_eq(key, sym"转切割")
+          || str_eq(key, sym"转贯穿") || str_eq(key, sym"转灾厄") then
+    if res == 0.0 then 1.0 else phys_pool / (res * elem_pool)
+  else 1.0
+
+fn skip_braces(ts: List<Value>, i: Num, depth: Num) -> Num =
+  if i * 2.0 >= len(ts) then i
+  else if tok_is_op(ts, i, 123.0) then skip_braces(ts, i + 1.0, depth + 1.0)
+  else if tok_is_op(ts, i, 125.0) then
+    if depth <= 1.0 then i + 1.0 else skip_braces(ts, i + 1.0, depth - 1.0)
+  else skip_braces(ts, i + 1.0, depth)
+
+fn parse_primary(ts: List<Value>, i: Num, c: Config, env: Tok) -> (Num, Num) =
+  let code = tok_code(ts, i) in
+  if code == 0.0 then (tok_num(ts, i), i + 1.0)
+  else if code == 1040.0 then
+    let (v, j) = parse_expr(ts, i + 1.0, c, env) in
+    (v, if tok_is_op(ts, j, 41.0) then j + 1.0 else j)
+  else if code == 1.0 then
+    if tok_is_op(ts, i + 1.0, 40.0) then call_builtin(ts, i, c, env, tok_payload(ts, i))
+    else if tok_is_op(ts, i + 1.0, 58.0) then
+      if tok_is_op(ts, i + 2.0, 58.0) then
+        let ns = tok_payload(ts, i) in
+        (var_value(tok_payload(ts, i + 3.0), c, with_scope(env, ns)), i + 4.0)
+      else (var_value(tok_payload(ts, i), c, env), i + 1.0)
+    else (var_value(tok_payload(ts, i), c, env), i + 1.0)
+  else (0.0, i + 1.0)
+
+fn call_builtin(ts: List<Value>, i: Num, c: Config, env: Tok, name: Value) -> (Num, Num) =
+  let (a, j1) = parse_expr(ts, i + 2.0, c, env) in
+  let (b, j2) = if tok_is_op(ts, j1, 44.0) then
+      let (v, j) = parse_expr(ts, j1 + 1.0, c, env) in (v, j)
+    else (0.0, j1) in
+  let end = if tok_is_op(ts, j2, 41.0) then j2 + 1.0 else j2 in
+  (apply_fn(name, a, b), end)
+
+fn apply_fn(name: Value, a: Num, b: Num) -> Num =
+  if str_eq(name, sym"min") then min(a, b)
+  else if str_eq(name, sym"max") then max(a, b)
+  else if str_eq(name, sym"floor") then floor(a)
+  else if str_eq(name, sym"ceil") then ceil(a)
+  else if str_eq(name, sym"abs") then abs(a)
+  else if str_eq(name, sym"or") then if a != 0.0 then a else b
+  else 0.0
+
+fn safe_div(a: Num, b: Num) -> Num = if b == 0.0 then 0.0 else a / b
+
+// 作用域名同样是运行期文本：武器别名映射到编译期符号；
+// 其余（技能名）由 `lookup` 直接按文本匹配，不走 `Sym`。
+fn scope_sym(v: Value) -> Sym =
+  if str_eq(v, sym"melee") || str_eq(v, sym"近战") then sym"近战"
+  else if str_eq(v, sym"ranged") || str_eq(v, sym"远程") then sym"远程"
+  else if str_eq(v, sym"skill") || str_eq(v, sym"同律") then sym"同律"
+  else sym"角色"
+
+// 追加作用域：显式重建记录，避免 `update` 在开放记录上丢字段
+// 追加作用域：`fields` / `panel` 原样透传（不重建映射，避免每次作用域切换都复制整张表）
+fn with_scope(env: Tok, ns: Value) -> Tok =
+  { k: 0.0, n: 0.0, t: none, ns: ns,
+    visiting: rec_list(env, sym"visiting"),
+    fields: rec_pairs_raw(env),
+    attrs: rec_list_raw(env, sym"attrs"),
+    panel: match field(env, sym"panel") { some(v) => v, _ => none } }
+
+fn rec_pairs_raw(rec: Tok) -> List<Value> =
+  match field(rec, sym"fields") {
+    some(x) => if is_list(x) then x else [],
+    _ => []
+  }
+
+fn env_scope(env: Tok) -> Value =
+  match field(env, sym"ns") { some(v) => v, _ => sym"角色" }
+
+
+fn var_value(name: Value, c: Config, env: Tok) -> Num = lookup(name, c, env)
+
+// 武器技能字段（`送行挽歌::伤害`）：技能名来自武器表
+fn weapon_skill_fields(c: Config) -> List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)> =
+  concat(weapon_skill_fields_of(c.melee_weapon), weapon_skill_fields_of(c.ranged_weapon))
+
+fn weapon_skill_fields_of(id: Num) -> List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)> =
+  match weapon_of(id) {
+    some(w) => match field(w, sym"技能") {
+      some(v) => if is_list(v) then map(v, |s| skill_entry(s)) else [],
+      _ => []
+    },
+    _ => []
+  }
+
+fn eval_text(text: Sym, c: Config, env: Tok) -> Num =
+  at(parse_expr(tokenize(text), 0.0, c, env), 0)
+
+// 变量解析：自定义变量（可递归，带环检测）优先，其次属性
+// 变量名来自 setting，可能是运行期字符串（`[审判]DPS`），因此用文本比较而不是符号相等。
+fn target(c: Config) -> Num =
+  let texts = concat([c.target_function], map(c.custom_variables, |cv| at(cv, 1))) in
+  let sk = concat(skill_records(c.char_id), weapon_skill_fields(c)) in
+  let refs = fold(texts, [], |acc, t| collect_refs_sk(sk, t, acc)) in
+  let p = if len(refs) == 0.0 then none else field_panel(c) in
+  eval_text(c.target_function, c, {
+    visiting: [],
+    fields: if len(refs) == 0.0 then [] else map(refs, |r| (at(r, 1), field_damage_sk(c, p, sk, at(r, 0), at(r, 1)))),
+    attrs: precompute_attrs(c, p),
+    panel: p
+  })
+
+fn target_list(c: Config) -> List<Num> =
+  let texts = c.expressions in
+  let sk = concat(skill_records(c.char_id), weapon_skill_fields(c)) in
+  let refs = fold(texts, [], |acc, t| collect_refs_sk(sk, t, acc)) in
+  let p = if len(refs) == 0.0 then none else field_panel(c) in
+  let fields = if len(refs) == 0.0 then [] else map(refs, |r| (at(r, 1), field_damage_sk(c, p, sk, at(r, 0), at(r, 1)))) in
+  map(c.expressions, |e| eval_text(e, c, { visiting: [], fields: fields, attrs: precompute_attrs(c, p), panel: p }))
+
+// 收集文本里全部 `技能名::字段` 引用（去重）
+fn is_skill_name(sk: List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)>, ns: Value) -> Bool =
+  any(sk, |s| str_eq(ns, at(s, 0)))
+
+fn collect_refs_sk(sk: List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)>, text: Sym, acc: List<(Value, Value)>) -> List<(Value, Value)> =
+  let toks = tokenize(text) in
+  let n = tok_count(toks) in
+  at(fix((0.0, acc), |st| ref_step(sk, toks, n, at(st, 0), at(st, 1)),
+    |st| at(st, 0) >= n, n + 1.0), 1)
+
+// 单趟扫描：只在 `名称::字段` 处取 token，不建索引表（`num.range` 每文本一次全量拷贝）。
+fn ref_step(sk: List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)>, toks: List<Value>,
+            n: Num, j: Num, acc: List<(Value, Value)>) -> (Num, List<(Value, Value)>) =
+  // `&&` 不短路：嵌套写，绝大多数位置只探一次。
+  if tok_is_op(toks, j + 1.0, 58.0) then
+    if tok_is_op(toks, j + 2.0, 58.0) then
+      let ns = tok_payload(toks, j) in
+      let fname = tok_payload(toks, j + 3.0) in
+      if not(is_skill_name(sk, ns)) then (j + 1.0, acc)
+      else if any(acc, |e| str_eq(at(e, 1), fname)) then (j + 1.0, acc)
+      else (j + 1.0, concat(acc, [(ns, fname)]))
+    else (j + 1.0, acc)
+  else (j + 1.0, acc)
+
+// 全部属性值预计算一次：变量递归时只查表，不再逐层重建面板
+fn precompute_attrs(c: Config, p: Value) -> List<Value> =
+  let pp = match p { some(v) => v, _ => panel(c) } in
+  concat(
+    map(attr_keys(), |k| [k, attr_value_p(c, pp, k, sym"角色")]),
+    // `角色::[攻击]` = 攻击 × 防御 × 该字段的期望伤害
+    [[sym"[攻击]", attack_of(c, pp, char_element(c.char_id))
+                   * defense_zone(c, pp, { kind: sym"skill", element: char_element(c.char_id), multiplier: 1.0 })
+                   * plain_expected(c, pp)]])
+
+// 无武器归属、非召唤物的技能池期望伤害（`[攻击]` 用）
+fn plain_expected(c: Config, p: Record{..open}) -> Num =
+  let pool = 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"技能伤害") in
+  let part = pool + rec_num(p, sym"元素增伤") in
+  max(0.0, 1.0 - c.enemy_resist) * part
+    * hp_zone(c, p) * (1.0 + rec_num(p, sym"属性穿透"))
+
+fn attr_keys() -> List<Sym> = [
+  sym"攻击", sym"固定攻击", sym"生命", sym"防御", sym"护盾", sym"神智",
+  sym"属性攻击", sym"元素增伤", sym"物理增伤", sym"增伤", sym"技能伤害",
+  sym"武器伤害", sym"技能追伤", sym"追加伤害", sym"独立增伤", sym"技能独立增伤",
+  sym"属性穿透", sym"无视防御", sym"技能无视防御", sym"暴击", sym"暴伤",
+  sym"触发", sym"充盈威力", sym"技能威力", sym"技能耐久", sym"技能效益",
+  sym"技能范围", sym"技能速度", sym"昂扬", sym"背水", sym"减伤",
+  sym"失衡易伤", sym"攻速", sym"多重", sym"召唤物伤害",
+  sym"召唤物属性继承比例", sym"召唤物攻击速度", sym"召唤物独立增伤", sym"召唤物范围"
+]
+
+fn lookup(name: Value, c: Config, env: Tok) -> Num =
+  let visiting = rec_list(env, sym"visiting") in
+  if any(visiting, |v| str_eq(name, v)) then 0.0
+  else match custom_var_text(c, name) {
+    some(t) => eval_text(t, c, update(env, { visiting: concat(visiting, [text_of(name)]) })),
+    none => attr_or_field(c, name, env_scope(env), env)
+  }
+
+// 自定义变量按名查找：同一变量在多条表达式里出现时只扫一遍变量表。
+fn custom_var_text(c: Config, name: Value) -> Option<Sym> =
+  match find(c.custom_variables, |cv| str_eq(name, at(cv, 0))) {
+    some(cv) => some(at(cv, 1)),
+    _ => none
+  }
+
+// 命名空间作用域下的标识符：可能是技能字段（`庆典开始喽::[召唤物·审判]技能伤害`），
+// 否则回落到属性。
+// 命名空间作用域：先查已缓存的技能字段表（`env.fields`），再回落属性。
+// 不在求值现场调用 `field_damage`——那会与 `panel → context → values_of` 互相触发。
+// `field_damage` 不回调 `lookup`（只依赖面板与技能表），因此这里可以惰性求值。
+// `scope` 是原始文本（可能是技能名，也可能是武器别名）。
+fn attr_or_field(c: Config, name: Value, scope: Value, env: Tok) -> Num =
+  match pair_lookup(rec_list_raw(env, sym"fields"), name) {
+    some(v) => v,
+    // 角色作用域查预计算表；武器作用域直接走面板（含作用域词条）
+    none => if scope_sym(scope) != sym"角色" then
+              attr_value_p(c, env_panel(c, env), as_sym(name), scope_sym(scope))
+            else match pair_lookup(rec_list_raw(env, sym"attrs"), name) {
+              some(v) => v,
+              _ => attr_value_p(c, env_panel(c, env), as_sym(name), sym"角色")
+            }
+  }
+
+// 预计算表按名查找：函数化后同一 (表, 名) 只扫一遍，其余走记忆化。
+fn pair_lookup(tbl: List<Value>, name: Value) -> Option<Num> =
+  match find(tbl, |e| str_eq(name, at(e, 0))) {
+    some(e) => some(num_of(at(e, 1))),
+    _ => none
+  }
+
+// 求值期间共享的面板（`target` 入口算一次）
+fn env_panel(c: Config, env: Tok) -> Record{..open} =
+  match field(env, sym"panel") {
+    some(v) => if is_record_like(v) then v else panel(c),
+    _ => panel(c)
+  }
+
+fn is_record_like(v: Value) -> Bool =
+  match v {
+    rec => has(rec, sym"攻击"),
+    _ => false
+  }
+
+// 技能表由调用方传入（一次解析，多处复用）
+fn field_damage_sk(c: Config, p: Record{..open}, sk: List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)>, ns: Value, fname: Value) -> Num =
+  match find(sk, |s| str_eq(ns, at(s, 0)) || ns == at(s, 0)) {
+    some(s) => match find(at(s, 1), |f| field_matches(at(f, 0), fname)) {
+      some(f) => field_damage_sk1(c, p, s, at(f, 0)),
+      _ => 0.0
+    },
+    _ => 0.0
+  }
+
+// 字段伤害：技能记录已定位，直接用其字段表
+// `full` 与 `short` 是否指向同一字段：全等，或 `full` 以 `short` 结尾
+// （`[送行挽歌]伤害` ↔ `伤害`，`[召唤物·审判]技能伤害` ↔ `[召唤物·审判]技能伤害`）
+fn field_matches(full: Sym, short: Sym) -> Bool =
+  if str_eq(full, short) then true
+  else if str_len(full) < str_len(short) then false
+  else str_eq(str_slice(full, str_len(full) - str_len(short), str_len(full)), short)
+
+fn field_damage_sk1(c: Config, p: Record{..open}, s: (Sym, List<(Sym, List<Num>, List<Sym>, Sym)>), field_name: Sym) -> Num =
+  let fields = at(s, 1) in
+  // 字段名允许省略外层方括号（`送行挽歌::伤害` ↔ `[送行挽歌]伤害`）
+  let f = match find(fields, |x| field_matches(at(x, 0), field_name)) {
+    some(x) => x,
+    _ => (sym"<none>", [], [], sym"<none>")
+  } in
+  let values = at(f, 1) in
+  let tags = at(f, 2) in
+  let is_weapon = any(tags, |t| t == sym"武器") in
+  let summon = any(tags, |t| t == sym"召唤物") in
+  let src = { kind: if is_weapon then sym"weapon" else sym"skill",
+              element: char_element(c.char_id), multiplier: 1.0 } in
+  let ratio = at_level(values, c.skill_level) in
+  let power = 1.0 + rec_num(p, sym"技能威力") in
+  let inherit = if summon then 1.0 + rec_num(p, sym"召唤物属性继承比例") else 1.0 in
+  // 结合顺序与引擎一致：`lv × (威力 × (攻击 × 继承))`，否则差 1-2 ULP
+  let base = ratio * (power * (attack_of(c, p, char_element(c.char_id)) * inherit)) in
+  if is_weapon then
+    // 武器池：总攻击 = 角色攻击 + 武器攻击；池吃 `武器伤害`，不吃召唤物独立
+    let weapon_atk = match weapon_for_scope(c, sym"近战") {
+      some(w) => round2(w.攻击 * level_multiplier(c.char_level)),
+      _ => 0.0
+    } in
+    let weapon_atk = match weapon_for_scope(c, sym"近战") {
+      some(w) => round2(w.攻击 * level_multiplier(c.char_level)),
+      _ => 0.0
+    } in
+    // 引擎 `base_damage = 10 × 6136.3 = 10 × (角色攻击 5556.39 + 武器面板攻击 579.91)`
+    let total = attack_of(c, p, char_element(c.char_id)) + rec_num(p, sym"武器面板攻击") in
+    at_level(values, c.skill_level) * total
+      * weapon_expected(c, p, at(f, 3)) * defense_zone(c, p, src)
+  else
+    (base * defense_zone(c, p, src)) * skill_expected(c, p, summon)
+
+// 武器池的 expected_damage（`damage.rs::calculate_damage` 的武器分支）。
+// 引擎插桩实测：分量全在物理侧（`ratio=1.0`，元素分量 `0.0`），因此
+//   `no_trigger = 抗性 × (1 + 增伤 + 武器伤害)`（**不含元素增伤**）
+// 再乘触发期望与暴击期望——武器池有武器归属，双爆取武器面板。
+// 武器池的 expected_damage（引擎插桩实测，`[送行挽歌]伤害`）：
+//   `parts = [(1.0, 1.0, 1.0, false), (0.0, 1.0, 0.0, true)]` —— 全在物理分量
+//   `no_trigger = 抗性 × (1 + 角色增伤 + 武器面板增伤 + 角色武器伤害)`
+//   `expected   = no_trigger × (1 + trigger_add × 武器触发) × 暴击期望
+//                 × 血量 × 独立 × 追伤 × 穿透`
+// 其中 `trigger_add = 1`（灾厄且敌方有抗性），`暴击期望` 取武器面板双爆。
+// 武器池的 expected_damage。引擎插桩实测该字段全在物理分量
+// （`parts = [(1.0, 1.0, 1.0, false)]`），池不含元素增伤。
+// 武器池的 expected_damage（引擎插桩实测 `[送行挽歌]伤害`）：
+//   `parts = [(1.0, 1.0, 1.0, false), (0.0, 1.0, 0.0, true)]`
+//   —— 分量全在**物理侧**（`ratio=1.0`），物理分量的抗性因子是 `1.0`（不吃敌人抗性）
+//   池 = `1 + 角色增伤 + 武器面板增伤 + 角色武器伤害`（不含元素增伤）
+//   `expected = 池 × (1 + trigger_add × 武器触发) × 暴击期望 × 血量 × 独立 × 追伤 × (1+穿透)`
+// 武器池的 expected_damage（引擎打点实测 `[送行挽歌]伤害`）：
+//   `parts = [(1.0, 1.0, 1.0, false), (0.0, 1.0, 0.0, true)]` → 全在物理分量（抗性因子 1.0）
+//   池 = `1 + 角色增伤 + 武器面板增伤 + 角色武器伤害`（不含元素增伤）
+//   `expected = 池 × (1 + trigger_add × 武器触发) × 暴击期望 × 血量 × 独立 × 追伤 × (1+穿透)`
+fn weapon_expected(c: Config, p: Record{..open}, damage_type: Sym) -> Num =
+  let pool = 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"武器面板增伤")
+             + rec_num(p, sym"武器伤害") in
+  let trigger = 1.0 + trigger_multiplier(c, damage_type)
+                  * clamp(rec_num(p, sym"武器触发"), 0.0, 1.0) in
+  let crit = 1.0 + rec_num(p, sym"武器暴击") * (rec_num(p, sym"武器暴伤") - 1.0) in
+  let indep = 1.0 + rec_num(p, sym"独立增伤") in
+  let add = 1.0 + rec_num(p, sym"追加伤害") in
+  let pen = 1.0 + rec_num(p, sym"属性穿透") in
+  pool * trigger * crit * hp_zone(c, p) * indep * add * pen
+
+
+// 武器池的防御乘区：不施加技能无视防御（插桩实测 `def = 300` → `0.5`）
+
+// 武器面板的触发率（封顶 100%）
+
+// 触发倍率：灾厄只需敌方存在抗性；其余物理类型只在敌方血量类型匹配时生效
+fn trigger_multiplier(c: Config, kind: Sym) -> Num =
+  if kind == sym"灾厄" then
+    if c.enemy_resist != 0.0 then 1.0 + rec_num(panel(c), sym"触发倍率") else 0.0
+  else 0.0
+
+// 字段名 → 编译期符号：按该角色全部技能字段匹配后返回表里的 `Sym`
+fn field_sym(c: Config, name: Value) -> Sym =
+  fold(skill_records(c.char_id), sym"<none>", |acc, s|
+    if acc != sym"<none>" then acc
+    else match find(at(s, 1), |f| str_eq(name, at(f, 0))) {
+      some(f) => at(f, 0),
+      _ => sym"<none>"
+    })
+
+// 技能名 → 编译期符号（按技能表匹配后返回表里的 `Sym`）
+fn skill_sym(c: Config, ns: Value) -> Sym =
+  match find(skill_records(c.char_id), |s| str_eq(ns, at(s, 0))) {
+    some(s) => at(s, 0),
+    _ => sym"<none>"
+  }
+
+// `env.fields` 存成 `List<[Value, Num]>`（二元数组），读回时按数组解析。
+fn rec_pairs(rec: Tok, key: Sym) -> List<(Value, Num)> =
+  match field(rec, key) {
+    some(x) => if is_list(x) then map(x, |e| (at(e, 0), num_of(at(e, 1)))) else [],
+    _ => []
+  }
+
+fn rec_list_raw(rec: Tok, key: Sym) -> List<Value> =
+  match field(rec, key) {
+    some(x) => if is_list(x) then x else [],
+    _ => []
+  }
+
+fn text_of(v: Value) -> Value = v
+
+// 运行期文本 → 符号：`Sym` 原样返回；`Str` 走 `sym_of`（要求该符号已在符号表）。
+fn text_sym(v: Value) -> Sym =
+  match v {
+    s => s,
+    _ => sym"<none>"
+  }
+
+// 运行期文本 → 属性键：按编译期登记的属性名比较，命中才返回对应 `Sym`。
+// 引擎的 `sym_of` 只认符号表里已有的名字，而 `[攻击]` 之类来自 setting 的文本不在表里。
+fn as_sym(v: Value) -> Sym = key_of(v)
+
+fn key_of(v: Value) -> Sym =
+  if str_eq(v, sym"攻击") then sym"攻击"
+  else if str_eq(v, sym"生命") then sym"生命"
+  else if str_eq(v, sym"防御") then sym"防御"
+  else if str_eq(v, sym"护盾") then sym"护盾"
+  else if str_eq(v, sym"神智") then sym"神智"
+  else if str_eq(v, sym"技能威力") then sym"技能威力"
+  else if str_eq(v, sym"技能耐久") then sym"技能耐久"
+  else if str_eq(v, sym"技能效益") then sym"技能效益"
+  else if str_eq(v, sym"技能范围") then sym"技能范围"
+  else if str_eq(v, sym"技能速度") then sym"技能速度"
+  else if str_eq(v, sym"昂扬") then sym"昂扬"
+  else if str_eq(v, sym"背水") then sym"背水"
+  else if str_eq(v, sym"增伤") then sym"增伤"
+  else if str_eq(v, sym"元素增伤") then sym"元素增伤"
+  else if str_eq(v, sym"物理增伤") then sym"物理增伤"
+  else if str_eq(v, sym"属性攻击") then sym"属性攻击"
+  else if str_eq(v, sym"武器伤害") then sym"武器伤害"
+  else if str_eq(v, sym"技能伤害") then sym"技能伤害"
+  else if str_eq(v, sym"技能追伤") then sym"技能追伤"
+  else if str_eq(v, sym"追加伤害") then sym"追加伤害"
+  else if str_eq(v, sym"独立增伤") then sym"独立增伤"
+  else if str_eq(v, sym"技能独立增伤") then sym"技能独立增伤"
+  else if str_eq(v, sym"属性穿透") then sym"属性穿透"
+  else if str_eq(v, sym"无视防御") then sym"无视防御"
+  else if str_eq(v, sym"技能无视防御") then sym"技能无视防御"
+  else if str_eq(v, sym"暴击") then sym"暴击"
+  else if str_eq(v, sym"暴伤") then sym"暴伤"
+  else if str_eq(v, sym"触发") then sym"触发"
+  else if str_eq(v, sym"充盈威力") then sym"充盈威力"
+  else if str_eq(v, sym"召唤物伤害") then sym"召唤物伤害"
+  else if str_eq(v, sym"召唤物属性继承比例") then sym"召唤物属性继承比例"
+  else if str_eq(v, sym"召唤物攻击速度") then sym"召唤物攻击速度"
+  else if str_eq(v, sym"召唤物独立增伤") then sym"召唤物独立增伤"
+  else if str_eq(v, sym"召唤物范围") then sym"召唤物范围"
+  else if str_eq(v, sym"攻速") then sym"攻速"
+  else if str_eq(v, sym"多重") then sym"多重"
+  else if str_eq(v, sym"固定攻击") then sym"固定攻击"
+  else if str_eq(v, sym"失衡易伤") then sym"失衡易伤"
+  else if str_eq(v, sym"减伤") then sym"减伤"
+  else sym"<none>"
+
+fn rec_list(rec: Tok, key: Sym) -> List<Sym> =
+  match field(rec, key) {
+    some(x) => if is_list(x) then x else [],
+    _ => []
+  }
+
+// 字段求值用的增强面板：把武器转化得到的召唤物攻速/独立增伤/充盈威力一次算好，
+// 避免 `field_damage` 内部反复重建上下文（会耗尽求值预算）。
+fn field_panel(c: Config) -> Record{..open} =
+  let ctx = all_context(c) in
+  let p = panel_ctx(c, active_mods(c), ctx) in
+  let spd = rec_num(p, sym"召唤物攻击速度") + summon_speed_ctx(c, ctx) in
+  let si = if has_code(c, sym"伊薇4溯")
+           then (1.0 + rec_num(p, sym"召唤物独立增伤")) * (1.0 + max(0.0, spd)) - 1.0
+           else rec_num(p, sym"召唤物独立增伤") in
+  let w = weapon_fields_ctx(c, ctx) in
+  update(p, {
+    召唤物攻击速度: spd,
+    召唤物独立增伤: si,
+    充盈威力: rec_num(p, sym"充盈威力") + fullness_ctx(c, ctx),
+    武器面板增伤: rec_num(w, sym"增伤"),
+    武器暴击: rec_num(w, sym"暴击"),
+    武器暴伤: rec_num(w, sym"暴伤"),
+    武器触发: rec_num(w, sym"触发"),
+    武器面板攻击: rec_num(w, sym"攻击")
+  })
+
+// 武器面板里字段伤害需要的五项（复用已算好的 `CondCtx`）
+fn weapon_fields_ctx(c: Config, ctx: CondCtx) -> Record{..open} =
+  match weapon_for_scope(c, sym"近战") {
+    some(wp) => build_wf(c, ctx, wp),
+    _ => {}
+  }
+
+// `trigger_bonus = total_bonus("近战触发") + total_bonus("触发")`（后者是穿透类，会并入角色槽）
+fn build_wf(c: Config, ctx: CondCtx, wp: Weapon) -> Record{..open} =
+  let pre = |k| sum_key(scope_mods(c, sym"近战"), k, ctx)
+               + effect_scalar_all(c, scope_prefix_key(sym"近战", k)) in
+  // `total_bonus(k, "近战")`：近战桶 + 穿透类并入的角色槽 + 共享池里的武器特效层
+  let both = |k| pre(k) + sum_key(active_mods(c), k, ctx)
+                + weapon_effect(c.melee_weapon, c.melee_refine, char_element(c.char_id), k)
+                + weapon_effect(c.ranged_weapon, c.ranged_refine, char_element(c.char_id), k) in
+  {
+    // 引擎 `weapon_panel` 的 `attack_bonus` 只取 `近战攻击` 与近战作用域的 `攻击`，不叠角色槽
+    攻击: round2(round2(wp.攻击 * level_multiplier(c.char_level))
+                 * (1.0 + pre(sym"攻击")) * mastery_ratio(c, wp, sym"近战")),
+    增伤: both(sym"增伤"),
+    暴击: round2(wp.暴击 * (1.0 + both(sym"暴击"))),
+    暴伤: round2(wp.暴伤 * (1.0 + both(sym"暴伤"))),
+    触发: round2(wp.触发 * (1.0 + both(sym"触发")))
+  }
+
+// 武器面板里字段伤害需要的四项（复用已算好的 `CondCtx`，避免重建上下文）
+// 武器作用域的触发率：`melee::触发`（穿透类，角色槽会并进来）
+
+
+
+// (技能名, 字段列表)；字段 = (名称, 等级数组, tag 列表, 伤害类型)
+fn skill_records(id: Num) -> List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)> =
+  match data.chars.by_id(id) {
+    some(ch) => char_skills(ch),
+    _ => []
+  }
+
+// 角色技能字段表：`技能[].字段[]` 摊平成按名字索引的列表
+fn skill_fields(c: Config, skill_name: Sym) -> List<(Sym, List<Num>, List<Sym>, Sym)> =
+  match find(skill_records(c.char_id), |s| at(s, 0) == skill_name) {
+    some(s) => at(s, 1),
+    _ => []
+  }
+
+fn char_skills(ch: Char) -> List<(Sym, List<(Sym, List<Num>, List<Sym>, Sym)>)> =
+  match field(ch, sym"技能") {
+    some(v) => if is_list(v) then map(v, |s| skill_entry(s)) else [],
+    _ => []
+  }
+
+fn skill_entry(s: Value) -> (Sym, List<(Sym, List<Num>, List<Sym>, Sym)>) =
+  let fields = match field(s, sym"字段") {
+    some(f) => if is_list(f) then map(f, |x| field_entry(x)) else [],
+    _ => []
+  } in
+  (sym_of(get_or(field(s, sym"名称"), sym"<none>")), fields)
+
+fn field_entry(f: Value) -> (Sym, List<Num>, List<Sym>, Sym) =
+  let name = sym_of(get_or(field(f, sym"名称"), sym"<none>")) in
+  let values = match field(f, sym"值") {
+    some(v) => if is_list(v) then v else [v],
+    _ => []
+  } in
+  let tags = match field(f, sym"tag") {
+    some(t) => if is_list(t) then t else [t],
+    _ => []
+  } in
+  let dtype = match field(f, sym"伤害类型") { some(v) => sym_of(v), _ => sym"<none>" } in
+  (name, values, tags, dtype)
+
+// 字段的倍率：12 级数组按技能等级取值（1 基，超界取末档）
+fn field_value(c: Config, skill_name: Sym, field_name: Sym) -> Num =
+  match find(skill_fields(c, skill_name), |f| f.name == field_name) {
+    some(f) => at_level(f.value, c.skill_level),
+    _ => 0.0
+  }
+
+fn field_tags(c: Config, skill_name: Sym, field_name: Sym) -> List<Sym> =
+  match find(skill_fields(c, skill_name), |f| f.name == field_name) {
+    some(f) => f.tags,
+    _ => []
+  }
+
+fn is_summon_field(c: Config, skill_name: Sym, field_name: Sym) -> Bool =
+  any(field_tags(c, skill_name, field_name), |t| t == sym"召唤物")
+
+// 字段的基数：`v1 × 攻击 × 召唤物继承`（召唤物字段才乘继承；引擎打点确认无攻速/穿透项）
+fn field_base(c: Config, skill_name: Sym, field_name: Sym, p: Record{..open}) -> Num =
+  let ratio = field_value(c, skill_name, field_name) * (1.0 + rec_num(p, sym"技能威力")) in
+  let inherit = if is_summon_field(c, skill_name, field_name) then
+                  1.0 + rec_num(p, sym"召唤物属性继承比例") else 1.0 in
+  ratio * attack_of(c, p, char_element(c.char_id)) * inherit
+
+// 技能池的 expected_damage（逐行对译 `damage.rs::calculate_damage` 的技能池分支）：
+//   分量 = [(1, (1-抗性), trigger, 元素)]，`part_increase = 增伤基座 + 元素增伤`
+//   no_trigger = Σ 分量比 × 抗性 × part_increase
+//   expected   = no_trigger × 暴击期望 × common_more
+//   common_more = hp_more × independent × additional × summon_independent × 抗性穿透
+// `召唤物独立增伤` 会被 `code` BUFF 改写（`伊薇4溯`）。数据里唯一的改写形态是
+// `召唤物独立增伤=(1+召唤物独立增伤)*(1+max(0,召唤物攻击速度))-1`，
+// 它用**已装配的**召唤物攻速，因此这里按该公式求值一次。
+// 不重建整个面板：只用 MOD/BUFF 词条 + 武器转化，避免 `panel → … → values_of` 成环。
+fn summon_indep_value(c: Config) -> Num = summon_indep_of(c, panel(c))
+
+// `召唤物独立增伤` 与其自变量都取**面板原始分量**（不含 code），再套一次改写。
+fn summon_indep_of(c: Config, p: Record{..open}) -> Num =
+  let base = rec_num(p, sym"召唤物独立增伤") in
+  let speed = rec_num(p, sym"召唤物攻击速度") in
+  if has_code(c, sym"伊薇4溯") then
+    (1.0 + base) * (1.0 + max(0.0, speed)) - 1.0
+  else base
+
+// 条件键取值：显式值优先，缺省时取该键的 **MOD `加成` + BUFF** 基座
+// （不含 `生效` 与面板，避免条件自引用与 `weapon_panel` 成环）。
+// 条件键取值：显式值优先；缺省时取「角色自带 + 角色槽 MOD 的 `加成`」基座。
+// 只读 `加成`（不含 `生效`），因此不会自引用；也不碰武器面板，避免成环。
+fn values_of(c: Config) -> List<(Sym, Num)> =
+  let used = used_condition_keys(c) in
+  let btbl = buff_table_of(all_buffs(c)) in
+  map(used, |k| (k, cond_value_in(c, btbl, k)))
+
+// 全部 MOD 的 `条件` 里出现的键（去重）
+fn used_condition_keys(c: Config) -> List<Sym> =
+  uniq(concat_map(active_mods(c), |e| map(condition_list(at(e, 0)), |cc| at(cc, 0))))
+
+// 只在键确实被某个 MOD 的 `条件` 引用时才求基座；否则返回显式值（通常为 0），
+// 避免为 24 个键各自遍历一次 MOD 表。
+fn cond_value_of(c: Config, k: Sym) -> Num =
+  cond_value_in(c, all_buffs(c), k)
+
+// BUFF 表由调用方传入：`values_of` 只解析一次，避免 24 个键各遍历一遍 20 条 BUFF
+fn cond_value_in(c: Config, btbl: Record{..open}, k: Sym) -> Num =
+  let explicit = opt_scalar(c.condition_values, k) in
+  if explicit != 0.0 then explicit
+  else
+    let raw = char_bonus(c.char_id, k)
+      + fold2(active_mods(c), 0.0, |acc, m, lv| acc + mod_base(m, m.加成, k, lv))
+      + buff_bonus_of(btbl, k) in
+    if one_based(k) then 1.0 + raw else raw
+
+fn has_code(c: Config, buff_name: Sym) -> Bool =
+  any(all_buffs(c), |e| at(e, 0) == buff_name)
+
+// 召唤物字段：`attack` / `昂扬` / `背水` 按 `召唤物属性继承比例` 缩放（`summon_attrs`）
+fn summon_scaled(c: Config, summon: Bool, value: Num, p: Record{..open}) -> Num =
+  if summon then value * (1.0 + rec_num(p, sym"召唤物属性继承比例")) else value
+
+
+
+fn summon_hp_zone(c: Config, p: Record{..open}, summon: Bool) -> Num =
+  let hp = clamp(c.hp_percent, 0.0, 1.0) in
+  let hp_d = clamp(c.hp_percent, 0.25, 1.0) in
+  let boost = summon_scaled(c, summon, rec_num(p, sym"昂扬"), p) in
+  let desperate = summon_scaled(c, summon, rec_num(p, sym"背水"), p) in
+  (1.0 + boost * hp)
+    * (1.0 + 4.0 * desperate * (1.0 - hp_d) * (1.5 - hp_d))
+
+fn skill_expected(c: Config, p: Record{..open}, summon: Bool) -> Num =
+  let base_pool = 1.0 + rec_num(p, sym"增伤") + rec_num(p, sym"技能伤害")
+                  + (if summon then rec_num(p, sym"召唤物伤害") else 0.0) in
+  // `part_increase = 增伤基座 + 元素增伤`；召唤物字段的 `召唤物伤害` 已在基座里
+  let part_increase = base_pool + rec_num(p, sym"元素增伤") in
+  let resist = (1.0 - c.enemy_resist) in
+  let no_trigger = max(0.0, resist) * part_increase in
+  let crit = if summon then 1.0
+             else 1.0 + rec_num(p, sym"暴击") * (rec_num(p, sym"暴伤") - 1.0) in
+  let indep = (1.0 + rec_num(p, sym"独立增伤")) * (1.0 + rec_num(p, sym"技能独立增伤")) in
+  let add = 1.0 + rec_num(p, sym"技能追伤") in
+  let summon_indep = if summon then 1.0 + rec_num(p, sym"召唤物独立增伤") else 1.0 in
+  let pen = 1.0 + rec_num(p, sym"属性穿透") in
+  // 引擎顺序（`damage.rs`）：`expected = (base × increase) × (crit × common_more)`，
+  // `common_more = hp × (独立 × 追伤 × 召唤物独立 × 失衡 × 穿透)`。
+  // 逐步相乘会差 1-2 ULP；失衡易伤未启用时恒为 1.0
+  let other = indep * add * summon_indep * pen in
+  no_trigger * (crit * (summon_hp_zone(c, p, summon) * other))
+
+// 技能字段伤害 = 基数 × 防御 × expected（技能池乘区）
+fn field_damage(c: Config, skill_name: Sym, field_name: Sym) -> Num =
+  field_damage_with(c, field_panel(c), skill_name, field_name)
+
+
+
+fn field_damage_with(c: Config, p: Record{..open}, skill_name: Sym, field_name: Sym) -> Num =
+  let src = { kind: sym"skill", element: char_element(c.char_id), multiplier: 1.0 } in
+  field_base(c, skill_name, field_name, p)
+    * defense_zone(c, p, src) * skill_expected(c, p, is_summon_field(c, skill_name, field_name))

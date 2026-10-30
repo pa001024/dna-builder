@@ -1,0 +1,18 @@
+// lib/stack.bhl — the stacking semantics of spec §2.3, each a `fold` with a pack-chosen init
+// value, element order and binary function. The engine cannot tell them apart, and must not.
+module stack
+
+// 加算池：Σx
+fn additive(xs: List<Num>, init: Num) -> Num = fold(xs, init, |a, b| a + b)
+
+// 乘算池：Π(1+x)，返回净倍率
+fn multiplicative(xs: List<Num>) -> Num = fold(xs, 1.0, |a, b| a * (1.0 + b))
+
+// 乘算池的净增量：Π(1+x) - 1
+fn net(xs: List<Num>) -> Num = multiplicative(xs) - 1.0
+
+// 递减池：1 - Π(1-x)
+fn diminishing(xs: List<Num>) -> Num = 1.0 - fold(xs, 1.0, |a, b| a * (1.0 - b))
+
+// 取前 k 个最大值的和
+fn top_k(xs: List<Num>, k: Num) -> Num = additive(take(sort_by(xs, |x| -x), floor(k)), 0.0)

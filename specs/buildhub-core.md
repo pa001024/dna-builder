@@ -268,11 +268,15 @@ sqrt pow log  # 走 libm（可配 host，见 §9.4）
 safe_div      # 除零返回缺省，而不是 inf
 
 # 列表（顺序语义显式）
-len at slice concat concat_map map filter fold sort_by take drop zip find any all count
+len at slice concat concat_map map filter fold fold2 sort_by take drop zip find any all count dedup_by
 # 记录
 field get_or has update
+keys          # 记录的字段名（插入序）；`Some(rec)` 视同该记录
+group_sum     # List<(Sym, Num)> 按键归并求和 -> Record（一遍遍历累加的通用形式）
 # 构造
 sym_of num_of
+# 值形状谓词（宿主数据可能在同一字段里混放标量/数组，pack 需要按形状分派）
+is_num is_list
 # 有界递归
 fix(init, step: |T| T, done: |T| Bool, max: Num) -> T
 
@@ -286,7 +290,14 @@ expected(x: T) -> T
 inf nan
 ```
 
-> 这 39 个名字里没有一个是业务概念；连 `sum`/`avg` 都在标准库里用 `fold` 写。
+> 这 45 个名字里没有一个是业务概念；连 `sum`/`avg` 都在标准库里用 `fold` 写。
+>
+> `keys` 与 `group_sum` 是为「一遍遍历累加」补的：没有它们，pack 只能对每个目标键各遍历
+> 一遍数据源（N 个键 × M 条记录），而在 pack 里用 `fold` + 记录累加每加一个键都要复制整张表。
+> `dedup_by(list, key)` 保留每个键的首次出现：把「查首个匹配」这类 O(n²) 扫描压成一次
+> 线性遍历（pack 的槽位去重从每次 `find` 整表变成一遍 `dedup_by`）。
+> `fold2(xs, init, |acc, a, b| …)` 是 `fold` 的二元解构形式：元素必须是二元组，闭包直接拿到
+> 两个分量，省掉每个元素两次 `at`。三者仍是纯结构的，不含任何领域词汇。
 
 ### 3.4 模块与包
 
@@ -1148,6 +1159,21 @@ wasm 里只有运行时（堆分配、值表示、JSON 边界、memo、fuel）�
 §9.5.1 保留了路径 B——需要热修或用户自带规则时走 B，只换 `CodeImage` 或数据包，不用发版。
 
 ### 9.6 wasm 后端（路径 W）
+
+> **实现偏离（2026-10-29，2026-10-30 重构）**：AOT 的实际发射目标是 **LLVM IR**，不是 wasm 字节码。
+> 理由与本节的技术判断一致（"不要把语义实现第二遍"），但把 §9.6.3 的手写值表示交给独立 crate
+> `crates/buildhub-aot` 的运行库，把 §9.6.2 的"发射器"交给同一 crate 的 `src/emit.rs`：每个 pack
+> 函数是一个 `define`，控制流是 `br`，数值是原生 `fadd`/`fcmp`，动态操作是一次 `bhub_*` 调用。
+> 发布形态有两种：路径 A（`crates/buildhub-core` 的 `cabi` 特性 → `engine.wasm`，装载 `CodeImage`）
+> 与路径 B（`buildhub-aot --wasm` → 运行时与 pack 链接成**单个** `pack.wasm`）。
+> 见 `crates/buildhub-core/EXECUTION.md`。
+>
+> **编译路径的记忆化（2026-10-30）**：§6.1 的键是结构哈希；AOT 路径改用**参数句柄本身**
+> （BVal 原字）。值不可变，epoch 内同一句柄永远是同一个值，键不需要结构哈希。每个函数一张
+> 64 槽直接映射表（`@m{id}_e/_k/_r`），`bhub_reset` 递增全局 epoch 使上一轮条目失效。
+> 句柄恒等只是**充分**条件，命中率取决于句柄复用，运行时因此维护三样东西：字符串按内容驻留、
+> 复合值按 `Rc` 指针身份复用句柄、闭包保存捕获值的已编码句柄。它们只影响命中率、不影响结果，
+> 由 `g4_aot_matches_the_native_paths` 逐字符比对 AOT 与解释器的输出。
 
 #### 9.6.1 编译范围
 

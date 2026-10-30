@@ -1,0 +1,17 @@
+// lib/list.bhl — list helpers, all written with `fold` (spec §2.3).
+module list
+
+fn sum(xs: List<Num>) -> Num = fold(xs, 0.0, |a, b| a + b)
+
+fn prod(xs: List<Num>) -> Num = fold(xs, 1.0, |a, b| a * b)
+
+fn avg(xs: List<Num>) -> Num =
+  if len(xs) == 0.0 then 0.0 else sum(xs) / len(xs)
+
+fn max_of(xs: List<Num>) -> Num = fold(xs, -inf, |a, b| max(a, b))
+
+fn count_if(xs: List<Num>, p: |Num| Bool) -> Num = len(filter(xs, |x| p(x)))
+
+fn sort_desc(xs: List<Num>) -> List<Num> = sort_by(xs, |x| -x)
+
+fn sort_asc(xs: List<Num>) -> List<Num> = sort_by(xs, |x| x)

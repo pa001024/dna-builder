@@ -1,0 +1,163 @@
+# buildhub pack: dna
+# Duet Night Abyss — a *new* implementation of the game's damage rules in BHL.
+#
+# This pack is written from the mechanic descriptions, not translated from `dob-calc-core`.
+# Everything the engine does not know lives here: attributes, stacking, crits, mitigation,
+# per-element resistance, the four damage pools, the party and the aura.
+id      = "dna"
+version = "0.1.0"
+engine  = ">=0.1 <1"
+
+# Unknown JSON fields are tolerated so game-data updates do not break loading.
+schema_check = "open"
+
+[capabilities]
+host = ["rng.splitmix"]
+
+[dimensions]
+names     = ["direct", "dot", "reaction", "execute"]
+partition = false
+
+# 直接读上游 datapack（`crates/dob-calc-core/tests/fixtures/modules.json` 同源）。
+# `#<模块键>` 选择文件内的模块；属性键在上游已是**分量形式**（`雷属性攻击`、`切割攻击`），
+# 因此这里不做任何重命名或展开。
+[[data]]
+name    = "chars"
+dataset = "datapack/modules.json#char.data"
+schema  = "Char"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "mods"
+dataset = "datapack/modules.json#mod.data"
+schema  = "Mod"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "weapons"
+dataset = "datapack/modules.json#weapon.data"
+schema  = "Weapon"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "monsters"
+dataset = "datapack/modules.json#monster.data"
+schema  = "Monster"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "effects"
+dataset = "datapack/modules.json#effect.data"
+schema  = "Effect"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "pets"
+dataset = "datapack/modules.json#pet.data"
+schema  = "Pet"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "petTraits"
+dataset = "datapack/modules.json#petTraits"
+schema  = "PetTrait"
+key     = "id"
+index   = true
+
+[[data]]
+name    = "buffs"
+dataset = "datapack/modules.json#buff.data"
+schema  = "Buff"
+key     = "名称"
+index   = true
+
+[[entries]]
+name = "damage"
+fn   = "damage"
+args = ["Config", "Source"]
+
+[[entries]]
+name = "breakdown"
+fn   = "breakdown"
+args = ["Config", "Source"]
+
+[[entries]]
+name = "panel"
+fn   = "panel"
+args = ["Config"]
+
+[[entries]]
+name = "element_attack"
+fn   = "element_attack"
+args = ["Config", "Sym"]
+
+[[entries]]
+name = "element_bonus"
+fn   = "element_bonus"
+args = ["Config", "Sym"]
+
+[[entries]]
+name = "dot_total"
+fn   = "dot_total_from"
+args = ["Config", "List<DotSpec>", "Num"]
+
+[[entries]]
+name = "char_of"
+fn   = "char_of"
+args = ["Num"]
+
+[[entries]]
+name = "monster_of"
+fn   = "monster_of"
+args = ["Num"]
+
+[[entries]]
+name = "weapon_of"
+fn   = "weapon_of"
+args = ["Num"]
+
+
+
+[[entries]]
+name = "crit_expected"
+fn   = "crit_expected"
+args = ["Num", "Num"]
+
+[[entries]]
+name = "crit_lower"
+fn   = "crit_lower"
+args = ["Num", "Num"]
+
+[[entries]]
+name = "crit_upper"
+fn   = "crit_upper"
+args = ["Num", "Num"]
+
+[[entries]]
+name = "crit_overflow"
+fn   = "crit_overflow"
+args = ["Num", "Num", "Num"]
+
+
+[[entries]]
+name = "target"
+fn   = "target"
+args = ["Config"]
+
+
+[[entries]]
+name = "target_list"
+fn   = "target_list"
+args = ["Config"]
+
+
+[[entries]]
+name = "field_damage"
+fn   = "field_damage"
+args = ["Config", "Sym", "Sym"]

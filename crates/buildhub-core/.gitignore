@@ -1,0 +1,10 @@
+# Logs
+logs
+*.log
+
+node_modules
+dist
+dist-ssr
+target/
+crates/*/target/
+*.local

@@ -1,0 +1,36 @@
+[package]
+name = "buildhub-aot"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "buildhub AOT: pack → LLVM IR, plus the runtime the generated code links against"
+license = "MIT"
+
+[lib]
+name = "buildhub_rt"
+path = "src/lib.rs"
+# `staticlib` is what links into the generated program (native or wasm).
+# `cdylib` is the wasm form of that same link: `--wasm` passes the pack object in via
+# `-C link-arg`, so one cargo invocation yields a single `pack.wasm`.
+crate-type = ["staticlib", "rlib", "cdylib"]
+
+[[bin]]
+name = "buildhub-aot"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[dependencies]
+# The runtime needs the JSON boundary (`host::convert_set`) only; the pack loader belongs to the
+# compiler CLI, so a wasm build of the runtime stays free of `toml`.
+buildhub-core = { path = "../buildhub-core", default-features = false, features = ["json"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+hashbrown = { version = "0.17.1", default-features = false, features = ["default-hasher"] }
+
+[features]
+default = ["cli"]
+cli = ["buildhub-core/loader"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

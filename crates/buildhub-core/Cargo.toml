@@ -1,0 +1,53 @@
+[package]
+name = "buildhub-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "buildhub: an executable rule kernel with a pack-defined DSL (BHL)"
+license = "MIT"
+
+[lib]
+name = "buildhub_core"
+path = "src/lib.rs"
+# `rlib` for the kernel + CLI; `cdylib` is the §10.2 wasm ABI, linked by `build.sh`.
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "buildhub"
+path = "src/main.rs"
+# The CLI is a host tool: it needs the filesystem loader and JSON. A `no_std` build is lib-only.
+required-features = ["std", "loader", "json"]
+
+[dependencies]
+hashbrown = { version = "0.17.1", default-features = false, features = ["default-hasher"] }
+# The kernel is `no_std` + `alloc`. `libm` is not an optimisation: spec §9.4 requires transcendentals
+# to be identical across targets, and the platform `f64::sqrt/ln/powf` are std-only anyway.
+libm = "0.2"
+# Host-side types only: the C ABI (path B/W) and the CLI parse/emit JSON. The rule kernel never sees
+# JSON, so `no_std` builds (`--no-default-features`) drop these entirely.
+serde_json = { version = "1", optional = true, default-features = false, features = ["alloc"] }
+# Only the pack loader reads `pack.toml` from disk.
+toml = { version = "0.8", optional = true }
+
+[dev-dependencies]
+# The AOT parity test feeds the artifact the same JSON a host would.
+serde_json = "1"
+
+[features]
+default = ["std", "loader", "json"]
+# `std` unlocks the filesystem loader and the CLI. The kernel modules themselves compile without it.
+std = []
+# JSON at the host boundary (`bhub_call`, `pack test`, CLI). Not needed by the kernel.
+json = ["dep:serde_json"]
+loader = ["std", "dep:toml"]
+# The §10.2 C ABI (`src/cabi.rs`), built as a cdylib by `build.sh`. It needs the pack loader and
+# the JSON boundary; the kernel stays free of both when the feature is off.
+cabi = ["json", "loader"]
+# Only for `tests/no_domain_leak.rs`: a `no_std` build of a crate that also declares a cdylib still
+# has to *link*, which needs a panic handler and an allocator. Never enable it for a real build.
+no_std_gate = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

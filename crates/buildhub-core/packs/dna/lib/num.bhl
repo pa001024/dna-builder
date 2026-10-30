@@ -1,0 +1,37 @@
+// lib/num.bhl — numeric helpers. Vendored per spec Q4 (no cross-pack sharing).
+module num
+
+fn lerp(a: Num, b: Num, t: Num) -> Num = a + (b - a) * t
+
+fn almost_eq(a: Num, b: Num, eps: Num) -> Bool = abs(a - b) <= eps
+
+// 分段线性插值：knots 为升序 (x, y)，区间外取端点。
+fn pwl(knots: List<(Num, Num)>, x: Num) -> Num =
+  let n = len(knots) in
+  if n == 0 then 0.0
+  else if x <= at(at(knots, 0), 0) then 0.0 + at(at(knots, 0), 1)
+  else if x >= at(at(knots, n - 1), 0) then 0.0 + at(at(knots, n - 1), 1)
+  else segment(knots, x, 0)
+
+fn segment(knots: List<(Num, Num)>, x: Num, i: Num) -> Num =
+  let n = len(knots) in
+  if i + 1 >= n then 0.0 + at(at(knots, n - 1), 1)
+  else
+    let a = at(knots, i) in
+    let b = at(knots, i + 1) in
+    if x < at(b, 0) then
+      let t = (x - at(a, 0)) / (at(b, 0) - at(a, 0)) in
+      at(a, 1) + (at(b, 1) - at(a, 1)) * t
+    else
+      segment(knots, x, i + 1)
+
+// range(start, stop, step)：按步长构造网格。步长必须 > 0（spec §9.9.13 的时间网格）。
+fn range(start: Num, stop: Num, step: Num) -> List<Num> =
+  if step <= 0.0 then []
+  else if stop <= start then []
+  else range_from(start, stop, step, 0.0)
+
+fn range_from(start: Num, stop: Num, step: Num, i: Num) -> List<Num> =
+  let v = start + i * step in
+  if v >= stop then []
+  else concat([v], range_from(start, stop, step, i + 1.0))

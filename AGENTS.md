@@ -75,7 +75,8 @@ packages/
 ├── graphql-mobius/    # GraphQL 类型安全客户端（原 externals/graphql-mobius）
 └── dob-script/        # dob-script CLI 的 npm 包装
 tools/                # 仓库级 Dev tools（i18n.ts、icon-tool.ts、data-pack.ts…），cwd 无关
-crates/               # Rust crates（hpatchz-wasm、mcp_server、dob-script-runtime）
+crates/               # Rust crates（buildhub-core 解释器+wasm ABI、buildhub-aot 编译器+运行库、
+                      # hpatchz-wasm、mcp_server、dob-script-runtime）
 ```
 
 ## Key Technologies
