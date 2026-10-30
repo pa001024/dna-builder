@@ -5,6 +5,7 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import ReaderDialogueBody, { type ReaderDialogueLine } from "@/components/ReaderDialogueBody.vue"
 import ReaderModeOverlay from "@/components/ReaderModeOverlay.vue"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
+import { conditionsMap } from "@/data/d/condition.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { storySummaryData } from "@/data/d/storysummary.data"
@@ -563,6 +564,9 @@ watch(
  * 获取任务链版本号。
  * @returns 版本号
  */
+/** 解锁条件：questChain.unlock 存的是 Condition 表 id，取表里对应条目交给 ConditionItem 呈现 */
+const unlockCondition = computed(() => (props.questChain.unlock ? conditionsMap[props.questChain.unlock] : undefined))
+
 const questChainVersion = computed(() => props.questChain.版本 || "")
 const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChain.type))
 
@@ -784,6 +788,12 @@ function openQuestReader(): void {
                 </template>
             </SectionHeader>
             <p class="text-sm leading-relaxed whitespace-pre-line text-base-content/75">{{ questChainAiSummary }}</p>
+        </section>
+
+        <!-- 解锁条件 -->
+        <section v-if="unlockCondition" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="UNLOCK" :title="$t('questchain-detail.unlockCondition')" />
+            <ConditionItem :condition="unlockCondition" />
         </section>
 
         <!-- 奖励信息 -->

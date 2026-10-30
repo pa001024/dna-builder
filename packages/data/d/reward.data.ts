@@ -69018,6 +69018,18 @@ const t: Reward[] = [
         ],
     },
     {
+        id: 82051,
+        m: "Fixed",
+        child: [
+            {
+                id: 10051,
+                t: "HeadFrame",
+                c: 1,
+                n: "冰湖灯火",
+            },
+        ],
+    },
+    {
         id: 91001,
         m: "Fixed",
         child: [

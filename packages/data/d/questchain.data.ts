@@ -10,6 +10,8 @@ export interface QuestChain {
     icon?: string
     reward?: number[]
     questReward?: Record<number, number>
+    /** 解锁条件：条件表（Condition）id，详情页用 ConditionItem 呈现 */
+    unlock?: number
     quests: QuestChainItem[]
     main?: number
     startTime?: number
@@ -180,6 +182,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon01",
         reward: [50501],
+        unlock: 100101,
         quests: [
             {
                 id: 10010201,
@@ -264,6 +267,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon01",
         reward: [50502],
+        unlock: 100102,
         quests: [
             {
                 id: 10010311,
@@ -345,6 +349,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50503],
+        unlock: 100103,
         quests: [
             {
                 id: 10020101,
@@ -421,6 +426,7 @@ const questChainDataRaw: QuestChain[] = [
             "10020215": 4000008,
             "10020223": 50531,
         },
+        unlock: 200101,
         quests: [
             {
                 id: 10020201,
@@ -524,6 +530,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50508],
+        unlock: 10020201,
         quests: [
             {
                 id: 10020301,
@@ -614,6 +621,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10020407": 4000005,
         },
+        unlock: 100203,
         quests: [
             {
                 id: 10020401,
@@ -694,6 +702,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10020505": 4000010,
         },
+        unlock: 100204,
         quests: [
             {
                 id: 10020501,
@@ -748,6 +757,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50512],
+        unlock: 10020501,
         quests: [
             {
                 id: 10020651,
@@ -841,6 +851,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50513],
+        unlock: 10020601,
         quests: [
             {
                 id: 10020701,
@@ -917,6 +928,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50514],
+        unlock: 100207,
         quests: [
             {
                 id: 10020801,
@@ -986,6 +998,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10030110": 4000014,
         },
+        unlock: 11010901,
         quests: [
             {
                 id: 10030101,
@@ -1102,6 +1115,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50522],
+        unlock: 100301,
         quests: [
             {
                 id: 10030299,
@@ -1177,6 +1191,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10030395": 4000015,
         },
+        unlock: 100302,
         quests: [
             {
                 id: 10030399,
@@ -1236,6 +1251,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10030404": 4000016,
         },
+        unlock: 100303,
         quests: [
             {
                 id: 10030498,
@@ -1290,6 +1306,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50525],
+        unlock: 100304,
         quests: [
             {
                 id: 10030501,
@@ -1385,6 +1402,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50526],
+        unlock: 100305,
         quests: [
             {
                 id: 10030601,
@@ -1403,6 +1421,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 1,
         icon: "T_Chapter_Icon01",
         reward: [50527],
+        unlock: 100306,
         quests: [
             {
                 id: 10030701,
@@ -1428,6 +1447,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "10040104": 10040107,
         },
+        unlock: 10040101,
         quests: [
             {
                 id: 10040101,
@@ -1507,6 +1527,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         main: 1,
         reward: [50545],
+        unlock: 100401,
         quests: [
             {
                 id: 10040201,
@@ -1600,6 +1621,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         main: 1,
         reward: [50546],
+        unlock: 100402,
         quests: [
             {
                 id: 10040301,
@@ -1700,6 +1722,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         main: 1,
         reward: [50547],
+        unlock: 100403,
         quests: [
             {
                 id: 10040401,
@@ -1891,6 +1914,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         main: 1,
         reward: [50548],
+        unlock: 100404,
         quests: [
             {
                 id: 10040501,
@@ -1985,6 +2009,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50515],
+        unlock: 20010401,
         quests: [
             {
                 id: 11010103,
@@ -2044,6 +2069,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50516],
+        unlock: 110101,
         quests: [
             {
                 id: 11010301,
@@ -2131,6 +2157,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50517],
+        unlock: 110103,
         quests: [
             {
                 id: 11010501,
@@ -2311,6 +2338,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "11010706": 4000011,
         },
+        unlock: 110105,
         quests: [
             {
                 id: 11010702,
@@ -2349,6 +2377,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50519],
+        unlock: 110107,
         quests: [
             {
                 id: 11010808,
@@ -2436,6 +2465,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50520],
+        unlock: 110108,
         quests: [
             {
                 id: 11010902,
@@ -2509,6 +2539,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50643],
+        unlock: 10040501,
         quests: [
             {
                 id: 11020101,
@@ -2547,6 +2578,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50644],
+        unlock: 110201,
         quests: [
             {
                 id: 11020201,
@@ -2571,6 +2603,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50645],
+        unlock: 110202,
         quests: [
             {
                 id: 11020301,
@@ -2595,6 +2628,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50646],
+        unlock: 110203,
         quests: [
             {
                 id: 11021101,
@@ -2612,6 +2646,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50647],
+        unlock: 110203,
         quests: [
             {
                 id: 11021201,
@@ -2629,6 +2664,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50648],
+        unlock: 110203,
         quests: [
             {
                 id: 11021301,
@@ -2653,6 +2689,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50649],
+        unlock: 110203,
         quests: [
             {
                 id: 11021401,
@@ -2703,6 +2740,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50650],
+        unlock: 110203,
         quests: [
             {
                 id: 11021501,
@@ -2727,6 +2765,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50651],
+        unlock: 11022000,
         quests: [
             {
                 id: 11022001,
@@ -2751,6 +2790,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50652],
+        unlock: 110220,
         quests: [
             {
                 id: 11022101,
@@ -2791,6 +2831,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50653],
+        unlock: 110220,
         quests: [
             {
                 id: 11022201,
@@ -2837,6 +2878,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50654],
+        unlock: 11023100,
         quests: [
             {
                 id: 11023101,
@@ -2875,6 +2917,7 @@ const questChainDataRaw: QuestChain[] = [
         main: 2,
         icon: "T_Chapter_Icon02",
         reward: [50655],
+        unlock: 110231,
         quests: [
             {
                 id: 11023201,
@@ -2924,6 +2967,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "潘多拉之匣",
         type: 3,
         reward: [50656],
+        unlock: 110232,
         quests: [
             {
                 id: 11023300,
@@ -2968,6 +3012,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50528],
+        unlock: 10030701,
         quests: [
             {
                 id: 12000101,
@@ -3004,6 +3049,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50529],
+        unlock: 120001,
         quests: [
             {
                 id: 12000201,
@@ -3076,6 +3122,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50530],
+        unlock: 12000201,
         quests: [
             {
                 id: 12000301,
@@ -3139,6 +3186,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50532],
+        unlock: 12010001,
         quests: [
             {
                 id: 12010101,
@@ -3230,6 +3278,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50533],
+        unlock: 120101,
         quests: [
             {
                 id: 12010201,
@@ -3365,6 +3414,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "12010306": 4000017,
         },
+        unlock: 120102,
         quests: [
             {
                 id: 12010301,
@@ -3518,6 +3568,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50535],
+        unlock: 12010301,
         quests: [
             {
                 id: 12010401,
@@ -3656,6 +3707,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50536],
+        unlock: 12010302,
         quests: [
             {
                 id: 12010501,
@@ -3738,6 +3790,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50537],
+        unlock: 12010601,
         quests: [
             {
                 id: 12010601,
@@ -3803,6 +3856,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50592],
+        unlock: 120110,
         startTime: 1764036000,
         quests: [
             {
@@ -3883,6 +3937,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50593],
+        unlock: 120111,
         startTime: 1764122400,
         quests: [
             {
@@ -3956,6 +4011,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50594],
+        unlock: 120112,
         startTime: 1764208800,
         quests: [
             {
@@ -4022,6 +4078,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50595],
+        unlock: 120113,
         startTime: 1764295200,
         quests: [
             {
@@ -4147,6 +4204,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "12020105": 4000022,
         },
+        unlock: 12010602,
         quests: [
             {
                 id: 12020101,
@@ -4268,6 +4326,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50539],
+        unlock: 120201,
         quests: [
             {
                 id: 12020201,
@@ -4368,6 +4427,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50540],
+        unlock: 120202,
         quests: [
             {
                 id: 12020301,
@@ -4541,6 +4601,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "12020406": 4000019,
         },
+        unlock: 120203,
         quests: [
             {
                 id: 12020401,
@@ -4641,6 +4702,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50542],
+        unlock: 120204,
         quests: [
             {
                 id: 12020501,
@@ -4748,6 +4810,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         icon: "T_Chapter_Icon03",
         reward: [50543],
+        unlock: 120205,
         quests: [
             {
                 id: 12020601,
@@ -4911,6 +4974,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50621],
+        unlock: 120206,
         startTime: 1776909600,
         quests: [
             {
@@ -4956,6 +5020,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50622],
+        unlock: 120301,
         startTime: 1776909600,
         quests: [
             {
@@ -5001,6 +5066,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50623],
+        unlock: 1203021,
         startTime: 1776996000,
         quests: [
             {
@@ -5039,6 +5105,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50624],
+        unlock: 1203031,
         startTime: 1777082400,
         quests: [
             {
@@ -5070,6 +5137,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50625],
+        unlock: 120304,
         startTime: 1777082400,
         quests: [
             {
@@ -5101,6 +5169,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50626],
+        unlock: 1203051,
         startTime: 1777168800,
         quests: [
             {
@@ -5139,6 +5208,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50627],
+        unlock: 1203061,
         startTime: 1777255200,
         quests: [
             {
@@ -5205,6 +5275,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 6,
         icon: "T_Chapter_Icon03",
         reward: [50628],
+        unlock: 120307,
         startTime: 1780279200,
         quests: [
             {
@@ -5221,6 +5292,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50665],
+        unlock: 1004051207,
         startTime: 1776909600,
         quests: [
             {
@@ -5251,6 +5323,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50666],
+        unlock: 120701,
         startTime: 1776909600,
         quests: [
             {
@@ -5288,6 +5361,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50667],
+        unlock: 120702,
         startTime: 1776909600,
         quests: [
             {
@@ -5339,6 +5413,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50668],
+        unlock: 120703,
         startTime: 1776909600,
         quests: [
             {
@@ -5369,6 +5444,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50669],
+        unlock: 120704,
         startTime: 1776909600,
         quests: [
             {
@@ -5399,6 +5475,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "行于破晓",
         type: 6,
         reward: [50670],
+        unlock: 120705,
         startTime: 1776909600,
         quests: [
             {
@@ -5424,6 +5501,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "20010102": 4000018,
         },
+        unlock: 100201,
         quests: [
             {
                 id: 20010101,
@@ -5462,6 +5540,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 1,
         main: 1,
         reward: [50551],
+        unlock: 100204,
         quests: [
             {
                 id: 20010201,
@@ -5499,6 +5578,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "魔灵啊魔灵",
         type: 4,
         reward: [50577],
+        unlock: 10020202,
         quests: [
             {
                 id: 20010301,
@@ -5548,6 +5628,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "我可以养它吗",
         type: 4,
         reward: [50578],
+        unlock: 10020803,
         quests: [
             {
                 id: 20010401,
@@ -5635,6 +5716,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50552],
         npc: 700020,
+        unlock: 100203,
         quests: [
             {
                 id: 20020100,
@@ -5680,6 +5762,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50554],
         npc: 700006,
+        unlock: 100201,
         quests: [
             {
                 id: 20020300,
@@ -5770,6 +5853,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50555],
         npc: 200015,
+        unlock: 100204,
         quests: [
             {
                 id: 20020400,
@@ -5807,6 +5891,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50556],
         npc: 700048,
+        unlock: 200215,
         quests: [
             {
                 id: 20020501,
@@ -5886,6 +5971,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50557],
         npc: 200003,
+        unlock: 100202,
         quests: [
             {
                 id: 20020600,
@@ -5945,6 +6031,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50558],
         npc: 700086,
+        unlock: 100203,
         quests: [
             {
                 id: 20020700,
@@ -6001,6 +6088,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "你好，冰湖城",
         type: 3,
         reward: [50559],
+        unlock: 20021301,
         quests: [
             {
                 id: 20020802,
@@ -6022,6 +6110,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "你好，冰湖城",
         type: 3,
         reward: [50560],
+        unlock: 20021301,
         quests: [
             {
                 id: 20020901,
@@ -6072,6 +6161,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "下水道的枯木",
         type: 3,
         reward: [50561],
+        unlock: 100206,
         quests: [
             {
                 id: 20021007,
@@ -6117,6 +6207,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50562],
         npc: 700012,
+        unlock: 10020802,
         quests: [
             {
                 id: 20021100,
@@ -6169,6 +6260,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50563],
         npc: 700113,
+        unlock: 10020802,
         quests: [
             {
                 id: 20021200,
@@ -6222,6 +6314,7 @@ const questChainDataRaw: QuestChain[] = [
             "20021300": 4000001,
         },
         npc: 700115,
+        unlock: 10020802,
         quests: [
             {
                 id: 20021300,
@@ -6269,6 +6362,7 @@ const questChainDataRaw: QuestChain[] = [
             "20021501": 4000009,
         },
         npc: 700116,
+        unlock: 100204,
         quests: [
             {
                 id: 20021500,
@@ -6343,6 +6437,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "帝国三兄弟",
         type: 3,
         reward: [50567],
+        unlock: 100203,
         quests: [
             {
                 id: 20021601,
@@ -6378,6 +6473,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "你好，冰湖城",
         type: 3,
         reward: [50570],
+        unlock: 20021301,
         quests: [
             {
                 id: 20021904,
@@ -6427,6 +6523,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "小队名字几个字",
         type: 4,
         reward: [50571],
+        unlock: 100205,
         quests: [
             {
                 id: 20022002,
@@ -6483,6 +6580,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "欲望与考古",
         type: 3,
         reward: [50572],
+        unlock: 100202,
         quests: [
             {
                 id: 20022105,
@@ -6523,6 +6621,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50573],
         npc: 700069,
+        unlock: 100202,
         quests: [
             {
                 id: 20022200,
@@ -6568,6 +6667,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50574],
         npc: 700011,
+        unlock: 100202,
         quests: [
             {
                 id: 20022300,
@@ -6591,6 +6691,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "一段时间后你在下水道入口再次碰到了西奥，过去与他聊聊，看看他这次又在好奇些什么东西吧。",
         type: 3,
         reward: [50575],
+        unlock: 20022301,
         quests: [
             {
                 id: 20022401,
@@ -6627,6 +6728,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "一段时间后你在修普诺斯之家再次碰到了西奥，过去与他聊聊，看看他这次又在好奇些什么东西吧。",
         type: 3,
         reward: [50576],
+        unlock: 20022401,
         quests: [
             {
                 id: 20022501,
@@ -6663,6 +6765,7 @@ const questChainDataRaw: QuestChain[] = [
         desc: "与热情的剧团成员交谈",
         type: 4,
         reward: [50580],
+        unlock: 110109,
         quests: [
             {
                 id: 20022701,
@@ -6689,6 +6792,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "再次见证的伊始",
         desc: "铁匠皎皎似乎正在找你",
         type: 4,
+        unlock: 99,
         quests: [
             {
                 id: 20022801,
@@ -6724,6 +6828,7 @@ const questChainDataRaw: QuestChain[] = [
         questReward: {
             "20022901": 4000013,
         },
+        unlock: 100206,
         quests: [
             {
                 id: 20022901,
@@ -6758,6 +6863,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50583],
         npc: 700306,
+        unlock: 100307,
         quests: [
             {
                 id: 20023000,
@@ -6817,6 +6923,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50584],
         npc: 700303,
+        unlock: 100307,
         quests: [
             {
                 id: 20023100,
@@ -6869,6 +6976,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50585],
         npc: 700309,
+        unlock: 100307,
         quests: [
             {
                 id: 20023201,
@@ -6913,6 +7021,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "最近经历的几件事都指向了一桩十六年前的绑架纵火案，直觉告诉你这其中存在着千丝万缕的联系，根据已有的线索试着理清现状吧。",
         type: 3,
         reward: [50586],
+        unlock: 20023300,
         quests: [
             {
                 id: 20023301,
@@ -6955,6 +7064,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "你又一次见到了那只在广场附近徘徊的野猫，它似乎是认出了你，大老远就喵喵叫了起来。",
         type: 4,
         reward: [50589],
+        unlock: 800061,
         quests: [
             {
                 id: 20023401,
@@ -6978,6 +7088,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "完成一次避险委托",
         type: 4,
         reward: [50590],
+        unlock: 100202,
         quests: [
             {
                 id: 20023501,
@@ -6999,6 +7110,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "完成松露与榛子对应的委托密函，获取松露与榛子的思绪片段",
         type: 4,
         reward: [50591],
+        unlock: 4340,
         quests: [
             {
                 id: 20023601,
@@ -7030,6 +7142,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "离开冰湖城也有几日，这次回来也该回休憩之所看看，只是……白去哪里了？",
         type: 4,
         reward: [50631],
+        unlock: 20023701,
         quests: [
             {
                 id: 20023701,
@@ -7054,6 +7167,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 4,
         reward: [50632],
         npc: 900001,
+        unlock: 200237,
         quests: [
             {
                 id: 20023800,
@@ -7085,6 +7199,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 4,
         reward: [50633],
         npc: 900001,
+        unlock: 200238,
         quests: [
             {
                 id: 20023900,
@@ -7116,6 +7231,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 4,
         reward: [50634],
         npc: 900001,
+        unlock: 200239,
         quests: [
             {
                 id: 20024000,
@@ -7146,6 +7262,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "你被一个神神叨叨的老者叫停了脚步，他说着让人半懂半不懂的话，向你提出了委托。",
         type: 3,
         reward: [50596],
+        unlock: 120106,
         quests: [
             {
                 id: 20030100,
@@ -7191,6 +7308,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50597],
         npc: 700321,
+        unlock: 120106,
         quests: [
             {
                 id: 20030200,
@@ -7236,6 +7354,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50598],
         npc: 700322,
+        unlock: 120106,
         quests: [
             {
                 id: 20030300,
@@ -7281,6 +7400,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50599],
         npc: 700324,
+        unlock: 20030401,
         quests: [
             {
                 id: 20030400,
@@ -7360,6 +7480,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "小女孩瑟瑟发抖地向白龙神君祈祷，去帮帮她吧。",
         type: 3,
         reward: [50600],
+        unlock: 120104,
         quests: [
             {
                 id: 20030500,
@@ -7440,6 +7561,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50601],
         npc: 700323,
+        unlock: 12010306,
         quests: [
             {
                 id: 20030600,
@@ -7478,6 +7600,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50602],
         npc: 700365,
+        unlock: 120103,
         quests: [
             {
                 id: 20030700,
@@ -7516,6 +7639,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50605],
         npc: 700372,
+        unlock: 120106,
         quests: [
             {
                 id: 20030800,
@@ -7552,6 +7676,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "最近总有华胥之民宣称路过幽明涧时感觉有阵阵凉风，想必是无由生作祟，不如抽空和白一起去看看是怎么回事。",
         type: 3,
         reward: [50604],
+        unlock: 120106,
         quests: [
             {
                 id: 20030901,
@@ -7604,6 +7729,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50606],
         npc: 701087,
+        unlock: 120103,
         quests: [
             {
                 id: 20031001,
@@ -7648,6 +7774,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "那位带着孩子的父亲似乎有事相求，去和他聊聊吧。",
         type: 3,
         reward: [50607],
+        unlock: 120106,
         quests: [
             {
                 id: 20031100,
@@ -7685,6 +7812,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "屋檐下的小女孩似乎快要站着睡着了，去看看她的情况。",
         type: 3,
         reward: [50608],
+        unlock: 120106,
         quests: [
             {
                 id: 20031200,
@@ -7730,6 +7858,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50609],
         npc: 701091,
+        unlock: 120003,
         quests: [
             {
                 id: 20031301,
@@ -7782,6 +7911,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 4,
         reward: [50610],
         npc: 701096,
+        unlock: 12010306,
         quests: [
             {
                 id: 20031401,
@@ -7798,6 +7928,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50611],
         npc: 701095,
+        unlock: 120106,
         quests: [
             {
                 id: 20031500,
@@ -7842,6 +7973,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "在皓京周边与白闲逛之时，竟在路边看到了一位熟悉的无由生，如果没有记错的话，它的名字应该叫逍遥生，多少也算是有“过命”交情的“熟人”，你们决定上前搭话。",
         type: 3,
         reward: [50629],
+        unlock: 120206,
         quests: [
             {
                 id: 20031700,
@@ -7926,6 +8058,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "忘川回响",
         type: 3,
         reward: [50630],
+        unlock: 120206,
         quests: [
             {
                 id: 20031801,
@@ -7976,6 +8109,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "行商向你们展示了一种奇怪的盒子，看起来年代已久……你们不仅有些怀疑，这么小的盒子里面，真的会有宝贝吗？",
         type: 3,
         reward: [50635],
+        unlock: 100402,
         quests: [
             {
                 id: 20040100,
@@ -8021,6 +8155,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50636],
         npc: 700397,
+        unlock: 100405,
         quests: [
             {
                 id: 20040200,
@@ -8100,6 +8235,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "\n在百花车站的货运区发现了一个很可疑的木箱，正当打算处理掉它之时，此前有过一面之缘的老妇人站了出来，好像有什么话要说。",
         type: 3,
         reward: [50637],
+        unlock: 100403,
         quests: [
             {
                 id: 20040300,
@@ -8159,6 +8295,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50638],
         npc: 700486,
+        unlock: 200401,
         quests: [
             {
                 id: 20040400,
@@ -8307,6 +8444,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "无论以什么样的方式，你圆满完成了罗连特交给你的任务，打消了大部分工人们对于杰克先生的热情，是时候该回到螺丝刀行会获取属于你的奖励了。",
         type: 3,
         reward: [50639],
+        unlock: 200404,
         quests: [
             {
                 id: 20040501,
@@ -8412,6 +8550,7 @@ const questChainDataRaw: QuestChain[] = [
             "20040602": 506401,
             "20040605": 506402,
         },
+        unlock: 200402,
         quests: [
             {
                 id: 20040601,
@@ -8491,6 +8630,7 @@ const questChainDataRaw: QuestChain[] = [
         detail: "Content_200407_1",
         type: 3,
         reward: [50641],
+        unlock: 200406,
         quests: [
             {
                 id: 20040700,
@@ -8543,6 +8683,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 3,
         reward: [50642],
         npc: 700400,
+        unlock: 200407,
         quests: [
             {
                 id: 20040801,
@@ -8658,6 +8799,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110002],
+        unlock: 120002,
         startTime: 1765159200,
         endTime: 1766437200,
         quests: [
@@ -8676,6 +8818,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110004],
+        unlock: 120002,
         startTime: 1765227600,
         endTime: 1766437200,
         quests: [
@@ -8694,6 +8837,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110006],
+        unlock: 120002,
         startTime: 1765314000,
         endTime: 1766437200,
         quests: [
@@ -8712,6 +8856,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110008],
+        unlock: 120002,
         startTime: 1765400400,
         endTime: 1766437200,
         quests: [
@@ -8730,6 +8875,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110010],
+        unlock: 120002,
         startTime: 1765486800,
         endTime: 1766437200,
         quests: [
@@ -8748,6 +8894,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110012],
+        unlock: 120002,
         startTime: 1765573200,
         endTime: 1766437200,
         quests: [
@@ -8766,6 +8913,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [110014],
+        unlock: 120002,
         startTime: 1765659600,
         endTime: 1766437200,
         quests: [
@@ -8783,6 +8931,7 @@ const questChainDataRaw: QuestChain[] = [
         type: 5,
         icon: "T_Chapter_Icon03",
         reward: [50603],
+        unlock: 100307,
         startTime: 1766628000,
         endTime: 1768856400,
         quests: [
@@ -8841,6 +8990,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·旧日残光",
         type: 5,
         reward: [50614],
+        unlock: 40012101,
         startTime: 1775700000,
         endTime: 1776718800,
         quests: [
@@ -8864,6 +9014,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·第一缕风",
         type: 5,
         reward: [50615],
+        unlock: 40012201,
         startTime: 1775768400,
         endTime: 1776718800,
         quests: [
@@ -8880,6 +9031,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·坚冰中绽放",
         type: 5,
         reward: [50616],
+        unlock: 40012301,
         startTime: 1775854800,
         endTime: 1776718800,
         quests: [
@@ -8896,6 +9048,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·无光的舞台",
         type: 5,
         reward: [50617],
+        unlock: 40012401,
         startTime: 1775941200,
         endTime: 1776718800,
         quests: [
@@ -8912,6 +9065,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·璀璨终曲",
         type: 5,
         reward: [50618],
+        unlock: 40012501,
         startTime: 1776027600,
         endTime: 1776718800,
         quests: [
@@ -8928,6 +9082,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·织星撷香",
         type: 5,
         reward: [50619],
+        unlock: 40012601,
         startTime: 1776114000,
         endTime: 1776718800,
         quests: [
@@ -8944,6 +9099,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·神阙弈天",
         type: 5,
         reward: [50620],
+        unlock: 40012701,
         startTime: 1776200400,
         endTime: 1776718800,
         quests: [
@@ -8960,6 +9116,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·序章",
         type: 5,
         reward: [50612],
+        unlock: 40012801,
         startTime: 1775700000,
         endTime: 1776718800,
         quests: [
@@ -8990,6 +9147,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·后日谈",
         type: 5,
         reward: [50613],
+        unlock: 40012901,
         startTime: 1776200400,
         endTime: 1776718800,
         quests: [
@@ -9006,6 +9164,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·往来过客",
         type: 5,
         reward: [50658],
+        unlock: 40013001,
         startTime: 1788987600,
         endTime: 1790629200,
         quests: [
@@ -9022,6 +9181,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·远方的梦想",
         type: 5,
         reward: [50659],
+        unlock: 40013101,
         startTime: 1789074000,
         endTime: 1790629200,
         quests: [
@@ -9038,6 +9198,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·汽油与烟尘",
         type: 5,
         reward: [50660],
+        unlock: 40013201,
         startTime: 1789160400,
         endTime: 1790629200,
         quests: [
@@ -9054,6 +9215,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·废墟里起舞",
         type: 5,
         reward: [50661],
+        unlock: 40013301,
         startTime: 1789246800,
         endTime: 1790629200,
         quests: [
@@ -9070,6 +9232,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·不变的轮回",
         type: 5,
         reward: [50662],
+        unlock: 40013401,
         startTime: 1789333200,
         endTime: 1790629200,
         quests: [
@@ -9086,6 +9249,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·梦中的乐园",
         type: 5,
         reward: [50663],
+        unlock: 40013501,
         startTime: 1789419600,
         endTime: 1790629200,
         quests: [
@@ -9102,6 +9266,7 @@ const questChainDataRaw: QuestChain[] = [
         episode: "定格的往事·染血的记忆",
         type: 5,
         reward: [50664],
+        unlock: 40013601,
         startTime: 1789506000,
         endTime: 1790629200,
         quests: [

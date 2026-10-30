@@ -3719,6 +3719,7 @@
         "story_voice_settings": "剧情语音设置",
         "title": "任务剧情详情",
         "unknown_quest": "未知任务 {{id}}",
+        "unlockCondition": "解锁条件",
         "voice_language": "语音语言"
     },
     "questchain-list": {

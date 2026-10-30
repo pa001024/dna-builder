@@ -3710,6 +3710,7 @@
         "story_voice_settings": "Réglages des voix de l’histoire",
         "title": "Détails de la chaîne de quêtes",
         "unknown_quest": "Quête inconnue {{id}}",
+        "unlockCondition": "Condition de déblocage",
         "voice_language": "Langue des voix"
     },
     "questchain-list": {

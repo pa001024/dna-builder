@@ -3669,6 +3669,7 @@
         "story_voice_settings": "劇情語音設定",
         "title": "任務劇情詳情",
         "unknown_quest": "未知任務 {{id}}",
+        "unlockCondition": "解鎖條件",
         "voice_language": "語音語言"
     },
     "questchain-list": {

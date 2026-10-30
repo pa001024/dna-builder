@@ -3693,6 +3693,7 @@
         "story_voice_settings": "Story voice settings",
         "title": "Quest Chain Details",
         "unknown_quest": "Unknown Quest {{id}}",
+        "unlockCondition": "Unlock Condition",
         "voice_language": "Voice Language"
     },
     "questchain-list": {

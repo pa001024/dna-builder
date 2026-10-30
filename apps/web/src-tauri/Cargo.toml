@@ -34,10 +34,13 @@ tauri-plugin-opener = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-process = "2"
 tauri-plugin-window-state = "2"
+tauri-plugin-deep-link = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-http = "2"
 tauri-plugin-updater = "2"
+# 单实例（对应 dob-app 的 singleTop）：热启深链转交已运行的实例，deep-link 特性把参数先喂给 deep-link 插件
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sysinfo = "0.37.2"

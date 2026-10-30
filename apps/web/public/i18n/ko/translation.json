@@ -3672,6 +3672,7 @@
         "story_voice_settings": "스토리 음성 설정",
         "title": "퀘스트 체인 상세",
         "unknown_quest": "알 수 없는 퀘스트 {{id}}",
+        "unlockCondition": "해금 조건",
         "voice_language": "음성 언어"
     },
     "questchain-list": {

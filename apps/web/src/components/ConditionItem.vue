@@ -45,6 +45,8 @@ type SegmentType = "term" | "op" | "value" | "group" | "name" | "paren" | "raw"
 interface ConditionSegment {
     type: SegmentType
     text: string
+    /** 站内跳转路由（任务 / 任务链名称可点击跳转） */
+    to?: string
 }
 
 interface ConditionClause {
@@ -107,6 +109,25 @@ function getQuestItemName(questId: number): string {
  */
 function getQuestChainName(chainId: number): string {
     return questChainMap.get(chainId)?.name ?? String(chainId)
+}
+
+/**
+ * 查找任务 id 所属的任务链 id。
+ * @param questId 任务 id
+ * @returns 任务链 id，查不到时返回 undefined（此时名称不做跳转）
+ */
+function getQuestChainId(questId: number): number | undefined {
+    for (const chain of questChainMap.values()) {
+        if (chain.quests.some(quest => quest.id === questId)) {
+            return chain.id
+        }
+    }
+    for (const [chainId, story] of questMap.entries()) {
+        if (story.quests.some(quest => quest.id === questId)) {
+            return chainId
+        }
+    }
+    return undefined
 }
 
 /**
@@ -206,27 +227,44 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         }
     }
 
-    if (key === "Quest") {
+    if (key === "Quest" || key === "TrueQuest") {
         const ids = (Array.isArray(entry) ? entry : [entry]).map(value => Number(value))
         const op = negated ? negateOp("=") : "="
-        return {
-            segments: [
-                { type: "term", text: "condition-item.quest" },
-                { type: "op", text: op },
-                { type: "name", text: ids.map(getQuestItemName).join(" / ") },
-            ],
-        }
+        const segments: ConditionSegment[] = [
+            { type: "term", text: "condition-item.quest" },
+            { type: "op", text: op },
+        ]
+        ids.forEach((questId, index) => {
+            if (index > 0) {
+                segments.push({ type: "raw", text: " / " })
+            }
+            const chainId = getQuestChainId(questId)
+            segments.push({
+                type: "name",
+                text: getQuestItemName(questId),
+                ...(chainId !== undefined ? { to: `/db/questchain/${chainId}/${questId}` } : {}),
+            })
+        })
+        return { segments }
     }
-    if (key === "QuestChain") {
+    if (key === "QuestChain" || key === "TrueQuestChain") {
         const ids = (Array.isArray(entry) ? entry : [entry]).map(value => Number(value))
         const op = negated ? negateOp("=") : "="
-        return {
-            segments: [
-                { type: "term", text: "condition-item.quest_chain" },
-                { type: "op", text: op },
-                { type: "name", text: ids.map(getQuestChainName).join(" / ") },
-            ],
-        }
+        const segments: ConditionSegment[] = [
+            { type: "term", text: "condition-item.quest_chain" },
+            { type: "op", text: op },
+        ]
+        ids.forEach((chainId, index) => {
+            if (index > 0) {
+                segments.push({ type: "raw", text: " / " })
+            }
+            segments.push({
+                type: "name",
+                text: getQuestChainName(chainId),
+                ...(questChainMap.has(chainId) ? { to: `/db/questchain/${chainId}` } : {}),
+            })
+        })
+        return { segments }
     }
 
     if (key === "DialogueHasRead") {
@@ -352,6 +390,12 @@ const joinLogic = computed<"AND" | "OR">(() => {
                             {{ segment.text }}
                         </span>
                         <span v-else-if="segment.type === 'group'" class="text-secondary">{{ formatGameText(segment.text) }}</span>
+                        <SRouterLink
+                            v-else-if="segment.type === 'name' && segment.to"
+                            :to="segment.to"
+                            class="font-medium text-base-content/90 hover:underline"
+                            >{{ formatGameText(segment.text) }}</SRouterLink
+                        >
                         <span v-else-if="segment.type === 'name'" class="font-medium text-base-content/90">{{
                             formatGameText(segment.text)
                         }}</span>

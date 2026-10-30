@@ -3671,6 +3671,7 @@
         "story_voice_settings": "ストーリーボイス設定",
         "title": "クエストチェイン詳細",
         "unknown_quest": "不明なクエスト {{id}}",
+        "unlockCondition": "解放条件",
         "voice_language": "ボイス言語"
     },
     "questchain-list": {
