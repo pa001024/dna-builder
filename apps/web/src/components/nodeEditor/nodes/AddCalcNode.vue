@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NodeProps } from "@vue-flow/core"
+import { formatDamage } from "@/util"
 import BaseNode from "./BaseNode.vue"
 
 // 定义节点属性
@@ -16,17 +17,15 @@ defineProps<NodeProps>()
         :description="$t('node-editor.addCalc.description')"
     >
         <!-- 节点内容 -->
-        <div class="space-y-2">
+        <div class="w-45 max-w-full">
             <!-- 计算结果预览 -->
             <div v-if="data.result">
-                <div class="font-semibold text-xs text-base-content/60">{{ $t("node-editor.addCalc.result") }}</div>
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-lg text-primary font-orbitron">{{ data.result?.value?.toFixed(2) || "0" }}</span>
-                </div>
+                <div class="text-[10px] text-base-content/45">{{ $t("node-editor.addCalc.result") }}</div>
+                <div class="font-orbitron text-[13px] font-bold tabular-nums text-primary">{{ formatDamage(data.result?.value ?? 0) }}</div>
             </div>
 
             <!-- 提示信息 -->
-            <div v-else class="text-xs text-yellow-500">{{ $t("node-editor.addCalc.waiting") }}</div>
+            <div v-else class="text-[10px] text-yellow-500">{{ $t("node-editor.addCalc.waiting") }}</div>
         </div>
     </BaseNode>
 </template>

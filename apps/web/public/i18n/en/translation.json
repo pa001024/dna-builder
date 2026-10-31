@@ -3437,10 +3437,13 @@
         "astExpression": {
             "description": "Validate AST expressions",
             "expression": "Expression",
+            "functionDefinition": "Function definition",
             "missingCore": "Missing core calculation node",
             "result": "Result",
             "title": "AST expression",
             "unknownError": "Unknown error",
+            "value": "Value",
+            "variableName": "Variable name",
             "waiting": "Waiting for input..."
         },
         "attrCalc": {

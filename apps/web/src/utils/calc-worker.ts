@@ -1,4 +1,12 @@
-import type { CalcAutobuildRequest, CalcIncomeRequest, CalcResponse, CalcTargetValuesRequest, CalcWorkerMessage } from "@/data/Calc.worker"
+import type {
+    CalcAutobuildRequest,
+    CalcBuildEvaluation,
+    CalcEvaluateRequest,
+    CalcIncomeRequest,
+    CalcResponse,
+    CalcTargetValuesRequest,
+    CalcWorkerMessage,
+} from "@/data/Calc.worker"
 
 type PendingRequest = {
     resolve: (data: CalcResponse) => void
@@ -37,9 +45,25 @@ function getWorker(): Worker {
     return worker
 }
 
-export type CalcRequest = CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest
+export type CalcRequest = CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest | CalcEvaluateRequest
 
-type CalcRequestInput = Omit<CalcAutobuildRequest, "id"> | Omit<CalcIncomeRequest, "id"> | Omit<CalcTargetValuesRequest, "id">
+type CalcRequestInput =
+    | Omit<CalcAutobuildRequest, "id">
+    | Omit<CalcIncomeRequest, "id">
+    | Omit<CalcTargetValuesRequest, "id">
+    | Omit<CalcEvaluateRequest, "id">
+
+/**
+ * 提交一次构筑求值（节点编辑器使用）：走 wasm worker，失败时 worker 内部回退 TS。
+ * @param payload 角色 id、完整配置与可选目标函数覆盖
+ * @returns 属性 / 武器面板 / 目标值 / 伤害明细
+ */
+export function requestBuildEvaluation(payload: Omit<CalcEvaluateRequest, "id" | "kind">): Promise<CalcBuildEvaluation> {
+    return postCalcRequest({ ...payload, kind: "evaluate" }).then(data => {
+        if (!data.evaluation) throw new Error(data.error || "构筑求值无结果")
+        return data.evaluation
+    })
+}
 
 export function postCalcRequest(message: CalcRequestInput, onLog?: (text: string) => void): Promise<CalcResponse> {
     const target = getWorker()

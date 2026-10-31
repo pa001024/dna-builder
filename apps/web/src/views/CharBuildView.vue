@@ -76,7 +76,7 @@ import { useSettingStore } from "@/store/setting"
 import { useTimeline } from "@/store/timeline"
 import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
-import { copyText, formatBigNumber, pasteText, roundBuffValue } from "@/util"
+import { copyText, formatBigNumber, formatExpressionValue, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
@@ -1245,7 +1245,7 @@ function getCustomVariableResult(variable: [string, string]) {
 
     const value = charBuild.value.evaluateCustomVariableDefinition(variable[0], variable[1])
     if (!Number.isFinite(value)) return "0"
-    const formatted = `${+value.toFixed(4)}`
+    const formatted = formatExpressionValue(value)
     const definition = charBuild.value.parseCustomFunctionDefinition(variable[0])
     if (!definition) return formatted
     const sampleArgs = definition.params.map((_, index) => index + 1)

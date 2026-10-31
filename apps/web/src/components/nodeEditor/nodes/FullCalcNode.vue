@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { NodeProps } from "@vue-flow/core"
-import { Handle, Position } from "@vue-flow/core"
+import { formatDamage } from "@/util"
 import BaseNode from "./BaseNode.vue"
+import VectorResultTable from "./VectorResultTable.vue"
 
 // 定义节点属性
 defineProps<NodeProps>()
@@ -16,27 +17,18 @@ defineProps<NodeProps>()
         :title="$t('node-editor.fullCalc.title')"
         :description="$t('node-editor.fullCalc.description')"
     >
-        <!-- 输入手柄 -->
-        <Handle
-            id="input"
-            type="target"
-            :position="Position.Left"
-            style="top: 50%"
-            class="w-3 h-3 bg-blue-500 border-2 border-white shadow-md"
-        />
-
         <!-- 节点内容 -->
-        <div class="space-y-2">
+        <div class="w-55 max-w-full space-y-1.5">
             <!-- 计算结果预览 -->
             <div v-if="data.result">
-                <div class="font-semibold text-xs text-base-content/60">{{ $t("node-editor.fullCalc.result") }}</div>
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-lg text-primary font-orbitron">{{ data.result?.value?.toFixed(0) || "0" }}</span>
-                </div>
+                <div class="text-[10px] text-base-content/45">{{ $t("node-editor.fullCalc.result") }}</div>
+                <div class="font-orbitron text-[13px] font-bold tabular-nums text-primary">{{ formatDamage(data.result?.value ?? 0) }}</div>
             </div>
 
             <!-- 提示信息 -->
-            <div v-else class="text-xs text-yellow-500">{{ $t("node-editor.fullCalc.waiting") }}</div>
+            <div v-else class="text-[10px] text-yellow-500">{{ $t("node-editor.fullCalc.waiting") }}</div>
+
+            <VectorResultTable v-if="data.vectorResult" :vector="data.vectorResult" />
         </div>
     </BaseNode>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { NodeProps } from "@vue-flow/core"
-import { Handle, Position, useVueFlow } from "@vue-flow/core"
-import { computed, ref } from "vue"
+import { useVueFlow } from "@vue-flow/core"
+import { computed, ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
+import { formatDamage } from "@/util"
 import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<NodeProps>()
@@ -22,13 +23,21 @@ const result = computed(() => {
 })
 
 // 输入数量
-const inputCount = ref<number>(2)
+const inputCount = ref<number>(Number(props.data.inputCount) || 2)
 const { updateNodeInternals } = useVueFlow()
-// 更新输入数量
+// 更新输入数量：端口行随 inputCount 增减，通知 VueFlow 重新测量连接点
 const updateInputCount = () => {
     store.updateNodeData(props.id, { inputCount: inputCount.value })
-    updateNodeInternals([props.id])
+    requestAnimationFrame(() => updateNodeInternals([props.id]))
 }
+
+watch(
+    () => props.data.inputCount,
+    value => {
+        inputCount.value = Number(value) || 2
+        requestAnimationFrame(() => updateNodeInternals([props.id]))
+    }
+)
 </script>
 
 <template>
@@ -40,43 +49,26 @@ const updateInputCount = () => {
         :title="$t('node-editor.expressionCalc.title')"
         :description="$t('node-editor.expressionCalc.description')"
     >
-        <template #input>
-            <!-- 动态输入手柄 -->
-            <Handle
-                v-for="i in inputCount"
-                :id="`input${i}`"
-                :key="`input${i}`"
-                type="target"
-                :position="Position.Left"
-                :style="{ top: `${(i / (inputCount + 1)) * 100}%` }"
-                class="w-3 h-3 bg-blue-500 border-2 border-white shadow-md"
-            >
-                <span class="mr-2 whitespace-nowrap text-xs text-base-content/60">{{ String.fromCharCode(96 + i) }}</span>
-            </Handle>
-        </template>
-
         <!-- 节点内容 -->
-        <div class="space-y-2">
+        <div class="w-55 max-w-full space-y-1.5">
             <!-- 表达式输入 -->
             <div>
-                <label class="block text-xs font-semibold text-base-content/60 mb-1">{{
-                    $t("node-editor.expressionCalc.expression")
-                }}</label>
+                <label class="mb-0.5 block text-[10px] text-base-content/45">{{ $t("node-editor.expressionCalc.expression") }}</label>
                 <input
                     v-model="expression"
                     type="text"
                     :placeholder="$t('node-editor.expressionCalc.expressionPlaceholder')"
-                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 font-mono text-[11px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @input="updateExpression"
                 />
             </div>
 
             <!-- 输入数量设置 -->
             <div class="flex items-center gap-2">
-                <label class="text-xs font-semibold text-base-content/60">{{ $t("node-editor.expressionCalc.inputCount") }}</label>
+                <label class="text-[10px] text-base-content/45">{{ $t("node-editor.expressionCalc.inputCount") }}</label>
                 <Select
                     v-model.number="inputCount"
-                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[11px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
                     @change="updateInputCount"
                 >
                     <SelectItem :value="1">1</SelectItem>
@@ -89,14 +81,12 @@ const updateInputCount = () => {
 
             <!-- 计算结果预览 -->
             <div>
-                <div class="font-semibold text-xs text-base-content/60 mb-1">{{ $t("node-editor.expressionCalc.result") }}</div>
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-lg text-primary font-orbitron">{{ result?.toFixed(2) || "0" }}</span>
-                </div>
+                <div class="text-[10px] text-base-content/45">{{ $t("node-editor.expressionCalc.result") }}</div>
+                <div class="font-orbitron text-[13px] font-bold tabular-nums text-primary">{{ formatDamage(result) }}</div>
             </div>
 
             <!-- 错误信息 -->
-            <div v-if="data.error" class="text-xs text-red-500">{{ data.error }}</div>
+            <div v-if="data.error" class="text-[10px] text-red-500">{{ data.error }}</div>
         </div>
     </BaseNode>
 </template>

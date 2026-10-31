@@ -24,6 +24,7 @@ type DobccExports = WebAssembly.Exports & {
     dobcc_alloc(size: number): number
     dobcc_dealloc(pointer: number, size: number): void
     dobcc_open_session(tablesPtr: number, tablesLen: number): bigint
+    dobcc_evaluate(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_autobuild(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_income(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_close_session(session: bigint): void
@@ -47,10 +48,57 @@ export interface WasmAutobuildResult {
     iters: number
 }
 
+/** 构筑求值结果（对应 Rust `BuildResult` 的 JSON 口径）。 */
+export interface WasmEvaluateResult {
+    attributes: Record<string, number>
+    weapon: Record<string, number> | null
+    targetValue: number
+    damage: {
+        expectedDamage: number
+        noHpDamage: number
+        physicalDamage: number
+        elementDamage: number
+        higherCritExpectedTrigger: number
+        lowerCritExpectedTrigger: number
+    } | null
+    targetFunction: string
+    buffs: { name: string; applicableSkill: string | null; tags: string[] }[]
+    error: string | null
+}
+
+export interface WasmEvaluateInput {
+    charId: number
+    settings: CharSettings
+    /** 覆盖 settings.targetFunction 的目标函数（节点编辑器按节点指定表达式时使用） */
+    targetFunction?: string
+    /** 覆盖 settings.baseName 的技能基名（武器伤害节点切到武器技能口径） */
+    baseName?: string
+}
+
 const textEncoder = new TextEncoder()
 const textDecoder = new TextDecoder()
 
 let sessionPromise: Promise<{ exports: DobccExports; session: bigint } | undefined> | undefined
+let sessionDataKey = ""
+
+/**
+ * 数据包水合会整体替换静态数据；用长度与首尾 id 做低成本指纹，变化时重建 wasm 会话。
+ * @returns 当前数据指纹
+ */
+function currentDataKey(): string {
+    const sample = (list: readonly { id?: number }[]) => `${list.length}:${list[0]?.id ?? ""}:${list[list.length - 1]?.id ?? ""}`
+    return [
+        sample(charData),
+        sample(modData),
+        sample(weaponData),
+        sample(buffData),
+        sample(monsterData),
+        modEffectMap.size,
+        weaponEffectMap.size,
+        petMap.size,
+        petEntrys.length,
+    ].join("|")
+}
 
 function buildModulesJson(): string {
     return JSON.stringify({
@@ -66,7 +114,11 @@ function buildModulesJson(): string {
 }
 
 async function getSession(): Promise<{ exports: DobccExports; session: bigint } | undefined> {
+    const dataKey = currentDataKey()
+    // 数据包换入后旧会话的静态表已过期；不主动关闭，避免与在途求值竞争
+    if (sessionPromise && sessionDataKey !== dataKey) sessionPromise = undefined
     if (!sessionPromise) {
+        sessionDataKey = dataKey
         sessionPromise = (async () => {
             try {
                 const base =
@@ -79,7 +131,13 @@ async function getSession(): Promise<{ exports: DobccExports; session: bigint } 
                 if (!response.ok) return undefined
                 const { instance } = await WebAssembly.instantiate(await response.arrayBuffer(), {})
                 const wasm = instance.exports as DobccExports
-                if (typeof wasm.dobcc_autobuild !== "function" || typeof wasm.dobcc_income !== "function") return undefined
+                if (
+                    typeof wasm.dobcc_evaluate !== "function" ||
+                    typeof wasm.dobcc_autobuild !== "function" ||
+                    typeof wasm.dobcc_income !== "function"
+                ) {
+                    return undefined
+                }
                 const bytes = textEncoder.encode(buildModulesJson())
                 const ptr = wasm.dobcc_alloc(bytes.length)
                 new Uint8Array(wasm.memory.buffer).set(bytes, ptr)
@@ -150,6 +208,29 @@ export async function runWasmAutobuild(input: WasmAutobuildInput): Promise<WasmA
         ready.exports,
         (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_autobuild(ready.session, reqPtr, reqLen, lenPtr),
         buildWasmAutobuildRequest(input)
+    )
+}
+
+/**
+ * 在 wasm 侧求值一份构筑（属性 / 当前武器面板 / 目标函数 / 伤害明细）。
+ * @param input 角色 id、构筑配置与可选的目标函数覆盖
+ * @returns wasm 求值结果
+ */
+export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmEvaluateResult> {
+    const ready = await getSession()
+    if (!ready) throw new Error("wasm 不可用")
+    const settings =
+        input.targetFunction === undefined && input.baseName === undefined
+            ? input.settings
+            : {
+                  ...input.settings,
+                  targetFunction: input.targetFunction ?? input.settings.targetFunction,
+                  baseName: input.baseName ?? input.settings.baseName,
+              }
+    return callDobcc<WasmEvaluateResult>(
+        ready.exports,
+        (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_evaluate(ready.session, reqPtr, reqLen, lenPtr),
+        JSON.stringify({ charId: input.charId, settings })
     )
 }
 

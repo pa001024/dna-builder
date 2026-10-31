@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Handle, Position } from "@vue-flow/core"
 import { computed } from "vue"
 import type { DamageResult } from "@/data/CharBuild"
-import { useNodeEditorStore } from "@/store/nodeEditor"
+import { formatDamage } from "@/util"
 import BaseNode from "./BaseNode.vue"
+import VectorResultTable from "./VectorResultTable.vue"
 
 const props = defineProps<{
     id: string
@@ -12,36 +12,21 @@ const props = defineProps<{
     selected: boolean
 }>()
 
-const store = useNodeEditorStore()
-
-// 计算武器伤害
-const weaponDamage = computed<DamageResult | null>(() => {
-    return store.calculateNode(props.id) as DamageResult | null
-})
+// 伤害结果由 worker 异步写回节点数据
+const weaponDamage = computed<DamageResult | null>(() => props.data.result ?? null)
 </script>
 
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
-        <div v-if="weaponDamage" class="space-y-1 text-sm">
-            <div class="font-semibold text-xs text-base-content/60 mb-2">{{ $t("武器伤害") }}</div>
-            <div class="grid grid-cols-1 gap-1">
-                <div>{{ $t("node-editor.weaponDmg.expectedDamage") }}: {{ +(weaponDamage.expectedDamage?.toFixed(4) || 0) }}</div>
-                <div>{{ $t("node-editor.weaponDmg.lowerCrit") }}: {{ +(weaponDamage.lowerCritNoTrigger?.toFixed(4) || 0) }}</div>
-                <div>{{ $t("node-editor.weaponDmg.higherCrit") }}: {{ +(weaponDamage.higherCritNoTrigger?.toFixed(4) || 0) }}</div>
-            </div>
+        <div v-if="weaponDamage" class="w-52.5 max-w-full space-y-0.5 text-[11px] tabular-nums">
+            <div class="mb-1 text-[10px] text-base-content/45">{{ $t("武器伤害") }}</div>
+            <div>{{ $t("node-editor.weaponDmg.expectedDamage") }}: {{ formatDamage(weaponDamage.expectedDamage ?? 0) }}</div>
+            <div>{{ $t("物理") }}: {{ formatDamage(weaponDamage.physicalDamage ?? 0) }}</div>
+            <div>{{ $t("元素") }}: {{ formatDamage(weaponDamage.elementDamage ?? 0) }}</div>
         </div>
-        <div v-else class="text-sm text-base-content/60">{{ $t("node-editor.weaponDmg.waiting") }}</div>
-
-        <template #output>
-            <Handle id="expectedDamage" type="source" :position="Position.Right" style="top: 25%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.expectedDamage") }}</span>
-            </Handle>
-            <Handle id="lowerCritNoTrigger" type="source" :position="Position.Right" style="top: 50%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.lowerCrit") }}</span>
-            </Handle>
-            <Handle id="higherCritNoTrigger" type="source" :position="Position.Right" style="top: 75%">
-                <span class="ml-2 whitespace-nowrap text-xs text-base-content/60">{{ $t("node-editor.weaponDmg.higherCrit") }}</span>
-            </Handle>
-        </template>
+        <div v-else-if="data.evalPending" class="text-[11px] text-base-content/45">{{ $t("node-editor.weaponDmg.waiting") }}</div>
+        <div v-else-if="data.error" class="text-[11px] text-error">{{ data.error }}</div>
+        <div v-else class="text-[11px] text-base-content/45">{{ $t("node-editor.weaponDmg.waiting") }}</div>
+        <VectorResultTable v-if="data.vectorResult" :vector="data.vectorResult" />
     </BaseNode>
 </template>

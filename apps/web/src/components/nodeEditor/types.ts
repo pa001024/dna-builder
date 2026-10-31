@@ -39,6 +39,8 @@ export enum NodeCategory {
     CALCULATION = "calculation", // 计算节点
     OUTPUT = "output", // 输出节点
     SPECIAL = "special", // 特殊节点（AST等）
+    BASIC = "basic", // 基础组件（分组 / 标签 / 文本 / 数值 / 向量）
+    BUILD_SOURCE = "build-source", // 构筑来源（JSON / 在线构筑）
 }
 
 /**
@@ -67,8 +69,11 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.MELEE_WEAPON_INPUT]: "近战武器输入",
         [NodeType.RANGED_WEAPON_INPUT]: "远程武器输入",
         [NodeType.MOD_INPUT]: "MOD输入",
-        [NodeType.BUFF_INPUT]: "Buff输入",
+        [NodeType.BUFF_INPUT]: "BUFF与队友",
+        [NodeType.EFFECT_INPUT]: "特效设置",
+        [NodeType.PET_INPUT]: "魔灵设置",
         [NodeType.ENEMY_INPUT]: "敌人设置",
+        [NodeType.CUSTOM_VARS_INPUT]: "自定义变量组",
         [NodeType.CORE_CALC]: "核心计算",
         [NodeType.ATTR_CALC]: "计算属性",
         [NodeType.WEAPON_ATTR_CALC]: "计算武器属性",
@@ -83,6 +88,15 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.WEAPON_OUTPUT]: "武器输出",
         [NodeType.DAMAGE_OUTPUT]: "伤害输出",
         [NodeType.AST_EXPRESSION_CALC]: "目标函数",
+        [NodeType.CUSTOM_EXPRESSION]: "自定义变量求值",
+        [NodeType.GROUP]: "分组",
+        [NodeType.LABEL]: "标签",
+        [NodeType.TEXT_INPUT]: "文本输入",
+        [NodeType.NUMBER_INPUT]: "数值输入",
+        [NodeType.VECTOR_INPUT]: "向量输入",
+        [NodeType.DOT_INPUT]: "DOT频率",
+        [NodeType.JSON_BUILD]: "JSON构筑",
+        [NodeType.ONLINE_BUILD]: "在线构筑",
     }
     return labels[type] || type
 }
@@ -122,10 +136,31 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     },
     {
         type: NodeType.BUFF_INPUT,
-        label: "Buff输入",
+        label: "BUFF与队友",
         category: NodeCategory.INPUT,
         icon: "ri:flashlight-line",
-        description: "添加Buff加成",
+        description: "添加 Buff 并设置协战队友（队友用于过滤 Buff）",
+    },
+    {
+        type: NodeType.EFFECT_INPUT,
+        label: "特效设置",
+        category: NodeCategory.INPUT,
+        icon: "ri:sparkling-line",
+        description: "设置 MOD / 武器特效等级",
+    },
+    {
+        type: NodeType.PET_INPUT,
+        label: "魔灵设置",
+        category: NodeCategory.INPUT,
+        icon: "ri:ghost-2-line",
+        description: "选择魔灵与潜质",
+    },
+    {
+        type: NodeType.CUSTOM_VARS_INPUT,
+        label: "自定义变量组",
+        category: NodeCategory.INPUT,
+        icon: "ri:code-s-slash-line",
+        description: "定义表达式变量（不参与求值）",
     },
     {
         type: NodeType.ENEMY_INPUT,
@@ -133,6 +168,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.INPUT,
         icon: "ri:skull-line",
         description: "设置敌人等级和抗性",
+    },
+    {
+        type: NodeType.DOT_INPUT,
+        label: "DOT频率",
+        category: NodeCategory.INPUT,
+        icon: "ri:time-line",
+        description: "配置技能 / 武器 DOT 每秒触发次数",
     },
     // 计算节点
     {
@@ -203,7 +245,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "集线节点",
         category: NodeCategory.CALCULATION,
         icon: "ri:git-branch-line",
-        description: "将所有输入集线到一起原样传递给输出",
+        description: "将构筑原样传递给输出",
     }, // 输出节点
     {
         type: NodeType.ATTR_OUTPUT,
@@ -233,5 +275,63 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.SPECIAL,
         icon: "ri:function-line",
         description: "自定义表达式计算",
+    },
+    {
+        type: NodeType.CUSTOM_EXPRESSION,
+        label: "自定义变量求值",
+        category: NodeCategory.SPECIAL,
+        icon: "ri:function-line",
+        description: "选择构筑中的自定义变量并输出数值",
+    },
+    // 基础组件
+    {
+        type: NodeType.GROUP,
+        label: "分组",
+        category: NodeCategory.BASIC,
+        icon: "ri:group-line",
+        description: "带标题的分组框，可拖动与缩放",
+    },
+    {
+        type: NodeType.LABEL,
+        label: "标签",
+        category: NodeCategory.BASIC,
+        icon: "ri:pushpin-2-line",
+        description: "在画布上添加说明文字",
+    },
+    {
+        type: NodeType.TEXT_INPUT,
+        label: "文本输入",
+        category: NodeCategory.BASIC,
+        icon: "ri:edit-line",
+        description: "输出一段文本",
+    },
+    {
+        type: NodeType.NUMBER_INPUT,
+        label: "数值输入",
+        category: NodeCategory.BASIC,
+        icon: "ri:hashtag",
+        description: "输出一个数值，可接入计算节点",
+    },
+    {
+        type: NodeType.VECTOR_INPUT,
+        label: "向量输入",
+        category: NodeCategory.BASIC,
+        icon: "ri:sort-number-asc",
+        description: "输入一组数值，接入自定义变量组做批量取值",
+    },
+    // 构筑来源
+    {
+        type: NodeType.JSON_BUILD,
+        label: "JSON构筑",
+        category: NodeCategory.BUILD_SOURCE,
+        icon: "ri:file-code-line",
+        description: "接收文本 JSON 并输出构筑",
+    },
+    {
+        type: NodeType.ONLINE_BUILD,
+        label: "在线构筑",
+        category: NodeCategory.BUILD_SOURCE,
+        icon: "ri:cloud-line",
+        description: "从在线构筑列表选择并输出构筑",
     },
 ]

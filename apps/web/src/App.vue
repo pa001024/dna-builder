@@ -487,9 +487,18 @@ onBeforeUnmount(() => {
                         </Suspense>
                     </KeepAlive>
                     <div v-else :key="$route.path" class="w-full h-full overflow-hidden">
-                        <ErrorBoundary>
-                            <component :is="Component" />
-                        </ErrorBoundary>
+                        <Suspense>
+                            <ErrorBoundary>
+                                <component :is="Component" />
+                            </ErrorBoundary>
+                            <template #fallback>
+                                <div class="flex h-full w-full flex-col items-center justify-center gap-3">
+                                    <img src="/app-icon.png" class="size-10 object-contain" alt="" />
+                                    <span class="loading loading-spinner loading-sm text-primary" />
+                                    <span class="text-[11px] tracking-wide text-base-content/45">正在加载…</span>
+                                </div>
+                            </template>
+                        </Suspense>
                     </div>
                 </transition>
             </RouterView>

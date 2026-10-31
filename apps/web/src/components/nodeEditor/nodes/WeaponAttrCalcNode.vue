@@ -2,7 +2,9 @@
 import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import type { WeaponAttr } from "@/data/CharBuild"
+import { format1, format100 } from "@/util"
 import BaseNode from "./BaseNode.vue"
+import VectorResultTable from "./VectorResultTable.vue"
 
 const props = defineProps<{
     id: string
@@ -22,17 +24,19 @@ const weaponAttrs = computed<WeaponAttr | null>(() => {
 
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
-        <div v-if="weaponAttrs" class="space-y-1 text-sm">
-            <div class="font-semibold text-xs text-base-content/60 mb-2">{{ t("node-editor.weaponAttr.result") }}</div>
-            <div class="grid grid-cols-2 gap-1">
-                <div>{{ $t("攻击") }}: {{ Math.round(weaponAttrs.攻击 * 100) / 100 }}</div>
-                <div>{{ $t("暴击") }}: {{ Math.round(weaponAttrs.暴击 * 100) }}%</div>
-                <div>{{ $t("暴伤") }}: {{ Math.round(weaponAttrs.暴伤 * 100) }}%</div>
-                <div>{{ $t("攻速") }}: {{ Math.round(weaponAttrs.攻速 * 100) / 100 }}</div>
-                <div>{{ $t("触发") }}: {{ Math.round(weaponAttrs.触发 * 100) }}%</div>
-                <div>{{ $t("多重") }}: {{ weaponAttrs.多重 }}</div>
+        <div v-if="weaponAttrs" class="w-55 max-w-full text-[11px] tabular-nums">
+            <div class="mb-1 text-[10px] text-base-content/45">{{ t("node-editor.weaponAttr.result") }}</div>
+            <div class="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                <div>{{ $t("攻击") }}: {{ format1(weaponAttrs.攻击, 2) }}</div>
+                <div>{{ $t("暴击") }}: {{ format100(weaponAttrs.暴击) }}</div>
+                <div>{{ $t("暴伤") }}: {{ format100(weaponAttrs.暴伤) }}</div>
+                <div>{{ $t("攻速") }}: {{ format1(weaponAttrs.攻速, 2) }}</div>
+                <div>{{ $t("触发") }}: {{ format100(weaponAttrs.触发) }}</div>
+                <div>{{ $t("多重") }}: {{ format1(weaponAttrs.多重, 2) }}</div>
             </div>
         </div>
-        <div v-else class="text-sm text-base-content/60">{{ $t("node-editor.weaponAttr.waiting") }}</div>
+        <div v-else-if="data.error" class="text-[11px] text-error">{{ data.error }}</div>
+        <div v-else class="text-[11px] text-base-content/45">{{ $t("node-editor.weaponAttr.waiting") }}</div>
+        <VectorResultTable v-if="data.vectorResult" :vector="data.vectorResult" />
     </BaseNode>
 </template>

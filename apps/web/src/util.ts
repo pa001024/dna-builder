@@ -42,6 +42,26 @@ export function formatBigNumber(n: number, d = 3) {
     return `${+n.toFixed(2)}`
 }
 
+/**
+ * 格式化伤害结果，与构筑页 DamageShow 使用同一口径。
+ * @param value 数值
+ * @returns 展示文本
+ */
+export function formatDamage(value: number) {
+    if (value >= 1e8) return formatBigNumber(value, 6)
+    if (value < 1) return `${value}`
+    return value.toFixed(0)
+}
+
+/**
+ * 格式化表达式/自定义变量数值（最多保留 4 位小数），与构筑页变量提示一致。
+ * @param value 数值
+ * @returns 展示文本
+ */
+export function formatExpressionValue(value: number) {
+    return `${+value.toFixed(4)}`
+}
+
 const numKeys = new Set([
     "有效生命",
     "基础攻击",

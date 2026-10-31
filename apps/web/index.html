@@ -7,19 +7,79 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
         <!-- SEO Meta Tags -->
-        <title>Duet Night Abyss Builder - 二重螺旋 - 免费角色构筑工具</title>
+        <title>DNA Builder - 二重螺旋DOB - 免费角色构筑工具</title>
         <meta
             name="description"
-            content="Duet Night Abyss Builder 是一款免费的二重螺旋角色构筑工具，支持角色属性计算、装备搭配、技能规划和构筑分享。提供详细的游戏数据和实用的配置方案。"
+            content="DNA Builder(DOB) 是一款免费的二重螺旋角色构筑工具，支持角色属性计算、装备搭配、技能规划和构筑分享。提供详细的游戏数据和实用的配置方案。"
         />
-        <meta name="keywords" content="二重螺旋,Duet Night Abyss,构筑工具,角色构筑,装备搭配,游戏工具,角色计算,构筑分享" />
+        <meta name="keywords" content="二重螺旋,DOB,Duet Night Abyss,构筑工具,角色构筑,装备搭配,游戏工具,角色计算,构筑分享" />
         <meta name="author" content="Duet Night Abyss Builder" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://dna-builder.cn/" />
+        <style>
+            html,
+            body {
+                margin: 0;
+            }
+            #boot-loader {
+                position: fixed;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                background: #0d0f13;
+                color: #c9ced8;
+                font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+                font-size: 12px;
+                letter-spacing: 0.08em;
+                z-index: 9999;
+            }
+            #boot-loader .boot-mark {
+                width: 48px;
+                height: 48px;
+                object-fit: contain;
+            }
+            #boot-loader .boot-spinner {
+                width: 90px;
+                height: 2px;
+                overflow: hidden;
+                background: rgba(201, 206, 216, 0.15);
+            }
+            #boot-loader .boot-spinner::after {
+                content: "";
+                display: block;
+                width: 40%;
+                height: 100%;
+                background: #8b9cff;
+                animation: boot-slide 1.1s ease-in-out infinite;
+            }
+            @keyframes boot-slide {
+                0% {
+                    transform: translateX(-110%);
+                }
+                100% {
+                    transform: translateX(260%);
+                }
+            }
+            @media (prefers-color-scheme: light) {
+                #boot-loader {
+                    background: #f2f4f8;
+                    color: #4b5563;
+                }
+            }
+        </style>
     </head>
 
     <body>
-        <div id="app"></div>
+        <div id="app">
+            <div id="boot-loader">
+                <img class="boot-mark" src="/app-icon.png" alt="" />
+                <div class="boot-spinner"></div>
+                <div>正在加载数据…</div>
+            </div>
+        </div>
         <script type="module" src="/src/main.ts"></script>
     </body>
 </html>

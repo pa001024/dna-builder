@@ -1,33 +1,48 @@
 <script setup lang="ts">
 import { Background } from "@vue-flow/background"
 import { Controls } from "@vue-flow/controls"
-import { useVueFlow, VueFlow } from "@vue-flow/core"
+import { SelectionMode, useVueFlow, VueFlow } from "@vue-flow/core"
 import { MiniMap } from "@vue-flow/minimap"
 import "@vue-flow/core/dist/style.css"
 import "@vue-flow/core/dist/theme-default.css"
-import type { EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
+import type { Connection, EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
 import { nanoid } from "nanoid"
-import { computed, markRaw, onMounted, onUnmounted, ref } from "vue"
+import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { charMap } from "@/data"
-import { useNodeEditorStore } from "@/store/nodeEditor"
+import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
+import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
+import { getNodePorts, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
 import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
 import AttrCalcNode from "./nodes/AttrCalcNode.vue"
 import BuffInputNode from "./nodes/BuffInputNode.vue"
 import CharInputNode from "./nodes/CharInputNode.vue"
 import CoreCalcNode from "./nodes/CoreCalcNode.vue"
+import CustomExpressionNode from "./nodes/CustomExpressionNode.vue"
+import CustomVariablesNode from "./nodes/CustomVariablesNode.vue"
+import DotInputNode from "./nodes/DotInputNode.vue"
+import EffectInputNode from "./nodes/EffectInputNode.vue"
 import EnemyInputNode from "./nodes/EnemyInputNode.vue"
 import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
 import FullCalcNode from "./nodes/FullCalcNode.vue"
+import GroupNode from "./nodes/GroupNode.vue"
 import HubNode from "./nodes/HubNode.vue"
+import JSONBuildNode from "./nodes/JSONBuildNode.vue"
+import LabelNode from "./nodes/LabelNode.vue"
 import MeleeWeaponInputNode from "./nodes/MeleeWeaponInputNode.vue"
 import ModInputNode from "./nodes/ModInputNode.vue"
 import MultiplyCalcNode from "./nodes/MultiplyCalcNode.vue"
+import NumberInputNode from "./nodes/NumberInputNode.vue"
+import OnlineBuildNode from "./nodes/OnlineBuildNode.vue"
+import OutputNode from "./nodes/OutputNode.vue"
+import PetInputNode from "./nodes/PetInputNode.vue"
 import RangedWeaponInputNode from "./nodes/RangedWeaponInputNode.vue"
 import SkillDmgCalcNode from "./nodes/SkillDmgCalcNode.vue"
+import TextInputNode from "./nodes/TextInputNode.vue"
+import VectorInputNode from "./nodes/VectorInputNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
 import WeaponDmgCalcNode from "./nodes/WeaponDmgCalcNode.vue"
 import { type NodeData, PALETTE_ITEMS, type PaletteItem } from "./types"
@@ -37,7 +52,19 @@ const store = useNodeEditorStore()
 const ui = useUIStore()
 
 // VueFlow 实例
-const { onInit, fitView, getSelectedNodes, getSelectedEdges } = useVueFlow()
+const {
+    onInit,
+    fitView,
+    getSelectedNodes,
+    getSelectedEdges,
+    onConnectStart,
+    onConnectEnd,
+    onNodeDragStart,
+    onNodeDrag,
+    onNodeDragStop,
+    screenToFlowCoordinate,
+    viewport,
+} = useVueFlow()
 
 // 选中的节点和边
 const selectedNode = ref<{ id: string; data: NodeData } | null>(null)
@@ -50,9 +77,275 @@ const contextMenuPosition = ref({ x: 0, y: 0 })
 // 拖拽状态
 const draggingItem = ref<PaletteItem | null>(null)
 const draggingPosition = ref({ x: 0, y: 0 })
+/** 移动端节点抽屉 */
+const paletteOpen = ref(false)
+
+/** 从端口拖出但未连接时，候选节点与端口 */
+interface ConnectCandidate {
+    item: PaletteItem
+    inputId?: string
+    outputId?: string
+    portLabel: string
+}
+
+/** 端口拖出后的落点菜单状态 */
+interface ConnectMenuState {
+    x: number
+    y: number
+    clientX: number
+    clientY: number
+    /** 新节点需要提供的端口方向：从输出拖出时为 input，从输入拖出时为 output */
+    direction: "input" | "output"
+    sourceNodeId: string
+    sourceHandleId: string | null
+    portType: PortType
+    candidates: ConnectCandidate[]
+}
+
+interface ConnectStartState {
+    nodeId: string
+    handleId: string | null
+    handleType: "source" | "target"
+    portType: PortType
+    /** 输入端口是否允许多条连线（MOD / BUFF） */
+    multiple: boolean
+    clientX: number
+    clientY: number
+    /** 开始连接时的边数量，用于判定本次手势是否已成功建线 */
+    edgeCount: number
+}
+
+const connectMenu = ref<ConnectMenuState | null>(null)
+const connectMenuSearch = ref("")
+const connectMenuEl = ref<HTMLElement | null>(null)
+const connectSearchInput = ref<HTMLInputElement | null>(null)
+let pendingConnectStart: ConnectStartState | null = null
+let connectSucceeded = false
+let connectGestureId = 0
+
+/** 读取鼠标/触摸事件的客户端坐标 */
+function getEventClientPoint(event?: MouseEvent | TouchEvent) {
+    if (!event) return { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+    if ("changedTouches" in event && event.changedTouches.length > 0) {
+        return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY }
+    }
+    if ("touches" in event && event.touches.length > 0) {
+        return { x: event.touches[0].clientX, y: event.touches[0].clientY }
+    }
+    const mouseEvent = event as MouseEvent
+    return { x: mouseEvent.clientX, y: mouseEvent.clientY }
+}
+
+/**
+ * 查找与拖出端口同类型的候选节点；从输出拖出时找输入端口，反之亦然。
+ * @param portType 拖出的端口类型
+ * @param direction 新节点需要提供的端口方向
+ * @returns 候选节点与可连接的端口
+ */
+function findConnectCandidates(portType: PortType, direction: "input" | "output"): ConnectCandidate[] {
+    return PALETTE_ITEMS.flatMap((item): ConnectCandidate[] => {
+        const ports = getNodePorts(item.type)
+        if (direction === "input") {
+            const port = ports.inputs.find(candidate => candidate.type === portType)
+            return port ? [{ item, inputId: port.id, portLabel: port.label }] : []
+        }
+        const port = ports.outputs.find(candidate => candidate.type === portType)
+        return port ? [{ item, outputId: port.id, portLabel: port.label }] : []
+    })
+}
+
+/** 关闭端口落点菜单 */
+function closeConnectMenu() {
+    connectMenu.value = null
+    connectMenuSearch.value = ""
+}
+
+/**
+ * 打开端口落点菜单：菜单只列出可提供同类型端口的节点。
+ * @param start 拖出端口信息
+ * @param event 释放事件
+ */
+function openConnectMenu(start: ConnectStartState, event?: MouseEvent | TouchEvent) {
+    // 从已占用且只允许单连线的输入端口拖出时，无法再接入第二条边
+    if (start.handleType === "target" && !start.multiple) {
+        const occupied = store.edges.some(edge => edge.target === start.nodeId && edge.targetHandle === start.handleId)
+        if (occupied) return
+    }
+    const point = getEventClientPoint(event)
+    // 单击端口（没有实际拖动）不弹菜单，避免干扰 VueFlow 的点击连线模式
+    if (Math.hypot(point.x - start.clientX, point.y - start.clientY) < 6) return
+    const direction = start.handleType === "source" ? "input" : "output"
+    const candidates = findConnectCandidates(start.portType, direction)
+    const width = 320
+    const height = 360
+    connectMenuSearch.value = ""
+    contextMenuVisible.value = false
+    connectMenu.value = {
+        x: Math.max(8, Math.min(point.x, window.innerWidth - width - 8)),
+        y: Math.max(8, Math.min(point.y, window.innerHeight - height - 8)),
+        clientX: point.x,
+        clientY: point.y,
+        direction,
+        sourceNodeId: start.nodeId,
+        sourceHandleId: start.handleId,
+        portType: start.portType,
+        candidates,
+    }
+    nextTick(() => connectSearchInput.value?.focus())
+}
+
+/** 选择候选节点：在落点创建节点并自动补上连线 */
+function chooseConnectCandidate(candidate: ConnectCandidate) {
+    const menu = connectMenu.value
+    if (!menu) return
+    const position = screenToFlowCoordinate({ x: menu.clientX, y: menu.clientY })
+    const nodeId = nanoid()
+    store.addNode({
+        id: nodeId,
+        type: candidate.item.type,
+        position,
+        data: { label: candidate.item.label },
+    })
+    if (menu.direction === "input") {
+        store.addEdge({
+            id: `e${nanoid()}`,
+            source: menu.sourceNodeId,
+            target: nodeId,
+            sourceHandle: menu.sourceHandleId,
+            targetHandle: candidate.inputId,
+        })
+    } else {
+        store.addEdge({
+            id: `e${nanoid()}`,
+            source: nodeId,
+            target: menu.sourceNodeId,
+            sourceHandle: candidate.outputId,
+            targetHandle: menu.sourceHandleId,
+        })
+    }
+    closeConnectMenu()
+}
+
+/** 过滤后的候选节点 */
+const filteredConnectCandidates = computed(() => {
+    const query = connectMenuSearch.value.trim().toLowerCase()
+    if (!query) return connectMenu.value?.candidates ?? []
+    return (connectMenu.value?.candidates ?? []).filter(candidate =>
+        `${candidate.item.label} ${candidate.item.description ?? ""}`.toLowerCase().includes(query)
+    )
+})
+
+/** 候选节点按分类分组 */
+const groupedConnectCandidates = computed(() => {
+    const groups: Record<string, ConnectCandidate[]> = {}
+    filteredConnectCandidates.value.forEach(candidate => {
+        const category = candidate.item.category
+        if (!groups[category]) groups[category] = []
+        groups[category].push(candidate)
+    })
+    return groups
+})
+
+/** 搜索框回车选择第一个候选 */
+function chooseFirstConnectCandidate() {
+    const first = filteredConnectCandidates.value[0]
+    if (first) chooseConnectCandidate(first)
+}
+
+/** 画布连线校验：单占端口允许被新连线替换 */
+function isValidCanvasConnection(connection: Connection) {
+    return store.isValidConnection(connection, { allowOccupiedTarget: true })
+}
+
+/** 画布连线提交：成功后标记本次手势已完成 */
+function handleCanvasConnect(connection: Connection) {
+    const added = store.onConnect(connection)
+    if (added) connectSucceeded = true
+    return added
+}
+
+/** 读取指针下方的 VueFlow 端口；用于落点判定失败时手动补连 */
+function findHandleAtPoint(point: { x: number; y: number }) {
+    const element = document.elementFromPoint(point.x, point.y)?.closest<HTMLElement>(".vue-flow__handle")
+    if (!element) return null
+    const nodeId = element.dataset.nodeid
+    const handleId = element.dataset.handleid ?? null
+    if (!nodeId) return null
+    return {
+        nodeId,
+        handleId,
+        handleType: element.classList.contains("source") ? ("source" as const) : ("target" as const),
+    }
+}
+
+/** 端口拖出结束：已建线则不弹菜单；落在端口上则手动补连，仍失败才弹出候选节点菜单 */
+onConnectStart(params => {
+    connectGestureId++
+    connectSucceeded = false
+    const node = params.nodeId ? store.nodes.find(item => item.id === params.nodeId) : undefined
+    const handleType = params.handleType === "target" ? "target" : "source"
+    const port = resolvePort(node?.type ?? "", params.handleId, handleType === "source" ? "output" : "input", node?.data ?? {})
+    const startPoint = getEventClientPoint(params.event)
+    pendingConnectStart =
+        params.nodeId && port
+            ? {
+                  nodeId: params.nodeId,
+                  handleId: params.handleId,
+                  handleType,
+                  portType: port.type,
+                  multiple: port.multiple === true,
+                  clientX: startPoint.x,
+                  clientY: startPoint.y,
+                  edgeCount: store.edges.length,
+              }
+            : null
+})
+
+onConnectEnd(event => {
+    const start = pendingConnectStart
+    const gesture = connectGestureId
+    pendingConnectStart = null
+    if (!start || connectSucceeded) {
+        connectSucceeded = false
+        return
+    }
+    // onConnect 与 connectEnd 的触发顺序在不同输入方式下可能不同，放到微任务后再判定
+    setTimeout(() => {
+        if (gesture !== connectGestureId) return
+        if (connectSucceeded || store.edges.length > start.edgeCount) {
+            connectSucceeded = false
+            return
+        }
+        const dropHandle = findHandleAtPoint(getEventClientPoint(event))
+        if (dropHandle && dropHandle.nodeId !== start.nodeId && dropHandle.handleType !== start.handleType) {
+            const connection: Connection =
+                start.handleType === "source"
+                    ? {
+                          source: start.nodeId,
+                          sourceHandle: start.handleId,
+                          target: dropHandle.nodeId,
+                          targetHandle: dropHandle.handleId,
+                      }
+                    : {
+                          source: dropHandle.nodeId,
+                          sourceHandle: dropHandle.handleId,
+                          target: start.nodeId,
+                          targetHandle: start.handleId,
+                      }
+            if (handleCanvasConnect(connection)) {
+                connectSucceeded = false
+                return
+            }
+        }
+        openConnectMenu(start, event)
+        connectSucceeded = false
+    }, 0)
+})
 
 // 图切换
 const selectedGraphId = ref<number | "">("")
+/** 首屏加载图数据时显示画布加载层 */
+const initializing = ref(true)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 // 节点点击事件
@@ -74,6 +367,7 @@ function handleNodeContextMenu(event: NodeMouseEvent) {
         event.event.preventDefault()
     }
 
+    closeConnectMenu()
     selectedNode.value = event.node as unknown as { id: string; data: NodeData }
     selectedEdge.value = null
 
@@ -100,6 +394,7 @@ function handleEdgeContextMenu(event: EdgeMouseEvent) {
         event.event.preventDefault()
     }
 
+    closeConnectMenu()
     selectedEdge.value = event.edge as unknown as { id: string; source: string; target: string }
     selectedNode.value = null
 
@@ -124,6 +419,7 @@ function handleSelectionContextMenu(event: { event: MouseEvent; nodes: any[] }) 
     // 阻止默认右键菜单
     event.event.preventDefault()
 
+    closeConnectMenu()
     contextMenuPosition.value = { x: event.event.clientX, y: event.event.clientY }
     contextMenuVisible.value = true
 }
@@ -133,6 +429,7 @@ function handlePaneContextMenu(event: MouseEvent) {
     // 阻止默认右键菜单
     event.preventDefault()
 
+    closeConnectMenu()
     contextMenuPosition.value = { x: event.clientX, y: event.clientY }
     contextMenuVisible.value = true
 }
@@ -151,6 +448,20 @@ function deleteSelectedEdge() {
         store.removeEdge(selectedEdge.value.id)
         selectedEdge.value = null
     }
+}
+
+/** 右键菜单撤销：不可撤销时保持菜单打开 */
+function undoFromMenu() {
+    if (!store.canUndo) return
+    store.undo()
+    contextMenuVisible.value = false
+}
+
+/** 右键菜单重做 */
+function redoFromMenu() {
+    if (!store.canRedo) return
+    store.redo()
+    contextMenuVisible.value = false
 }
 
 function reloadPage() {
@@ -172,11 +483,41 @@ function deleteSelectedItems() {
     selectedEdge.value = null
 }
 
+let paletteDragStart: { x: number; y: number } | null = null
+let paletteDragMoved = false
+
+/** 在画布坐标处创建调色板节点 */
+function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
+    store.addNode({
+        id: nanoid(),
+        type: item.type as string,
+        position,
+        data: { label: item.label },
+    })
+    if (window.innerWidth < 1024) paletteOpen.value = false
+}
+
+/** 计算屏幕坐标对应的画布坐标 */
+function screenPointToFlow(point: { x: number; y: number }) {
+    const canvas = document.querySelector(".vue-flow__container")
+    if (!canvas) return null
+    const transformationPane = (document.querySelector(".vue-flow__transformationpane") as Element) || canvas
+    const rect = canvas.getBoundingClientRect()
+    const transform = window.getComputedStyle(transformationPane).transform
+    const matrix = new DOMMatrix(transform === "none" ? "matrix(1, 0, 0, 1, 0, 0)" : transform)
+    return {
+        x: (point.x - rect.left + canvas.scrollLeft - matrix.e) / matrix.a,
+        y: (point.y - rect.top + canvas.scrollTop - matrix.f) / matrix.d,
+    }
+}
+
 // 鼠标按下事件 - 开始拖拽
 function onMouseDown(event: MouseEvent, item: PaletteItem) {
     // 记录拖拽的节点项
     draggingItem.value = item
     draggingPosition.value = { x: event.clientX, y: event.clientY }
+    paletteDragStart = { x: event.clientX, y: event.clientY }
+    paletteDragMoved = false
 
     // 添加全局鼠标事件监听
     document.addEventListener("mousemove", onMouseMove)
@@ -190,6 +531,9 @@ function onMouseDown(event: MouseEvent, item: PaletteItem) {
 // 鼠标移动事件 - 更新拖拽位置
 function onMouseMove(event: MouseEvent) {
     if (!draggingItem.value) return
+    if (paletteDragStart && Math.hypot(event.clientX - paletteDragStart.x, event.clientY - paletteDragStart.y) > 4) {
+        paletteDragMoved = true
+    }
 
     // 更新拖拽位置
     draggingPosition.value = { x: event.clientX, y: event.clientY }
@@ -198,50 +542,23 @@ function onMouseMove(event: MouseEvent) {
 // 鼠标释放事件 - 完成拖拽
 function onMouseUp(event: MouseEvent) {
     if (!draggingItem.value) return
-
-    // 获取画布元素和变换容器
+    const item = draggingItem.value
     const canvas = document.querySelector(".vue-flow__container")
     if (!canvas) {
         resetDragState()
         return
     }
-
-    // 变换容器可能不存在，使用canvas作为备选
-    const transformationPane = (document.querySelector(".vue-flow__transformationpane") as Element) || canvas
-
-    // 检查鼠标是否在画布内
     const rect = canvas.getBoundingClientRect()
-    if (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom) {
-        // 计算节点在画布中的位置，考虑画布的transform和滚动
+    const insideCanvas =
+        event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom
 
-        // 获取变换容器的transform矩阵（transform实际存在于此）
-        const transform = window.getComputedStyle(transformationPane).transform
-        const matrix = new DOMMatrix(transform === "none" ? "matrix(1, 0, 0, 1, 0, 0)" : transform)
-
-        // 获取画布的滚动偏移
-        const scrollLeft = canvas.scrollLeft
-        const scrollTop = canvas.scrollTop
-
-        // 计算鼠标在画布坐标系中的位置
-        // 1. 计算鼠标相对于canvas的位置
-        // 2. 考虑滚动偏移
-        // 3. 减去translate偏移(matrix.e, matrix.f)
-        // 4. 除以缩放因子(matrix.a, matrix.d)
-        const relativeX = event.clientX - rect.left + scrollLeft
-        const relativeY = event.clientY - rect.top + scrollTop
-        const x = (relativeX - matrix.e) / matrix.a
-        const y = (relativeY - matrix.f) / matrix.d
-
-        // 创建新节点
-        const newNodeId = nanoid()
-        store.addNode({
-            id: newNodeId,
-            type: draggingItem.value.type as string,
-            position: { x, y },
-            data: {
-                label: draggingItem.value.label,
-            },
-        })
+    if (!paletteDragMoved) {
+        // 点击/点按调色板：放到画布中心，兼容触屏设备
+        const center = screenPointToFlow({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+        if (center) addPaletteNode(item, center)
+    } else if (insideCanvas) {
+        const position = screenPointToFlow({ x: event.clientX, y: event.clientY })
+        if (position) addPaletteNode(item, position)
     }
 
     // 重置拖拽状态
@@ -252,6 +569,8 @@ function onMouseUp(event: MouseEvent) {
 function resetDragState() {
     draggingItem.value = null
     draggingPosition.value = { x: 0, y: 0 }
+    paletteDragStart = null
+    paletteDragMoved = false
 
     // 移除全局事件监听
     document.removeEventListener("mousemove", onMouseMove)
@@ -266,7 +585,11 @@ const nodeTypes = {
     "ranged-weapon-input": markRaw(RangedWeaponInputNode),
     "mod-input": markRaw(ModInputNode),
     "buff-input": markRaw(BuffInputNode),
+    "effect-input": markRaw(EffectInputNode),
+    "pet-input": markRaw(PetInputNode),
     "enemy-input": markRaw(EnemyInputNode),
+    "custom-vars-input": markRaw(CustomVariablesNode),
+    "dot-input": markRaw(DotInputNode),
     "core-calc": markRaw(CoreCalcNode),
     "attr-calc": markRaw(AttrCalcNode),
     "weapon-attr-calc": markRaw(WeaponAttrCalcNode),
@@ -274,10 +597,21 @@ const nodeTypes = {
     "weapon-dmg-calc": markRaw(WeaponDmgCalcNode),
     "full-calc": markRaw(FullCalcNode),
     "ast-expression-calc": markRaw(ASTExpressionNode),
+    "custom-expression": markRaw(CustomExpressionNode),
     "add-calc": markRaw(AddCalcNode),
     "multiply-calc": markRaw(MultiplyCalcNode),
     "expression-calc": markRaw(ExpressionCalcNode),
     "hub-calc": markRaw(HubNode),
+    "attr-output": markRaw(OutputNode),
+    "weapon-output": markRaw(OutputNode),
+    "damage-output": markRaw(OutputNode),
+    group: markRaw(GroupNode),
+    label: markRaw(LabelNode),
+    "text-input": markRaw(TextInputNode),
+    "number-input": markRaw(NumberInputNode),
+    "vector-input": markRaw(VectorInputNode),
+    "json-build": markRaw(JSONBuildNode),
+    "online-build": markRaw(OnlineBuildNode),
 } as unknown as import("@vue-flow/core").NodeTypesObject
 
 // 按类别分组调色板项
@@ -299,6 +633,8 @@ function getCategoryLabel(category: string): string {
         calculation: "计算节点",
         output: "输出节点",
         special: "特殊节点",
+        basic: "基础组件",
+        "build-source": "构筑来源",
     }
     return labels[category] || category
 }
@@ -319,7 +655,16 @@ function onDelete(event: { nodes: any[]; edges: any[] }) {
 function handleKeyDown(event: KeyboardEvent) {
     // 如果焦点在 input 元素上，不处理快捷键
     const target = event.target as HTMLElement
-    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable) {
+        return
+    }
+
+    if (event.key === "Escape" && paletteOpen.value) {
+        paletteOpen.value = false
+        return
+    }
+    if (event.key === "Escape" && connectMenu.value) {
+        closeConnectMenu()
         return
     }
 
@@ -346,13 +691,14 @@ function handleKeyDown(event: KeyboardEvent) {
     else if ((event.ctrlKey || event.metaKey) && event.key === "s") {
         handleSave()
     }
-    // Ctrl+Z 撤销
-    else if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+    // Ctrl+Z 撤销 / Ctrl+Shift+Z 重做
+    else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
         event.preventDefault()
-        store.undo()
+        if (event.shiftKey) store.redo()
+        else store.undo()
     }
     // Ctrl+Y 重做
-    else if ((event.ctrlKey || event.metaKey) && event.key === "y") {
+    else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") {
         event.preventDefault()
         store.redo()
     }
@@ -363,15 +709,230 @@ onInit(() => {
     fitView()
 })
 
+/** 复制节点时只保留可持久化的普通数据，避免把 CharBuild 实例带进新节点 */
+function cloneNodeDataForDuplicate(data: Record<string, any>) {
+    const clone = { ...data }
+    delete clone.charBuild
+    delete clone.build
+    delete clone.buildVector
+    delete clone.vectorDimensions
+    delete clone.vectorResult
+    delete clone.evaluation
+    delete clone.evalSignature
+    delete clone.evalPending
+    delete clone.result
+    delete clone.error
+    delete clone.missingInputs
+    delete clone.inputData
+    return JSON.parse(JSON.stringify(clone)) as Record<string, any>
+}
+
+/**
+ * 生成副本标题编号：MOD输入 → MOD输入 #2；已有 #2 时继续递增。
+ * @param label 原节点标题
+ * @param usedLabels 当前图中已使用的标题
+ * @returns 副本标题
+ */
+function createDuplicateLabel(label: string, usedLabels: Set<string>) {
+    const base = label.trim().replace(/\s+#\d+$/, "").trim()
+    if (!base) return label
+    let index = 2
+    while (usedLabels.has(`${base} #${index}`)) index++
+    const next = `${base} #${index}`
+    usedLabels.add(next)
+    return next
+}
+
+/** Ctrl / Cmd 拖动时记录的“原节点 → 副本”映射 */
+interface DuplicateDragEntry {
+    originalId: string
+    cloneId: string
+    start: { x: number; y: number }
+}
+
+let duplicateDrag: DuplicateDragEntry[] | null = null
+/** 复制拖动开始时的指针位置与画布缩放，用于把屏幕位移换算成流坐标 */
+let duplicateDragStart: { x: number; y: number } | null = null
+let duplicateDragZoom = 1
+/** Ctrl 按下时的指针起点（VueFlow 的拖动事件会晚于真实按下位置） */
+let duplicatePointerOrigin: { x: number; y: number } | null = null
+/** 复制拖动是否已开启历史批次：整次复制 + 拖动只占一个撤销步骤 */
+let duplicateHistoryBatch = false
+
+/** 记录按住 Ctrl / Cmd 在节点上按下的真实指针位置 */
+function captureDuplicatePointer(event: PointerEvent) {
+    if (!(event.ctrlKey || event.metaKey)) {
+        duplicatePointerOrigin = null
+        return
+    }
+    const target = event.target as Element | null
+    duplicatePointerOrigin = target?.closest?.(".vue-flow__node") ? { x: event.clientX, y: event.clientY } : null
+}
+
+/**
+ * Ctrl / Cmd + 拖动：复制被拖动的节点及其全部连线，拖动的是副本，原节点留在原地。
+ * 连线外部的一端保持连接原节点，内部两端都换成副本；单连接端口已占用时自动跳过该线。
+ * @param draggedNodes 被拖动的节点
+ * @returns 原节点与副本的对应关系
+ */
+function duplicateDraggedNodes(draggedNodes: { id: string }[]): DuplicateDragEntry[] {
+    const usedLabels = new Set(
+        store.nodes.map(node => (typeof node.data.label === "string" ? node.data.label.trim() : "")).filter(Boolean)
+    )
+    const idMap = new Map<string, string>()
+    const entries: DuplicateDragEntry[] = []
+    draggedNodes.forEach(source => {
+        const node = store.nodes.find(item => item.id === source.id)
+        if (!node) return
+        const nextId = nanoid()
+        idMap.set(node.id, nextId)
+        const data = cloneNodeDataForDuplicate(node.data)
+        if (typeof data.label === "string" && data.label.trim()) {
+            data.label = createDuplicateLabel(data.label, usedLabels)
+        }
+        store.addNode({
+            id: nextId,
+            type: node.type,
+            position: { ...node.position },
+            data,
+        })
+        entries.push({ originalId: node.id, cloneId: nextId, start: { ...node.position } })
+    })
+    if (idMap.size === 0) return []
+    store.edges.forEach(edge => {
+        const source = idMap.get(edge.source) ?? edge.source
+        const target = idMap.get(edge.target) ?? edge.target
+        if (source === edge.source && target === edge.target) return
+        const duplicate = {
+            ...edge,
+            id: `e${nanoid()}`,
+            source,
+            target,
+            data: edge.data ? { ...edge.data } : undefined,
+        }
+        // 单连接端口已被原连线占用时无法复制该线，直接跳过
+        if (store.isValidConnection(duplicate)) store.addEdge(duplicate)
+    })
+    return entries
+}
+
+/**
+ * 按指针位移更新副本位置，并把被拖动的原节点放回起始位置。
+ * @param point 当前指针的屏幕坐标
+ */
+function syncDuplicateDrag(point: { x: number; y: number }) {
+    if (!duplicateDrag || !duplicateDragStart) return
+    const dx = (point.x - duplicateDragStart.x) / duplicateDragZoom
+    const dy = (point.y - duplicateDragStart.y) / duplicateDragZoom
+    duplicateDrag.forEach(entry => {
+        const clone = store.nodes.find(node => node.id === entry.cloneId)
+        if (clone) clone.position = { x: entry.start.x + dx, y: entry.start.y + dy }
+        const original = store.nodes.find(node => node.id === entry.originalId)
+        if (original) original.position = { ...entry.start }
+    })
+}
+
+/** 拖动分组时记录的起始位置与框内节点偏移 */
+let groupDrag: { id: string; children: { id: string; offsetX: number; offsetY: number }[] } | null = null
+
+/** 读取节点在画布上的实际渲染尺寸 */
+function measureNodeElement(nodeId: string) {
+    const element = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${nodeId}"]`)
+    return { width: element?.offsetWidth ?? 0, height: element?.offsetHeight ?? 0 }
+}
+
+/** 判断节点是否完全落在分组框内 */
+function isNodeInsideGroup(node: { id: string; position: { x: number; y: number } }, group: { position: { x: number; y: number }; data: Record<string, any> }) {
+    const size = measureNodeElement(node.id)
+    const width = Number(group.data.width) || 640
+    const height = Number(group.data.height) || 420
+    return (
+        node.position.x >= group.position.x &&
+        node.position.y >= group.position.y &&
+        node.position.x + size.width <= group.position.x + width &&
+        node.position.y + size.height <= group.position.y + height
+    )
+}
+
+// 拖动分组框时同步移动框内的普通节点；Ctrl 拖动时改为复制并拖动副本
+onNodeDragStart(({ event, node, nodes: draggedNodes }) => {
+    const modifier = (event as MouseEvent | undefined)?.ctrlKey || (event as MouseEvent | undefined)?.metaKey
+    duplicateDrag = null
+    duplicateDragStart = null
+    if (modifier && draggedNodes.length > 0) {
+        store.beginHistoryBatch()
+        duplicateHistoryBatch = true
+        duplicateDrag = duplicateDraggedNodes(draggedNodes)
+        duplicateDragStart = duplicatePointerOrigin ?? getEventClientPoint(event)
+        duplicateDragZoom = viewport.value.zoom || 1
+    }
+    groupDrag = null
+    if (duplicateDrag) return
+    if (node.type !== NodeType.GROUP) return
+    const group = store.nodes.find(item => item.id === node.id)
+    if (!group) return
+    const children = store.nodes.filter(
+        item => item.id !== group.id && item.type !== NodeType.GROUP && isNodeInsideGroup(item, group)
+    )
+    groupDrag = {
+        id: group.id,
+        children: children.map(child => ({
+            id: child.id,
+            offsetX: child.position.x - node.position.x,
+            offsetY: child.position.y - node.position.y,
+        })),
+    }
+})
+
+onNodeDrag(({ event, node }) => {
+    if (duplicateDrag) {
+        syncDuplicateDrag(getEventClientPoint(event))
+        return
+    }
+    if (!groupDrag || node.id !== groupDrag.id) return
+    groupDrag.children.forEach(child => {
+        const target = store.nodes.find(item => item.id === child.id)
+        if (!target) return
+        target.position = { x: node.position.x + child.offsetX, y: node.position.y + child.offsetY }
+    })
+})
+
+onNodeDragStop(({ event, node }) => {
+    if (duplicateDrag) {
+        // 用松开时的指针位置收尾：副本留在终点，原节点回到起点
+        syncDuplicateDrag(getEventClientPoint(event))
+        duplicateDrag = null
+        duplicateDragStart = null
+    }
+    duplicatePointerOrigin = null
+    if (groupDrag?.id === node.id) groupDrag = null
+    if (duplicateHistoryBatch) {
+        duplicateHistoryBatch = false
+        store.endHistoryBatch("复制节点")
+    } else {
+        // 普通拖动/分组拖动：位置变化在松开时记为一步
+        store.commitHistory("移动节点")
+    }
+})
+
 // 点击外部关闭右键菜单
 function handleClickOutside(_event: MouseEvent) {
     contextMenuVisible.value = false
+}
+
+/** 点击菜单外部时关闭端口落点菜单（用 pointerdown 避免菜单打开当次点击立即关闭） */
+function handleConnectMenuPointerDown(event: PointerEvent) {
+    if (!connectMenu.value) return
+    if (connectMenuEl.value?.contains(event.target as Node)) return
+    closeConnectMenu()
 }
 
 // 注册事件监听器
 onMounted(() => {
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("click", handleClickOutside)
+    window.addEventListener("pointerdown", handleConnectMenuPointerDown, true)
+    window.addEventListener("pointerdown", captureDuplicatePointer, true)
 })
 
 // 图切换处理
@@ -456,99 +1017,173 @@ onMounted(async () => {
     selectedGraphId.value = store.currentGraphId || ""
     // 启动自动保存
     store.startAutoSave()
+    await nextTick()
+    initializing.value = false
+})
+
+// 数据包延迟 hydrate 后重建构筑实例与求值结果
+watch(dataPackHydrationKey, () => {
+    store.recalculateAllNodes()
 })
 
 // 移除事件监听器
 onUnmounted(() => {
     window.removeEventListener("keydown", handleKeyDown)
     window.removeEventListener("click", handleClickOutside)
+    window.removeEventListener("pointerdown", handleConnectMenuPointerDown, true)
+    window.removeEventListener("pointerdown", captureDuplicatePointer, true)
+    // 复制拖动期间卸载时结束未闭合的历史批次
+    if (duplicateHistoryBatch) {
+        duplicateHistoryBatch = false
+        store.endHistoryBatch("复制节点")
+    }
     // 停止自动保存
     store.stopAutoSave()
 })
 
 const transferDialogShow = ref(false)
 const selectedCharName = ref("")
-function handleTransfer(charName: string) {
+async function handleTransfer(charName: string) {
     const charId = charMap.get(charName)?.id
     if (!charId) {
         ui.showErrorMessage(`角色 ${charName} 不存在`)
         return
     }
     const charSettings = useCharSettings(ref(charId))
-    importCharSettingsToNodeEditor(charName, charSettings.value)
+    await importCharSettingsToNodeEditor(charName, charSettings.value)
     transferDialogShow.value = false
+    // 等待 VueFlow 完成节点尺寸测量后再适配视图
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    await fitView({ padding: 0.1, duration: 300 })
 }
 </script>
 
 <template>
-    <div class="flex h-full w-full" style="touch-action: manipulation">
+    <div class="relative flex h-full min-h-0 bg-base-200 text-base-content" style="touch-action: manipulation">
         <DialogModel v-model="transferDialogShow">
             <div class="flex flex-col gap-2">
                 <div>{{ $t("node-editor.import_from_build") }}</div>
                 <CharSelect v-model="selectedCharName" />
             </div>
             <template #action>
-                <button class="btn btn-sm btn-primary" :disabled="!selectedCharName" @click="handleTransfer(selectedCharName)">
+                <button class="btn btn-xs btn-primary" :disabled="!selectedCharName" @click="handleTransfer(selectedCharName)">
                     {{ $t("node-editor.migrate") }}
                 </button>
             </template>
         </DialogModel>
-        <!-- 调色板侧边栏 -->
-        <div class="w-64 bg-base-200 border-r border-base-300 p-4 overflow-y-auto">
-            <h2 class="text-lg font-bold mb-4">节点列表</h2>
-            <div v-for="(items, category) in groupedPaletteItems" :key="category" class="mb-4">
-                <div class="font-semibold mb-2">{{ getCategoryLabel(category) }}</div>
-                <div
-                    v-for="item in items"
-                    :key="item.type"
-                    class="p-3 mb-2 bg-base-100 rounded cursor-move hover:bg-base-300 transition-colors duration-200"
-                    @mousedown="onMouseDown($event, item)"
+        <!-- 移动端抽屉遮罩 -->
+        <div
+            v-if="paletteOpen"
+            class="absolute inset-0 z-30 bg-black/40 backdrop-blur-[1px] lg:hidden"
+            @click="paletteOpen = false"
+        />
+        <!-- 调色板侧边栏：桌面固定，移动端为抽屉 -->
+        <aside
+            class="absolute inset-y-0 left-0 z-40 flex w-64 max-w-[82vw] flex-none flex-col border-r border-base-content/10 bg-base-100 shadow-xl transition-transform duration-200 lg:static lg:z-auto lg:w-56 lg:max-w-none lg:translate-x-0 lg:shadow-none"
+            :class="paletteOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        >
+            <div class="flex h-8 flex-none items-center gap-1.5 border-b border-base-content/10 px-2">
+                <Icon icon="ri:node-tree" class="size-3.5 text-base-content/50" />
+                <span class="text-[11px] tracking-wide text-base-content/55">节点列表</span>
+                <span class="ml-auto hidden font-mono text-[10px] text-base-content/35 lg:inline">{{ PALETTE_ITEMS.length }}</span>
+                <button
+                    type="button"
+                    class="ml-auto grid size-6 cursor-pointer place-items-center text-base-content/50 hover:bg-base-content/10 hover:text-base-content lg:hidden"
+                    title="关闭节点列表"
+                    @click="paletteOpen = false"
                 >
-                    <div class="flex items-center gap-2">
-                        <Icon v-if="item.icon" :icon="item.icon" class="text-lg" />
-                        <span>{{ item.label }}</span>
-                    </div>
-                    <div v-if="item.description" class="text-xs text-base-content/60 mt-1">{{ item.description }}</div>
-                </div>
+                    <Icon icon="ri:close-line" class="size-3.5" />
+                </button>
             </div>
+            <ScrollArea class="min-h-0 flex-1">
+                <div class="p-1.5">
+                    <div v-for="(items, category) in groupedPaletteItems" :key="category" class="mb-1.5">
+                        <div class="px-1 py-1 text-[10px] tracking-wide text-base-content/40">{{ getCategoryLabel(category) }}</div>
+                        <div
+                            v-for="item in items"
+                            :key="item.type"
+                            class="group mb-0.5 flex cursor-move items-center gap-1.5 border border-transparent px-1.5 py-1 transition-colors duration-150 hover:border-primary/40 hover:bg-primary/5"
+                            @mousedown="onMouseDown($event, item)"
+                        >
+                            <Icon v-if="item.icon" :icon="item.icon" class="size-3.5 shrink-0 text-base-content/50 group-hover:text-primary" />
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-[12px] text-base-content/80">{{ item.label }}</span>
+                                <span v-if="item.description" class="block truncate text-[10px] leading-4 text-base-content/35">
+                                    {{ item.description }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </ScrollArea>
 
             <!-- 拖拽中的节点副本 -->
             <div
                 v-if="draggingItem"
-                class="fixed pointer-events-none z-50 bg-base-100/80 backdrop-blur-sm border border-base-300 rounded-lg shadow-lg p-3 opacity-80"
+                class="pointer-events-none fixed z-50 rounded-xs border border-base-content/20 bg-base-100/90 px-2 py-1 shadow-lg backdrop-blur-sm"
                 :style="{
                     left: draggingPosition.x + 'px',
                     top: draggingPosition.y + 'px',
                     transform: 'translate(-50%, -50%)',
                 }"
             >
-                <div class="flex items-center gap-2">
-                    <Icon v-if="draggingItem.icon" :icon="draggingItem.icon" class="text-lg" />
-                    <span>{{ draggingItem.label }}</span>
+                <div class="flex items-center gap-1.5">
+                    <Icon v-if="draggingItem.icon" :icon="draggingItem.icon" class="size-3.5" />
+                    <span class="text-[12px]">{{ draggingItem.label }}</span>
                 </div>
             </div>
-        </div>
+        </aside>
 
         <!-- 节点编辑器画布 -->
-        <div class="flex-1 flex flex-col relative">
+        <div class="relative flex min-w-0 flex-1 flex-col">
             <!-- 工具栏 -->
-            <div class="bg-base-100 border-b border-base-300 p-2 flex items-center gap-2">
-                <!-- 图切换 -->
-                <div class="relative grow flex items-center">
-                    <label class="text-sm text-base-content/60 mr-2">图名称:</label>
+            <div class="flex flex-none flex-wrap items-center gap-1 border-b border-base-content/10 bg-base-100 px-2 py-1 sm:gap-1.5">
+                <!-- 移动端节点抽屉开关 -->
+                <button
+                    type="button"
+                    class="grid size-6 cursor-pointer place-items-center text-base-content/60 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary lg:hidden"
+                    title="节点列表"
+                    aria-label="节点列表"
+                    @click="paletteOpen = true"
+                >
+                    <Icon icon="ri:menu-line" class="size-3.5" />
+                </button>
+                <!-- 移动端撤销 / 重做（无键盘、右键菜单时仍可操作） -->
+                <button
+                    type="button"
+                    class="grid size-6 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.95] disabled:cursor-not-allowed disabled:opacity-30 sm:hidden"
+                    title="撤销"
+                    aria-label="撤销"
+                    :disabled="!store.canUndo"
+                    @click="store.undo"
+                >
+                    <Icon icon="ri:arrow-left-line" class="size-3.5" />
+                </button>
+                <button
+                    type="button"
+                    class="grid size-6 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.95] disabled:cursor-not-allowed disabled:opacity-30 sm:hidden"
+                    title="重做"
+                    aria-label="重做"
+                    :disabled="!store.canRedo"
+                    @click="store.redo"
+                >
+                    <Icon icon="ri:arrow-right-line" class="size-3.5" />
+                </button>
+                <!-- 图名称 / 切换图 -->
+                <div class="hidden min-w-0 items-center gap-1 md:flex">
+                    <span class="shrink-0 text-[10px] text-base-content/40">图名称</span>
                     <input
                         v-model="store.currentGraphName"
-                        class="w-48 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="未命名图"
                         @blur="store.setCurrentGraphName(store.currentGraphName)"
                     />
                 </div>
-
-                <div class="relative flex items-center">
-                    <label class="text-sm text-base-content/60 mr-2 shrink-0">切换图:</label>
+                <div class="hidden min-w-0 items-center gap-1 md:flex">
+                    <span class="shrink-0 text-[10px] text-base-content/40">切换图</span>
                     <Select
                         :model-value="selectedGraphId === '' ? '-' : selectedGraphId"
-                        class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
                         @update:model-value="selectedGraphId = $event === '-' ? '' : Number($event)"
                         @change="handleGraphChange"
                     >
@@ -560,49 +1195,76 @@ function handleTransfer(charName: string) {
                 </div>
 
                 <!-- 自动保存 -->
-                <div class="flex items-center gap-2">
+                <label class="flex items-center gap-1 text-[11px] text-base-content/50" title="自动保存">
                     <input
                         id="auto-save"
                         v-model="store.autoSaveEnabled"
                         type="checkbox"
-                        class="checkbox checkbox-sm"
+                        class="checkbox checkbox-xs"
+                        aria-label="自动保存"
                         @change="store.setAutoSaveEnabled(store.autoSaveEnabled)"
                     />
-                    <label for="auto-save" class="text-sm">自动保存</label>
-                </div>
+                    <span class="hidden sm:inline">自动保存</span>
+                </label>
 
-                <!-- 导入导出 -->
-                <div class="flex items-center gap-2">
-                    <button class="btn btn-sm btn-outline" @click="transferDialogShow = true">
-                        <Icon icon="ri:file-transfer-line" class="mr-1" />
-                        {{ $t("node-editor.migrate") }}
+                <!-- 导入导出：移动端仅显示图标 -->
+                <div class="ml-auto flex items-center gap-0.5 sm:gap-1">
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        :title="$t('node-editor.migrate')"
+                        :aria-label="$t('node-editor.migrate')"
+                        @click="transferDialogShow = true"
+                    >
+                        <Icon icon="ri:file-transfer-line" class="size-3" />
+                        <span class="hidden sm:inline">{{ $t("node-editor.migrate") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-outline" @click="handleImport">
-                        <Icon icon="ri:upload-2-line" class="mr-1" />
-                        导入
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="导入"
+                        aria-label="导入"
+                        @click="handleImport"
+                    >
+                        <Icon icon="ri:upload-2-line" class="size-3" />
+                        <span class="hidden sm:inline">导入</span>
                     </button>
-                    <button class="btn btn-sm btn-outline" @click="store.exportGraph">
-                        <Icon icon="ri:download-2-line" class="mr-1" />
-                        导出
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="导出"
+                        aria-label="导出"
+                        @click="store.exportGraph"
+                    >
+                        <Icon icon="ri:download-2-line" class="size-3" />
+                        <span class="hidden sm:inline">导出</span>
                     </button>
-                    <button class="btn btn-sm btn-primary" @click="handleSave">
-                        <Icon icon="ri:save-fill" class="mr-1" />
-                        保存
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-primary/40 bg-primary/15 px-1.5 text-[10px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20 active:scale-[0.97]"
+                        title="保存"
+                        aria-label="保存"
+                        @click="handleSave"
+                    >
+                        <Icon icon="ri:save-fill" class="size-3" />
+                        <span class="hidden sm:inline">保存</span>
                     </button>
-                    <button class="btn btn-sm btn-error" :disabled="!store.currentGraphId" @click="handleDeleteGraph">
-                        <Icon icon="ri:delete-bin-2-fill" class="mr-1" />
-                        删除
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-error/30 bg-base-100 px-1.5 text-[10px] text-error transition-colors duration-150 hover:bg-error/10 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                        title="删除"
+                        aria-label="删除"
+                        :disabled="!store.currentGraphId"
+                        @click="handleDeleteGraph"
+                    >
+                        <Icon icon="ri:delete-bin-2-fill" class="size-3" />
+                        <span class="hidden sm:inline">删除</span>
                     </button>
                 </div>
 
                 <!-- 删除确认对话框 -->
                 <dialog id="delete-graph-dialog" class="modal">
-                    <div class="modal-box">
-                        <h3 class="font-bold text-lg">确认删除</h3>
-                        <p class="py-4">您确定要删除当前图吗？此操作不可撤销。</p>
+                    <div class="modal-box rounded-xs">
+                        <h3 class="text-base font-bold">确认删除</h3>
+                        <p class="py-3 text-sm text-base-content/60">您确定要删除当前图吗？此操作不可撤销。</p>
                         <div class="modal-action">
-                            <button class="btn" @click="closeDeleteDialog">取消</button>
-                            <button class="btn btn-error" @click="confirmDeleteGraph">确认删除</button>
+                            <button class="btn btn-xs" @click="closeDeleteDialog">取消</button>
+                            <button class="btn btn-xs btn-error" @click="confirmDeleteGraph">确认删除</button>
                         </div>
                     </div>
                     <form method="dialog" class="modal-backdrop">
@@ -614,6 +1276,17 @@ function handleTransfer(charName: string) {
             <!-- 隐藏的文件输入 -->
             <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleFileInputChange" />
 
+            <!-- 图数据加载层 -->
+            <div
+                v-if="initializing"
+                class="absolute inset-0 z-20 grid place-items-center bg-base-100/75 backdrop-blur-sm"
+            >
+                <div class="flex flex-col items-center gap-2">
+                    <span class="loading loading-spinner loading-md text-primary" />
+                    <span class="text-[11px] tracking-wide text-base-content/50">正在加载节点图…</span>
+                </div>
+            </div>
+
             <VueFlow
                 v-model:nodes="store.nodes"
                 v-model:edges="store.edges"
@@ -621,7 +1294,10 @@ function handleTransfer(charName: string) {
                 :default-zoom="0.8"
                 :min-zoom="0.2"
                 :max-zoom="2"
-                @connect="store.onConnect"
+                :selection-mode="SelectionMode.Partial"
+                multi-selection-key-code="Shift"
+                :is-valid-connection="isValidCanvasConnection"
+                @connect="handleCanvasConnect"
                 @node-click="handleNodeClick"
                 @edge-click="handleEdgeClick"
                 @node-context-menu="handleNodeContextMenu"
@@ -636,14 +1312,72 @@ function handleTransfer(charName: string) {
                 <!-- 控制按钮 -->
                 <Controls />
 
-                <!-- 小地图 -->
-                <MiniMap />
+                <!-- 小地图：移动端隐藏以避免遮挡画布 -->
+                <MiniMap class="hidden md:block" />
             </VueFlow>
+
+            <!-- 端口拖出未连接时的候选节点菜单 -->
+            <div
+                v-if="connectMenu"
+                ref="connectMenuEl"
+                class="fixed z-50 flex w-72 max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-xs border border-base-content/10 bg-base-100/95 shadow-lg backdrop-blur-sm"
+                :style="{ left: connectMenu.x + 'px', top: connectMenu.y + 'px' }"
+                @pointerdown.stop
+                @click.stop
+                @wheel.stop
+            >
+                <div class="flex items-center gap-1.5 border-b border-base-content/10 px-2 py-1.5">
+                    <span class="size-2 shrink-0 rounded-full" :style="{ background: PORT_META[connectMenu.portType].color }" />
+                    <span class="text-[11px] text-base-content/60">
+                        {{ PORT_META[connectMenu.portType].label }}
+                        {{ connectMenu.direction === "input" ? "输入" : "输出" }}
+                    </span>
+                    <button class="ml-auto grid size-5 place-items-center text-base-content/50 hover:text-base-content" @click="closeConnectMenu">
+                        <Icon icon="ri:close-line" class="size-3.5" />
+                    </button>
+                </div>
+                <div class="border-b border-base-content/10 px-2 py-1.5">
+                    <input
+                        ref="connectSearchInput"
+                        v-model="connectMenuSearch"
+                        type="search"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        placeholder="搜索可连接的节点"
+                        @keydown.enter.prevent="chooseFirstConnectCandidate"
+                        @keydown.esc.stop.prevent="closeConnectMenu"
+                    />
+                </div>
+                <div class="max-h-80 overflow-y-auto p-1">
+                    <div v-for="(items, category) in groupedConnectCandidates" :key="category">
+                        <div class="px-1.5 py-1 text-[10px] tracking-wide text-base-content/40">
+                            {{ getCategoryLabel(category) }}
+                        </div>
+                        <button
+                            v-for="candidate in items"
+                            :key="candidate.item.type"
+                            class="flex w-full items-center gap-1.5 px-1.5 py-1 text-left transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                            @click="chooseConnectCandidate(candidate)"
+                        >
+                            <Icon v-if="candidate.item.icon" :icon="candidate.item.icon" class="size-3.5 shrink-0" />
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-[12px]">{{ candidate.item.label }}</span>
+                                <span class="block truncate text-[10px] opacity-50">{{ candidate.item.description }}</span>
+                            </span>
+                            <span class="shrink-0 border border-base-content/15 px-1 text-[9px] text-base-content/45">
+                                {{ connectMenu.direction === "input" ? "输入" : "输出" }} {{ candidate.portLabel }}
+                            </span>
+                        </button>
+                    </div>
+                    <div v-if="filteredConnectCandidates.length === 0" class="px-2 py-3 text-center text-[11px] text-base-content/45">
+                        没有可连接的节点
+                    </div>
+                </div>
+            </div>
 
             <!-- 自定义右键菜单 -->
             <div
                 v-if="contextMenuVisible"
-                class="fixed z-50 bg-base-100/80 backdrop-blur-sm border border-base-300 rounded-lg shadow-lg p-2 outline-none"
+                class="fixed z-50 rounded-xs border border-base-content/10 bg-base-100/95 p-1 shadow-lg outline-none backdrop-blur-sm"
                 :style="{
                     left: contextMenuPosition.x + 'px',
                     top: contextMenuPosition.y + 'px',
@@ -652,10 +1386,30 @@ function handleTransfer(charName: string) {
                 @click.stop
                 @contextmenu.stop
             >
+                <!-- 撤销 / 重做 -->
+                <div
+                    class="flex select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none transition-colors duration-150"
+                    :class="store.canUndo ? 'cursor-pointer text-base-content/75 hover:bg-primary/10 hover:text-primary' : 'cursor-not-allowed text-base-content/30'"
+                    @click="undoFromMenu"
+                >
+                    <Icon class="size-3.5" icon="ri:arrow-left-line" />
+                    撤销
+                    <span class="ml-auto text-[10px] opacity-60">Ctrl+Z</span>
+                </div>
+                <div
+                    class="flex select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none transition-colors duration-150"
+                    :class="store.canRedo ? 'cursor-pointer text-base-content/75 hover:bg-primary/10 hover:text-primary' : 'cursor-not-allowed text-base-content/30'"
+                    @click="redoFromMenu"
+                >
+                    <Icon class="size-3.5" icon="ri:arrow-right-line" />
+                    重做
+                    <span class="ml-auto text-[10px] opacity-60">Ctrl+Y</span>
+                </div>
+                <div class="my-1 h-px bg-base-content/10" />
                 <!-- 复制选项 -->
                 <div
                     v-if="getSelectedNodes.length > 0"
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
                             store.copySelectedNodes(getSelectedNodes)
@@ -663,14 +1417,14 @@ function handleTransfer(charName: string) {
                         }
                     "
                 >
-                    <Icon class="size-4 mr-2" icon="ri:file-copy-line" />
+                    <Icon class="size-3.5" icon="ri:file-copy-line" />
                     复制选中项
                     <span v-if="getSelectedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ getSelectedNodes.length }}节点) </span>
                 </div>
                 <!-- 粘贴选项 -->
                 <div
                     v-if="store.copiedNodes.length > 0"
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
                             store.pasteNodes()
@@ -678,14 +1432,14 @@ function handleTransfer(charName: string) {
                         }
                     "
                 >
-                    <Icon class="size-4 mr-2" icon="ri:clipboard-line" />
+                    <Icon class="size-3.5" icon="ri:clipboard-line" />
                     粘贴
                     <span v-if="store.copiedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ store.copiedNodes.length }}节点) </span>
                 </div>
                 <!-- 批量删除选项 -->
                 <div
                     v-if="getSelectedNodes.length > 0 || getSelectedEdges.length > 0"
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
                             deleteSelectedItems()
@@ -693,7 +1447,7 @@ function handleTransfer(charName: string) {
                         }
                     "
                 >
-                    <Icon class="size-4 mr-2" icon="ri:delete-bin-line" />
+                    <Icon class="size-3.5" icon="ri:delete-bin-line" />
                     删除选中项
                     <span v-if="getSelectedNodes.length > 0 || getSelectedEdges.length > 0" class="ml-1 text-xs opacity-70">
                         ({{ getSelectedNodes.length }}节点, {{ getSelectedEdges.length }}边)
@@ -702,7 +1456,7 @@ function handleTransfer(charName: string) {
                 <!-- 单个节点删除选项 -->
                 <div
                     v-else-if="selectedNode"
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
                             deleteSelectedNode()
@@ -710,13 +1464,13 @@ function handleTransfer(charName: string) {
                         }
                     "
                 >
-                    <Icon class="size-4 mr-2" icon="ri:delete-bin-line" />
+                    <Icon class="size-3.5" icon="ri:delete-bin-line" />
                     删除节点
                 </div>
                 <!-- 单条边删除选项 -->
                 <div
                     v-else-if="selectedEdge"
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
                             deleteSelectedEdge()
@@ -724,14 +1478,14 @@ function handleTransfer(charName: string) {
                         }
                     "
                 >
-                    <Icon class="size-4 mr-2" icon="ri:delete-bin-line" />
+                    <Icon class="size-3.5" icon="ri:delete-bin-line" />
                     删除边
                 </div>
                 <div
-                    class="group text-sm p-2 leading-none text-base-content rounded flex items-center relative select-none outline-none hover:bg-primary hover:text-base-100 cursor-pointer"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="reloadPage"
                 >
-                    <Icon class="size-4 mr-2" icon="ri:refresh-line" />
+                    <Icon class="size-3.5" icon="ri:refresh-line" />
                     刷新
                 </div>
             </div>
@@ -740,8 +1494,13 @@ function handleTransfer(charName: string) {
 </template>
 <style>
 .vue-flow__handle {
-    /* 自定义宽高，替换默认值（默认一般是 10px 左右） */
-    width: 10px !important;
-    height: 10px !important;
+    /* 高紧凑节点使用 8px 连接点 */
+    width: 8px !important;
+    height: 8px !important;
+}
+
+/* 分组框始终垫在普通节点下方 */
+.vue-flow__node-group {
+    z-index: -1 !important;
 }
 </style>

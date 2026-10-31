@@ -3415,10 +3415,13 @@
         "astExpression": {
             "description": "AST 式を検証します",
             "expression": "式",
+            "functionDefinition": "関数定義",
             "missingCore": "コア計算ノードがありません",
             "result": "結果",
             "title": "AST 式",
             "unknownError": "不明なエラー",
+            "value": "値",
+            "variableName": "変数名",
             "waiting": "入力を待っています..."
         },
         "attrCalc": {

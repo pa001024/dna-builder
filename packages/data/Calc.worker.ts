@@ -1,5 +1,6 @@
-import { runWasmAutobuild, runWasmIncome, type WasmIncomeItem } from "./CalcWasm"
+import { runWasmAutobuild, runWasmEvaluate, runWasmIncome, type WasmIncomeItem } from "./CalcWasm"
 import { type ModTypeKey, ModTypeMap } from "./CharBuild"
+import { createCharBuildFromSettings } from "./CharBuildHelper"
 import { type CharBuildWorkerSnapshot, createBuildFromSnapshot, createWorkerSnapshot } from "./CharBuildSnapshot"
 import type { CharSettings } from "./charSettings"
 import type { Buff, Mod, Weapon } from "./data-types"
@@ -107,6 +108,38 @@ export type CalcIncomeRequest = CalcWasmSource & {
     skillInherit?: string
 }
 
+/** 节点编辑器的构筑求值请求：直接给角色 id 与完整配置，由 wasm 求值 */
+export type CalcEvaluateRequest = {
+    id: number
+    kind: "evaluate"
+    charId: number
+    settings: CharSettings
+    /** 覆盖 settings.targetFunction（如目标函数节点的表达式） */
+    targetFunction?: string
+    /** 覆盖 settings.baseName（武器伤害节点切到武器技能口径） */
+    baseName?: string
+    /** TS 回退时用于选择伤害口径；wasm 以 targetFunction 求值结果为准 */
+    damageKind?: "skill" | "weapon"
+}
+
+/** 构筑求值结果（属性 / 武器面板 / 目标值 / 伤害明细） */
+export interface CalcBuildEvaluation {
+    attributes: Record<string, number>
+    weapon: Record<string, number> | null
+    targetValue: number
+    damage: {
+        expectedDamage: number
+        noHpDamage: number
+        physicalDamage: number
+        elementDamage: number
+        higherCritExpectedTrigger: number
+        lowerCritExpectedTrigger: number
+    } | null
+    targetFunction: string
+    error: string | null
+    engine: "ts" | "wasm"
+}
+
 export type CalcTargetValuesRequest = {
     id: number
     kind: "targetValues"
@@ -130,6 +163,7 @@ export type CalcResponse = {
     values?: Record<string, number>
     failed?: string[]
     settings?: CharSettings
+    evaluation?: CalcBuildEvaluation
     engine?: "ts" | "wasm"
     wasmError?: string
     error?: string
@@ -161,8 +195,12 @@ function wasmReady(request: CalcWasmSource): request is CalcWasmSource & { charI
     return request.charId !== undefined && request.settings !== undefined
 }
 
-self.onmessage = (event: MessageEvent<CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest>) => {
+self.onmessage = (event: MessageEvent<CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest | CalcEvaluateRequest>) => {
     const request = event.data
+    if (request.kind === "evaluate") {
+        void handleEvaluate(request)
+        return
+    }
     if (request.kind === "targetValues") {
         void handleTargetValues(request)
         return
@@ -180,6 +218,91 @@ self.onmessage = (event: MessageEvent<CalcAutobuildRequest | CalcIncomeRequest |
         return
     }
     handleIncomeTs(request)
+}
+
+/**
+ * 节点编辑器求值：优先走 wasm（与界面数值口径一致），不可用时回退 TS 构筑实例。
+ * @param request 求值请求
+ */
+async function handleEvaluate(request: CalcEvaluateRequest) {
+    const { id } = request
+    try {
+        let evaluation: CalcBuildEvaluation
+        let engine: "ts" | "wasm" = "wasm"
+        try {
+            const wasmResult = await runWasmEvaluate({
+                charId: request.charId,
+                settings: request.settings,
+                targetFunction: request.targetFunction,
+                baseName: request.baseName,
+            })
+            evaluation = { ...wasmResult, engine: "wasm" }
+        } catch (error) {
+            console.warn("wasm 构筑求值失败，回退 TS", error)
+            evaluation = evaluateTs(request)
+            engine = "ts"
+        }
+        self.postMessage({ id, type: "result", evaluation, engine } satisfies CalcResponse)
+    } catch (error) {
+        self.postMessage({
+            id,
+            type: "result",
+            error: error instanceof Error ? error.message : String(error),
+        } satisfies CalcResponse)
+    }
+}
+
+/**
+ * TS 回退求值：按节点请求的伤害口径现建构筑实例，返回与 wasm 结果同形的扁平数据。
+ * @param request 求值请求
+ * @returns 构筑求值结果
+ */
+function evaluateTs(request: CalcEvaluateRequest): CalcBuildEvaluation {
+    const settings =
+        request.targetFunction === undefined && request.baseName === undefined
+            ? request.settings
+            : {
+                  ...request.settings,
+                  targetFunction: request.targetFunction ?? request.settings.targetFunction,
+                  baseName: request.baseName ?? request.settings.baseName,
+              }
+    const build = createCharBuildFromSettings(request.charId, settings)
+    const attributes = build.calculateAttributes()
+    const weaponAttrs = build.calculateWeaponAttributes()
+    const targetFunction = settings.targetFunction || "伤害"
+    let targetValue = 0
+    let error: string | null = null
+    try {
+        targetValue = build.calculateTargetFunction(weaponAttrs, targetFunction)
+    } catch (reason) {
+        error = reason instanceof Error ? reason.message : String(reason)
+    }
+    let damage: CalcBuildEvaluation["damage"] = null
+    try {
+        const result =
+            request.damageKind === "weapon"
+                ? build.calculateWeaponDamage(weaponAttrs, build.selectedWeapon || build.meleeWeapon)
+                : build.calculateSkillDamage(weaponAttrs)
+        damage = {
+            expectedDamage: result.expectedDamage,
+            noHpDamage: result.noHpDamage,
+            physicalDamage: result.physicalDamage ?? 0,
+            elementDamage: result.elementDamage ?? 0,
+            higherCritExpectedTrigger: result.higherCritExpectedTrigger ?? 0,
+            lowerCritExpectedTrigger: result.lowerCritExpectedTrigger ?? 0,
+        }
+    } catch (reason) {
+        console.warn("TS 伤害求值失败", reason)
+    }
+    return {
+        attributes: attributes as unknown as Record<string, number>,
+        weapon: (weaponAttrs.weapon as unknown as Record<string, number>) ?? null,
+        targetValue,
+        damage,
+        targetFunction,
+        error,
+        engine: "ts",
+    }
 }
 
 function handleAutobuildTs(request: CalcAutobuildRequest, wasmError?: string) {

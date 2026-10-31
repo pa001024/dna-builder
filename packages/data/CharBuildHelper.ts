@@ -40,9 +40,11 @@ export function createCharBuildFromSettings(
     const getBuffLv = (modId: number) => (useGlobal ? getBuffLvFromSnapshot(inv, modId) : getModBuffLvFromSetting(effectConfig, modId))
     const getWBuffLv = (weaponId: number) =>
         useGlobal ? getWBuffLvFromSnapshot(inv, weaponId, char.属性) : getWBuffLvFromSetting(effectConfig, weaponId, char.属性)
+    // 中枢魔之楔 id 为 0 表示未装备（节点编辑器新建 MOD 节点的默认态）
+    const auraModId = getModVariantAura(charSettings as CharSettings)
     return new CharBuild({
         char,
-        auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings as CharSettings)),
+        auraMod: auraModId > 0 ? LeveledModHelper.fromId(auraModId) : undefined,
         // MOD 一律取当前激活的变体（A/B/C）：分享构筑时上传的多份配置各自独立
         charMods: getModVariantSlots(charSettings as CharSettings, "角色")
             .filter(mod => mod !== null)

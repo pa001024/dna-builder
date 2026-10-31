@@ -1,15 +1,11 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
-import * as Sentry from "@sentry/vue"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { initRangeProgress } from "dob-ui/runtime/range"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import { getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
 import { dataPackBootstrapLoading, isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
-import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "@/utils/data-pack/data-pack-runtime"
-import { mountImgsToVirtualPath } from "@/utils/data-pack/imgs-runtime"
-import { applyAllPackTranslations } from "@/utils/data-pack/translations-pack"
 import packageJson from "../package.json"
 import { env } from "./env"
 import { applyLanguageFontClass, initI18n } from "./i18n"
@@ -59,9 +55,18 @@ async function registerImgsServiceWorker(): Promise<void> {
  * 重写插件关闭时数据直读源码，不碰数据包存储。
  */
 async function bootstrapRuntimeAssets(): Promise<void> {
+    // 数据包运行时与游戏文案表都很大（dev 下含完整源数据），动态导入让应用外壳先上屏
+    let runtime: typeof import("@/utils/data-pack/data-pack-runtime") | null = null
     try {
+        const [runtimeModule, translations] = await Promise.all([
+            import("@/utils/data-pack/data-pack-runtime"),
+            import("@/utils/data-pack/translations-pack"),
+        ])
+        runtime = runtimeModule
+        // 文案注入不阻塞数据包初始化；数据包换入后 translations-pack 会自行重注
+        void translations.applyAllPackTranslations()
         if (!isDataPackRewriteDisabled()) {
-            await bootstrapDataPack()
+            await runtime.bootstrapDataPack()
         }
     } catch (error) {
         console.error("数据包初始化失败", error)
@@ -69,11 +74,12 @@ async function bootstrapRuntimeAssets(): Promise<void> {
         dataPackBootstrapLoading.value = false
     }
 
-    if (env.isApp) {
+    if (env.isApp && runtime) {
         try {
-            const cacheInfo = getLoadedDataPackImgsCacheInfo()
+            const { mountImgsToVirtualPath } = await import("@/utils/data-pack/imgs-runtime")
+            const cacheInfo = runtime.getLoadedDataPackImgsCacheInfo()
             await mountImgsToVirtualPath({
-                manifest: getLoadedDataPackImgsManifest(),
+                manifest: runtime.getLoadedDataPackImgsManifest(),
                 installedVersion: cacheInfo?.installedVersion,
                 manifestHash: cacheInfo?.manifestHash,
             })
@@ -84,11 +90,7 @@ async function bootstrapRuntimeAssets(): Promise<void> {
     }
 }
 
-void initI18n(localStorage.getItem("setting_lang") || navigator.language).then(() => {
-    // 游戏文案随数据包下发；这里先注入一次（构建时是被重写插件替换的空壳，dev 下就是源码数据），
-    // 数据包稍后激活完成时会再注入一次把新版本换上
-    return applyAllPackTranslations()
-})
+void initI18n(localStorage.getItem("setting_lang") || navigator.language)
 setCurrentVersionLimit(getCurrentVersionLimit())
 
 /**
@@ -110,16 +112,21 @@ async function bootstrap() {
     app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
     if (import.meta.env.PROD) {
-        Sentry.init({
-            app,
-            dsn: "https://797cb2155c06501ec466bc020bcfb2ca@o4510704299868160.ingest.us.sentry.io/4510704307470336",
-            environment: import.meta.env.MODE || "production",
-            release: packageJson.version,
-            integrations: [Sentry.browserTracingIntegration({ router }), Sentry.replayIntegration()],
-            tracesSampleRate: 0.1,
-            replaysSessionSampleRate: 0.1,
-            replaysOnErrorSampleRate: 1.0,
-        })
+        // Sentry 体积较大，放到应用挂载后再加载，不阻塞首屏
+        void import("@sentry/vue")
+            .then(Sentry => {
+                Sentry.init({
+                    app,
+                    dsn: "https://797cb2155c06501ec466bc020bcfb2ca@o4510704299868160.ingest.us.sentry.io/4510704307470336",
+                    environment: import.meta.env.MODE || "production",
+                    release: packageJson.version,
+                    integrations: [Sentry.browserTracingIntegration({ router }), Sentry.replayIntegration()],
+                    tracesSampleRate: 0.1,
+                    replaysSessionSampleRate: 0.1,
+                    replaysOnErrorSampleRate: 1.0,
+                })
+            })
+            .catch(error => console.error("Sentry 初始化失败", error))
     }
 
     app.directive("h-resize-for", (el, { value: { el: target, min, max } }) => {
@@ -160,10 +167,13 @@ async function bootstrap() {
         dataPackBootstrapLoading.value = false
         return
     }
-    requestAnimationFrame(() => {
-        // 图片缓存与数据包下载都走 CDN，先等测速出结果再开跑，避免用错源下载大文件
-        void cdnProbe.then(() => bootstrapRuntimeAssets())
-    })
+    const loadRuntimeAssets = () => {
+        // 最多等测速 800ms；超时后按主源继续，避免慢测速拖住数据包加载
+        const probeTimeout = new Promise<void>(resolve => window.setTimeout(resolve, 800))
+        void Promise.race([cdnProbe, probeTimeout]).then(() => bootstrapRuntimeAssets())
+    }
+    // 先让应用外壳完成首帧，再把重型数据加载放到下一轮事件循环
+    window.setTimeout(loadRuntimeAssets, 250)
 
     const prefetchDatabaseShell = () => {
         void import("./views/DBViewShell.vue").catch(error => {

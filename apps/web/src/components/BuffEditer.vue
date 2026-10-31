@@ -241,7 +241,8 @@ function getDisplayBuff(buff: LeveledBuff) {
                 <Icon icon="ri:clipboard-line" class="size-4" />
             </button>
         </div>
-        <ScrollArea class="h-80">
+        <!-- 阻止滚轮冒泡到画布：在列表内滚动时不能触发节点图缩放 -->
+        <ScrollArea class="h-80" @wheel.stop>
             <transition-group name="list" tag="div" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
                 <!-- 已选择的BUFF -->
                 <BuffCell

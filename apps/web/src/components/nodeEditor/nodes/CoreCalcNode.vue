@@ -22,6 +22,8 @@ interface CoreCalcNodeData {
     error?: string
     missingInputs?: string[]
     selectedSkill?: string // 当前选择的技能
+    vectorDimensions?: number[]
+    buildVector?: { contexts: unknown[] }
 }
 
 // 定义属性
@@ -68,49 +70,50 @@ const handleSkillChange = (val: string) => {
 
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
-        <div class="space-y-2">
+        <div class="w-57.5 max-w-full space-y-1 text-[11px]">
             <!-- 状态信息 -->
-            <div class="text-sm">
-                <div v-if="!hasMissingInputs && !data.charBuild" class="text-center">
-                    <span
-                        :class="{
-                            'text-green-600': !hasMissingInputs && !data.error,
-                            'text-red-600': hasMissingInputs || data.error,
-                            'text-yellow-600': !hasMissingInputs && !data.error && !data.charBuild,
-                        }"
-                    >
-                        {{ statusText }}
-                    </span>
-                </div>
+            <div v-if="!hasMissingInputs && !data.charBuild" class="text-center">
+                <span
+                    :class="{
+                        'text-green-600': !hasMissingInputs && !data.error,
+                        'text-red-600': hasMissingInputs || data.error,
+                        'text-yellow-600': !hasMissingInputs && !data.error && !data.charBuild,
+                    }"
+                >
+                    {{ statusText }}
+                </span>
+            </div>
 
-                <!-- 缺少输入列表 -->
-                <div v-if="hasMissingInputs" class="mt-2">
-                    <div class="text-xs text-red-600 font-medium mb-1">{{ $t("node-editor.coreCalc.missingInputs") }}</div>
-                    <div class="text-xs text-red-500">
-                        <ul class="list-disc list-inside">
-                            <li v-for="input in data.missingInputs" :key="input">{{ input }}</li>
-                        </ul>
-                    </div>
+            <!-- 缺少输入列表 -->
+            <div v-if="hasMissingInputs">
+                <div class="mb-0.5 font-medium text-red-600">{{ $t("node-editor.coreCalc.missingInputs") }}</div>
+                <ul class="list-inside list-disc text-[10px] text-red-500">
+                    <li v-for="input in data.missingInputs" :key="input">{{ input }}</li>
+                </ul>
+            </div>
+            <!-- 错误信息 -->
+            <div v-else-if="data.error">
+                <div class="mb-0.5 font-medium text-red-600">{{ $t("node-editor.coreCalc.errorInfo") }}</div>
+                <div class="text-[10px] text-red-500">{{ data.error }}</div>
+            </div>
+            <!-- 技能选择 -->
+            <div v-else-if="data.charBuild">
+                <div class="mb-0.5 text-[10px] text-base-content/45">{{ $t("node-editor.coreCalc.defaultSkill") }}</div>
+                <Select
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :model-value="data.selectedSkill || ''"
+                    :placeholder="$t('node-editor.coreCalc.selectSkill')"
+                    @update:model-value="handleSkillChange"
+                >
+                    <SelectItem v-for="skill in availableSkills" :key="skill.名称" :value="skill.名称">
+                        {{ skill.名称 }}
+                    </SelectItem>
+                </Select>
+
+                <div v-if="data.vectorDimensions?.length" class="mt-1.5 text-[10px] text-base-content/45">
+                    向量构筑：{{ data.vectorDimensions.join(" × ") }}（{{ data.buildVector?.contexts.length ?? 0 }} 组）
                 </div>
-                <!-- 错误信息 -->
-                <div v-else-if="data.error" class="mt-2">
-                    <div class="text-xs text-red-600 font-medium mb-1">{{ $t("node-editor.coreCalc.errorInfo") }}</div>
-                    <div class="text-xs text-red-500">{{ data.error }}</div>
-                </div>
-                <!-- 技能选择 -->
-                <div v-else-if="data.charBuild" class="mt-2">
-                    <div class="text-xs text-base-content/60 mb-1">{{ $t("node-editor.coreCalc.defaultSkill") }}</div>
-                    <Select
-                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                        :model-value="data.selectedSkill || ''"
-                        :placeholder="$t('node-editor.coreCalc.selectSkill')"
-                        @update:model-value="handleSkillChange"
-                    >
-                        <SelectItem v-for="skill in availableSkills" :key="skill.名称" :value="skill.名称">
-                            {{ skill.名称 }}
-                        </SelectItem>
-                    </Select>
-                </div>
+                <div class="mt-1.5 text-[10px] text-base-content/45">构筑已就绪，可在下游计算节点求值</div>
             </div>
         </div>
     </BaseNode>

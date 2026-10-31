@@ -3463,10 +3463,13 @@
         "astExpression": {
             "description": "验证 AST 表达式",
             "expression": "表达式",
+            "functionDefinition": "函数定义",
             "missingCore": "缺少核心计算节点",
             "result": "结果",
             "title": "AST 表达式",
             "unknownError": "未知错误",
+            "value": "值",
+            "variableName": "变量名",
             "waiting": "等待输入..."
         },
         "attrCalc": {

@@ -3416,10 +3416,13 @@
         "astExpression": {
             "description": "AST 표현식을 검증합니다",
             "expression": "식",
+            "functionDefinition": "함수 정의",
             "missingCore": "핵심 계산 노드가 없습니다",
             "result": "결과",
             "title": "AST 표현식",
             "unknownError": "알 수 없는 오류",
+            "value": "값",
+            "variableName": "변수 이름",
             "waiting": "입력을 기다리는 중..."
         },
         "attrCalc": {

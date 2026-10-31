@@ -3413,10 +3413,13 @@
         "astExpression": {
             "description": "驗證 AST 表達式",
             "expression": "表達式",
+            "functionDefinition": "函式定義",
             "missingCore": "缺少核心計算節點",
             "result": "結果",
             "title": "AST 表達式",
             "unknownError": "未知錯誤",
+            "value": "值",
+            "variableName": "變數名",
             "waiting": "等待輸入..."
         },
         "attrCalc": {
