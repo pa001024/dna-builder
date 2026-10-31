@@ -19,6 +19,7 @@ export const DEEP_LINK_SCHEME = "dobapp"
 const DEEP_LINK_PREFIXES: Record<string, string> = {
     "open-build": "/build",
     "open-dye": "/skin-colorize",
+    "open-graph": "/graph",
 }
 
 /**
@@ -99,6 +100,15 @@ export function buildDeepLink(buildId: string): string {
  */
 export function dyePlanDeepLink(planId?: string): string {
     return planId ? `${DEEP_LINK_SCHEME}://open-dye/${encodeURIComponent(planId)}` : `${DEEP_LINK_SCHEME}://open-dye`
+}
+
+/**
+ * 拼节点图深链：`dobapp://open-graph/<id>`，落到 `/graph/:id` 中转页。
+ * @param graphId 节点图 id
+ * @returns 可直接放在网页 `<a href>` 里的深链
+ */
+export function graphDeepLink(graphId: string): string {
+    return `${DEEP_LINK_SCHEME}://open-graph/${encodeURIComponent(graphId)}`
 }
 
 /**

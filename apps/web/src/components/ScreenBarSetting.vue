@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
-import DragNumberInput from "@/components/DragNumberInput.vue"
-import ScreenBarContent from "@/components/ScreenBarContent.vue"
 import { useScreenBar } from "@/composables/useScreenBar"
 import { useScreenBarContent } from "@/composables/useScreenBarContent"
 import { env } from "@/env"

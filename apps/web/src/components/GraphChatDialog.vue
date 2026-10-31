@@ -1,0 +1,304 @@
+<script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue"
+import { aiQuotaQuery } from "@/api/graphql"
+import { useGraphChat } from "@/composables/useGraphChat"
+import { useNodeEditorStore } from "@/store/nodeEditor"
+import { useUIStore } from "@/store/ui"
+import { useUserStore } from "@/store/user"
+import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
+import { formatCost } from "@/utils/ai-log-format"
+import type { ChatSubmitPayload } from "@/utils/chat-image"
+import { warmupBuildSandbox } from "@/utils/code-sandbox"
+import type { AskUserResponse } from "@/utils/db-ask-user"
+import { createGraphApi, setGraphApi } from "@/utils/graph-api"
+
+/**
+ * 节点图助手悬浮对话窗。
+ *
+ * 与配装助手的 AIChatDialog 同构：呈现层共用 {@link AgentChatMessages}，
+ * 状态层走 {@link useGraphChat}；本组件只负责窗口形态、头部工具栏与输入框接线。
+ * 沙箱接口层把节点图 store 包成 graph 对象，run_code 工具据此执行代码。
+ */
+const props = withDefaults(
+    defineProps<{
+        chatKey: string
+        /** 是否展示右下角悬浮唤起按钮（嵌入工具栏时关闭，只走外部 open()） */
+        fab?: boolean
+    }>(),
+    { fab: true }
+)
+
+const ui = useUIStore()
+const user = useUserStore()
+const { t } = useTranslation()
+
+const store = useNodeEditorStore()
+
+/** 当前图名（头部副标题展示用） */
+const graphName = computed(() => store.currentGraphName || "未命名图")
+
+const graphApi = createGraphApi({ store })
+
+setGraphApi(graphApi)
+
+const {
+    messages,
+    hasMessages,
+    isBusy,
+    liveReasoning,
+    pendingAsk,
+    failedPrompt,
+    isCompacting,
+    contextUsage,
+    loadMessages,
+    clearChat,
+    send,
+    retry,
+    compactNow,
+    answerAsk,
+    skipAsk,
+    interrupt,
+} = useGraphChat(computed(() => props.chatKey))
+
+/** 充值弹窗开关 */
+const rechargeOpen = ref(false)
+/** AI 合计可用额度（微元），未登录或加载失败时为 null */
+const quotaBalance = ref<number | null>(null)
+
+/**
+ * 拉取 AI 额度余额，用于头部展示；未登录时静默跳过。
+ */
+async function refreshQuotaBalance() {
+    if (!user.jwtToken) {
+        quotaBalance.value = null
+        return
+    }
+    try {
+        quotaBalance.value = (await aiQuotaQuery(undefined, { requestPolicy: "network-only" }))?.totalBalance ?? null
+    } catch {
+        quotaBalance.value = null
+    }
+}
+
+/** 窗口是否展开 */
+const isOpen = ref(false)
+/** 输入框内容 */
+const inputText = ref("")
+/** 输入框实例（打开窗口时自动聚焦） */
+const askBoxRef = ref<{ focus: () => void } | null>(null)
+
+/**
+ * 是否已具备可用的上游配置：没有密钥又未登录时给出可操作提示，不打无谓的请求。
+ */
+const hasUpstream = computed(() => Boolean(resolveSharedAgentUpstream()))
+
+/**
+ * 输入框占位文案：等待作答 > 已有对话 > 全新对话。
+ */
+const placeholder = computed(() => {
+    if (pendingAsk.value) {
+        return t("ai-chat.askInputPlaceholder")
+    }
+
+    return hasMessages.value ? t("ai-chat.continuePlaceholder") : t("ai-chat.inputPlaceholder")
+})
+
+/**
+ * 输入框下方的快捷键提示：等待作答时说明可以直接打字作答。
+ */
+const hint = computed(() => (pendingAsk.value ? t("ai-chat.askHint") : t("ai-chat.tip")))
+
+/**
+ * 打开窗口：载入该图的历史对话并聚焦输入框。
+ */
+async function open() {
+    isOpen.value = true
+    await loadMessages()
+    // 提前建好沙箱线程：首次 run_code 不再为冷启动付费
+    warmupBuildSandbox()
+    await nextTick()
+    askBoxRef.value?.focus()
+    void refreshQuotaBalance()
+}
+
+/**
+ * 关闭窗口（不打断正在进行的运行，回来时内容仍在）。
+ */
+function close() {
+    isOpen.value = false
+}
+
+/**
+ * 提交一次提问：正文与附图都交给会话中枢（节点图截图直接粘贴即可）。
+ *
+ * 提交即清空输入框：DBAskBox 只负责 emit，清空要靠宿主回写 v-model（与 DBView 对齐）。
+ * @param payload 输入框提交的正文与附图
+ */
+function handleSubmit(payload: ChatSubmitPayload) {
+    inputText.value = ""
+    void send(payload.text, payload.images)
+}
+
+/**
+ * 回答挂起的提问并继续运行。
+ * @param response 用户回答
+ */
+function handleAnswer(response: AskUserResponse) {
+    void answerAsk(response)
+}
+
+/** 跳过挂起的提问。 */
+function handleSkip() {
+    void skipAsk()
+}
+
+/** 清空当前图的对话（清空后窗口保持打开）。 */
+function handleClear() {
+    void clearChat()
+}
+
+/** 重试上一轮失败的提问。 */
+function handleRetry() {
+    void retry()
+}
+
+/**
+ * 手动压缩当前对话上下文（容量面板入口）：给出轻量反馈。
+ * 文案与配装助手共用同一套压缩反馈，不重复维护。
+ */
+async function handleCompactContext() {
+    const result = await compactNow()
+
+    if (result === "compacted") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactDone"))
+        return
+    }
+
+    if (result === "noNeed") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactNothing"))
+        return
+    }
+
+    ui.showErrorMessage(t("dbAgent.ui.contextUsage.compactFailed"))
+}
+
+onMounted(() => {
+    // 未配置上游时直接展开窗口，把「请先登录 / 填密钥」的提示摆到用户面前
+    if (!hasUpstream.value) {
+        void open()
+    }
+})
+
+onBeforeUnmount(() => {
+    setGraphApi(null)
+})
+
+defineExpose({ open, close })
+</script>
+
+<template>
+    <div>
+        <!-- 悬浮唤起按钮：方章风格，直角 hairline，不用 daisyUI 圆形 btn -->
+        <button
+            v-if="!isOpen && fab"
+            type="button"
+            class="fixed right-6 bottom-6 z-50 inline-flex h-10 cursor-pointer items-center gap-2 border border-primary/60 bg-base-100/85 px-3 text-xs text-primary shadow-lg backdrop-blur-md transition-colors duration-200 hover:bg-primary hover:text-primary-content focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
+            :title="t('ai-chat.title')"
+            @click="open"
+        >
+            <Icon icon="ri:chat-3-line" class="h-4 w-4" />
+            <span>{{ t("ai-chat.title") }}</span>
+        </button>
+
+        <!-- 对话窗：与配装助手同一位置与尺寸 -->
+        <section
+            v-if="isOpen"
+            class="fixed right-4 bottom-4 z-50 flex h-[min(46rem,84vh)] w-[min(30rem,calc(100vw-2rem))] flex-col border border-base-content/15 bg-base-100/85 shadow-2xl backdrop-blur-md"
+        >
+            <!-- 头部：等宽小标 + hairline 分隔，右侧为清空与关闭 -->
+            <header class="flex shrink-0 items-center justify-between gap-3 border-b border-base-content/12 px-4 py-3">
+                <div class="flex min-w-0 items-baseline gap-2">
+                    <p class="shrink-0 font-mono text-[10px] tracking-[0.28em] text-base-content/40 uppercase">Graph Agent</p>
+                    <p class="min-w-0 truncate text-xs text-base-content/55">{{ graphName }}</p>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-1.5">
+                    <button
+                        v-if="user.jwtToken"
+                        type="button"
+                        class="cursor-pointer border border-base-content/20 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        :title="t('ai-recharge.balance')"
+                        @click="rechargeOpen = true"
+                    >
+                        {{ quotaBalance === null ? t("ai-recharge.title") : `${formatCost(quotaBalance)} · ${t("ai-recharge.title")}` }}
+                    </button>
+                    <button
+                        type="button"
+                        class="grid size-6 cursor-pointer place-items-center text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
+                        :title="t('ai-chat.clear')"
+                        :aria-label="t('ai-chat.clear')"
+                        :disabled="isBusy || !hasMessages"
+                        @click="handleClear"
+                    >
+                        <Icon icon="ri:delete-bin-line" class="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                        type="button"
+                        class="grid size-6 cursor-pointer place-items-center text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        :title="t('ai-chat.close')"
+                        :aria-label="t('ai-chat.close')"
+                        @click="close"
+                    >
+                        <Icon icon="ri:close-line" class="h-3.5 w-3.5" />
+                    </button>
+                </div>
+            </header>
+
+            <!-- 消息流：与资料库同一套渲染 -->
+            <AgentChatMessages
+                :messages="messages"
+                :busy="isBusy"
+                :reasoning="liveReasoning"
+                :pending-ask="pendingAsk"
+                i18n-prefix="ai-chat.ui"
+                empty-kicker="Graph Agent"
+                class="px-4"
+                @answer="handleAnswer"
+                @skip="handleSkip"
+            />
+
+            <!-- 输入区：与配装助手同一个输入框组件；容量面板入口在工具行左侧 -->
+            <div class="shrink-0 border-t border-base-content/12 px-4 py-3">
+                <div v-if="failedPrompt" class="mb-2 flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="cursor-pointer border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                        :disabled="isBusy"
+                        @click="handleRetry"
+                    >
+                        {{ t("ai-chat.retry") }}
+                    </button>
+                </div>
+
+                <DBAskBox
+                    ref="askBoxRef"
+                    v-model="inputText"
+                    :show-rag="false"
+                    i18n-prefix="ai-chat.ui"
+                    :busy="isBusy"
+                    :placeholder="placeholder"
+                    :hint="hint"
+                    :submit-label="t('ai-chat.send')"
+                    :context-usage="contextUsage"
+                    :compacting="isCompacting"
+                    :can-compact="hasMessages && !isBusy"
+                    @compact="handleCompactContext"
+                    @submit="handleSubmit"
+                    @stop="interrupt"
+                />
+            </div>
+        </section>
+        <AiRechargeDialog v-model:open="rechargeOpen" @redeemed="refreshQuotaBalance" />
+    </div>
+</template>

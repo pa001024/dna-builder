@@ -10,11 +10,13 @@ import {
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
     createBuildContextsFromInputs,
+    createExpressionVectorOutput,
     createSettingsFromNodeInputs,
     deriveTeamBuffs,
     ensureNodeModSettings,
     migrateLegacyTeamBuffs,
     type NodeBuildInputs,
+    normalizeLabeledVector,
     reconcileTeamBuffs,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
@@ -351,6 +353,41 @@ describe("nodeEditorBuild", () => {
         const settings = ensureNodeModSettings(data)
         expect(settings.charMods).toContainEqual([mod!.id, 7])
         expect(settings.meleeMods.every(slot => slot === null)).toBe(true)
+    })
+
+    it("目标函数输出带标题的向量：向量结果沿用组合标签，标量结果包装为单元素", () => {
+        const vector = createExpressionVectorOutput({
+            label: "综合DPS",
+            vectorResult: { labels: ["倍率=1", "倍率=2"], values: [10, 20], valueLabel: "数值" },
+        })
+        expect(vector).toEqual({ title: "综合DPS", labels: ["倍率=1", "倍率=2"], values: [10, 20], valueLabel: "数值" })
+
+        expect(createExpressionVectorOutput({ label: "木桩伤害", result: { value: 5 } })).toEqual({
+            title: "木桩伤害",
+            labels: ["木桩伤害"],
+            values: [5],
+            valueLabel: "数值",
+        })
+        expect(createExpressionVectorOutput({ label: "目标函数", result: { value: Number.NaN } })).toBeUndefined()
+        expect(createExpressionVectorOutput({})).toBeUndefined()
+    })
+
+    it("图表向量归一化：带标题向量与向量输入节点数值列表", () => {
+        expect(normalizeLabeledVector({ title: "综合DPS", labels: ["一", "二"], values: [1, 2] })).toEqual({
+            title: "综合DPS",
+            labels: ["一", "二"],
+            values: [1, 2],
+        })
+        expect(normalizeLabeledVector({ label: "向量输入", values: [3, 4] })).toEqual({
+            title: "向量输入",
+            labels: ["1", "2"],
+            values: [3, 4],
+        })
+        expect(normalizeLabeledVector([1, 2])).toEqual({ title: "向量", labels: ["1", "2"], values: [1, 2] })
+        expect(normalizeLabeledVector({ values: [1, Number.NaN] })).toEqual({ title: "向量", labels: ["1"], values: [1] })
+        expect(normalizeLabeledVector({ values: [Number.NaN] })).toBeUndefined()
+        expect(normalizeLabeledVector({ values: [] })).toBeUndefined()
+        expect(normalizeLabeledVector(null)).toBeUndefined()
     })
 
     it("表达式覆盖不修改原配置", () => {

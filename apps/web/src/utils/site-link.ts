@@ -24,6 +24,8 @@ const INTERNAL_PATH_PREFIXES = [
     "/more",
     "/login",
     "/build",
+    "/graph",
+    "/flow",
     "/skin-colorize",
 ] as const
 

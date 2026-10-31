@@ -760,6 +760,83 @@ export interface CoreBuildSet {
 /** 单次核心组装的组合上限，避免向量维度爆炸 */
 export const MAX_BUILD_COMBINATIONS = 64
 
+/** 带标题的向量：目标函数节点的向量输出，也是图表节点的输入 */
+export interface LabeledVector {
+    /** 图表标题 */
+    title: string
+    /** 每个数据点的分类标签 */
+    labels: string[]
+    values: number[]
+    /** 数值含义（如「数值」「期望伤害」） */
+    valueLabel?: string
+}
+
+/**
+ * 按顺序配对标签与有限数值，跳过无效值并保持标签对齐。
+ * @param rawValues 原始数值列表
+ * @param rawLabels 原始标签列表
+ * @returns 对齐后的标签与数值
+ */
+function pickVectorEntries(rawValues: unknown, rawLabels: unknown) {
+    const valueList = Array.isArray(rawValues) ? rawValues : []
+    const labelList = Array.isArray(rawLabels) ? rawLabels : []
+    const labels: string[] = []
+    const values: number[] = []
+    valueList.forEach((value, index) => {
+        if (typeof value !== "number" || !Number.isFinite(value)) return
+        const label = labelList[index]
+        labels.push(typeof label === "string" && label.trim() ? label.trim() : String(index + 1))
+        values.push(value)
+    })
+    return { labels, values }
+}
+
+/**
+ * 归一化向量输入：兼容目标函数的带标题向量、向量输入节点的原始数值列表与纯数值数组。
+ * @param value 上游输出
+ * @param fallbackTitle 没有标题时的回退名称
+ * @returns 图表向量；没有有效数值时返回 undefined
+ */
+export function normalizeLabeledVector(value: unknown, fallbackTitle = "向量"): LabeledVector | undefined {
+    const source = Array.isArray(value)
+        ? { values: value }
+        : value && typeof value === "object"
+          ? (value as Record<string, any>)
+          : undefined
+    if (!source || !Array.isArray(source.values)) return undefined
+    const { labels, values } = pickVectorEntries(source.values, source.labels)
+    if (values.length === 0) return undefined
+    const rawTitle = typeof source.title === "string" ? source.title.trim() : ""
+    const rawLabel = typeof source.label === "string" ? source.label.trim() : ""
+    const valueLabel = typeof source.valueLabel === "string" && source.valueLabel.trim() ? source.valueLabel.trim() : undefined
+    return {
+        title: rawTitle || rawLabel || fallbackTitle,
+        labels,
+        values,
+        ...(valueLabel ? { valueLabel } : {}),
+    }
+}
+
+/**
+ * 读取目标函数节点的带标题向量输出：优先使用向量求值结果，标量结果包装为单元素向量。
+ * @param data 目标函数节点数据
+ * @returns 带标题向量；还没有结果时返回 undefined
+ */
+export function createExpressionVectorOutput(data: Record<string, any>): LabeledVector | undefined {
+    const title = typeof data.label === "string" && data.label.trim() ? data.label.trim() : "目标函数"
+    const vector = data.vectorResult
+    if (vector && typeof vector === "object") {
+        const { labels, values } = pickVectorEntries(vector.values, vector.labels)
+        if (values.length > 0) {
+            const valueLabel = typeof vector.valueLabel === "string" && vector.valueLabel.trim() ? vector.valueLabel.trim() : undefined
+            return { title, labels, values, ...(valueLabel ? { valueLabel } : {}) }
+        }
+    }
+    const value = data.result?.value
+    if (typeof value !== "number" || !Number.isFinite(value)) return undefined
+    return { title, labels: [title], values: [value], valueLabel: "数值" }
+}
+
 /**
  * 生成多输入向量的展示标签：同名节点追加序号，避免组合行无法区分。
  * @param nodes 输入节点

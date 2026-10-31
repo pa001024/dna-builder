@@ -6,6 +6,7 @@
 | 深链 | 应用内路径 | 说明 |
 |---|---|---|
 | `dobapp://open-build/<id>`（或 `?id=`） | `/build/:id` 中转页 | 查到归属角色后 replace 到 `/char/:charId/:buildId` |
+| `dobapp://open-graph/<id>`（或 `?id=`） | `/graph/:id` 中转页 | 直接 replace 到 `/flow/:graphId`（节点图编辑页载入分享图） |
 | `dobapp://open-dye/<planId>`（或 `?id=`） | `/skin-colorize/:planId` | 方案详情 |
 | `dobapp://open-dye`（裸链接） | `/skin-colorize` | 画廊；构筑裸链接无目的地，直接忽略 |
 

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, onUnmounted, ref } from "vue"
-import DragNumberInput from "@/components/DragNumberInput.vue"
-import SkillCdPosPicker from "@/components/SkillCdPosPicker.vue"
 import { useSkillCdOverlay } from "@/composables/useSkillCdOverlay"
 import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"

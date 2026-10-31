@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
-import Icon from "@/components/Icon.vue"
-import QrCodeStyled from "@/components/QrCodeStyled.vue"
 import { env } from "@/env"
 import {
     type ApkReleaseInfo,

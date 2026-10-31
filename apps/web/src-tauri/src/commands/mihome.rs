@@ -59,7 +59,8 @@ pub struct QrPayload {
 pub async fn mihome_status(app: AppHandle) -> Result<MiHomeStatus, String> {
     let auth = auth_file(&app)?;
     tokio::task::spawn_blocking(move || {
-        let mut svc = mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
+        let mut svc =
+            mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
         Ok(MiHomeStatus {
             logged_in: svc.login_status(),
         })
@@ -73,7 +74,8 @@ pub async fn mihome_status(app: AppHandle) -> Result<MiHomeStatus, String> {
 pub async fn mihome_qr_begin(app: AppHandle) -> Result<QrBegin, String> {
     let auth = auth_file(&app)?;
     tokio::task::spawn_blocking(move || {
-        let mut svc = mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
+        let mut svc =
+            mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
         match svc.qr_login_begin().map_err(|e| e.message)? {
             None => Ok(QrBegin {
                 already: true,
@@ -96,7 +98,8 @@ pub async fn mihome_qr_begin(app: AppHandle) -> Result<QrBegin, String> {
 pub async fn mihome_qr_wait(app: AppHandle, payload: QrPayload) -> Result<(), String> {
     let auth = auth_file(&app)?;
     tokio::task::spawn_blocking(move || {
-        let mut svc = mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
+        let mut svc =
+            mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
         let data = mihome_api::client::QrLoginData {
             refreshed: false,
             login_url: payload.login_url,
@@ -126,7 +129,8 @@ pub async fn mihome_logout(app: AppHandle) -> Result<(), String> {
 pub async fn mihome_scenes(app: AppHandle) -> Result<Vec<mihome_api::SceneInfo>, String> {
     let auth = auth_file(&app)?;
     tokio::task::spawn_blocking(move || {
-        let mut svc = mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
+        let mut svc =
+            mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
         svc.scene_list(None).map_err(|e| e.message)
     })
     .await
@@ -135,10 +139,15 @@ pub async fn mihome_scenes(app: AppHandle) -> Result<Vec<mihome_api::SceneInfo>,
 
 /// 执行一个手动场景。
 #[tauri::command]
-pub async fn mihome_run_scene(app: AppHandle, scene_id: String, home_id: String) -> Result<(), String> {
+pub async fn mihome_run_scene(
+    app: AppHandle,
+    scene_id: String,
+    home_id: String,
+) -> Result<(), String> {
     let auth = auth_file(&app)?;
     tokio::task::spawn_blocking(move || {
-        let mut svc = mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
+        let mut svc =
+            mihome_api::MiHomeService::new(Some(auth.as_path())).map_err(|e| e.message)?;
         svc.run_scene(&mihome_api::SceneInfo {
             scene_id,
             name: String::new(),

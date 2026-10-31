@@ -13,11 +13,7 @@ import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { getAfkWidgetWindow, setAfkWidgetIgnoreCursorEvents } from "@/api/afk-widget-window"
 import { readTextFile, writeTextFile } from "@/api/app"
-import AfkLedgerChart from "@/components/AfkLedgerChart.vue"
-import AfkLedgerHero from "@/components/AfkLedgerHero.vue"
-import AfkMiHomeSetting from "@/components/AfkMiHomeSetting.vue"
-import FilterSelect from "@/components/FilterSelect.vue"
-import ScrollSpyLayout from "@/components/ScrollSpyLayout.vue"
+import { type DateRangeValue } from "@/components/DateRangePicker.vue"
 import { useAfkWidget } from "@/composables/useAfkWidget"
 import { dungeonMap } from "@/data/d"
 import { env } from "@/env"
@@ -44,7 +40,7 @@ import { readAfkWidgetClickThrough, writeAfkWidgetClickThrough } from "@/utils/a
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRarityColor, getRaritySwatchClass } from "@/utils/rarity-utils"
 
-type RangeKey = "today" | "7d" | "30d" | "all"
+type RangeKey = "today" | "7d" | "30d" | "all" | "custom"
 
 /** 选中的时间桶（点击趋势图柱子或「时段」筛选产生）。 */
 type Period = { from: number; to: number }
@@ -100,6 +96,8 @@ const confirmingClear = ref(false)
 let clearTimer: number | null = null
 
 const range = ref<RangeKey>("today")
+/** 自定义区间：首日零点（含）～末日次日零点（不含），上限查询时才截到 now。 */
+const customRange = ref<DateRangeValue | null>(null)
 const dungeon = ref("")
 const rarity = ref<number | null>(null)
 /** 品质分布卡片的分组维度。 */
@@ -124,8 +122,52 @@ function rangeFrom(key: RangeKey) {
     if (key === "7d") return day - 6 * 86400000
     if (key === "30d") return day - 29 * 86400000
     if (key === "all") return 0
+    if (key === "custom") return customRange.value?.from ?? day
     return day
 }
+
+/**
+ * 当前筛选的结束时刻（趋势图与查询共用）：自定义区间的上限截到 now，避免趋势图拖出空桶。
+ * @returns 结束时间戳
+ */
+function rangeTo() {
+    if (range.value === "custom" && customRange.value) return Math.min(customRange.value.to, Date.now())
+    return Date.now()
+}
+
+/**
+ * 自定义区间落定：记下区间并切到 custom。
+ * @param value 首日零点～末日次日零点
+ */
+function onCustomSelect(value: DateRangeValue) {
+    customRange.value = value
+    range.value = "custom"
+}
+
+/** 自定义按钮文案：已选区间时显示 `MM-DD~MM-DD`（单日只显示一天），否则显示「自定义」。 */
+const customLabel = computed(() => {
+    const current = customRange.value
+    if (range.value !== "custom" || !current) return t("afk-ledger.range_custom")
+    const pad = (value: number) => String(value).padStart(2, "0")
+    const fmt = (ts: number) => {
+        const date = new Date(ts)
+        return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    }
+    const last = current.to - 1
+    if (startOfDay(current.from) === startOfDay(last)) return fmt(current.from)
+    const crossYear = new Date(current.from).getFullYear() !== new Date(last).getFullYear()
+    const head = crossYear ? `${new Date(current.from).getFullYear()}-${fmt(current.from)}` : fmt(current.from)
+    return `${head}~${crossYear ? `${new Date(last).getFullYear()}-${fmt(last)}` : fmt(last)}`
+})
+
+/** 日期区间弹窗的文案：调用方按界面语言传入，组件本身不碰业务 i18n。 */
+const customPickerLabels = computed(() => ({
+    hint: t("afk-ledger.custom_hint"),
+    yesterday: t("afk-ledger.custom_yesterday"),
+    thisMonth: t("afk-ledger.custom_this_month"),
+    lastMonth: t("afk-ledger.custom_last_month"),
+    days90: t("afk-ledger.custom_90d"),
+}))
 
 /**
  * 重新查询当前时间范围与副本下的数据。
@@ -135,7 +177,7 @@ async function reload() {
     loading.value = true
     loadError.value = ""
     try {
-        const to = Date.now()
+        const to = rangeTo()
         // 「全部」从最早一条记录开始，避免空桶把横轴拉得很长
         const from = range.value === "all" ? 0 : rangeFrom(range.value)
         const data = await ledger.loadRange(from, to, dungeon.value)
@@ -159,7 +201,7 @@ async function reload() {
     }
 }
 
-watch([range, dungeon], () => {
+watch([range, dungeon, customRange], () => {
     period.value = null
     void reload()
 })
@@ -388,11 +430,11 @@ function rarityName(n: number) {
 
 const rarityOptions = computed(() => [5, 4, 3, 2, 1].map(n => ({ value: n, label: rarityName(n), swatch: n })))
 
-/** 趋势分桶：今日按小时，其余按天。 */
-const bucketMs = computed(() => (range.value === "today" ? 3600000 : 86400000))
+/** 趋势分桶：跨度 2 天内按小时，其余按天（今日与单日自定义走小时桶）。 */
+const bucketMs = computed(() => (rangeTo() - rangeFrom(range.value) <= 2 * 86400000 ? 3600000 : 86400000))
 
 const trend = computed(() => {
-    const now = Date.now()
+    const now = rangeTo()
     let from = rangeFrom(range.value)
     if (range.value === "all") {
         const earliest = drops.value.reduce((min, drop) => Math.min(min, drop.at), now)
@@ -546,12 +588,12 @@ const chartColors = computed(() => {
 /**
  * 趋势图横轴标签。
  * @param at 桶起点
- * @returns 今日为小时，其余为月-日
+ * @returns 小时桶为 HH:00，其余为月-日
  */
 function trendLabel(at: number) {
     const date = new Date(at)
     const pad = (value: number) => String(value).padStart(2, "0")
-    if (range.value === "today") return `${pad(date.getHours())}:00`
+    if (bucketMs.value < 86400000) return `${pad(date.getHours())}:00`
     return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
@@ -1053,6 +1095,13 @@ function clearAll() {
                     {{ $t(option.labelKey) }}
                 </button>
             </div>
+            <DateRangePicker
+                :active="range === 'custom'"
+                :label="customLabel"
+                :current="customRange"
+                :labels="customPickerLabels"
+                @select="onCustomSelect"
+            />
             <!-- 标准筛选控件：与 /db 列表页同一套 FilterSelect 配方 -->
             <FilterSelect
                 v-model="dungeon"

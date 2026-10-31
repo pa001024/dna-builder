@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, watch } from "vue"
 import { type AiQuota, aiQuotaQuery, meQuery, myShopSummaryQuery, type UserShopSummary, updateUserMetaMutation } from "@/api/graphql"
-import AiRechargeDialog from "@/components/AiRechargeDialog.vue"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"

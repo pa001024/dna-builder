@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
-import ExprInput from "@/components/ExprInput.vue"
 import { CharBuild } from "@/data/CharBuild"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { formatDamage } from "@/util"

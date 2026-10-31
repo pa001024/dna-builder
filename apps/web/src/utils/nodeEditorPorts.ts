@@ -157,8 +157,13 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.WEAPON_OUTPUT]: { inputs: [input("attrs", PortType.WEAPON_ATTRS, "武器属性")], outputs: [] },
     [NodeType.DAMAGE_OUTPUT]: { inputs: [input("damage", PortType.DAMAGE, "伤害结果")], outputs: [] },
     [NodeType.FULL_CALC]: { inputs: [BUILD_INPUT], outputs: [NUMBER_OUTPUT] },
-    [NodeType.AST_EXPRESSION_CALC]: { inputs: [BUILD_INPUT], outputs: [NUMBER_OUTPUT] },
+    // 目标函数除标量结果外还输出带标题的向量，供图表节点绘制
+    [NodeType.AST_EXPRESSION_CALC]: {
+        inputs: [BUILD_INPUT],
+        outputs: [NUMBER_OUTPUT, output("vector", PortType.VECTOR, "向量")],
+    },
     [NodeType.CUSTOM_EXPRESSION]: { inputs: [BUILD_INPUT], outputs: [NUMBER_OUTPUT] },
+    [NodeType.CHART]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [] },
     [NodeType.ADD_CALC]: {
         inputs: [
             input("a", PortType.NUMBER, "a"),

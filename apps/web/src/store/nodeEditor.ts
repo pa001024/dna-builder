@@ -18,10 +18,12 @@ import {
     createBuildContextFromJSONText,
     createBuildContextFromSettings,
     createBuildContextsFromInputs,
+    createExpressionVectorOutput,
     getSkillDamageTarget,
     getWeaponDamageTarget,
     migrateLegacyTeamBuffs,
     type NodeBuildContext,
+    normalizeLabeledVector,
     readNodeBuffEntries,
     readNodeCustomVariables,
     readNodeTeamBuffs,
@@ -910,6 +912,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     buildVector: undefined, // 构筑向量（含 CharBuild 实例），不需要保存
                     vectorDimensions: undefined, // 构筑向量维度，重新计算即可
                     vectorResult: undefined, // 向量求值结果，不需要保存
+                    chartVector: undefined, // 图表节点归一化后的输入向量，重新计算即可
                     evaluation: undefined, // worker 求值结果，不需要保存
                     evalSignature: undefined, // 求值签名，不需要保存
                     evalPending: undefined, // 求值状态，不需要保存
@@ -1187,6 +1190,42 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             document.body.removeChild(a)
             URL.revokeObjectURL(url)
         }
+    }
+
+    /**
+     * 把已解析的图 JSON 载入画布（分享载入 / 在线载入共用，与 importGraph 同口径）。
+     * @param graphData 图 JSON（含 nodes/edges/name）
+     * @param graphName 覆盖显示的图名（缺省用 JSON 里的 name）
+     */
+    function loadGraphData(graphData: { nodes?: unknown[]; edges?: unknown[]; name?: string }, graphName?: string): void {
+        const rawNodes = Array.isArray(graphData.nodes) ? graphData.nodes : []
+        const rawEdges = Array.isArray(graphData.edges) ? graphData.edges : []
+        nodes.value = normalizeNodes(rawNodes as EditorNodeInput[])
+        const legacyHubs = collectLegacyHubIds(nodes.value, rawEdges as EditorEdge[])
+        const importedEdges = [...(rawEdges as EditorEdge[])]
+        migrateLegacyExpressionNodes(nodes.value, importedEdges)
+        migrateLegacyTeamNodes(nodes.value, importedEdges)
+        edges.value = migrateGraphEdges(nodes.value, importedEdges)
+        nodes.value = nodes.value.filter(node => !legacyHubs.has(node.id))
+        edges.value.forEach(decorateEdge)
+        currentGraphName.value = graphName ?? (typeof graphData.name === "string" && graphData.name ? graphData.name : "分享的图")
+        currentGraphId.value = null
+        markGraphDirty()
+        resetHistory("载入分享图")
+        recalculateAllNodes()
+    }
+
+    /**
+     * 序列化当前图为可分享/可存档的 JSON 文本。
+     * @param name 图名（缺省用当前图名）
+     * @returns 图 JSON 文本
+     */
+    function exportGraphJson(name?: string): string {
+        return JSON.stringify({
+            name: name ?? currentGraphName.value,
+            nodes: serializeNodes(Object.values(nodes.value)),
+            edges: serializeEdges(edges.value),
+        })
     }
 
     /**
@@ -1845,7 +1884,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 }
                 if (hasVector) scheduleVectorEvaluation(node, vector, expression || undefined)
                 else scheduleEvaluation(node, context, expression || undefined)
-                return node.data.result ?? undefined
+                // 数值端口沿用原有结果，同时把带标题的向量输出给图表等下游节点
+                return { ...(node.data.result ?? {}), vector: createExpressionVectorOutput(node.data) }
             }
             default:
                 return storeError(node, "未知节点类型")
@@ -1920,6 +1960,16 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 node.data.charBuild = parsed.context ? markRaw(parsed.context.charBuild) : undefined
                 node.data.error = parsed.error
                 const result = parsed.context ? { build: parsed.context } : { build: null, error: parsed.error }
+                calculationCache.set(nodeId, result)
+                return result
+            }
+
+            // 图表节点：把上游向量归一化为带标题的图表数据
+            if (nodeType === NodeType.CHART) {
+                const label = typeof node.data.label === "string" ? node.data.label : "向量"
+                const chartVector = normalizeLabeledVector(collectInputPortValues(node).get("vector"), label)
+                node.data.chartVector = chartVector
+                const result = chartVector ? { vector: chartVector } : null
                 calculationCache.set(nodeId, result)
                 return result
             }
@@ -2091,6 +2141,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         // 导入导出
         exportGraph,
         importGraph,
+        loadGraphData,
+        exportGraphJson,
         // 计算属性
         nodeCount,
         edgeCount,

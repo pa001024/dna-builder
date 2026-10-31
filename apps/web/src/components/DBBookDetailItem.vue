@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
-import ReaderModeOverlay from "@/components/ReaderModeOverlay.vue"
-import StoryArticleBody from "@/components/StoryArticleBody.vue"
 import { useGameText } from "@/composables/useGameText"
 import { useReaderArticle } from "@/composables/useReaderArticle"
 import { regionMap, subRegionMap } from "@/data/d"

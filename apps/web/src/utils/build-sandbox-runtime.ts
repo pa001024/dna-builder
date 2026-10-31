@@ -1,5 +1,13 @@
 import { createBuildFromSnapshot } from "@/data/CharBuildSnapshot"
 
+/** 主线程发给沙箱的执行请求附带要暴露的全局对象名（配装 `build` / 节点图 `graph`） */
+export interface SandboxRunRequest {
+    type: "run"
+    code: string
+    /** 沙箱全局对象名，缺省 build */
+    globalName?: string
+}
+
 /** 沙箱（worker 侧）发给主线程的消息 */
 export type SandboxOutbound =
     | { type: "ready" }
@@ -8,9 +16,7 @@ export type SandboxOutbound =
     | { type: "done"; ok: boolean; value?: string; error?: string }
 
 /** 主线程发给沙箱的消息 */
-export type SandboxInbound =
-    | { type: "run"; code: string }
-    | { type: "rpc:result"; id: number; ok: boolean; value?: unknown; error?: string }
+export type SandboxInbound = SandboxRunRequest | { type: "rpc:result"; id: number; ok: boolean; value?: unknown; error?: string }
 
 export interface SandboxRuntime {
     onMessage(message: SandboxInbound): void
@@ -151,12 +157,14 @@ function isViewPayload(value: unknown): value is { __view: true; snapshot: unkno
 /**
  * 创建 worker 侧的沙箱运行时。
  *
- * 用户代码在这里编译执行：`build` 的每个方法都是一次到主线程的 RPC（页面状态只存在于主线程），
- * 而主线程回传的构筑快照会在 worker 内重建出真正的 CharBuild，之后的查数值都在本地跑，不再往返。
+ * 用户代码在这里编译执行：沙箱全局对象（配装 `build` / 节点图 `graph`）的每个方法
+ * 都是一次到主线程的 RPC（页面状态只存在于主线程），而主线程回传的构筑快照会在
+ * worker 内重建出真正的 CharBuild，之后的查数值都在本地跑，不再往返。
  * @param send 向主线程发消息
+ * @param globalName 沙箱全局对象名（默认 build）
  * @returns 运行时
  */
-export function createSandboxRuntime(send: (message: SandboxOutbound) => void): SandboxRuntime {
+export function createSandboxRuntime(send: (message: SandboxOutbound) => void, globalName = "build"): SandboxRuntime {
     let nextId = 1
     let disposed = false
     const pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>()
@@ -234,7 +242,7 @@ export function createSandboxRuntime(send: (message: SandboxOutbound) => void): 
         })
     }
 
-    const build = remote([])
+    const sandboxGlobal = remote([])
 
     function makeConsole(level: "log" | "warn" | "error") {
         return (...args: unknown[]) => {
@@ -242,10 +250,10 @@ export function createSandboxRuntime(send: (message: SandboxOutbound) => void): 
         }
     }
 
-    function run(code: string): void {
+    function run(code: string, name: string): void {
         const scope: Record<string, unknown> = {
             ...SAFE_GLOBALS,
-            build,
+            [name]: sandboxGlobal,
             console: { log: makeConsole("log"), warn: makeConsole("warn"), error: makeConsole("error") },
         }
 
@@ -257,12 +265,12 @@ export function createSandboxRuntime(send: (message: SandboxOutbound) => void): 
                     return (target as Record<symbol, unknown>)[key]
                 }
                 if (BLOCKED.has(key)) {
-                    throw new ReferenceError(`沙箱里不能访问 ${key}：只能通过 build 对象读写配装`)
+                    throw new ReferenceError(`沙箱里不能访问 ${key}：只能通过 ${name} 对象读写`)
                 }
                 if (key in target) {
                     return target[key]
                 }
-                throw new ReferenceError(`${key} 未定义：沙箱里只有 build 对象可用`)
+                throw new ReferenceError(`${key} 未定义：沙箱里只有 ${name} 对象可用`)
             },
             set() {
                 throw new ReferenceError("沙箱里不能写入全局变量")
@@ -288,7 +296,7 @@ export function createSandboxRuntime(send: (message: SandboxOutbound) => void): 
     return {
         onMessage(message) {
             if (message.type === "run") {
-                run(message.code)
+                run(message.code, message.globalName ?? globalName)
                 return
             }
 

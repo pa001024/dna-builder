@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import CharTooltip from "@/components/CharTooltip.vue"
-import WeaponTooltip from "@/components/WeaponTooltip.vue"
 import { useGameText } from "@/composables/useGameText"
 import type { LeveledChar, LeveledSkillWeapon, LeveledWeapon } from "@/data"
 import { formatProp } from "@/util"

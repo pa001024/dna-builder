@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from "vue"
-import PetEditor from "@/components/PetEditor.vue"
-import TraitEditer from "@/components/TraitEditer.vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { getEffectivePetLevel, getPetTraitByLevel, getTraitPetLevelBonus, normalizeTraitSlots, TRAIT_SLOT_COUNT, type TraitSlot } from "@/data/petTrait"
 import { useNodeEditorStore } from "@/store/nodeEditor"

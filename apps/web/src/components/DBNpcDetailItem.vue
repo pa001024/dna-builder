@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue"
-import DBDialogueCard from "@/components/DBDialogueCard.vue"
 import type { NPC } from "@/data/d/npc.data"
 import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"

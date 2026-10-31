@@ -31,6 +31,7 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
             { name: "用户管理", path: "/admin/user", icon: "ri:team-line" },
             { name: "攻略管理", path: "/admin/guide", icon: "ri:book-line" },
             { name: "构筑管理", path: "/admin/build", icon: "ri:hammer-line" },
+            { name: "节点图管理", path: "/admin/graph", icon: "ri:share-line" },
             { name: "时间线管理", path: "/admin/timeline", icon: "ri:timeline-view" },
             { name: "染色方案管理", path: "/admin/dyeplan", icon: "ri:palette-line" },
             { name: "MOD 分享管理", path: "/admin/game-mod", icon: "ri:puzzle-line" },

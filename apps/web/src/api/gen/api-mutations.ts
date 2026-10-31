@@ -896,6 +896,324 @@ export const pinGuideMutation = typedMutation<Types.Guide, { id: string; pinned:
     }
 `)
 
+export const createGraphMutation = typedMutation<Types.Graph, { input: Types.GraphInput }>(/* GraphQL */ `
+    mutation ($input: GraphInput!) {
+        createGraph(input: $input) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
+export const updateGraphMutation = typedMutation<Types.Graph, { id: string; input: Types.GraphInput }>(/* GraphQL */ `
+    mutation ($id: String!, $input: GraphInput!) {
+        updateGraph(id: $id, input: $input) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
+export const deleteGraphMutation = typedMutation<boolean, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        deleteGraph(id: $id)
+    }
+`)
+
+export const likeGraphMutation = typedMutation<Types.Graph, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        likeGraph(id: $id) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
+export const unlikeGraphMutation = typedMutation<Types.Graph, { id: string }>(/* GraphQL */ `
+    mutation ($id: String!) {
+        unlikeGraph(id: $id) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
+export const recommendGraphMutation = typedMutation<Types.Graph, { id: string; recommended: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $recommended: Boolean!) {
+        recommendGraph(id: $id, recommended: $recommended) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
+export const pinGraphMutation = typedMutation<Types.Graph, { id: string; pinned: boolean }>(/* GraphQL */ `
+    mutation ($id: String!, $pinned: Boolean!) {
+        pinGraph(id: $id, pinned: $pinned) {
+            id
+            title
+            desc
+            graphData
+            userId
+            views
+            likes
+            isRecommended
+            isPinned
+            createdAt
+            updateAt
+            user {
+                id
+                name
+                email
+                qq
+                pic
+                uid
+                roles
+                experience
+                points
+                level
+                selectedTitleAssetId
+                selectedNameCardAssetId
+                currentTitleText
+                currentTitleClass
+                nameEffectClass
+                dailyExperienceStatus {
+                    todayAwardedExp
+                    totalAvailableExp
+                    dailyLaunchProgress
+                    dailyLaunchLimit
+                    dailyOnlineHourProgress
+                    dailyOnlineHourLimit
+                    dailyMessageProgress
+                    dailyMessageLimit
+                    dailyOnlineHourRetryAfterMs
+                }
+                abyssUsageUploadStatus {
+                    uploadedThisSeason
+                }
+                createdAt
+                updateAt
+            }
+            isLiked
+        }
+    }
+`)
+
 export const updateGameModMutation = typedMutation<Types.GameMod, { id: string; input: Types.GameModInput }>(/* GraphQL */ `
     mutation ($id: String!, $input: GameModInput!) {
         updateGameMod(id: $id, input: $input) {

@@ -1,4 +1,5 @@
-<script lang="ts">
+<script setup lang="ts">
+
 /**
  * 阅读模式的对话正文排版：说话人名 + 台词段落。
  *
@@ -13,11 +14,6 @@ export interface ReaderDialogueLine {
     /** 台词原文（含剧情样式标签与占位符，由 StoryArticleBody 解析） */
     content: string
 }
-</script>
-
-<script setup lang="ts">
-import StoryArticleBody from "@/components/StoryArticleBody.vue"
-
 defineProps<{
     lines: ReaderDialogueLine[]
 }>()

@@ -328,6 +328,22 @@ export interface Guide {
     isLiked?: boolean
 }
 
+export interface Graph {
+    id: string
+    title: string
+    desc?: string
+    graphData: string
+    userId: string
+    views: number
+    likes: number
+    isRecommended?: boolean
+    isPinned?: boolean
+    createdAt: number
+    updateAt: number
+    user?: User
+    isLiked?: boolean
+}
+
 export interface GameModVersion {
     id: string
     version: string
@@ -697,6 +713,12 @@ export interface GuideInput {
     images: string[]
     charId?: number
     buildId?: string
+}
+
+export interface GraphInput {
+    title: string
+    desc?: string
+    graphData: string
 }
 
 export interface GameModInput {

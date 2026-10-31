@@ -178,6 +178,21 @@ export const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/FlowBuildView.vue"),
         beforeEnter: () => setMinSize(320, 360),
     },
+    {
+        // 分享节点图载入页：对标 `/char/:charId/:buildId`，短链 `/graph/:id` 中转到这里
+        name: "flow-share",
+        path: "/flow/:graphId",
+        component: () => import("./views/FlowBuildView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+    },
+    {
+        // 短链中转：与 `/build/:id` 同构，查到图后 replace 到 `/flow/:graphId`
+        name: "graph-detail",
+        path: "/graph/:id",
+        component: () => import("./views/GraphRedirectView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
     // more: lazy load
     {
         name: "dps",
@@ -232,6 +247,12 @@ export const routes: readonly RouteRecordRaw[] = [
                 name: "admin-todo",
                 path: "todo",
                 component: () => import("./admin/TodoManagement.vue"),
+            },
+            {
+                name: "admin-graph",
+                path: "graph",
+                component: () => import("./admin/GraphManagement.vue"),
+                beforeEnter: () => setMinSize(320, 360),
             },
             {
                 name: "admin-build",

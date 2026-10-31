@@ -921,6 +921,230 @@ export const guideQuery = typedQuery(
     ` as const
 )<Types.Guide, { id: string }>()
 
+export const graphsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String, $userId: String, $limit: Int, $offset: Int, $sortBy: String) {
+            graphs(search: $search, userId: $userId, limit: $limit, offset: $offset, sortBy: $sortBy) {
+                id
+                title
+                desc
+                graphData
+                userId
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Graph[], { search?: string; userId?: string; limit?: number; offset?: number; sortBy?: string }>()
+
+export const graphsCountQuery = typedQuery(
+    /* GraphQL */ `
+        query ($search: String) {
+            graphsCount(search: $search)
+        }
+    ` as const
+)<number, { search?: string }>()
+
+export const recommendedGraphsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int) {
+            recommendedGraphs(limit: $limit) {
+                id
+                title
+                desc
+                graphData
+                userId
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Graph[], { limit?: number }>()
+
+export const trendingGraphsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($limit: Int) {
+            trendingGraphs(limit: $limit) {
+                id
+                title
+                desc
+                graphData
+                userId
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Graph[], { limit?: number }>()
+
+export const graphQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: String!) {
+            graph(id: $id) {
+                id
+                title
+                desc
+                graphData
+                userId
+                views
+                likes
+                isRecommended
+                isPinned
+                createdAt
+                updateAt
+                user {
+                    id
+                    name
+                    email
+                    qq
+                    pic
+                    uid
+                    roles
+                    experience
+                    points
+                    level
+                    selectedTitleAssetId
+                    selectedNameCardAssetId
+                    currentTitleText
+                    currentTitleClass
+                    nameEffectClass
+                    dailyExperienceStatus {
+                        todayAwardedExp
+                        totalAvailableExp
+                        dailyLaunchProgress
+                        dailyLaunchLimit
+                        dailyOnlineHourProgress
+                        dailyOnlineHourLimit
+                        dailyMessageProgress
+                        dailyMessageLimit
+                        dailyOnlineHourRetryAfterMs
+                    }
+                    abyssUsageUploadStatus {
+                        uploadedThisSeason
+                    }
+                    createdAt
+                    updateAt
+                }
+                isLiked
+            }
+        }
+    ` as const
+)<Types.Graph, { id: string }>()
+
 export const gameModsQuery = typedQuery(
     /* GraphQL */ `
         query (

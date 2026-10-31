@@ -308,6 +308,44 @@ export interface BuildAgentChat {
 
 export type UBuildAgentChat = BuildAgentChat
 
+// 节点图助手对话持久化接口（结构与配装助手对齐，共用同一套渲染层）
+export interface GraphAgentChatMessage {
+    /** 消息 id：会话内自增，用于渲染层的折叠态与 DOM 绑定 */
+    id: number
+    /** system 角色只用于上下文压缩边界（一条摘要分隔消息，不作为普通消息渲染） */
+    role: "user" | "assistant" | "system"
+    content: string
+    /** 用户提问附带的图片（节点图截图等） */
+    images?: ChatImage[]
+    /** 该条回复过程中的工具调用（结构化，供渲染层分组折叠） */
+    toolTraces?: MessageToolTrace[]
+    /** 该条回复过程中的分段思考内容 */
+    reasonings?: MessageReasoning[]
+    /** 该条回复的执行过程总耗时（毫秒）；挂起续跑时累加，不含用户作答的等待时间 */
+    processMs?: number
+    /** 该条回复挂起时等待用户回答的提问 */
+    pendingAsk?: MessagePendingAsk
+    /** 该条回复的真实 token 用量（上游回传时落库） */
+    tokenUsage?: MessageTokenUsage
+    /** 上下文压缩边界（仅 system 角色消息携带） */
+    compaction?: MessageCompaction
+    createdAt: number
+}
+
+export interface GraphAgentChat {
+    id: string
+    graphKey: string
+    messages: GraphAgentChatMessage[]
+    /**
+     * AI 调用日志的显式会话 id：随请求头发给服务端代理，日志按它归会话。
+     * 首次提问时生成并随会话落库；缺省表示还没跑过 AI（服务端退回指纹推导）。
+     */
+    aiSessionId?: string
+    updatedAt: number
+}
+
+export type UGraphAgentChat = GraphAgentChat
+
 // 节点编辑器相关接口
 export interface NodeEditorGraph {
     id: number
@@ -408,6 +446,7 @@ interface DB {
     conversations: Conversation
     messages: Message
     buildAgentChats: BuildAgentChat
+    graphAgentChats: GraphAgentChat
     dnaUsers: DNAUser
     userMapMarkers: UserMapMarker
     nodeEditorGraphs: NodeEditorGraph
@@ -426,6 +465,7 @@ db.version(1).stores({
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
     buildAgentChats: "&id, charName, updatedAt",
+    graphAgentChats: "&id, graphKey, updatedAt",
     dnaUsers: "++id, uid",
     userMapMarkers: "++id, mapId, createdAt",
     nodeEditorGraphs: "++id, name, createdAt, updatedAt",

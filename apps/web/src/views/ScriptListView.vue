@@ -28,7 +28,6 @@ import {
 import { createScriptMutation, deleteScriptMutation, updateScriptMutation } from "@/api/gen/api-mutations"
 import { type Script, type ScriptCategory, scriptCategoriesQuery, scriptQuery, scriptsCountQuery, scriptsQuery } from "@/api/graphql"
 import { openSChat } from "@/api/swindow"
-import AutoScript from "@/components/AutoScript.vue"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { env } from "@/env"
 import { useCloudGameStore } from "@/store/cloudgame"

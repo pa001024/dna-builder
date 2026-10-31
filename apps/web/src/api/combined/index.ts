@@ -11,6 +11,8 @@ import {
     adminShopRedemptionsQuery,
     buildsCountQuery,
     buildsQuery,
+    graphsCountQuery,
+    graphsQuery,
     guidesCountQuery,
     guidesQuery,
     roomsCountQuery,
@@ -27,6 +29,7 @@ import {
 import { combinedQuery } from "../query"
 
 export const buildsWithCountQuery = combinedQuery(buildsQuery, buildsCountQuery)
+export const graphsWithCountQuery = combinedQuery(graphsQuery, graphsCountQuery)
 export const usersWithCountQuery = combinedQuery(usersQuery, usersCountQuery)
 export const todosWithCountQuery = combinedQuery(todosQuery, todosCountQuery)
 export const timelinesWithCountQuery = combinedQuery(timelinesQuery, timelinesCountQuery)

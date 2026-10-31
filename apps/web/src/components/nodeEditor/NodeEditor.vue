@@ -7,11 +7,15 @@ import "@vue-flow/core/dist/style.css"
 import "@vue-flow/core/dist/theme-default.css"
 import type { Connection, EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
 import { nanoid } from "nanoid"
-import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { computed, defineAsyncComponent, markRaw, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { createGraphMutation, graphQuery } from "@/api/graphql"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { charMap } from "@/data"
+import { env } from "@/env"
 import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
+import { copyText } from "@/util"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
 import { getNodePorts, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
@@ -20,6 +24,7 @@ import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
 import AttrCalcNode from "./nodes/AttrCalcNode.vue"
 import BuffInputNode from "./nodes/BuffInputNode.vue"
 import CharInputNode from "./nodes/CharInputNode.vue"
+import ChartNode from "./nodes/ChartNode.vue"
 import CoreCalcNode from "./nodes/CoreCalcNode.vue"
 import CustomExpressionNode from "./nodes/CustomExpressionNode.vue"
 import CustomVariablesNode from "./nodes/CustomVariablesNode.vue"
@@ -50,6 +55,11 @@ import { type NodeData, PALETTE_ITEMS, type PaletteItem } from "./types"
 // Store
 const store = useNodeEditorStore()
 const ui = useUIStore()
+const route = useRoute()
+const router = useRouter()
+
+/** 路由上的分享图 id（/flow/:graphId） */
+const routeGraphId = computed(() => (typeof route.params.graphId === "string" ? route.params.graphId : ""))
 
 // VueFlow 实例
 const {
@@ -605,6 +615,7 @@ const nodeTypes = {
     "attr-output": markRaw(OutputNode),
     "weapon-output": markRaw(OutputNode),
     "damage-output": markRaw(OutputNode),
+    chart: markRaw(ChartNode),
     group: markRaw(GroupNode),
     label: markRaw(LabelNode),
     "text-input": markRaw(TextInputNode),
@@ -717,6 +728,7 @@ function cloneNodeDataForDuplicate(data: Record<string, any>) {
     delete clone.buildVector
     delete clone.vectorDimensions
     delete clone.vectorResult
+    delete clone.chartVector
     delete clone.evaluation
     delete clone.evalSignature
     delete clone.evalPending
@@ -1011,8 +1023,13 @@ onMounted(async () => {
     window.addEventListener("click", handleClickOutside)
     // 加载所有图
     await store.loadAllGraphs()
-    // 加载最后编辑的图
-    await store.loadLastEditedGraph()
+    // 分享链接进来的优先加载分享图，否则恢复最后编辑的本地图
+    if (routeGraphId.value) {
+        await loadSharedGraph(routeGraphId.value)
+    } else {
+        // 加载最后编辑的图
+        await store.loadLastEditedGraph()
+    }
     // 更新selectedGraphId为当前图ID
     selectedGraphId.value = store.currentGraphId || ""
     // 启动自动保存
@@ -1024,6 +1041,13 @@ onMounted(async () => {
 // 数据包延迟 hydrate 后重建构筑实例与求值结果
 watch(dataPackHydrationKey, () => {
     store.recalculateAllNodes()
+})
+
+// 分享路由切换（/flow ↔ /flow/:graphId）：切到带 id 时载入分享图，切回时不断开当前画布
+watch(routeGraphId, graphId => {
+    if (graphId && graphId !== activeRemoteId.value) {
+        void loadSharedGraph(graphId)
+    }
 })
 
 // 移除事件监听器
@@ -1040,6 +1064,94 @@ onUnmounted(() => {
     // 停止自动保存
     store.stopAutoSave()
 })
+
+/** 当前载入的分享图 id（路由 /flow/:graphId 或浏览弹窗载入后设置，用于徽标与评论区） */
+const activeRemoteId = ref<string | null>(null)
+const share_model_show = ref(false)
+const share_title = ref("")
+const share_desc = ref("")
+const sharing = ref(false)
+const browse_open = ref(false)
+const graphShow = ref<{ fetchGraphs: () => void } | null>(null)
+const graphChat = ref<{ open: () => void } | null>(null)
+const DOBGraphShow = defineAsyncComponent(() => import("@/components/DOBGraphShow.vue"))
+const CommentSection = defineAsyncComponent(() => import("@/components/CommentSection.vue"))
+const GraphChatDialog = defineAsyncComponent(() => import("@/components/GraphChatDialog.vue"))
+
+/** 节点图助手会话键：分享图按远端 id，本地按图，互不串话 */
+const graphChatKey = computed(() => (activeRemoteId.value ? `shared:${activeRemoteId.value}` : `local:${store.currentGraphId ?? "new"}`))
+
+function openShareModal() {
+    share_title.value = store.currentGraphName ? `${store.currentGraphName}节点图` : "我的节点图"
+    share_desc.value = ""
+    share_model_show.value = true
+}
+
+async function confirmShare() {
+    if (sharing.value) return
+    const title = share_title.value.trim()
+    if (!title) {
+        ui.showErrorMessage("请填写标题")
+        return
+    }
+    sharing.value = true
+    try {
+        const graphData = store.exportGraphJson(store.currentGraphName || title)
+        const result = await createGraphMutation({
+            input: { title, desc: share_desc.value, graphData },
+        })
+
+        if (result) {
+            activeRemoteId.value = result.id
+            await copyText(`${env.endpoint}/graph/${result.id}`)
+            ui.showSuccessMessage("节点图分享链接已复制")
+            share_model_show.value = false
+            graphShow.value?.fetchGraphs()
+        }
+    } catch (error) {
+        ui.showErrorMessage("分享失败:", error instanceof Error ? error.message : "未知错误")
+    } finally {
+        sharing.value = false
+    }
+}
+
+/** 从服务端加载一张分享图到画布 */
+async function loadSharedGraph(graphId: string) {
+    try {
+        const graph = await graphQuery({ id: graphId }, { requestPolicy: "network-only" })
+        if (graph?.graphData) {
+            const parsed = JSON.parse(graph.graphData) as { nodes?: unknown[]; edges?: unknown[]; name?: string }
+            store.loadGraphData(parsed, graph.title)
+            selectedGraphId.value = ""
+            activeRemoteId.value = graph.id
+            return
+        }
+        ui.showErrorMessage("节点图不存在或数据损坏")
+    } catch (error) {
+        console.error("加载分享节点图失败", error)
+        ui.showErrorMessage("加载分享节点图失败")
+    }
+}
+
+/** 浏览弹窗里点「载入」：走路由中转，保证刷新/短链与当前视图一致 */
+function handleUseGraph(_graphData: string, remoteId: string) {
+    browse_open.value = false
+    if (remoteId === routeGraphId.value) {
+        void loadSharedGraph(remoteId)
+        return
+    }
+    void router.replace(`/flow/${remoteId}`)
+}
+
+/** 回到本地空白图（清除分享态） */
+function handleNewGraph() {
+    activeRemoteId.value = null
+    void router.replace("/flow")
+    store.clearGraph()
+    store.currentGraphId = null
+    store.currentGraphName = "未命名图"
+    selectedGraphId.value = ""
+}
 
 const transferDialogShow = ref(false)
 const selectedCharName = ref("")
@@ -1193,6 +1305,10 @@ async function handleTransfer(charName: string) {
                         </SelectItem>
                     </Select>
                 </div>
+                <span v-if="activeRemoteId" class="badge badge-success badge-sm hidden gap-1 md:inline-flex" title="当前画布来自分享链接，可继续编辑后另存为新分享">
+                    <Icon icon="ri:download-2-line" class="size-3" />
+                    分享载入
+                </span>
 
                 <!-- 自动保存 -->
                 <label class="flex items-center gap-1 text-[11px] text-base-content/50" title="自动保存">
@@ -1237,6 +1353,43 @@ async function handleTransfer(charName: string) {
                         <span class="hidden sm:inline">导出</span>
                     </button>
                     <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="浏览分享"
+                        aria-label="浏览分享"
+                        @click="browse_open = true"
+                    >
+                        <Icon icon="ri:share-line" class="size-3" />
+                        <span class="hidden sm:inline">浏览分享</span>
+                    </button>
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="AI 助手"
+                        aria-label="AI 助手"
+                        @click="graphChat?.open()"
+                    >
+                        <Icon icon="ri:robot-2-line" class="size-3" />
+                        <span class="hidden sm:inline">AI 助手</span>
+                    </button>
+                    <button
+                        v-if="activeRemoteId"
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="回到本地新图"
+                        aria-label="回到本地新图"
+                        @click="handleNewGraph"
+                    >
+                        <Icon icon="ri:file-add-line" class="size-3" />
+                        <span class="hidden sm:inline">新建</span>
+                    </button>
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-primary/40 bg-primary/15 px-1.5 text-[10px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20 active:scale-[0.97]"
+                        :title="activeRemoteId ? '已载入分享图，分享当前画布为一张新图' : '分享'"
+                        aria-label="分享"
+                        @click="openShareModal"
+                    >
+                        <Icon icon="ri:upload-cloud-line" class="size-3" />
+                        <span class="hidden sm:inline">分享</span>
+                    </button>
+                    <button
                         class="flex h-6 cursor-pointer items-center gap-1 border border-primary/40 bg-primary/15 px-1.5 text-[10px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20 active:scale-[0.97]"
                         title="保存"
                         aria-label="保存"
@@ -1271,6 +1424,66 @@ async function handleTransfer(charName: string) {
                         <button>关闭</button>
                     </form>
                 </dialog>
+
+                <!-- 分享弹窗 -->
+                <DialogModel v-model="share_model_show" class="bg-base-300" @submit="confirmShare">
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold">分享节点图</h3>
+                        <p class="text-xs text-base-content/55">将当前画布的全部节点与连线打包分享，载入后可继续编辑与求值。</p>
+                        <div>
+                            <label class="label" for="share-graph-title">
+                                <span class="label-text">标题</span>
+                            </label>
+                            <input
+                                id="share-graph-title"
+                                v-model="share_title"
+                                type="text"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                placeholder="输入标题..."
+                                maxlength="50"
+                            />
+                        </div>
+                        <div>
+                            <label class="label" for="share-graph-desc">
+                                <span class="label-text">描述</span>
+                            </label>
+                            <textarea
+                                id="share-graph-desc"
+                                v-model="share_desc"
+                                class="w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                placeholder="这张图算什么、怎么用..."
+                                rows="3"
+                                maxlength="800"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <template #action>
+                        <button type="button" class="btn btn-ghost flex-1" @click="share_model_show = false">取消</button>
+                        <button type="button" class="btn btn-primary flex-1" :class="{ 'btn-disabled': sharing }" @click="confirmShare">
+                            <span v-if="sharing" class="loading loading-spinner loading-sm" />
+                            {{ sharing ? "分享中..." : "分享" }}
+                        </button>
+                    </template>
+                </DialogModel>
+
+                <!-- 浏览分享弹窗 -->
+                <DialogModel v-model="browse_open" class="max-w-4xl bg-base-200">
+                    <div class="flex h-[70vh] flex-col">
+                        <div class="mb-2 flex items-center justify-between">
+                            <h3 class="text-lg font-bold">节点图分享</h3>
+                            <button type="button" class="btn btn-ghost btn-sm" @click="browse_open = false">关闭</button>
+                        </div>
+                        <div class="min-h-0 flex-1">
+                            <DOBGraphShow ref="graphShow" :active-graph-id="activeRemoteId" @use-graph="handleUseGraph" />
+                        </div>
+                        <div v-if="activeRemoteId" class="mt-2 border-t border-base-content/10 pt-2">
+                            <CommentSection :target-id="`graph_${activeRemoteId}`" />
+                        </div>
+                    </div>
+                </DialogModel>
+
+                <!-- 节点图助手对话窗（悬浮按钮关闭，只走工具栏「AI 助手」入口） -->
+                <GraphChatDialog ref="graphChat" :chat-key="graphChatKey" :fab="false" />
             </div>
 
             <!-- 隐藏的文件输入 -->

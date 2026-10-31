@@ -99,14 +99,20 @@ function toPlain(value: unknown): unknown {
 /**
  * 在主线程执行沙箱发来的一次调用。
  *
- * 页面状态与数据包只在主线程，因此 `build.*` 全部在这里真正执行；
+ * 页面状态与数据包只在主线程，因此沙箱全局对象的方法全部在这里真正执行；
  * 返回构筑视图时改成回传快照，让 worker 那边能在本地重算。
- * @param api 配装接口对象
+ * @param api 沙箱全局对象（配装 `build` / 节点图 `graph` 等）
  * @param path 调用路径（如 ["compute","build"]）
  * @param args 参数
+ * @param globalName 沙箱全局对象名（只用于报错文案）
  * @returns 回传给 worker 的结果
  */
-async function dispatch(api: BuildApi, path: string[], args: unknown[]): Promise<{ ok: boolean; value?: unknown; error?: string }> {
+async function dispatch(
+    api: unknown,
+    path: string[],
+    args: unknown[],
+    globalName: string
+): Promise<{ ok: boolean; value?: unknown; error?: string }> {
     try {
         let parent: unknown = api
 
@@ -121,7 +127,7 @@ async function dispatch(api: BuildApi, path: string[], args: unknown[]): Promise
         const method = (parent as Record<string, unknown> | undefined)?.[path[path.length - 1]]
 
         if (typeof method !== "function") {
-            return { ok: false, error: `build.${path.join(".")} 不存在，请对照接口契约写` }
+            return { ok: false, error: `${globalName}.${path.join(".")} 不存在，请对照接口契约写` }
         }
 
         const value = await (method as (...inner: unknown[]) => unknown).apply(parent, args)
@@ -206,10 +212,39 @@ export function isSandboxWorkerResident(): boolean {
 }
 
 /**
- * 在 worker 沙箱里执行一段代码。
+ * 在 worker 沙箱里执行一段代码（通用入口：配装 `build` / 节点图 `graph` 共用同一条执行链）。
  *
  * 代码跑在独立 realm：没有 window / document / DOM，网络与线程入口也已清掉；
  * 超时不是「不再等待」而是真的 terminate 掉线程，因此死循环不会把页面卡死。
+ * @param code 用户代码
+ * @param api 沙箱全局对象
+ * @param globalName 沙箱全局对象名（代码里只能用这个名字访问）
+ * @param options.timeoutMs 超时毫秒数
+ * @param options.onDeadline 截止时间回调（给接口层做循环内的自检）
+ * @returns 执行结果
+ */
+export async function runInSandbox(
+    code: string,
+    api: unknown,
+    globalName: string,
+    options: { timeoutMs?: number; onDeadline?: (at: number) => void } = {}
+): Promise<SandboxResult> {
+    const startedAt = Date.now()
+    const timeoutMs = options.timeoutMs ?? SANDBOX_TIMEOUT_MS
+
+    options.onDeadline?.(startedAt + timeoutMs)
+
+    // 浏览器里一定有 Worker；没有它的只有 node / 单测环境，那条路径只用于跑通逻辑，
+    // 没有线程隔离（也就没有「超时能杀掉死循环」这层保护）
+    if (typeof Worker === "undefined") {
+        return runInline(code, api, globalName, startedAt)
+    }
+
+    return runInWorker(code, api, globalName, timeoutMs, startedAt)
+}
+
+/**
+ * 在 worker 沙箱里执行一段配装代码（`runInSandbox` 的 build 专用包装）。
  * @param code 用户代码
  * @param build 配装接口对象
  * @param options.timeoutMs 超时毫秒数
@@ -221,28 +256,18 @@ export async function runInBuildSandbox(
     build: BuildApi,
     options: { timeoutMs?: number; onDeadline?: (at: number) => void } = {}
 ): Promise<SandboxResult> {
-    const startedAt = Date.now()
-    const timeoutMs = options.timeoutMs ?? SANDBOX_TIMEOUT_MS
-
-    options.onDeadline?.(startedAt + timeoutMs)
-
-    // 浏览器里一定有 Worker；没有它的只有 node / 单测环境，那条路径只用于跑通逻辑，
-    // 没有线程隔离（也就没有「超时能杀掉死循环」这层保护）
-    if (typeof Worker === "undefined") {
-        return runInline(code, build, startedAt)
-    }
-
-    return runInWorker(code, build, timeoutMs, startedAt)
+    return runInSandbox(code, build, "build", options)
 }
 
 /**
  * 同线程执行（仅供没有 Worker 的环境跑逻辑用）。
  * @param code 用户代码
- * @param build 配装接口对象
+ * @param api 沙箱全局对象
+ * @param globalName 沙箱全局对象名
  * @param startedAt 起始时间
  * @returns 执行结果
  */
-function runInline(code: string, build: BuildApi, startedAt: number): Promise<SandboxResult> {
+function runInline(code: string, api: unknown, globalName: string, startedAt: number): Promise<SandboxResult> {
     const logs: string[] = []
 
     return new Promise<SandboxResult>(resolve => {
@@ -253,7 +278,7 @@ function runInline(code: string, build: BuildApi, startedAt: number): Promise<Sa
             }
 
             if (message.type === "rpc") {
-                void dispatch(build, message.path, message.args).then(result => {
+                void dispatch(api, message.path, message.args, globalName).then(result => {
                     runtime.onMessage({ type: "rpc:result", id: message.id, ...result })
                 })
                 return
@@ -271,21 +296,22 @@ function runInline(code: string, build: BuildApi, startedAt: number): Promise<Sa
                 logs,
                 ms: Date.now() - startedAt,
             })
-        })
+        }, globalName)
 
-        runtime.onMessage({ type: "run", code })
+        runtime.onMessage({ type: "run", code, globalName })
     })
 }
 
 /**
  * 在 worker 线程里执行。
  * @param code 用户代码
- * @param build 配装接口对象
+ * @param api 沙箱全局对象
+ * @param globalName 沙箱全局对象名
  * @param timeoutMs 超时毫秒数
  * @param startedAt 起始时间
  * @returns 执行结果
  */
-function runInWorker(code: string, build: BuildApi, timeoutMs: number, startedAt: number): Promise<SandboxResult> {
+function runInWorker(code: string, api: unknown, globalName: string, timeoutMs: number, startedAt: number): Promise<SandboxResult> {
     const created = ensureWorker()
     const ready = workerReady
 
@@ -306,20 +332,28 @@ function runInWorker(code: string, build: BuildApi, timeoutMs: number, startedAt
             }
         }
 
-        return runOnReadyWorker(code, build, created, timeoutMs, startedAt)
+        return runOnReadyWorker(code, api, globalName, created, timeoutMs, startedAt)
     })()
 }
 
 /**
  * 在已就绪的常驻线程上执行（投递即起算执行预算）。
  * @param code 用户代码
- * @param build 配装接口对象
+ * @param api 沙箱全局对象
+ * @param globalName 沙箱全局对象名
  * @param created 本次使用的常驻实例（调用时已就绪）
  * @param timeoutMs 超时毫秒数
  * @param startedAt 起始时间
  * @returns 执行结果
  */
-function runOnReadyWorker(code: string, build: BuildApi, created: Worker, timeoutMs: number, startedAt: number): Promise<SandboxResult> {
+function runOnReadyWorker(
+    code: string,
+    api: unknown,
+    globalName: string,
+    created: Worker,
+    timeoutMs: number,
+    startedAt: number
+): Promise<SandboxResult> {
     const logs: string[] = []
 
     return new Promise<SandboxResult>(resolve => {
@@ -353,7 +387,7 @@ function runOnReadyWorker(code: string, build: BuildApi, created: Worker, timeou
             }
 
             if (message.type === "rpc") {
-                void dispatch(build, message.path, message.args).then(result => {
+                void dispatch(api, message.path, message.args, globalName).then(result => {
                     try {
                         created.postMessage({ type: "rpc:result", id: message.id, ...result } satisfies SandboxInbound)
                     } catch {
@@ -362,7 +396,7 @@ function runOnReadyWorker(code: string, build: BuildApi, created: Worker, timeou
                             type: "rpc:result",
                             id: message.id,
                             ok: false,
-                            error: `build.${message.path.join(".")} 的返回无法传回线程（混入了不可克隆的值），请只返回纯数据`,
+                            error: `${globalName}.${message.path.join(".")} 的返回无法传回线程（混入了不可克隆的值），请只返回纯数据`,
                         } satisfies SandboxInbound)
                     }
                 })
@@ -400,6 +434,6 @@ function runOnReadyWorker(code: string, build: BuildApi, created: Worker, timeou
             })
         }, timeoutMs)
 
-        created.postMessage({ type: "run", code } satisfies SandboxInbound)
+        created.postMessage({ type: "run", code, globalName } satisfies SandboxInbound)
     })
 }

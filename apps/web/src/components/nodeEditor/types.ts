@@ -87,6 +87,7 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.ATTR_OUTPUT]: "属性输出",
         [NodeType.WEAPON_OUTPUT]: "武器输出",
         [NodeType.DAMAGE_OUTPUT]: "伤害输出",
+        [NodeType.CHART]: "图表",
         [NodeType.AST_EXPRESSION_CALC]: "目标函数",
         [NodeType.CUSTOM_EXPRESSION]: "自定义变量求值",
         [NodeType.GROUP]: "分组",
@@ -267,6 +268,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.OUTPUT,
         icon: "ri:fire-line",
         description: "显示伤害计算结果",
+    },
+    {
+        type: NodeType.CHART,
+        label: "图表",
+        category: NodeCategory.OUTPUT,
+        icon: "ri:line-chart-line",
+        description: "把向量绘制为折线图或柱状图",
     },
     // 特殊节点
     {

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import DBLatestItemCard from "@/components/DBLatestItemCard.vue"
 import { resolveDBCardEntry } from "@/utils/db-card-utils"
 
 /**

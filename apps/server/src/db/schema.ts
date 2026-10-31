@@ -595,6 +595,8 @@ export const userRelations = relations(users, ({ one, many }) => ({
     dnaBinding: one(dnaUserBindings, { fields: [users.id], references: [dnaUserBindings.userId] }),
     builds: many(builds),
     buildLikes: many(buildLikes),
+    graphs: many(graphs),
+    graphLikes: many(graphLikes),
     dyePlans: many(dyePlans),
     dyePlanLikes: many(dyePlanLikes),
     comments: many(comments),
@@ -711,6 +713,61 @@ export const buildLikes = sqliteTable(
 export const buildLikesRelations = relations(buildLikes, ({ one }) => ({
     build: one(builds, { fields: [buildLikes.buildId], references: [builds.id] }),
     user: one(users, { fields: [buildLikes.userId], references: [users.id] }),
+}))
+
+/** 节点图分享：对标 builds，存整张节点图的 nodes/edges JSON */
+export const graphs = sqliteTable(
+    "graphs",
+    {
+        id: text("id").$default(id).primaryKey(),
+        title: text("title").notNull(),
+        desc: text("desc"),
+        graphData: text("graph_data").notNull(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        views: integer("views").default(0),
+        likes: integer("likes").default(0),
+        isRecommended: integer("is_recommended", { mode: "boolean" }).default(false),
+        isPinned: integer("is_pinned", { mode: "boolean" }).default(false),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
+    },
+    graphs => [
+        index("graphs_user_id_idx").on(graphs.userId),
+        index("graphs_is_recommended_idx").on(graphs.isRecommended),
+        index("graphs_update_at_idx").on(graphs.updateAt),
+        index("graphs_views_idx").on(graphs.views),
+    ]
+)
+
+export const graphsRelations = relations(graphs, ({ one, many }) => ({
+    user: one(users, { fields: [graphs.userId], references: [users.id] }),
+    likes: many(graphLikes),
+}))
+
+/** 节点图点赞 */
+export const graphLikes = sqliteTable(
+    "graph_likes",
+    {
+        id: text("id").$default(id).primaryKey(),
+        graphId: text("graph_id")
+            .notNull()
+            .references(() => graphs.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        createdAt: integer("created_at").$default(now),
+    },
+    graphLikes => [
+        uniqueIndex("graph_like_idx").on(graphLikes.userId, graphLikes.graphId),
+        index("graph_like_graph_idx").on(graphLikes.graphId),
+    ]
+)
+
+export const graphLikesRelations = relations(graphLikes, ({ one }) => ({
+    graph: one(graphs, { fields: [graphLikes.graphId], references: [graphs.id] }),
+    user: one(users, { fields: [graphLikes.userId], references: [users.id] }),
 }))
 
 /** 染色方案分享 */

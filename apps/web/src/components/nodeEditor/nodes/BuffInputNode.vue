@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { groupBy } from "lodash-es"
 import { computed, reactive, ref, watch } from "vue"
-import TeamEditor from "@/components/TeamEditor.vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { buffData, charData, charMap, LeveledBuff, LeveledChar, LeveledWeapon, weaponData } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"

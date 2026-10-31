@@ -9,6 +9,7 @@ import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
 import { resolvers as dyePlanResolvers, typeDefs as dyePlanSchema } from "./dyePlan"
 import { resolvers as gameDataResolvers, typeDefs as gameDataSchema } from "./gameData"
 import { resolvers as gameModResolvers, typeDefs as gameModSchema } from "./gameMod"
+import { resolvers as graphResolvers, typeDefs as graphSchema } from "./graph"
 import { resolvers as guideResolvers, typeDefs as guideSchema } from "./guide"
 import { resolvers as messageResolvers, typeDefs as messageSchema } from "./message"
 import { resolvers as missionsIngameResolvers, typeDefs as missionsIngameSchema } from "./missionsIngame"
@@ -37,6 +38,7 @@ export function schemaWith(ctx: any) {
         abyssUsageSchema,
         todoSchema,
         buildSchema,
+        graphSchema,
         dyePlanSchema,
         gameModSchema,
         gameDataSchema,
@@ -62,6 +64,7 @@ export function schemaWith(ctx: any) {
         abyssUsageResolvers,
         todoResolvers,
         buildResolvers,
+        graphResolvers,
         dyePlanResolvers,
         gameModResolvers,
         gameDataResolvers,

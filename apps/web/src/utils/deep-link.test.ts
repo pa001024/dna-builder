@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { createMemoryHistory, createRouter, type Router } from "vue-router"
 import { routes } from "@/router"
-import { buildDeepLink, deepLinkPathFor, dyePlanDeepLink, openDeepLink } from "@/utils/deep-link"
+import { buildDeepLink, deepLinkPathFor, dyePlanDeepLink, graphDeepLink, openDeepLink } from "@/utils/deep-link"
 
 /** 深链解析目标必须落在路由表里：用同一张路由表建 memory history 实例校验。 */
 const router = createRouter({ history: createMemoryHistory(), routes: [...routes] })
@@ -10,6 +10,21 @@ describe("深链解析", () => {
     it("构筑链接映射到构筑中转路径", () => {
         expect(deepLinkPathFor("dobapp://open-build/abc123")).toBe("/build/abc123")
         expect(buildDeepLink("abc123")).toBe("dobapp://open-build/abc123")
+    })
+
+    it("节点图链接映射到节点图中转路径", () => {
+        expect(deepLinkPathFor("dobapp://open-graph/abc123")).toBe("/graph/abc123")
+        expect(deepLinkPathFor("dobapp://open-graph?id=abc123")).toBe("/graph/abc123")
+        expect(deepLinkPathFor("dobapp://open-graph")).toBeNull()
+        expect(graphDeepLink("abc123")).toBe("dobapp://open-graph/abc123")
+    })
+
+    it("节点图链接解析结果能落进路由表（中转页）", () => {
+        const path = deepLinkPathFor("dobapp://open-graph/abc123")!
+        const resolved = router.resolve(path)
+        expect(resolved.matched.length).not.toBe(0)
+        expect(resolved.name).toBe("graph-detail")
+        expect(resolved.params.id).toBe("abc123")
     })
 
     it("染色链接：带 id 落方案详情，裸链接落画廊", () => {
@@ -79,6 +94,7 @@ describe("深链解析", () => {
         expect(deepLinkPathFor(buildDeepLink("abc123"))).toBe("/build/abc123")
         expect(deepLinkPathFor(dyePlanDeepLink("abc123"))).toBe("/skin-colorize/abc123")
         expect(deepLinkPathFor(dyePlanDeepLink())).toBe("/skin-colorize")
+        expect(deepLinkPathFor(graphDeepLink("abc123"))).toBe("/graph/abc123")
     })
 })
 

@@ -79,6 +79,22 @@ describe("nodeEditorPorts", () => {
         expect(canConnectPorts(textOutput, numberInput)).toBe(false)
     })
 
+    it("目标函数输出数值与带标题向量，图表节点接收向量", () => {
+        const ast = getNodePorts(NodeType.AST_EXPRESSION_CALC)
+        expect(ast.outputs).toEqual([
+            { id: "value", type: PortType.NUMBER, label: "数值" },
+            { id: "vector", type: PortType.VECTOR, label: "向量" },
+        ])
+        const chart = getNodePorts(NodeType.CHART)
+        expect(chart.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }])
+        expect(chart.outputs).toEqual([])
+        expect(canConnectPorts(ast.outputs[1], chart.inputs[0])).toBe(true)
+
+        // 原始向量输入节点同样可以接入图表
+        const rawVector = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
+        expect(canConnectPorts(rawVector, chart.inputs[0])).toBe(true)
+    })
+
     it("唯一端口在旧边没有 handle 时可以自动解析", () => {
         expect(resolvePort(NodeType.CHAR_INPUT, null, "output")?.id).toBe("char")
         expect(resolvePort(NodeType.CORE_CALC, null, "input")).toBeUndefined()
