@@ -112,6 +112,34 @@ export function graphDeepLink(graphId: string): string {
 }
 
 /**
+ * 深链内容类型：与 `DEEP_LINK_PREFIXES` 的 host 一一对应（`build`→`open-build`…）。
+ */
+export type DeepLinkKind = "build" | "graph" | "dye"
+
+/**
+ * 按内容类型拼深链：`OpenInAppButton` 与各详情页共用这一个入口，新增类型时只改这里。
+ *
+ * 构筑 / 节点图没有 id 就没有目的地，此时返回 null（调用方不渲染按钮）；
+ * 染色允许裸链接（画廊），不传 id 即返回画廊深链。
+ * @param kind 内容类型
+ * @param id 内容 id（染色画廊可省略）
+ * @returns 深链；拼不出时返回 null
+ */
+export function deepLinkFor(kind: DeepLinkKind | string | undefined, id?: string | number | string[] | null): string | null {
+    const normalizedId = (Array.isArray(id) ? id[0] : id)?.toString().trim() ?? ""
+    if (kind === "build") {
+        return normalizedId ? buildDeepLink(normalizedId) : null
+    }
+    if (kind === "graph") {
+        return normalizedId ? graphDeepLink(normalizedId) : null
+    }
+    if (kind === "dye") {
+        return dyePlanDeepLink(normalizedId || undefined)
+    }
+    return null
+}
+
+/**
  * 打开一条深链，返回是否真的跳转了。
  *
  * 链接可能来自任何地方（手输、旧版网页、别的应用），解析不出与应用内没有的页面

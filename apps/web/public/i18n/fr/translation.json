@@ -2265,6 +2265,9 @@
             "userImage": "Image envoyée par l'utilisateur"
         }
     },
+    "deep-link": {
+        "open_in_app": "Ouvrir dans l'App"
+    },
     "dev-components": {
         "title": "Composants"
     },

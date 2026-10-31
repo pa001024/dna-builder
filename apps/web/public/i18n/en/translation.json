@@ -2250,6 +2250,9 @@
             "userImage": "Image attached by user"
         }
     },
+    "deep-link": {
+        "open_in_app": "Open in App"
+    },
     "dev-components": {
         "title": "Component Lab"
     },

@@ -2276,6 +2276,9 @@
             "userImage": "用户附带的图片"
         }
     },
+    "deep-link": {
+        "open_in_app": "在APP中打开"
+    },
     "dev-components": {
         "title": "组件调试"
     },

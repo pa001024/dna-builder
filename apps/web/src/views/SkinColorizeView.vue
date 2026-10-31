@@ -720,6 +720,7 @@ onBeforeUnmount(() => {
                             <template #trailing>
                                 <!-- 未登录：点赞/评论/发布都需要账号，这里常驻登录入口 -->
                                 <LoginButton v-if="!user.id" size="xs" variant="outline" />
+                                <OpenInAppButton kind="dye" :id="sharePlanId" class="btn btn-xs" icon-class="size-3.5" />
                                 <button
                                     v-if="loadedPlan && (loadedPlan.userId === user.id || user.isAdmin)"
                                     class="btn btn-xs border-error/40 text-error hover:border-error hover:bg-error/10"

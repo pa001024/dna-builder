@@ -1309,6 +1309,14 @@ async function handleTransfer(charName: string) {
                     <Icon icon="ri:download-2-line" class="size-3" />
                     分享载入
                 </span>
+                <OpenInAppButton
+                    kind="graph"
+                    :id="activeRemoteId"
+                    class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                    icon-class="size-3"
+                >
+                    <span class="hidden sm:inline">{{ $t("deep-link.open_in_app") }}</span>
+                </OpenInAppButton>
 
                 <!-- 自动保存 -->
                 <label class="flex items-center gap-1 text-[11px] text-base-content/50" title="自动保存">

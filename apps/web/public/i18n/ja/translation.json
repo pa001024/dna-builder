@@ -2226,6 +2226,9 @@
             "userImage": "ユーザーが添付した画像"
         }
     },
+    "deep-link": {
+        "open_in_app": "アプリで開く"
+    },
     "dev-components": {
         "title": "コンポーネント"
     },

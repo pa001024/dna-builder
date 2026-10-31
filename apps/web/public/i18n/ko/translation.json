@@ -2227,6 +2227,9 @@
             "userImage": "사용자가 첨부한 이미지"
         }
     },
+    "deep-link": {
+        "open_in_app": "앱에서 열기"
+    },
     "dev-components": {
         "title": "컴포넌트"
     },

@@ -2341,6 +2341,14 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <Icon icon="ri:share-line" class="size-5 sm:size-4" />
                             <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                         </button>
+                        <OpenInAppButton
+                            kind="build"
+                            :id="route.params.buildId"
+                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            icon-class="size-5 sm:size-4"
+                        >
+                            <span class="hidden sm:inline">{{ $t("deep-link.open_in_app") }}</span>
+                        </OpenInAppButton>
                         <button
                             v-if="['黎瑟', '赛琪'].includes(selectedChar)"
                             class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"

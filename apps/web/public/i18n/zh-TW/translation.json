@@ -2225,6 +2225,9 @@
             "userImage": "使用者附帶的圖片"
         }
     },
+    "deep-link": {
+        "open_in_app": "在APP中開啟"
+    },
     "dev-components": {
         "title": "元件除錯"
     },

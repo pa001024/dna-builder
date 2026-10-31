@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { createMemoryHistory, createRouter, type Router } from "vue-router"
 import { routes } from "@/router"
-import { buildDeepLink, deepLinkPathFor, dyePlanDeepLink, graphDeepLink, openDeepLink } from "@/utils/deep-link"
+import { buildDeepLink, deepLinkFor, deepLinkPathFor, dyePlanDeepLink, graphDeepLink, openDeepLink } from "@/utils/deep-link"
 
 /** 深链解析目标必须落在路由表里：用同一张路由表建 memory history 实例校验。 */
 const router = createRouter({ history: createMemoryHistory(), routes: [...routes] })
@@ -95,6 +95,25 @@ describe("深链解析", () => {
         expect(deepLinkPathFor(dyePlanDeepLink("abc123"))).toBe("/skin-colorize/abc123")
         expect(deepLinkPathFor(dyePlanDeepLink())).toBe("/skin-colorize")
         expect(deepLinkPathFor(graphDeepLink("abc123"))).toBe("/graph/abc123")
+    })
+
+    it("deepLinkFor 按类型分发：缺 id 的构筑/节点图返回 null，染色回落画廊", () => {
+        expect(deepLinkFor("build", "abc123")).toBe("dobapp://open-build/abc123")
+        expect(deepLinkFor("graph", "abc123")).toBe("dobapp://open-graph/abc123")
+        expect(deepLinkFor("dye", "abc123")).toBe("dobapp://open-dye/abc123")
+        expect(deepLinkFor("dye")).toBe("dobapp://open-dye")
+        expect(deepLinkFor("dye", "")).toBe("dobapp://open-dye")
+        expect(deepLinkFor("build", "")).toBeNull()
+        expect(deepLinkFor("build")).toBeNull()
+        expect(deepLinkFor("graph", null)).toBeNull()
+        expect(deepLinkFor("mod", "11001")).toBeNull()
+        expect(deepLinkFor(undefined, "abc123")).toBeNull()
+    })
+
+    it("deepLinkFor 兼容路由 params 形态（数组取首个、数字转字符串）", () => {
+        expect(deepLinkFor("build", ["abc123"])).toBe("dobapp://open-build/abc123")
+        expect(deepLinkFor("build", 123)).toBe("dobapp://open-build/123")
+        expect(deepLinkFor("graph", "  abc123  ")).toBe("dobapp://open-graph/abc123")
     })
 })
 
