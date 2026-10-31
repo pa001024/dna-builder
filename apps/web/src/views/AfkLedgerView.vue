@@ -15,6 +15,7 @@ import { getAfkWidgetWindow, setAfkWidgetIgnoreCursorEvents } from "@/api/afk-wi
 import { readTextFile, writeTextFile } from "@/api/app"
 import AfkLedgerChart from "@/components/AfkLedgerChart.vue"
 import AfkLedgerHero from "@/components/AfkLedgerHero.vue"
+import AfkMiHomeSetting from "@/components/AfkMiHomeSetting.vue"
 import FilterSelect from "@/components/FilterSelect.vue"
 import ScrollSpyLayout from "@/components/ScrollSpyLayout.vue"
 import { useAfkWidget } from "@/composables/useAfkWidget"
@@ -1480,6 +1481,11 @@ function clearAll() {
             </section>
             </div>
         </template>
+
+        <!-- 米家联动：事件绑定到米家手动场景，空账本时也要能配置 -->
+        <section :data-scroll-title="$t('afk-mihome.title')">
+            <AfkMiHomeSetting />
+        </section>
 
         <p class="text-[11px] leading-relaxed text-base-content/35">{{ $t("afk-ledger.note") }}</p>
         </div>

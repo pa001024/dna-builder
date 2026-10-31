@@ -187,6 +187,13 @@ pub fn run() {
         commands::afk_support::afk_bridge_start,
         commands::afk_support::afk_bridge_stop,
         commands::afk_support::afk_bridge_status,
+        // 米家联动（内嵌云协议，不依赖外部服务进程）
+        commands::mihome::mihome_status,
+        commands::mihome::mihome_qr_begin,
+        commands::mihome::mihome_qr_wait,
+        commands::mihome::mihome_logout,
+        commands::mihome::mihome_scenes,
+        commands::mihome::mihome_run_scene,
         // 游戏
         commands::game::get_game_install,
         commands::game::is_game_running,
