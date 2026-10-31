@@ -347,6 +347,8 @@
         "filter_reset": "Clear filters",
         "filter_time": "Period",
         "hero_missing": "Game folder not found — animation disabled",
+        "hero_res_download": "Download pack",
+        "hero_res_missing": "Animation resource pack missing — download it and extract into the game folder",
         "hint_click_bar": "Click a bar to filter by that time",
         "hint_click_rarity": "Click a rarity band to filter it",
         "import": "Import",

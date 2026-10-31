@@ -343,6 +343,8 @@
         "filter_reset": "清除篩選",
         "filter_time": "時段",
         "hero_missing": "未找到遊戲目錄，動畫已停用",
+        "hero_res_download": "下載資源包",
+        "hero_res_missing": "動畫資源包缺失，下載後解壓到遊戲目錄",
         "hint_click_bar": "點擊柱狀圖按該時段篩選",
         "hint_click_rarity": "點擊品質色塊篩選該品質",
         "import": "匯入",

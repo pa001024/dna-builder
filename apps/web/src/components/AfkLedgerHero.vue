@@ -24,7 +24,7 @@ const CANVAS_WIDTH = 1098
 const CANVAS_HEIGHT = 118
 
 const canvas = ref<HTMLCanvasElement | null>(null)
-const { manifest, error } = useAfkAnimation(canvas, {
+const { manifest, error, hasGameDir } = useAfkAnimation(canvas, {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     entitySize: CANVAS_HEIGHT,
@@ -56,6 +56,20 @@ const { manifest, error } = useAfkAnimation(canvas, {
             class="absolute right-2 bottom-2 rounded-xs bg-base-content/60 px-1.5 py-0.5 text-[10px] text-base-100"
         >
             {{ $t("afk-support.app_only") }}
+        </span>
+        <span
+            v-else-if="error && hasGameDir"
+            class="absolute right-2 bottom-2 max-w-2/3 text-[10px] text-warning"
+        >
+            {{ $t("afk-ledger.hero_res_missing") }}
+            <a
+                :href="env.afkResPackUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline hover:text-primary"
+            >
+                {{ $t("afk-ledger.hero_res_download") }}
+            </a>
         </span>
         <span v-else-if="error" class="absolute right-2 bottom-2 max-w-2/3 truncate text-[10px] text-warning">
             {{ $t("afk-ledger.hero_missing") }}

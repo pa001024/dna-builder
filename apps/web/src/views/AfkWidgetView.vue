@@ -10,6 +10,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { closeAfkWidgetWindow, placeAfkWidget, setAfkWidgetAlwaysOnTop, setAfkWidgetIgnoreCursorEvents } from "@/api/afk-widget-window"
 import { useAfkAnimation } from "@/composables/useAfkAnimation"
+import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { AFK_WIDGET_CLICK_THROUGH_KEY, readAfkWidgetClickThrough, writeAfkWidgetClickThrough } from "@/utils/afk-widget"
 
@@ -18,7 +19,7 @@ const CANVAS_WIDTH = 366
 const CANVAS_HEIGHT = 118
 
 const canvas = ref<HTMLCanvasElement | null>(null)
-const { manifest, error, animState } = useAfkAnimation(canvas, {
+const { manifest, error, hasGameDir, animState } = useAfkAnimation(canvas, {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     entitySize: CANVAS_HEIGHT,
@@ -227,7 +228,18 @@ onBeforeUnmount(() => {
             </span>
         </div>
 
-        <span v-if="error" class="absolute left-1 bottom-1 max-w-2/3 truncate text-[9px] text-warning">
+        <span v-if="error && hasGameDir" class="absolute left-1 bottom-1 max-w-2/3 text-[9px] text-warning">
+            {{ $t("afk-ledger.hero_res_missing") }}
+            <a
+                :href="env.afkResPackUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline hover:text-primary"
+            >
+                {{ $t("afk-ledger.hero_res_download") }}
+            </a>
+        </span>
+        <span v-else-if="error" class="absolute left-1 bottom-1 max-w-2/3 truncate text-[9px] text-warning">
             {{ $t("afk-ledger.hero_missing") }}
         </span>
     </div>

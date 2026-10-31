@@ -12,4 +12,6 @@ export const env = {
     apiEndpoint: "https://api.dna-builder.cn",
     /** 安全模式解锁密码的夸克网盘分享链接（服务端定时更新包内容，链接固定不变） */
     quarkShareUrl: "https://pan.quark.cn/s/1419bbc8aa2d",
+    /** 狩月动画资源包（游戏目录下 AFKSupport/Res）的夸克网盘分享链接：目录已配但资源缺失时提示下载 */
+    afkResPackUrl: "https://pan.quark.cn/s/ac0bb7335fa2",
 }

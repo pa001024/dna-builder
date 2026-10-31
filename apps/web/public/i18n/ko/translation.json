@@ -345,6 +345,8 @@
         "filter_reset": "필터 지우기",
         "filter_time": "기간",
         "hero_missing": "게임 폴더를 찾을 수 없어 애니메이션을 끕니다",
+        "hero_res_download": "팩 다운로드",
+        "hero_res_missing": "애니메이션 리소스 팩이 없습니다. 다운로드 후 게임 폴더에 압축 해제하세요",
         "hint_click_bar": "막대를 클릭하면 해당 시간대로 필터링됩니다",
         "hint_click_rarity": "등급 띠를 클릭하면 해당 등급으로 필터링됩니다",
         "import": "가져오기",

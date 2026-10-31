@@ -344,6 +344,8 @@
         "filter_reset": "フィルターを解除",
         "filter_time": "期間",
         "hero_missing": "ゲームフォルダが見つかりません（アニメーション停止）",
+        "hero_res_download": "パックをダウンロード",
+        "hero_res_missing": "アニメーション素材が見つかりません、リソースパックをゲームフォルダに解凍してください",
         "hint_click_bar": "棒をクリックするとその時間帯で絞り込めます",
         "hint_click_rarity": "レアリティの帯をクリックすると絞り込めます",
         "import": "読み込み",

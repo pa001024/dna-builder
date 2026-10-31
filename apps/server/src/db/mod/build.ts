@@ -142,7 +142,7 @@ export const resolvers = {
             const limit = args?.limit ?? 10
             const result = await db.query.builds.findMany({
                 where: eq(schema.builds.isRecommended, true),
-                orderBy: [desc(schema.builds.createdAt)],
+                orderBy: [desc(schema.builds.updateAt)],
                 limit,
                 with: { user: getSubSelection(info, "user") ? true : undefined },
             })

@@ -345,6 +345,8 @@
         "filter_reset": "Effacer les filtres",
         "filter_time": "Période",
         "hero_missing": "Dossier du jeu introuvable — animation désactivée",
+        "hero_res_download": "Télécharger le pack",
+        "hero_res_missing": "Pack de ressources d'animation manquant — téléchargez-le et extrayez-le dans le dossier du jeu",
         "hint_click_bar": "Cliquez sur une barre pour filtrer sur cette période",
         "hint_click_rarity": "Cliquez sur une bande de rareté pour filtrer",
         "import": "Importer",

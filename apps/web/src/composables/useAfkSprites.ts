@@ -26,6 +26,8 @@ export function useAfkSprites() {
         if (!env.isApp || !game.path) return ""
         return `${game.path.replace(/EM\.exe$/, "")}${RUNTIME_DIR}/`
     })
+    /** 是否已指定游戏目录：有目录但资源读不到时说明缺资源包，不是目录没配。 */
+    const hasGameDir = computed(() => game.path !== "")
 
     /**
      * 按相对路径取贴图的 ObjectURL（带缓存）。
@@ -73,5 +75,5 @@ export function useAfkSprites() {
     watch(root, () => void loadManifest(), { immediate: true })
     void ensureGamePath().then(() => loadManifest())
 
-    return { manifest, root, error, imageUrl, loadManifest }
+    return { manifest, root, error, hasGameDir, imageUrl, loadManifest }
 }

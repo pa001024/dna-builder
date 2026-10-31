@@ -43,7 +43,7 @@ export type AfkAnimationOptions = {
  * @returns 引擎状态与错误信息
  */
 export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: AfkAnimationOptions) {
-    const { manifest, imageUrl, error } = useAfkSprites()
+    const { manifest, hasGameDir, imageUrl, error } = useAfkSprites()
     // 主窗口与独立小窗读同一份 localStorage 状态，避免两边各记一套
     const animState = useAfkAnimState()
     /** 当前角色事件。 */
@@ -424,5 +424,5 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
         window.removeEventListener("resize", resize)
     })
 
-    return { manifest, error, combat, resize, animState }
+    return { manifest, error, hasGameDir, combat, resize, animState }
 }

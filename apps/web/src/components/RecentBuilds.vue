@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { type Build, recommendedBuildsQuery } from "@/api/graphql"
 import { charData, LeveledChar } from "@/data"
+import { formatRelativeTime } from "@/utils/time"
 
 const router = useRouter()
 
@@ -12,7 +13,7 @@ const loading = ref(false)
 const failed = ref(false)
 
 /**
- * @description 拉取最新的推荐构筑（服务端按时间倒序返回，已推荐标记）。
+ * @description 拉取最新的推荐构筑（服务端按最后修改时间倒序返回，已推荐标记）。
  */
 async function fetchRecentBuilds() {
     loading.value = true
@@ -28,7 +29,7 @@ async function fetchRecentBuilds() {
     }
 }
 
-// 展示的构筑列表（最多 3 条）
+// 展示的构筑列表（服务端已按最后修改时间倒序，最多 3 条）
 const displayBuilds = computed(() => builds.value.slice(0, 3))
 
 /**
@@ -108,6 +109,10 @@ onMounted(fetchRecentBuilds)
                         <span class="flex items-center gap-1 tabular-nums">
                             <Icon icon="ri:heart-line" class="h-3 w-3 shrink-0" />
                             {{ build.likes }}
+                        </span>
+                        <span class="flex items-center gap-1 tabular-nums">
+                            <Icon icon="ri:time-line" class="h-3 w-3 shrink-0" />
+                            {{ formatRelativeTime(build.updateAt ?? build.createdAt) }}
                         </span>
                     </span>
                 </span>
