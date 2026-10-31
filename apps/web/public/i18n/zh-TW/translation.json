@@ -3077,6 +3077,7 @@
         "moveUp": "上移",
         "noHiddenSections": "沒有隱藏的板塊",
         "noupdate": "當前版本無更新內容",
+        "qr_popup_title": "掃碼下載 DOB Mobile (Android)",
         "recentBuilds": "最近構築",
         "recentBuildsCount": "最新 {{count}} 個",
         "recentBuildsEmpty": "暫無推薦構築",

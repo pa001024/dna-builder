@@ -3079,6 +3079,7 @@
         "moveUp": "上へ",
         "noHiddenSections": "非表示のセクションはありません",
         "noupdate": "現在のバージョンに更新はありません",
+        "qr_popup_title": "スキャンして DOB Mobile (Android) をダウンロード",
         "recentBuilds": "最近の構築",
         "recentBuildsCount": "最新 {{count}} 件",
         "recentBuildsEmpty": "おすすめの構築はまだありません",

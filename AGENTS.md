@@ -54,6 +54,15 @@ bun i18n check [--json] [--locale-gap]     # 扫描代码引用但翻译文件�
 
 细节见技能 `.agents/skills/i18n/SKILL.md`。
 
+
+### Icon Tool（`bun icon` = `bun tools/icon-tool.ts`）
+
+把图标从库里添加到Icon.vue组件库：
+
+```bash
+bun icon add <icon-name>
+```
+
 ### Server (Bun + Elysia)
 
 ```bash

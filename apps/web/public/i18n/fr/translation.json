@@ -3118,6 +3118,7 @@
         "moveUp": "Monter",
         "noHiddenSections": "Aucune section masquée",
         "noupdate": "Aucune mise à jour disponible",
+        "qr_popup_title": "Scannez pour télécharger DOB Mobile (Android)",
         "recentBuilds": "Constructions récentes",
         "recentBuildsCount": "Dernières {{count}}",
         "recentBuildsEmpty": "Aucune construction recommandée pour le moment",

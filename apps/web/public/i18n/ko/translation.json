@@ -3080,6 +3080,7 @@
         "moveUp": "위로",
         "noHiddenSections": "숨겨진 섹션이 없습니다",
         "noupdate": "현재 버전에 업데이트 내용이 없습니다",
+        "qr_popup_title": "스캔하여 DOB Mobile (Android) 다운로드",
         "recentBuilds": "최근 빌드",
         "recentBuildsCount": "최신 {{count}}개",
         "recentBuildsEmpty": "추천 빌드가 아직 없습니다",

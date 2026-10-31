@@ -13,6 +13,7 @@ import TodoList from "@/components/TodoList.vue"
 import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { DOWNLOAD_PAGE_URL } from "@/utils/app-download"
 import { getMoreItems } from "@/utils/entry-util"
 import pg from "../../package.json"
 
@@ -255,6 +256,9 @@ const openServerDays = computed(() => {
     return Math.max(1, diffDays + 1)
 })
 
+/** 二维码内容：下载页自身地址，与 download 页扫码卡保持一致 */
+const pageUrl = DOWNLOAD_PAGE_URL
+
 /**
  * @description 检查并更新应用版本，成功后提示已是最新版本。
  */
@@ -268,7 +272,7 @@ async function checkUpdate() {
     <div class="h-full flex flex-col">
         <ScrollArea class="h-full">
             <!-- 主视觉面板：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
-            <header class="relative overflow-hidden border-b-2 border-primary bg-base-100/50">
+            <header class="relative border-b-2 border-primary bg-base-100/50">
                 <!-- 引导线网格（装饰性，随主题明暗） -->
                 <div
                     class="pointer-events-none absolute inset-0"
@@ -306,24 +310,40 @@ async function checkUpdate() {
                         </a>
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <!-- 下载入口指向站内下载页（安卓 APK 与 Windows 版都在那里） -->
-                        <SRouterLink
-                            v-if="!env.isApp"
-                            to="/download"
-                            class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
-                        >
-                            <Icon icon="ri:download-2-line" class="h-5 w-5" />
-                            <span>{{ $t("home.download") }}</span>
-                        </SRouterLink>
-                        <button
-                            v-else
-                            type="button"
-                            class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
-                            @click="checkUpdate"
-                        >
-                            <Icon icon="ri:refresh-line" class="h-5 w-5" />
-                            <span>{{ $t("home.checkUpdate") }}</span>
-                        </button>
+                        <!-- 下载入口指向站内下载页（安卓 APK 与 Windows 版都在那里）；悬停浮层与 download 页扫码卡同款 -->
+                        <div class="group relative inline-flex">
+                            <SRouterLink
+                                v-if="!env.isApp"
+                                to="/download"
+                                class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
+                            >
+                                <Icon icon="ri:download-2-line" class="h-5 w-5" />
+                                <span>{{ $t("home.download") }}</span>
+                            </SRouterLink>
+                            <button
+                                v-else
+                                type="button"
+                                class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
+                                @click="checkUpdate"
+                            >
+                                <Icon icon="ri:refresh-line" class="h-5 w-5" />
+                                <span>{{ $t("home.checkUpdate") }}</span>
+                            </button>
+                            <div
+                                class="invisible pointer-events-none absolute top-full left-0 z-20 mt-3 w-84 max-w-[calc(100vw-2rem)] -translate-y-1 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:visible [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100"
+                                aria-hidden="true"
+                            >
+                                <div class="rounded-2xl border border-base-content/10 bg-base-100 p-4 shadow-xl">
+                                    <p class="mb-2 text-[15px] font-semibold text-base-content">{{ $t("home.qr_popup_title") }}</p>
+                                    <div class="flex items-center gap-4">
+                                        <QrCodeStyled :value="pageUrl" :size="148" />
+                                        <p class="min-w-0 flex-1 text-[13px] leading-relaxed text-base-content/80">
+                                            {{ $t("download.scanDesc") }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <a
                             href="https://github.com/pa001024/dna-builder"
                             target="_blank"

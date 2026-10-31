@@ -3101,6 +3101,7 @@
         "moveUp": "Move up",
         "noHiddenSections": "No hidden sections",
         "noupdate": "No updates available",
+        "qr_popup_title": "Scan to download DOB Mobile (Android)",
         "recentBuilds": "Recent Builds",
         "recentBuildsCount": "Latest {{count}}",
         "recentBuildsEmpty": "No recommended builds yet",
