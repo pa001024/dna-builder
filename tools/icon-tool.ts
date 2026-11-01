@@ -3,6 +3,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
 import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
+import { format } from "prettier"
 
 /** 以下相对路径一律相对仓库根：切到工具所在目录的上级，保证从任何 cwd 调用口径一致 */
 process.chdir(join(dirname(fileURLToPath(import.meta.url)), ".."))
