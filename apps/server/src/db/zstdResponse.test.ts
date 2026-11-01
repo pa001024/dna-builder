@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test"
-import { zstdDecompressSync } from "node:zlib"
 import { clientAcceptsZstd, maybeCompressGraphqlResponse, ZSTD_THRESHOLD_BYTES } from "./zstdResponse"
 
 function graphqlJsonResponse(payload: string): Response {
@@ -43,7 +42,7 @@ describe("maybeCompressGraphqlResponse", () => {
         expect(res.headers.get("vary")).toContain("Accept-Encoding")
         const raw = Buffer.from(await res.arrayBuffer())
         expect(raw.length).toBeLessThan(Buffer.byteLength(big))
-        expect(Buffer.from(zstdDecompressSync(raw)).toString("utf-8")).toBe(big)
+        expect((await Bun.zstdDecompress(raw)).toString("utf-8")).toBe(big)
     })
 
     it("客户端不支持 zstd 时不压缩", async () => {

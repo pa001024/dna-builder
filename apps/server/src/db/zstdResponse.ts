@@ -1,5 +1,3 @@
-import { zstdCompressSync } from "node:zlib"
-
 export const ZSTD_THRESHOLD_BYTES = 4 * 1024
 
 export function clientAcceptsZstd(request: Request): boolean {
@@ -34,12 +32,6 @@ export function clientAcceptsZstd(request: Request): boolean {
     return wildcardQ !== null && wildcardQ > 0
 }
 
-function compressZstd(data: Uint8Array): Uint8Array {
-    const compressor = (Bun as unknown as { zstdCompressSync?: (input: Uint8Array) => Uint8Array }).zstdCompressSync
-    if (compressor) return compressor(data)
-    return zstdCompressSync(data)
-}
-
 export async function maybeCompressGraphqlResponse(request: Request, response: Response): Promise<Response> {
     if (request.method === "HEAD") return response
     if (response.status === 204 || response.status === 304) return response
@@ -58,7 +50,7 @@ export async function maybeCompressGraphqlResponse(request: Request, response: R
         })
     }
 
-    const compressed = Buffer.from(compressZstd(raw))
+    const compressed = await Bun.zstdCompress(raw)
     const headers = new Headers(response.headers)
     headers.set("content-encoding", "zstd")
     headers.set("content-length", String(compressed.length))
