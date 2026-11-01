@@ -37,6 +37,7 @@ import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
 import GroupNode from "./nodes/GroupNode.vue"
 import HubNode from "./nodes/HubNode.vue"
 import JSONBuildNode from "./nodes/JSONBuildNode.vue"
+import JSONExportNode from "./nodes/JSONExportNode.vue"
 import LabelNode from "./nodes/LabelNode.vue"
 import MeleeWeaponInputNode from "./nodes/MeleeWeaponInputNode.vue"
 import ModInputNode from "./nodes/ModInputNode.vue"
@@ -443,9 +444,11 @@ const switchMenuOpen = ref(false)
 const initializing = ref(true)
 const fileInput = ref<HTMLInputElement | null>(null)
 
-// 节点点击事件
+// 节点点击事件：锁定节点不响应
 function handleNodeClick(event: NodeMouseEvent) {
-    selectedNode.value = event.node as unknown as { id: string; data: NodeData }
+    const node = event.node as unknown as { id: string; data: NodeData } | undefined
+    if (!node || (node.data as Record<string, any>)?.locked === true) return
+    selectedNode.value = node
     selectedEdge.value = null
 }
 
@@ -462,6 +465,8 @@ function handleNodeContextMenu(event: NodeMouseEvent) {
         event.event.preventDefault()
     }
 
+    // 锁定节点不弹出菜单
+    if ((event.node.data as Record<string, any>)?.locked === true) return
     closeConnectMenu()
     selectedNode.value = event.node as unknown as { id: string; data: NodeData }
     selectedEdge.value = null
@@ -776,6 +781,7 @@ const nodeTypes = {
     "vector-decompose": markRaw(VectorDecomposeNode),
     "vector-calc": markRaw(VectorCalcNode),
     "json-build": markRaw(JSONBuildNode),
+    "json-export": markRaw(JSONExportNode),
     "online-build": markRaw(OnlineBuildNode),
 } as unknown as import("@vue-flow/core").NodeTypesObject
 
@@ -809,31 +815,103 @@ const graphNodes = computed(() =>
     store.nodes.map(node => {
         const palette = PALETTE_ITEMS.find(item => item.type === node.type)
         const label = typeof node.data?.label === "string" ? node.data.label.trim() : ""
-        return { id: node.id, label: label || palette?.label || String(node.type ?? ""), icon: palette?.icon }
+        return {
+            id: node.id,
+            label: label || palette?.label || String(node.type ?? ""),
+            icon: palette?.icon,
+            hidden: node.hidden === true,
+            locked: node.data?.locked === true,
+            selected: isItemSelected("node", node.id),
+        }
     })
 )
 
 /**
- * 定位到图中某个节点：选中并把视图移到该节点；
- * 移动端侧栏占满整屏，收起后才看得见画布，故一并收起。
+ * 选中画布列表中的节点：单击单选，Shift / Ctrl / Cmd 加选或取消。
+ * 隐藏节点先自动显示；锁定节点不可选中。
  * @param id 节点 id
+ * @param event 点击事件（判断是否多选）
  */
-async function focusGraphNode(id: string) {
+function selectGraphNode(id: string, event?: MouseEvent) {
     const target = store.nodes.find(node => node.id === id)
-    if (!target) return
+    if (!target || target.data?.locked === true) return
+    if (target.hidden) store.setNodeHidden(id, false)
     const flowNode = findNode(id)
+    const additive = !!event && (event.shiftKey || event.ctrlKey || event.metaKey)
+    if (additive && flowNode) {
+        if (isItemSelected("node", id)) {
+            removeSelectedNodes([flowNode])
+            if (selectedNode.value?.id === id) selectedNode.value = null
+        } else {
+            addSelectedNodes([flowNode])
+            selectedNode.value = { id: target.id, data: target.data as NodeData }
+            selectedEdge.value = null
+        }
+        return
+    }
     if (flowNode) {
         removeSelectedNodes([...getSelectedNodes.value])
         addSelectedNodes([flowNode])
     }
     selectedNode.value = { id: target.id, data: target.data as NodeData }
     selectedEdge.value = null
+}
+
+/** 切换节点显隐 */
+function toggleGraphNodeHidden(id: string) {
+    const target = store.nodes.find(node => node.id === id)
+    if (!target) return
+    store.setNodeHidden(id, !target.hidden)
+}
+
+/** 切换节点锁定 */
+function toggleGraphNodeLocked(id: string) {
+    const target = store.nodes.find(node => node.id === id)
+    if (!target) return
+    store.setNodeLocked(id, !(target.data?.locked === true))
+}
+
+/**
+ * 定位到图中某个节点：只移动视图，不改变选中；
+ * 移动端侧栏占满整屏，收起后才看得见画布，故一并收起。
+ * @param id 节点 id
+ */
+async function focusGraphNode(id: string) {
+    const target = store.nodes.find(node => node.id === id)
+    if (!target) return
+    if (target.hidden) store.setNodeHidden(id, false)
     if (window.innerWidth < 1024) sidebarCollapsed.value = true
     await nextTick()
     await new Promise(resolve => requestAnimationFrame(resolve))
     // 按节点实测包围盒同时算居中与缩放：大节点缩到能完整显示，小节点最多放到 1 倍
     // （setCenter 不传 zoom 时会用 maxZoom，大节点会溢出视野）
     void fitView({ nodes: [target.id], padding: 0.15, maxZoom: 1, duration: 300 })
+}
+
+/** VueFlow 画布就绪后 resolve：首屏与载图后的适配都等待它，避免在空画布上空跑 */
+let resolveFlowReady: (() => void) | null = null
+const flowReady = new Promise<void>(resolve => {
+    resolveFlowReady = resolve
+})
+
+/** 适配视口到所有可见节点（隐藏节点不参与）：等待画布就绪与节点尺寸测量完成 */
+async function fitVisibleNodes(duration = 250) {
+    const ids = store.nodes.filter(node => !node.hidden).map(node => node.id)
+    if (ids.length === 0) return
+    await flowReady
+    // 等待节点尺寸测量完成，否则包围盒为零导致缩放错误；最多等约 3 秒
+    for (let frame = 0; frame < 180; frame++) {
+        const measured = ids.every(id => {
+            const found = findNode(id)
+            if (!found) return true
+            const dimensions = found.dimensions
+            return (dimensions?.width ?? 0) > 0 && (dimensions?.height ?? 0) > 0
+        })
+        if (measured) break
+        await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+    await nextTick()
+    void fitView({ nodes: ids, padding: 0.1, duration })
 }
 
 // 删除
@@ -908,9 +986,10 @@ function handleKeyDown(event: KeyboardEvent) {
     }
 }
 
-// 初始化时调整视图
+// 画布就绪：放行等待中的视口适配（首屏空画布不再做无效适配）
 onInit(() => {
-    fitView()
+    resolveFlowReady?.()
+    resolveFlowReady = null
 })
 
 /** 复制节点时只保留可持久化的普通数据，避免把 CharBuild 实例带进新节点 */
@@ -1170,6 +1249,8 @@ async function handleGraphChange() {
         store.currentGraphId = null
         store.currentGraphName = "未命名图"
     }
+    // 载图后适配一次视口，容下所有可见节点（空图直接跳过）
+    void fitVisibleNodes()
 }
 
 // 导入处理
@@ -1186,6 +1267,8 @@ async function handleFileInputChange(event: Event) {
             await store.importGraph(file)
             // 重置文件输入
             target.value = ""
+            // 载图后适配一次视口，容下所有可见节点
+            void fitVisibleNodes()
         } catch (error) {
             console.error("导入图失败:", error)
         }
@@ -1242,6 +1325,8 @@ onMounted(async () => {
     } else {
         // 加载最后编辑的图
         await store.loadLastEditedGraph()
+        // 首屏视口容下所有可见节点
+        void fitVisibleNodes()
     }
     // 更新selectedGraphId为当前图ID
     selectedGraphId.value = store.currentGraphId || ""
@@ -1261,13 +1346,6 @@ watch(routeGraphId, graphId => {
     if (graphId && graphId !== activeRemoteId.value) {
         void loadSharedGraph(graphId)
     }
-})
-
-// 侧栏收起 / 展开会改变画布宽度，重新适配视图，保证图中所有节点都在视野内
-watch(sidebarCollapsed, async () => {
-    await nextTick()
-    await new Promise(resolve => requestAnimationFrame(resolve))
-    void fitView({ padding: 0.1, duration: 250 })
 })
 
 // 移除事件监听器
@@ -1344,6 +1422,8 @@ async function loadSharedGraph(graphId: string) {
             store.loadGraphData(parsed, graph.title)
             selectedGraphId.value = ""
             activeRemoteId.value = graph.id
+            // 载图后适配一次视口，容下所有可见节点
+            await fitVisibleNodes()
             return
         }
         ui.showErrorMessage("节点图不存在或数据损坏")
@@ -1385,8 +1465,7 @@ async function handleTransfer(charName: string) {
     await importCharSettingsToNodeEditor(charName, charSettings.value)
     transferDialogShow.value = false
     // 等待 VueFlow 完成节点尺寸测量后再适配视图
-    await new Promise(resolve => requestAnimationFrame(resolve))
-    await fitView({ padding: 0.1, duration: 300 })
+    await fitVisibleNodes(300)
 }
 </script>
 
@@ -1407,6 +1486,16 @@ async function handleTransfer(charName: string) {
         <aside v-if="!sidebarCollapsed" class="flex w-full flex-none flex-col border-r border-base-content/10 bg-base-100 lg:w-56">
             <div class="flex h-8 flex-none items-center gap-1.5 border-b border-base-content/10 px-2">
                 <PaneTabs v-model="activePane" />
+                <!-- 移动端抽屉关闭：侧栏打开时画布工具栏不可见，只能在这里关 -->
+                <button
+                    type="button"
+                    class="ml-auto grid size-6 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.95] lg:hidden"
+                    title="关闭侧栏"
+                    aria-label="关闭侧栏"
+                    @click="sidebarCollapsed = true"
+                >
+                    <Icon icon="ri:close-line" class="size-4" />
+                </button>
             </div>
             <ScrollArea class="min-h-0 flex-1">
                 <!-- 节点库：可拖入画布的节点 -->
@@ -1442,16 +1531,53 @@ async function handleTransfer(charName: string) {
                         <span class="ml-auto font-mono text-[10px] text-base-content/35">{{ graphNodes.length }}</span>
                     </div>
                     <div v-if="graphNodes.length === 0" class="px-1.5 py-3 text-[11px] text-base-content/40">画布里还没有节点</div>
-                    <button
+                    <div
                         v-for="node in graphNodes"
                         :key="node.id"
-                        type="button"
-                        class="group mb-0.5 flex w-full cursor-pointer items-center gap-1.5 border border-transparent px-1.5 py-1 text-left transition-colors duration-150 hover:border-primary/40 hover:bg-primary/5"
-                        @click="focusGraphNode(node.id)"
+                        class="group mb-0.5 flex w-full items-center gap-0.5 border px-1 py-0.5 transition-colors duration-150"
+                        :class="node.selected ? 'border-primary/40 bg-primary/5' : 'border-transparent hover:border-primary/40 hover:bg-primary/5'"
                     >
-                        <Icon v-if="node.icon" :icon="node.icon" class="size-3.5 shrink-0 text-base-content/50 group-hover:text-primary" />
-                        <span class="min-w-0 flex-1 truncate text-[12px] text-base-content/80">{{ node.label }}</span>
-                    </button>
+                        <button
+                            type="button"
+                            class="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-0.5 text-left"
+                            :title="node.locked ? `${node.label}（已锁定）` : node.label"
+                            @click="selectGraphNode(node.id, $event)"
+                        >
+                            <Icon v-if="node.icon" :icon="node.icon" class="size-3.5 shrink-0 text-base-content/50 group-hover:text-primary" />
+                            <span
+                                class="min-w-0 flex-1 truncate text-[12px]"
+                                :class="node.hidden ? 'text-base-content/35 line-through' : 'text-base-content/80'"
+                            >
+                                {{ node.label }}
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            class="grid size-5 shrink-0 cursor-pointer place-items-center text-base-content/45 transition-colors duration-150 hover:text-primary"
+                            title="定位到节点"
+                            @click.stop="focusGraphNode(node.id)"
+                        >
+                            <Icon icon="ri:crosshair-line" class="size-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            class="grid size-5 shrink-0 cursor-pointer place-items-center transition-colors duration-150 hover:text-primary"
+                            :class="node.hidden ? 'text-warning' : 'text-base-content/45'"
+                            :title="node.hidden ? '显示节点' : '隐藏节点'"
+                            @click.stop="toggleGraphNodeHidden(node.id)"
+                        >
+                            <Icon :icon="node.hidden ? 'ri:eye-off-line' : 'ri:eye-line'" class="size-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            class="grid size-5 shrink-0 cursor-pointer place-items-center transition-colors duration-150 hover:text-primary"
+                            :class="node.locked ? 'text-warning' : 'text-base-content/45'"
+                            :title="node.locked ? '解锁节点' : '锁定节点'"
+                            @click.stop="toggleGraphNodeLocked(node.id)"
+                        >
+                            <Icon icon="ri:lock-line" class="size-3.5" />
+                        </button>
+                    </div>
                 </div>
                 <!-- 性能：同步阶段 / worker 请求耗时与按节点的调用记录 -->
                 <PerformancePane v-else />
@@ -1586,6 +1712,15 @@ async function handleTransfer(charName: string) {
 
                 <!-- 导入导出：移动端仅显示图标 -->
                 <div class="ml-auto flex items-center gap-0.5 sm:gap-1">
+                    <button
+                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
+                        title="显示全部"
+                        aria-label="显示全部"
+                        @click="fitVisibleNodes(300)"
+                    >
+                        <Icon icon="ri:focus-3-line" class="size-3" />
+                        <span class="hidden sm:inline">显示全部</span>
+                    </button>
                     <button
                         class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
                         :title="$t('node-editor.migrate')"

@@ -224,12 +224,16 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.VECTOR_CALC]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [NUMBER_OUTPUT] },
     // 构筑来源：JSON 文本 / 在线构筑
     [NodeType.JSON_BUILD]: {
-        inputs: [input("text", PortType.STRING, "构筑 JSON")],
+        inputs: [input("char", PortType.CHAR, "角色"), input("text", PortType.STRING, "构筑 JSON")],
         outputs: [output("build", PortType.BUILD, "构筑")],
     },
     [NodeType.ONLINE_BUILD]: {
         inputs: [input("char", PortType.CHAR, "角色过滤")],
         outputs: [output("build", PortType.BUILD, "构筑")],
+    },
+    [NodeType.JSON_EXPORT]: {
+        inputs: [BUILD_INPUT],
+        outputs: [output("text", PortType.STRING, "JSON 文本")],
     },
 }
 

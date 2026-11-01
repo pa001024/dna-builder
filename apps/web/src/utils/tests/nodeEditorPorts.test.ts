@@ -180,6 +180,18 @@ describe("nodeEditorPorts", () => {
         expect(canConnectPorts(ports.outputs[0], coreBuff)).toBe(true)
     })
 
+    it("JSON 构筑节点接收角色与标准 charSettings 文本并输出构筑", () => {
+        const ports = getNodePorts(NodeType.JSON_BUILD)
+        expect(ports.inputs).toEqual([
+            { id: "char", type: PortType.CHAR, label: "角色", multiple: false },
+            { id: "text", type: PortType.STRING, label: "构筑 JSON", multiple: false },
+        ])
+        expect(ports.outputs).toEqual([{ id: "build", type: PortType.BUILD, label: "构筑" }])
+        expect(canConnectPorts(getNodePorts(NodeType.CHAR_INPUT).outputs[0], ports.inputs[0])).toBe(true)
+        expect(canConnectPorts(getNodePorts(NodeType.TEXT_INPUT).outputs[0], ports.inputs[1])).toBe(true)
+        expect(canConnectPorts(getNodePorts(NodeType.JSON_EXPORT).outputs[0], ports.inputs[1])).toBe(true)
+    })
+
     it("唯一端口在旧边没有 handle 时可以自动解析", () => {
         expect(resolvePort(NodeType.CHAR_INPUT, null, "output")?.id).toBe("char")
         expect(resolvePort(NodeType.CORE_CALC, null, "input")).toBeUndefined()

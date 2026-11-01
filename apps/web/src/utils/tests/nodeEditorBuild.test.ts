@@ -11,6 +11,7 @@ import {
     computeVectorStat,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
+    createBuildContextFromSettings,
     createBuildContextsFromInputs,
     createExpressionVectorOutput,
     createSettingsFromNodeInputs,
@@ -25,6 +26,7 @@ import {
     readNodeVectorValues,
     readVectorCalcMode,
     reconcileTeamBuffs,
+    serializeBuildContext,
     sortDownstreamIds,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
@@ -393,13 +395,45 @@ describe("nodeEditorBuild", () => {
     it("JSON 构筑文本解析为构筑上下文", () => {
         const { settings } = createInputs()
         const json = JSON.stringify({ charId: CHAR_ID, charSettings: JSON.stringify(settings) })
-        const { context, error } = createBuildContextFromJSONText(json)
+        const { context, error } = createBuildContextFromJSONText(json, { charId: CHAR_ID })
         expect(error).toBeUndefined()
         expect(context?.charId).toBe(CHAR_ID)
         expect(context?.settings.baseName).toBe("潜入夜色")
 
-        expect(createBuildContextFromJSONText("{not json}").error).toContain("JSON 解析失败")
-        expect(createBuildContextFromJSONText("{}").error).toContain("charId")
+        expect(createBuildContextFromJSONText("{not json}", { charName: "法露茜" }).error).toContain("JSON 解析失败")
+    })
+
+    it("JSON 构筑只接受标准 charSettings 文本，角色必须由角色端口提供", () => {
+        const { settings } = createInputs()
+        const json = JSON.stringify(settings)
+        // 未连接角色端口时报错，不再从 JSON 读取 charId
+        expect(createBuildContextFromJSONText(json).error).toContain("角色")
+        const wrapped = JSON.stringify({ charId: CHAR_ID, charSettings: json })
+        expect(createBuildContextFromJSONText(wrapped).error).toContain("角色")
+        // 端口提供角色时解析成功；JSON 内携带的 charId 被忽略，端口非法 id 时报错
+        const { context, error } = createBuildContextFromJSONText(json, { charName: "法露茜" })
+        expect(error).toBeUndefined()
+        expect(context?.charId).toBe(CHAR_ID)
+        expect(context?.settings.baseName).toBe("潜入夜色")
+        const overridden = createBuildContextFromJSONText(wrapped, { charId: 9999 })
+        expect(overridden.context).toBeUndefined()
+        expect(overridden.error).toBeDefined()
+    })
+
+    it("构筑导出为标准 charSettings 文本（不带 charId），可回导", () => {
+        const { settings } = createInputs()
+        const built = createBuildContextFromSettings(CHAR_ID, settings)
+        expect(built.error).toBeUndefined()
+        const text = serializeBuildContext(built.context!)
+        const parsed = JSON.parse(text)
+        expect(parsed.charId).toBeUndefined()
+        expect(parsed.charSettings).toBeUndefined()
+        expect(parsed.baseName).toBe("潜入夜色")
+        // 导出的标准文本配合角色端口可重新解析为同一构筑
+        const { context, error } = createBuildContextFromJSONText(text, { charName: "法露茜" })
+        expect(error).toBeUndefined()
+        expect(context?.charId).toBe(CHAR_ID)
+        expect(context?.settings.baseName).toBe("潜入夜色")
     })
 
     it("自定义变量向量按变量名覆盖并展开为二维构筑", () => {

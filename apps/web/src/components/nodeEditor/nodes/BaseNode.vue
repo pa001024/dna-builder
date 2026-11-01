@@ -132,15 +132,29 @@ const getIcon = (type: string): IconTypes => {
         "vector-calc": "ri:bar-chart-line",
         "json-build": "ri:file-code-line",
         "online-build": "ri:cloud-line",
+        "json-export": "ri:file-copy-line",
     }
     return icons[type] || "ri:node-tree"
 }
 </script>
 
 <template>
-    <div class="rounded-xs border border-base-content/15 bg-base-100/80 shadow-sm backdrop-blur-sm" :class="nodeClass">
+    <div class="relative rounded-xs border border-base-content/15 bg-base-100/80 shadow-sm backdrop-blur-sm" :class="nodeClass">
+        <!-- 锁定覆盖层：吞掉节点内全部指针事件，解锁请用画布列表的锁图标 -->
+        <div
+            v-if="data.locked"
+            class="absolute inset-0 z-10 cursor-not-allowed"
+            title="已锁定"
+            @click.stop
+            @mousedown.stop
+            @mouseup.stop
+            @dblclick.stop
+            @contextmenu.stop.prevent
+            @pointerdown.stop
+        />
         <div class="flex h-7 items-center gap-1.5 px-2">
             <Icon :icon="getIcon(type)" class="size-3.5 shrink-0 text-base-content/55" />
+            <Icon v-if="data.locked" icon="ri:lock-line" class="size-3 shrink-0 text-warning" />
             <input
                 v-if="editingTitle"
                 ref="titleInput"

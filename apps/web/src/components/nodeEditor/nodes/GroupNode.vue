@@ -91,6 +91,18 @@ onBeforeUnmount(() => {
         :class="selected ? 'border-primary/70 bg-primary/8' : 'border-base-content/20 bg-primary/4 hover:border-base-content/40'"
         :style="{ width: `${width}px`, height: `${height}px` }"
     >
+        <!-- 锁定覆盖层：吞掉节点内全部指针事件，解锁请用画布列表的锁图标 -->
+        <div
+            v-if="props.data.locked"
+            class="absolute inset-0 z-10 cursor-not-allowed"
+            title="已锁定"
+            @click.stop
+            @mousedown.stop
+            @mouseup.stop
+            @dblclick.stop
+            @contextmenu.stop.prevent
+            @pointerdown.stop
+        />
         <div class="flex h-7 items-center gap-1.5 border-b border-dashed border-base-content/15 bg-base-content/5 px-2">
             <Icon icon="ri:group-line" class="size-3.5 shrink-0 text-base-content/45" />
             <input

@@ -1,5 +1,5 @@
 import * as dialog from "@tauri-apps/plugin-dialog"
-import type { Connection } from "@vue-flow/core"
+import type { Connection, HandleConnectable } from "@vue-flow/core"
 import { nanoid } from "nanoid"
 import { defineStore } from "pinia"
 import { computed, markRaw, ref } from "vue"
@@ -31,6 +31,7 @@ import {
     readNodeTeamBuffs,
     readVectorCalcMode,
     resolveBuffSourceNode,
+    serializeBuildContext,
     sortDownstreamIds,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
@@ -86,6 +87,13 @@ interface EditorNode {
     type?: string
     position: EditorNodePosition
     data: EditorNodeData
+    /** 隐藏：不渲染但仍参与计算 */
+    hidden?: boolean
+    /** 锁定衍生的 vue-flow 交互开关（以 data.locked 为准） */
+    selected?: boolean
+    draggable?: boolean
+    selectable?: boolean
+    connectable?: HandleConnectable
 }
 
 /**
@@ -236,10 +244,18 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             data.buffs = migrateLegacyTeamBuffs(readNodeBuffEntries(data), data.teamBuffs)
             delete data.teamBuffs
         }
-        return {
+        const normalized: EditorNode = {
             ...node,
             data,
         }
+        // 锁定状态跨版本恢复：仅 data.locked 可信时补齐交互开关
+        if (data.locked === true) {
+            normalized.draggable = false
+            normalized.selectable = false
+            normalized.connectable = false
+            normalized.selected = false
+        }
+        return normalized
     }
 
     /**
@@ -427,6 +443,41 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             // 高频编辑（如输入框连续修改）合并为一个撤销步骤
             commitHistory("更新节点数据", `node:${nodeId}`)
         }
+    }
+
+    /**
+     * 设置节点显隐：隐藏节点不渲染（含连线），但仍参与计算与保存。
+     * @param nodeId 节点 id
+     * @param hidden 是否隐藏
+     */
+    function setNodeHidden(nodeId: string, hidden: boolean) {
+        const node = nodes.value.find(n => n.id === nodeId)
+        if (!node || node.hidden === hidden) return
+        node.hidden = hidden
+        if (hidden) node.selected = false
+        markGraphDirty()
+        commitHistory(hidden ? "隐藏节点" : "显示节点")
+    }
+
+    /**
+     * 设置节点锁定：锁定后不可选中 / 拖动 / 连线，节点内的全部事件由覆盖层吞掉。
+     * @param nodeId 节点 id
+     * @param locked 是否锁定
+     */
+    function setNodeLocked(nodeId: string, locked: boolean) {
+        const node = nodes.value.find(n => n.id === nodeId)
+        if (!node || node.data.locked === locked) return
+        if (locked) node.data = { ...node.data, locked: true }
+        else {
+            const { locked: _omitted, ...rest } = node.data
+            node.data = rest
+        }
+        node.draggable = !locked
+        node.selectable = !locked
+        node.connectable = !locked
+        if (locked) node.selected = false
+        markGraphDirty()
+        commitHistory(locked ? "锁定节点" : "解锁节点")
     }
 
     /**
@@ -968,6 +1019,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 id: node.id,
                 type: node.type,
                 position: node.position,
+                // 显隐与锁定是纯展示状态：持久化以便重开图 / 撤销 / 复制粘贴后保持一致
+                ...(node.hidden === true ? { hidden: true as const } : null),
+                ...(node.data?.locked === true ? { draggable: false, selectable: false, connectable: false } : null),
                 data: {
                     ...node.data,
                     // 过滤掉不需要持久化的数据
@@ -2222,11 +2276,18 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
             // 构筑来源节点：JSON 文本 / 在线构筑
             if (nodeType === NodeType.JSON_BUILD) {
-                const portValue = collectInputPortValues(node).get("text")
+                const portValues = collectInputPortValues(node)
+                const portValue = portValues.get("text")
                 // 文本输入节点的输出是节点数据对象，这里统一取其中的 value
                 const portText = typeof portValue === "string" ? portValue : typeof portValue?.value === "string" ? portValue.value : ""
                 const text = portText.trim() ? portText : typeof node.data.text === "string" ? node.data.text : ""
-                const { context, error } = createBuildContextFromJSONText(text)
+                // 角色必须由角色端口提供；文本为标准 charSettings
+                const charPort = portValues.get("char")
+                const portCharId = Number(charPort?.charId)
+                const { context, error } = createBuildContextFromJSONText(text, {
+                    charName: typeof charPort?.charName === "string" ? charPort.charName : undefined,
+                    charId: Number.isFinite(portCharId) ? portCharId : undefined,
+                })
                 node.data.build = context ? markRaw(context) : undefined
                 node.data.charBuild = context ? markRaw(context.charBuild) : undefined
                 node.data.error = error
@@ -2258,6 +2319,35 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 const result = parsed.context ? { build: parsed.context } : { build: null, error: parsed.error }
                 calculationCache.set(nodeId, result)
                 return result
+            }
+
+            // JSON 导出节点：把上游构筑序列化为 JSON 文本
+            if (nodeType === NodeType.JSON_EXPORT) {
+                const context = getBuildInputVector(node.id)?.contexts[0]
+                if (!context) {
+                    node.data.build = undefined
+                    node.data.exportText = ""
+                    node.data.error = "缺少构筑输入"
+                    const result = { value: "", text: "", error: node.data.error }
+                    calculationCache.set(nodeId, result)
+                    return result
+                }
+                try {
+                    const text = serializeBuildContext(context)
+                    node.data.build = markRaw(context)
+                    node.data.exportText = text
+                    node.data.error = undefined
+                    const result = { value: text, text }
+                    calculationCache.set(nodeId, result)
+                    return result
+                } catch (error) {
+                    node.data.build = undefined
+                    node.data.exportText = ""
+                    node.data.error = `导出失败: ${error instanceof Error ? error.message : String(error)}`
+                    const result = { value: "", text: "", error: node.data.error }
+                    calculationCache.set(nodeId, result)
+                    return result
+                }
             }
 
             // 图表节点：把上游向量归一化为带标题的图表数据
@@ -2421,6 +2511,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         copiedEdges,
         // 操作
         updateNodeData,
+        setNodeHidden,
+        setNodeLocked,
         addNode,
         removeNode,
         addEdge,

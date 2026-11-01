@@ -17,6 +17,7 @@ import {
     normalizeCharSettings,
     normalizeCharSkillLevels,
     normalizeModVariantLetter,
+    serializeCharSettings,
 } from "@/data/charSettings"
 import { isPetRelatedBuffName, normalizeTraitSlots } from "@/data/petTrait"
 import { NodeType } from "@/store/nodeEditorTypes"
@@ -1597,20 +1598,25 @@ export function createBuildContextsFromInputs(
 }
 
 /**
- * 从 CharSettings JSON 文本创建构筑上下文。
- * 支持 `{ charId, charSettings }`、`{ charId, settings }` 以及直接带 charId 的配置 JSON。
- * @param text JSON 文本
+ * 从标准 charSettings JSON 文本创建构筑上下文。
+ * 角色必须由角色端口提供，不再从 JSON 读取 charId。
+ * @param text 标准 charSettings 文本
+ * @param char 角色端口提供的角色（名称 / id）
  * @returns 构筑上下文或错误
  */
-export function createBuildContextFromJSONText(text: string): { context?: NodeBuildContext; error?: string } {
+export function createBuildContextFromJSONText(
+    text: string,
+    char: { charName?: string; charId?: number } = {}
+): { context?: NodeBuildContext; error?: string } {
     const trimmed = text.trim()
     if (!trimmed) return {}
+    const portCharId = charIdFromNode(typeof char.charName === "string" ? char.charName : "", toFiniteNumber(char.charId, 0))
+    if (!(portCharId > 0)) return { error: "缺少角色：请连接角色输入" }
     try {
         const parsed = JSON.parse(trimmed)
-        const charId = toFiniteNumber(parsed?.charId ?? parsed?.charSettings?.charId ?? parsed?.settings?.charId, 0)
         let rawSettings = parsed?.charSettings ?? parsed?.settings ?? parsed
         if (typeof rawSettings === "string") rawSettings = JSON.parse(rawSettings)
-        return createBuildContextFromSettings(charId, rawSettings)
+        return createBuildContextFromSettings(portCharId, rawSettings)
     } catch (error) {
         return { error: `JSON 解析失败: ${error instanceof Error ? error.message : String(error)}` }
     }
@@ -1632,6 +1638,15 @@ export function createBuildContextFromSettings(charId: number, rawSettings: unkn
     } catch (error) {
         return { error: `构筑创建失败: ${error instanceof Error ? error.message : String(error)}` }
     }
+}
+
+/**
+ * 将构筑上下文序列化为标准 charSettings 文本（不带 charId，角色由角色端口提供）。
+ * @param context 构筑上下文
+ * @returns JSON 文本
+ */
+export function serializeBuildContext(context: NodeBuildContext): string {
+    return serializeCharSettings(context.settings)
 }
 
 /**

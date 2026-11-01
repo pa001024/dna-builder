@@ -54,4 +54,5 @@ export enum NodeType {
     // 构筑来源
     JSON_BUILD = "json-build", // 从 JSON 文本解析构筑
     ONLINE_BUILD = "online-build", // 从在线构筑列表选择构筑
+    JSON_EXPORT = "json-export", // 将构筑导出为 JSON 文本
 }

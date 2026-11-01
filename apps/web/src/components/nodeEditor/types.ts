@@ -98,6 +98,7 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.DOT_INPUT]: "DOT频率",
         [NodeType.JSON_BUILD]: "JSON构筑",
         [NodeType.ONLINE_BUILD]: "在线构筑",
+        [NodeType.JSON_EXPORT]: "JSON导出",
     }
     return labels[type] || type
 }
@@ -333,7 +334,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "JSON构筑",
         category: NodeCategory.BUILD_SOURCE,
         icon: "ri:file-code-line",
-        description: "接收文本 JSON 并输出构筑",
+        description: "接收角色与标准 charSettings 文本并输出构筑",
     },
     {
         type: NodeType.ONLINE_BUILD,
@@ -341,5 +342,12 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.BUILD_SOURCE,
         icon: "ri:cloud-line",
         description: "从在线构筑列表选择并输出构筑",
+    },
+    {
+        type: NodeType.JSON_EXPORT,
+        label: "JSON导出",
+        category: NodeCategory.OUTPUT,
+        icon: "ri:file-copy-line",
+        description: "将构筑导出为 JSON 文本，可复制或传给其他节点",
     },
 ]
