@@ -144,6 +144,9 @@ pub struct BuildContext<'a> {
     /// 基线计算内部经 attr 型 BUFF 的表达式求值会再次进入差分函数，
     /// 此时直接返回空（基线本就不含条件 code），同时掐断无限递归。
     pub(crate) scoped_code_computing: bool,
+    /// `weapon_panels_for` 选中槽 code 回填重入保护：回填经全量属性重算，
+    /// 其内部 code 沙盒装配会再次进入本函数，重入时跳过回填（返回裸槽位面板）。
+    pub(crate) panels_correcting: bool,
     /// 召唤物继承比例等按字段上下文查询时需要原属性。
     pub custom_variables: HashMap<String, String>,
     /// 团队武器类别（协战武器）。
@@ -304,6 +307,7 @@ impl<'a> BuildContext<'a> {
             source_table: BonusSourceTable::default(),
             conditional_props_cache: None,
             scoped_code_computing: false,
+            panels_correcting: false,
             custom_variables: settings.custom_variables.iter().cloned().collect(),
             team_weapon_categories: Vec::new(),
             missing_resource: None,

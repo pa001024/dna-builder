@@ -30,7 +30,6 @@ import {
     modData,
     modEffectMap,
     monsterData,
-    monsterMap,
     petMap,
     weaponData,
     weaponEffectMap,
@@ -69,11 +68,12 @@ function toJson<T>(value: T): T {
     return JSON.parse(JSON.stringify(value)) as T
 }
 
-/** 三件套输出：calculate / attributes / weapon。 */
+/** 三件套输出：calculate / attributes / weapon（attributes 取 calculateWeaponAttributes
+ * 口径，含充盈/召唤物转化后的最终值，与 Rust `evaluate_build` 的 result.attributes 同源）。 */
 function triple(build: CharBuild): { calculate: number; attributes: Record<string, number>; weapon: unknown } {
-    const attributes = toJson(build.calculateAttributes() as unknown as Record<string, number>)
-    const panel = build.calculateWeaponAttributes() as { weapon?: unknown }
-    return { calculate: build.calculate(), attributes, weapon: toJson(panel.weapon ?? null) }
+    const full = build.calculateWeaponAttributes() as unknown as Record<string, unknown>
+    const { weapon, ...rest } = toJson(full)
+    return { calculate: build.calculate(), attributes: rest as Record<string, number>, weapon: toJson(weapon ?? null) }
 }
 
 function writeFixture(name: string, doc: FixtureDoc): void {

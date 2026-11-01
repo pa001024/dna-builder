@@ -259,6 +259,103 @@ pub unsafe extern "C" fn dobcc_calc_close(calc: u64) {
     session::remove_calc_session(calc);
 }
 
+/// 取某技能的结算字段表，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
+///
+/// 请求 JSON：`{charId, settings, skill?}`（`skill` 按名称或 safeName 匹配；
+/// 缺省/未命中时 `fields` 为空数组）。
+///
+/// # Safety
+/// 与 `dobcc_evaluate` 同（`req_ptr` 可读 `req_len` 字节，`out_len` 可写，返回指针需释放）。
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn dobcc_skill_fields(
+    session: u64,
+    req_ptr: *const u8,
+    req_len: usize,
+    out_len: *mut usize,
+) -> *mut u8 {
+    export_text(skill_fields_envelope(session, req_ptr, req_len), out_len)
+}
+
+fn skill_fields_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> String {
+    let payload = match session::with_payload(session, |payload| payload.tables.clone()) {
+        Ok(tables) => tables,
+        Err(error) => return error_envelope(error),
+    };
+    let raw = match request_json(req_ptr, req_len) {
+        Ok(raw) => raw,
+        Err(error) => return error_envelope(error),
+    };
+    let request = match BuildRequest::from_json(&raw) {
+        Ok(request) => request,
+        Err(error) => return error_envelope(error),
+    };
+    let skill = raw
+        .get("skill")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("");
+    let fields = crate::evaluate::skill_fields_for(&payload, &request, skill)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|field| {
+            serde_json::json!({
+                "name": field.name,
+                "safeName": field.safe_name,
+                "value": field.value,
+                "value2": field.value2,
+                "format": field.format,
+                "base": field.base,
+                "tags": field.tags,
+                "damageType": field.damage_type,
+            })
+        })
+        .collect::<Vec<_>>();
+    ok_envelope(serde_json::json!({"fields": fields}))
+}
+
+/// 取全槽武器面板，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
+///
+/// 请求 JSON：`{charId, settings}`；结果 `panels` 键集与上游 `weapon_panels` 一致
+///（近战/远程/同律 + melee/ranged/skill + 各武器技能名）。
+///
+/// # Safety
+/// 与 `dobcc_evaluate` 同（`req_ptr` 可读 `req_len` 字节，`out_len` 可写，返回指针需释放）。
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn dobcc_panels(
+    session: u64,
+    req_ptr: *const u8,
+    req_len: usize,
+    out_len: *mut usize,
+) -> *mut u8 {
+    export_text(panels_envelope(session, req_ptr, req_len), out_len)
+}
+
+fn panels_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> String {
+    let payload = match session::with_payload(session, |payload| payload.tables.clone()) {
+        Ok(tables) => tables,
+        Err(error) => return error_envelope(error),
+    };
+    let raw = match request_json(req_ptr, req_len) {
+        Ok(raw) => raw,
+        Err(error) => return error_envelope(error),
+    };
+    let request = match BuildRequest::from_json(&raw) {
+        Ok(request) => request,
+        Err(error) => return error_envelope(error),
+    };
+    let panels = crate::evaluate::panels_for(&payload, &request).unwrap_or_default();
+    let mut map = serde_json::Map::new();
+    let mut keys: Vec<&String> = panels.keys().collect();
+    keys.sort();
+    for key in keys {
+        let panel: serde_json::Map<String, serde_json::Value> = panels[key]
+            .iter()
+            .map(|(name, value)| (name.to_string(), serde_json::Value::from(*value)))
+            .collect();
+        map.insert(key.to_string(), serde_json::Value::Object(panel));
+    }
+    ok_envelope(serde_json::json!({"panels": map}))
+}
+
 /// 在会话里跑整轮自动配装，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
 ///
 /// 请求 JSON：`{base: BuildRequest, candidates, options, seed}`（见 spec §4.1）。

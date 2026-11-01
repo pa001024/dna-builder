@@ -204,7 +204,7 @@ impl<'a> BuildContext<'a> {
 
         // 基础值为 0 的属性
         let mut boost = self.total_bonus("昂扬", "角色", true);
-        let desperate = self.total_bonus("背水", "角色", true);
+        let mut desperate = self.total_bonus("背水", "角色", true);
         let mut damage_increase = self.total_bonus("增伤", "角色", true);
         let mut element_damage_increase = self.total_bonus("元素增伤", "角色", true);
         let mut physical_damage_increase = self.total_bonus("物理增伤", "角色", true);
@@ -287,6 +287,7 @@ impl<'a> BuildContext<'a> {
             efficiency += mod_attribute_bonus * weighted("技能效益");
             range += mod_attribute_bonus * weighted("技能范围");
             boost += mod_attribute_bonus * weighted("昂扬");
+            desperate += mod_attribute_bonus * weighted("背水");
             damage_increase += mod_attribute_bonus * weighted("增伤");
             element_damage_increase += mod_attribute_bonus * weighted("元素增伤");
             physical_damage_increase += mod_attribute_bonus * weighted("物理增伤");
@@ -813,6 +814,9 @@ impl<'a> BuildContext<'a> {
         nocode: bool,
         nochar: bool,
     ) -> WeaponAttributes {
+        // 来源表随状态版本重建：nochar 快径跳过角色属性装配，需在此确保
+        // （base_attributes 只在算角色属性时建表；面板先行时表是空的）。
+        self.ensure_source_table();
         let key = self.memo_key(nocode as u8 | (nochar as u8) << 1);
         let version = self.memo.version;
         let slot = super::context::memo_weapon_slot(key, weapon);
@@ -977,7 +981,75 @@ impl<'a> BuildContext<'a> {
                 map.entry(skill.name.clone()).or_insert(panel);
             }
         }
+        // 选中槽位 code 回填：命中选中武器实例的键用全量面板覆盖
+        //（对齐上游求值上下文/旧 SDK `context_panels` 口径，含 code 修正）。
+        // 重入保护：全量重算内部的 code 沙盒装配会再次进入本函数，
+        // 重入时跳过回填（返回裸槽位面板，与回填前行为一致）。
+        if !self.panels_correcting {
+            self.panels_correcting = true;
+            let full = self.calculate_weapon_attributes(None);
+            self.panels_correcting = false;
+            if let (Some(selected), Some(panel)) = (full.weapon, full.panel) {
+            let selected_id = self.weapon_instance_id(selected);
+            if let Some(selected_id) = selected_id {
+                let keys: Vec<String> = map.keys().cloned().collect();
+                for key in keys {
+                    if self.panel_key_weapon_id(&key) == Some(selected_id) {
+                        map.insert(key, panel.clone());
+                    }
+                }
+            }
+        }
+        }
         map
+    }
+
+    /// 面板键对应的武器实例 id（inherit 已消解；未知键返回 `None`）。
+    fn panel_key_weapon_id(&self, key: &str) -> Option<i64> {
+        match key {
+            "近战" | "melee" => Some(self.melee_weapon.id),
+            "远程" | "ranged" => Some(self.ranged_weapon.id),
+            "同律" | "skill" => self.skill_weapon_instance_id(),
+            name => {
+                if self.melee_weapon_skills().iter().any(|s| s.name == name) {
+                    return Some(self.melee_weapon.id);
+                }
+                if self.ranged_weapon_skills().iter().any(|s| s.name == name) {
+                    return Some(self.ranged_weapon.id);
+                }
+                if self.skill_weapon_skills().iter().any(|s| s.name == name) {
+                    return self.skill_weapon_instance_id();
+                }
+                None
+            }
+        }
+    }
+
+    /// 同律武器实例 id（inherit 指向被继承武器；无同律武器返回 `None`）。
+    fn skill_weapon_instance_id(&self) -> Option<i64> {
+        let weapon = self.skill_weapon.as_ref()?;
+        match weapon.inherit.as_deref() {
+            Some("melee") => Some(self.melee_weapon.id),
+            Some("ranged") => Some(self.ranged_weapon.id),
+            _ => Some(weapon.id),
+        }
+    }
+
+    /// 计算引用对应的武器实例 id（inherit 已消解）。
+    pub fn weapon_instance_id(&self, target: WeaponRef) -> Option<i64> {
+        match target {
+            WeaponRef::Melee => Some(self.melee_weapon.id),
+            WeaponRef::Ranged => Some(self.ranged_weapon.id),
+            WeaponRef::Skill => self.skill_weapon_instance_id(),
+            // Selected 不应出现（resolve 已消解）；防御性回退再消解一次。
+            WeaponRef::Selected => self
+                .resolve_weapon_ref(Some(WeaponRef::Selected))
+                .and_then(|resolved| match resolved {
+                    WeaponRef::Selected => None,
+                    concrete => self.weapon_instance_id(concrete),
+                }),
+            _ => None,
+        }
     }
 
     /// 取远程武器多重射击（1 开始）：供技能字段 影响:"多重" 读取。

@@ -2,7 +2,7 @@
     "meta": {
         "sourceFile": "packages/data/tests/leveled.test.ts",
         "caseName": "等级公式/取档/钳制锚点",
-        "tsBaseline": "1.4.12",
+        "tsBaseline": "1.5.0",
         "kind": "leveled-values"
     },
     "request": {

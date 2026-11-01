@@ -710,7 +710,10 @@ impl<'a> BuildContext<'a> {
     ///
     /// 返回按「技能 → 近战 → 远程 → 同律」顺序的来源表（含上限共享后的
     /// 自身频率 / 其余属性频率 / 结算用武器攻击）。
-    pub fn dot_frequencies(&mut self) -> Vec<DotSourceFreq> {
+    ///
+    /// `attrs` 为调用方已算好的武器属性（`calculateWeaponAttributes` 口径，含充盈叠加；
+    /// 对齐上游 `calculateDotFrequencies(inputattrs)`，避免 attr 表达式里的 DOT 反复重算）。
+    pub fn dot_frequencies(&mut self, attrs: &AttrMap) -> Vec<DotSourceFreq> {
         crate::prof!("damage::dot_frequencies");
         if let Some((version, cached)) = &self.dot_cache
             && *version == self.memo.version
@@ -722,7 +725,7 @@ impl<'a> BuildContext<'a> {
         let mut last: Vec<DotSourceFreq> = Vec::new();
         for _ in 0..4 {
             let start_version = self.memo.version;
-            let attrs = self.attrs();
+            let attrs = attrs;
             let melee_panel = self
                 .calculate_weapon_attributes(Some(super::context::WeaponRef::Melee))
                 .panel
@@ -867,10 +870,12 @@ impl<'a> BuildContext<'a> {
     ///
     /// `namespace`：空为全部来源；`角色` 取技能分量，`近战` / `远程` / `同律`
     ///（及英文别名）取对应武器分量；未命中时为 0。
-    pub fn dot_damage(&mut self, namespace: Option<&str>) -> f64 {
+    /// `attrs` 为调用方已算好的武器属性（`calculateWeaponAttributes` 口径，含充盈叠加；
+    /// 对齐上游 `calculateDotDamage(ns, attrs)`，复用求值上下文避免反复重算与递归）。
+    pub fn dot_damage(&mut self, namespace: Option<&str>, attrs: &AttrMap) -> f64 {
         crate::prof!("damage::dot_damage");
-        let sources = self.dot_frequencies();
-        let attrs = self.attrs();
+        let sources = self.dot_frequencies(attrs);
+        let attrs = attrs;
         let selected: Vec<&DotSourceFreq> = match namespace {
             None => sources.iter().collect(),
             Some("角色") | Some("char") | Some("character") => sources

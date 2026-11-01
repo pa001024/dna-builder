@@ -155,11 +155,12 @@ pub struct ExpressionResult {
 ///
 /// `evaluate_build_inner` 与 [`CalcSession`] 共用：前者现装配现算，后者复用装配。
 fn evaluate_on_context(context: &mut BuildContext<'_>, target_function: &str) -> BuildResult {
-    // 角色属性（含 code 动态 BUFF）
-    let attributes = context.attrs();
+    // 角色属性（含 code 动态 BUFF 与充盈/召唤物转化后的最终值；对齐上游
+    // `calculateByBasename` 取 `calculateWeaponAttributes()` 的口径）
+    let weapon_result = context.calculate_weapon_attributes(None);
+    let attributes = weapon_result.char.clone();
 
     // 当前武器面板
-    let weapon_result = context.calculate_weapon_attributes(None);
     let weapon = weapon_result.panel.clone();
 
     // BUFF 清单（`buffs` 已含全部实例，按名字去重；条件BUFF带生效范围）
@@ -281,6 +282,61 @@ pub fn evaluate_candidates(tables: &BuildTables, requests: &[BuildRequest]) -> V
         .iter()
         .map(|request| evaluate_build_inner(tables, request))
         .collect()
+}
+
+/// 技能字段视图（`dobcc_skill_fields` 的结果元素）；对应上游字段表条目。
+#[derive(Debug, Clone, Default)]
+pub struct SkillFieldView {
+    pub name: String,
+    pub safe_name: String,
+    pub value: f64,
+    pub value2: f64,
+    pub format: Option<String>,
+    pub base: Option<String>,
+    pub tags: Vec<String>,
+    pub damage_type: Option<String>,
+}
+
+/// 取某技能的结算字段表（`skill` 按名称或 safeName 匹配角色/武器技能；
+/// 未命中返回 `None`，调用方按上游口径记空表）。
+pub fn skill_fields_for(
+    tables: &BuildTables,
+    request: &BuildRequest,
+    skill: &str,
+) -> Option<Vec<SkillFieldView>> {
+    let mut context = BuildContext::new(tables, request.char_id, &request.settings)?;
+    let safe = context
+        .all_skills()
+        .find(|s| s.name == skill || s.safe_name == skill)?
+        .safe_name
+        .clone();
+    let mut evaluator = Evaluator::new(&mut context);
+    let fields = evaluator.fields_for(&safe)?;
+    Some(
+        fields
+            .iter()
+            .map(|field| SkillFieldView {
+                name: field.base.name.clone(),
+                safe_name: field.base.safe_name.clone(),
+                value: field.value,
+                value2: field.value2,
+                format: field.base.format.clone(),
+                base: field.base.attr_base.clone(),
+                tags: field.base.tags.clone(),
+                damage_type: field.base.damage_type.clone(),
+            })
+            .collect(),
+    )
+}
+
+/// 取全槽武器面板（`dobcc_panels` 的结果；键集与上游 `weapon_panels` 一致：
+/// 近战/远程/同律 + melee/ranged/skill + 各武器技能名）。
+pub fn panels_for(
+    tables: &BuildTables,
+    request: &BuildRequest,
+) -> Option<std::collections::HashMap<String, AttrMap>> {
+    let mut context = BuildContext::new(tables, request.char_id, &request.settings)?;
+    Some(context.weapon_panels_for(true, true, true))
 }
 
 /// FNV-1a 64（指纹用）。

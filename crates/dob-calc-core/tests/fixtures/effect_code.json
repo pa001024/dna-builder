@@ -2,7 +2,7 @@
     "meta": {
         "sourceFile": "packages/data/tests/effect-code.test.ts",
         "caseName": "code开/关差值",
-        "tsBaseline": "1.4.12",
+        "tsBaseline": "1.5.0",
         "kind": "code-diff"
     },
     "request": {
@@ -2317,7 +2317,7 @@
                                     "id": 10199007,
                                     "名称": "谜题·证明",
                                     "icon": "T_Rouge_Talent_Sword_Zaie",
-                                    "描述": "处于[求索]效果时，若技能速度大于2.2，造成技能伤害时无视目标30.0%防御",
+                                    "描述": "处于[求索]效果时，若技能速度大于220.0%，造成技能伤害时无视目标30.0%防御",
                                     "解锁": {
                                         "无解谜题的原型": 30,
                                         "雷之晶块": 90,

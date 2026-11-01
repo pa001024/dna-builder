@@ -76,7 +76,7 @@ fn timeline_request_shape() {
     for index in 0..5 {
         let fixture = load_fixture(&format!("timeline_{index:02}"));
         assert_eq!(fixture["meta"]["kind"].as_str(), Some("timeline+triple"));
-        assert_eq!(fixture["meta"]["tsBaseline"].as_str(), Some("1.4.12"));
+        assert_eq!(fixture["meta"]["tsBaseline"].as_str(), Some("1.5.0"));
     }
     // DPS 折算关系：timeline_03（DPS）与 timeline_01（同事件总量）的比值应为 1/2。
     let total = load_fixture("timeline_01")["expected"]["calculate"]

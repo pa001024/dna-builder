@@ -312,7 +312,9 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         // DOT伤害 特殊标识符：无命名空间为全部来源，加命名空间只算该来源
         // （如 角色::DOT伤害 技能分量 / 近战::DOT伤害 近战分量）；对应上游 evaluateIdentity。
         if name == "DOT伤害" {
-            return Ok(self.context.dot_damage(namespace));
+            // 上游 `calculateDotDamage(ns, attrs)` 复用求值上下文的武器属性（含充盈叠加）
+            let attrs = self.attrs.clone();
+            return Ok(self.context.dot_damage(namespace, &attrs));
         }
         if !force_attr && namespace.is_none() {
             // 自定义函数的形参（上游 `currentScope`，优先于一切查表）
@@ -541,7 +543,7 @@ impl<'a, 'b> Evaluator<'a, 'b> {
     }
 
     /// 取某个技能字段表（按 `safeName` 键）；首次用到的技能现场按当前属性构建。
-    fn fields_for(&mut self, key: &str) -> Option<Rc<Vec<super::models::SkillField>>> {
+    pub fn fields_for(&mut self, key: &str) -> Option<Rc<Vec<super::models::SkillField>>> {
         if let Some(found) = self.skill_fields.get(key) {
             return Some(found.clone());
         }
@@ -1086,14 +1088,14 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             if !fast.is_nan() {
                 return fast;
             }
-            return value1 * base_value;
+            return format_arith_fallback(&expression, value1, base_value);
         }
         // 模板级分类：不含字段引用、且模板结构决定解析必失败的（如 `{}米`），
         // 直接回退，省掉每次拼串后的解析浪费。分类用零值试解析一次定格：
         // 占位符只换数字字面量，不改变解析成败（误判只损失优化，不改语义——
         // 见 `format_kind`）。
         if !expression.contains('[') && format_kind(format) == FormatKind::Fallback {
-            return value1 * base_value;
+            return format_arith_fallback(&expression, value1, base_value);
         }
         // 数字表达式同样走本求值器（静态表求值器已按 spec §2 从 ast_parser 剥离）；
         // 此时表达式里只剩数字与算符，无变量/伤害字段，行为与静态求值一致。
@@ -1106,7 +1108,7 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         {
             return value;
         }
-        value1 * base_value
+        format_arith_fallback(&expression, value1, base_value)
     }
 
     /// 求值自定义变量；对应上游 `evaluateCustomVariable`。
@@ -1231,6 +1233,20 @@ impl<'a, 'b> Evaluator<'a, 'b> {
     pub fn current_damage(&self) -> Option<DamageResult> {
         self.last_damage
     }
+}
+
+/// 格式串兜底求值；对应上游 `evaluateExpression` 的 `Function` 安全求值分支：
+/// 含单位/中文的模板剥离非算术字符后求值（如 `(1736.7)最大生命+199.2` →
+/// `(1736.7)+199.2`）。仍失败时调用方回退 `value1 * base_value`。
+fn eval_sanitized_arith(expression: &str) -> Option<f64> {
+    let clean: String = expression
+        .chars()
+        .filter(|c| c.is_ascii_digit() || "+-*/.() \t\n\r".contains(*c))
+        .collect();
+    if clean.trim().is_empty() {
+        return None;
+    }
+    eval_arith(&clean)
 }
 
 /// 纯算术快路：占位后的表达式若只含数字与四则算符/括号，直接求值，跳过词法/语法分析。
@@ -1424,6 +1440,16 @@ pub(crate) fn compiled_variables(context: &BuildContext<'_>) -> HashMap<String, 
 enum FormatKind {
     Fallback,
     Evaluate,
+}
+
+/// 格式串最终回退：先按上游 `Function` 口径剥离非算术字符求值，仍失败才取 `value1 * base`。
+fn format_arith_fallback(expression: &str, value1: f64, base_value: f64) -> f64 {
+    if let Some(value) = eval_sanitized_arith(expression)
+        && !value.is_nan()
+    {
+        return value;
+    }
+    value1 * base_value
 }
 
 /// 模板分类（零值试解析一次定格，结果进程级缓存）。

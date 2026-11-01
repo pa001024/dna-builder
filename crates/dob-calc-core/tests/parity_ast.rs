@@ -117,7 +117,7 @@ fn ast_vector_count() {
         let fixture = load_fixture(&name);
         assert_eq!(
             fixture["meta"]["tsBaseline"].as_str(),
-            Some("1.4.12"),
+            Some("1.5.0"),
             "{name} 基线版本"
         );
     }

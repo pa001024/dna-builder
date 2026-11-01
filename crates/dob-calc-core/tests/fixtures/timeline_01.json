@@ -2,7 +2,7 @@
     "meta": {
         "sourceFile": "packages/data/tests/timeline.test.ts",
         "caseName": "普通技能多事件线性累加",
-        "tsBaseline": "1.4.12",
+        "tsBaseline": "1.5.0",
         "kind": "timeline+triple"
     },
     "request": {
@@ -548,6 +548,12 @@
             "技能无视防御": 0,
             "技能速度": 1,
             "失衡易伤": 0,
+            "歧视": 0,
+            "秽兽增伤": 0,
+            "军团增伤": 0,
+            "神弃者增伤": 0,
+            "神使增伤": 0,
+            "华胥增伤": 0,
             "技能倍率加数": 0,
             "技能倍率乘数": 0,
             "召唤物属性继承比例": 1,

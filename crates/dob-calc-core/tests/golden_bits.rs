@@ -43,7 +43,7 @@ const CASES: &[(&str, u64, u64, u64)] = &[
     (
         "dobapp_shardBuild1",
         0x41f5b1e3b8395658,
-        0x7eeddc2ce040f159,
+        0xa44d51d7e6d191f1,
         0x74e59ba6d3f986cd,
     ),
     (
@@ -55,7 +55,7 @@ const CASES: &[(&str, u64, u64, u64)] = &[
     (
         "dobapp_vy",
         0x41da54e2f202dc99,
-        0xffdb8e12d3dccd95,
+        0xc65db30c1d5828bc,
         0x9e3779b97f4a7c15,
     ),
     (
@@ -67,7 +67,7 @@ const CASES: &[(&str, u64, u64, u64)] = &[
     (
         "dobapp_OkdnBN3OlC",
         0x41d0be6d244fb97c,
-        0xa0e90df51736ebd3,
+        0x4c9daf010e3e52f5,
         0x9e3779b97f4a7c15,
     ),
 ];
