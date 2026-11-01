@@ -8,6 +8,7 @@ import { machineIdSync } from "node-machine-id"
 import { pubsub } from "../rt/pubsub"
 import { isIntrospectionOperation } from "./introspection"
 import { schemaWith } from "./mod"
+import { maybeCompressGraphqlResponse } from "./zstdResponse"
 
 export type Context = YogaInitialContext & CustomContext
 
@@ -65,6 +66,8 @@ export function yogaPlugin() {
 
         const path = "/graphql"
 
+        const handleGraphql = async ({ request }: { request: Request }) => maybeCompressGraphqlResponse(request, await yoga.fetch(request))
+
         const handler = makeWSHandler({
             schema,
             // execute: (args) => args.rootValue.execute(args),
@@ -103,8 +106,8 @@ export function yogaPlugin() {
             },
         })
         const result = app
-            .get(path, async ({ request }) => yoga.fetch(request))
-            .post(path, async ({ request }) => yoga.fetch(request), {
+            .get(path, handleGraphql)
+            .post(path, handleGraphql, {
                 // type: "none",
             })
             .ws(path, {
