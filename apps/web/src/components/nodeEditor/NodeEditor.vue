@@ -1359,8 +1359,8 @@ onUnmounted(() => {
         duplicateHistoryBatch = false
         store.endHistoryBatch("复制节点")
     }
-    // 停止自动保存
-    store.stopAutoSave()
+    // 落盘排队的自动保存
+    store.flushAutoSave()
 })
 
 /** 当前载入的分享图 id（路由 /flow/:graphId 或浏览弹窗载入后设置，用于徽标与评论区） */
@@ -1708,6 +1708,13 @@ async function handleTransfer(charName: string) {
                         @change="store.setAutoSaveEnabled(store.autoSaveEnabled)"
                     />
                     <span class="hidden sm:inline">自动保存</span>
+                    <Icon
+                        v-if="store.autoSaveEnabled"
+                        :icon="store.autoSaveStatus === 'waiting' ? 'ri:time-line' : 'ri:check-line'"
+                        class="size-3.5"
+                        :class="store.autoSaveStatus === 'waiting' ? 'text-warning/70' : 'text-success/70'"
+                        :title="store.autoSaveStatus === 'waiting' ? '等待自动保存' : '已自动保存'"
+                    />
                 </label>
 
                 <!-- 导入导出：移动端仅显示图标 -->

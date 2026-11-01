@@ -141,10 +141,12 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     // 所有保存的图
     const savedGraphs = ref<NodeEditorGraph[]>([])
 
-    // 自动保存配置
+    // 自动保存配置：跟随 undo 记录点，变更后防抖写入
     const autoSaveEnabled = ref<boolean>(true)
-    const autoSaveInterval = ref<number>(30000) // 30秒自动保存
+    const AUTO_SAVE_DEBOUNCE_MS = 2000
     let autoSaveTimer: number | null = null
+    /** 自动保存状态：checked 已落盘，waiting 有变更在等防抖写入 */
+    const autoSaveStatus = ref<"checked" | "waiting">("checked")
 
     // 图名称
     const currentGraphName = ref<string>("未命名图")
@@ -327,6 +329,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             historyIndex.value = 0
             lastHistoryCommitAt = Date.now()
             lastHistoryCoalesceKey = coalesceKey ?? null
+            scheduleAutoSave()
             return
         }
 
@@ -362,6 +365,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             history.value.shift()
             historyIndex.value--
         }
+        scheduleAutoSave()
     }
 
     /** 开始一个历史批次：批次内的多次变更合并为一个撤销步骤 */
@@ -386,6 +390,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         clearCache()
         markGraphDirty()
         recalculateAllNodes()
+        scheduleAutoSave()
     }
 
     /**
@@ -1186,6 +1191,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         clearCache()
         markGraphDirty()
         if (options.resetHistory !== false) resetHistory("清空图")
+        scheduleAutoSave()
     }
 
     /**
@@ -1214,30 +1220,61 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
-     * 启动自动保存
+     * undo 记录点同源的自动保存：每次图变更后 2s 防抖写回同一张图，未保存的新图不写。
      */
-    function startAutoSave() {
+    function scheduleAutoSave() {
         if (autoSaveTimer) {
-            window.clearInterval(autoSaveTimer)
+            window.clearTimeout(autoSaveTimer)
+            autoSaveTimer = null
         }
-
-        if (autoSaveEnabled.value) {
-            autoSaveTimer = window.setInterval(() => {
-                if (currentGraphId.value) {
-                    saveGraphToDB(currentGraphName.value, true)
-                }
-            }, autoSaveInterval.value)
-        }
+        if (!autoSaveEnabled.value || !currentGraphId.value) return
+        autoSaveStatus.value = "waiting"
+        autoSaveTimer = window.setTimeout(() => {
+            autoSaveTimer = null
+            if (!autoSaveEnabled.value || !currentGraphId.value) return
+            saveGraphToDB(currentGraphName.value, true)
+                .catch(error => console.error("自动保存失败:", error))
+                .finally(() => {
+                    if (!autoSaveTimer) autoSaveStatus.value = "checked"
+                })
+        }, AUTO_SAVE_DEBOUNCE_MS)
     }
 
     /**
-     * 停止自动保存
+     * 立即落盘排队的自动保存（页面卸载前调用，避免丢防抖窗口内的变更）。
+     */
+    function flushAutoSave() {
+        if (!autoSaveTimer) return
+        window.clearTimeout(autoSaveTimer)
+        autoSaveTimer = null
+        if (!autoSaveEnabled.value || !currentGraphId.value) return
+        saveGraphToDB(currentGraphName.value, true)
+            .catch(error => console.error("自动保存失败:", error))
+            .finally(() => {
+                autoSaveStatus.value = "checked"
+            })
+    }
+
+    /**
+     * 启动自动保存：事件驱动无需轮询，保留入口供挂载时调用。
+     */
+    function startAutoSave() {
+        if (autoSaveTimer) {
+            window.clearTimeout(autoSaveTimer)
+            autoSaveTimer = null
+        }
+        autoSaveStatus.value = "checked"
+    }
+
+    /**
+     * 停止自动保存：丢弃排队的写入（关闭功能时用，卸载请用 flushAutoSave）。
      */
     function stopAutoSave() {
         if (autoSaveTimer) {
-            window.clearInterval(autoSaveTimer)
+            window.clearTimeout(autoSaveTimer)
             autoSaveTimer = null
         }
+        autoSaveStatus.value = "checked"
     }
 
     /**
@@ -1245,21 +1282,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      */
     function setAutoSaveEnabled(enabled: boolean) {
         autoSaveEnabled.value = enabled
-        if (enabled) {
-            startAutoSave()
-        } else {
-            stopAutoSave()
-        }
-    }
-
-    /**
-     * 设置自动保存间隔
-     */
-    function setAutoSaveInterval(interval: number) {
-        autoSaveInterval.value = interval
-        if (autoSaveEnabled.value) {
-            startAutoSave()
-        }
+        if (!enabled) stopAutoSave()
     }
 
     /**
@@ -2505,7 +2528,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         currentGraphId,
         savedGraphs,
         autoSaveEnabled,
-        autoSaveInterval,
+        autoSaveStatus,
         currentGraphName,
         copiedNodes,
         copiedEdges,
@@ -2550,8 +2573,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         // 自动保存
         startAutoSave,
         stopAutoSave,
+        flushAutoSave,
         setAutoSaveEnabled,
-        setAutoSaveInterval,
         setCurrentGraphName,
         // 导入导出
         exportGraph,
