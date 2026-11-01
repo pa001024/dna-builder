@@ -401,7 +401,8 @@ function isPolset(index: number) {
 const auraPolset = computed(() => props.type === "角色" && polsetIndices.value.includes(props.charBuild.getMods(props.type).length - 1))
 </script>
 <template>
-    <div>
+    <!-- @container：槽位列数按 ModEditer 自身宽度算，嵌入节点或构筑页都不受外层容器影响 -->
+    <div class="@container">
         <Teleport v-if="mod_model_show" to="body">
             <dialog class="modal" :class="{ 'modal-open': mod_model_show }">
                 <div class="modal-box max-w-11/12 h-11/12 relative">
@@ -558,7 +559,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8 gap-4">
+        <div class="grid grid-cols-2 gap-4 @xs:grid-cols-4 @6xl:grid-cols-8">
             <ModItem
                 v-for="(mod, index) in mods"
                 :key="index"
