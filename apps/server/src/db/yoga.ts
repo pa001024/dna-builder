@@ -1,8 +1,13 @@
+// 注意：graphql-yoga 必须第一个导入。Bun 下若让 @envelop/graphql-jit（CJS）先实例化，
+// 会连带把 graphql-yoga/@graphql-tools/schema 的 CJS 构建拉起来，而 graphql@17 是纯 ESM，
+// CJS 里 require("graphql") 直接启动崩溃。先让 ESM 版本占住模块记录即可避开。
+import { createSchema, createYoga, type YogaInitialContext } from "graphql-yoga"
+export type Yoga = typeof createYoga
+
 import { useGraphQlJit } from "@envelop/graphql-jit"
 import type { ServerWebSocket } from "bun"
 import type Elysia from "elysia"
 import { makeHandler as makeWSHandler } from "graphql-ws/use/bun"
-import { createSchema, createYoga, type YogaInitialContext } from "graphql-yoga"
 import jwt from "jsonwebtoken"
 import { machineIdSync } from "node-machine-id"
 import { pubsub } from "../rt/pubsub"
