@@ -150,6 +150,7 @@ const getIcon = (type: string): IconTypes => {
                 @keydown.esc.prevent="cancelTitle"
                 @blur="commitTitle"
                 @pointerdown.stop
+                @mousedown.stop
                 @click.stop
             />
             <span

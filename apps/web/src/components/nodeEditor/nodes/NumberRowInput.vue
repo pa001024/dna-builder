@@ -196,6 +196,7 @@ function onPointerCancel(event: PointerEvent) {
                 @keydown.esc.prevent="cancelEdit"
                 @blur="commitEdit"
                 @pointerdown.stop
+                @mousedown.stop
                 @click.stop
             />
             <div

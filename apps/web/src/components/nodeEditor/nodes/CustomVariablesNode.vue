@@ -161,6 +161,8 @@ async function pasteVariables() {
                             class="nodrag w-18 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             placeholder="变量名"
                             @input="commit"
+                            @pointerdown.stop
+                            @mousedown.stop
                         />
                         <span class="flex-none select-none text-[10px] text-base-content/35">=</span>
                         <FullTooltip side="top">

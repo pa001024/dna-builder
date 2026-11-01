@@ -58,8 +58,10 @@ watch(
                     v-model="expression"
                     type="text"
                     :placeholder="$t('node-editor.expressionCalc.expressionPlaceholder')"
-                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 font-mono text-[11px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    class="nodrag w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 font-mono text-[11px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @input="updateExpression"
+                    @pointerdown.stop
+                    @mousedown.stop
                 />
             </div>
 

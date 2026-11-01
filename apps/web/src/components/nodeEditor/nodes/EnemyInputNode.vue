@@ -89,7 +89,7 @@ function selectEnemy(id: number) {
                 </div>
                 <div class="min-w-0">
                     <div class="mb-0.5 text-[10px] text-base-content/45">{{ $t("失衡") }}</div>
-                    <input v-model="imbalance" type="checkbox" class="toggle toggle-xs toggle-secondary" @change="commit" />
+                    <input v-model="imbalance" type="checkbox" class="toggle toggle-xs toggle-secondary nodrag" @change="commit" @pointerdown.stop @mousedown.stop />
                 </div>
             </div>
 

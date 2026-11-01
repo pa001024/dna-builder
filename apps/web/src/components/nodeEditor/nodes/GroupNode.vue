@@ -99,6 +99,8 @@ onBeforeUnmount(() => {
                 placeholder="分组名称"
                 @change="commitTitle"
                 @keydown.enter.prevent="blurOnEnter"
+                @pointerdown.stop
+                @mousedown.stop
             />
         </div>
         <!-- 右下角缩放手柄 -->

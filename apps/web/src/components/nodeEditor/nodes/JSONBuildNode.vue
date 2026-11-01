@@ -47,6 +47,8 @@ onBeforeUnmount(() => {
                 class="nodrag nowheel min-h-24 w-full resize-y rounded-none border border-base-content/15 bg-base-100/60 p-1.5 font-mono text-[11px] leading-relaxed outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary/60"
                 placeholder='粘贴构筑 JSON，例如 {"charId": 3104, "charSettings": "{...}"}'
                 @input="onInput"
+                @pointerdown.stop
+                @mousedown.stop
             />
             <div class="text-[10px] text-base-content/40">已连接文本输入时优先使用连接的文本</div>
             <div v-if="data.build" class="flex items-center gap-2 border border-base-content/10 bg-base-content/4 px-1.5 py-1 text-[10px] text-base-content/60">
