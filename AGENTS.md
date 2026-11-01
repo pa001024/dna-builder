@@ -11,6 +11,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 |---|---|
 | 构建 / 增量 lint / SSG 预渲染 / 数据包改写（动手前必读） | [build-and-ssg.md](.agents/docs/build-and-ssg.md) |
 | 代码风格细则（Formatter / TS / Vue / Rust） | [code-style.md](.agents/docs/code-style.md) |
+| 提交规范（type / scope、正文 `-` 列表、拆分粒度、示例） | [commit-convention.md](.agents/docs/commit-convention.md) |
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
