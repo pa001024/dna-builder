@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const avatar = computed(() => ({
-    src: props.qq ? `//q2.qlogo.cn/headimg_dl?dst_uin=${props.qq}&spec=100` : "/imgs/webp/T_GameReview_JiaoJiao.webp",
+    src: props.qq ? `https://q.qlogo.cn/g?b=qq&nk=${props.qq}&s=100` : "/imgs/webp/T_GameReview_JiaoJiao.webp",
 }))
 
 const { isReady } = useImage(avatar)
