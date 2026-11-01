@@ -185,11 +185,11 @@ pnpm tauri build
 ### Server (Bun + Elysia)
 
 ```bash
-cd server
-bun install
+# 在仓库根目录安装全部 workspace 依赖（含 apps/server，运行时仍用 Bun）
+pnpm install
 
 # Dev mode (with migrations)
-bun run dev
+cd apps/server && bun run dev
 
 # Generate migrations
 bun run gen

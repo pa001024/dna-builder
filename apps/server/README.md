@@ -5,12 +5,12 @@
 ## 快速开始
 
 1. 克隆仓库
-2. 安装 Bun：[Bun 安装指南](https://bun.sh/docs/installation)
-3. 安装依赖：`bun install`
-4. 配置环境变量：
+2. 安装 Bun（运行需要）：[Bun 安装指南](https://bun.sh/docs/installation)；安装 Node.js 与 pnpm（安装依赖需要，版本见仓库根 `packageManager`，可用 corepack 激活）
+3. 在仓库根目录安装依赖：`pnpm install`（含本包的全部 workspace 依赖）
+4. 进入 `apps/server` 配置环境变量：
     - 创建 `.env` 文件
     - 添加 `API_TOKEN=your_secret_token`
-5. 启动开发服务器：`bun dev`
+5. 启动开发服务器：`bun run dev`
 6. 访问 GraphQL Playground：[http://localhost:8887/graphql](http://localhost:8887/graphql)
 
 ## 主要功能

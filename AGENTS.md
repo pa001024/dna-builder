@@ -67,7 +67,8 @@ bun icon add <icon-name>
 ### Server (Bun + Elysia)
 
 ```bash
-cd server && bun run dev         # Start dev server (port 8887)
+pnpm install                              # Workspace 根目录安装全部依赖（含 apps/server，运行时仍用 Bun）
+cd apps/server && bun run dev         # Start dev server (port 8887)
 bun run gen                      # Generate database migrations
 ```
 
