@@ -173,6 +173,10 @@ export default defineConfig(async () => ({
             "lexical",
             "@lexical/plain-text",
             "@lexical/history",
+            "@vue-flow/background",
+            "@vue-flow/controls",
+            "@vue-flow/core",
+            "@vue-flow/minimap",
         ],
     },
     build: {
