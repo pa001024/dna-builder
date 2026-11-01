@@ -81,6 +81,5 @@
         "typescript": "~5.9.3",
         "vitest": "^4.1.11",
         "wasm-opt": "2.0.1"
-    },
-    "workspaces": ["apps/web", "apps/server", "packages/*", "tools/data-mapper", "tools/vue-mapper"]
+    }
 }
