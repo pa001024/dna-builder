@@ -129,6 +129,7 @@ const getIcon = (type: string): IconTypes => {
         "number-input": "ri:hashtag",
         "vector-input": "ri:sort-number-asc",
         "vector-decompose": "ri:split-cells-horizontal",
+        "vector-calc": "ri:bar-chart-line",
         "json-build": "ri:file-code-line",
         "online-build": "ri:cloud-line",
     }

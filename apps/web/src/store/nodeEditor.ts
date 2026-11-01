@@ -16,6 +16,7 @@ import {
     collectCoreInputNodes,
     collectNumericParamVectors,
     collectVariableVectors,
+    computeVectorStat,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
     createBuildContextFromSettings,
@@ -28,6 +29,7 @@ import {
     readNodeBuffEntries,
     readNodeCustomVariables,
     readNodeTeamBuffs,
+    readVectorCalcMode,
     resolveBuffSourceNode,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
@@ -2137,6 +2139,20 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 } catch (error) {
                     return storeError(node, `表达式计算失败: ${(error as Error).message}`)
                 }
+            }
+            case NodeType.VECTOR_CALC: {
+                const label = typeof node.data.label === "string" ? node.data.label : "向量"
+                const raw = portValues.get("vector")
+                if (raw === undefined || raw === null) return storeError(node, "缺少向量输入")
+                // 构筑向量带维度信息，不是一维数值向量，直接报错
+                if (typeof raw === "object" && !Array.isArray(raw) && Array.isArray((raw as Record<string, any>).dimensions)) {
+                    return storeError(node, "仅支持一维向量输入")
+                }
+                const vector = normalizeLabeledVector(raw, label)
+                if (!vector || vector.values.length === 0) return storeError(node, "缺少向量输入")
+                const value = computeVectorStat(readVectorCalcMode(node.data), vector.values)
+                if (value === undefined || !Number.isFinite(value)) return storeError(node, "向量计算失败")
+                return storeResult(node, { value, count: vector.values.length })
             }
             case NodeType.HUB_CALC: {
                 const vector = getBuildInputVector(node.id)

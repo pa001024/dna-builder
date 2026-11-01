@@ -47,6 +47,7 @@ import OutputNode from "./nodes/OutputNode.vue"
 import PetInputNode from "./nodes/PetInputNode.vue"
 import RangedWeaponInputNode from "./nodes/RangedWeaponInputNode.vue"
 import TextInputNode from "./nodes/TextInputNode.vue"
+import VectorCalcNode from "./nodes/VectorCalcNode.vue"
 import VectorDecomposeNode from "./nodes/VectorDecomposeNode.vue"
 import VectorInputNode from "./nodes/VectorInputNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
@@ -773,6 +774,7 @@ const nodeTypes = {
     "number-input": markRaw(NumberInputNode),
     "vector-input": markRaw(VectorInputNode),
     "vector-decompose": markRaw(VectorDecomposeNode),
+    "vector-calc": markRaw(VectorCalcNode),
     "json-build": markRaw(JSONBuildNode),
     "online-build": markRaw(OnlineBuildNode),
 } as unknown as import("@vue-flow/core").NodeTypesObject

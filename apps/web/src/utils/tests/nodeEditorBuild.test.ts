@@ -8,6 +8,7 @@ import {
     collectCoreInputNodes,
     collectNumericParamVectors,
     collectVariableVectors,
+    computeVectorStat,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
     createBuildContextsFromInputs,
@@ -22,6 +23,7 @@ import {
     normalizeLabeledVector,
     normalizeNumericParamValue,
     readNodeVectorValues,
+    readVectorCalcMode,
     reconcileTeamBuffs,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
@@ -753,5 +755,22 @@ describe("nodeEditorBuild", () => {
             { label: "角色配置·E 技能等级", values: ["E 技能等级=9"] },
             { label: "近战武器·精炼等级", values: ["精炼等级=4"] },
         ])
+    })
+
+    it("向量统计按模式聚合一维向量", () => {
+        const values = [2, 4, 4, 4, 5, 5, 7, 9]
+        expect(computeVectorStat("sum", values)).toBe(40)
+        expect(computeVectorStat("mean", values)).toBe(5)
+        expect(computeVectorStat("variance", values)).toBe(4)
+        expect(computeVectorStat("std", values)).toBe(2)
+        expect(computeVectorStat("min", values)).toBe(2)
+        expect(computeVectorStat("max", values)).toBe(9)
+        expect(computeVectorStat("median", values)).toBe(4.5)
+        expect(computeVectorStat("median", [3, 1, 2])).toBe(2)
+        expect(computeVectorStat("count", values)).toBe(8)
+        expect(computeVectorStat("sum", [])).toBeUndefined()
+        expect(readVectorCalcMode({})).toBe("sum")
+        expect(readVectorCalcMode({ mode: "std" })).toBe("std")
+        expect(readVectorCalcMode({ mode: "unknown" })).toBe("sum")
     })
 })

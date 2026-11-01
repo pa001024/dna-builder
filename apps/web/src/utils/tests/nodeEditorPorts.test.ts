@@ -159,6 +159,15 @@ describe("nodeEditorPorts", () => {
         expect(resolvePort(NodeType.VECTOR_DECOMPOSE, "value-1", "output", { vectorLabels: ["a", "b"] })?.type).toBe(PortType.NUMBER)
     })
 
+    it("向量计算节点输入一维向量并输出数值", () => {
+        const ports = getNodePorts(NodeType.VECTOR_CALC)
+        expect(ports.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }])
+        expect(ports.outputs).toEqual([{ id: "value", type: PortType.NUMBER, label: "数值" }])
+        const vectorOutput = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
+        expect(canConnectPorts(vectorOutput, ports.inputs[0])).toBe(true)
+        expect(canConnectPorts(ports.outputs[0], getNodePorts(NodeType.ADD_CALC).inputs[0])).toBe(true)
+    })
+
     it("BUFF 合并节点接收两路 BUFF 并输出一路 BUFF", () => {
         const ports = getNodePorts(NodeType.BUFF_MERGE)
         expect(ports.inputs).toEqual([

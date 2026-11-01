@@ -165,9 +165,12 @@ function onPointerCancel(event: PointerEvent) {
         />
         <span
             v-if="label"
-            class="w-16 shrink-0 truncate text-[10px] leading-none text-base-content/45"
+            class="nodrag w-16 shrink-0 cursor-text truncate text-[10px] leading-none text-base-content/45"
             :class="{ 'opacity-50': disabled }"
             :title="label"
+            @pointerdown.stop
+            @mousedown.stop
+            @click="startEditing"
         >
             {{ label }}
         </span>

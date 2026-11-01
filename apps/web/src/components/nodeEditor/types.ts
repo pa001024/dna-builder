@@ -94,6 +94,7 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.NUMBER_INPUT]: "数值输入",
         [NodeType.VECTOR_INPUT]: "向量输入",
         [NodeType.VECTOR_DECOMPOSE]: "向量分解",
+        [NodeType.VECTOR_CALC]: "向量计算",
         [NodeType.DOT_INPUT]: "DOT频率",
         [NodeType.JSON_BUILD]: "JSON构筑",
         [NodeType.ONLINE_BUILD]: "在线构筑",
@@ -218,6 +219,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.CALCULATION,
         icon: "ri:equalizer-line",
         description: "根据输入值计算表达式结果",
+    },
+    {
+        type: NodeType.VECTOR_CALC,
+        label: "向量计算",
+        category: NodeCategory.CALCULATION,
+        icon: "ri:bar-chart-line",
+        description: "对一维向量求和、平均、方差等并输出数值",
     },
     {
         type: NodeType.HUB_CALC,

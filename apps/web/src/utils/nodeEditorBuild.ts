@@ -285,6 +285,64 @@ export function readBuffMergeMode(data: Record<string, any>): BuffMergeMode {
     return data.mergeMode === "intersect" ? "intersect" : "union"
 }
 
+/** 向量计算节点的统计模式 */
+export const VECTOR_CALC_MODES = [
+    { mode: "sum", label: "求和", description: "全部取值的总和" },
+    { mode: "mean", label: "平均", description: "全部取值的算术平均" },
+    { mode: "variance", label: "方差", description: "总体方差：与平均值之差平方的平均" },
+    { mode: "std", label: "标准差", description: "总体标准差：方差的平方根" },
+    { mode: "min", label: "最小值", description: "全部取值中的最小值" },
+    { mode: "max", label: "最大值", description: "全部取值中的最大值" },
+    { mode: "median", label: "中位数", description: "排序后居中的取值" },
+    { mode: "count", label: "数量", description: "有效取值的个数" },
+] as const
+
+/** 向量计算节点的统计模式 */
+export type VectorCalcMode = (typeof VECTOR_CALC_MODES)[number]["mode"]
+
+/**
+ * 读取向量计算节点的模式，未知取值回退为求和。
+ * @param data 节点数据
+ * @returns 统计模式
+ */
+export function readVectorCalcMode(data: Record<string, any>): VectorCalcMode {
+    const mode = typeof data.mode === "string" ? data.mode : "sum"
+    return (VECTOR_CALC_MODES as readonly { mode: string }[]).some(item => item.mode === mode) ? (mode as VectorCalcMode) : "sum"
+}
+
+/**
+ * 按模式聚合一维向量，调用方保证全部取值为有限数值。
+ * @param mode 统计模式
+ * @param values 一维向量取值
+ * @returns 聚合结果；空向量返回 undefined
+ */
+export function computeVectorStat(mode: VectorCalcMode, values: number[]): number | undefined {
+    if (values.length === 0) return undefined
+    switch (mode) {
+        case "count":
+            return values.length
+        case "min":
+            return Math.min(...values)
+        case "max":
+            return Math.max(...values)
+        case "median": {
+            const sorted = [...values].sort((a, b) => a - b)
+            const middle = Math.floor(sorted.length / 2)
+            return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2
+        }
+        case "mean":
+        case "variance":
+        case "std": {
+            const mean = values.reduce((sum, value) => sum + value, 0) / values.length
+            if (mode === "mean") return mean
+            const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length
+            return mode === "variance" ? variance : Math.sqrt(variance)
+        }
+        default:
+            return values.reduce((sum, value) => sum + value, 0)
+    }
+}
+
 /** 读取 BUFF 覆盖率，缺省视为满覆盖 */
 function buffEntryCoverage(entry: [string, number, number?]) {
     return typeof entry[2] === "number" && Number.isFinite(entry[2]) ? entry[2] : 1

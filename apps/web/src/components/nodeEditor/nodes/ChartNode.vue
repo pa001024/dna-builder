@@ -19,13 +19,18 @@ const element = ref<HTMLDivElement | null>(null)
 let chart: echarts.ECharts | null = null
 let observer: ResizeObserver | null = null
 
-const CHART_TYPES: { type: "line" | "bar"; label: string; icon: IconTypes }[] = [
+type ChartKind = "line" | "bar" | "pie"
+
+const CHART_TYPES: { type: ChartKind; label: string; icon?: IconTypes }[] = [
     { type: "line", label: "折线", icon: "ri:line-chart-line" },
     { type: "bar", label: "柱状", icon: "ri:bar-chart-line" },
+    { type: "pie", label: "饼图", icon: "ri:donut-chart-line" },
 ]
 
 const vector = computed<LabeledVector | undefined>(() => props.data.chartVector)
-const chartType = computed<"line" | "bar">(() => (props.data.chartType === "bar" ? "bar" : "line"))
+const chartType = computed<ChartKind>(() =>
+    CHART_TYPES.some(item => item.type === props.data.chartType) ? (props.data.chartType as ChartKind) : "line"
+)
 
 /** 图表数值展示：大数走紧凑单位，小数保留有效位 */
 function formatValue(value: number) {
@@ -37,6 +42,36 @@ const option = computed<echarts.EChartsOption>(() => {
     const labels = source?.labels ?? []
     const values = source?.values ?? []
     const type = chartType.value
+    if (type === "pie") {
+        return {
+            animation: false,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                backgroundColor: "rgba(24, 24, 27, 0.92)",
+                borderWidth: 0,
+                padding: [6, 8],
+                textStyle: { color: "#f4f4f5", fontSize: 11 },
+                formatter: (params: unknown) => {
+                    const item = params as { name?: string; value?: number; percent?: number } | undefined
+                    const value = typeof item?.value === "number" ? item.value : 0
+                    return `${item?.name ?? ""}<br/>${source?.valueLabel ?? "值"}: ${formatValue(value)} (${item?.percent ?? 0}%)`
+                },
+            },
+            series: [
+                {
+                    name: source?.title ?? "数值",
+                    type: "pie",
+                    radius: ["38%", "68%"],
+                    center: ["50%", "52%"],
+                    data: labels.map((name, index) => ({ name, value: values[index] ?? 0 })),
+                    label: { fontSize: 9, color: "#a1a1aa", formatter: "{b} {d}%" },
+                    labelLine: { length: 6, length2: 6 },
+                    itemStyle: { borderColor: "rgba(24, 24, 27, 0.9)", borderWidth: 1 },
+                },
+            ],
+        }
+    }
     return {
         animation: false,
         grid: { left: 6, right: 10, top: 12, bottom: 4, containLabel: true },
@@ -100,13 +135,14 @@ function disposeChart() {
 function mountChart() {
     disposeChart()
     if (!element.value) return
-    chart = echarts.init(element.value)
+    // SVG 渲染：画布缩放是 CSS transform 拉伸，canvas 位图会糊，矢量则一直清晰
+    chart = echarts.init(element.value, null, { renderer: "svg" })
     chart.setOption(option.value, { notMerge: true })
     observer = new ResizeObserver(() => chart?.resize())
     observer.observe(element.value)
 }
 
-function setChartType(type: "line" | "bar") {
+function setChartType(type: ChartKind) {
     if (type === chartType.value) return
     store.updateNodeData(props.id, { chartType: type })
 }
@@ -138,7 +174,7 @@ onBeforeUnmount(disposeChart)
                         "
                         @click="setChartType(item.type)"
                     >
-                        <Icon :icon="item.icon" class="size-3" />
+                        <Icon v-if="item.icon" :icon="item.icon" class="size-3" />
                         {{ item.label }}
                     </button>
                 </div>

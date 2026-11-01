@@ -156,7 +156,7 @@ export const CORE_INPUT = {
     dot: "dot",
 } as const
 
-/** 各节点类型的固定端口；表达式计算的动态端口由 getNodePorts 生成 */
+/** 各节点类型的固定端口；加法 / 乘法 / 表达式计算的动态端口由 getNodePorts 生成 */
 export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.CHAR_INPUT]: {
         inputs: numericParamPorts(NodeType.CHAR_INPUT),
@@ -208,24 +208,6 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     },
     [NodeType.CUSTOM_EXPRESSION]: { inputs: [BUILD_INPUT], outputs: [NUMBER_OUTPUT] },
     [NodeType.CHART]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [] },
-    [NodeType.ADD_CALC]: {
-        inputs: [
-            input("a", PortType.NUMBER, "a"),
-            input("b", PortType.NUMBER, "b"),
-            input("c", PortType.NUMBER, "c"),
-            input("d", PortType.NUMBER, "d"),
-        ],
-        outputs: [output("value", PortType.NUMBER, "数值")],
-    },
-    [NodeType.MULTIPLY_CALC]: {
-        inputs: [
-            input("a", PortType.NUMBER, "a"),
-            input("b", PortType.NUMBER, "b"),
-            input("c", PortType.NUMBER, "c"),
-            input("d", PortType.NUMBER, "d"),
-        ],
-        outputs: [output("value", PortType.NUMBER, "数值")],
-    },
     [NodeType.HUB_CALC]: { inputs: [BUILD_INPUT], outputs: [output("build", PortType.BUILD, "构筑")] },
     [NodeType.BUFF_MERGE]: {
         inputs: [input(BUFF_MERGE_INPUT.left, PortType.BUFF, "BUFF A"), input(BUFF_MERGE_INPUT.right, PortType.BUFF, "BUFF B")],
@@ -239,6 +221,7 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.VECTOR_INPUT]: { inputs: [], outputs: [output("vector", PortType.VECTOR, "向量")] },
     // 输出端口数量由上游向量长度决定，在 getNodePorts 中按 vectorLabels 生成
     [NodeType.VECTOR_DECOMPOSE]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [] },
+    [NodeType.VECTOR_CALC]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [NUMBER_OUTPUT] },
     // 构筑来源：JSON 文本 / 在线构筑
     [NodeType.JSON_BUILD]: {
         inputs: [input("text", PortType.STRING, "构筑 JSON")],
@@ -380,13 +363,16 @@ export function getNodePorts(type: string, data: Record<string, any> = {}): Node
             outputs: [output("build", PortType.BUILD, `构筑${dimensions.map((size: number) => `[${size}]`).join("")}`)],
         }
     }
-    if (type === NodeType.EXPRESSION_CALC) {
+    if (type === NodeType.ADD_CALC || type === NodeType.MULTIPLY_CALC || type === NodeType.EXPRESSION_CALC) {
+        // 加乘沿用 a-e 端口 id，旧图连线不断；表达式沿用 inputN 端口 id
+        const fallback = type === NodeType.EXPRESSION_CALC ? 2 : 4
         const rawCount = Number(data.inputCount)
-        const count = Number.isFinite(rawCount) ? Math.min(5, Math.max(1, Math.round(rawCount))) : 2
+        const count = Number.isFinite(rawCount) ? Math.min(5, Math.max(1, Math.round(rawCount))) : fallback
         return {
-            inputs: Array.from({ length: count }, (_, index) =>
-                input(`input${index + 1}`, PortType.NUMBER, String.fromCharCode(97 + index))
-            ),
+            inputs: Array.from({ length: count }, (_, index) => {
+                const label = String.fromCharCode(97 + index)
+                return input(type === NodeType.EXPRESSION_CALC ? `input${index + 1}` : label, PortType.NUMBER, label)
+            }),
             outputs: [output("value", PortType.NUMBER, "数值")],
         }
     }

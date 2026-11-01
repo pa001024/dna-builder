@@ -27,6 +27,7 @@ export enum NodeType {
     ADD_CALC = "add-calc", // 加法计算
     MULTIPLY_CALC = "multiply-calc", // 乘法计算
     EXPRESSION_CALC = "expression-calc", // 通用表达式计算
+    VECTOR_CALC = "vector-calc", // 向量统计计算
     HUB_CALC = "hub-calc", // 集线节点
 
     // BUFF 合并节点

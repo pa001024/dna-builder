@@ -5,6 +5,7 @@ import { computed, ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { formatDamage } from "@/util"
 import BaseNode from "./BaseNode.vue"
+import NumberRowInput from "./NumberRowInput.vue"
 
 const props = defineProps<NodeProps>()
 const store = useNodeEditorStore()
@@ -29,6 +30,13 @@ const { updateNodeInternals } = useVueFlow()
 const updateInputCount = () => {
     store.updateNodeData(props.id, { inputCount: inputCount.value })
     requestAnimationFrame(() => updateNodeInternals([props.id]))
+}
+
+/** 输入数量：数值组件增减端口，钳制在 1-5 */
+function setInputCount(next: number) {
+    if (!Number.isFinite(next)) return
+    inputCount.value = Math.min(5, Math.max(1, Math.round(next)))
+    updateInputCount()
 }
 
 watch(
@@ -67,18 +75,16 @@ watch(
 
             <!-- 输入数量设置 -->
             <div class="flex items-center gap-2">
-                <label class="text-[10px] text-base-content/45">{{ $t("node-editor.expressionCalc.inputCount") }}</label>
-                <Select
-                    v-model.number="inputCount"
-                    class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[11px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                    @change="updateInputCount"
-                >
-                    <SelectItem :value="1">1</SelectItem>
-                    <SelectItem :value="2">2</SelectItem>
-                    <SelectItem :value="3">3</SelectItem>
-                    <SelectItem :value="4">4</SelectItem>
-                    <SelectItem :value="5">5</SelectItem>
-                </Select>
+                <span class="text-[10px] text-base-content/45">{{ $t("node-editor.expressionCalc.inputCount") }}</span>
+                <NumberRowInput
+                    class="min-w-0 flex-1"
+                    :model-value="inputCount"
+                    :min="1"
+                    :max="5"
+                    :step="1"
+                    :precision="0"
+                    @update:model-value="setInputCount($event)"
+                />
             </div>
 
             <!-- 计算结果预览 -->
