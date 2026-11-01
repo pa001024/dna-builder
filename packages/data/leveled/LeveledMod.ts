@@ -1,8 +1,28 @@
-import i18next, { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
 import type { Buff, Mod, WeaponSkill } from "../data-types"
 import { LeveledBuff } from "./LeveledBuff"
 import { getMinusAttrValue } from "./minusAttr"
+
+export type TranslateFunction = (key: string) => string
+
+/**
+ * MOD 展示名翻译的宿主注入点。data 包不直接依赖任何 i18n 库；
+ * 宿主（web / 脚本）在启动时调用 setModI18n 提供当前语言与翻译函数，未注入时返回原文。
+ */
+export interface ModI18nProvider {
+    getLanguage(): string
+    t: TranslateFunction
+}
+
+const identityI18n: ModI18nProvider = { getLanguage: () => "", t: key => key }
+let modI18n: ModI18nProvider = identityI18n
+
+export function setModI18n(next: ModI18nProvider): void {
+    modI18n = next
+}
+
+/** 调用时取值的注入翻译函数：宿主注入后即时生效 */
+const translateInjected: TranslateFunction = key => modI18n.t(key)
 
 export type LeveledModResolver = (id: number) => { mod: Mod; effect?: Buff } | undefined
 
@@ -20,11 +40,11 @@ const POSTPOSED_SERIES_LANGUAGES = ["fr"]
 
 /**
  * 判断指定语言的 MOD 系列名是否需要排在名称之后。
- * @param language 语言代码，缺省时取 i18next 当前语言
+ * @param language 语言代码，缺省时取宿主注入的当前语言
  * @returns 系列名需后置返回 true
  */
 export function isSeriesPostposed(language?: string): boolean {
-    const lang = (language ?? i18next.language ?? "").toLowerCase()
+    const lang = (language ?? modI18n.getLanguage() ?? "").toLowerCase()
     return POSTPOSED_SERIES_LANGUAGES.some(code => lang.startsWith(code))
 }
 
@@ -34,10 +54,10 @@ export function isSeriesPostposed(language?: string): boolean {
  * 系列名在前时直接相接（译文自带连接词/尾空格）；系列名在后时用空格分隔并去掉译文两端空白。
  * @param series MOD 系列名（i18n 键，一般为中文原文）
  * @param name MOD 名称（i18n 键）
- * @param t 翻译函数，默认使用 i18next 全局 t
+ * @param t 翻译函数，默认使用宿主注入的翻译函数
  * @returns 拼接后的展示名
  */
-export function formatModName(series: string, name: string, t: (key: string) => string = translate): string {
+export function formatModName(series: string, name: string, t: TranslateFunction = translateInjected): string {
     const seriesText = series ? t(series) : ""
     const nameText = name ? t(name) : ""
     if (isSeriesPostposed()) {
@@ -60,10 +80,10 @@ export class LeveledMod implements Mod {
     /**
      * 拼接 MOD 完整展示名：属性前缀 + 语言相关的「系列 + 名称」+ 品质。
      * @param mod MOD 数据
-     * @param t 翻译函数，默认使用 i18next 全局 t
+     * @param t 翻译函数，默认使用宿主注入的翻译函数
      * @returns 完整展示名
      */
-    static fullName(mod: Mod, t: (key: string) => string = translate) {
+    static fullName(mod: Mod, t: TranslateFunction = translateInjected) {
         return `${t(mod.属性 || "")}${formatModName(mod.系列, mod.名称, t)}(${mod.品质})`
     }
 

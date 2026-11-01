@@ -7,6 +7,7 @@ import { createSSRApp } from "vue"
 import { renderToString } from "vue/server-renderer"
 import { createMemoryHistory, createRouter } from "vue-router"
 import App from "@/App.vue"
+import { setModI18n } from "@/data/leveled/LeveledMod"
 import { routes } from "@/router"
 
 /**
@@ -60,6 +61,8 @@ export function initSsrI18n(options: SsrRenderOptions = {}): void {
         showSupportNotice: false,
         initImmediate: false,
     })
+    // 与客户端 initI18n 同步：把单例注入给 MOD 展示名函数（预渲染直接读磁盘语言包）
+    setModI18n({ getLanguage: () => i18next.language, t: key => i18next.t(key) })
 
     i18nReady = true
 }

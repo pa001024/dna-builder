@@ -1,5 +1,6 @@
 import i18next from "i18next"
 import Backend, { type HttpBackendOptions } from "i18next-http-backend"
+import { setModI18n } from "@/data/leveled/LeveledMod"
 export const i18nLanguages: { name: string; code: string; alias?: string[] }[] = [
     {
         name: "English",
@@ -90,7 +91,7 @@ export async function initI18n(selectedLanguage: string) {
     const resolvedLanguage = resolveI18nLanguage(selectedLanguage)
     const lngCodes = i18nLanguages.map(l => l.code)
     useI18nHmr()
-    return i18next.use(Backend).init<HttpBackendOptions>({
+    const result = await i18next.use(Backend).init<HttpBackendOptions>({
         backend: {
             loadPath: "/i18n/{{lng}}/{{ns}}.json",
         },
@@ -105,6 +106,9 @@ export async function initI18n(selectedLanguage: string) {
         },
         showSupportNotice: false,
     })
+    // data 包不直引 i18next：这里把单例的当前语言与 t 注入给 MOD 展示名函数
+    setModI18n({ getLanguage: () => i18next.language, t: key => i18next.t(key) })
+    return result
 }
 
 function useI18nHmr(): void {
