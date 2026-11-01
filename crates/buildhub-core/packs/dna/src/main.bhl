@@ -1154,7 +1154,18 @@ fn crit_zone(p: Record{..open}, mode: Sym) -> Num =
   let dmg = rec_num(p, sym"暴伤") in
   if mode == sym"lower" then 1.0 + floor(rate) * (dmg - 1.0)
   else if mode == sym"upper" then 1.0 + ceil(rate) * (dmg - 1.0)
-  else 1.0 + min(rate, 1.0) * (dmg - 1.0)
+  else crit_dist(rate, dmg)
+
+# §9.8 暴击分布：一次求值一次抽样，同一求值内共享；下游在分布上传播，
+# 出口 expect 投影即期望（§9.8.11）。权重不必归一；零权 case 为编译期错误（Q15），
+# 因此端点退化为单值，避免 choice 权重为 0。
+fn crit_dist(rate: Num, dmg: Num) -> Num =
+  let r = clamp(rate, 0.0, 1.0) in
+  if r <= 0.0 then 1.0
+  else if r >= 1.0 then dmg
+  else
+    let crit = choice([(1.0 - r, 1.0), (r, dmg)]) in
+    crit
 
 // 抗性乘区 = (1 - 抗性) * (1 + 穿透)，下限 0。穿透不是独立乘区。
 fn resist_zone(c: Config, p: Record{..open}) -> Num =
@@ -1167,16 +1178,24 @@ fn high_level_reduce(level: Num) -> Num =
   if level >= 200.0 then 1.0 / (1.0 + (level - 190.0) * 0.05) else 1.0
 
 fn defense_zone(c: Config, p: Record{..open}, src: Source) -> Num =
-  let ignore = if src.kind == sym"skill"
-               then rec_num(p, sym"无视防御") + rec_num(p, sym"技能无视防御")
-               else rec_num(p, sym"无视防御") in
-  let def = enemy_def(c) * (1.0 - clamp(ignore, 0.0, 1.0)) in
-  let red = def / (300.0 + def - level_diff(c) * 10.0) in
-  clamp((1.0 - red) * high_level_reduce(c.enemy_level), 0.0, 1.0)
+  if enemy_shield(c) > 0.0 then high_level_reduce(c.enemy_level)
+  else
+    let ignore = if src.kind == sym"skill"
+                 then rec_num(p, sym"无视防御") + rec_num(p, sym"技能无视防御")
+                 else rec_num(p, sym"无视防御") in
+    let def = enemy_def(c) * (1.0 - clamp(ignore, 0.0, 1.0)) in
+    let red = def / (300.0 + def - level_diff(c) * 10.0) in
+    clamp((1.0 - red) * high_level_reduce(c.enemy_level), 0.0, 1.0)
 
 fn enemy_def(c: Config) -> Num =
   match monster_of(c.monster_id) {
     some(m) => m.def,
+    _ => 0.0
+  }
+
+fn enemy_shield(c: Config) -> Num =
+  match monster_of(c.monster_id) {
+    some(m) => opt_num(m.es, 0.0),
     _ => 0.0
   }
 
@@ -1204,12 +1223,12 @@ fn breakdown(c: Config, src: Source) -> Record{..open} =
     attack: attack_of(c, p, src.element),
     damage_pool: damage_pool(p, src, src.element),
     additional: additional_zone(p, src),
-    crit: crit_zone(p, c.crit_mode),
+    crit: expected(crit_zone(p, c.crit_mode)),
     independent: independent_zone(p, src),
     resist_zone: resist_zone(c, p),
     hp_zone: hp_zone(c, p),
     defense_zone: defense_zone(c, p, src),
-    damage: damage(c, src)
+    damage: expected(damage(c, src))
   }
 
 fn element_attack(c: Config, el: Sym) -> Num = attack_of(c, panel(c), el)
@@ -2038,3 +2057,37 @@ fn field_damage_with(c: Config, p: Record{..open}, skill_name: Sym, field_name: 
   let src = { kind: sym"skill", element: char_element(c.char_id), multiplier: 1.0 } in
   field_base(c, skill_name, field_name, p)
     * defense_zone(c, p, src) * skill_expected(c, p, is_summon_field(c, skill_name, field_name))
+
+// ---------------------------------------------------------------------------------------------
+// §9.8 分布与 §9.9 时序（G13/G16/G19/G20）：choice + trace/simulate
+// 暴击见 crit_dist（choice 保留分布形状，出口 expect 投影；引擎从不隐式塌缩）。
+// 时序见下面的 SimState + trace_step/trace_probe + simulate（§9.9.6：simulate
+// 即 trace 投影到末帧；宿主经 bhub_trace 驱动，pack 只提供状态与推进函数）。
+// ---------------------------------------------------------------------------------------------
+
+schema SimState {
+  t: Num
+  def: Num
+  total: Num
+  ..open
+}
+
+schema Sample {
+  total: Num
+  per_dim: Record{..open}
+  state: Record{..open}
+  ..open
+}
+
+fn trace_init(def: Num) -> SimState = SimState { t: 0.0, def: def, total: 0.0 }
+
+fn trace_step(shred: Num) -> |SimState, Num| SimState =
+  |s, t|
+    let dmg = 100.0 * (1.0 - s.def / (300.0 + s.def)) in
+    SimState { t: t, def: max(s.def * (1.0 - shred), 0.0), total: s.total + dmg }
+
+fn trace_probe(s: SimState) -> Sample =
+  Sample { total: s.total, per_dim: { direct: s.total }, state: { def: s.def } }
+
+fn simulate(s0: SimState, steps: List<Num>, step: |SimState, Num| SimState) -> SimState =
+  fold(steps, s0, step)
