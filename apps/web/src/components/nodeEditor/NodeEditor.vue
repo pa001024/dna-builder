@@ -436,6 +436,8 @@ onConnectEnd(event => {
 
 // 图切换
 const selectedGraphId = ref<number | "">("")
+/** 切换图浮层菜单开关：切换图标是独立按钮，点开后列出已存图 */
+const switchMenuOpen = ref(false)
 /** 首屏加载图数据时显示画布加载层 */
 const initializing = ref(true)
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -858,6 +860,11 @@ function handleKeyDown(event: KeyboardEvent) {
         return
     }
 
+    if (event.key === "Escape" && switchMenuOpen.value) {
+        switchMenuOpen.value = false
+        return
+    }
+
     if (event.key === "Escape" && connectMenu.value) {
         closeConnectMenu()
         return
@@ -1123,9 +1130,10 @@ onNodeDragStop(({ event, node }) => {
     }
 })
 
-// 点击外部关闭右键菜单
+// 点击外部关闭右键菜单与切换图菜单
 function handleClickOutside(_event: MouseEvent) {
     contextMenuVisible.value = false
+    switchMenuOpen.value = false
 }
 
 /** 点击菜单外部时关闭端口落点菜单（用 pointerdown 避免菜单打开当次点击立即关闭） */
@@ -1142,6 +1150,13 @@ onMounted(() => {
     window.addEventListener("pointerdown", handleConnectMenuPointerDown, true)
     window.addEventListener("pointerdown", captureDuplicatePointer, true)
 })
+
+/** 切换图菜单选中：收起菜单并载入目标图 */
+function selectGraphFromMenu(graphId: number) {
+    selectedGraphId.value = graphId
+    switchMenuOpen.value = false
+    void handleGraphChange()
+}
 
 // 图切换处理
 async function handleGraphChange() {
@@ -1492,29 +1507,54 @@ async function handleTransfer(charName: string) {
                 >
                     <Icon icon="ri:arrow-right-line" class="size-3.5" />
                 </button>
-                <!-- 图名称 / 切换图 -->
-                <div class="hidden min-w-0 items-center gap-1 md:flex">
-                    <span class="shrink-0 text-[10px] text-base-content/40">图名称</span>
+                <!-- 图名称 + 切换图合并：输入框改名，加号新建，切换图标切图 -->
+                <div class="hidden min-w-0 items-center gap-0.5 md:flex">
                     <input
                         v-model="store.currentGraphName"
-                        class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="未命名图"
                         @blur="store.setCurrentGraphName(store.currentGraphName)"
                     />
-                </div>
-                <div class="hidden min-w-0 items-center gap-1 md:flex">
-                    <span class="shrink-0 text-[10px] text-base-content/40">切换图</span>
-                    <Select
-                        :model-value="selectedGraphId === '' ? '-' : selectedGraphId"
-                        class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                        @update:model-value="selectedGraphId = $event === '-' ? '' : Number($event)"
-                        @change="handleGraphChange"
+                    <button
+                        type="button"
+                        class="grid size-6 shrink-0 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.95]"
+                        title="创建新图"
+                        aria-label="创建新图"
+                        @click="handleNewGraph"
                     >
-                        <SelectItem value="-">创建新图</SelectItem>
-                        <SelectItem v-for="graph in store.savedGraphs" :key="graph.id" :value="graph.id">
-                            {{ graph.name }}
-                        </SelectItem>
-                    </Select>
+                        <Icon icon="ri:add-line" class="size-3.5" />
+                    </button>
+                    <div class="relative shrink-0">
+                        <button
+                            type="button"
+                            class="grid size-6 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.95]"
+                            title="切换图"
+                            aria-label="切换图"
+                            @click.stop="switchMenuOpen = !switchMenuOpen"
+                        >
+                            <Icon icon="ri:exchange-line" class="size-3.5" />
+                        </button>
+                        <div
+                            v-if="switchMenuOpen"
+                            class="absolute left-0 top-7 z-50 max-h-64 w-44 overflow-y-auto border border-base-content/10 bg-base-100 py-1 shadow-lg"
+                            @click.stop
+                        >
+                            <div v-if="store.savedGraphs.length === 0" class="px-2 py-3 text-center text-[11px] text-base-content/45">
+                                还没有保存的图
+                            </div>
+                            <button
+                                v-for="graph in store.savedGraphs"
+                                :key="graph.id"
+                                type="button"
+                                class="flex w-full cursor-pointer items-center gap-1.5 px-2 py-1.5 text-left text-[12px] transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                                :class="graph.id === store.currentGraphId ? 'text-primary' : 'text-base-content/75'"
+                                @click="selectGraphFromMenu(graph.id)"
+                            >
+                                <span class="min-w-0 flex-1 truncate">{{ graph.name }}</span>
+                                <Icon v-if="graph.id === store.currentGraphId" icon="ri:check-line" class="size-3.5 shrink-0" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <span v-if="activeRemoteId" class="badge badge-success badge-sm hidden gap-1 md:inline-flex" title="当前画布来自分享链接，可继续编辑后另存为新分享">
                     <Icon icon="ri:download-2-line" class="size-3" />
@@ -1588,16 +1628,6 @@ async function handleTransfer(charName: string) {
                     >
                         <Icon icon="ri:robot-2-line" class="size-3" />
                         <span class="hidden sm:inline">AI</span>
-                    </button>
-                    <button
-                        v-if="activeRemoteId"
-                        class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
-                        title="回到本地新图"
-                        aria-label="回到本地新图"
-                        @click="handleNewGraph"
-                    >
-                        <Icon icon="ri:file-add-line" class="size-3" />
-                        <span class="hidden sm:inline">新建</span>
                     </button>
                     <button
                         class="flex h-6 cursor-pointer items-center gap-1 border border-primary/40 bg-primary/15 px-1.5 text-[10px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20 active:scale-[0.97]"
