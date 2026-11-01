@@ -7,33 +7,37 @@ import { writeTextFile } from "@/api/app"
 import type { CalcBuildEvaluation } from "@/data/Calc.worker"
 import type { CharBuild } from "@/data/CharBuild"
 import { env } from "@/env"
-import { requestBuildEvaluation } from "@/utils/calc-worker"
+import { requestBuildEvaluation, requestBuildPanels } from "@/utils/calc-worker"
 import {
     type BuildVector,
+    type BuildVectorDimension,
     clonePlain,
     collectAllInputs,
     collectCoreInputNodes,
+    collectNumericParamVectors,
     collectVariableVectors,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
     createBuildContextFromSettings,
     createBuildContextsFromInputs,
     createExpressionVectorOutput,
-    getSkillDamageTarget,
-    getWeaponDamageTarget,
+    createVectorDecomposeOutput,
     migrateLegacyTeamBuffs,
     type NodeBuildContext,
     normalizeLabeledVector,
     readNodeBuffEntries,
     readNodeCustomVariables,
     readNodeTeamBuffs,
+    resolveBuffSourceNode,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
+import { recordSyncPhase } from "@/utils/nodeEditorPerf"
 import {
     CORE_INPUT,
     canConnectPorts,
     customVariableVectorPortId,
     getNodePorts,
+    NUMERIC_PARAM_PORTS,
     PortType,
     parseCustomVariableVectorPortId,
     portColor,
@@ -161,13 +165,46 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
-     * 判断节点数据更新是否真的发生变化。
-     * @param nodeData 原节点数据。
-     * @param data 待合并的新数据。
-     * @returns 是否有字段变化。
+     * 仅影响节点自身展示、不参与构筑计算的字段：改动时不失效缓存、不触发重算。
+     * 标题不在此列：向量输出的维度/标签读取 `data.label`，需按下游是否消费向量决定。
      */
-    function hasNodeDataChanges(nodeData: Record<string, any>, data: Record<string, any>) {
-        return Object.keys(data).some(key => !Object.is(nodeData[key], data[key]))
+    const DISPLAY_ONLY_NODE_KEYS = new Set(["isCollapsed"])
+
+    /**
+     * 判断节点标题是否参与计算：只有向量展示会读取输入节点标题。
+     * 自身是图表节点，或下游存在向量输入端口、核心把该节点当作 MOD/BUFF 向量维度时才需要重算。
+     * @param nodeId 改标题的节点 id
+     * @returns 标题是否影响计算
+     */
+    function labelAffectsCalculation(nodeId: string): boolean {
+        const node = nodes.value.find(item => item.id === nodeId)
+        if (!node) return false
+        // 图表没有上游标题时用自身标题兜底
+        if (node.type === NodeType.CHART) return true
+        // 输入节点的数值参数标题会进入构筑向量维度标签
+        const paramIds = new Set((NUMERIC_PARAM_PORTS[node.type as NodeType] ?? []).map(param => param.id))
+        if (paramIds.size > 0 && edges.value.some(edge => edge.target === nodeId && paramIds.has(edge.targetHandle ?? ""))) return true
+
+        const visited = new Set<string>()
+        const queue = edges.value.filter(edge => edge.source === nodeId).map(edge => edge.target)
+        while (queue.length > 0) {
+            const currentId = queue.shift()!
+            if (visited.has(currentId)) continue
+            visited.add(currentId)
+            const current = nodes.value.find(item => item.id === currentId)
+            if (!current) continue
+            // 向量输入端口的节点会读取上游向量的标签 / 标题
+            if (getNodePorts(current.type ?? "", current.data).inputs.some(port => port.type === PortType.VECTOR)) return true
+            // 多个 MOD / BUFF 输入作为核心的向量维度，维度名取自输入节点标题
+            if (current.type === NodeType.CORE_CALC) {
+                const inputs = collectCoreInputNodes(nodes.value, edges.value, current.id)
+                const isModDimension = inputs.modInputs.length > 1 && inputs.modInputs.some(item => item.id === nodeId)
+                const isBuffDimension = inputs.buffInputs.length > 1 && inputs.buffInputs.some(item => item.id === nodeId)
+                if (isModDimension || isBuffDimension) return true
+            }
+            edges.value.filter(edge => edge.source === currentId).forEach(edge => queue.push(edge.target))
+        }
+        return false
     }
 
     /**
@@ -364,18 +401,27 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         const node = nodes.value.find(n => n.id === nodeId)
         if (node) {
             const currentNodeData = node.data
-            if (!hasNodeDataChanges(currentNodeData, data)) {
+            const changedKeys = Object.keys(data).filter(key => !Object.is(currentNodeData[key], data[key]))
+            if (changedKeys.length === 0) {
                 return
             }
 
             // 更新节点数据
             node.data = { ...currentNodeData, ...data }
 
-            // 清除缓存并触发相关节点的重新计算
-            clearCache()
-            markGraphDirty()
+            const needsRecalculation = changedKeys.some(key => {
+                if (DISPLAY_ONLY_NODE_KEYS.has(key)) return false
+                // 标题只在向量展示读取时才参与计算
+                return key !== "label" || labelAffectsCalculation(nodeId)
+            })
+            // 折叠 / 不影响向量的标题改动：保持计算缓存，避免连带 worker 求值
+            if (needsRecalculation) {
+                // 清除缓存并触发相关节点的重新计算
+                clearCache()
+                markGraphDirty()
 
-            triggerRecalculation(nodeId)
+                triggerRecalculation(nodeId)
+            }
 
             // 高频编辑（如输入框连续修改）合并为一个撤销步骤
             commitHistory("更新节点数据", `node:${nodeId}`)
@@ -547,6 +593,22 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             })
             buffNodes.push(teamNode)
         })
+    }
+
+    /** 已移除的求值节点类型：旧图加载时连同连线一起丢弃 */
+    const LEGACY_REMOVED_NODE_TYPES = new Set(["full-calc", "skill-dmg-calc", "weapon-dmg-calc"])
+
+    /**
+     * 丢弃已移除节点类型的节点及其连线，保证旧图仍能载入。
+     * @param inputNodes 图中的节点
+     * @param inputEdges 图中的边
+     * @returns 保留的节点与边
+     */
+    function dropRemovedNodes(inputNodes: EditorNode[], inputEdges: EditorEdge[]) {
+        const keptNodes = inputNodes.filter(node => !LEGACY_REMOVED_NODE_TYPES.has(node.type ?? ""))
+        if (keptNodes.length === inputNodes.length) return { nodes: inputNodes, edges: inputEdges }
+        const keptIds = new Set(keptNodes.map(node => node.id))
+        return { nodes: keptNodes, edges: inputEdges.filter(edge => keptIds.has(edge.source) && keptIds.has(edge.target)) }
     }
 
     /**
@@ -919,6 +981,12 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     result: undefined, // 计算结果，不需要保存
                     error: undefined, // 错误信息，不需要保存
                     missingInputs: undefined, // 临时状态，不需要保存
+                    hasSkillWeapon: undefined, // 武器槽按钮组状态，重新计算即可
+                    weaponSlotAuto: undefined, // 构筑默认武器槽，重新计算即可
+                    attrOutputVector: undefined, // 属性逐项输出类型，重新计算即可
+                    attributeVectorValues: undefined, // 属性逐项向量值，重新计算即可
+                    panels: undefined, // 面板缓存（角色 / 武器槽），重新计算即可
+                    panelVectors: undefined, // 面板逐项向量缓存，重新计算即可
                     inputData: undefined, // 计算中间数据，不需要保存
                 },
             }
@@ -1026,6 +1094,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             migrateLegacyTeamNodes(nodes.value, migratedEdges)
             edges.value = migrateGraphEdges(nodes.value, migratedEdges)
             nodes.value = nodes.value.filter(node => !legacyHubs.has(node.id))
+            const pruned = dropRemovedNodes(nodes.value, edges.value)
+            nodes.value = pruned.nodes
+            edges.value = pruned.edges
             edges.value.forEach(decorateEdge)
             currentGraphId.value = graph.id
             markGraphDirty()
@@ -1072,6 +1143,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * 触发相关节点的重新计算
      */
     function triggerRecalculation(nodeId: string) {
+        const startedAt = performance.now()
         // 找到所有受影响的下游节点
         const affectedNodes = new Set<string>()
         const visited = new Set<string>()
@@ -1096,6 +1168,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         affectedNodes.forEach(affectedId => {
             calculateNode(affectedId, false)
         })
+        const node = nodes.value.find(item => item.id === nodeId)
+        recordSyncPhase("级联重算", performance.now() - startedAt, { nodeId, nodeType: node?.type })
     }
 
     /**
@@ -1207,6 +1281,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         migrateLegacyTeamNodes(nodes.value, importedEdges)
         edges.value = migrateGraphEdges(nodes.value, importedEdges)
         nodes.value = nodes.value.filter(node => !legacyHubs.has(node.id))
+        const pruned = dropRemovedNodes(nodes.value, edges.value)
+        nodes.value = pruned.nodes
+        edges.value = pruned.edges
         edges.value.forEach(decorateEdge)
         currentGraphName.value = graphName ?? (typeof graphData.name === "string" && graphData.name ? graphData.name : "分享的图")
         currentGraphId.value = null
@@ -1247,6 +1324,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     migrateLegacyTeamNodes(nodes.value, importedEdges)
                     edges.value = migrateGraphEdges(nodes.value, importedEdges)
                     nodes.value = nodes.value.filter(node => !legacyHubs.has(node.id))
+                    const pruned = dropRemovedNodes(nodes.value, edges.value)
+                    nodes.value = pruned.nodes
+                    edges.value = pruned.edges
                     edges.value.forEach(decorateEdge)
                     currentGraphName.value = graphData.name || "导入的图"
                     currentGraphId.value = null // 新图，未保存
@@ -1279,15 +1359,44 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
+     * 解析核心节点的构筑输入：求值期按上游重新计算，渲染期只读已写回的结果。
+     * @param coreId 核心节点 id
+     * @param storedOnly 是否只读上游已缓存的构筑
+     * @returns 构筑向量；没有构筑输入时返回 null
+     */
+    function resolveIncomingBuild(
+        coreId: string,
+        storedOnly: boolean
+    ): { contexts: NodeBuildContext[]; dimensions: BuildVectorDimension[]; labels: string[] } | null {
+        const source = findBuildInputSource(coreId)
+        if (!source) return null
+        if (!storedOnly) return getBuildInputVector(coreId)
+        const storedVector = source.data.buildVector as BuildVector | undefined
+        if (storedVector && storedVector.contexts.length > 0) return storedVector
+        const storedBuild = source.data.build as NodeBuildContext | undefined
+        return storedBuild ? { dimensions: [], labels: [""], contexts: [storedBuild] } : null
+    }
+
+    /**
      * 解析核心节点的构筑上下文，不修改节点数据。
      * @param coreNode 核心计算节点
+     * @param options `readStoredBuildInput` 为 true 时只读上游缓存，供渲染期调用
      * @returns 构筑上下文、向量与缺失信息
      */
-    function resolveCoreBuild(coreNode: EditorNode): CoreBuildResolution {
+    function resolveCoreBuild(coreNode: EditorNode, options: { readStoredBuildInput?: boolean } = {}): CoreBuildResolution {
         // 只读取核心节点端口上直接相连的输入；下游节点永远不会反向并入构筑
         const inputs = collectCoreInputNodes(nodes.value, edges.value, coreNode.id)
         const variableVectors = collectVariableVectors(nodes.value, edges.value, inputs.customVarsInput?.id)
-        return createBuildContextsFromInputs(inputs, variableVectors, coreNode.data)
+        const paramVectors = collectNumericParamVectors(nodes.value, edges.value, inputs)
+        const incoming = resolveIncomingBuild(coreNode.id, options.readStoredBuildInput === true)
+        const mode = coreNode.data.buildMode === "append" ? "append" : "override"
+        return createBuildContextsFromInputs(
+            inputs,
+            variableVectors,
+            coreNode.data,
+            incoming ? { ...incoming, mode } : undefined,
+            paramVectors
+        )
     }
 
     /**
@@ -1354,7 +1463,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             const related = findConnectedCore(nodeId, "downstream") ?? findConnectedCore(nodeId, "upstream")
             if (related) {
                 // 这里会在节点渲染期间被调用：核心尚未计算时只做只读解析，不写回节点数据
-                const context = (related.data.build as NodeBuildContext | undefined) ?? resolveCoreBuild(related).contexts[0]
+                const context =
+                    (related.data.build as NodeBuildContext | undefined) ??
+                    resolveCoreBuild(related, { readStoredBuildInput: true }).contexts[0]
                 if (context) return context
             }
         }
@@ -1409,6 +1520,24 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
+     * 属性节点的输出：`attrs` 下挂整块面板，同时把每项属性平铺成独立输出口，
+     * 向量构筑时每项属性是该组合下的数值数组。
+     * @param node 目标节点
+     * @returns 输出对象；尚未求值时返回 null
+     */
+    function attributeOutputs(node: EditorNode) {
+        const panel = node.data.result as Record<string, number> | null | undefined
+        if (!panel || typeof panel !== "object") return null
+        const vectors = node.data.attributeVectorValues as Record<string, number[]> | undefined
+        const output: Record<string, number | number[] | Record<string, number>> = { attrs: panel }
+        Object.entries(panel).forEach(([key, value]) => {
+            if (typeof value !== "number") return
+            output[key] = vectors?.[key] ?? value
+        })
+        return output
+    }
+
+    /**
      * 读取上游节点的输出值：按 sourceHandle 精确取值，输入节点直接返回节点数据。
      * @param node 上游节点
      * @param handleId 输出端口 id
@@ -1419,6 +1548,11 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (result === undefined || result === null) return undefined
         const nodeType = node.type ?? ""
         if (nodeType.includes("input")) return result
+        // 属性节点：attrs 取整块面板，属性键取逐项值；旧边没有 handle 时仍按整块面板处理
+        if (nodeType === NodeType.ATTR_CALC || nodeType === NodeType.WEAPON_ATTR_CALC) {
+            if (!handleId || handleId === "attrs") return result.attrs
+            return result[handleId] ?? result.attrs
+        }
         if (handleId && typeof result === "object" && handleId in result) return result[handleId]
         return result
     }
@@ -1524,21 +1658,21 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * @param evaluation worker 求值结果
      */
     function applyEvaluation(node: EditorNode, evaluation: CalcBuildEvaluation) {
+        const startedAt = performance.now()
         node.data.evalPending = false
         node.data.evaluation = evaluation
         // 属性节点只关心属性/面板：目标函数求值失败不应让属性结果变成错误
         const ignoresTargetError = node.type === NodeType.ATTR_CALC || node.type === NodeType.WEAPON_ATTR_CALC
         if (evaluation.error && !ignoresTargetError) {
             node.data.error = evaluation.error
-            // 伤害节点约定 result 为 DamageResult，出错时置空而不是塞入 { value }，避免渲染层按伤害字段取值崩溃
-            const isDamageNode = node.type === NodeType.SKILL_DMG_CALC || node.type === NodeType.WEAPON_DMG_CALC
-            node.data.result = isDamageNode ? null : { value: evaluation.targetValue, error: evaluation.error }
+            node.data.result = { value: evaluation.targetValue, error: evaluation.error }
         } else {
             node.data.error = undefined
             node.data.result = mapEvaluationResult(node, evaluation)
         }
         clearCache()
         refreshDownstream(node.id)
+        recordSyncPhase("结果写回", performance.now() - startedAt, { nodeId: node.id, nodeType: node.type })
     }
 
     /**
@@ -1553,9 +1687,6 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 return evaluation.attributes
             case NodeType.WEAPON_ATTR_CALC:
                 return evaluation.weapon
-            case NodeType.SKILL_DMG_CALC:
-            case NodeType.WEAPON_DMG_CALC:
-                return evaluation.damage
             default:
                 return { value: evaluation.targetValue }
         }
@@ -1566,6 +1697,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * @param nodeId 起点节点
      */
     function refreshDownstream(nodeId: string) {
+        const startedAt = performance.now()
         const visited = new Set<string>([nodeId])
         const queue = [nodeId]
         while (queue.length > 0) {
@@ -1577,17 +1709,197 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 calculateNode(edge.target, false)
             })
         }
+        const node = nodes.value.find(item => item.id === nodeId)
+        recordSyncPhase("下游刷新", performance.now() - startedAt, { nodeId, nodeType: node?.type })
+    }
+
+    /** 计算武器属性节点可选的武器槽 */
+    type WeaponSlot = "melee" | "ranged" | "skill"
+
+    /** 面板请求的面板键：角色属性面板 + 武器槽面板 */
+    type PanelKey = "char" | WeaponSlot
+
+    /** 武器属性节点一次取齐的槽位：切换按钮时直接取缓存，不再发请求 */
+    const WEAPON_PANEL_SLOTS: WeaponSlot[] = ["melee", "ranged", "skill"]
+
+    /** 构筑默认武器槽 → 节点展示槽位 */
+    const AUTO_WEAPON_SLOT: Record<string, WeaponSlot> = { 近战: "melee", 远程: "ranged", 同律: "skill" }
+
+    /**
+     * 读取节点当前展示的武器面板槽：手选优先，未选时跟随构筑默认武器。
+     * @param node 计算武器属性节点
+     * @returns 武器槽
+     */
+    function activeWeaponSlot(node: EditorNode): WeaponSlot {
+        const slot = node.data.weaponSlot
+        if (slot === "melee" || slot === "ranged" || slot === "skill") return slot
+        return AUTO_WEAPON_SLOT[node.data.weaponSlotAuto as string] ?? "melee"
+    }
+
+    /**
+     * 节点在面板结果里展示的键：属性节点取角色面板，武器属性节点取当前槽位。
+     * @param node 属性节点
+     * @returns 面板键
+     */
+    function activePanelKey(node: EditorNode): PanelKey {
+        return node.type === NodeType.ATTR_CALC ? "char" : activeWeaponSlot(node)
+    }
+
+    /**
+     * 节点一次面板请求要取的面板键。
+     * @param node 属性节点
+     * @returns 面板键列表
+     */
+    function panelKeysFor(node: EditorNode): PanelKey[] {
+        return node.type === NodeType.ATTR_CALC ? ["char"] : WEAPON_PANEL_SLOTS
+    }
+
+    /**
+     * 从批量面板结果同步节点展示：面板与向量都按当前面板键取值（切换武器槽无需重新请求）。
+     * @param node 属性节点
+     */
+    function applyPanelSelection(node: EditorNode) {
+        const key = activePanelKey(node)
+        const panels = node.data.panels as Partial<Record<PanelKey, Record<string, number>>> | undefined
+        const vectorsByKey = node.data.panelVectors as Partial<Record<PanelKey, Record<string, number[]>>> | undefined
+        node.data.result = panels?.[key] ?? null
+        node.data.attributeVectorValues = vectorsByKey?.[key]
+        const vectorResult = node.data.vectorResult as { values: number[] } | undefined
+        const vectors = vectorsByKey?.[key]
+        if (vectorResult && vectors) node.data.vectorResult = { ...vectorResult, values: vectors.攻击 ?? [] }
+    }
+
+    /**
+     * 调度面板求值：只请求面板（不跑目标函数 / 伤害明细），同一构筑一次取齐该节点的全部面板键。
+     * @param node 属性节点
+     * @param context 构筑上下文
+     */
+    function schedulePanels(node: EditorNode, context: NodeBuildContext) {
+        const signature = JSON.stringify([context.charId, context.settings])
+        if (node.data.evalSignature === signature) {
+            applyPanelSelection(node)
+            return
+        }
+        node.data.evalSignature = signature
+        node.data.evalPending = true
+        node.data.panelVectors = undefined
+        node.data.attributeVectorValues = undefined
+        const pendingTimer = evaluationTimers.get(node.id)
+        if (pendingTimer) clearTimeout(pendingTimer)
+        const requestId = (evaluationRequestIds.get(node.id) ?? 0) + 1
+        evaluationRequestIds.set(node.id, requestId)
+        const timer = setTimeout(() => {
+            evaluationTimers.delete(node.id)
+            requestBuildPanels(
+                {
+                    charId: context.charId,
+                    settings: clonePlain(context.settings),
+                    panels: panelKeysFor(node),
+                },
+                { nodeId: node.id, nodeType: node.type }
+            )
+                .then(panels => {
+                    if (evaluationRequestIds.get(node.id) !== requestId) return
+                    node.data.evalPending = false
+                    node.data.error = undefined
+                    node.data.panels = panels
+                    node.data.panelVectors = undefined
+                    applyPanelSelection(node)
+                    clearCache()
+                    refreshDownstream(node.id)
+                })
+                .catch(error => {
+                    if (evaluationRequestIds.get(node.id) !== requestId) return
+                    node.data.evalPending = false
+                    node.data.error = error instanceof Error ? error.message : String(error)
+                })
+        }, EVAL_DEBOUNCE_MS)
+        evaluationTimers.set(node.id, timer)
+    }
+
+    /**
+     * 调度向量构筑的面板求值：每个组合一次批量面板请求，按面板键合并为逐项向量。
+     * @param node 属性节点
+     * @param vector 构筑向量
+     */
+    function scheduleVectorPanels(node: EditorNode, vector: BuildVector) {
+        const panelKeys = panelKeysFor(node)
+        const signature = JSON.stringify([
+            vector.dimensions.map(dimension => dimension.values),
+            vector.contexts.map(context => [context.charId, context.settings]),
+        ])
+        if (node.data.evalSignature === signature) {
+            applyPanelSelection(node)
+            return
+        }
+        node.data.evalSignature = signature
+        node.data.evalPending = true
+        node.data.panelVectors = undefined
+        node.data.attributeVectorValues = undefined
+        const pendingTimer = evaluationTimers.get(node.id)
+        if (pendingTimer) clearTimeout(pendingTimer)
+        const requestId = (evaluationRequestIds.get(node.id) ?? 0) + 1
+        evaluationRequestIds.set(node.id, requestId)
+        const timer = setTimeout(() => {
+            evaluationTimers.delete(node.id)
+            Promise.all(
+                vector.contexts.map(context =>
+                    requestBuildPanels(
+                        {
+                            charId: context.charId,
+                            settings: clonePlain(context.settings),
+                            panels: panelKeys,
+                        },
+                        { nodeId: node.id, nodeType: node.type }
+                    )
+                )
+            )
+                .then(panelsList => {
+                    if (evaluationRequestIds.get(node.id) !== requestId) return
+                    const vectorsByKey: Partial<Record<PanelKey, Record<string, number[]>>> = {}
+                    panelsList.forEach(panels => {
+                        panelKeys.forEach(panelKey => {
+                            const panel = panels[panelKey]
+                            if (!panel) return
+                            const vectors = (vectorsByKey[panelKey] ??= {})
+                            Object.entries(panel).forEach(([key, value]) => {
+                                if (typeof value === "number") (vectors[key] ??= []).push(value)
+                            })
+                        })
+                    })
+                    node.data.evalPending = false
+                    node.data.error = undefined
+                    node.data.panels = panelsList[0] ?? {}
+                    node.data.panelVectors = vectorsByKey
+                    node.data.vectorResult = {
+                        dimensions: vector.dimensions,
+                        labels: vector.labels,
+                        values: [],
+                        valueLabel: "攻击",
+                    }
+                    applyPanelSelection(node)
+                    clearCache()
+                    refreshDownstream(node.id)
+                })
+                .catch(error => {
+                    if (evaluationRequestIds.get(node.id) !== requestId) return
+                    node.data.evalPending = false
+                    node.data.error = error instanceof Error ? error.message : String(error)
+                })
+        }, EVAL_DEBOUNCE_MS)
+        evaluationTimers.set(node.id, timer)
     }
 
     /**
      * 调度一次异步构筑求值：按节点签名去重，过期请求的结果直接丢弃。
      * @param node 目标节点
      * @param context 构筑上下文
-     * @param targetFunction 目标函数覆盖（AST / 伤害节点）
-     * @param baseName 技能基名覆盖（武器伤害节点）
+     * @param targetFunction 目标函数覆盖（AST 节点）
+     * @param baseName 技能基名覆盖
      */
     function scheduleEvaluation(node: EditorNode, context: NodeBuildContext, targetFunction?: string, baseName?: string) {
         node.data.vectorResult = undefined
+        node.data.attributeVectorValues = undefined
         const base = withExpressionSettings(context.settings, targetFunction)
         const settings = baseName ? { ...base, baseName } : base
         const signature = JSON.stringify([context.charId, settings])
@@ -1598,16 +1910,17 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (pendingTimer) clearTimeout(pendingTimer)
         const requestId = (evaluationRequestIds.get(node.id) ?? 0) + 1
         evaluationRequestIds.set(node.id, requestId)
-        const damageKind = node.type === NodeType.WEAPON_DMG_CALC ? "weapon" : node.type === NodeType.SKILL_DMG_CALC ? "skill" : undefined
         const timer = setTimeout(() => {
             evaluationTimers.delete(node.id)
-            requestBuildEvaluation({
-                charId: context.charId,
-                settings: clonePlain(settings),
-                targetFunction: settings.targetFunction,
-                baseName: settings.baseName,
-                damageKind,
-            })
+            requestBuildEvaluation(
+                {
+                    charId: context.charId,
+                    settings: clonePlain(settings),
+                    targetFunction: settings.targetFunction,
+                    baseName: settings.baseName,
+                },
+                { nodeId: node.id, nodeType: node.type }
+            )
                 .then(evaluation => {
                     if (evaluationRequestIds.get(node.id) !== requestId) return
                     applyEvaluation(node, evaluation)
@@ -1651,18 +1964,19 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (pendingTimer) clearTimeout(pendingTimer)
         const requestId = (evaluationRequestIds.get(node.id) ?? 0) + 1
         evaluationRequestIds.set(node.id, requestId)
-        const damageKind = node.type === NodeType.WEAPON_DMG_CALC ? "weapon" : node.type === NodeType.SKILL_DMG_CALC ? "skill" : undefined
         const timer = setTimeout(() => {
             evaluationTimers.delete(node.id)
             Promise.all(
                 prepared.map(item =>
-                    requestBuildEvaluation({
-                        charId: item.context.charId,
-                        settings: clonePlain(item.settings),
-                        targetFunction: item.settings.targetFunction,
-                        baseName: item.settings.baseName,
-                        damageKind,
-                    })
+                    requestBuildEvaluation(
+                        {
+                            charId: item.context.charId,
+                            settings: clonePlain(item.settings),
+                            targetFunction: item.settings.targetFunction,
+                            baseName: item.settings.baseName,
+                        },
+                        { nodeId: node.id, nodeType: node.type }
+                    )
                 )
             )
                 .then(evaluations => {
@@ -1685,9 +1999,6 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 return { label: "攻击", pick: evaluation => evaluation.attributes?.攻击 ?? 0 }
             case NodeType.WEAPON_ATTR_CALC:
                 return { label: "攻击", pick: evaluation => evaluation.weapon?.攻击 ?? 0 }
-            case NodeType.SKILL_DMG_CALC:
-            case NodeType.WEAPON_DMG_CALC:
-                return { label: "期望伤害", pick: evaluation => evaluation.damage?.expectedDamage ?? 0 }
             default:
                 return { label: "数值", pick: evaluation => evaluation.targetValue ?? 0 }
         }
@@ -1700,6 +2011,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * @param evaluations 各组合的求值结果
      */
     function applyVectorEvaluation(node: EditorNode, vector: BuildVector, evaluations: CalcBuildEvaluation[]) {
+        const startedAt = performance.now()
         node.data.evalPending = false
         node.data.evaluation = evaluations[0]
         const firstError = evaluations.find(evaluation => evaluation.error)?.error
@@ -1710,13 +2022,23 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             values: evaluations.map(evaluation => extractor.pick(evaluation)),
             valueLabel: extractor.label,
         }
+        // 属性节点：逐项属性各存一组与组合对齐的数值，作为向量输出
+        const panelKey = node.type === NodeType.ATTR_CALC ? "attributes" : node.type === NodeType.WEAPON_ATTR_CALC ? "weapon" : undefined
+        if (panelKey) {
+            const vectors: Record<string, number[]> = {}
+            evaluations.forEach(evaluation => {
+                const panel = evaluation[panelKey] as Record<string, number> | null
+                if (!panel) return
+                Object.entries(panel).forEach(([key, value]) => {
+                    if (typeof value !== "number") return
+                    ;(vectors[key] ??= []).push(value)
+                })
+            })
+            node.data.attributeVectorValues = vectors
+        }
         if (firstError) {
             node.data.error = firstError
-            const structuredResult =
-                node.type === NodeType.ATTR_CALC ||
-                node.type === NodeType.WEAPON_ATTR_CALC ||
-                node.type === NodeType.SKILL_DMG_CALC ||
-                node.type === NodeType.WEAPON_DMG_CALC
+            const structuredResult = node.type === NodeType.ATTR_CALC || node.type === NodeType.WEAPON_ATTR_CALC
             node.data.result = structuredResult ? null : { value: evaluations[0]?.targetValue ?? 0, error: firstError }
         } else {
             node.data.error = undefined
@@ -1724,6 +2046,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         }
         clearCache()
         refreshDownstream(node.id)
+        recordSyncPhase("向量写回", performance.now() - startedAt, { nodeId: node.id, nodeType: node.type })
     }
 
     /**
@@ -1778,14 +2101,11 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      */
     function storeError(node: EditorNode, message: string, invalidateEvaluation = false) {
         node.data.error = message
-        // 属性 / 伤害节点的 result 有固定结构，出错时置空让组件展示错误而不是按字段取值
-        const structuredResult =
-            node.type === NodeType.ATTR_CALC ||
-            node.type === NodeType.WEAPON_ATTR_CALC ||
-            node.type === NodeType.SKILL_DMG_CALC ||
-            node.type === NodeType.WEAPON_DMG_CALC
+        // 属性节点的 result 有固定结构，出错时置空让组件展示错误而不是按字段取值
+        const structuredResult = node.type === NodeType.ATTR_CALC || node.type === NodeType.WEAPON_ATTR_CALC
         node.data.result = structuredResult ? null : { value: 0, error: message }
         node.data.vectorResult = undefined
+        node.data.attributeVectorValues = undefined
         if (invalidateEvaluation) {
             node.data.evalSignature = undefined
             node.data.evalPending = false
@@ -1859,22 +2179,19 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
         switch (nodeType) {
             case NodeType.ATTR_CALC:
-            case NodeType.WEAPON_ATTR_CALC:
-            case NodeType.FULL_CALC:
-                if (hasVector) scheduleVectorEvaluation(node, vector)
-                else scheduleEvaluation(node, context)
-                return node.data.result ?? undefined
-            case NodeType.SKILL_DMG_CALC: {
-                const target = getSkillDamageTarget(context.charBuild)
-                if (hasVector) scheduleVectorEvaluation(node, vector, target.targetFunction, target.baseName)
-                else scheduleEvaluation(node, context, target.targetFunction, target.baseName)
-                return node.data.result ?? undefined
-            }
-            case NodeType.WEAPON_DMG_CALC: {
-                const target = getWeaponDamageTarget(context.charBuild)
-                if (hasVector) scheduleVectorEvaluation(node, vector, target.targetFunction, target.baseName)
-                else scheduleEvaluation(node, context, target.targetFunction, target.baseName)
-                return node.data.result ?? undefined
+            case NodeType.WEAPON_ATTR_CALC: {
+                if (nodeType === NodeType.WEAPON_ATTR_CALC) {
+                    // 同律按钮只在构筑有独立同律武器时显示；未手选槽位时高亮构筑默认武器
+                    node.data.hasSkillWeapon = Boolean(context.charBuild.skillWeapon && !context.charBuild.skillWeapon.inherit)
+                    node.data.weaponSlotAuto = context.charBuild.selectedSkillType
+                }
+                // 逐项属性输出：向量构筑输出向量，单个构筑输出数值
+                node.data.charBuild = markRaw(context.charBuild)
+                node.data.attrOutputVector = hasVector
+                // 属性 / 武器属性只依赖面板：走独立面板请求（不跑目标函数 / 伤害），一次取齐该节点的全部面板
+                if (hasVector) scheduleVectorPanels(node, vector)
+                else schedulePanels(node, context)
+                return attributeOutputs(node)
             }
             case NodeType.AST_EXPRESSION_CALC: {
                 const expression = typeof node.data.expression === "string" ? node.data.expression.trim() : ""
@@ -1907,6 +2224,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         const node = nodes.value.find(n => n.id === nodeId)
         if (!node) return null
         const nodeType = node.type ?? ""
+        const startedAt = performance.now()
         try {
             // 输入节点：直接返回节点数据
             if (nodeType.includes("input")) {
@@ -1916,7 +2234,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
 
             if (nodeType === NodeType.CORE_CALC) {
                 // 核心节点只产出构筑，不在核心上执行任何目标函数求值
+                const coreStartedAt = performance.now()
                 const context = createCoreContext(node)
+                recordSyncPhase("构筑组装", performance.now() - coreStartedAt, { nodeId: node.id, nodeType })
                 const result = context
                     ? { build: context, buildVector: node.data.buildVector }
                     : { build: null, buildVector: undefined, error: node.data.error }
@@ -1974,6 +2294,31 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 return result
             }
 
+            // 向量分解节点：按分量展开为逐项数值输出
+            if (nodeType === NodeType.VECTOR_DECOMPOSE) {
+                const fallbackTitle = typeof node.data.label === "string" ? node.data.label : "向量"
+                const decomposed = createVectorDecomposeOutput(collectInputPortValues(node).get("vector"), fallbackTitle)
+                const labels = decomposed?.labels ?? []
+                const currentLabels = Array.isArray(node.data.vectorLabels) ? node.data.vectorLabels : []
+                // 输出端口随向量长度变化；标签随节点持久化，加载图时端口先于求值可用
+                if (labels.length !== currentLabels.length || labels.some((label, index) => label !== currentLabels[index])) {
+                    node.data.vectorLabels = labels
+                }
+                node.data.result = decomposed?.outputs ?? null
+                node.data.error = undefined
+                calculationCache.set(nodeId, node.data.result)
+                return node.data.result
+            }
+
+            // BUFF 合并节点：按模式合并两路上游，输出结果供核心节点读取
+            if (nodeType === NodeType.BUFF_MERGE) {
+                const data = resolveBuffSourceNode(node, nodes.value, edges.value).data
+                node.data.result = data
+                node.data.error = undefined
+                calculationCache.set(nodeId, data)
+                return data
+            }
+
             // 计算节点：按端口读取输入并生成输出
             if (nodeType.endsWith("calc") || nodeType === NodeType.CUSTOM_EXPRESSION) {
                 const result = calculateCalcNode(node, collectInputPortValues(node))
@@ -1996,6 +2341,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             node.data.error = `计算失败: ${(error as Error).message}`
             node.data.result = null
             return null
+        } finally {
+            recordSyncPhase("节点计算", performance.now() - startedAt, { nodeId: node.id, nodeType })
         }
     }
 

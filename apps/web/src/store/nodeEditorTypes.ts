@@ -22,15 +22,15 @@ export enum NodeType {
     // 计算节点（显式计算方法）
     ATTR_CALC = "attr-calc", // calculateAttributes()
     WEAPON_ATTR_CALC = "weapon-attr-calc", // calculateWeaponAttributes()
-    SKILL_DMG_CALC = "skill-dmg-calc", // calculateSkillDamage()
-    WEAPON_DMG_CALC = "weapon-dmg-calc", // calculateWeaponDamage()
-    FULL_CALC = "full-calc", // calculate() - 快捷节点
 
     // 数学计算节点
     ADD_CALC = "add-calc", // 加法计算
     MULTIPLY_CALC = "multiply-calc", // 乘法计算
     EXPRESSION_CALC = "expression-calc", // 通用表达式计算
     HUB_CALC = "hub-calc", // 集线节点
+
+    // BUFF 合并节点
+    BUFF_MERGE = "buff-merge", // 合并两路 BUFF（并集 / 交集）
 
     // 输出节点
     ATTR_OUTPUT = "attr-output", // 显示 CharAttr
@@ -48,6 +48,7 @@ export enum NodeType {
     TEXT_INPUT = "text-input", // 文本输入
     NUMBER_INPUT = "number-input", // 数值输入
     VECTOR_INPUT = "vector-input", // 向量输入（一组数值）
+    VECTOR_DECOMPOSE = "vector-decompose", // 向量分解（按分量输出数值）
 
     // 构筑来源
     JSON_BUILD = "json-build", // 从 JSON 文本解析构筑

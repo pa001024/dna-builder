@@ -3,6 +3,7 @@ import { Background } from "@vue-flow/background"
 import { Controls } from "@vue-flow/controls"
 import { SelectionMode, useVueFlow, VueFlow } from "@vue-flow/core"
 import { MiniMap } from "@vue-flow/minimap"
+import { useLocalStorage } from "@vueuse/core"
 import "@vue-flow/core/dist/style.css"
 import "@vue-flow/core/dist/theme-default.css"
 import type { Connection, EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
@@ -18,11 +19,12 @@ import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
-import { getNodePorts, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
+import { getNodePorts, isPortTypeCompatible, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
 import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
 import AttrCalcNode from "./nodes/AttrCalcNode.vue"
 import BuffInputNode from "./nodes/BuffInputNode.vue"
+import BuffMergeNode from "./nodes/BuffMergeNode.vue"
 import CharInputNode from "./nodes/CharInputNode.vue"
 import ChartNode from "./nodes/ChartNode.vue"
 import CoreCalcNode from "./nodes/CoreCalcNode.vue"
@@ -32,7 +34,6 @@ import DotInputNode from "./nodes/DotInputNode.vue"
 import EffectInputNode from "./nodes/EffectInputNode.vue"
 import EnemyInputNode from "./nodes/EnemyInputNode.vue"
 import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
-import FullCalcNode from "./nodes/FullCalcNode.vue"
 import GroupNode from "./nodes/GroupNode.vue"
 import HubNode from "./nodes/HubNode.vue"
 import JSONBuildNode from "./nodes/JSONBuildNode.vue"
@@ -45,11 +46,10 @@ import OnlineBuildNode from "./nodes/OnlineBuildNode.vue"
 import OutputNode from "./nodes/OutputNode.vue"
 import PetInputNode from "./nodes/PetInputNode.vue"
 import RangedWeaponInputNode from "./nodes/RangedWeaponInputNode.vue"
-import SkillDmgCalcNode from "./nodes/SkillDmgCalcNode.vue"
 import TextInputNode from "./nodes/TextInputNode.vue"
+import VectorDecomposeNode from "./nodes/VectorDecomposeNode.vue"
 import VectorInputNode from "./nodes/VectorInputNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
-import WeaponDmgCalcNode from "./nodes/WeaponDmgCalcNode.vue"
 import { type NodeData, PALETTE_ITEMS, type PaletteItem } from "./types"
 
 // Store
@@ -73,6 +73,9 @@ const {
     onNodeDrag,
     onNodeDragStop,
     screenToFlowCoordinate,
+    findNode,
+    addSelectedNodes,
+    removeSelectedNodes,
     viewport,
 } = useVueFlow()
 
@@ -84,11 +87,80 @@ const selectedEdge = ref<{ id: string; source: string; target: string } | null>(
 const contextMenuVisible = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
 
+/** 右键菜单作用对象：命中已选中的元素时按整个选中集合操作，否则只作用于命中项 */
+type ContextMenuTarget =
+    | { type: "selection" }
+    | { type: "node"; id: string }
+    | { type: "edge"; id: string }
+    | { type: "pane" }
+
+const contextMenuTarget = ref<ContextMenuTarget>({ type: "pane" })
+
+/** 快捷键说明弹窗 */
+const shortcutsHelpShow = ref(false)
+
+/** 快捷键说明内容：按用途分组展示全部键位 */
+const shortcutHelpGroups = [
+    {
+        title: "编辑",
+        items: [
+            { label: "复制选中节点", keys: "Ctrl+C" },
+            { label: "粘贴节点", keys: "Ctrl+V" },
+            { label: "删除选中的节点或边", keys: "Delete / Backspace" },
+            { label: "撤销", keys: "Ctrl+Z" },
+            { label: "重做", keys: "Ctrl+Shift+Z / Ctrl+Y" },
+            { label: "保存当前图", keys: "Ctrl+S" },
+        ],
+    },
+    {
+        title: "画布与选择",
+        items: [
+            { label: "多选节点或边", keys: "Shift+点击" },
+            { label: "框选", keys: "Shift+拖动空白处" },
+            { label: "平移画布", keys: "拖动空白处 / Space+拖动" },
+            { label: "缩放画布", keys: "滚轮" },
+        ],
+    },
+    {
+        title: "拖动节点",
+        items: [
+            { label: "复制节点及连线", keys: "Ctrl+拖动" },
+            { label: "只复制节点，不复制连线", keys: "Ctrl+Alt+拖动" },
+        ],
+    },
+    {
+        title: "节点与菜单",
+        items: [
+            { label: "重命名节点", keys: "点击标题" },
+            { label: "从端口拖到空白处，选择节点并自动连接", keys: "拖出端口" },
+            { label: "取消重命名 / 关闭候选节点菜单", keys: "Esc" },
+        ],
+    },
+]
+
+/** 判断节点 / 边是否在当前选中集合内 */
+function isItemSelected(type: "node" | "edge", id: string) {
+    const selected = type === "node" ? getSelectedNodes.value : getSelectedEdges.value
+    return selected.some(item => item.id === id)
+}
+
+/**
+ * 解析右键菜单作用对象：命中已选中元素时按选中集合操作，否则只作用于命中的元素。
+ * @param type 元素类型
+ * @param id 元素 id
+ * @returns 右键菜单目标
+ */
+function resolveContextMenuTarget(type: "node" | "edge", id: string): ContextMenuTarget {
+    return isItemSelected(type, id) ? { type: "selection" } : { type, id }
+}
+
 // 拖拽状态
 const draggingItem = ref<PaletteItem | null>(null)
 const draggingPosition = ref({ x: 0, y: 0 })
-/** 移动端节点抽屉 */
-const paletteOpen = ref(false)
+/** 侧栏整体收起（完全隐藏），标题栏按钮再点开 */
+const sidebarCollapsed = useLocalStorage("node-editor-sidebar-collapsed", false)
+/** 侧栏标签页：节点库 = 可拖入的节点，画布 = 当前图里的节点，性能 = 计算耗时统计 */
+const activePane = useLocalStorage<"palette" | "canvas" | "perf">("node-editor-active-pane", "palette")
 
 /** 从端口拖出但未连接时，候选节点与端口 */
 interface ConnectCandidate {
@@ -147,7 +219,8 @@ function getEventClientPoint(event?: MouseEvent | TouchEvent) {
 }
 
 /**
- * 查找与拖出端口同类型的候选节点；从输出拖出时找输入端口，反之亦然。
+ * 查找与拖出端口兼容的候选节点；从输出拖出时找输入端口，反之亦然。
+ * 数值输出同样可以接入向量输入。
  * @param portType 拖出的端口类型
  * @param direction 新节点需要提供的端口方向
  * @returns 候选节点与可连接的端口
@@ -156,10 +229,15 @@ function findConnectCandidates(portType: PortType, direction: "input" | "output"
     return PALETTE_ITEMS.flatMap((item): ConnectCandidate[] => {
         const ports = getNodePorts(item.type)
         if (direction === "input") {
-            const port = ports.inputs.find(candidate => candidate.type === portType)
+            // 精确同类型优先，其次才是数值 → 向量的兼容端口
+            const port =
+                ports.inputs.find(candidate => candidate.type === portType) ??
+                ports.inputs.find(candidate => isPortTypeCompatible(portType, candidate.type))
             return port ? [{ item, inputId: port.id, portLabel: port.label }] : []
         }
-        const port = ports.outputs.find(candidate => candidate.type === portType)
+        const port =
+            ports.outputs.find(candidate => candidate.type === portType) ??
+            ports.outputs.find(candidate => isPortTypeCompatible(candidate.type, portType))
         return port ? [{ item, outputId: port.id, portLabel: port.label }] : []
     })
 }
@@ -210,11 +288,15 @@ function chooseConnectCandidate(candidate: ConnectCandidate) {
     if (!menu) return
     const position = screenToFlowCoordinate({ x: menu.clientX, y: menu.clientY })
     const nodeId = nanoid()
+    // 图源节点带上默认值，保证首次重算就能读到这次连线
+    const data: Record<string, any> = { label: candidate.item.label }
+    if (candidate.item.type === NodeType.VECTOR_INPUT) data.values = [0]
+    if (candidate.item.type === NodeType.NUMBER_INPUT) data.value = 0
     store.addNode({
         id: nodeId,
         type: candidate.item.type,
         position,
-        data: { label: candidate.item.label },
+        data,
     })
     if (menu.direction === "input") {
         store.addEdge({
@@ -380,6 +462,7 @@ function handleNodeContextMenu(event: NodeMouseEvent) {
     closeConnectMenu()
     selectedNode.value = event.node as unknown as { id: string; data: NodeData }
     selectedEdge.value = null
+    contextMenuTarget.value = resolveContextMenuTarget("node", event.node.id)
 
     // 使用event的absolutePosition或clientX/clientY（根据事件类型）
     if ("clientX" in event.event) {
@@ -407,6 +490,7 @@ function handleEdgeContextMenu(event: EdgeMouseEvent) {
     closeConnectMenu()
     selectedEdge.value = event.edge as unknown as { id: string; source: string; target: string }
     selectedNode.value = null
+    contextMenuTarget.value = resolveContextMenuTarget("edge", event.edge.id)
 
     // 使用event的absolutePosition或clientX/clientY（根据事件类型）
     if ("clientX" in event.event) {
@@ -430,6 +514,7 @@ function handleSelectionContextMenu(event: { event: MouseEvent; nodes: any[] }) 
     event.event.preventDefault()
 
     closeConnectMenu()
+    contextMenuTarget.value = { type: "selection" }
     contextMenuPosition.value = { x: event.event.clientX, y: event.event.clientY }
     contextMenuVisible.value = true
 }
@@ -440,6 +525,7 @@ function handlePaneContextMenu(event: MouseEvent) {
     event.preventDefault()
 
     closeConnectMenu()
+    contextMenuTarget.value = { type: "pane" }
     contextMenuPosition.value = { x: event.clientX, y: event.clientY }
     contextMenuVisible.value = true
 }
@@ -493,6 +579,56 @@ function deleteSelectedItems() {
     selectedEdge.value = null
 }
 
+/** 删除指定节点（右键命中的非选中项） */
+function deleteNodeById(nodeId: string) {
+    store.removeNode(nodeId)
+    if (selectedNode.value?.id === nodeId) selectedNode.value = null
+}
+
+/** 删除指定边（右键命中的非选中项） */
+function deleteEdgeById(edgeId: string) {
+    store.removeEdge(edgeId)
+    if (selectedEdge.value?.id === edgeId) selectedEdge.value = null
+}
+
+/** 右键菜单删除项：只删除右键命中的目标，命中选中集合时才提供批量删除 */
+const contextMenuDelete = computed(() => {
+    const target = contextMenuTarget.value
+    if (target.type === "selection") {
+        const nodeCount = getSelectedNodes.value.length
+        const edgeCount = getSelectedEdges.value.length
+        if (nodeCount === 0 && edgeCount === 0) return null
+        return { label: "删除选中项", detail: `(${nodeCount}节点, ${edgeCount}边)`, action: deleteSelectedItems }
+    }
+    if (target.type === "node") {
+        return { label: "删除节点", detail: "", action: () => deleteNodeById(target.id) }
+    }
+    if (target.type === "edge") {
+        return { label: "删除边", detail: "", action: () => deleteEdgeById(target.id) }
+    }
+    return null
+})
+
+/** 右键菜单是否提供复制：仅当命中项属于当前选中节点集合 */
+const contextMenuCopyable = computed(() => {
+    const target = contextMenuTarget.value
+    if (target.type === "selection") return getSelectedNodes.value.length > 0
+    if (target.type === "node") return isItemSelected("node", target.id)
+    return false
+})
+
+/** 执行右键菜单的删除操作并关闭菜单 */
+function deleteFromMenu() {
+    contextMenuDelete.value?.action()
+    contextMenuVisible.value = false
+}
+
+/** 从右键菜单打开快捷键说明 */
+function openShortcutsHelp() {
+    contextMenuVisible.value = false
+    shortcutsHelpShow.value = true
+}
+
 let paletteDragStart: { x: number; y: number } | null = null
 let paletteDragMoved = false
 
@@ -504,7 +640,22 @@ function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
         position,
         data: { label: item.label },
     })
-    if (window.innerWidth < 1024) paletteOpen.value = false
+    // 移动端侧栏是整屏面板，放完节点直接收起露出画布
+    if (window.innerWidth < 1024) sidebarCollapsed.value = true
+}
+
+/**
+ * 移动端侧栏占满整屏，画布被挤到 0 宽、量不出尺寸，落点改用现有节点包围盒中心，
+ * 保证收起侧栏后新节点就在视野里。
+ * @returns 画布坐标落点
+ */
+function paletteClickPosition(canvas: Element) {
+    const rect = canvas.getBoundingClientRect()
+    if (rect.width > 0 && rect.height > 0) return screenPointToFlow({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+    if (store.nodes.length === 0) return { x: 0, y: 0 }
+    const xs = store.nodes.map(node => node.position.x)
+    const ys = store.nodes.map(node => node.position.y)
+    return { x: (Math.min(...xs) + Math.max(...xs)) / 2 + 40, y: (Math.min(...ys) + Math.max(...ys)) / 2 + 40 }
 }
 
 /** 计算屏幕坐标对应的画布坐标 */
@@ -564,7 +715,7 @@ function onMouseUp(event: MouseEvent) {
 
     if (!paletteDragMoved) {
         // 点击/点按调色板：放到画布中心，兼容触屏设备
-        const center = screenPointToFlow({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+        const center = paletteClickPosition(canvas)
         if (center) addPaletteNode(item, center)
     } else if (insideCanvas) {
         const position = screenPointToFlow({ x: event.clientX, y: event.clientY })
@@ -595,6 +746,7 @@ const nodeTypes = {
     "ranged-weapon-input": markRaw(RangedWeaponInputNode),
     "mod-input": markRaw(ModInputNode),
     "buff-input": markRaw(BuffInputNode),
+    "buff-merge": markRaw(BuffMergeNode),
     "effect-input": markRaw(EffectInputNode),
     "pet-input": markRaw(PetInputNode),
     "enemy-input": markRaw(EnemyInputNode),
@@ -603,9 +755,6 @@ const nodeTypes = {
     "core-calc": markRaw(CoreCalcNode),
     "attr-calc": markRaw(AttrCalcNode),
     "weapon-attr-calc": markRaw(WeaponAttrCalcNode),
-    "skill-dmg-calc": markRaw(SkillDmgCalcNode),
-    "weapon-dmg-calc": markRaw(WeaponDmgCalcNode),
-    "full-calc": markRaw(FullCalcNode),
     "ast-expression-calc": markRaw(ASTExpressionNode),
     "custom-expression": markRaw(CustomExpressionNode),
     "add-calc": markRaw(AddCalcNode),
@@ -621,6 +770,7 @@ const nodeTypes = {
     "text-input": markRaw(TextInputNode),
     "number-input": markRaw(NumberInputNode),
     "vector-input": markRaw(VectorInputNode),
+    "vector-decompose": markRaw(VectorDecomposeNode),
     "json-build": markRaw(JSONBuildNode),
     "online-build": markRaw(OnlineBuildNode),
 } as unknown as import("@vue-flow/core").NodeTypesObject
@@ -650,6 +800,38 @@ function getCategoryLabel(category: string): string {
     return labels[category] || category
 }
 
+/** 画布标签页数据：当前图里的全部节点，按加入顺序列出 */
+const graphNodes = computed(() =>
+    store.nodes.map(node => {
+        const palette = PALETTE_ITEMS.find(item => item.type === node.type)
+        const label = typeof node.data?.label === "string" ? node.data.label.trim() : ""
+        return { id: node.id, label: label || palette?.label || String(node.type ?? ""), icon: palette?.icon }
+    })
+)
+
+/**
+ * 定位到图中某个节点：选中并把视图移到该节点；
+ * 移动端侧栏占满整屏，收起后才看得见画布，故一并收起。
+ * @param id 节点 id
+ */
+async function focusGraphNode(id: string) {
+    const target = store.nodes.find(node => node.id === id)
+    if (!target) return
+    const flowNode = findNode(id)
+    if (flowNode) {
+        removeSelectedNodes([...getSelectedNodes.value])
+        addSelectedNodes([flowNode])
+    }
+    selectedNode.value = { id: target.id, data: target.data as NodeData }
+    selectedEdge.value = null
+    if (window.innerWidth < 1024) sidebarCollapsed.value = true
+    await nextTick()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    // 按节点实测包围盒同时算居中与缩放：大节点缩到能完整显示，小节点最多放到 1 倍
+    // （setCenter 不传 zoom 时会用 maxZoom，大节点会溢出视野）
+    void fitView({ nodes: [target.id], padding: 0.15, maxZoom: 1, duration: 300 })
+}
+
 // 删除
 function onDelete(event: { nodes: any[]; edges: any[] }) {
     for (const node of event.nodes) {
@@ -670,10 +852,12 @@ function handleKeyDown(event: KeyboardEvent) {
         return
     }
 
-    if (event.key === "Escape" && paletteOpen.value) {
-        paletteOpen.value = false
+    // 快捷键说明打开时只响应 Esc，避免误操作画布
+    if (shortcutsHelpShow.value) {
+        if (event.key === "Escape") shortcutsHelpShow.value = false
         return
     }
+
     if (event.key === "Escape" && connectMenu.value) {
         closeConnectMenu()
         return
@@ -733,6 +917,8 @@ function cloneNodeDataForDuplicate(data: Record<string, any>) {
     delete clone.evalSignature
     delete clone.evalPending
     delete clone.result
+    delete clone.panels
+    delete clone.panelVectors
     delete clone.error
     delete clone.missingInputs
     delete clone.inputData
@@ -783,11 +969,13 @@ function captureDuplicatePointer(event: PointerEvent) {
 
 /**
  * Ctrl / Cmd + 拖动：复制被拖动的节点及其全部连线，拖动的是副本，原节点留在原地。
+ * 再按住 Alt 时只复制节点、不复制连线。
  * 连线外部的一端保持连接原节点，内部两端都换成副本；单连接端口已占用时自动跳过该线。
  * @param draggedNodes 被拖动的节点
+ * @param copyEdges 是否连同连线一起复制
  * @returns 原节点与副本的对应关系
  */
-function duplicateDraggedNodes(draggedNodes: { id: string }[]): DuplicateDragEntry[] {
+function duplicateDraggedNodes(draggedNodes: { id: string }[], copyEdges: boolean): DuplicateDragEntry[] {
     const usedLabels = new Set(
         store.nodes.map(node => (typeof node.data.label === "string" ? node.data.label.trim() : "")).filter(Boolean)
     )
@@ -810,21 +998,28 @@ function duplicateDraggedNodes(draggedNodes: { id: string }[]): DuplicateDragEnt
         })
         entries.push({ originalId: node.id, cloneId: nextId, start: { ...node.position } })
     })
-    if (idMap.size === 0) return []
-    store.edges.forEach(edge => {
-        const source = idMap.get(edge.source) ?? edge.source
-        const target = idMap.get(edge.target) ?? edge.target
-        if (source === edge.source && target === edge.target) return
-        const duplicate = {
-            ...edge,
-            id: `e${nanoid()}`,
-            source,
-            target,
-            data: edge.data ? { ...edge.data } : undefined,
-        }
-        // 单连接端口已被原连线占用时无法复制该线，直接跳过
-        if (store.isValidConnection(duplicate)) store.addEdge(duplicate)
-    })
+    if (idMap.size === 0) return entries
+    let copiedEdge = false
+    if (copyEdges) {
+        store.edges.forEach(edge => {
+            const source = idMap.get(edge.source) ?? edge.source
+            const target = idMap.get(edge.target) ?? edge.target
+            if (source === edge.source && target === edge.target) return
+            const duplicate = {
+                ...edge,
+                id: `e${nanoid()}`,
+                source,
+                target,
+                data: edge.data ? { ...edge.data } : undefined,
+            }
+            // 单连接端口已被原连线占用时无法复制该线，直接跳过
+            if (store.isValidConnection(duplicate) && store.addEdge(duplicate)) copiedEdge = true
+        })
+    }
+    // 没有复制到连线时不会触发现有重算：补算副本，按“无输入”刷新派生数据（如向量标签）
+    if (!copiedEdge) {
+        for (const entry of entries) store.calculateNode(entry.cloneId)
+    }
     return entries
 }
 
@@ -866,15 +1061,16 @@ function isNodeInsideGroup(node: { id: string; position: { x: number; y: number 
     )
 }
 
-// 拖动分组框时同步移动框内的普通节点；Ctrl 拖动时改为复制并拖动副本
+// 拖动分组框时同步移动框内的普通节点；Ctrl 拖动时改为复制并拖动副本，Ctrl+Alt 复制时不带连线
 onNodeDragStart(({ event, node, nodes: draggedNodes }) => {
-    const modifier = (event as MouseEvent | undefined)?.ctrlKey || (event as MouseEvent | undefined)?.metaKey
+    const mouseEvent = event as MouseEvent | undefined
+    const modifier = mouseEvent?.ctrlKey || mouseEvent?.metaKey
     duplicateDrag = null
     duplicateDragStart = null
     if (modifier && draggedNodes.length > 0) {
         store.beginHistoryBatch()
         duplicateHistoryBatch = true
-        duplicateDrag = duplicateDraggedNodes(draggedNodes)
+        duplicateDrag = duplicateDraggedNodes(draggedNodes, !mouseEvent?.altKey)
         duplicateDragStart = duplicatePointerOrigin ?? getEventClientPoint(event)
         duplicateDragZoom = viewport.value.zoom || 1
     }
@@ -1050,6 +1246,13 @@ watch(routeGraphId, graphId => {
     }
 })
 
+// 侧栏收起 / 展开会改变画布宽度，重新适配视图，保证图中所有节点都在视野内
+watch(sidebarCollapsed, async () => {
+    await nextTick()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    void fitView({ padding: 0.1, duration: 250 })
+})
+
 // 移除事件监听器
 onUnmounted(() => {
     window.removeEventListener("keydown", handleKeyDown)
@@ -1183,32 +1386,19 @@ async function handleTransfer(charName: string) {
                 </button>
             </template>
         </DialogModel>
-        <!-- 移动端抽屉遮罩 -->
-        <div
-            v-if="paletteOpen"
-            class="absolute inset-0 z-30 bg-black/40 backdrop-blur-[1px] lg:hidden"
-            @click="paletteOpen = false"
-        />
-        <!-- 调色板侧边栏：桌面固定，移动端为抽屉 -->
-        <aside
-            class="absolute inset-y-0 left-0 z-40 flex w-64 max-w-[82vw] flex-none flex-col border-r border-base-content/10 bg-base-100 shadow-xl transition-transform duration-200 lg:static lg:z-auto lg:w-56 lg:max-w-none lg:translate-x-0 lg:shadow-none"
-            :class="paletteOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-        >
+        <!-- 左侧栏：节点库 / 画布 / 性能 三个标签页，可整体收起 -->
+        <aside v-if="!sidebarCollapsed" class="flex w-full flex-none flex-col border-r border-base-content/10 bg-base-100 lg:w-56">
             <div class="flex h-8 flex-none items-center gap-1.5 border-b border-base-content/10 px-2">
-                <Icon icon="ri:node-tree" class="size-3.5 text-base-content/50" />
-                <span class="text-[11px] tracking-wide text-base-content/55">节点列表</span>
-                <span class="ml-auto hidden font-mono text-[10px] text-base-content/35 lg:inline">{{ PALETTE_ITEMS.length }}</span>
-                <button
-                    type="button"
-                    class="ml-auto grid size-6 cursor-pointer place-items-center text-base-content/50 hover:bg-base-content/10 hover:text-base-content lg:hidden"
-                    title="关闭节点列表"
-                    @click="paletteOpen = false"
-                >
-                    <Icon icon="ri:close-line" class="size-3.5" />
-                </button>
+                <PaneTabs v-model="activePane" />
             </div>
             <ScrollArea class="min-h-0 flex-1">
-                <div class="p-1.5">
+                <!-- 节点库：可拖入画布的节点 -->
+                <div v-if="activePane === 'palette'" class="p-1.5">
+                    <div class="flex items-center gap-1.5 px-1 py-1">
+                        <Icon icon="ri:node-tree" class="size-3.5 text-base-content/50" />
+                        <span class="text-[11px] tracking-wide text-base-content/55">节点列表</span>
+                        <span class="ml-auto font-mono text-[10px] text-base-content/35">{{ PALETTE_ITEMS.length }}</span>
+                    </div>
                     <div v-for="(items, category) in groupedPaletteItems" :key="category" class="mb-1.5">
                         <div class="px-1 py-1 text-[10px] tracking-wide text-base-content/40">{{ getCategoryLabel(category) }}</div>
                         <div
@@ -1227,6 +1417,27 @@ async function handleTransfer(charName: string) {
                         </div>
                     </div>
                 </div>
+                <!-- 画布：当前图里的全部节点，点击选中并定位 -->
+                <div v-else-if="activePane === 'canvas'" class="p-1.5">
+                    <div class="flex items-center gap-1.5 px-1 py-1">
+                        <Icon icon="ri:artboard-2-line" class="size-3.5 text-base-content/50" />
+                        <span class="text-[11px] tracking-wide text-base-content/55">画布</span>
+                        <span class="ml-auto font-mono text-[10px] text-base-content/35">{{ graphNodes.length }}</span>
+                    </div>
+                    <div v-if="graphNodes.length === 0" class="px-1.5 py-3 text-[11px] text-base-content/40">画布里还没有节点</div>
+                    <button
+                        v-for="node in graphNodes"
+                        :key="node.id"
+                        type="button"
+                        class="group mb-0.5 flex w-full cursor-pointer items-center gap-1.5 border border-transparent px-1.5 py-1 text-left transition-colors duration-150 hover:border-primary/40 hover:bg-primary/5"
+                        @click="focusGraphNode(node.id)"
+                    >
+                        <Icon v-if="node.icon" :icon="node.icon" class="size-3.5 shrink-0 text-base-content/50 group-hover:text-primary" />
+                        <span class="min-w-0 flex-1 truncate text-[12px] text-base-content/80">{{ node.label }}</span>
+                    </button>
+                </div>
+                <!-- 性能：同步阶段 / worker 请求耗时与按节点的调用记录 -->
+                <PerformancePane v-else />
             </ScrollArea>
 
             <!-- 拖拽中的节点副本 -->
@@ -1246,19 +1457,19 @@ async function handleTransfer(charName: string) {
             </div>
         </aside>
 
-        <!-- 节点编辑器画布 -->
-        <div class="relative flex min-w-0 flex-1 flex-col">
+        <!-- 节点编辑器画布：移动端侧栏占满整屏时整列隐藏，桌面端始终与侧栏并排 -->
+        <div class="relative min-w-0 flex-1 flex-col" :class="sidebarCollapsed ? 'flex' : 'hidden lg:flex'">
             <!-- 工具栏 -->
             <div class="flex flex-none flex-wrap items-center gap-1 border-b border-base-content/10 bg-base-100 px-2 py-1 sm:gap-1.5">
-                <!-- 移动端节点抽屉开关 -->
+                <!-- 侧栏收起 / 展开 -->
                 <button
                     type="button"
-                    class="grid size-6 cursor-pointer place-items-center text-base-content/60 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary lg:hidden"
-                    title="节点列表"
-                    aria-label="节点列表"
-                    @click="paletteOpen = true"
+                    class="grid size-6 cursor-pointer place-items-center text-base-content/60 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary"
+                    :title="sidebarCollapsed ? '展开侧栏' : '收起侧栏'"
+                    :aria-label="sidebarCollapsed ? '展开侧栏' : '收起侧栏'"
+                    @click="sidebarCollapsed = !sidebarCollapsed"
                 >
-                    <Icon icon="ri:menu-line" class="size-3.5" />
+                    <Icon :icon="sidebarCollapsed ? 'ri:contract-right-line' : 'ri:contract-left-line'" class="size-3.5" />
                 </button>
                 <!-- 移动端撤销 / 重做（无键盘、右键菜单时仍可操作） -->
                 <button
@@ -1362,21 +1573,21 @@ async function handleTransfer(charName: string) {
                     </button>
                     <button
                         class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
-                        title="浏览分享"
-                        aria-label="浏览分享"
+                        title="浏览"
+                        aria-label="浏览"
                         @click="browse_open = true"
                     >
                         <Icon icon="ri:share-line" class="size-3" />
-                        <span class="hidden sm:inline">浏览分享</span>
+                        <span class="hidden sm:inline">浏览</span>
                     </button>
                     <button
                         class="flex h-6 cursor-pointer items-center gap-1 border border-base-content/10 bg-base-100 px-1.5 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.97]"
-                        title="AI 助手"
-                        aria-label="AI 助手"
+                        title="AI"
+                        aria-label="AI"
                         @click="graphChat?.open()"
                     >
                         <Icon icon="ri:robot-2-line" class="size-3" />
-                        <span class="hidden sm:inline">AI 助手</span>
+                        <span class="hidden sm:inline">AI</span>
                     </button>
                     <button
                         v-if="activeRemoteId"
@@ -1488,6 +1699,35 @@ async function handleTransfer(charName: string) {
                             <CommentSection :target-id="`graph_${activeRemoteId}`" />
                         </div>
                     </div>
+                </DialogModel>
+
+                <!-- 快捷键说明弹窗 -->
+                <DialogModel v-model="shortcutsHelpShow" class="max-w-xl bg-base-100">
+                    <div class="flex items-center gap-2">
+                        <Icon icon="ri:keyboard-line" class="size-4 text-primary" />
+                        <h3 class="text-base font-bold">快捷键说明</h3>
+                    </div>
+                    <p class="mt-1 text-[11px] text-base-content/45">macOS 上可将 Ctrl 换成 Cmd 使用。</p>
+                    <div class="mt-3 grid grid-cols-1 gap-x-5 gap-y-3 sm:grid-cols-2">
+                        <section v-for="group in shortcutHelpGroups" :key="group.title" class="space-y-1">
+                            <div class="text-[10px] tracking-wide text-base-content/40">{{ group.title }}</div>
+                            <div
+                                v-for="item in group.items"
+                                :key="item.label"
+                                class="flex items-start justify-between gap-2 text-[11px] leading-4"
+                            >
+                                <span class="min-w-0 text-base-content/70">{{ item.label }}</span>
+                                <kbd
+                                    class="kbd kbd-xs mt-0.5 shrink-0 border-base-content/15 bg-base-200 font-mono text-[10px] text-base-content/60"
+                                >
+                                    {{ item.keys }}
+                                </kbd>
+                            </div>
+                        </section>
+                    </div>
+                    <template #action>
+                        <button type="button" class="btn btn-xs btn-primary" @click="shortcutsHelpShow = false">关闭</button>
+                    </template>
                 </DialogModel>
 
                 <!-- 节点图助手对话窗（悬浮按钮关闭，只走工具栏「AI 助手」入口） -->
@@ -1629,7 +1869,7 @@ async function handleTransfer(charName: string) {
                 <div class="my-1 h-px bg-base-content/10" />
                 <!-- 复制选项 -->
                 <div
-                    v-if="getSelectedNodes.length > 0"
+                    v-if="contextMenuCopyable"
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                     @click="
                         () => {
@@ -1641,6 +1881,7 @@ async function handleTransfer(charName: string) {
                     <Icon class="size-3.5" icon="ri:file-copy-line" />
                     复制选中项
                     <span v-if="getSelectedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ getSelectedNodes.length }}节点) </span>
+                    <span class="ml-auto pl-3 text-[10px] opacity-60">Ctrl+C</span>
                 </div>
                 <!-- 粘贴选项 -->
                 <div
@@ -1656,51 +1897,18 @@ async function handleTransfer(charName: string) {
                     <Icon class="size-3.5" icon="ri:clipboard-line" />
                     粘贴
                     <span v-if="store.copiedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ store.copiedNodes.length }}节点) </span>
+                    <span class="ml-auto pl-3 text-[10px] opacity-60">Ctrl+V</span>
                 </div>
-                <!-- 批量删除选项 -->
+                <!-- 删除选项：按右键命中的目标决定删除对象 -->
                 <div
-                    v-if="getSelectedNodes.length > 0 || getSelectedEdges.length > 0"
+                    v-if="contextMenuDelete"
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="
-                        () => {
-                            deleteSelectedItems()
-                            contextMenuVisible = false
-                        }
-                    "
+                    @click="deleteFromMenu"
                 >
                     <Icon class="size-3.5" icon="ri:delete-bin-line" />
-                    删除选中项
-                    <span v-if="getSelectedNodes.length > 0 || getSelectedEdges.length > 0" class="ml-1 text-xs opacity-70">
-                        ({{ getSelectedNodes.length }}节点, {{ getSelectedEdges.length }}边)
-                    </span>
-                </div>
-                <!-- 单个节点删除选项 -->
-                <div
-                    v-else-if="selectedNode"
-                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="
-                        () => {
-                            deleteSelectedNode()
-                            contextMenuVisible = false
-                        }
-                    "
-                >
-                    <Icon class="size-3.5" icon="ri:delete-bin-line" />
-                    删除节点
-                </div>
-                <!-- 单条边删除选项 -->
-                <div
-                    v-else-if="selectedEdge"
-                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="
-                        () => {
-                            deleteSelectedEdge()
-                            contextMenuVisible = false
-                        }
-                    "
-                >
-                    <Icon class="size-3.5" icon="ri:delete-bin-line" />
-                    删除边
+                    {{ contextMenuDelete.label }}
+                    <span v-if="contextMenuDelete.detail" class="ml-1 text-xs opacity-70">{{ contextMenuDelete.detail }}</span>
+                    <span class="ml-auto pl-3 text-[10px] opacity-60">Delete</span>
                 </div>
                 <div
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
@@ -1708,6 +1916,15 @@ async function handleTransfer(charName: string) {
                 >
                     <Icon class="size-3.5" icon="ri:refresh-line" />
                     刷新
+                </div>
+                <div class="my-1 h-px bg-base-content/10" />
+                <!-- 快捷键说明入口 -->
+                <div
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                    @click="openShortcutsHelp"
+                >
+                    <Icon class="size-3.5" icon="ri:keyboard-line" />
+                    快捷键说明
                 </div>
             </div>
         </div>

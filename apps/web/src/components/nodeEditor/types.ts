@@ -77,13 +77,11 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.CORE_CALC]: "核心计算",
         [NodeType.ATTR_CALC]: "计算属性",
         [NodeType.WEAPON_ATTR_CALC]: "计算武器属性",
-        [NodeType.SKILL_DMG_CALC]: "计算技能伤害",
-        [NodeType.WEAPON_DMG_CALC]: "计算武器伤害",
-        [NodeType.FULL_CALC]: "完整计算",
         [NodeType.ADD_CALC]: "加法计算",
         [NodeType.MULTIPLY_CALC]: "乘法计算",
         [NodeType.EXPRESSION_CALC]: "表达式计算",
         [NodeType.HUB_CALC]: "集线节点",
+        [NodeType.BUFF_MERGE]: "BUFF合并",
         [NodeType.ATTR_OUTPUT]: "属性输出",
         [NodeType.WEAPON_OUTPUT]: "武器输出",
         [NodeType.DAMAGE_OUTPUT]: "伤害输出",
@@ -95,6 +93,7 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.TEXT_INPUT]: "文本输入",
         [NodeType.NUMBER_INPUT]: "数值输入",
         [NodeType.VECTOR_INPUT]: "向量输入",
+        [NodeType.VECTOR_DECOMPOSE]: "向量分解",
         [NodeType.DOT_INPUT]: "DOT频率",
         [NodeType.JSON_BUILD]: "JSON构筑",
         [NodeType.ONLINE_BUILD]: "在线构筑",
@@ -200,27 +199,6 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         description: "计算武器属性",
     },
     {
-        type: NodeType.SKILL_DMG_CALC,
-        label: "计算技能伤害",
-        category: NodeCategory.CALCULATION,
-        icon: "ri:magic-line",
-        description: "计算技能伤害",
-    },
-    {
-        type: NodeType.WEAPON_DMG_CALC,
-        label: "计算武器伤害",
-        category: NodeCategory.CALCULATION,
-        icon: "ri:crosshair-line",
-        description: "计算武器伤害",
-    },
-    {
-        type: NodeType.FULL_CALC,
-        label: "完整计算",
-        category: NodeCategory.CALCULATION,
-        icon: "ri:refresh-line",
-        description: "执行所有计算",
-    },
-    {
         type: NodeType.ADD_CALC,
         label: "加法计算",
         category: NodeCategory.CALCULATION,
@@ -247,6 +225,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.CALCULATION,
         icon: "ri:git-branch-line",
         description: "将构筑原样传递给输出",
+    },
+    {
+        type: NodeType.BUFF_MERGE,
+        label: "BUFF合并",
+        category: NodeCategory.CALCULATION,
+        icon: "ri:git-merge-line",
+        description: "合并两个 BUFF 输入，可选并集或交集",
     }, // 输出节点
     {
         type: NodeType.ATTR_OUTPUT,
@@ -326,6 +311,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.BASIC,
         icon: "ri:sort-number-asc",
         description: "输入一组数值，接入自定义变量组做批量取值",
+    },
+    {
+        type: NodeType.VECTOR_DECOMPOSE,
+        label: "向量分解",
+        category: NodeCategory.BASIC,
+        icon: "ri:split-cells-horizontal",
+        description: "把向量的每个分量拆成独立的数值输出",
     },
     // 构筑来源
     {

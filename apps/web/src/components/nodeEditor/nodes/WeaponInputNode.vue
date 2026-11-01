@@ -3,7 +3,10 @@ import { t } from "i18next"
 import { computed, ref, watch } from "vue"
 import { LeveledWeaponHelper, weaponMap } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
+import { getNodePorts } from "@/utils/nodeEditorPorts"
 import BaseNode from "./BaseNode.vue"
+import NodePortRow from "./NodePortRow.vue"
+import NumberRowInput from "./NumberRowInput.vue"
 
 const props = defineProps<{
     id: string
@@ -61,7 +64,31 @@ const weaponMeta = computed(() => {
 const meleeWeapon = computed(() => (isMelee.value ? weaponId.value : (settings.value?.meleeWeapon ?? 0)))
 const rangedWeapon = computed(() => (isMelee.value ? (settings.value?.rangedWeapon ?? 0) : weaponId.value))
 
+/** 数值参数端口是否已有连线：连线后手动输入框禁用，取值由上游决定 */
+function isDriven(handleId: string) {
+    return store.edges.some(edge => edge.target === props.id && edge.targetHandle === handleId)
+}
+
+const ports = computed(() => getNodePorts(props.type, props.data))
+const paramPorts = computed(() => ports.value.inputs)
+const outputPort = computed(() => ports.value.outputs[0])
+
+/** 精炼等级来自行输入组件，写回本地状态后提交节点 */
+function setRefineLevel(value: number) {
+    refineLevel.value = value
+    commit()
+}
+
+/** 武器等级来自行输入组件，写回本地状态后提交节点 */
+function setWeaponLevel(value: number) {
+    weaponLevel.value = value
+    commit()
+}
+
 function commit() {
+    // 数字输入框清空时恢复默认值，避免把空串写进节点数据
+    if (!Number.isFinite(refineLevel.value)) refineLevel.value = 5
+    if (!Number.isFinite(weaponLevel.value)) weaponLevel.value = 80
     store.updateNodeData(props.id, {
         weapon: weaponId.value,
         refine: refineLevel.value,
@@ -83,6 +110,13 @@ function handleWeaponSelection(melee: number, ranged: number) {
 
 <template>
     <BaseNode v-bind="{ id, data, type, selected }">
+        <template #ports>
+            <!-- 展开时参数端口跟随各行，收起时回到端口区，保证收起后仍可接线 -->
+            <NodePortRow :output="outputPort" />
+            <template v-if="data.isCollapsed">
+                <NodePortRow v-for="port in paramPorts" :key="port.id" :input="port" />
+            </template>
+        </template>
         <div class="w-70 max-w-full space-y-1.5">
             <!-- 武器名片：图像区 + 名称/类型层级，点击打开武器选择 -->
             <button
@@ -117,30 +151,28 @@ function handleWeaponSelection(melee: number, ranged: number) {
                 <Icon icon="radix-icons:chevron-right" class="mt-1 size-3.5 shrink-0 text-base-content/30" />
             </button>
 
-            <div class="grid grid-cols-2 gap-2">
-                <label class="block min-w-0">
-                    <span class="mb-0.5 block text-[10px] text-base-content/45">{{ $t(labels.refine) }}</span>
-                    <Select
-                        v-model="refineLevel"
-                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                        @change="commit"
-                    >
-                        <SelectItem v-for="lv in [0, 1, 2, 3, 4, 5]" :key="lv" :value="lv">{{ lv }}</SelectItem>
-                    </Select>
-                </label>
-                <label class="block min-w-0">
-                    <span class="mb-0.5 block text-[10px] text-base-content/45">{{ $t(labels.level) }}</span>
-                    <input
-                        v-model.number="weaponLevel"
-                        type="number"
-                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 font-mono text-[12px] tabular-nums text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                        placeholder="80"
-                        min="1"
-                        max="90"
-                        @change="commit"
-                    />
-                </label>
-            </div>
+            <NumberRowInput
+                :model-value="refineLevel"
+                :label="$t(labels.refine)"
+                handle-id="refine"
+                :min="0"
+                :max="5"
+                :precision="0"
+                :disabled="isDriven('refine')"
+                :hint="isDriven('refine') ? '连线' : undefined"
+                @update:model-value="setRefineLevel"
+            />
+            <NumberRowInput
+                :model-value="weaponLevel"
+                :label="$t(labels.level)"
+                handle-id="level"
+                :min="1"
+                :max="90"
+                :precision="0"
+                :disabled="isDriven('level')"
+                :hint="isDriven('level') ? '连线' : undefined"
+                @update:model-value="setWeaponLevel"
+            />
         </div>
 
         <Teleport to="body">

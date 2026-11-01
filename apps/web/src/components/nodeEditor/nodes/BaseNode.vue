@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useVueFlow } from "@vue-flow/core"
 import { computed, nextTick, ref, watch } from "vue"
 import { IconTypes } from "@/components/Icon.vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
@@ -15,6 +16,13 @@ const props = defineProps<{
 
 // 获取store实例
 const store = useNodeEditorStore()
+const { updateNodeInternals } = useVueFlow()
+
+// 收起 / 展开会改变端口位置（部分节点把端口渲染在行内），通知 VueFlow 重新测量
+watch(
+    () => props.data.isCollapsed,
+    () => requestAnimationFrame(() => updateNodeInternals([props.id]))
+)
 
 // 切换收缩状态
 const toggleCollapse = () => {
@@ -33,6 +41,11 @@ watch(
         if (!editingTitle.value) titleDraft.value = typeof value === "string" ? value : ""
     }
 )
+
+/** 记录标题按下的起始位置；模板内直接赋值会被 vue-tsc 按初始值收窄为 null */
+function onTitlePointerDown(event: PointerEvent) {
+    titlePointerStart = { x: event.clientX, y: event.clientY }
+}
 
 /** 点击标题文本进入编辑；拖动超过阈值时不触发 */
 function onTitleClick(event: MouseEvent) {
@@ -99,13 +112,11 @@ const getIcon = (type: string): IconTypes => {
         "core-calc": "ri:cpu-line",
         "attr-calc": "ri:calculator-line",
         "weapon-attr-calc": "ri:sword-line",
-        "skill-dmg-calc": "ri:magic-line",
-        "weapon-dmg-calc": "ri:crosshair-line",
-        "full-calc": "ri:refresh-line",
         "add-calc": "ri:add-line",
         "multiply-calc": "ri:calculator-line",
         "expression-calc": "ri:equalizer-line",
         "hub-calc": "ri:git-branch-line",
+        "buff-merge": "ri:git-merge-line",
         "attr-output": "ri:bar-chart-line",
         "weapon-output": "ri:bar-chart-line",
         "damage-output": "ri:more-line",
@@ -117,6 +128,7 @@ const getIcon = (type: string): IconTypes => {
         "text-input": "ri:edit-line",
         "number-input": "ri:hashtag",
         "vector-input": "ri:sort-number-asc",
+        "vector-decompose": "ri:split-cells-horizontal",
         "json-build": "ri:file-code-line",
         "online-build": "ri:cloud-line",
     }
@@ -144,7 +156,7 @@ const getIcon = (type: string): IconTypes => {
                 v-else
                 class="min-w-0 cursor-text truncate text-[12px] font-semibold"
                 title="点击编辑标题"
-                @pointerdown="titlePointerStart = { x: $event.clientX, y: $event.clientY }"
+                @pointerdown="onTitlePointerDown"
                 @click="onTitleClick"
             >
                 {{ data.label }}

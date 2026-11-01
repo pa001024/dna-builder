@@ -100,6 +100,8 @@ function handleMouseDown(event: MouseEvent) {
     }
 
     event.preventDefault()
+    // 阻止冒泡：节点编辑器里拖动 MOD 不能同时带动节点或画布平移
+    event.stopPropagation()
     isDragging.value = true
 
     // 保存拖动开始的元素引用
@@ -176,7 +178,7 @@ function handleMouseUp(event: MouseEvent) {
 <template>
     <!-- 方形卡片：固定高度（aspect-square），底部信息半透明叠加，hover 无位移动画，避免闪烁 -->
     <div
-        class="group relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
+        class="nodrag group relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
         :class="[mod ? ['border-base-content/15', getQualityHoverBorder(mod.品质)] : 'border-dashed border-base-content/25']"
         :style="dragStyle"
         :data-index="index"

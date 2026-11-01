@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest"
 import { NodeType } from "@/store/nodeEditorTypes"
-import { CORE_INPUT, canConnectPorts, getNodePorts, PortType, resolvePort } from "@/utils/nodeEditorPorts"
+import {
+    CHAR_ATTR_OUTPUT_KEYS,
+    CORE_INPUT,
+    canConnectPorts,
+    getNodePorts,
+    PortType,
+    resolvePort,
+    WEAPON_ATTR_OUTPUT_KEYS,
+} from "@/utils/nodeEditorPorts"
 
 describe("nodeEditorPorts", () => {
-    it("核心节点只输出构筑，且输入端口覆盖全部构筑输入", () => {
+    it("核心节点带构筑输入，且输入端口覆盖全部构筑输入", () => {
         const ports = getNodePorts(NodeType.CORE_CALC)
         expect(ports.outputs).toEqual([{ id: "build", type: PortType.BUILD, label: "构筑" }])
         expect(ports.inputs.map(port => port.type)).toEqual([
+            PortType.BUILD,
             PortType.CHAR,
             PortType.MELEE_WEAPON,
             PortType.RANGED_WEAPON,
@@ -18,6 +27,7 @@ describe("nodeEditorPorts", () => {
             PortType.CUSTOM_VARS,
             PortType.DOT,
         ])
+        expect(ports.inputs[0]).toEqual({ id: CORE_INPUT.build, type: PortType.BUILD, label: "构筑", multiple: false })
         expect(ports.inputs.find(port => port.id === CORE_INPUT.mod)?.multiple).toBe(true)
         expect(ports.inputs.find(port => port.id === CORE_INPUT.buff)?.multiple).toBe(true)
     })
@@ -42,6 +52,22 @@ describe("nodeEditorPorts", () => {
         const ports = getNodePorts(NodeType.CORE_CALC, { vectorDimensions: [3, 3] })
         expect(ports.outputs[0]).toEqual({ id: "build", type: PortType.BUILD, label: "构筑[3][3]" })
         expect(getNodePorts(NodeType.CORE_CALC, { vectorDimensions: [] }).outputs[0].label).toBe("构筑")
+    })
+
+    it("属性节点逐项输出端口：单个构筑为数值、向量构筑为向量", () => {
+        const charPorts = getNodePorts(NodeType.ATTR_CALC)
+        expect(charPorts.inputs[0].type).toBe(PortType.BUILD)
+        expect(charPorts.outputs[0]).toEqual({ id: "attrs", type: PortType.ATTRS, label: "角色属性" })
+        expect(charPorts.outputs).toHaveLength(CHAR_ATTR_OUTPUT_KEYS.length + 1)
+        expect(charPorts.outputs.slice(1).every(port => port.type === PortType.NUMBER)).toBe(true)
+        expect(charPorts.outputs[1]).toEqual({ id: "攻击", type: PortType.NUMBER, label: "攻击" })
+
+        const vectorPorts = getNodePorts(NodeType.ATTR_CALC, { attrOutputVector: true })
+        expect(vectorPorts.outputs.slice(1).every(port => port.type === PortType.VECTOR)).toBe(true)
+
+        const weaponPorts = getNodePorts(NodeType.WEAPON_ATTR_CALC)
+        expect(weaponPorts.outputs[0]).toEqual({ id: "attrs", type: PortType.WEAPON_ATTRS, label: "武器属性" })
+        expect(weaponPorts.outputs).toHaveLength(WEAPON_ATTR_OUTPUT_KEYS.length + 1)
     })
 
     it("表达式计算按 inputCount 生成精确端口", () => {
@@ -93,6 +119,56 @@ describe("nodeEditorPorts", () => {
         // 原始向量输入节点同样可以接入图表
         const rawVector = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
         expect(canConnectPorts(rawVector, chart.inputs[0])).toBe(true)
+    })
+
+    it("角色与武器输入节点的数值参数作为可选向量输入", () => {
+        const charPorts = getNodePorts(NodeType.CHAR_INPUT)
+        expect(charPorts.inputs).toEqual([
+            { id: "charLevel", type: PortType.VECTOR, label: "等级", multiple: false },
+            { id: "skillE", type: PortType.VECTOR, label: "E 技能等级", multiple: false },
+            { id: "skillQ", type: PortType.VECTOR, label: "Q 技能等级", multiple: false },
+            { id: "skillPassive", type: PortType.VECTOR, label: "被动技能等级", multiple: false },
+        ])
+        expect(getNodePorts(NodeType.MELEE_WEAPON_INPUT).inputs.map(port => port.id)).toEqual(["level", "refine"])
+        expect(getNodePorts(NodeType.RANGED_WEAPON_INPUT).inputs.map(port => port.id)).toEqual(["level", "refine"])
+
+        const numberOutput = getNodePorts(NodeType.NUMBER_INPUT).outputs[0]
+        const vectorOutput = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
+        expect(canConnectPorts(numberOutput, charPorts.inputs[0])).toBe(true)
+        expect(canConnectPorts(vectorOutput, charPorts.inputs[0])).toBe(true)
+        expect(canConnectPorts(charPorts.outputs[0], charPorts.inputs[0])).toBe(false)
+        expect(canConnectPorts(vectorOutput, getNodePorts(NodeType.ADD_CALC).inputs[0])).toBe(false)
+    })
+
+    it("向量分解按向量长度生成逐项数值输出", () => {
+        expect(getNodePorts(NodeType.VECTOR_DECOMPOSE)).toEqual({
+            inputs: [{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }],
+            outputs: [],
+        })
+
+        const ports = getNodePorts(NodeType.VECTOR_DECOMPOSE, { vectorLabels: ["倍率=1", "倍率=2"] })
+        expect(ports.outputs).toEqual([
+            { id: "value-0", type: PortType.NUMBER, label: "倍率=1" },
+            { id: "value-1", type: PortType.NUMBER, label: "倍率=2" },
+        ])
+        expect(getNodePorts(NodeType.VECTOR_DECOMPOSE, { vectorLabels: [""] }).outputs[0].label).toBe("数值1")
+
+        const vectorOutput = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
+        expect(canConnectPorts(vectorOutput, ports.inputs[0])).toBe(true)
+        expect(canConnectPorts(ports.outputs[0], getNodePorts(NodeType.ADD_CALC).inputs[0])).toBe(true)
+        expect(resolvePort(NodeType.VECTOR_DECOMPOSE, "value-1", "output", { vectorLabels: ["a", "b"] })?.type).toBe(PortType.NUMBER)
+    })
+
+    it("BUFF 合并节点接收两路 BUFF 并输出一路 BUFF", () => {
+        const ports = getNodePorts(NodeType.BUFF_MERGE)
+        expect(ports.inputs).toEqual([
+            { id: "left", type: PortType.BUFF, label: "BUFF A", multiple: false },
+            { id: "right", type: PortType.BUFF, label: "BUFF B", multiple: false },
+        ])
+        expect(ports.outputs).toEqual([{ id: "buff", type: PortType.BUFF, label: "BUFF" }])
+        expect(canConnectPorts(getNodePorts(NodeType.BUFF_INPUT).outputs[0], ports.inputs[0])).toBe(true)
+        const coreBuff = getNodePorts(NodeType.CORE_CALC).inputs.find(port => port.id === CORE_INPUT.buff)!
+        expect(canConnectPorts(ports.outputs[0], coreBuff)).toBe(true)
     })
 
     it("唯一端口在旧边没有 handle 时可以自动解析", () => {

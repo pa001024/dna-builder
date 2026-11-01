@@ -6,7 +6,10 @@ import { normalizeCharSkillLevels } from "@/data/charSettings"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { getElementAccentColor, getElementSoftBgClass } from "@/utils/element-utils"
+import { getNodePorts } from "@/utils/nodeEditorPorts"
 import BaseNode from "./BaseNode.vue"
+import NodePortRow from "./NodePortRow.vue"
+import NumberRowInput from "./NumberRowInput.vue"
 
 const props = defineProps<{
     id: string
@@ -43,7 +46,10 @@ const charName = computed({
 })
 
 const charLevel = computed({
-    get: () => props.data.charLevel,
+    get: () => {
+        const level = Number(props.data.charLevel)
+        return Number.isFinite(level) ? level : 80
+    },
     set: value => store.updateNodeData(props.id, { charLevel: value }),
 })
 
@@ -94,14 +100,28 @@ const resonanceGain = computed({
     set: value => store.updateNodeData(props.id, { resonanceGain: value }),
 })
 
-const NUMBER_INPUT =
-    "w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 font-mono text-[12px] tabular-nums text-base-content outline-none transition-colors duration-150 focus:border-primary"
 const UNDERLINE_SELECT =
     "w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-[12px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
+
+/** 数值参数端口是否已有连线：连线后手动输入框禁用，取值由上游决定 */
+function isDriven(handleId: string) {
+    return store.edges.some(edge => edge.target === props.id && edge.targetHandle === handleId)
+}
+
+const ports = computed(() => getNodePorts(props.type, props.data))
+const paramPorts = computed(() => ports.value.inputs)
+const outputPort = computed(() => ports.value.outputs[0])
 </script>
 
 <template>
     <BaseNode v-bind="{ id, data, type, selected }">
+        <template #ports>
+            <!-- 展开时参数端口跟随各行，收起时回到端口区，保证收起后仍可接线 -->
+            <NodePortRow :output="outputPort" />
+            <template v-if="data.isCollapsed">
+                <NodePortRow v-for="port in paramPorts" :key="port.id" :input="port" />
+            </template>
+        </template>
         <div class="w-75 max-w-full space-y-1.5">
             <!-- 角色名片：沿用资料库条目卡片的图像区 + 名称/属性层级 -->
             <div class="flex items-stretch gap-2 border border-base-content/10 bg-base-100/60 p-1.5">
@@ -128,38 +148,65 @@ const UNDERLINE_SELECT =
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
-                <label class="block min-w-0">
-                    <span class="mb-0.5 block text-[10px] text-base-content/45">{{ $t("char-build.level") }}</span>
-                    <input v-model.number="charLevel" type="number" :class="NUMBER_INPUT" placeholder="80" />
-                </label>
-                <label class="block min-w-0">
-                    <span class="mb-0.5 block text-[10px] text-base-content/45">{{ $t("weapon-detail.extraMastery") }}</span>
-                    <Select v-model="extraMastery" :class="UNDERLINE_SELECT" :disabled="extraMasteryOptions.length === 0">
-                        <SelectItem value="-">无</SelectItem>
-                        <SelectItem v-for="item in extraMasteryOptions" :key="item.名称" :value="item.名称">
-                            {{ item.名称 }}
-                        </SelectItem>
-                    </Select>
-                </label>
+            <NumberRowInput
+                v-model="charLevel"
+                :label="$t('char-build.level')"
+                handle-id="charLevel"
+                :min="1"
+                :max="80"
+                :precision="0"
+                :disabled="isDriven('charLevel')"
+                :hint="isDriven('charLevel') ? '连线' : undefined"
+            />
+            <div class="flex h-6 items-center gap-1.5">
+                <span class="w-16 shrink-0 truncate text-[10px] leading-none text-base-content/45">
+                    {{ $t("weapon-detail.extraMastery") }}
+                </span>
+                <Select
+                    v-model="extraMastery"
+                    :class="UNDERLINE_SELECT"
+                    class="h-5 min-w-0 flex-1"
+                    :disabled="extraMasteryOptions.length === 0"
+                >
+                    <SelectItem value="-">无</SelectItem>
+                    <SelectItem v-for="item in extraMasteryOptions" :key="item.名称" :value="item.名称">
+                        {{ item.名称 }}
+                    </SelectItem>
+                </Select>
             </div>
 
-            <div>
-                <div class="mb-0.5 text-[10px] text-base-content/45">{{ $t("char-build.skill_level") }}</div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <label class="block min-w-0">
-                        <span class="mb-0.5 block text-[9px] text-base-content/40">E</span>
-                        <input v-model.number="skillE" type="number" min="1" max="12" :class="NUMBER_INPUT" placeholder="12" />
-                    </label>
-                    <label class="block min-w-0">
-                        <span class="mb-0.5 block text-[9px] text-base-content/40">Q</span>
-                        <input v-model.number="skillQ" type="number" min="1" max="12" :class="NUMBER_INPUT" placeholder="12" />
-                    </label>
-                    <label class="block min-w-0">
-                        <span class="mb-0.5 block text-[9px] text-base-content/40">{{ $t("被动") }}</span>
-                        <input v-model.number="skillPassive" type="number" min="1" max="12" :class="NUMBER_INPUT" placeholder="12" />
-                    </label>
-                </div>
+            <div class="space-y-0.5">
+                <div class="text-[10px] text-base-content/45">{{ $t("char-build.skill_level") }}</div>
+                <NumberRowInput
+                    v-model="skillE"
+                    label="E"
+                    handle-id="skillE"
+                    :min="1"
+                    :max="12"
+                    :precision="0"
+                    :disabled="isDriven('skillE')"
+                    :hint="isDriven('skillE') ? '连线' : undefined"
+                />
+                <NumberRowInput
+                    v-model="skillQ"
+                    label="Q"
+                    handle-id="skillQ"
+                    :min="1"
+                    :max="12"
+                    :precision="0"
+                    :disabled="isDriven('skillQ')"
+                    :hint="isDriven('skillQ') ? '连线' : undefined"
+                />
+                <NumberRowInput
+                    v-model="skillPassive"
+                    :label="$t('被动')"
+                    handle-id="skillPassive"
+                    :min="1"
+                    :max="12"
+                    :precision="0"
+                    :disabled="isDriven('skillPassive')"
+                    :hint="isDriven('skillPassive') ? '连线' : undefined"
+                />
             </div>
 
             <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">

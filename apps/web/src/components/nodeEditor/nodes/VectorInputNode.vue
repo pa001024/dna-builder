@@ -2,6 +2,7 @@
 import { ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import BaseNode from "./BaseNode.vue"
+import NumberRowInput from "./NumberRowInput.vue"
 
 const props = defineProps<{
     id: string
@@ -38,9 +39,9 @@ function commit() {
     })
 }
 
-function onValueInput(index: number, event: Event) {
-    const parsed = Number((event.target as HTMLInputElement).value)
-    values.value[index] = Number.isFinite(parsed) ? parsed : 0
+/** 行输入组件的提交入口 */
+function setValue(index: number, value: number) {
+    values.value[index] = value
     commit()
 }
 
@@ -62,12 +63,11 @@ function removeValue(index: number) {
             <div class="space-y-1">
                 <div v-for="(value, index) in values" :key="index" class="flex items-center gap-1.5">
                     <span class="w-4 shrink-0 text-right font-mono text-[10px] tabular-nums text-base-content/35">{{ index + 1 }}</span>
-                    <input
-                        :value="value"
-                        type="number"
-                        step="any"
-                        class="nodrag nowheel w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-center font-mono text-[12px] tabular-nums text-base-content outline-none transition-colors duration-150 focus:border-primary"
-                        @input="onValueInput(index, $event)"
+                    <NumberRowInput
+                        class="min-w-0 flex-1"
+                        :model-value="value"
+                        :step="1"
+                        @update:model-value="setValue(index, $event)"
                     />
                     <button
                         type="button"

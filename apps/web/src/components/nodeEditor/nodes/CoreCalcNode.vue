@@ -4,6 +4,7 @@ import { computed } from "vue"
 import type { CharBuildOptions } from "@/data/CharBuild"
 import { CharBuild } from "@/data/CharBuild"
 import { useNodeEditorStore } from "@/store/nodeEditor"
+import { CORE_INPUT } from "@/utils/nodeEditorPorts"
 import BaseNode from "./BaseNode.vue"
 
 // 定义节点数据类型
@@ -22,6 +23,8 @@ interface CoreCalcNodeData {
     error?: string
     missingInputs?: string[]
     selectedSkill?: string // 当前选择的技能
+    /** 构筑输入合并模式：override 覆盖构筑对应项目，append 原构筑与叠加结果同时产出 */
+    buildMode?: "override" | "append"
     vectorDimensions?: number[]
     buildVector?: { contexts: unknown[] }
 }
@@ -66,11 +69,48 @@ const availableSkills = computed(() => {
 const handleSkillChange = (val: string) => {
     store.updateNodeData(props.id, { selectedSkill: val })
 }
+
+/** 是否接了构筑输入：没有构筑输入时覆盖 / 追加没有意义 */
+const hasBuildInput = computed(() => store.edges.some(edge => edge.target === props.id && edge.targetHandle === CORE_INPUT.build))
+
+const BUILD_MODES = [
+    { value: "override", label: "覆盖" },
+    { value: "append", label: "追加" },
+] as const
+
+const buildMode = computed<"override" | "append">(() => (props.data.buildMode === "append" ? "append" : "override"))
+
+/**
+ * 切换构筑输入合并模式。
+ * @param mode 覆盖或追加
+ */
+function setBuildMode(mode: "override" | "append") {
+    store.updateNodeData(props.id, { buildMode: mode })
+}
 </script>
 
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
         <div class="w-57.5 max-w-full space-y-1 text-[11px]">
+            <!-- 构筑输入合并模式 -->
+            <div v-if="hasBuildInput" class="flex items-center gap-1">
+                <span class="shrink-0 text-[10px] text-base-content/45">构筑输入</span>
+                <button
+                    v-for="mode in BUILD_MODES"
+                    :key="mode.value"
+                    type="button"
+                    class="h-5 cursor-pointer border px-1.5 text-[10px] font-semibold transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        buildMode === mode.value
+                            ? 'border-primary/40 bg-primary/15 text-primary'
+                            : 'border-base-content/10 bg-base-100 text-base-content/60 hover:border-primary/30 hover:text-primary'
+                    "
+                    :title="mode.value === 'override' ? '连线输入覆盖构筑的对应项目' : '原构筑与叠加输入后的构筑同时产出'"
+                    @click="setBuildMode(mode.value)"
+                >
+                    {{ mode.label }}
+                </button>
+            </div>
             <!-- 状态信息 -->
             <div v-if="!hasMissingInputs && !data.charBuild" class="text-center">
                 <span
