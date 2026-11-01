@@ -50,11 +50,6 @@ export const typeDefs = /* GraphQL */ `
     }
 `
 
-/**
- * 校验节点图 JSON 体积与基本形状。
- * @param graphData 待存的图 JSON 文本
- * @returns 非法时返回中文原因；合法返回 null
- */
 function validateGraphData(graphData: string): string | null {
     if (!graphData?.trim()) {
         return "节点图数据不能为空"
@@ -86,17 +81,11 @@ export const resolvers = {
                 conditions.push(eq(schema.graphs.userId, userId))
             }
 
-            let orderBy: any[]
-            switch (sortBy) {
-                case "likes":
-                    orderBy = [desc(schema.graphs.likes)]
-                    break
-                case "views":
-                    orderBy = [desc(schema.graphs.views)]
-                    break
-                default:
-                    orderBy = [desc(schema.graphs.updateAt)]
+            const sortOrders: Record<string, any[]> = {
+                likes: [desc(schema.graphs.likes)],
+                views: [desc(schema.graphs.views)],
             }
+            const orderBy = sortOrders[sortBy] ?? [desc(schema.graphs.updateAt)]
 
             const result = await db.query.graphs.findMany({
                 where: conditions.length > 0 ? and(...conditions) : undefined,

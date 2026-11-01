@@ -40,12 +40,6 @@ function compressZstd(data: Uint8Array): Uint8Array {
     return zstdCompressSync(data)
 }
 
-/**
- * 大于阈值且客户端支持时对 GraphQL JSON 响应做 zstd 压缩。
- * @param request 原始请求（读 Accept-Encoding 用）
- * @param response yoga 产出的原始响应
- * @returns 视情况压缩后的响应
- */
 export async function maybeCompressGraphqlResponse(request: Request, response: Response): Promise<Response> {
     if (request.method === "HEAD") return response
     if (response.status === 204 || response.status === 304) return response
