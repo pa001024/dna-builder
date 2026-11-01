@@ -5,9 +5,10 @@ import path from "node:path"
 import process from "node:process"
 import { glob } from "glob"
 
-const DEFAULT_PATTERNS = ["**/*.ts", "**/*.vue"]
+const DEFAULT_PATTERNS = ["**/*.ts", "**/*.vue", "**/*.rs"]
 const DEFAULT_IGNORE_PATTERNS = [
     "**/*.data.ts",
+    "**/*.generated.ts",
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
@@ -240,10 +241,11 @@ async function resolveRealPath(targetPath: string): Promise<string> {
  */
 async function collectFiles(targetPath: string): Promise<string[]> {
     const normalizedTargetPath = path.normalize(targetPath)
-    const isDirectFile = normalizedTargetPath.endsWith(".ts") || normalizedTargetPath.endsWith(".vue")
+    const isDirectFile =
+        normalizedTargetPath.endsWith(".ts") || normalizedTargetPath.endsWith(".vue") || normalizedTargetPath.endsWith(".rs")
 
     if (isDirectFile) {
-        if (normalizedTargetPath.endsWith(".data.ts")) {
+        if (normalizedTargetPath.endsWith(".data.ts") || normalizedTargetPath.endsWith(".generated.ts")) {
             return []
         }
         return [normalizedTargetPath]
