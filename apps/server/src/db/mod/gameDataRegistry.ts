@@ -97,6 +97,7 @@ export const FIELD_SCAN_LIMIT = 200
  * 每项都是显式 import，拼错文件名会在类型检查阶段暴露；`load` 只在被查询时调用。
  */
 export const DATA_MODULES: DataModuleEntry[] = [
+    { id: "archive", label: "陈列室", file: "packages/data/d/archive.data.ts", load: () => import("dna-builder-data/d/archive.data") },
     { id: "abyss", label: "深渊", file: "packages/data/d/abyss.data.ts", load: () => import("dna-builder-data/d/abyss.data") },
     {
         id: "accessory",
@@ -193,6 +194,12 @@ export const DATA_MODULES: DataModuleEntry[] = [
         load: async () => ({ default: (await import("dna-builder-data/d/charvoice-locale")).loadCharVoiceDataByLocale("fr") }),
     },
     {
+        id: "clue",
+        label: "线索板",
+        file: "packages/data/d/clue.data.ts",
+        load: () => import("dna-builder-data/d/clue.data"),
+    },
+    {
         id: "condition",
         label: "条件配置",
         file: "packages/data/d/condition.data.ts",
@@ -206,6 +213,7 @@ export const DATA_MODULES: DataModuleEntry[] = [
     { id: "dynquest", label: "动态委托", file: "packages/data/d/dynquest.data.ts", load: () => import("dna-builder-data/d/dynquest.data") },
     { id: "effect", label: "特效词条", file: "packages/data/d/effect.data.ts", load: () => import("dna-builder-data/d/effect.data") },
     { id: "event", label: "活动", file: "packages/data/d/event.data.ts", load: () => import("dna-builder-data/d/event.data") },
+    { id: "extvoice", label: "AI语音", file: "packages/data/d/extvoice.data.ts", load: () => import("dna-builder-data/d/extvoice.data") },
     { id: "fish", label: "钓鱼", file: "packages/data/d/fish.data.ts", load: () => import("dna-builder-data/d/fish.data") },
     { id: "forge", label: "锻造", file: "packages/data/d/forge.data.ts", load: () => import("dna-builder-data/d/forge.data") },
     { id: "hardboss", label: "强敌", file: "packages/data/d/hardboss.data.ts", load: () => import("dna-builder-data/d/hardboss.data") },
@@ -258,6 +266,7 @@ export const DATA_MODULES: DataModuleEntry[] = [
         file: "packages/data/d/optreward.data.ts",
         load: () => import("dna-builder-data/d/optreward.data"),
     },
+    { id: "pan", label: "潘神", file: "packages/data/d/pan.data.ts", load: () => import("dna-builder-data/d/pan.data") },
     {
         id: "partytopic",
         label: "光阴集",
@@ -349,6 +358,7 @@ export const DATA_MODULES: DataModuleEntry[] = [
     },
     { id: "resource", label: "资源", file: "packages/data/d/resource.data.ts", load: () => import("dna-builder-data/d/resource.data") },
     { id: "reward", label: "奖励", file: "packages/data/d/reward.data.ts", load: () => import("dna-builder-data/d/reward.data") },
+    { id: "review", label: "剧情回顾", file: "packages/data/d/review.data.ts", load: () => import("dna-builder-data/d/review.data") },
     { id: "rouge", label: "轮回玩法", file: "packages/data/d/rouge.data.ts", load: () => import("dna-builder-data/d/rouge.data") },
     { id: "shop", label: "商店", file: "packages/data/d/shop.data.ts", load: () => import("dna-builder-data/d/shop.data") },
     {
@@ -408,6 +418,7 @@ export const DATA_MODULES: DataModuleEntry[] = [
         load: () => import("dna-builder-data/d/weapon-verify.data"),
     },
     { id: "weapon", label: "武器", file: "packages/data/d/weapon.data.ts", load: () => import("dna-builder-data/d/weapon.data") },
+    { id: "wiki", label: "百科", file: "packages/data/d/wiki.data.ts", load: () => import("dna-builder-data/d/wiki.data") },
 ]
 
 /** 模块 id → 注册项 */
