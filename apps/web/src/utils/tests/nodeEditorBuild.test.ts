@@ -25,6 +25,7 @@ import {
     readNodeVectorValues,
     readVectorCalcMode,
     reconcileTeamBuffs,
+    sortDownstreamIds,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
 import { CORE_INPUT } from "@/utils/nodeEditorPorts"
@@ -772,5 +773,34 @@ describe("nodeEditorBuild", () => {
         expect(readVectorCalcMode({})).toBe("sum")
         expect(readVectorCalcMode({ mode: "std" })).toBe("std")
         expect(readVectorCalcMode({ mode: "unknown" })).toBe("sum")
+    })
+
+    it("下游按拓扑序排列：上游在前，子图外输入不约束顺序", () => {
+        const chain = [
+            { source: "a", target: "b" },
+            { source: "b", target: "c" },
+        ]
+        expect(sortDownstreamIds(["a"], chain)).toEqual(["a", "b", "c"])
+        expect(sortDownstreamIds(["b"], chain)).toEqual(["b", "c"])
+
+        const diamond = [
+            { source: "a", target: "b" },
+            { source: "a", target: "c" },
+            { source: "b", target: "d" },
+            { source: "c", target: "d" },
+            { source: "x", target: "b" },
+        ]
+        const ordered = sortDownstreamIds(["a"], diamond)
+        expect(ordered[0]).toBe("a")
+        expect(ordered[ordered.length - 1]).toBe("d")
+        expect(ordered).toHaveLength(4)
+        expect(ordered).not.toContain("x")
+        expect(ordered.indexOf("b")).toBeLessThan(ordered.indexOf("d"))
+        expect(ordered.indexOf("c")).toBeLessThan(ordered.indexOf("d"))
+
+        expect(sortDownstreamIds(["b", "c"], diamond)).toEqual(["b", "c", "d"])
+        expect(sortDownstreamIds([], diamond)).toEqual([])
+        // 环路兜底：不断不重，一个不少
+        expect(sortDownstreamIds(["a"], [...diamond, { source: "d", target: "a" }]).sort()).toEqual(["a", "b", "c", "d"])
     })
 })

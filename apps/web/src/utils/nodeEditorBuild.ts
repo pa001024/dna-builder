@@ -343,6 +343,48 @@ export function computeVectorStat(mode: VectorCalcMode, values: number[]): numbe
     }
 }
 
+/**
+ * 收集种子及其全部下游并按拓扑序排列：上游在前，子图外的输入走缓存不约束顺序。
+ * @param seedIds 变化起点
+ * @param edges 全图边
+ * @returns 拓扑序 id；环路兜底按发现顺序追加，保证一个不少
+ */
+export function sortDownstreamIds(seedIds: string[], edges: { source: string; target: string }[]): string[] {
+    const affected = new Set<string>(seedIds)
+    const queue = [...affected]
+    while (queue.length > 0) {
+        const current = queue.shift()!
+        edges.forEach(edge => {
+            if (edge.source !== current || affected.has(edge.target)) return
+            affected.add(edge.target)
+            queue.push(edge.target)
+        })
+    }
+    const inDegree = new Map<string, number>()
+    affected.forEach(id => inDegree.set(id, 0))
+    edges.forEach(edge => {
+        if (affected.has(edge.source) && affected.has(edge.target)) inDegree.set(edge.target, (inDegree.get(edge.target) ?? 0) + 1)
+    })
+    const ready = [...affected].filter(id => (inDegree.get(id) ?? 0) === 0)
+    const ordered: string[] = []
+    const pushed = new Set<string>()
+    while (ready.length > 0) {
+        const current = ready.shift()!
+        ordered.push(current)
+        pushed.add(current)
+        edges.forEach(edge => {
+            if (edge.source !== current || !affected.has(edge.target)) return
+            const next = (inDegree.get(edge.target) ?? 1) - 1
+            inDegree.set(edge.target, next)
+            if (next === 0 && !pushed.has(edge.target)) ready.push(edge.target)
+        })
+    }
+    affected.forEach(id => {
+        if (!pushed.has(id)) ordered.push(id)
+    })
+    return ordered
+}
+
 /** 读取 BUFF 覆盖率，缺省视为满覆盖 */
 function buffEntryCoverage(entry: [string, number, number?]) {
     return typeof entry[2] === "number" && Number.isFinite(entry[2]) ? entry[2] : 1

@@ -31,6 +31,7 @@ import {
     readNodeTeamBuffs,
     readVectorCalcMode,
     resolveBuffSourceNode,
+    sortDownstreamIds,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
 import { recordSyncPhase } from "@/utils/nodeEditorPerf"
@@ -418,11 +419,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             })
             // 折叠 / 不影响向量的标题改动：保持计算缓存，避免连带 worker 求值
             if (needsRecalculation) {
-                // 清除缓存并触发相关节点的重新计算
-                clearCache()
+                // 只重算该节点及其下游：上游命中缓存不再重算，签名未变的 worker 不发新请求
                 markGraphDirty()
-
-                triggerRecalculation(nodeId)
+                recalculateFromSeeds([nodeId])
             }
 
             // 高频编辑（如输入框连续修改）合并为一个撤销步骤
@@ -739,6 +738,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
      * 删除节点
      */
     function removeNode(nodeId: string) {
+        // 先记下被删节点的原下游：它们少一路输入，需要重算
+        const downstreamIds = edges.value.filter(edge => edge.source === nodeId).map(edge => edge.target)
         nodes.value = nodes.value.filter(n => n.id !== nodeId)
         edges.value = edges.value.filter(e => e.source !== nodeId && e.target !== nodeId)
         const pendingTimer = evaluationTimers.get(nodeId)
@@ -746,7 +747,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         evaluationTimers.delete(nodeId)
         evaluationRequestIds.delete(nodeId)
         markGraphDirty()
-        recalculateAllNodes()
+        recalculateFromSeeds(downstreamIds)
         commitHistory("删除节点")
     }
 
@@ -780,8 +781,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         }
         edges.value.push(decorateEdge(edge))
         markGraphDirty()
-        // 边变化会改变核心节点的输入/表达式集合，整图重算保证上下文一致
-        recalculateAllNodes()
+        // 只重算连线目标及其下游：源头输出走缓存，核心输入集合变化经下游重算收敛
+        recalculateFromSeeds([edge.target])
         commitHistory("添加连接")
         return true
     }
@@ -796,7 +797,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             // 删除边
             edges.value = edges.value.filter(e => e.id !== edgeId)
             markGraphDirty()
-            recalculateAllNodes()
+            recalculateFromSeeds([edge.target])
             commitHistory("删除连接")
         }
     }
@@ -833,9 +834,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         })
         if (!changed) return
         edges.value = nextEdges
-        clearCache()
         markGraphDirty()
-        recalculateAllNodes()
+        recalculateFromSeeds([nodeId])
         commitHistory("同步变量接线", `node:${nodeId}`)
     }
 
@@ -916,8 +916,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         edges.value.push(...filteredEdges.map(decorateEdge))
         markGraphDirty()
 
-        // 整图重算：粘贴的节点可能改变已有核心节点的输入集合
-        recalculateAllNodes()
+        // 只算粘贴进来的节点：粘贴边只在新节点内部，已有节点不受影响
+        recalculateFromSeeds(newNodes.map(node => node.id))
         commitHistory("粘贴节点")
 
         return newNodes
@@ -1142,36 +1142,21 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
-     * 触发相关节点的重新计算
+     * 按依赖增量重算：只重算种子及其下游，上游命中缓存不再重算。
+     * 不碰求值签名与 debounce 计时：签名未变的 worker 不发新请求，变化的由 schedule 自行取消旧计时重排。
+     * @param seedIds 变化起点
      */
-    function triggerRecalculation(nodeId: string) {
+    function recalculateFromSeeds(seedIds: string[]) {
+        const ordered = sortDownstreamIds(
+            seedIds.filter(id => nodes.value.some(node => node.id === id)),
+            edges.value
+        )
+        if (ordered.length === 0) return
         const startedAt = performance.now()
-        // 找到所有受影响的下游节点
-        const affectedNodes = new Set<string>()
-        const visited = new Set<string>()
-        const queue = [nodeId]
-
-        while (queue.length > 0) {
-            const current = queue.shift()!
-            if (visited.has(current)) continue
-            visited.add(current)
-
-            // 找到所有以此节点为源头的边
-            const outgoingEdges = edges.value.filter(e => e.source === current)
-            for (const edge of outgoingEdges) {
-                const targetId = edge.target
-                affectedNodes.add(targetId)
-                queue.push(targetId)
-            }
-        }
-
-        // 先重算自身（核心节点的技能选择、表达式节点等），再重算下游
-        calculateNode(nodeId, false)
-        affectedNodes.forEach(affectedId => {
-            calculateNode(affectedId, false)
-        })
-        const node = nodes.value.find(item => item.id === nodeId)
-        recordSyncPhase("级联重算", performance.now() - startedAt, { nodeId, nodeType: node?.type })
+        // 只作废受影响节点的缓存，上游缓存保留
+        ordered.forEach(id => calculationCache.delete(id))
+        ordered.forEach(id => calculateNode(id, false))
+        recordSyncPhase("增量重算", performance.now() - startedAt, { nodeId: seedIds.join(",") })
     }
 
     /**
@@ -1672,8 +1657,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             node.data.error = undefined
             node.data.result = mapEvaluationResult(node, evaluation)
         }
-        clearCache()
-        refreshDownstream(node.id)
+        recalculateFromSeeds([node.id])
         recordSyncPhase("结果写回", performance.now() - startedAt, { nodeId: node.id, nodeType: node.type })
     }
 
@@ -1692,27 +1676,6 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             default:
                 return { value: evaluation.targetValue }
         }
-    }
-
-    /**
-     * 重新计算节点下游的所有节点，用于求值完成后同步展示与输出。
-     * @param nodeId 起点节点
-     */
-    function refreshDownstream(nodeId: string) {
-        const startedAt = performance.now()
-        const visited = new Set<string>([nodeId])
-        const queue = [nodeId]
-        while (queue.length > 0) {
-            const current = queue.shift()!
-            edges.value.forEach(edge => {
-                if (edge.source !== current || visited.has(edge.target)) return
-                visited.add(edge.target)
-                queue.push(edge.target)
-                calculateNode(edge.target, false)
-            })
-        }
-        const node = nodes.value.find(item => item.id === nodeId)
-        recordSyncPhase("下游刷新", performance.now() - startedAt, { nodeId, nodeType: node?.type })
     }
 
     /** 计算武器属性节点可选的武器槽 */
@@ -1807,8 +1770,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     node.data.panels = panels
                     node.data.panelVectors = undefined
                     applyPanelSelection(node)
-                    clearCache()
-                    refreshDownstream(node.id)
+                    recalculateFromSeeds([node.id])
                 })
                 .catch(error => {
                     if (evaluationRequestIds.get(node.id) !== requestId) return
@@ -1880,8 +1842,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                         valueLabel: "攻击",
                     }
                     applyPanelSelection(node)
-                    clearCache()
-                    refreshDownstream(node.id)
+                    recalculateFromSeeds([node.id])
                 })
                 .catch(error => {
                     if (evaluationRequestIds.get(node.id) !== requestId) return
@@ -2046,8 +2007,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             node.data.error = undefined
             node.data.result = evaluations[0] ? mapEvaluationResult(node, evaluations[0]) : null
         }
-        clearCache()
-        refreshDownstream(node.id)
+        recalculateFromSeeds([node.id])
         recordSyncPhase("向量写回", performance.now() - startedAt, { nodeId: node.id, nodeType: node.type })
     }
 
