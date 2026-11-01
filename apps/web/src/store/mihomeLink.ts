@@ -87,6 +87,8 @@ export function matchMiHomeRule(rule: MiHomeRule, event: AfkEvent) {
 export const useMiHomeLinkStore = defineStore("mihomeLink", {
     state: () => ({
         enabled: useLocalStorage("setting_mihome_enabled", false),
+        /** 仅一次：自动触发命中后关闭总开关（口径对齐密函 `mihanNotifyOnce`）。 */
+        fireOnce: useLocalStorage("setting_mihome_fire_once", true),
         rules: useLocalStorage<MiHomeRule[]>("setting_mihome_rules", [], {
             serializer: StorageSerializers.object,
             writeDefaults: false,
@@ -125,6 +127,13 @@ export const useMiHomeLinkStore = defineStore("mihomeLink", {
     actions: {
         setEnabled(enabled: boolean) {
             this.enabled = enabled
+        },
+        /**
+         * 开关“仅一次”：只影响自动触发，手动“立即执行”不受影响。
+         * @param once 是否命中一次后自动关闭联动
+         */
+        setFireOnce(once: boolean) {
+            this.fireOnce = once
         },
         /**
          * 启动时初始化：查登录态，已登录且无场景缓存时静默拉一次。
@@ -285,13 +294,17 @@ export const useMiHomeLinkStore = defineStore("mihomeLink", {
         },
         /**
          * 对实时事件做匹配并触发（回放事件不触发，与通知口径一致）。
+         * 仅一次开启时命中后自动关闭总开关，手动“立即执行”不受影响。
          * @param event 管道事件
          * @param replayed 是否来自连接瞬间的历史回放
          */
         maybeFire(event: AfkEvent, replayed: boolean) {
             if (replayed || !this.enabled) return
-            for (const rule of this.enabledRules) {
-                if (!matchMiHomeRule(rule, event)) continue
+            const matched = this.enabledRules.filter(rule => matchMiHomeRule(rule, event))
+            if (matched.length === 0) return
+            // 仅一次：命中即先关总开关（对齐密函 `mihanNotifyOnce` 先关后通知），快速连续事件也只执行这一批
+            if (this.fireOnce) this.enabled = false
+            for (const rule of matched) {
                 void this.fireRule(rule.id).catch(() => {})
             }
         },

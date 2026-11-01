@@ -240,6 +240,16 @@ onMounted(() => {
                         :title="$t(loginStatusKey)"
                     />
                     <span class="text-[11px] text-base-content/55">{{ $t(loginStatusKey) }}</span>
+                    <label v-if="mihome.enabled" class="flex items-center gap-1 text-[11px] text-base-content/55">
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-xs toggle-secondary"
+                            :checked="mihome.fireOnce"
+                            :disabled="!env.isApp"
+                            @change="mihome.setFireOnce(($event.target as HTMLInputElement).checked)"
+                        />
+                        {{ $t("resizeableWindow.onlyOnce") }}
+                    </label>
                     <input
                         type="checkbox"
                         class="toggle toggle-secondary"
