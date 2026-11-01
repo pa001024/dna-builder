@@ -173,3 +173,24 @@
 
 接收端与官方工具二选一（同一个管道名）。账本只消费本应用收到的实时事件；
 官方工具关闭后，进入/退出挂机场景即可让游戏连到本应用。详见 `specs/afk-support-protocol.md` §6。
+
+## 9. 米家联动
+
+- 协议是 vendored `mihome-api`（`crates/mihome-api`），扫码登录态落盘 `<app_data>/mihome/auth.json`，不依赖外部服务进程；仅桌面端可用（`env.isApp`，浏览器调用直接抛错）。
+- Tauri 命令只有六个：`mihome_status`（token 有效自动刷新）/ `mihome_qr_begin`（有效返回 `already`，否则返回 `login_url` + `lp`）/ `mihome_qr_wait`（最长阻塞约 2 分钟）/ `mihome_logout`（删登录态文件）/ `mihome_scenes`（手动场景列表，即米家 APP → 智能 → 手动控制）/ `mihome_run_scene`（按 `scene_id` + `home_id` 执行）。所有调用都在 `spawn_blocking` 里跑，不在 async 上下文持有服务实例。
+- 设置入口是账本页尾独立一节（`AfkMiHomeSetting`，空账本时也能配置），i18n 命名空间 `afk-mihome`：扫码登录（二维码前端自渲染，成功自动拉场景）/ 退出登录 / 刷新场景列表（live 为空时退回本地 `sceneCache`，离线可编辑）。
+- 事件绑定三种（`matchMiHomeRule` 判定）：`dungeon_complete`（可指定副本，空=任意）/ `item_drop`（物品名子串 + 最低品质 1..5，空名=任意）/ `craft_complete`（物品名子串）；命中即执行对应手动场景，规则行显示上次执行时刻与 `fireError`。
+- 自动触发：`afkSupport.handleEvent` → `maybeFire(event, replayed)`，连接瞬间回放窗内的历史事件只记录不触发；执行走 `mihomeRunScene`，错误记到 `fireError[ruleId]`。
+- 迁移：`localStorage` 老键 `setting_mijia_{enabled,rules,scenes}` 命中即搬到 `setting_mihome_*`；Rust 侧登录态文件 `mijia/auth.json` 存在即复制到 `mihome/auth.json`。
+
+## 10. 仅一次开关 fireOnce
+
+- 默认开（`setting_mihome_fire_once` 初值 `true`）；开关在联动卡片头部（label 复用 `resizeableWindow.onlyOnce`），只桌面端可改。
+- 语义：首个命中的事件批次触发时先把总开关 `enabled` 置 false 再执行（对齐密函 `mihanNotifyOnce`），同一批次多条命中规则全部执行，之后事件不再触发，直到用户手动重开。
+- 只影响自动触发：手动「立即执行」（`fireRule`）不受 `fireOnce` 与 `enabled` 影响；回放事件不触发（与通知口径一致）；关闭时每次命中都执行。
+
+## 11. 动画资源包缺失提示
+
+- 素材不打包：`useAfkSprites` 直读游戏安装目录 `EM/Binaries/Win64/AFKSupport/Res/Runtime/manifest.json`（读不到记 `error`）；`hasGameDir` 即 `game.path !== ""`。
+- 页头（`AfkLedgerHero`）与小窗（`AfkWidgetView`）右下角同一口径：`error && hasGameDir` 显示 `afk-ledger.hero_res_missing` + 下载链接（`env.afkResPackUrl`）`afk-ledger.hero_res_download`；有 `error` 但无游戏目录显示 `afk-ledger.hero_missing`。
+- `hero_res_missing` / `hero_res_download` 六语言一次补齐。
