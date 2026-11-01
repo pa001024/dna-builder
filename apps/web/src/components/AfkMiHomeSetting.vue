@@ -5,7 +5,7 @@ import { env } from "@/env"
 import { useAfkLedgerStore } from "@/store/afkLedger"
 import { type MiHomeRuleDraft, type MiHomeRuleKind, useMiHomeLinkStore } from "@/store/mihomeLink"
 import { useUIStore } from "@/store/ui"
-import { AFK_DUNGEON_ALIASES, afkDungeonName } from "@/utils/afk-ledger"
+import { afkDungeonName } from "@/utils/afk-ledger"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
 
 const { t } = useTranslation()
@@ -36,9 +36,13 @@ const dungeonOptions = computed(() => {
     return [{ value: "-", label: t("afk-mihome.dungeon_any") }, ...entries]
 })
 
+function encodeSceneKey(sceneId: string, homeId: string) {
+    return `${sceneId}@@${homeId}`
+}
+
 const sceneOptions = computed(() =>
     mihome.effectiveScenes.map(scene => ({
-        value: `${scene.scene_id}@@${scene.home_id}`,
+        value: encodeSceneKey(scene.scene_id, scene.home_id),
         label: scene.home_name ? `${scene.name} · ${scene.home_name}` : scene.name,
     }))
 )
@@ -48,23 +52,12 @@ const rarityOptions = computed(() => [
     ...[5, 4, 3, 2].map(n => ({ value: n, label: t(`afk-ledger.rarity_${n}`) })),
 ])
 
-/**
- * 副本 id 转展示名：快照里有就用快照名，否则按 id 原样。
- * @param id 副本 id
- * @returns 展示名
- */
 function dungeonLabel(id: string) {
     if (!id) return t("afk-mihome.dungeon_any")
     const entry = ledger.snapshot.dungeons[id]
-    if (id in AFK_DUNGEON_ALIASES) return dungeonDisplayName(id, afkDungeonName(id, entry?.name ?? id))
     return dungeonDisplayName(id, afkDungeonName(id, entry?.name ?? id))
 }
 
-/**
- * 规则的条件摘要（种类徽标右侧的文字）。
- * @param rule 规则
- * @returns 条件文本
- */
 function conditionText(rule: { kind: MiHomeRuleKind; dungeonId: string; itemName: string; minRarity: number }) {
     if (rule.kind === "dungeon_complete") return dungeonLabel(rule.dungeonId)
     if (rule.kind === "item_drop") {
@@ -75,11 +68,6 @@ function conditionText(rule: { kind: MiHomeRuleKind; dungeonId: string; itemName
     return rule.itemName.trim() || t("afk-mihome.dungeon_any")
 }
 
-/**
- * 场景 key 转完整场景（含 home_id）。
- * @param key 复合 key
- * @returns 场景或 null
- */
 function sceneOf(key: string) {
     const [sceneId, homeId] = key.split("@@")
     if (!sceneId || sceneId === "-") return null
@@ -90,9 +78,6 @@ function sceneOf(key: string) {
     )
 }
 
-/**
- * 打开新增表单：默认值按当前副本/场景是否有数据给个合理起点。
- */
 function openAdd() {
     editingId.value = null
     formKind.value = "dungeon_complete"
@@ -103,10 +88,6 @@ function openAdd() {
     showForm.value = true
 }
 
-/**
- * 打开编辑表单：把规则回填进草稿。
- * @param id 规则 id
- */
 function openEdit(id: string) {
     const rule = mihome.rules.find(item => item.id === id)
     if (!rule) return
@@ -115,13 +96,10 @@ function openEdit(id: string) {
     formDungeonId.value = rule.dungeonId || "-"
     formItemName.value = rule.itemName
     formMinRarity.value = rule.minRarity
-    formSceneKey.value = `${rule.sceneId}@@${rule.homeId}`
+    formSceneKey.value = encodeSceneKey(rule.sceneId, rule.homeId)
     showForm.value = true
 }
 
-/**
- * 保存表单：新增或更新一条绑定，场景必填。
- */
 function saveForm() {
     const scene = sceneOf(formSceneKey.value)
     if (!scene) {
@@ -144,9 +122,6 @@ function saveForm() {
     editingId.value = null
 }
 
-/**
- * 取二维码并等待扫码：二维码出现即开始等，成功自动拉场景。
- */
 async function getQrAndWait() {
     if (mihome.qrBusy || mihome.loginBusy) return
     try {
@@ -168,9 +143,6 @@ async function getQrAndWait() {
     }
 }
 
-/**
- * 仅刷新场景列表（不弹成功提示，失败才提示）。
- */
 async function refreshOnly() {
     if (mihome.scenesBusy) return
     try {
@@ -180,9 +152,6 @@ async function refreshOnly() {
     }
 }
 
-/**
- * 退出登录。
- */
 async function logout() {
     try {
         await mihome.logout()
@@ -191,10 +160,6 @@ async function logout() {
     }
 }
 
-/**
- * 立即执行一次规则绑定的场景。
- * @param id 规则 id
- */
 async function fireNow(id: string) {
     const rule = mihome.rules.find(item => item.id === id)
     if (!rule) return
@@ -206,11 +171,6 @@ async function fireNow(id: string) {
     }
 }
 
-/**
- * 时刻格式化为 HH:MM:SS。
- * @param ms Unix 毫秒
- * @returns 时间文本
- */
 function timeLabel(ms: number) {
     return new Date(ms).toLocaleTimeString(undefined, { hour12: false })
 }

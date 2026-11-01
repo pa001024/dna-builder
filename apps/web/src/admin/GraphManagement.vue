@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Graph } from "@/api/graphql"
 import {
     deleteGraphMutation,
-    type Graph,
     graphsWithCountQuery,
     likeGraphMutation,
     pinGraphMutation,

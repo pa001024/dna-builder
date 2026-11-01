@@ -83,11 +83,7 @@ async function loadBuildOptions(charId: number, force = false) {
     await task
 }
 
-/**
- * 角色下拉变更：标准 Select 直接透出原始类型值，无需 .number 修饰。
- * @param index 条目下标
- * @param value 新选中的角色 id
- */
+/** 标准 Select 直接透出原始类型值，无需 .number 修饰 */
 function handleCharSelect(index: number, value: unknown) {
     const row = rows.value[index]
     if (!row) return

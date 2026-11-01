@@ -20,15 +20,7 @@ import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 /** 节点图助手会话主键前缀（与配装助手的 build-agent-chat: 同构，按图键一条存档） */
 const GRAPH_AGENT_CHAT_ID_PREFIX = "graph-agent-chat:"
 
-/**
- * 把历史存档里的消息补齐成当前结构。
- *
- * 与配装助手同口径：旧版把工具痕迹存成 `string[]`、思考存成单个字符串，两者都无法还原成
- * 「思考 → 工具 → 再思考」的过程流，因此直接丢弃工具痕迹、把整段思考收成一段保留。
- * @param raw 存档里的原始消息
- * @param index 消息在会话中的下标（用于补 id）
- * @returns 归一化后的消息；结构完全不可用时返回 null
- */
+/** 旧存档补齐：旧版 string[] 痕迹无法还原过程流，直接丢弃，单段思考收成一段保留 */
 function normalizeStoredMessage(raw: unknown, index: number): GraphAgentChatMessage | null {
     if (!raw || typeof raw !== "object") {
         return null
@@ -81,15 +73,6 @@ function normalizeStoredMessage(raw: unknown, index: number): GraphAgentChatMess
     return message
 }
 
-/**
- * 节点图助手对话状态：消息流 + 节点图 Agent 调用。
- *
- * 与配装助手的 {@link useBuildChat} 共用同一个公共核（{@link useAgentChatCore}：
- * 回调构建 / 耗时累加 / 挂起续跑 / 错误兜底），差别只在会话按图键一条存档
- * （分享图按远端 id，本地按图，互不串话），且失败提问可重试。
- * @param chatKey 当前图的会话键（分享图用远端 id，本地用图标识）
- * @returns 对话状态与操作方法
- */
 export function useGraphChat(chatKey: Ref<string>) {
     const agent = createGraphAgent({
         ...(resolveSharedAgentUpstream() ?? { api_key: "" }),
@@ -117,26 +100,14 @@ export function useGraphChat(chatKey: Ref<string>) {
 
     const hasMessages = computed(() => messages.value.length > 0)
 
-    /**
-     * 取当前图对应的会话主键。
-     * @param key 图键
-     * @returns 会话主键
-     */
     function chatId(key: string): string {
         return `${GRAPH_AGENT_CHAT_ID_PREFIX}${key}`
     }
 
-    /**
-     * 会话内自增的消息 id：取现有最大值 + 1，保证同一会话内稳定且不冲突。
-     * @returns 新的消息 id
-     */
     function nextMessageId(): number {
         return messages.value.reduce((max, message) => Math.max(max, message.id), 0) + 1
     }
 
-    /**
-     * 从本地库加载当前图的历史对话。
-     */
     async function loadMessages(): Promise<void> {
         try {
             const chat = await db.graphAgentChats.get(chatId(chatKey.value))
@@ -179,10 +150,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         }
     }
 
-    /**
-     * 取显式 AI 会话 id：没有就生成一个（下次 persistMessages 时落库）。
-     * @returns 会话 id。
-     */
     function ensureAiSessionId(): string {
         if (!aiSessionId) {
             aiSessionId = `s-${crypto.randomUUID()}`
@@ -190,9 +157,7 @@ export function useGraphChat(chatKey: Ref<string>) {
         return aiSessionId
     }
 
-    /**
-     * 清空当前图的对话，并落一条空的会话记录（保证刷新后仍是空对话）。
-     */
+    /** 清空对话并落空记录，保证刷新后仍是空对话 */
     async function clearChat(): Promise<void> {
         messages.value = []
         core.liveReasoning.value = ""
@@ -204,13 +169,7 @@ export function useGraphChat(chatKey: Ref<string>) {
         await persistMessages()
     }
 
-    /**
-     * 构建发给模型的会话历史（感知压缩边界）。
-     *
-     * 最后一条压缩边界之前的消息已并入边界摘要，全部丢弃、以边界摘要作为首条用户消息替代。
-     * @param excludeId 需要排除的消息 id（发送时排除本轮占位的助手消息）
-     * @returns 回灌历史
-     */
+    /** 边界之前的消息已并入摘要并丢弃，以摘要作为首条用户消息替代 */
     function buildHistory(excludeId?: number) {
         const markerIndex = lastCompactionIndex(messages.value)
         const history: Array<{ role: "user" | "assistant"; content: string; images?: ChatImage[] }> = []
@@ -239,10 +198,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         return history
     }
 
-    /**
-     * 落库一条压缩边界消息（system 角色，content 为回灌给模型的摘要全文）。
-     * @param outcome 压缩结果
-     */
     async function persistCompactionMarker(outcome: AgentCompactionOutcome): Promise<void> {
         const compaction: MessageCompaction = {
             preTokens: outcome.preTokens,
@@ -264,12 +219,7 @@ export function useGraphChat(chatKey: Ref<string>) {
         core.refreshContextUsage(buildHistory(), { dropProviderAnchor: true })
     }
 
-    /**
-     * 发送前压缩预检：估算当前会话上下文，逼近阈值时生成摘要并落库压缩边界。
-     *
-     * 必须在写入本轮提问**之前**执行：边界要排在本轮消息之前，后续构建历史时
-     * 「边界之后的照常回灌」才包含本轮提问。
-     */
+    /** 边界必须排在本轮消息之前，所以在写入提问之前执行 */
     async function runAutoCompaction(): Promise<void> {
         try {
             const outcome = await core.maybeCompactHistory(buildHistory())
@@ -282,14 +232,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         }
     }
 
-    /**
-     * 跑一轮助手回复：调用 Agent 并流式写回消息。
-     *
-     * 用户消息此刻已在消息列表里，这里只负责助手侧；失败时把错误写进助手消息
-     * 正文并记下失败的提问，供界面提供「重试」。
-     * @param message 本轮的助手消息（必须已在列表里）
-     * @param prompt 本轮的提问原文（失败重试用）
-     */
     async function runTurn(message: GraphAgentChatMessage, prompt: string): Promise<void> {
         // 历史消息（不含本轮占位；感知压缩边界，见 buildHistory）
         const history = buildHistory(message.id)
@@ -306,11 +248,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         })
     }
 
-    /**
-     * 发送提问：压缩预检 → 写入用户消息 → 调用节点图 Agent → 流式写入回复。
-     * @param rawText 用户输入
-     * @param rawImages 本次附带的图片；只取前 MAX_CHAT_IMAGES 张
-     */
     async function send(rawText: string, rawImages: ChatImage[] = []) {
         const text = rawText.trim()
         const images = rawImages.slice(0, MAX_CHAT_IMAGES)
@@ -355,10 +292,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         await runTurn(assistantMessage, text)
     }
 
-    /**
-     * 手动触发上下文压缩（容量面板的「压缩历史」）：无视阈值直接压缩当前会话历史。
-     * @returns compacted 已压缩；noNeed 无需压缩（会话太短）；failed 压缩失败
-     */
     async function compactNow(): Promise<"compacted" | "noNeed" | "failed"> {
         if (!hasMessages.value || core.isBusy.value) {
             return "noNeed"
@@ -379,9 +312,6 @@ export function useGraphChat(chatKey: Ref<string>) {
         }
     }
 
-    /**
-     * 重试上一轮失败的提问：丢掉失败留下的助手消息，用原提问重跑同一轮。
-     */
     async function retry() {
         const prompt = failedPrompt.value
 

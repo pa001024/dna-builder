@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { groupBy } from "lodash-es"
 import { computed, reactive, ref, watch } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { buffData, charData, charMap, LeveledBuff, LeveledChar, LeveledWeapon, weaponData } from "@/data"
@@ -151,9 +150,20 @@ const teamWeaponOptions = computed(() => [
         })),
 ])
 
-const groupedTeam1Options = computed(() => groupBy(team1Options.value, "elm"))
-const groupedTeam2Options = computed(() => groupBy(team2Options.value, "elm"))
-const groupedTeamWeaponOptions = computed(() => groupBy(teamWeaponOptions.value, "type"))
+function groupByKey<T extends Record<string, unknown>>(list: T[], key: keyof T): Record<string, T[]> {
+    const map = new Map<string, T[]>()
+    for (const item of list) {
+        const k = String(item[key] ?? "")
+        const group = map.get(k)
+        if (group) group.push(item)
+        else map.set(k, [item])
+    }
+    return Object.fromEntries(map)
+}
+
+const groupedTeam1Options = computed(() => groupByKey(team1Options.value, "elm"))
+const groupedTeam2Options = computed(() => groupByKey(team2Options.value, "elm"))
+const groupedTeamWeaponOptions = computed(() => groupByKey(teamWeaponOptions.value, "type"))
 const teamSettings = computed(() => team as unknown as CharSettings)
 
 const selectedBuffs = computed<LeveledBuff[]>(() => {

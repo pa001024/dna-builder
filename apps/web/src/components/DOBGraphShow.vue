@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
+import type { Graph } from "@/api/graphql"
 import {
     deleteGraphMutation,
-    type Graph,
     graphQuery,
     graphsWithCountQuery,
     likeGraphMutation,
@@ -35,43 +35,36 @@ const graphs = ref<Graph[]>([])
 const totalCount = ref(0)
 const LIMIT = 10
 
-const edit_model_show = ref(false)
+const editModelShow = ref(false)
 const editingGraphId = ref<string | null>(null)
 const editingGraph = ref<Graph | null>(null)
-const edit_title = ref("")
-const edit_desc = ref("")
+const editTitle = ref("")
+const editDesc = ref("")
 const updatingGraph = ref<string | null>(null)
 const deletingGraph = ref<string | null>(null)
 const recommendingGraph = ref<string | null>(null)
 const expandedGraphIds = ref<Record<string, boolean>>({})
 const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
-/**
- * 节点图里的节点数量（卡片上一眼看出图的规模）。
- * @param graph 节点图记录
- * @returns 节点数；解析失败时为 null
- */
-function nodeCountOf(graph: Graph): number | null {
+/** 解析一次拿节点/边数，失败返回 null */
+function graphCounts(graph: Graph): { nodes: number; edges: number } | null {
     try {
         const parsed = JSON.parse(graph.graphData) as { nodes?: unknown[]; edges?: unknown[] }
-        return Array.isArray(parsed.nodes) ? parsed.nodes.length : null
+        return {
+            nodes: Array.isArray(parsed.nodes) ? parsed.nodes.length : 0,
+            edges: Array.isArray(parsed.edges) ? parsed.edges.length : 0,
+        }
     } catch {
         return null
     }
 }
 
-/**
- * 节点图里的边数量。
- * @param graph 节点图记录
- * @returns 边数；解析失败时为 null
- */
+function nodeCountOf(graph: Graph): number | null {
+    return graphCounts(graph)?.nodes ?? null
+}
+
 function edgeCountOf(graph: Graph): number | null {
-    try {
-        const parsed = JSON.parse(graph.graphData) as { nodes?: unknown[]; edges?: unknown[] }
-        return Array.isArray(parsed.edges) ? parsed.edges.length : null
-    } catch {
-        return null
-    }
+    return graphCounts(graph)?.edges ?? null
 }
 
 function formatDate(timestamp: number) {
@@ -146,9 +139,9 @@ async function useGraph(graphId: string) {
 function openEditModal(graph: Graph) {
     editingGraphId.value = graph.id
     editingGraph.value = graph
-    edit_title.value = graph.title
-    edit_desc.value = graph.desc || ""
-    edit_model_show.value = true
+    editTitle.value = graph.title
+    editDesc.value = graph.desc || ""
+    editModelShow.value = true
 }
 
 async function confirmEdit() {
@@ -156,7 +149,7 @@ async function confirmEdit() {
 
     if (userStore.id !== editingGraph.value.userId && !userStore.isAdmin) {
         ui.showErrorMessage("没有权限编辑该节点图")
-        edit_model_show.value = false
+        editModelShow.value = false
         editingGraphId.value = null
         editingGraph.value = null
         return
@@ -168,8 +161,8 @@ async function confirmEdit() {
         const result = await updateGraphMutation({
             id: savedId,
             input: {
-                title: edit_title.value,
-                desc: edit_desc.value,
+                title: editTitle.value,
+                desc: editDesc.value,
                 graphData: editingGraph.value.graphData,
             },
         })
@@ -177,8 +170,8 @@ async function confirmEdit() {
         if (result) {
             const index = graphs.value.findIndex(g => g.id === savedId)
             if (index > -1) {
-                graphs.value[index].title = edit_title.value
-                graphs.value[index].desc = edit_desc.value
+                graphs.value[index].title = editTitle.value
+                graphs.value[index].desc = editDesc.value
             }
             ui.showSuccessMessage("节点图已更新")
         }
@@ -186,7 +179,7 @@ async function confirmEdit() {
         ui.showErrorMessage("更新节点图失败:", error instanceof Error ? error.message : "未知错误")
     } finally {
         updatingGraph.value = null
-        edit_model_show.value = false
+        editModelShow.value = false
         editingGraphId.value = null
         editingGraph.value = null
     }
@@ -238,7 +231,7 @@ async function deleteGraph() {
             graphs.value = graphs.value.filter(g => g.id !== editingGraphId.value)
             totalCount.value--
             ui.showSuccessMessage("节点图已删除")
-            edit_model_show.value = false
+            editModelShow.value = false
         }
     } catch (error) {
         ui.showErrorMessage("删除节点图失败:", error instanceof Error ? error.message : "未知错误")
@@ -473,7 +466,7 @@ defineExpose({
             共 <span class="font-orbitron tabular-nums">{{ totalCount }}</span> 个节点图
         </div>
 
-        <DialogModel v-model="edit_model_show" class="bg-base-300">
+        <DialogModel v-model="editModelShow" class="bg-base-300">
             <div class="space-y-4">
                 <h3 class="text-xl font-bold">编辑节点图</h3>
                 <div>
@@ -482,7 +475,7 @@ defineExpose({
                     </label>
                     <input
                         id="edit-graph-title"
-                        v-model="edit_title"
+                        v-model="editTitle"
                         type="text"
                         class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="输入标题..."
@@ -495,7 +488,7 @@ defineExpose({
                     </label>
                     <textarea
                         id="edit-graph-desc"
-                        v-model="edit_desc"
+                        v-model="editDesc"
                         class="w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="输入描述..."
                         rows="3"

@@ -140,18 +140,11 @@ const shortcutHelpGroups = [
     },
 ]
 
-/** 判断节点 / 边是否在当前选中集合内 */
 function isItemSelected(type: "node" | "edge", id: string) {
     const selected = type === "node" ? getSelectedNodes.value : getSelectedEdges.value
     return selected.some(item => item.id === id)
 }
 
-/**
- * 解析右键菜单作用对象：命中已选中元素时按选中集合操作，否则只作用于命中的元素。
- * @param type 元素类型
- * @param id 元素 id
- * @returns 右键菜单目标
- */
 function resolveContextMenuTarget(type: "node" | "edge", id: string): ContextMenuTarget {
     return isItemSelected(type, id) ? { type: "selection" } : { type, id }
 }
@@ -207,7 +200,6 @@ let pendingConnectStart: ConnectStartState | null = null
 let connectSucceeded = false
 let connectGestureId = 0
 
-/** 读取鼠标/触摸事件的客户端坐标 */
 function getEventClientPoint(event?: MouseEvent | TouchEvent) {
     if (!event) return { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     if ("changedTouches" in event && event.changedTouches.length > 0) {
@@ -220,13 +212,7 @@ function getEventClientPoint(event?: MouseEvent | TouchEvent) {
     return { x: mouseEvent.clientX, y: mouseEvent.clientY }
 }
 
-/**
- * 查找与拖出端口兼容的候选节点；从输出拖出时找输入端口，反之亦然。
- * 数值输出同样可以接入向量输入。
- * @param portType 拖出的端口类型
- * @param direction 新节点需要提供的端口方向
- * @returns 候选节点与可连接的端口
- */
+/** 数值输出同样可以接入向量输入 */
 function findConnectCandidates(portType: PortType, direction: "input" | "output"): ConnectCandidate[] {
     return PALETTE_ITEMS.flatMap((item): ConnectCandidate[] => {
         const ports = getNodePorts(item.type)
@@ -244,17 +230,11 @@ function findConnectCandidates(portType: PortType, direction: "input" | "output"
     })
 }
 
-/** 关闭端口落点菜单 */
 function closeConnectMenu() {
     connectMenu.value = null
     connectMenuSearch.value = ""
 }
 
-/**
- * 打开端口落点菜单：菜单只列出可提供同类型端口的节点。
- * @param start 拖出端口信息
- * @param event 释放事件
- */
 function openConnectMenu(start: ConnectStartState, event?: MouseEvent | TouchEvent) {
     // 从已占用且只允许单连线的输入端口拖出时，无法再接入第二条边
     if (start.handleType === "target" && !start.multiple) {
@@ -284,7 +264,6 @@ function openConnectMenu(start: ConnectStartState, event?: MouseEvent | TouchEve
     nextTick(() => connectSearchInput.value?.focus())
 }
 
-/** 选择候选节点：在落点创建节点并自动补上连线 */
 function chooseConnectCandidate(candidate: ConnectCandidate) {
     const menu = connectMenu.value
     if (!menu) return
@@ -320,7 +299,6 @@ function chooseConnectCandidate(candidate: ConnectCandidate) {
     closeConnectMenu()
 }
 
-/** 过滤后的候选节点 */
 const filteredConnectCandidates = computed(() => {
     const query = connectMenuSearch.value.trim().toLowerCase()
     if (!query) return connectMenu.value?.candidates ?? []
@@ -329,7 +307,6 @@ const filteredConnectCandidates = computed(() => {
     )
 })
 
-/** 候选节点按分类分组 */
 const groupedConnectCandidates = computed(() => {
     const groups: Record<string, ConnectCandidate[]> = {}
     filteredConnectCandidates.value.forEach(candidate => {
@@ -340,7 +317,6 @@ const groupedConnectCandidates = computed(() => {
     return groups
 })
 
-/** 搜索框回车选择第一个候选 */
 function chooseFirstConnectCandidate() {
     const first = filteredConnectCandidates.value[0]
     if (first) chooseConnectCandidate(first)
@@ -351,7 +327,6 @@ function isValidCanvasConnection(connection: Connection) {
     return store.isValidConnection(connection, { allowOccupiedTarget: true })
 }
 
-/** 画布连线提交：成功后标记本次手势已完成 */
 function handleCanvasConnect(connection: Connection) {
     const added = store.onConnect(connection)
     if (added) connectSucceeded = true
@@ -561,7 +536,6 @@ function undoFromMenu() {
     contextMenuVisible.value = false
 }
 
-/** 右键菜单重做 */
 function redoFromMenu() {
     if (!store.canRedo) return
     store.redo()
@@ -587,13 +561,11 @@ function deleteSelectedItems() {
     selectedEdge.value = null
 }
 
-/** 删除指定节点（右键命中的非选中项） */
 function deleteNodeById(nodeId: string) {
     store.removeNode(nodeId)
     if (selectedNode.value?.id === nodeId) selectedNode.value = null
 }
 
-/** 删除指定边（右键命中的非选中项） */
 function deleteEdgeById(edgeId: string) {
     store.removeEdge(edgeId)
     if (selectedEdge.value?.id === edgeId) selectedEdge.value = null
@@ -625,13 +597,11 @@ const contextMenuCopyable = computed(() => {
     return false
 })
 
-/** 执行右键菜单的删除操作并关闭菜单 */
 function deleteFromMenu() {
     contextMenuDelete.value?.action()
     contextMenuVisible.value = false
 }
 
-/** 从右键菜单打开快捷键说明 */
 function openShortcutsHelp() {
     contextMenuVisible.value = false
     shortcutsHelpShow.value = true
@@ -640,7 +610,6 @@ function openShortcutsHelp() {
 let paletteDragStart: { x: number; y: number } | null = null
 let paletteDragMoved = false
 
-/** 在画布坐标处创建调色板节点 */
 function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
     store.addNode({
         id: nanoid(),
@@ -666,7 +635,6 @@ function paletteClickPosition(canvas: Element) {
     return { x: (Math.min(...xs) + Math.max(...xs)) / 2 + 40, y: (Math.min(...ys) + Math.max(...ys)) / 2 + 40 }
 }
 
-/** 计算屏幕坐标对应的画布坐标 */
 function screenPointToFlow(point: { x: number; y: number }) {
     const canvas = document.querySelector(".vue-flow__container")
     if (!canvas) return null
@@ -810,7 +778,6 @@ function getCategoryLabel(category: string): string {
     return labels[category] || category
 }
 
-/** 画布标签页数据：当前图里的全部节点，按加入顺序列出 */
 const graphNodes = computed(() =>
     store.nodes.map(node => {
         const palette = PALETTE_ITEMS.find(item => item.type === node.type)
@@ -826,12 +793,7 @@ const graphNodes = computed(() =>
     })
 )
 
-/**
- * 选中画布列表中的节点：单击单选，Shift / Ctrl / Cmd 加选或取消。
- * 隐藏节点先自动显示；锁定节点不可选中。
- * @param id 节点 id
- * @param event 点击事件（判断是否多选）
- */
+/** 隐藏节点先自动显示；锁定节点不可选中 */
 function selectGraphNode(id: string, event?: MouseEvent) {
     const target = store.nodes.find(node => node.id === id)
     if (!target || target.data?.locked === true) return
@@ -857,14 +819,12 @@ function selectGraphNode(id: string, event?: MouseEvent) {
     selectedEdge.value = null
 }
 
-/** 切换节点显隐 */
 function toggleGraphNodeHidden(id: string) {
     const target = store.nodes.find(node => node.id === id)
     if (!target) return
     store.setNodeHidden(id, !target.hidden)
 }
 
-/** 切换节点锁定 */
 function toggleGraphNodeLocked(id: string) {
     const target = store.nodes.find(node => node.id === id)
     if (!target) return
@@ -1013,12 +973,6 @@ function cloneNodeDataForDuplicate(data: Record<string, any>) {
     return JSON.parse(JSON.stringify(clone)) as Record<string, any>
 }
 
-/**
- * 生成副本标题编号：MOD输入 → MOD输入 #2；已有 #2 时继续递增。
- * @param label 原节点标题
- * @param usedLabels 当前图中已使用的标题
- * @returns 副本标题
- */
 function createDuplicateLabel(label: string, usedLabels: Set<string>) {
     const base = label.trim().replace(/\s+#\d+$/, "").trim()
     if (!base) return label
@@ -1111,10 +1065,6 @@ function duplicateDraggedNodes(draggedNodes: { id: string }[], copyEdges: boolea
     return entries
 }
 
-/**
- * 按指针位移更新副本位置，并把被拖动的原节点放回起始位置。
- * @param point 当前指针的屏幕坐标
- */
 function syncDuplicateDrag(point: { x: number; y: number }) {
     if (!duplicateDrag || !duplicateDragStart) return
     const dx = (point.x - duplicateDragStart.x) / duplicateDragZoom
@@ -1130,13 +1080,11 @@ function syncDuplicateDrag(point: { x: number; y: number }) {
 /** 拖动分组时记录的起始位置与框内节点偏移 */
 let groupDrag: { id: string; children: { id: string; offsetX: number; offsetY: number }[] } | null = null
 
-/** 读取节点在画布上的实际渲染尺寸 */
 function measureNodeElement(nodeId: string) {
     const element = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${nodeId}"]`)
     return { width: element?.offsetWidth ?? 0, height: element?.offsetHeight ?? 0 }
 }
 
-/** 判断节点是否完全落在分组框内 */
 function isNodeInsideGroup(node: { id: string; position: { x: number; y: number } }, group: { position: { x: number; y: number }; data: Record<string, any> }) {
     const size = measureNodeElement(node.id)
     const width = Number(group.data.width) || 640
@@ -1232,7 +1180,6 @@ onMounted(() => {
     window.addEventListener("pointerdown", captureDuplicatePointer, true)
 })
 
-/** 切换图菜单选中：收起菜单并载入目标图 */
 function selectGraphFromMenu(graphId: number) {
     selectedGraphId.value = graphId
     switchMenuOpen.value = false
@@ -1413,7 +1360,6 @@ async function confirmShare() {
     }
 }
 
-/** 从服务端加载一张分享图到画布 */
 async function loadSharedGraph(graphId: string) {
     try {
         const graph = await graphQuery({ id: graphId }, { requestPolicy: "network-only" })
@@ -1443,7 +1389,6 @@ function handleUseGraph(_graphData: string, remoteId: string) {
     void router.replace(`/flow/${remoteId}`)
 }
 
-/** 回到本地空白图（清除分享态） */
 function handleNewGraph() {
     activeRemoteId.value = null
     void router.replace("/flow")
