@@ -81,6 +81,12 @@ pub trait Host {
     fn begin_choice(&self) -> u32;
     /// Record a branch for the outcome tree (§9.8.5).
     fn record_choice(&self, site: u32, branch: u32, p: f64, label: Option<Sym>);
+    /// Recorded `choice` instantiations, for the outcome tree (§9.8.5).
+    ///
+    /// Executors that never evaluate `choice` keep the default (empty).
+    fn choice_traces(&self) -> Vec<ChoiceTrace> {
+        Vec::new()
+    }
     /// Data sets bound to the running program (spec §4.2).
     fn sets(&self) -> &[crate::ir::DataSet];
 }
@@ -1338,6 +1344,9 @@ impl Host for Interp<'_> {
     }
     fn record_choice(&self, site: u32, branch: u32, p: f64, label: Option<Sym>) {
         self.choices.borrow_mut().push(ChoiceTrace { site, branch, p, label });
+    }
+    fn choice_traces(&self) -> Vec<ChoiceTrace> {
+        self.choices.borrow().clone()
     }
     fn sets(&self) -> &[crate::ir::DataSet] {
         &self.prog.data

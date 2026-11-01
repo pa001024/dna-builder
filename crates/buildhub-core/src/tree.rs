@@ -7,7 +7,7 @@
 
 
 use alloc::{format, string::{String, ToString}, vec, vec::Vec};
-use crate::eval::{EResult, EvalError, Interp};
+use crate::eval::{EResult, EvalError, Host};
 use crate::value::Dist;
 use crate::value::{Assign, Pt, Value};
 
@@ -33,9 +33,12 @@ pub struct Outcome {
 }
 
 /// Build the outcome tree for an already-evaluated distribution.
-pub fn build_tree(interp: &Interp, d: Dist, label: &str) -> EResult<Outcome> {
-    let pts = interp.trim(d)?;
-    let truncated = interp.truncated.get();
+///
+/// Takes any executor behind `&dyn Host`, so the tree walk and the bytecode VM share one
+/// projection (spec §9.8.11: `tree.root.value == call(...)` by construction, on every path).
+pub fn build_tree(host: &dyn Host, d: Dist, label: &str) -> EResult<Outcome> {
+    let pts = host.trim(d)?;
+    let truncated = host.was_truncated();
     let support = pts.len();
     if pts.len() == 1 && pts[0].assigns.is_empty() {
         let v = num_of_of(&pts[0].v)?;
@@ -63,7 +66,7 @@ pub fn build_tree(interp: &Interp, d: Dist, label: &str) -> EResult<Outcome> {
         match groups.iter().position(|(_, m)| same_assigns(&m[0].assigns, &p.assigns)) {
             Some(i) => groups[i].1.push(p),
             None => {
-                labels.push(label_of(interp, &p.assigns));
+                labels.push(label_of(host, &p.assigns));
                 groups.push((0.0, vec![p]));
             }
         }
@@ -106,14 +109,14 @@ pub fn build_tree(interp: &Interp, d: Dist, label: &str) -> EResult<Outcome> {
     })
 }
 
-fn label_of(interp: &Interp, assigns: &[Assign]) -> String {
+fn label_of(host: &dyn Host, assigns: &[Assign]) -> String {
     // Read the recorded label of the deepest assignment in this path.
-    let choices = interp.choices.borrow();
+    let choices = host.choice_traces();
     let mut out: Vec<String> = Vec::new();
     for a in assigns {
         let found = choices.iter().rfind(|c| c.site == a.choice && c.branch == a.branch);
         let text = match found.and_then(|c| c.label) {
-            Some(l) => interp.interner.name(l).to_string(),
+            Some(l) => host.interner().name(l).to_string(),
             None => format!("#{}", a.branch),
         };
         if !out.contains(&text) {

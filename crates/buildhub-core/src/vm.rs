@@ -664,6 +664,9 @@ impl Host for Vm<'_> {
     fn record_choice(&self, site: u32, branch: u32, p: f64, label: Option<Sym>) {
         self.choices.borrow_mut().push(ChoiceTrace { site, branch, p, label });
     }
+    fn choice_traces(&self) -> Vec<ChoiceTrace> {
+        self.choices.borrow().clone()
+    }
     fn sets(&self) -> &[crate::ir::DataSet] {
         self.sets
     }

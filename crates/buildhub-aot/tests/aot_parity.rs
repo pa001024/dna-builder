@@ -194,6 +194,12 @@ fn g4_single_wasm_matches_the_native_paths() {
         eprintln!("skipping wasm: link step failed (clang / wasm32 target / cargo)");
         return;
     };
+    // G11: the single-wasm artifact (runtime + pack, spec §9.6.5) must stay within budget.
+    let wasm_bytes = std::fs::metadata(&wasm).map(|m| m.len()).unwrap_or(0);
+    assert!(
+        wasm_bytes <= 350 * 1024,
+        "G11: pack.wasm (incl. runtime) is {wasm_bytes} bytes, budget 350 KB"
+    );
 
     let (data, cfg) = dna_inputs();
     std::fs::write(dir.join("data.json"), &data).expect("data");

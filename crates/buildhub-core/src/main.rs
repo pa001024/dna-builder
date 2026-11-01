@@ -32,6 +32,8 @@ fn run(args: Vec<String>) -> ExitCode {
     let rest = &args[1..];
     let result = match cmd {
         "check" => cmd_check(rest),
+        "build" => cmd_build(rest),
+        "fmt" => cmd_fmt(rest),
         "test" => cmd_test(rest),
         "eval" => cmd_eval(rest),
         "explain" => cmd_explain(rest),
@@ -63,9 +65,11 @@ const USAGE: &str = "\
 buildhub <command> [options]
 
   check   <pack-dir>                                  compile + diagnostics
+  build   <pack-dir> -o <out-dir> [--numeric libm|host]  emit CodeImage + datasets (.bhub artifact dir, path B)
+  fmt     <pack-dir>                                  canonical formatting for .bhl sources
   info    <pack-dir>                                  entries, schemas, data sets
   test    <pack-dir> [--filter <substr>]              run tests/*.jsonl
-  eval    <pack-dir> --fn <entry> [--config <json|@file>] [--args <json-array>]
+  eval    <pack-dir|artifact.bhub|artifact-dir> --fn <entry> [--config <json|@file>] [--args <json-array>]
   explain <pack-dir> --fn <entry> [--config ...] [--args ...]
   tree    <pack-dir> --fn <entry> [--config ...] [--max-support N] [--format json|text]
   sim     <pack-dir> --fn <entry> [--config ...] [--mode expect|trace] [--format json|text]
@@ -140,6 +144,124 @@ fn cmd_check(args: &[String]) -> Result<(), String> {
         pack.program.entries.len()
     );
     Ok(())
+}
+
+/// spec §10.3 `build`: compile a pack into a self-contained artifact dir (path B).
+///
+/// Layout: `<out>/<id>.bhub` (the `CodeImage`), `<out>/pack.toml`, plus each dataset source file
+/// at its pack-relative path. `eval <out-dir>` decodes the image and rebinds the staged datasets,
+/// so the built artifact runs without the `.bhl` sources.
+fn cmd_build(args: &[String]) -> Result<(), String> {
+    let dir = pack_dir(args)?;
+    let pack = load(&dir)?;
+    // Path W (ahead-of-time native/wasm) is emitted by crates/buildhub-aot against the same SSA;
+    // this command only ever emits path B, so the flags parse but redirect.
+    if matches!(opt(args, "--target").unwrap_or("bhub"), "wasm" | "w") || flag(args, "--bundle") {
+        return Err("path W emission (pack.wasm, --bundle) lives in crates/buildhub-aot; \
+            `buildhub build` emits the path-B artifact dir (.bhub CodeImage + datasets)".to_string());
+    }
+    let numeric = match opt(args, "--numeric").unwrap_or("libm") {
+        "host" => buildhub_core::image::NumericMode::Host,
+        _ => buildhub_core::image::NumericMode::Libm,
+    };
+    let out = opt(args, "-o")
+        .or_else(|| opt(args, "--out"))
+        .ok_or_else(|| "missing -o <out> (usage: buildhub build <pack-dir> -o out/)".to_string())?;
+    let bytes = pack.to_image(numeric);
+    if out.ends_with(".bhub") {
+        // Single-file form: the CodeImage alone (data-free entries only; no datasets staged).
+        if let Some(parent) = std::path::Path::new(out).parent() {
+            if !parent.as_os_str().is_empty() {
+                std::fs::create_dir_all(parent).map_err(|e| format!("cannot create {}: {e}", parent.display()))?;
+            }
+        }
+        std::fs::write(out, &bytes).map_err(|e| format!("cannot write {out}: {e}"))?;
+        println!("wrote {out} ({} bytes)", bytes.len());
+        return Ok(());
+    }
+    let root = std::path::Path::new(out);
+    std::fs::create_dir_all(root).map_err(|e| format!("cannot create {}: {e}", root.display()))?;
+    let img_name = format!("{}.bhub", pack.config.id);
+    std::fs::write(root.join(&img_name), &bytes).map_err(|e| format!("cannot write CodeImage: {e}"))?;
+    std::fs::copy(dir.join("pack.toml"), root.join("pack.toml")).map_err(|e| format!("cannot stage pack.toml: {e}"))?;
+    let mut staged = 0usize;
+    for d in &pack.config.data {
+        let file = d.dataset.split('#').next().unwrap_or(&d.dataset);
+        let src = dir.join(file);
+        let dst = root.join(file);
+        if let Some(parent) = dst.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| format!("cannot create {}: {e}", parent.display()))?;
+        }
+        std::fs::copy(&src, &dst).map_err(|e| format!("cannot stage dataset {}: {e}", src.display()))?;
+        staged += 1;
+    }
+    // §9.7: a single-pack CodeImage stays two orders of magnitude under its 2 MB budget; the
+    // 350 KB gate (G11) applies to path-W `pack.wasm` and is asserted in `tests/artifact_size.rs`.
+    println!("wrote {out}/{img_name} ({} bytes) + pack.toml + {staged} dataset(s)", bytes.len());
+    Ok(())
+}
+
+/// spec §10.3 `fmt`: canonical formatting for `.bhl` sources (trailing whitespace, blank runs,
+/// missing EOF newline). The language is indentation-insensitive (§3), and this command only
+/// touches trivia, so formatting never changes semantics.
+fn cmd_fmt(args: &[String]) -> Result<(), String> {
+    let dir = pack_dir(args)?;
+    let mut files = Vec::new();
+    collect_bhl(&dir, &mut files).map_err(|e| format!("cannot scan {}: {e}", dir.display()))?;
+    if files.is_empty() {
+        return Err(format!("no .bhl files under {}", dir.display()));
+    }
+    let mut changed = 0usize;
+    for f in &files {
+        let text = std::fs::read_to_string(f).map_err(|e| format!("cannot read {}: {e}", f.display()))?;
+        let formatted = fmt_bhl(&text);
+        if formatted != text {
+            std::fs::write(f, formatted).map_err(|e| format!("cannot write {}: {e}", f.display()))?;
+            changed += 1;
+            let rel = f.strip_prefix(&dir).unwrap_or(f).display().to_string().replace('\\', "/");
+            println!("fmt {rel}");
+        }
+    }
+    println!("{changed} file(s) reformatted, {} unchanged", files.len() - changed);
+    Ok(())
+}
+
+fn collect_bhl(dir: &std::path::Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
+    let mut entries: Vec<PathBuf> =
+        std::fs::read_dir(dir)?.filter_map(|e| e.ok()).map(|e| e.path()).collect();
+    entries.sort();
+    for p in entries {
+        if p.is_dir() {
+            collect_bhl(&p, out)?;
+        } else if p.extension().and_then(|e| e.to_str()) == Some("bhl") {
+            out.push(p);
+        }
+    }
+    Ok(())
+}
+
+fn fmt_bhl(src: &str) -> String {
+    let mut kept: Vec<&str> = Vec::new();
+    let mut blanks = 0usize;
+    for line in src.lines() {
+        let t = line.trim_end();
+        if t.is_empty() {
+            blanks += 1;
+            if blanks == 1 {
+                kept.push("");
+            }
+        } else {
+            blanks = 0;
+            kept.push(t);
+        }
+    }
+    // Drop leading blank lines; exactly one trailing newline.
+    while kept.first() == Some(&"") {
+        kept.remove(0);
+    }
+    let mut out = kept.join("\n");
+    out.push('\n');
+    out
 }
 
 fn cmd_info(args: &[String]) -> Result<(), String> {
@@ -369,22 +491,379 @@ fn run_value(pack: &LoadedPack, inv: &Invocation, budget: Budget, memo: bool) ->
     run_value_path(pack, inv, budget, memo, Path::T)
 }
 
-fn cmd_eval(args: &[String]) -> Result<(), String> {
-    let dir = pack_dir(args)?;
-    let pack = load(&dir)?;
-    let entry_name = opt(args, "--fn").ok_or_else(|| "missing --fn <entry>".to_string())?;
-    let inv = build_invocation(&pack, args, entry_name)?;
-    let memo = opt(args, "--memo").map(|m| m != "off").unwrap_or(true);
-    let v = run_value_path(&pack, &inv, budget_from(args), memo, path_of(args))?;
-    let out = if flag(args, "--json") {
-        format!("{{\"ok\":true,\"result\":{}}}", value_json(&pack, &v))
-    } else {
-        let interner = pack.interner.borrow();
-        let interp = Interp::new(&pack.program, &interner, Budget::default());
-        interp.show(&v)
+/// What `eval` runs: a source pack dir (tree walk, or VM with `--path b`), or a built artifact
+/// (`.bhub` file or the artifact dir `build` emits) decoded to its `CodeImage` and run on the VM
+/// (spec §9.5 path B). One command covers both, so B(interpreted pack) and W(compiled artifact)
+/// runs stay comparable.
+enum EvalSource {
+    Pack(LoadedPack),
+    Image(ImagePack),
+}
+
+/// A decoded `CodeImage` plus the data rebound from the artifact dir (when it stages datasets).
+struct ImagePack {
+    code: buildhub_core::ssa::Code,
+    interner: buildhub_core::Interner,
+    data: Vec<buildhub_core::ir::DataSet>,
+}
+
+fn resolve_source(target: &str) -> Result<EvalSource, String> {
+    let path = std::path::Path::new(target);
+    if path.is_dir() && path.join("pack.toml").exists() {
+        // A source pack dir — unless it is actually a build artifact (`.bhub` present, no `.bhl`
+        // sources), in which case the built image takes precedence over the sources.
+        let has_bhl = collect_bhl_has(path);
+        let bhub = single_bhub(path);
+        if !has_bhl {
+            if let Some(img) = bhub {
+                return Ok(EvalSource::Image(load_image(&img, Some(path))?));
+            }
+        }
+        return Ok(EvalSource::Pack(load(path)?));
+    }
+    if path.is_file() {
+        return Ok(EvalSource::Image(load_image(path, path.parent())?));
+    }
+    if path.is_dir() {
+        if let Some(img) = single_bhub(path) {
+            return Ok(EvalSource::Image(load_image(&img, Some(path))?));
+        }
+        return Err(format!("{} is neither a pack dir (pack.toml) nor an artifact (.bhub)", path.display()));
+    }
+    Err(format!("no such pack dir or artifact: {target}"))
+}
+
+fn collect_bhl_has(dir: &std::path::Path) -> bool {
+    let mut files = Vec::new();
+    collect_bhl(dir, &mut files).map(|_| ()).unwrap_or(());
+    !files.is_empty()
+}
+
+/// The artifact's image: exactly one top-level `*.bhub`, or `None`.
+fn single_bhub(dir: &std::path::Path) -> Option<PathBuf> {
+    let mut found: Vec<PathBuf> = Vec::new();
+    if let Ok(rd) = std::fs::read_dir(dir) {
+        for e in rd.filter_map(|e| e.ok()).map(|e| e.path()) {
+            if e.is_file() && e.extension().and_then(|x| x.to_str()) == Some("bhub") {
+                found.push(e);
+            }
+        }
+    }
+    found.sort();
+    if found.len() == 1 { found.into_iter().next() } else { None }
+}
+
+/// Decode a `.bhub` file and rebuild the symbol table; rebind datasets from the artifact dir
+/// (spec §4.2: data ships beside code, so a `CodeImage` alone is not enough for data entries).
+fn load_image(img: &std::path::Path, dir: Option<&std::path::Path>) -> Result<ImagePack, String> {
+    let bytes = std::fs::read(img).map_err(|e| format!("cannot read {}: {e}", img.display()))?;
+    let image = buildhub_core::image::decode(&bytes).map_err(|d| d.to_string())?;
+    let mut interner = buildhub_core::Interner::new();
+    for s in &image.code.syms {
+        interner.intern(s);
+    }
+    let data = match dir {
+        Some(d) if d.join("pack.toml").exists() => match bind_image_data(d, &image.code, &mut interner) {
+            Ok(v) => v,
+            // A stray pack.toml next to a bare .bhub must not break data-free entries; data
+            // entries will still fail loudly at access time. Real artifact dirs bind cleanly.
+            Err(e) => {
+                eprintln!("warning: cannot rebind staged datasets: {e}");
+                Vec::new()
+            }
+        },
+        _ => Vec::new(),
     };
-    println!("{out}");
-    Ok(())
+    Ok(ImagePack { code: image.code, interner, data })
+}
+
+/// Rebind the artifact dir's staged datasets against the image's schema table.
+fn bind_image_data(
+    dir: &std::path::Path,
+    code: &buildhub_core::ssa::Code,
+    interner: &mut buildhub_core::Interner,
+) -> Result<Vec<buildhub_core::ir::DataSet>, String> {
+    let config = buildhub_core::pack::read_config(dir).map_err(|d| d.to_string())?;
+    let mut out = Vec::with_capacity(config.data.len());
+    for d in &config.data {
+        let schema = code
+            .schemas
+            .iter()
+            .find(|s| s.name == d.schema)
+            .ok_or_else(|| format!("[[data]] `{}` refers to unknown schema `{}`", d.name, d.schema))?;
+        let (file, module) = match d.dataset.split_once('#') {
+            Some((f, m)) => (f, Some(m)),
+            None => (d.dataset.as_str(), None),
+        };
+        let path = dir.join(file);
+        let text = std::fs::read_to_string(&path).map_err(|e| format!("cannot read dataset {}: {e}", path.display()))?;
+        let mut json: serde_json::Value =
+            serde_json::from_str(&text).map_err(|e| format!("invalid JSON in {}: {e}", path.display()))?;
+        if let Some(m) = module {
+            json = json.get(m).cloned().ok_or_else(|| format!("dataset module `{m}` not found in `{}`", d.dataset))?;
+        }
+        let rows_json = match json {
+            serde_json::Value::Array(a) => a,
+            other => vec![other],
+        };
+        let key_sym = match &d.key {
+            Some(k) => Some(interner.intern(k)),
+            None => None,
+        };
+        let mut rows = Vec::with_capacity(rows_json.len());
+        let mut index = std::collections::HashMap::new();
+        for (i, r) in rows_json.into_iter().enumerate() {
+            let ty = buildhub_core::ssa::TyTag::Schema(schema.name.clone());
+            let v = iconvert(code, interner, &ty, &r, &format!("{}[{i}]", d.name))?;
+            if d.index {
+                if let Some(ks) = key_sym {
+                    match &v {
+                        buildhub_core::value::Value::Record(rec) => match rec.get(ks) {
+                            Some(k) => {
+                                index.insert(k.hash(), i);
+                            }
+                            None => return Err(format!("record #{} lacks key field `{}`", i, d.key.as_deref().unwrap_or(""))),
+                        },
+                        _ => return Err(format!("record #{} of `{}` is not a record", i, d.name)),
+                    }
+                } else {
+                    index.insert(buildhub_core::value::Value::Num(i as f64).hash(), i);
+                }
+            }
+            rows.push(v);
+        }
+        out.push(buildhub_core::ir::DataSet {
+            name: d.name.clone(),
+            dataset: d.dataset.clone(),
+            schema: d.schema.clone(),
+            key: d.key.clone(),
+            key_sym,
+            rows: std::rc::Rc::new(rows),
+            version: buildhub_core::hash::hash_bytes(text.as_bytes()),
+            index: index.into_iter().collect(),
+        });
+    }
+    Ok(out)
+}
+
+/// JSON → value against the image's `TyTag` table: the call-boundary conversion (spec §4.3)
+/// for artifact runs, mirroring the pack-dir path's typed conversion.
+fn iconvert(
+    code: &buildhub_core::ssa::Code,
+    interner: &mut buildhub_core::Interner,
+    ty: &buildhub_core::ssa::TyTag,
+    j: &serde_json::Value,
+    ctx: &str,
+) -> Result<buildhub_core::value::Value, String> {
+    use buildhub_core::ssa::TyTag;
+    use buildhub_core::value::Value;
+    Ok(match (ty, j) {
+        (_, serde_json::Value::Null) => Value::None,
+        (TyTag::Num, serde_json::Value::Number(n)) => Value::Num(n.as_f64().unwrap_or(f64::NAN)),
+        (TyTag::Bool, serde_json::Value::Bool(b)) => Value::Bool(*b),
+        (TyTag::Sym, serde_json::Value::String(s)) => Value::Sym(interner.intern(s)),
+        (TyTag::Str, serde_json::Value::String(s)) => Value::Str(std::rc::Rc::from(s.as_str())),
+        (TyTag::Unit, _) => Value::Unit,
+        (TyTag::List(inner), serde_json::Value::Array(a)) => {
+            let mut xs = Vec::with_capacity(a.len());
+            for (i, x) in a.iter().enumerate() {
+                xs.push(iconvert(code, interner, inner, x, &format!("{ctx}[{i}]"))?);
+            }
+            Value::list(xs)
+        }
+        (TyTag::Option(inner), other) => Value::Some(Box::new(iconvert(code, interner, inner, other, ctx)?)),
+        (TyTag::Tuple(items), serde_json::Value::Array(a)) => {
+            let mut xs = Vec::with_capacity(a.len());
+            for (i, x) in a.iter().enumerate() {
+                let t = items.get(i).cloned().unwrap_or(TyTag::Any);
+                xs.push(iconvert(code, interner, &t, x, &format!("{ctx}[{i}]"))?);
+            }
+            Value::tuple(xs)
+        }
+        (TyTag::Record(fields, open), serde_json::Value::Object(o)) => {
+            let mut rec = buildhub_core::value::Record::new();
+            for (k, v) in o {
+                let fty = fields.iter().find(|(n, _)| n == k).map(|(_, t)| t.clone());
+                let val = match fty {
+                    Some(t) => iconvert(code, interner, &t, v, &format!("{ctx}.{k}"))?,
+                    None if *open => iany(interner, v),
+                    None => return Err(format!("`{ctx}.{k}`: unknown field")),
+                };
+                rec.set(interner.intern(k), val);
+            }
+            Value::record(rec)
+        }
+        (TyTag::Schema(name), other) => {
+            // Undeclared nominal types (the pack's `Value` for "any JSON value") convert
+            // structurally, mirroring the pack-dir loader's `json_scalar` fallback.
+            let Some(schema) = code.schemas.iter().find(|s| &s.name == name) else {
+                return Ok(iany(interner, other));
+            };
+            let serde_json::Value::Object(o) = other else {
+                return Err(format!("`{ctx}`: expected an object for schema `{name}`"));
+            };
+            let schema = schema.clone();
+            let mut rec = buildhub_core::value::Record::new();
+            for (k, v) in o {
+                let fty = schema.fields.iter().find(|(n, _)| n == k).map(|(_, t)| t.clone());
+                let val = match fty {
+                    Some(t) => iconvert(code, interner, &t, v, &format!("{ctx}.{k}"))?,
+                    None if schema.open => iany(interner, v),
+                    None => return Err(format!("`{ctx}.{k}`: schema `{name}` has no such field")),
+                };
+                rec.set(interner.intern(k), val);
+            }
+            Value::record(rec)
+        }
+        (TyTag::Any, other) => iany(interner, other),
+        (want, got) => return Err(format!("`{ctx}`: expected {want:?}, got {got}")),
+    })
+}
+
+fn iany(interner: &mut buildhub_core::Interner, j: &serde_json::Value) -> buildhub_core::value::Value {
+    use buildhub_core::value::Value;
+    match j {
+        serde_json::Value::Null => Value::None,
+        serde_json::Value::Bool(b) => Value::Bool(*b),
+        serde_json::Value::Number(n) => Value::Num(n.as_f64().unwrap_or(f64::NAN)),
+        serde_json::Value::String(s) => Value::Sym(interner.intern(s)),
+        serde_json::Value::Array(a) => Value::list(a.iter().map(|x| iany(interner, x)).collect()),
+        serde_json::Value::Object(o) => {
+            let mut rec = buildhub_core::value::Record::new();
+            for (k, v) in o {
+                rec.set(interner.intern(k), iany(interner, v));
+            }
+            Value::record(rec)
+        }
+    }
+}
+
+fn image_value_json(interner: &buildhub_core::Interner, v: &buildhub_core::value::Value) -> String {
+    use buildhub_core::value::Value;
+    fn go(v: &Value, interner: &buildhub_core::Interner) -> String {
+        match v {
+            Value::Num(n) => {
+                if n.is_finite() { format!("{n:?}") } else { "null".to_string() }
+            }
+            Value::Bool(b) => b.to_string(),
+            Value::Sym(s) => buildhub_core::diag::json_str(interner.name(*s)),
+            Value::Str(s) => buildhub_core::diag::json_str(s),
+            Value::Unit | Value::Missing | Value::None => "null".to_string(),
+            Value::List(xs) | Value::Tuple(xs) => {
+                format!("[{}]", xs.iter().map(|x| go(x, interner)).collect::<Vec<_>>().join(","))
+            }
+            Value::Record(r) => format!(
+                "{{{}}}",
+                r.fields
+                    .iter()
+                    .map(|(k, v)| format!("{}:{}", buildhub_core::diag::json_str(interner.name(*k)), go(v, interner)))
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            Value::Some(x) => go(x, interner),
+            Value::Ok(x) => go(x, interner),
+            Value::Err(x) => format!("{{\"err\":{}}}", go(x, interner)),
+            Value::Closure(_) | Value::Builtin(_) => "\"<fn>\"".to_string(),
+        }
+    }
+    go(v, interner)
+}
+
+/// Run one entry from a decoded image on the VM (path B), with the CLI's `--config`/`--args`
+/// mapping: the first declared parameter binds `--config`, the rest bind `--args` items.
+fn run_image_eval(
+    img: &ImagePack,
+    entry_name: &str,
+    args: &[String],
+    budget: Budget,
+    memo: bool,
+) -> Result<buildhub_core::value::Value, String> {
+    let entry = img
+        .code
+        .entries
+        .iter()
+        .find(|e| e.name == entry_name)
+        .ok_or_else(|| format!("no entry `{entry_name}` (see `buildhub info` on the pack dir)"))?;
+    let (fn_id, nparams, params) = (entry.fn_id as usize, entry.nparams as usize, entry.params.clone());
+    let mut interner = img.interner.clone_for_host();
+    // Intern every reachable string first, so `sym"..."` comparisons see the host's ids.
+    fn walk(j: &serde_json::Value, out: &mut buildhub_core::Interner) {
+        match j {
+            serde_json::Value::String(s) => {
+                out.intern(s);
+            }
+            serde_json::Value::Array(a) => a.iter().for_each(|x| walk(x, out)),
+            serde_json::Value::Object(o) => o.values().for_each(|x| walk(x, out)),
+            _ => {}
+        }
+    }
+    let mut vals = Vec::new();
+    if let Some(c) = opt(args, "--config") {
+        let text = if let Some(path) = c.strip_prefix('@') {
+            std::fs::read_to_string(path).map_err(|e| format!("cannot read {path}: {e}"))?
+        } else {
+            c.to_string()
+        };
+        let json: serde_json::Value = serde_json::from_str(&text).map_err(|e| format!("invalid --config JSON: {e}"))?;
+        walk(&json, &mut interner);
+        let ty = params.first().cloned().unwrap_or(buildhub_core::ssa::TyTag::Any);
+        vals.push(iconvert(&img.code, &mut interner, &ty, &json, "config")?);
+    }
+    let extra = match opt(args, "--args") {
+        Some(a) => {
+            let json: serde_json::Value = serde_json::from_str(a).map_err(|e| format!("invalid --args JSON: {e}"))?;
+            match json {
+                serde_json::Value::Array(items) => items,
+                other => vec![other],
+            }
+        }
+        None => Vec::new(),
+    };
+    // Same leniency as the pack-dir path: extra `--args` only apply past the bound values.
+    let extra = if nparams > vals.len() { extra } else { Vec::new() };
+    for j in extra.into_iter() {
+        walk(&j, &mut interner);
+        let ty = params.get(vals.len()).cloned().unwrap_or(buildhub_core::ssa::TyTag::Any);
+        vals.push(iconvert(&img.code, &mut interner, &ty, &j, &format!("arg{}", vals.len()))?);
+    }
+    if vals.len() != nparams {
+        return Err(format!("entry `{entry_name}` takes {nparams} value(s), got {}", vals.len()));
+    }
+    let vm = buildhub_core::vm::Vm::new(&img.code, &interner, &img.data, budget);
+    vm.memo_on.set(memo);
+    let d = vm.call(fn_id, vals).map_err(|e| e.to_string())?;
+    vm.project(d).map_err(|e| e.to_string())
+}
+
+fn cmd_eval(args: &[String]) -> Result<(), String> {
+    let target = positional(args).ok_or_else(|| "missing <pack-dir|artifact>".to_string())?;
+    let entry_name = opt(args, "--fn").ok_or_else(|| "missing --fn <entry>".to_string())?;
+    let memo = opt(args, "--memo").map(|m| m != "off").unwrap_or(true);
+    let as_json = flag(args, "--json");
+    match resolve_source(target)? {
+        EvalSource::Pack(pack) => {
+            let inv = build_invocation(&pack, args, entry_name)?;
+            let v = run_value_path(&pack, &inv, budget_from(args), memo, path_of(args))?;
+            let out = if as_json {
+                format!("{{\"ok\":true,\"result\":{}}}", value_json(&pack, &v))
+            } else {
+                let interner = pack.interner.borrow();
+                let interp = Interp::new(&pack.program, &interner, Budget::default());
+                interp.show(&v)
+            };
+            println!("{out}");
+            Ok(())
+        }
+        EvalSource::Image(img) => {
+            let v = run_image_eval(&img, entry_name, args, budget_from(args), memo)?;
+            if as_json {
+                println!("{{\"ok\":true,\"result\":{}}}", image_value_json(&img.interner, &v));
+            } else {
+                println!("{}", buildhub_core::show::render(&img.interner, &v));
+            }
+            Ok(())
+        }
+    }
 }
 
 fn cmd_explain(args: &[String]) -> Result<(), String> {

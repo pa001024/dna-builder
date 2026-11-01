@@ -2191,7 +2191,7 @@ for child in &outcome.root.children {
 |---|---|---|
 | `bhub_pkg_load(ptr,len)` | 装载 `CodeImage`，返回包句柄 | 不需要（规则已编入模块，返回固定句柄 1） |
 | `bhub_pkg_info(pkg,out_len)` | 元信息 + 入口 + schema | 元信息 + 入口（schema 编进模块） |
-| `bhub_json_to_value(pkg,schema,ptr,len,out_len)` | 按 schema 转 | 同左（schema id 编进模块） |
+| `bhub_json_to_value(pkg,schema_ptr,schema_len,json_ptr,len,out_len)` | 按 schema 转调用参数 JSON | 同左（schema id 编进模块） |
 | `bhub_call(pkg,fn,args,out_len)` | 解释执行 | 原生执行 |
 | `bhub_explain(pkg,fn,args,out_len)` | 记录式重放 | 同左（走同一份插桩路径） |
 | `bhub_call_tree(pkg,fn,args,max_support,out_len)` | 概率展开，返回树 JSON | 同左 |
@@ -2201,7 +2201,7 @@ for child in &outcome.root.children {
 ```
 bhub_pkg_load(ptr, len) -> u64                 // 0 = 失败
 bhub_pkg_info(pkg, out_len) -> *mut u8
-bhub_json_to_value(pkg, schema_ptr, len, out_len) -> *mut u8
+bhub_json_to_value(pkg, schema_ptr, schema_len, json_ptr, len, out_len) -> *mut u8
 bhub_call(pkg, fn_ptr, args_ptr, len, out_len) -> *mut u8
 bhub_explain(pkg, fn_ptr, args_ptr, len, out_len) -> *mut u8
 bhub_call_tree(pkg, fn_ptr, args_ptr, len, max_support, out_len) -> *mut u8
@@ -2212,12 +2212,16 @@ bhub_close(handle)
 `bhub_trace` 的 `opts` 是 JSON：
 
 ```json
-{"mode":"trace","max_support":256,"split":true,"quantile":0.1,"states":["hp","armor"]}
+{"mode":"trace","max_support":256,"split":true,"quantile":0.1,"states":["hp","armor"],
+ "step":"step","probe":"probe","horizon":30.0,"dt":0.5}
 ```
 
 - `mode`：`expect` / `trace` / `trace_tree`（§9.9.3）；
 - `states`：额外要回传的状态量名（来自 `probe` 的 `state` 记录）；
 - `split`：是否展开 `per_dim`（§9.9.9）；
+- `step` / `probe`：步进与采样入口名（缺省 `"step"` / `"probe`"）；`fn` 参数给出初态，
+  与 `step` 工厂取同一份 `args`（参数个数一致时复用，否则 `step` 须是零参）；
+- `horizon` / `dt`：按 §9.9.13 构造时间网格（缺省 `3.0` / `1.0`）；
 - 返回体见 §9.9.12，体积与 `frames × dimensions` 成正比，**不返回完整树**。
 
 - 统一信封 `{"ok":true,"result":…}` / `{"ok":false,"error":"…","code":"BHC-Exxx"}`。
@@ -2231,11 +2235,12 @@ bhub_close(handle)
 
 ```bash
 buildhub check  packs/tabular                 # 类型/模块/schema 校验 + 诊断
-buildhub build  packs/tabular -o out/         # 编译 CodeImage（路径 B）
-buildhub build  packs/tabular --target wasm -o out/   # 编译 pack.wasm（路径 W）
+buildhub build  packs/tabular -o out/         # 编译 CodeImage（路径 B）+ pack.toml + 数据集，得到可直接 eval 的产物目录
+buildhub build  packs/tabular --target wasm -o out/   # 编译 pack.wasm（路径 W，由 crates/buildhub-aot 实现）
 buildhub build  packs/* --target wasm --bundle out/bundle.wasm
 buildhub test   packs/tabular                 # 跑 pack 内 tests/*.jsonl
-buildhub eval   out/tabular.bhub --config c.json --fn damage
+buildhub eval   out/ --config c.json --fn damage          # 产物目录：解码 .bhub 并重绑 staged 数据集
+buildhub eval   out/tabular.bhub --config c.json --fn damage   # 单个 CodeImage（无数据集，纯函数/Config 入口）
 buildhub eval   out/tabular.wasm --config c.json --fn damage   # 同一命令跑两种产物
 buildhub eval   out/tabular.bhub --config c.json --fn crit_a --args '[0.5, 2.0]'
 buildhub explain out/tabular.bhub --config c.json --fn damage
@@ -2245,7 +2250,10 @@ buildhub sim     out/tabular.bhub --config c.json --fn run --horizon 30 --dt 0.5
 buildhub sim     out/tabular.bhub --config c.json --fn run --mode trace --split --states hp,armor
 buildhub sim     out/tabular.bhub --config c.json --fn run --mode trace --format csv > d.csv
 buildhub parity packs/tabular                 # 三路交叉比对（T/B/W）
-buildhub fmt    packs/tabular
+buildhub fmt    packs/tabular                 # 规范化 .bhl 的 trivia（行尾空白/空行/EOF 换行），不改语义
+
+> `buildhub build`（本 crate CLI）只产出路径 B 产物目录；`--target wasm` / `--bundle`
+> 由 `crates/buildhub-aot` 实现（路径 W 的发射与链接），core CLI 遇到时报错指路。
 ```
 
 `buildhub tree` 支持 `--format json|dot|text`（`text` 即 §9.8.3 那种缩进 + 概率条）。

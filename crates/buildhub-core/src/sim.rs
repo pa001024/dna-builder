@@ -363,8 +363,9 @@ pub fn sample_record(interp: &dyn Host, total: f64, per_dim: Vec<(Sym, f64)>, st
     Value::record(rec)
 }
 
-/// Helper so the CLI can build a step function from a pack entry.
-pub fn value_of_entry(_interp: &Interp, fn_id: usize) -> Value {
+/// Helper so callers can build a step function from a pack entry.
+/// The host argument is unused today; it keeps the call sites (tree walk and VM) identical.
+pub fn value_of_entry(_host: &dyn Host, fn_id: usize) -> Value {
     Value::Closure(Rc::new(crate::value::Closure { fn_id, upvalues: Vec::new(), fast: Vec::new() }))
 }
 
