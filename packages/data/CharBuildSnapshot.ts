@@ -1,5 +1,5 @@
 import { CharBuild, type CharBuildOptions, type DotFrequencySettings } from "./CharBuild"
-import { type CharSkillLevels, normalizeCharSkillLevels } from "./charSettings"
+import { type CharSettings, type CharSkillLevels, normalizeCharSkillLevels } from "./charSettings"
 import type { Buff, Char, Mod, Weapon } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { LeveledChar } from "./leveled/LeveledChar"
@@ -67,6 +67,8 @@ export interface CharBuildWorkerSnapshot {
     dotSettings: DotFrequencySettings
     /** 所选魔灵主动技的原始冷却（秒）：角色属性「魔灵CD」的基数 */
     petBaseCd?: number
+    /** 生成构筑的原始配置：收益 / 目标值请求据此走 wasm（缺失时回退 TS 快照） */
+    settings?: CharSettings
 }
 
 /**
@@ -155,6 +157,10 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         extraMastery: charBuild.extraMastery,
         dotSettings: { ...charBuild.dotSettings },
         petBaseCd: charBuild.petBaseCd,
+        // 原始配置随快照带到 worker：收益请求据此走 wasm，技能等级统一为三项数组
+        settings: charBuild.settings
+            ? { ...charBuild.settings, charSkillLevel: normalizeCharSkillLevels(charBuild.settings.charSkillLevel) }
+            : undefined,
     }
 
     return toCloneableSnapshot(snapshot)
@@ -204,6 +210,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         extraMastery: snapshot.extraMastery,
         dotSettings: snapshot.dotSettings,
         petBaseCd: snapshot.petBaseCd,
+        settings: snapshot.settings,
     }
     return new CharBuild(options)
 }

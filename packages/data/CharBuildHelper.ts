@@ -116,6 +116,8 @@ export function createCharBuildFromSettings(
         teamWeaponCategories: [charSettings.team1Weapon, charSettings.team2Weapon]
             .filter((weapon): weapon is number => typeof weapon === "number")
             .map(weapon => LeveledWeaponHelper.getCategory(weapon)),
+        // 保留来源配置：worker 的 wasm 收益路径直接用同一份配置复现构筑
+        settings: charSettings,
     })
 }
 

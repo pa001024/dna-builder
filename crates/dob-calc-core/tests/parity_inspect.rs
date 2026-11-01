@@ -39,6 +39,83 @@ fn panels_keys_cover_slots() {
 }
 
 #[test]
+fn panels_batch_by_slot() {
+    let tables = tables();
+    let fixture = common::load_fixture("dobapp_shardBuild1");
+    let mut raw = serde_json::json!({
+        "charId": fixture["request"]["charId"],
+        "settings": fixture["request"]["settings"],
+        "panels": ["char", "melee", "ranged"],
+    });
+    // 一次请求批量算角色面板与多个武器槽：同一构筑只装配一次。
+    let request = dob_calc_core::evaluate::PanelsRequest::from_json(&raw).expect("面板请求");
+    let panels = dob_calc_core::evaluate::evaluate_panels(&tables, &request).expect("面板");
+    for key in ["char", "melee", "ranged"] {
+        assert!(panels.contains_key(key), "缺面板 {key}");
+        assert!(panels[key].get("攻击").copied().unwrap_or(0.0) > 0.0, "{key} 攻击应为正");
+    }
+    assert!(!panels.contains_key("skill"), "未请求的槽位不应返回");
+    assert_ne!(
+        panels["melee"].get("攻击"),
+        panels["ranged"].get("攻击"),
+        "不同槽位应是不同武器面板"
+    );
+    // 角色面板与完整求值结果同一口径（面板请求不跑目标函数 / 伤害明细）。
+    let evaluation = dob_calc_core::evaluate::evaluate_build(
+        &tables,
+        &BuildRequest::from_json(&raw).expect("求值请求"),
+    );
+    assert_eq!(panels["char"], evaluation.attributes, "角色面板应与求值属性一致");
+
+    // 缺省 panels 时取全部武器槽（该构筑有同律武器）。
+    raw.as_object_mut().expect("对象").remove("panels");
+    let request = dob_calc_core::evaluate::PanelsRequest::from_json(&raw).expect("面板请求");
+    let all = dob_calc_core::evaluate::evaluate_panels(&tables, &request).expect("面板");
+    for key in ["melee", "ranged", "skill"] {
+        assert!(all.contains_key(key), "缺省应包含槽 {key}");
+    }
+    assert!(!all.contains_key("char"), "缺省不包含角色面板");
+}
+
+#[test]
+fn evaluate_returns_requested_panels() {
+    let tables = tables();
+    let fixture = common::load_fixture("dobapp_shardBuild1");
+    let mut raw = serde_json::json!({
+        "charId": fixture["request"]["charId"],
+        "settings": fixture["request"]["settings"],
+        "panels": ["char", "melee"],
+    });
+    // evaluate 附带面板数组：与目标值同一次装配返回
+    let evaluation = dob_calc_core::evaluate::evaluate_build(
+        &tables,
+        &BuildRequest::from_json(&raw).expect("求值请求"),
+    );
+    for key in ["char", "melee"] {
+        assert!(evaluation.panels.contains_key(key), "附带面板缺 {key}");
+    }
+    assert!(!evaluation.panels.contains_key("ranged"), "未请求的面板不应返回");
+
+    // 与独立面板请求结果一致
+    let panel_request = dob_calc_core::evaluate::PanelsRequest::from_json(&raw).expect("面板请求");
+    let panels = dob_calc_core::evaluate::evaluate_panels(&tables, &panel_request).expect("面板");
+    assert_eq!(evaluation.panels, panels, "附带面板应与独立面板请求一致");
+
+    // 会话复用：同构筑先带面板、再不带面板，不能命中带面板的缓存
+    let mut session = dob_calc_core::evaluate::CalcSession::new(&tables);
+    let with_panels = session.evaluate(&BuildRequest::from_json(&raw).expect("求值请求"));
+    assert_eq!(with_panels.panels, panels);
+    raw.as_object_mut().expect("对象").remove("panels");
+    let plain = session.evaluate(&BuildRequest::from_json(&raw).expect("求值请求"));
+    assert!(plain.panels.is_empty(), "不带面板的请求不应命中带面板缓存");
+    assert_eq!(
+        plain.target_value.to_bits(),
+        with_panels.target_value.to_bits(),
+        "附带面板不应改变目标值"
+    );
+}
+
+#[test]
 fn skill_fields_roundtrip() {
     let tables = tables();
     let req = request();

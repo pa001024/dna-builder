@@ -14,7 +14,7 @@ use std::collections::HashMap;
 
 use super::ast_eval::Evaluator;
 use super::config::CharSettings;
-use super::context::BuildContext;
+use super::context::{BuildContext, WeaponRef};
 use super::damage::DamageResult;
 use super::models::AttrMap;
 use super::tables::BuildTables;
@@ -27,6 +27,8 @@ pub struct BuildRequest {
     pub char_id: i64,
     /// 构筑配置。
     pub settings: CharSettings,
+    /// 附带的面板数组：与目标值同一次装配批量计算，复用请求；缺省不返回面板。
+    pub panels: Option<PanelSelection>,
     /// 自动配装的确定性种子（spec §6.5；缺省固定值，结果可复现）。
     pub seed: Option<u64>,
     /// 时间轴输入（FlowPort 拥有类型；本入口暂不消费，由 FlowPort 的扩展消费）。
@@ -34,7 +36,7 @@ pub struct BuildRequest {
 }
 
 impl BuildRequest {
-    /// 从请求 JSON 解析 `{charId, settings, seed?, timeline?}`。
+    /// 从请求 JSON 解析 `{charId, settings, panels?, seed?, timeline?}`。
     pub fn from_json(raw: &serde_json::Value) -> Result<Self, CalcError> {
         let char_id = raw
             .get("charId")
@@ -44,6 +46,7 @@ impl BuildRequest {
             .get("settings")
             .map(CharSettings::from_json)
             .unwrap_or_default();
+        let panels = PanelSelection::from_json(raw);
         let seed = raw.get("seed").and_then(serde_json::Value::as_u64);
         let timeline = raw.get("timeline").and_then(|value| {
             serde_json::from_value::<crate::timeline::RawTimelineData>(value.clone()).ok()
@@ -51,10 +54,164 @@ impl BuildRequest {
         Ok(Self {
             char_id,
             settings,
+            panels,
             seed,
             timeline,
         })
     }
+}
+
+/// 武器槽名（`melee` / `ranged` / `skill`）；`Selected` 不是可请求的槽位。
+fn weapon_slot_name(slot: WeaponRef) -> Option<&'static str> {
+    match slot {
+        WeaponRef::Melee => Some("melee"),
+        WeaponRef::Ranged => Some("ranged"),
+        WeaponRef::Skill => Some("skill"),
+        WeaponRef::Selected => None,
+    }
+}
+
+/**
+ * 解析请求里的武器槽名（`melee` / `ranged` / `skill`）。
+ * @param value 槽名字符串
+ * @returns 武器槽；未知值返回 None
+ */
+fn parse_weapon_slot_name(value: &str) -> Option<WeaponRef> {
+    match value {
+        "melee" => Some(WeaponRef::Melee),
+        "ranged" => Some(WeaponRef::Ranged),
+        "skill" => Some(WeaponRef::Skill),
+        _ => None,
+    }
+}
+
+/// 面板选择：一次请求要算哪些面板（角色 + 武器槽）。
+#[derive(Debug, Clone)]
+pub struct PanelSelection {
+    /// 是否包含角色属性面板（键为 `char`）。
+    pub include_char: bool,
+    /// 需要的武器槽。
+    pub slots: Vec<WeaponRef>,
+}
+
+impl PanelSelection {
+    /// 解析 `panels` 数组（`char` + `melee` / `ranged` / `skill`）；缺省或空数组返回 None。
+    pub fn from_json(raw: &serde_json::Value) -> Option<Self> {
+        let items = raw.get("panels").and_then(serde_json::Value::as_array)?;
+        if items.is_empty() {
+            return None;
+        }
+        let mut include_char = false;
+        let mut slots: Vec<WeaponRef> = Vec::new();
+        for item in items {
+            let Some(name) = item.as_str() else { continue };
+            if name == "char" {
+                include_char = true;
+            } else if let Some(slot) = parse_weapon_slot_name(name)
+                && !slots.contains(&slot)
+            {
+                slots.push(slot);
+            }
+        }
+        Some(Self {
+            include_char,
+            slots,
+        })
+    }
+
+    /// 全部武器槽：`panels` 端点缺省口径。
+    pub fn all_weapon_slots() -> Self {
+        Self {
+            include_char: false,
+            slots: vec![WeaponRef::Melee, WeaponRef::Ranged, WeaponRef::Skill],
+        }
+    }
+}
+
+/// 面板请求：一个构筑 + 一组面板类型；同一构筑只装配一次，批量返回面板。
+#[derive(Debug, Clone)]
+pub struct PanelsRequest {
+    /// 角色 id（与 `BuildRequest` 同口径）。
+    pub char_id: i64,
+    /// 构筑配置。
+    pub settings: CharSettings,
+    /// 请求的面板；`panels` 缺省时取全部武器槽。
+    pub panels: PanelSelection,
+}
+
+impl PanelsRequest {
+    /// 从请求 JSON 解析 `{charId, settings, panels?}`。
+    ///
+    /// `panels` 支持 `char`（角色面板）与 `melee` / `ranged` / `skill`（武器面板）；
+    /// 缺省或空数组时取全部武器槽。
+    pub fn from_json(raw: &serde_json::Value) -> Result<Self, CalcError> {
+        let char_id = raw
+            .get("charId")
+            .and_then(super::config::json_id)
+            .ok_or_else(|| CalcError::ConfigParse("缺少 charId".to_string()))?;
+        let settings = raw
+            .get("settings")
+            .map(CharSettings::from_json)
+            .unwrap_or_default();
+        Ok(Self {
+            char_id,
+            settings,
+            panels: PanelSelection::from_json(raw).unwrap_or_else(PanelSelection::all_weapon_slots),
+        })
+    }
+}
+
+/**
+ * 按选择计算面板：武器键为 `melee` / `ranged` / `skill`，角色面板键为 `char`。
+ * 武器槽不存在（如无同律武器）时该键缺席。
+ * @param context 已装配的构筑
+ * @param selection 面板选择
+ * @returns 面板键 → 属性表
+ */
+fn compute_panels(
+    context: &mut BuildContext<'_>,
+    selection: &PanelSelection,
+) -> HashMap<String, AttrMap> {
+    let need = |slot: WeaponRef| selection.slots.contains(&slot);
+    let panels = context.weapon_panels_for(
+        need(WeaponRef::Melee),
+        need(WeaponRef::Ranged),
+        need(WeaponRef::Skill),
+    );
+    let mut result = HashMap::new();
+    for slot in [WeaponRef::Melee, WeaponRef::Ranged, WeaponRef::Skill] {
+        if !need(slot) {
+            continue;
+        }
+        let Some(name) = weapon_slot_name(slot) else {
+            continue;
+        };
+        if let Some(panel) = panels.get(name) {
+            result.insert(name.to_string(), panel.clone());
+        }
+    }
+    if selection.include_char {
+        // 与 evaluate 同一口径：含动态 BUFF code 与充盈 / 召唤物转化的最终角色属性
+        result.insert(
+            "char".to_string(),
+            context.calculate_weapon_attributes(None).char,
+        );
+    }
+    result
+}
+
+/**
+ * 批量计算面板：同一构筑只装配一次。
+ * @param tables 建好的数据表
+ * @param request 面板请求
+ * @returns 面板键 → 属性表；角色不存在时返回 None
+ */
+pub fn evaluate_panels(
+    tables: &BuildTables,
+    request: &PanelsRequest,
+) -> Option<HashMap<String, AttrMap>> {
+    let mut context = BuildContext::new(tables, request.char_id, &request.settings)?;
+    Some(compute_panels(&mut context, &request.panels))
 }
 
 /// 伤害明细（对外暴露的扁平结构）。
@@ -99,6 +256,8 @@ pub struct BuildResult {
     pub attributes: AttrMap,
     /// 当前武器面板。
     pub weapon: Option<AttrMap>,
+    /// 请求附带的批量面板（键同 [`PanelSelection`]）；未请求时为空。
+    pub panels: HashMap<String, AttrMap>,
     /// 目标函数求值结果（即界面上显示的总伤害 / DPS）。
     pub target_value: f64,
     /// 当前字段的伤害明细。
@@ -154,7 +313,12 @@ pub struct ExpressionResult {
 /// 在已有上下文上求值（属性/面板走记忆化，`target_function` 为空时按 `伤害`）。
 ///
 /// `evaluate_build_inner` 与 [`CalcSession`] 共用：前者现装配现算，后者复用装配。
-fn evaluate_on_context(context: &mut BuildContext<'_>, target_function: &str) -> BuildResult {
+/// `panels` 为附带请求的面板数组：与目标值共用同一次装配，复用请求。
+fn evaluate_on_context(
+    context: &mut BuildContext<'_>,
+    target_function: &str,
+    panels: Option<&PanelSelection>,
+) -> BuildResult {
     // 角色属性（含 code 动态 BUFF 与充盈/召唤物转化后的最终值；对齐上游
     // `calculateByBasename` 取 `calculateWeaponAttributes()` 的口径）
     let weapon_result = context.calculate_weapon_attributes(None);
@@ -188,10 +352,18 @@ fn evaluate_on_context(context: &mut BuildContext<'_>, target_function: &str) ->
         Ok(value) => (value, evaluator.current_damage(), None),
         Err(message) => (0.0, None, Some(message)),
     };
+    drop(evaluator);
+
+    // 附带请求的面板数组：复用同一次装配（面板已随求值上下文记忆化）
+    let panel_map = match panels {
+        Some(selection) => compute_panels(context, selection),
+        None => HashMap::new(),
+    };
 
     BuildResult {
         attributes,
         weapon,
+        panels: panel_map,
         target_value,
         // 目标函数不是单个伤害字段时（如 `1+1`），用总量兜一个明细
         damage: damage.map(DamageBreakdown::from).or(Some(DamageBreakdown {
@@ -215,7 +387,11 @@ fn evaluate_build_inner(tables: &BuildTables, request: &BuildRequest) -> BuildRe
             };
         }
     };
-    evaluate_on_context(&mut context, &request.settings.target_function)
+    evaluate_on_context(
+        &mut context,
+        &request.settings.target_function,
+        request.panels.as_ref(),
+    )
 }
 
 /// 求值一份构筑；对应上游 `CharBuild.calculate()`。
@@ -348,8 +524,12 @@ fn fnv1a(mut hash: u64, bytes: &[u8]) -> u64 {
     hash
 }
 
-/// 配置指纹：`assembly_only` 跳过目标函数与自定义变量（它们不影响装配）。
-fn fingerprint_settings(settings: &CharSettings, assembly_only: bool) -> u64 {
+/// 配置指纹：`assembly_only` 跳过目标函数、自定义变量与面板选择（它们不影响装配）。
+fn fingerprint_settings(
+    settings: &CharSettings,
+    assembly_only: bool,
+    panels: Option<&PanelSelection>,
+) -> u64 {
     let mut hash = 0xcbf29ce484222325u64;
     macro_rules! mix {
         ($bytes:expr) => {
@@ -374,6 +554,19 @@ fn fingerprint_settings(settings: &CharSettings, assembly_only: bool) -> u64 {
         for (key, value) in &settings.custom_variables {
             mix!(key.as_bytes());
             mix!(value.as_bytes());
+        }
+        // 附带面板只影响返回结果，不进装配指纹
+        mix!(&[u8::from(panels.is_some())]);
+        if let Some(selection) = panels {
+            mix!(&[u8::from(selection.include_char)]);
+            for slot in &selection.slots {
+                mix!(&[match slot {
+                    WeaponRef::Melee => 1u8,
+                    WeaponRef::Ranged => 2,
+                    WeaponRef::Skill => 3,
+                    WeaponRef::Selected => 4,
+                }]);
+            }
         }
     }
     for level in settings.char_skill_level {
@@ -512,7 +705,7 @@ impl CalcSession {
         if request.timeline.is_some() {
             return evaluate_build(&self.tables, request);
         }
-        let eval_fp = fingerprint_settings(&request.settings, false);
+        let eval_fp = fingerprint_settings(&request.settings, false, request.panels.as_ref());
         // 全命中：连求值器都不建。
         if self.context.is_some()
             && self.char_id == request.char_id
@@ -521,7 +714,7 @@ impl CalcSession {
         {
             return last.clone();
         }
-        let assembly_fp = fingerprint_settings(&request.settings, true);
+        let assembly_fp = fingerprint_settings(&request.settings, true, None);
         // 装配命中：复用上下文，只同步显示项并重跑求值。
         if self.context.is_some()
             && self.char_id == request.char_id
@@ -531,7 +724,11 @@ impl CalcSession {
             context.settings.target_function = request.settings.target_function.clone();
             context.settings.custom_variables = request.settings.custom_variables.clone();
             context.custom_variables = request.settings.custom_variables.iter().cloned().collect();
-            let result = evaluate_on_context(context, &request.settings.target_function);
+            let result = evaluate_on_context(
+                context,
+                &request.settings.target_function,
+                request.panels.as_ref(),
+            );
             self.eval_fp = eval_fp;
             self.last_result = Some(result.clone());
             return result;
@@ -552,7 +749,11 @@ impl CalcSession {
                 return result;
             }
         };
-        let result = evaluate_on_context(&mut context, &request.settings.target_function);
+        let result = evaluate_on_context(
+            &mut context,
+            &request.settings.target_function,
+            request.panels.as_ref(),
+        );
         self.context = Some(unsafe {
             // 安全：`tables` 在本 struct 内地址稳定（建会话后永不移动/替换），
             // 且析构时 `context` 先于 `tables` 释放（字段声明顺序）。

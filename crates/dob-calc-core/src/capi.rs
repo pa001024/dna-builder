@@ -9,7 +9,7 @@ use std::ptr;
 use std::slice;
 
 use crate::config::CharSettings;
-use crate::evaluate::{BuildRequest, evaluate_build};
+use crate::evaluate::{BuildRequest, PanelSelection, PanelsRequest, evaluate_build};
 use crate::session::{self, BuildPayload};
 
 fn byte_layout(size: usize) -> Option<Layout> {
@@ -136,6 +136,7 @@ fn evaluate_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> String
     let request = BuildRequest {
         char_id,
         settings,
+        panels: PanelSelection::from_json(&raw),
         seed: None,
         timeline: None,
     };
@@ -183,6 +184,7 @@ fn build_result_json(result: &crate::evaluate::BuildResult) -> serde_json::Value
     serde_json::json!({
         "attributes": attributes,
         "weapon": weapon,
+        "panels": panels_json(&result.panels),
         "targetValue": result.target_value,
         "damage": damage,
         "targetFunction": result.target_function,
@@ -312,10 +314,14 @@ fn skill_fields_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> St
     ok_envelope(serde_json::json!({"fields": fields}))
 }
 
-/// 取全槽武器面板，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
+/// 取武器面板，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
 ///
-/// 请求 JSON：`{charId, settings}`；结果 `panels` 键集与上游 `weapon_panels` 一致
-///（近战/远程/同律 + melee/ranged/skill + 各武器技能名）。
+/// 请求 JSON：
+/// - `{charId, settings, panels?: ["char" | "melee" | "ranged" | "skill", …]}`：独立面板请求，
+///   同一构筑只装配一次，按请求批量返回（角色面板键为 `char`，武器面板键为槽名，
+///   没有对应武器的槽位缺席）；
+/// - 不带 `panels` 时沿用 inspect 口径，返回上游 `weapon_panels` 的全量键集
+///   （近战/远程/同律 + melee/ranged/skill + 各武器技能名）。
 ///
 /// # Safety
 /// 与 `dobcc_evaluate` 同（`req_ptr` 可读 `req_len` 字节，`out_len` 可写，返回指针需释放）。
@@ -338,11 +344,27 @@ fn panels_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> String {
         Ok(raw) => raw,
         Err(error) => return error_envelope(error),
     };
+    // 显式 panels 数组走批量面板请求；缺省保留 inspect 的全量键集。
+    if raw.get("panels").is_some() {
+        let request = match PanelsRequest::from_json(&raw) {
+            Ok(request) => request,
+            Err(error) => return error_envelope(error),
+        };
+        let Some(panels) = crate::evaluate::evaluate_panels(&payload, &request) else {
+            return error_envelope("角色未在数据表中找到");
+        };
+        return ok_envelope(serde_json::json!({"panels": panels_json(&panels)}));
+    }
     let request = match BuildRequest::from_json(&raw) {
         Ok(request) => request,
         Err(error) => return error_envelope(error),
     };
     let panels = crate::evaluate::panels_for(&payload, &request).unwrap_or_default();
+    ok_envelope(serde_json::json!({"panels": panels_json(&panels)}))
+}
+
+/// 面板表 → JSON（键排序保证输出稳定）。
+fn panels_json(panels: &std::collections::HashMap<String, crate::attrmap::AttrMap>) -> serde_json::Value {
     let mut map = serde_json::Map::new();
     let mut keys: Vec<&String> = panels.keys().collect();
     keys.sort();
@@ -353,7 +375,7 @@ fn panels_envelope(session: u64, req_ptr: *const u8, req_len: usize) -> String {
             .collect();
         map.insert(key.to_string(), serde_json::Value::Object(panel));
     }
-    ok_envelope(serde_json::json!({"panels": map}))
+    serde_json::Value::Object(map)
 }
 
 /// 在会话里跑整轮自动配装，恒返回合法 JSON 信封（同 `dobcc_evaluate` 约定）。
@@ -491,6 +513,22 @@ fn income_item_value(
                 base.char_id,
                 &base.settings,
                 name,
+                timeline,
+                Some(base_value),
+            )
+        }
+        "effect_set" => {
+            let id = item.get("id").and_then(crate::config::json_id).unwrap_or(0);
+            let level = num("level").unwrap_or(0.0);
+            // 挂载点与上游 `buff.pt` 一致：Weapon 特效走 `w:<id>`，其余（Mod）走 `m:<id>`
+            let prefix = if text("owner") == "Weapon" { "w" } else { "m" };
+            crate::income::calc_effect_income(
+                payload,
+                base.char_id,
+                &base.settings,
+                prefix,
+                id,
+                level,
                 timeline,
                 Some(base_value),
             )

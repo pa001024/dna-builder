@@ -38,7 +38,8 @@ pub use autobuild::{AutobuildOptions, AutobuildRequest, AutobuildResult, ModCand
 pub use error::CalcError;
 pub use evaluate::{
     BuffScope, BuildRequest, BuildResult, CalcSession, DamageBreakdown, ExpressionResult,
-    SkillFieldView, evaluate_build, evaluate_expressions, macros, panels_for, skill_fields_for,
+    PanelSelection, PanelsRequest, SkillFieldView, evaluate_build, evaluate_expressions,
+    evaluate_panels, macros, panels_for, skill_fields_for,
 };
 pub use income::{ModSlotKey, WeaponCandidate, calc_weapon_replacement_incomes};
 pub use session::{BuildPayload, ModulesJson};

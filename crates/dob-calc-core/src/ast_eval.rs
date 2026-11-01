@@ -373,7 +373,16 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         } else {
             name
         };
-        let key = namespace.unwrap_or("");
+        // 无命名空间时按 `baseName` 取面板（上游 `getCalculatedWeaponAttr` 的 `base || this.baseName`），
+        // `panel_keys` 只收录显式命名空间，不回退会漏掉裸标识符（如 `攻速`）的武器面板值。
+        let base_name;
+        let key = match namespace {
+            Some(value) => value,
+            None => {
+                base_name = self.context.settings.base_name.as_str();
+                base_name
+            }
+        };
         let Some(panel_key) = self.panel_keys.get(key) else {
             return 0.0;
         };

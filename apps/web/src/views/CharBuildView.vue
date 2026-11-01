@@ -465,6 +465,8 @@ const charBuild = computed(() => {
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
             extraMastery: char.额外精通?.includes(charSettings.value.extraMastery) ? charSettings.value.extraMastery : "",
             dotSettings: charSettings.value.dotSettings,
+            // 收益计算把它带到 worker：wasm 直接用同一份配置复现构筑
+            settings: charSettings.value,
         })
         return b
     } catch (e) {

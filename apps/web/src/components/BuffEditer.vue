@@ -138,8 +138,15 @@ const selectedBuffs = computed(() => {
     return props.buffOptions.filter(buff => props.selectedBuffs.some(v => v.名称 === buff.label) && matchBuffOptionQuery(buff, query))
 })
 
+/**
+ * 收益键：特效 BUFF 按挂载点区分（金/紫品质的特效可能同名，仅 id 不同）。
+ * @param buff 候选 BUFF
+ * @param minus 是否为移除口径
+ * @returns 收益表键
+ */
 function getIncomeKey(buff: BuffOption, minus: boolean) {
-    return `${minus ? "minus" : "add"}:${buff.label}:${buff.lv}:${buff.coverage ?? 1}`
+    const owner = buff.value.pid === undefined ? "" : `${buff.value.pt}:${buff.value.pid}`
+    return `${minus ? "minus" : "add"}:${owner}:${buff.label}:${buff.lv}:${buff.coverage ?? 1}`
 }
 
 function getIncome(buff: BuffOption, minus: boolean) {
@@ -191,6 +198,9 @@ function refreshIncomes() {
                 level: buff.value.等级,
                 minus: buff.minus,
                 coverage: buff.coverage,
+                // 特效 BUFF 的挂载点（MOD / 武器）不在原始数据里，需单独带给 worker
+                pid: buff.value.pid,
+                pt: buff.value.pt,
             })),
         })
     )

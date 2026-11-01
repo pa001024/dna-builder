@@ -145,6 +145,7 @@ pub fn build_value(
         &super::evaluate::BuildRequest {
             char_id,
             settings: settings.clone(),
+            panels: None,
             seed: None,
             timeline: timeline.cloned(),
         },
@@ -222,6 +223,38 @@ pub fn calc_equipped_buff_income(
         return 0.0;
     }
     base / without - 1.0
+}
+
+/// 特效等级收益：按 `m:<id>` / `w:<id>` 改写特效等级后重建求值。
+///
+/// 特效属性挂在 MOD / 武器实例上（`tables.mods[id].effect`），不在 `settings.buffs` 里，
+/// `buff_add` / `buff_remove` 的按名查询覆盖不到，只能走特效等级键。
+/// `level == 0` 为移除口径（`base/without - 1`，`|without|<EPS → 0`），
+/// 否则为附加口径（`value/base - 1`，`|base|<EPS → 0`）。
+pub fn calc_effect_income(
+    tables: &BuildTables,
+    char_id: i64,
+    settings: &CharSettings,
+    prefix: &str,
+    id: i64,
+    level: f64,
+    timeline: Option<&RawTimelineData>,
+    base: Option<f64>,
+) -> f64 {
+    let base = base.unwrap_or_else(|| build_value(tables, char_id, settings, timeline));
+    let mut owned = settings.clone();
+    set_effect_level(&mut owned, prefix, id, level);
+    let value = build_value(tables, char_id, &owned, timeline);
+    if level == 0.0 {
+        if value.abs() < EPS {
+            return 0.0;
+        }
+        base / value - 1.0
+    } else if base.abs() < EPS {
+        0.0
+    } else {
+        value / base - 1.0
+    }
 }
 
 /// 已装备 MOD 的边际收益：移除指定槽位后重算（`calcEquippedModIncome:4417-4452`）。

@@ -496,6 +496,8 @@ export interface CharBuildOptions {
     dotSettings?: Partial<DotFrequencySettings>
     /** 所选魔灵主动技的原始冷却（秒，未选魔灵为 0）：用于折算角色属性「魔灵CD」 */
     petBaseCd?: number
+    /** 生成该构筑的原始配置：worker 的 wasm 收益路径据此复现构筑，缺失时回退 TS 快照 */
+    settings?: CharBuildSettingsInput
 }
 
 export class CharBuild {
@@ -760,6 +762,8 @@ export class CharBuild {
     }
     /** 所选魔灵主动技的原始冷却（秒）：角色属性「魔灵CD」= 该值 × (1 - 魔灵CD缩减) */
     public petBaseCd = 0
+    /** 生成该构筑的原始配置：随快照带到 worker，供 wasm 收益路径复现构筑 */
+    public settings?: CharBuildSettingsInput
 
     get baseWithTarget() {
         return `${this.baseName}::${this.targetFunction}`
@@ -823,6 +827,7 @@ export class CharBuild {
         this.teamWeaponCategories = options.teamWeaponCategories || []
         this.dotSettings = { ...defaultDotFrequencySettings, ...(options.dotSettings || {}) }
         this.petBaseCd = options.petBaseCd || 0
+        this.settings = options.settings
     }
 
     /**
@@ -4668,6 +4673,7 @@ export class CharBuild {
             extraMastery: this.extraMastery,
             dotSettings: { ...this.dotSettings },
             petBaseCd: this.petBaseCd,
+            settings: this.settings,
         })
         return cloned
     }

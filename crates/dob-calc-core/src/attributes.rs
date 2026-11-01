@@ -471,15 +471,15 @@ impl<'a> BuildContext<'a> {
     /// **复用同一个面板对象**，因此 `weaponAttr` 与 `skillWeaponAttr` 常常是同一份数据
     /// （被选武器是同律武器时），`code` 写其中一个、另一个也变。
     /// 这里把被选武器槽位统一用 `weaponAttr` 一个键，跑完再把它镜像回对应的槽位键。
+    ///
+    /// 注意不能按「没有动态 BUFF」提前返回：MOD / 武器特效的 code 与动态 BUFF 同批执行
+    /// （上游 `[...dynamicBuffs, ...effectCodeBuffs]`），只挂特效 code 的构筑同样要跑。
     fn run_dynamic_buff_codes(
         &mut self,
         mut attrs: AttrMap,
         mut selected_panel: Option<AttrMap>,
     ) -> (AttrMap, Option<AttrMap>) {
         crate::prof!("attributes::run_dynamic_buff_codes");
-        if self.dynamic_buffs.is_empty() {
-            return (attrs, selected_panel);
-        }
         let codes: Vec<String> = self
             .dynamic_buff_iter()
             .filter_map(|buff| {

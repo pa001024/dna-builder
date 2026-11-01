@@ -25,6 +25,7 @@ type DobccExports = WebAssembly.Exports & {
     dobcc_dealloc(pointer: number, size: number): void
     dobcc_open_session(tablesPtr: number, tablesLen: number): bigint
     dobcc_evaluate(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
+    dobcc_panels(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_autobuild(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_income(session: bigint, reqPtr: number, reqLen: number, outLenPtr: number): number
     dobcc_close_session(session: bigint): void
@@ -52,6 +53,8 @@ export interface WasmAutobuildResult {
 export interface WasmEvaluateResult {
     attributes: Record<string, number>
     weapon: Record<string, number> | null
+    /** 请求附带的面板；未请求时为空对象 */
+    panels: Partial<Record<PanelKind, Record<string, number>>>
     targetValue: number
     damage: {
         expectedDamage: number
@@ -73,6 +76,23 @@ export interface WasmEvaluateInput {
     targetFunction?: string
     /** 覆盖 settings.baseName 的技能基名（武器伤害节点切到武器技能口径） */
     baseName?: string
+    /** 附带面板数组：与目标值同一次装配计算，复用请求 */
+    panels?: PanelKind[]
+}
+
+/** 可批量请求的面板类型：角色属性面板 + 武器槽面板 */
+export type PanelKind = "char" | "melee" | "ranged" | "skill"
+
+export interface WasmPanelsInput {
+    charId: number
+    settings: CharSettings
+    /** 需要的面板类型：同一构筑一次装配批量计算 */
+    panels: PanelKind[]
+}
+
+export interface WasmPanelsResult {
+    /** 面板键 → 属性表；`char` 为角色面板，构筑没有对应武器（如无同律武器）时该槽缺席 */
+    panels: Partial<Record<PanelKind, Record<string, number>>>
 }
 
 const textEncoder = new TextEncoder()
@@ -113,6 +133,27 @@ function buildModulesJson(): string {
     })
 }
 
+/** 最近一次建表（数据填充 + open_session）耗时；由结果消息取走，只上报一次 */
+let sessionSetupMs: number | undefined
+
+/** wasm 同步调用结果：附带本次调用耗时 */
+export interface WasmCallResult<T> {
+    value: T
+    /** 会话就绪后的同步调用耗时：含请求序列化与结果解析，不含建表与排队 */
+    elapsedMs: number
+}
+
+/**
+ * 执行一次同步 wasm 调用并计时：从请求序列化开始算起，避免把会话等待摊入请求耗时。
+ * @param action 同步调用
+ * @returns 调用结果与耗时
+ */
+function callTimed<T>(action: () => T): WasmCallResult<T> {
+    const startedAt = performance.now()
+    const value = action()
+    return { value, elapsedMs: performance.now() - startedAt }
+}
+
 async function getSession(): Promise<{ exports: DobccExports; session: bigint } | undefined> {
     const dataKey = currentDataKey()
     // 数据包换入后旧会话的静态表已过期；不主动关闭，避免与在途求值竞争
@@ -138,12 +179,15 @@ async function getSession(): Promise<{ exports: DobccExports; session: bigint } 
                 ) {
                     return undefined
                 }
+                // 建表（序列化数据表 + open_session）单独计时：耗时远大于单次求值，不能混进首个请求
+                const fillStartedAt = performance.now()
                 const bytes = textEncoder.encode(buildModulesJson())
                 const ptr = wasm.dobcc_alloc(bytes.length)
                 new Uint8Array(wasm.memory.buffer).set(bytes, ptr)
                 const session = wasm.dobcc_open_session(ptr, bytes.length)
                 wasm.dobcc_dealloc(ptr, bytes.length)
                 if (!session) return undefined
+                sessionSetupMs = performance.now() - fillStartedAt
                 return { exports: wasm, session }
             } catch (error) {
                 console.warn("dob-calc-core wasm 会话建立失败", error)
@@ -152,6 +196,16 @@ async function getSession(): Promise<{ exports: DobccExports; session: bigint } 
         })()
     }
     return sessionPromise
+}
+
+/**
+ * 取走最近一次 wasm 建表耗时（只上报一次，避免重复计入性能统计）。
+ * @returns 建表耗时（毫秒）；尚未建表或已被取走时为 undefined
+ */
+export function takeWasmSessionSetupMs(): number | undefined {
+    const value = sessionSetupMs
+    sessionSetupMs = undefined
+    return value
 }
 
 export function buildWasmAutobuildRequest(input: WasmAutobuildInput): string {
@@ -201,22 +255,24 @@ function callDobcc<T>(wasm: DobccExports, invoke: (reqPtr: number, reqLen: numbe
     return envelope.result
 }
 
-export async function runWasmAutobuild(input: WasmAutobuildInput): Promise<WasmAutobuildResult> {
+export async function runWasmAutobuild(input: WasmAutobuildInput): Promise<WasmCallResult<WasmAutobuildResult>> {
     const ready = await getSession()
     if (!ready) throw new Error("wasm 不可用")
-    return callDobcc<WasmAutobuildResult>(
-        ready.exports,
-        (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_autobuild(ready.session, reqPtr, reqLen, lenPtr),
-        buildWasmAutobuildRequest(input)
+    return callTimed(() =>
+        callDobcc<WasmAutobuildResult>(
+            ready.exports,
+            (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_autobuild(ready.session, reqPtr, reqLen, lenPtr),
+            buildWasmAutobuildRequest(input)
+        )
     )
 }
 
 /**
- * 在 wasm 侧求值一份构筑（属性 / 当前武器面板 / 目标函数 / 伤害明细）。
- * @param input 角色 id、构筑配置与可选的目标函数覆盖
- * @returns wasm 求值结果
+ * 在 wasm 侧求值一份构筑（属性 / 当前武器面板 / 目标函数 / 伤害明细，可附带面板数组）。
+ * @param input 角色 id、构筑配置、可选的目标函数覆盖与附带面板
+ * @returns wasm 求值结果与本次调用耗时
  */
-export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmEvaluateResult> {
+export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmCallResult<WasmEvaluateResult>> {
     const ready = await getSession()
     if (!ready) throw new Error("wasm 不可用")
     const settings =
@@ -227,16 +283,36 @@ export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmEva
                   targetFunction: input.targetFunction ?? input.settings.targetFunction,
                   baseName: input.baseName ?? input.settings.baseName,
               }
-    return callDobcc<WasmEvaluateResult>(
-        ready.exports,
-        (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_evaluate(ready.session, reqPtr, reqLen, lenPtr),
-        JSON.stringify({ charId: input.charId, settings })
+    return callTimed(() =>
+        callDobcc<WasmEvaluateResult>(
+            ready.exports,
+            (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_evaluate(ready.session, reqPtr, reqLen, lenPtr),
+            JSON.stringify({ charId: input.charId, settings, panels: input.panels })
+        )
+    )
+}
+
+/**
+ * 在 wasm 侧批量计算武器面板：只装配构筑与面板，不跑目标函数 / 伤害明细。
+ * @param input 角色 id、构筑配置与需要面板的武器槽
+ * @returns 各槽位武器面板与本次调用耗时
+ */
+export async function runWasmPanels(input: WasmPanelsInput): Promise<WasmCallResult<WasmPanelsResult>> {
+    const ready = await getSession()
+    if (!ready) throw new Error("wasm 不可用")
+    return callTimed(() =>
+        callDobcc<WasmPanelsResult>(
+            ready.exports,
+            (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_panels(ready.session, reqPtr, reqLen, lenPtr),
+            JSON.stringify({ charId: input.charId, settings: input.settings, panels: input.panels })
+        )
     )
 }
 
 export type WasmIncomeItem =
     | { key: string; kind: "buff_add"; name: string; level: number; coverage?: number }
     | { key: string; kind: "buff_remove"; name: string }
+    | { key: string; kind: "effect_set"; owner: string; id: number; level: number }
     | { key: string; kind: "mod_add"; id: number; level: number; buffLevel?: number }
     | { key: string; kind: "mod_replace"; slot: string; index: number; id: number; level: number; buffLevel?: number }
     | { key: string; kind: "mod_remove"; slot: string; index: number }
@@ -254,16 +330,18 @@ export interface WasmIncomeResult {
     values: Record<string, number>
 }
 
-export async function runWasmIncome(input: WasmIncomeInput): Promise<WasmIncomeResult> {
+export async function runWasmIncome(input: WasmIncomeInput): Promise<WasmCallResult<WasmIncomeResult>> {
     const ready = await getSession()
     if (!ready) throw new Error("wasm 不可用")
-    return callDobcc<WasmIncomeResult>(
-        ready.exports,
-        (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_income(ready.session, reqPtr, reqLen, lenPtr),
-        JSON.stringify({
-            base: { charId: input.charId, settings: input.settings },
-            skillInherit: input.skillInherit,
-            items: input.items,
-        })
+    return callTimed(() =>
+        callDobcc<WasmIncomeResult>(
+            ready.exports,
+            (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_income(ready.session, reqPtr, reqLen, lenPtr),
+            JSON.stringify({
+                base: { charId: input.charId, settings: input.settings },
+                skillInherit: input.skillInherit,
+                items: input.items,
+            })
+        )
     )
 }
