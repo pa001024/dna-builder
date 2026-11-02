@@ -114,6 +114,7 @@ export async function publishRunDrops(): Promise<void> {
             .map(drop => ({
                 id: drop.itemId,
                 name: drop.itemName,
+                type: drop.itemType,
                 rarity: drop.rarity,
                 count: drop.count,
                 at: drop.at,

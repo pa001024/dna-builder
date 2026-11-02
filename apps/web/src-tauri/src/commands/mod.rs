@@ -7,7 +7,6 @@ pub mod download;
 pub mod fs;
 pub mod game;
 pub mod lan_sync;
-pub mod mihome;
 pub mod mod_import;
 pub mod net;
 pub mod pak;

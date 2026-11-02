@@ -54,7 +54,7 @@ bun i18n get <key> [--lang cn,en] [--json]
 bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]
                                  # 按译文反查 key（find/search 同义）：默认 6 语言大小写不敏感子串匹配；
                                  # --lang 限定语言，--exact 全字相等，--limit 最多展示数（默认 20）
-bun i18n rm <key>                # 从所有语言删除该键（会清理因此变空的父命名空间）
+bun i18n rm <key...>             # 从所有语言删除一个或多个键（会清理因此变空的父命名空间）
 bun i18n langs                   # 列出语言目录与全部别名
 bun i18n export                  # 导出「zh-CN 有值、其它语言缺值」的键 → tools/i18n-diff.json
 bun i18n import                  # 把 tools/i18n-diff.json 的译文写回并删除该文件

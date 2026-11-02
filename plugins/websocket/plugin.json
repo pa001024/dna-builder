@@ -1,0 +1,9 @@
+{
+    "id": "websocket",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "WebSocket",
+    "desc": "通过 WebSocket 推送文本消息"
+}

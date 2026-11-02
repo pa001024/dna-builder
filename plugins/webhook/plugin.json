@@ -1,0 +1,9 @@
+{
+    "id": "webhook",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "Webhook",
+    "desc": "向任意 HTTP 地址 POST JSON"
+}

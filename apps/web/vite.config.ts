@@ -15,6 +15,7 @@ import { dataPackRewritePlugin } from "./src/utils/data-pack/data-pack-rewrite-p
 
 const host = process.env.TAURI_DEV_HOST
 const mockDataPackDir = resolve(__dirname, "mock/data-pack")
+const mockPluginsDir = resolve(__dirname, "mock/plugins")
 const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
 const isDisableRewrite = process.env.DISABLE_REWRITE === "1"
 
@@ -229,6 +230,31 @@ export default defineConfig(async () => ({
                 use: (arg0: string, arg1: { (req: any, res: any, next: any): void; (req: any, res: any, next: any): void }) => void
             }
         }) {
+            server.middlewares.use("/mock/plugins", (req, res, next) => {
+                const url = req.url || "/"
+                const filePath = url === "/" ? "plugins.json" : url.replace(/^\//, "")
+                const absPath = resolve(mockPluginsDir, filePath)
+                if (!absPath.startsWith(mockPluginsDir)) {
+                    res.statusCode = 403
+                    res.end("Forbidden")
+                    return
+                }
+
+                fs.readFile(absPath, (error, buffer) => {
+                    if (error) {
+                        next()
+                        return
+                    }
+
+                    res.statusCode = 200
+                    if (absPath.endsWith(".json")) {
+                        res.setHeader("Content-Type", "application/json; charset=utf-8")
+                    } else if (absPath.endsWith(".zip")) {
+                        res.setHeader("Content-Type", "application/zip")
+                    }
+                    res.end(buffer)
+                })
+            })
             server.middlewares.use("/mock/data-pack", (req, res, next) => {
                 const url = req.url || "/"
                 const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")

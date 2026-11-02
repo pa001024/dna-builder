@@ -70,6 +70,8 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
 
     /** 掉落贴图（只画当前进行中场次里的掉落）。 */
     const drops: AfkDropParticle[] = []
+    /** 悬停命中的掉落：名称 + 画布 CSS 坐标（调用方定位提示用）。 */
+    const hovered = ref<{ name: string; x: number; y: number } | null>(null)
     /** 「掉落时刻:序号」→ 粒子：一件物品按数量铺几颗。 */
     const dropByKey = new Map<string, AfkDropParticle>()
     /** 图标缓存：同一物品反复掉落只解码一次。 */
@@ -200,7 +202,8 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
             const jitter = (Math.random() - 0.5) * 48
             const particle = createAfkDrop({
                 key: ++dropSeq,
-                icon: getRewardIconUrl("Resource", drop.id ?? drop.name),
+                icon: getRewardIconUrl(drop.type ?? "Resource", drop.id ?? drop.name),
+                name: drop.name,
                 x: Math.min(actorLeft + officialWidth - 12, Math.max(actorLeft + 12, monsterX + jitter)),
                 y: options.height - 46 - Math.random() * 12,
                 size,
@@ -229,9 +232,47 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
 
     watch(
         () => animState.value.runDrops,
-        () => syncDrops(),
+        () => {
+            hovered.value = null
+            syncDrops()
+        },
         { deep: true, immediate: true }
     )
+
+    /**
+     * 命中测试：从上往下找鼠标下的掉落（忽略旋转，按外接正方形 + 4px 宽容）。
+     * @param px 画布内 CSS 横坐标
+     * @param py 画布内 CSS 纵坐标
+     * @returns 命中的粒子；没有时为 null
+     */
+    function pickDrop(px: number, py: number): AfkDropParticle | null {
+        for (let index = drops.length - 1; index >= 0; index--) {
+            const drop = drops[index]!
+            const pad = 4
+            if (px >= drop.x - pad && px <= drop.x + drop.size + pad && py >= drop.y - pad && py <= drop.y + drop.size + pad) {
+                return drop
+            }
+        }
+        return null
+    }
+
+    /**
+     * 鼠标移动时更新悬停命中的掉落（提示定位用中心上沿）。
+     * @param event 鼠标事件
+     */
+    function onDropHover(event: MouseEvent) {
+        const element = canvas.value
+        if (!element) return
+        const rect = element.getBoundingClientRect()
+        const hit = pickDrop(event.clientX - rect.left, event.clientY - rect.top)
+        hovered.value = hit ? { name: hit.name, x: hit.x + hit.size / 2, y: hit.y } : null
+        element.style.cursor = hit ? "pointer" : ""
+    }
+
+    /** 鼠标离开画布时藏起提示。 */
+    function onDropLeave() {
+        hovered.value = null
+    }
 
     /**
      * 画一帧。
@@ -249,12 +290,23 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
 
         // 按 CSS 像素绘制：画布铺满容器，动画内容固定在 options.width 宽的居中带里
         const cssWidth = element.clientWidth || options.width
+        // 后备存储与当前 CSS 尺寸脱节时（DPR/缩放变化、观察器尚未触发）先同步，
+        // 否则整画布会被浏览器拉伸放大、看起来发糊
+        const dpr = window.devicePixelRatio || 1
+        if (element.width !== Math.round(cssWidth * dpr) || element.height !== Math.round(options.height * dpr)) {
+            element.width = Math.round(cssWidth * dpr)
+            element.height = Math.round(options.height * dpr)
+            element.style.height = `${options.height}px`
+        }
         const scale = element.width / cssWidth
         // 角色/怪物的活动范围与官方小窗一致（366 宽），在画布中央，不随画布变宽
         const actorLeft = (cssWidth - officialWidth) / 2
         context.setTransform(1, 0, 0, 1, 0, 0)
         context.clearRect(0, 0, element.width, element.height)
         context.setTransform(scale, 0, 0, scale, 0, 0)
+        // 缩小用高质量滤波：精灵帧（256 级）压到 118 显示，默认 low 档会发糊
+        context.imageSmoothingEnabled = true
+        context.imageSmoothingQuality = "high"
 
         const active = options.combat !== false && characterEvent.value?.state === "combat"
         const scene = manifest.value?.backgrounds[sceneId.value]
@@ -320,11 +372,25 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
         if (current && source) {
             const frame = afkSpriteFrame(current, now - sheetStartedAt, stateName.value === "Death")
             const fighting = combat.value.phase !== "idle"
-            const x = fighting
-                ? actorLeft + mapCombatX(combat.value.characterX, officialWidth, officialWidth) - entitySize / 2
-                : actorLeft + (officialWidth - entitySize) / 2 + officialWidth * (options.idleOffsetRatio ?? 0)
+            // 落到整数 CSS 像素：亚像素定位 + 双线性会让精灵边缘长期发虚
+            const x = Math.round(
+                fighting
+                    ? actorLeft + mapCombatX(combat.value.characterX, officialWidth, officialWidth) - entitySize / 2
+                    : actorLeft + (officialWidth - entitySize) / 2 + officialWidth * (options.idleOffsetRatio ?? 0)
+            )
             context.filter = silhouette ? "brightness(0)" : "none"
-            context.drawImage(source, frame.x, frame.y, frame.width, frame.height, x, options.height - entitySize, entitySize, entitySize)
+            // 源矩形内收 0.5px：高质量缩小时不再蹭到雪碧图里相邻帧的边缘
+            context.drawImage(
+                source,
+                frame.x + 0.5,
+                frame.y + 0.5,
+                Math.max(1, frame.width - 1),
+                Math.max(1, frame.height - 1),
+                x,
+                options.height - entitySize,
+                entitySize,
+                entitySize
+            )
             context.filter = "none"
         }
 
@@ -342,14 +408,14 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
                     : now - monsterStartedAt
                 // Death 只播一遍：播完停在最后一帧，否则刚好在冻结前回绕到首帧
                 const frame = afkSpriteFrame(monsterState, elapsed, combat.value.monsterAction === "Death")
-                const x = actorLeft + mapCombatX(combat.value.monsterX, officialWidth, officialWidth) - entitySize / 2
+                const x = Math.round(actorLeft + mapCombatX(combat.value.monsterX, officialWidth, officialWidth) - entitySize / 2)
                 context.filter = silhouette ? "brightness(0)" : "none"
                 context.drawImage(
                     monsterSource,
-                    frame.x,
-                    frame.y,
-                    frame.width,
-                    frame.height,
+                    frame.x + 0.5,
+                    frame.y + 0.5,
+                    Math.max(1, frame.width - 1),
+                    Math.max(1, frame.height - 1),
                     x,
                     options.height - entitySize,
                     entitySize,
@@ -409,7 +475,10 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
         resize()
         lastTick = 0
         raf = requestAnimationFrame(draw)
-        const parent = canvas.value?.parentElement
+        const element = canvas.value
+        element?.addEventListener("mousemove", onDropHover)
+        element?.addEventListener("mouseleave", onDropLeave)
+        const parent = element?.parentElement
         if (parent) {
             observer = new ResizeObserver(() => resize())
             observer.observe(parent)
@@ -421,8 +490,10 @@ export function useAfkAnimation(canvas: Ref<HTMLCanvasElement | null>, options: 
         cancelAnimationFrame(raf)
         observer?.disconnect()
         observer = null
+        canvas.value?.removeEventListener("mousemove", onDropHover)
+        canvas.value?.removeEventListener("mouseleave", onDropLeave)
         window.removeEventListener("resize", resize)
     })
 
-    return { manifest, error, hasGameDir, combat, resize, animState }
+    return { manifest, error, hasGameDir, combat, resize, animState, hovered }
 }

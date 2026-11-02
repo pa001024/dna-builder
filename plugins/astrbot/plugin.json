@@ -1,0 +1,9 @@
+{
+    "id": "astrbot",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "AstrBot",
+    "desc": "通过 AstrBot 发送消息"
+}

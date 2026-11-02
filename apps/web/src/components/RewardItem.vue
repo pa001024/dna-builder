@@ -242,10 +242,7 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
                 >{{ typeof header === "string" ? header : $t("reward-item.reward_group") }} <CopyID :id="reward.id" /></span
             >
             <slot></slot>
-            <span
-                class="text-xs px-1.5 py-0.5 rounded"
-                :class="reward.m === 'Independent' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
-            >
+            <span class="badge badge-sm" :class="reward.m === 'Independent' ? 'badge-success' : 'badge-warning'">
                 {{ $t(getDropModeText(reward.m || "")) }}
                 <span v-if="reward.totalP">{{ $t("reward-item.total_capacity", { count: reward.totalP }) }}</span>
             </span>
@@ -280,15 +277,7 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
                             <span v-if="isFixedRewardGroup(item)" class="text-base-content/70">{{ $t("reward-item.fixed") }}</span>
                             <span v-if="getParentShareText(item)" class="text-base-content/70">{{ getParentShareText(item) }}</span>
                             <!-- 显示掉落模式 -->
-                            <span
-                                v-if="item.t === 'Reward'"
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :class="
-                                    item.m === 'Independent'
-                                        ? 'bg-success text-success-content'
-                                        : 'bg-warning text-warning-content'
-                                "
-                            >
+                            <span v-if="item.t === 'Reward'" class="badge badge-sm" :class="item.m === 'Independent' ? 'badge-success' : 'badge-warning'">
                                 {{ $t(getDropModeText(item.m || "")) }}
                                 <span v-if="item.totalP">{{ $t("reward-item.total_capacity", { count: item.totalP }) }}</span>
                             </span>

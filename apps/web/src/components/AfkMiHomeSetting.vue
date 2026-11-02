@@ -1,33 +1,92 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
-import { env } from "@/env"
+import {
+    availablePlugins,
+    ensurePluginsLoaded,
+    installedPlugins,
+    installPlugin,
+    pluginSettings,
+    refreshAvailable,
+    uninstallPlugin,
+} from "@/automation/loader"
+import { useAutomationStore } from "@/automation/store"
+import AutomationPanel from "@/components/AutomationPanel.vue"
 import { useAfkLedgerStore } from "@/store/afkLedger"
-import { type MiHomeRuleDraft, type MiHomeRuleKind, useMiHomeLinkStore } from "@/store/mihomeLink"
+import {
+    type AutomationCondition,
+    type AutomationRulePreset,
+    migrateLegacyAutomation,
+} from "@/store/automation-migrate"
+import { MIHAN_TYPES } from "@/store/mihan"
 import { useUIStore } from "@/store/ui"
 import { afkDungeonName } from "@/utils/afk-ledger"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
 
 const { t } = useTranslation()
-const mihome = useMiHomeLinkStore()
+const automation = useAutomationStore()
 const ledger = useAfkLedgerStore()
 const ui = useUIStore()
 
-const KIND_OPTIONS: MiHomeRuleKind[] = ["dungeon_complete", "item_drop", "craft_complete"]
+const EMPTY_CONFIG = {}
+const selectedPlugin = ref("")
+const managerOpen = ref(false)
+const managerTab = ref<"installed" | "market">("installed")
+const managerTabs = computed(() => [
+    { label: t("automation.plugins_installed"), value: "installed" },
+    { label: t("automation.plugins_market"), value: "market" },
+])
+const marketLoading = ref(false)
+const operatingId = ref("")
+const marketError = ref("")
 
-const showForm = ref(false)
-const editingId = ref<string | null>(null)
-const formKind = ref<MiHomeRuleKind>("dungeon_complete")
-const formDungeonId = ref("-")
-const formItemName = ref("")
-const formMinRarity = ref(1)
-const formSceneKey = ref("-")
+const installedIds = computed(() => Object.keys(installedPlugins).sort())
+const marketList = computed(() => [...availablePlugins].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)))
+const selectedSettings = computed(() => (selectedPlugin.value ? pluginSettings[selectedPlugin.value] ?? null : null))
 
-const loginStatusKey = computed(() => {
-    if (mihome.loggedIn === true) return "afk-mihome.logged_in"
-    if (mihome.loggedIn === false) return "afk-mihome.not_logged_in"
-    return "afk-mihome.status_unknown"
-})
+function pluginName(id: string, title?: string) {
+    return title || id
+}
+
+async function refreshMarket() {
+    marketLoading.value = true
+    marketError.value = ""
+    try {
+        await refreshAvailable()
+    } catch (error) {
+        marketError.value = error instanceof Error ? error.message : String(error)
+    } finally {
+        marketLoading.value = false
+    }
+}
+
+async function install(id: string) {
+    operatingId.value = id
+    try {
+        await installPlugin(id)
+        if (!selectedPlugin.value) selectedPlugin.value = id
+        ui.showSuccessMessage(t("automation.plugin_installed", { id }))
+    } catch (error) {
+        ui.showErrorMessage(t("automation.plugin_install_fail", { error: error instanceof Error ? error.message : String(error) }))
+    } finally {
+        operatingId.value = ""
+    }
+}
+
+function uninstall(id: string) {
+    uninstallPlugin(id)
+    if (selectedPlugin.value === id) selectedPlugin.value = installedIds.value[0] ?? ""
+}
+
+const panelRef = ref<InstanceType<typeof AutomationPanel> | null>(null)
+
+type PresetShape = "dungeon_complete" | "item_drop" | "craft_complete" | "commission_refresh"
+const SHAPES: PresetShape[] = ["dungeon_complete", "item_drop", "craft_complete", "commission_refresh"]
+const presetShape = ref<PresetShape>("dungeon_complete")
+const presetDungeon = ref("-")
+const presetItem = ref("")
+const presetRarity = ref(1)
+const presetMihanType = ref("-")
 
 const dungeonOptions = computed(() => {
     const entries = Object.entries(ledger.snapshot.dungeons)
@@ -35,17 +94,6 @@ const dungeonOptions = computed(() => {
         .sort((a, b) => a.label.localeCompare(b.label))
     return [{ value: "-", label: t("afk-mihome.dungeon_any") }, ...entries]
 })
-
-function encodeSceneKey(sceneId: string, homeId: string) {
-    return `${sceneId}@@${homeId}`
-}
-
-const sceneOptions = computed(() =>
-    mihome.effectiveScenes.map(scene => ({
-        value: encodeSceneKey(scene.scene_id, scene.home_id),
-        label: scene.home_name ? `${scene.name} · ${scene.home_name}` : scene.name,
-    }))
-)
 
 const rarityOptions = computed(() => [
     { value: 1, label: t("afk-mihome.rarity_any") },
@@ -58,126 +106,64 @@ function dungeonLabel(id: string) {
     return dungeonDisplayName(id, afkDungeonName(id, entry?.name ?? id))
 }
 
-function conditionText(rule: { kind: MiHomeRuleKind; dungeonId: string; itemName: string; minRarity: number }) {
-    if (rule.kind === "dungeon_complete") return dungeonLabel(rule.dungeonId)
-    if (rule.kind === "item_drop") {
-        const name = rule.itemName.trim() || t("afk-mihome.dungeon_any")
-        if (rule.minRarity > 1) return `${name} · ${t(`afk-ledger.rarity_${rule.minRarity}`)}+`
-        return name
+function applyPreset() {
+    const when: AutomationCondition[] = []
+    let kind: string
+    let name: string
+    if (presetShape.value === "dungeon_complete") {
+        kind = "dungeon"
+        when.push({ field: "status", op: "eq", value: "complete" })
+        if (presetDungeon.value !== "-") {
+            when.push({ field: "id", op: "eq", value: presetDungeon.value })
+            name = dungeonLabel(presetDungeon.value)
+        } else {
+            name = t("afk-mihome.kind_dungeon_complete")
+        }
+    } else if (presetShape.value === "item_drop") {
+        kind = "reward"
+        const item = presetItem.value.trim()
+        if (item) {
+            when.push({ field: "name", op: "contains", value: item })
+            name = item
+        } else {
+            name = t("afk-mihome.kind_item_drop")
+        }
+        if (presetRarity.value > 1) when.push({ field: "rarity", op: "gte", value: presetRarity.value })
+    } else if (presetShape.value === "commission_refresh") {
+        kind = "commission_refresh"
+        if (presetMihanType.value !== "-") when.push({ field: "type", op: "eq", value: presetMihanType.value })
+        const mission = presetItem.value.trim()
+        if (mission) {
+            when.push({ field: "mission", op: "contains", value: mission })
+            name = mission
+        } else {
+            name = t("afk-mihome.kind_commission_refresh")
+        }
+    } else {
+        kind = "craft"
+        const item = presetItem.value.trim()
+        if (item) {
+            when.push({ field: "name", op: "contains", value: item })
+            name = item
+        } else {
+            name = t("afk-mihome.kind_craft_complete")
+        }
     }
-    return rule.itemName.trim() || t("afk-mihome.dungeon_any")
+    const preset: AutomationRulePreset = { name: name!, kind, when }
+    panelRef.value?.startNewRule(preset)
 }
 
-function sceneOf(key: string) {
-    const [sceneId, homeId] = key.split("@@")
-    if (!sceneId || sceneId === "-") return null
-    return (
-        mihome.effectiveScenes.find(scene => scene.scene_id === sceneId && scene.home_id === (homeId ?? "")) ??
-        mihome.effectiveScenes.find(scene => scene.scene_id === sceneId) ??
-        null
-    )
-}
-
-function openAdd() {
-    editingId.value = null
-    formKind.value = "dungeon_complete"
-    formDungeonId.value = "-"
-    formItemName.value = ""
-    formMinRarity.value = 1
-    formSceneKey.value = sceneOptions.value[0]?.value ?? "-"
-    showForm.value = true
-}
-
-function openEdit(id: string) {
-    const rule = mihome.rules.find(item => item.id === id)
-    if (!rule) return
-    editingId.value = id
-    formKind.value = rule.kind
-    formDungeonId.value = rule.dungeonId || "-"
-    formItemName.value = rule.itemName
-    formMinRarity.value = rule.minRarity
-    formSceneKey.value = encodeSceneKey(rule.sceneId, rule.homeId)
-    showForm.value = true
-}
-
-function saveForm() {
-    const scene = sceneOf(formSceneKey.value)
-    if (!scene) {
-        ui.showErrorMessage(t("afk-mihome.scene_placeholder"))
-        return
-    }
-    const draft: MiHomeRuleDraft = {
-        enabled: true,
-        kind: formKind.value,
-        dungeonId: formKind.value === "dungeon_complete" && formDungeonId.value !== "-" ? formDungeonId.value : "",
-        itemName: formKind.value === "dungeon_complete" ? "" : formItemName.value.trim(),
-        minRarity: formKind.value === "item_drop" ? formMinRarity.value : 1,
-        sceneId: scene.scene_id,
-        homeId: scene.home_id,
-        sceneName: scene.name,
-    }
-    if (editingId.value) mihome.updateRule(editingId.value, draft)
-    else mihome.addRule(draft)
-    showForm.value = false
-    editingId.value = null
-}
-
-async function getQrAndWait() {
-    if (mihome.qrBusy || mihome.loginBusy) return
-    try {
-        await mihome.beginQr()
-    } catch (error) {
-        ui.showErrorMessage(t("afk-mihome.login_fail", { error: error instanceof Error ? error.message : String(error) }))
-        return
-    }
-    if (!mihome.qrUrl) {
-        ui.showSuccessMessage(t("afk-mihome.login_ok"))
-        return
-    }
-    try {
-        await mihome.waitQr()
-        ui.showSuccessMessage(t("afk-mihome.login_ok"))
-    } catch (error) {
-        mihome.cancelQr()
-        ui.showErrorMessage(t("afk-mihome.login_fail", { error: error instanceof Error ? error.message : String(error) }))
-    }
-}
-
-async function refreshOnly() {
-    if (mihome.scenesBusy) return
-    try {
-        await mihome.refreshScenes()
-    } catch (error) {
-        ui.showErrorMessage(t("afk-mihome.test_fail", { error: error instanceof Error ? error.message : String(error) }))
-    }
-}
-
-async function logout() {
-    try {
-        await mihome.logout()
-    } catch (error) {
-        ui.showErrorMessage(t("afk-mihome.login_fail", { error: error instanceof Error ? error.message : String(error) }))
-    }
-}
-
-async function fireNow(id: string) {
-    const rule = mihome.rules.find(item => item.id === id)
-    if (!rule) return
-    try {
-        await mihome.fireRule(id)
-        ui.showSuccessMessage(t("afk-mihome.fire_ok", { scene: mihome.sceneNameOf(rule.sceneId, rule.sceneName) }))
-    } catch (error) {
-        ui.showErrorMessage(t("afk-mihome.fire_fail", { error: error instanceof Error ? error.message : String(error) }))
-    }
-}
-
-function timeLabel(ms: number) {
-    return new Date(ms).toLocaleTimeString(undefined, { hour12: false })
+function openManager() {
+    managerOpen.value = true
+    if (marketList.value.length === 0) void refreshMarket()
 }
 
 onMounted(() => {
+    migrateLegacyAutomation()
     void ledger.init()
-    if (env.isApp) void mihome.init()
+    void ensurePluginsLoaded().then(() => {
+        if (!selectedPlugin.value) selectedPlugin.value = installedIds.value[0] ?? ""
+    })
 })
 </script>
 
@@ -185,189 +171,139 @@ onMounted(() => {
     <div
         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
     >
-        <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="label-text">
-                    {{ $t("afk-mihome.enable") }}
-                    <div class="text-xs text-base-content/50">{{ $t("afk-mihome.enable_hint") }}</div>
-                    <div v-if="mihome.lastError" class="mt-0.5 text-xs text-error">{{ mihome.lastError }}</div>
-                    <div v-if="!env.isApp" class="mt-0.5 text-xs text-warning">{{ $t("afk-support.app_only") }}</div>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-[11px] font-medium text-base-content/55">
+                    {{ $t("automation.plugins_installed") }} · {{ installedIds.length }}
                 </span>
-                <div class="flex shrink-0 items-center gap-2">
-                    <span
-                        class="inline-block size-1.5 rounded-full"
-                        :class="mihome.loggedIn === true ? 'bg-success' : 'bg-base-content/25'"
-                        :title="$t(loginStatusKey)"
-                    />
-                    <span class="text-[11px] text-base-content/55">{{ $t(loginStatusKey) }}</span>
-                    <label v-if="mihome.enabled" class="flex items-center gap-1 text-[11px] text-base-content/55">
-                        <input
-                            type="checkbox"
-                            class="toggle toggle-xs toggle-secondary"
-                            :checked="mihome.fireOnce"
-                            :disabled="!env.isApp"
-                            @change="mihome.setFireOnce(($event.target as HTMLInputElement).checked)"
-                        />
-                        {{ $t("resizeableWindow.onlyOnce") }}
-                    </label>
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-secondary"
-                        :checked="mihome.enabled"
-                        :disabled="!env.isApp"
-                        @change="mihome.setEnabled(($event.target as HTMLInputElement).checked)"
-                    />
-                </div>
+                <button type="button" class="btn btn-xs ml-auto" @click="openManager">
+                    {{ $t("automation.plugins_manage") }}
+                </button>
             </div>
-
-            <div v-if="env.isApp" class="flex flex-col gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <div v-if="mihome.loggedIn !== true" class="flex flex-col gap-2">
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <button
-                            type="button"
-                            class="btn btn-xs"
-                            :disabled="mihome.qrBusy || mihome.loginBusy"
-                            @click="getQrAndWait"
+            <Dialog v-model="managerOpen" wide :title="$t('automation.plugins_manage')" @submit="managerOpen = false">
+                <template #content>
+                    <div class="flex flex-col gap-3">
+            <AniTabs v-model="managerTab" :tabs="managerTabs" />
+            <div v-show="managerTab === 'installed'" class="flex flex-col gap-1">
+                <div v-if="installedIds.length === 0" class="py-1 text-center text-[11px] text-base-content/45">
+                    {{ $t("automation.plugins_empty") }}
+                </div>
+                <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-[180px_1fr]">
+                    <div class="flex flex-col gap-1">
+                        <div
+                            v-for="id in installedIds"
+                            :key="id"
+                            class="flex items-center gap-1.5 rounded-xs border px-1.5 py-1 text-[11px]"
+                            :class="selectedPlugin === id ? 'border-secondary/50 bg-secondary/10 text-base-content/85' : 'border-base-content/15 text-base-content/70'"
                         >
-                            <span v-if="mihome.qrBusy" class="loading loading-spinner loading-xs" />
-                            {{ $t("afk-mihome.qr_get") }}
-                        </button>
-                        <span v-if="mihome.loginBusy" class="inline-flex items-center gap-1.5 text-[11px] text-base-content/55">
-                            <span class="loading loading-spinner loading-xs" />
-                            {{ $t("afk-mihome.qr_waiting") }}
-                        </span>
-                        <button
-                            v-if="mihome.qrUrl"
-                            type="button"
-                            class="btn btn-xs"
-                            @click="mihome.cancelQr"
-                        >
-                            {{ $t("afk-mihome.cancel") }}
-                        </button>
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-xs"
+                                :checked="automation.isPluginEnabled(id)"
+                                @click.stop
+                                @change="automation.setPluginEnabled(id, ($event.target as HTMLInputElement).checked)"
+                            />
+                            <button type="button" class="min-w-0 flex-1 truncate text-left" @click="selectedPlugin = id">
+                                {{ pluginName(id, installedPlugins[id].title) }}
+                            </button>
+                            <span class="font-mono text-[10px] text-base-content/35">v{{ installedPlugins[id].version }}</span>
+                            <button
+                                type="button"
+                                class="btn btn-xs h-5 min-h-0 px-1 text-[10px] text-error/80 hover:text-error"
+                                :title="$t('automation.plugin_uninstall')"
+                                @click="uninstall(id)"
+                            >
+                                {{ $t("automation.plugin_uninstall") }}
+                            </button>
+                        </div>
                     </div>
-                    <div v-if="mihome.qrUrl" class="flex flex-wrap items-center gap-3">
-                        <QrCodeStyled :value="mihome.qrUrl" :size="168" />
-                        <p class="min-w-40 flex-1 text-[11px] leading-relaxed text-base-content/55">
-                            {{ $t("afk-mihome.qr_scan_hint") }}
+                    <div class="min-w-0">
+                        <component
+                            v-if="selectedPlugin && selectedSettings"
+                            :is="selectedSettings"
+                            :model-value="EMPTY_CONFIG"
+                            :account-only="true"
+                        />
+                        <p v-else class="py-2 text-center text-[11px] text-base-content/45">
+                            {{ $t("automation.plugin_select_hint") }}
                         </p>
                     </div>
-                    <p class="text-[11px] leading-relaxed text-base-content/45">{{ $t("afk-mihome.need_login_hint") }}</p>
                 </div>
-                <div v-else class="flex flex-wrap items-center gap-1.5">
-                    <button type="button" class="btn btn-xs" :disabled="mihome.scenesBusy" @click="refreshOnly">
-                        <span v-if="mihome.scenesBusy" class="loading loading-spinner loading-xs" />
-                        {{ $t("afk-mihome.refresh") }}
-                    </button>
-                    <button type="button" class="btn btn-xs" @click="logout">
-                        {{ $t("afk-mihome.logout") }}
-                    </button>
-                    <span class="text-[11px] text-base-content/50">
-                        {{
-                            mihome.effectiveScenes.length > 0
-                                ? $t("afk-mihome.scenes_count", { count: mihome.effectiveScenes.length })
-                                : $t("afk-mihome.scenes_empty")
-                        }}
-                    </span>
-                </div>
-                <p class="text-[11px] leading-relaxed text-base-content/45">{{ $t("afk-mihome.service_hint") }}</p>
-                <p class="text-[11px] leading-relaxed text-base-content/45">{{ $t("afk-mihome.scenes_hint") }}</p>
             </div>
-
-            <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <div class="mb-1.5 flex items-center gap-2">
-                    <span class="text-[11px] font-medium text-base-content/55">{{ $t("afk-mihome.rules_title") }}</span>
-                    <button type="button" class="btn btn-xs ml-auto" @click="showForm ? (showForm = false) : openAdd()">
-                        {{ showForm ? $t("afk-mihome.cancel") : $t("afk-mihome.add_rule") }}
+            <div v-show="managerTab === 'market'" class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-medium text-base-content/55">{{ $t("automation.plugins_market") }}</span>
+                    <button
+                        type="button"
+                        class="btn btn-xs ml-auto"
+                        :disabled="marketLoading"
+                        @click="refreshMarket"
+                    >
+                        <span v-if="marketLoading" class="loading loading-spinner loading-xs" />
+                        {{ $t("automation.refresh") }}
                     </button>
                 </div>
-                <div v-if="mihome.rules.length === 0 && !showForm" class="py-2 text-center text-xs text-base-content/45">
-                    {{ $t("afk-mihome.rule_empty") }}
-                </div>
-                <div v-else class="flex flex-col gap-1">
+                <span v-if="marketError" class="text-xs text-error">{{ marketError }}</span>
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div
-                        v-for="rule in mihome.rules"
-                        :key="rule.id"
-                        class="flex flex-wrap items-center gap-2 rounded-xs bg-base-100/60 px-1.5 py-1"
+                        v-for="item in marketList"
+                        :key="item.id"
+                        class="flex flex-col gap-1.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                     >
-                        <input
-                            type="checkbox"
-                            class="toggle toggle-xs toggle-secondary"
-                            :checked="rule.enabled"
-                            @change="mihome.updateRule(rule.id, { enabled: ($event.target as HTMLInputElement).checked })"
-                        />
-                        <span class="inline-flex h-4 items-center rounded-xs bg-secondary/15 px-1 text-[9px] font-semibold text-secondary">
-                            {{ $t(`afk-mihome.kind_${rule.kind}`) }}
-                        </span>
-                        <span class="min-w-0 flex-1 truncate text-[11px] text-base-content/75">
-                            {{ conditionText(rule) }} → {{ mihome.sceneNameOf(rule.sceneId, rule.sceneName) }}
-                        </span>
-                        <span v-if="mihome.lastFiredAt[rule.id]" class="font-orbitron text-[10px] text-base-content/35 tabular-nums">
-                            {{ timeLabel(mihome.lastFiredAt[rule.id]) }}
-                        </span>
-                        <span v-if="mihome.fireError[rule.id]" class="max-w-48 truncate text-[10px] text-error" :title="mihome.fireError[rule.id]">
-                            {{ mihome.fireError[rule.id] }}
-                        </span>
-                        <button
-                            type="button"
-                            class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px]"
-                            :disabled="mihome.firingId === rule.id"
-                            :title="$t('afk-mihome.fire_now')"
-                            @click="fireNow(rule.id)"
-                        >
-                            {{ $t("afk-mihome.fire_now") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px]"
-                            :title="$t('afk-mihome.edit_rule')"
-                            @click="openEdit(rule.id)"
-                        >
-                            {{ $t("afk-mihome.edit_rule") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] text-error/80 hover:text-error"
-                            :title="$t('afk-mihome.delete')"
-                            @click="mihome.removeRule(rule.id)"
-                        >
-                            {{ $t("afk-mihome.delete") }}
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <span class="min-w-0 flex-1 truncate text-[12px] font-semibold text-base-content">
+                                {{ pluginName(item.id, item.title) }}
+                            </span>
+                            <span class="font-mono text-[10px] text-base-content/35">v{{ item.version }}</span>
+                        </div>
+                        <p v-if="item.desc" class="min-h-8 text-[11px] leading-relaxed text-base-content/55">
+                            {{ item.desc }}
+                        </p>
+                        <div class="flex items-center gap-1.5">
+                            <span v-if="installedPlugins[item.id]" class="text-[10px] text-success">
+                                {{ $t("automation.plugin_installed_tag", { version: installedPlugins[item.id].version }) }}
+                            </span>
+                            <button
+                                v-else
+                                type="button"
+                                class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px]"
+                                :disabled="operatingId === item.id"
+                                @click="install(item.id)"
+                            >
+                                <span v-if="operatingId === item.id" class="loading loading-spinner loading-xs" />
+                                {{ $t("automation.plugin_install") }}
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <div v-if="showForm" class="mt-2 flex flex-col gap-2 rounded-xs border border-primary/25 bg-primary/5 p-2">
-                    <div class="text-[11px] font-medium text-base-content/60">
-                        {{ editingId ? $t("afk-mihome.edit_rule") : $t("afk-mihome.add_rule") }}
+            </div>
                     </div>
-                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        <label class="flex flex-col gap-1">
-                            <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_kind") }}</span>
-                            <Select
-                                v-model="formKind"
-                                class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            >
-                                <SelectItem v-for="kind in KIND_OPTIONS" :key="kind" :value="kind">
-                                    {{ $t(`afk-mihome.kind_${kind}`) }}
-                                </SelectItem>
-                            </Select>
-                        </label>
-                        <label class="flex flex-col gap-1">
-                            <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_scene") }}</span>
-                            <Select
-                                v-model="formSceneKey"
-                                class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                :placeholder="$t('afk-mihome.scene_placeholder')"
-                            >
-                                <SelectItem v-for="option in sceneOptions" :key="option.value" :value="option.value">
-                                    {{ option.label }}
-                                </SelectItem>
-                            </Select>
-                        </label>
+                </template>
+                <template #actions>
+                    <div class="flex justify-end gap-1.5">
+                        <button type="button" class="btn btn-xs" @click="managerOpen = false">
+                            {{ $t("afk-mihome.close") }}
+                        </button>
                     </div>
-                    <label v-if="formKind === 'dungeon_complete'" class="flex flex-col gap-1">
+                </template>
+            </Dialog>
+            <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                <div class="mb-1.5 flex flex-wrap items-end gap-2">
+                    <label class="flex min-w-32 flex-col gap-1">
+                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_kind") }}</span>
+                        <Select
+                            v-model="presetShape"
+                            class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
+                            <SelectItem v-for="shape in SHAPES" :key="shape" :value="shape">
+                                {{ $t(`afk-mihome.kind_${shape}`) }}
+                            </SelectItem>
+                        </Select>
+                    </label>
+                    <label v-if="presetShape === 'dungeon_complete'" class="flex min-w-32 flex-1 flex-col gap-1">
                         <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_dungeon") }}</span>
                         <Select
-                            v-model="formDungeonId"
+                            v-model="presetDungeon"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         >
                             <SelectItem v-for="option in dungeonOptions" :key="option.value" :value="option.value">
@@ -375,20 +311,42 @@ onMounted(() => {
                             </SelectItem>
                         </Select>
                     </label>
-                    <label v-if="formKind !== 'dungeon_complete'" class="flex flex-col gap-1">
+                    <label v-else-if="presetShape === 'commission_refresh'" class="flex min-w-32 flex-1 flex-col gap-1">
+                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_mission") }}</span>
+                        <input
+                            v-model="presetItem"
+                            type="text"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            :placeholder="$t('afk-mihome.field_mission_placeholder')"
+                            autocomplete="off"
+                        />
+                    </label>
+                    <label v-else class="flex min-w-32 flex-1 flex-col gap-1">
                         <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_item") }}</span>
                         <input
-                            v-model="formItemName"
+                            v-model="presetItem"
                             type="text"
                             class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :placeholder="$t('afk-mihome.field_item_placeholder')"
                             autocomplete="off"
                         />
                     </label>
-                    <label v-if="formKind === 'item_drop'" class="flex flex-col gap-1">
+                    <label v-if="presetShape === 'commission_refresh'" class="flex min-w-28 flex-col gap-1">
+                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_mihan_type") }}</span>
+                        <Select
+                            v-model="presetMihanType"
+                            class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
+                            <SelectItem value="-">{{ $t("afk-mihome.mihan_type_any") }}</SelectItem>
+                            <SelectItem v-for="type in MIHAN_TYPES" :key="type" :value="type">
+                                {{ type }}
+                            </SelectItem>
+                        </Select>
+                    </label>
+                    <label v-if="presetShape === 'item_drop'" class="flex min-w-28 flex-col gap-1">
                         <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_rarity") }}</span>
                         <Select
-                            v-model="formMinRarity"
+                            v-model="presetRarity"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         >
                             <SelectItem v-for="option in rarityOptions" :key="option.value" :value="option.value">
@@ -396,15 +354,11 @@ onMounted(() => {
                             </SelectItem>
                         </Select>
                     </label>
-                    <div class="flex items-center gap-1.5">
-                        <button type="button" class="btn btn-xs btn-primary" @click="saveForm">
-                            {{ $t("afk-mihome.save") }}
-                        </button>
-                        <button type="button" class="btn btn-xs" @click="showForm = false; editingId = null">
-                            {{ $t("afk-mihome.cancel") }}
-                        </button>
-                    </div>
+                    <button type="button" class="btn btn-xs" @click="applyPreset">
+                        {{ $t("automation.preset_apply") }}
+                    </button>
                 </div>
+                <AutomationPanel ref="panelRef" />
             </div>
         </div>
     </div>

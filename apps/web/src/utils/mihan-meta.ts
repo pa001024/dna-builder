@@ -5,6 +5,9 @@
  * 首页密函卡片与屏幕信息条的委托条目共用,保证同一类型在两处配色一致;类型名走 i18n,不在这里存文案。
  * 任务名既是筛选用的稳定标识也是 i18n 键,因此放在这个无依赖模块里,供纯逻辑模块直接引用。
  */
+/** 委托类型名（原文，同时是各处下拉/匹配的稳定标识）。 */
+export const MIHAN_TYPES = ["角色", "武器", "魔之楔"] as const
+
 export const MIHAN_TYPE_META = [
     { icon: "/imgs/webp/T_Walnut_Avatar.webp", color: "#ba9011" },
     { icon: "/imgs/webp/T_Walnut_Weapon.webp", color: "#1171ba" },

@@ -12,7 +12,7 @@ use hotwatch::{Event, EventKind, Hotwatch};
 use lazy_static::lazy_static;
 use md5::Context;
 
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 
 lazy_static! {
     /// 全局文件监听器（脚本编辑联动），懒创建。
@@ -350,6 +350,25 @@ pub async fn remove_dir_all(path: String) -> Result<String, String> {
 #[tauri::command]
 pub fn path_exists(path: String) -> bool {
     Path::new(&path).exists()
+}
+
+/// 应用数据目录下拼接路径并确保父目录存在（插件文件存储用，如登录态）。
+#[tauri::command]
+pub fn app_data_file(app: tauri::AppHandle, segments: Vec<String>) -> Result<String, String> {
+    let mut dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("无法定位应用数据目录: {e}"))?;
+    for seg in &segments {
+        if seg.is_empty() || seg == "." || seg == ".." || seg.contains(['/', '\\']) {
+            return Err("非法路径片段".to_string());
+        }
+        dir.push(seg);
+    }
+    if let Some(parent) = dir.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("无法创建数据目录: {e}"))?;
+    }
+    Ok(dir.to_string_lossy().to_string())
 }
 
 /// 监听文件变化

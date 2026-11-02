@@ -19,7 +19,7 @@ const CANVAS_WIDTH = 366
 const CANVAS_HEIGHT = 118
 
 const canvas = ref<HTMLCanvasElement | null>(null)
-const { manifest, error, hasGameDir, animState } = useAfkAnimation(canvas, {
+const { manifest, error, hasGameDir, animState, hovered } = useAfkAnimation(canvas, {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     entitySize: CANVAS_HEIGHT,
@@ -148,6 +148,14 @@ onBeforeUnmount(() => {
         @mouseleave="hovering = false"
     >
         <canvas ref="canvas" class="block w-full" />
+        <!-- 掉落悬停提示：不拦截鼠标，小窗按钮不受影响 -->
+        <div
+            v-if="hovered"
+            class="pointer-events-none absolute z-10 max-w-[95%] -translate-x-1/2 -translate-y-full truncate rounded-xs bg-base-100/95 px-1.5 py-0.5 text-[10px] whitespace-nowrap text-base-content shadow-md backdrop-blur-sm"
+            :style="{ left: `${hovered.x}px`, top: `${hovered.y - 4}px` }"
+        >
+            {{ $t(hovered.name) }}
+        </div>
 
         <!-- 没有游戏目录时的兜底底纹 -->
         <div v-if="!manifest" class="absolute inset-0 bg-linear-to-r from-base-content/10 via-base-content/5 to-base-content/10" />

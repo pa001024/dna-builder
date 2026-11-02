@@ -553,7 +553,7 @@ const chevronClass = computed(() => (props.variant === "default" ? "size-4 opaci
                 :class="['select-trigger inline-flex items-center justify-between gap-1.5', triggerVariantClass]"
                 v-bind="$attrs"
             >
-                <SelectValue :placeholder="placeholder" class="min-w-0 truncate data-placeholder:text-base-content/40">
+                <SelectValue :placeholder="placeholder" class="min-w-0 truncate data-placeholder:text-base-content/40 min-h-lh">
                     {{ selectedItemText }}
                 </SelectValue>
                 <Icon v-if="!hidebtn" icon="radix-icons:chevron-down" :class="['select-chevron ml-auto shrink-0', chevronClass]" />

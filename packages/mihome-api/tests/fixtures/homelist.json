@@ -1,0 +1,10 @@
+{
+    "homelist": [
+        {
+            "id": 12345,
+            "name": "家",
+            "uid": 67890,
+            "roomlist": [{ "name": "客厅", "dids": ["did1", "did2"] }]
+        }
+    ]
+}

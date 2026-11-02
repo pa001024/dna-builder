@@ -2,6 +2,8 @@
 import { useSettingStore } from "@/store/setting"
 import { copyText } from "@/util"
 
+defineOptions({ inheritAttrs: false })
+
 defineProps<{
     id: string | number
     name?: string
@@ -16,6 +18,7 @@ const setting = useSettingStore()
     <template v-if="!setting.hideID">
         <button
             v-if="compact"
+            v-bind="$attrs"
             type="button"
             class="truncate flex h-5 cursor-pointer items-center gap-0.5 whitespace-nowrap rounded-xs border border-base-content/15 bg-base-content/4 px-1 font-mono text-[10px] leading-none tabular-nums text-base-content/45 opacity-80 transition-all duration-200 hover:border-primary/50 hover:text-primary hover:opacity-100"
             :title="$t('copy-id.click_copy_id')"
@@ -25,6 +28,7 @@ const setting = useSettingStore()
         </button>
         <button
             v-else
+            v-bind="$attrs"
             type="button"
             class="truncate cursor-pointer whitespace-nowrap rounded-xs border px-2 py-px text-[11px] transition-colors duration-150 active:scale-[0.97] text-base-content/60 hover:border-primary/60 hover:text-primary"
             :class="[border ? 'border-base-content/20' : 'border-transparent']"

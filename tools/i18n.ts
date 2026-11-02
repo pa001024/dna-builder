@@ -268,7 +268,7 @@ const HELP = `bun i18n <command> [options]
                         --lang 限定只查某几门语言，--exact 改为全字相等匹配，
                         --limit N 最多展示 N 个结果（默认 20），--json 输出结构化结果。
                         find/search 同义。
-  rm  <key>             删除某键（所有语言）
+  rm  <key...>          删除一个或多个键（所有语言）
   langs                 列出可用语言与别名
   export                导出缺失翻译到 tools/i18n-diff.json
   import                从 tools/i18n-diff.json 导入并删除该文件
@@ -807,11 +807,11 @@ async function main(): Promise<void> {
         case "rm":
         case "remove":
         case "del": {
-            const key = rest.find(a => !a.startsWith("-"))
-            if (!key) {
-                throw new Error("用法：bun i18n rm <key> [--dry-run]")
+            const keys = rest.filter(a => !a.startsWith("-"))
+            if (keys.length === 0) {
+                throw new Error("用法：bun i18n rm <key...> [--dry-run]")
             }
-            await cmdRemove(key, rest.includes("--dry-run"))
+            for (const key of keys) await cmdRemove(key, rest.includes("--dry-run"))
             break
         }
         case "langs":

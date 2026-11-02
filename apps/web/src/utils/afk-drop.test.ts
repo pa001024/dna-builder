@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { AFK_DROP_GRAVITY, AFK_DROP_MAX_BOUNCES, afkDropsAtRest, createAfkDrop, stepAfkDrop } from "./afk-drop"
 
 describe("掉落贴图物理", () => {
-    const spawn = () => createAfkDrop({ key: 1, icon: "a.webp", x: 100, y: 40, size: 20, groundY: 80, random: () => 0.5 })
+    const spawn = () => createAfkDrop({ key: 1, icon: "a.webp", name: "坚守", x: 100, y: 40, size: 20, groundY: 80, random: () => 0.5 })
 
     it("生成时从爆出点上方起步并带初始速度", () => {
         const drop = spawn()
@@ -10,6 +10,7 @@ describe("掉落贴图物理", () => {
         expect(drop.y).toBe(30)
         expect(drop.vy).toBeLessThan(0)
         expect(drop.resting).toBe(false)
+        expect(drop.name).toBe("坚守")
     })
 
     it("落地后弹跳，弹够次数停在地上", () => {

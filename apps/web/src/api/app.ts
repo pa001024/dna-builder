@@ -45,6 +45,15 @@ export async function pathExists(path: string) {
 }
 
 /**
+ * 应用数据目录下拼接路径并确保父目录存在（插件文件存储用）。
+ * @param segments 相对路径片段（如 "mihome", "auth.json"），非法片段直接报错
+ * @returns 绝对路径
+ */
+export async function appDataFile(...segments: string[]) {
+    return await invoke<string>("app_data_file", { segments })
+}
+
+/**
  * 递归删除指定目录。
  * @param path 目录路径
  * @returns 成功消息

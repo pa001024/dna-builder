@@ -1,0 +1,9 @@
+{
+    "id": "onebot",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "OneBot",
+    "desc": "通过 OneBot 协议发送群聊或私聊消息"
+}

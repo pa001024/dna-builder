@@ -21,6 +21,8 @@ export type AfkRunDrop = {
     /** 物品 id（管道不一定给） */
     id: number | null
     name: string
+    /** 掉落类型（决定图标解析口径，与账本 AfkDropType 同口径） */
+    type: "Mod" | "Resource" | "Weapon" | "Char"
     rarity: number
     count: number
     /** 接收时刻（毫秒） */
@@ -67,6 +69,7 @@ export function readAfkAnimState(): AfkAnimState {
                 ? parsed.runDrops.slice(-REWARD_KEEP).map(drop => ({
                       id: typeof drop.id === "number" ? drop.id : null,
                       name: drop.name,
+                      type: drop.type === "Mod" || drop.type === "Weapon" || drop.type === "Char" ? drop.type : "Resource",
                       rarity: drop.rarity,
                       count: drop.count,
                       at: drop.at,

@@ -1,0 +1,38 @@
+{
+    "description": "Test Bulb",
+    "services": [
+        { "iid": 1, "type": "urn:miot-spec-v2:service:device-information:00007801:dummy:1", "description": "Device Information" },
+        {
+            "iid": 2,
+            "type": "urn:miot-spec-v2:service:light:00007802:dummy:1",
+            "description": "Light",
+            "comment": "灯光",
+            "properties": [
+                {
+                    "iid": 1,
+                    "type": "urn:miot-spec-v2:property:on:00000006:dummy:1",
+                    "description": "Switch Status",
+                    "format": "bool",
+                    "access": ["read", "write", "notify"]
+                },
+                {
+                    "iid": 2,
+                    "type": "urn:miot-spec-v2:property:brightness:0000000d:dummy:1",
+                    "description": "Brightness",
+                    "format": "uint8",
+                    "access": ["read", "write"],
+                    "value-range": [1, 100, 1]
+                },
+                {
+                    "iid": 3,
+                    "type": "urn:miot-spec-v2:property:mode:00000008:dummy:1",
+                    "description": "Mode",
+                    "format": "uint8",
+                    "access": ["read", "write"],
+                    "value-list": [{ "value": 1, "description": "Normal" }, { "value": 2, "description": "Night" }]
+                }
+            ],
+            "actions": [{ "iid": 1, "type": "urn:miot-spec-v2:action:toggle:00002811:dummy:1", "description": "Toggle" }]
+        }
+    ]
+}

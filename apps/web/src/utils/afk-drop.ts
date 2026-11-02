@@ -20,6 +20,8 @@ export type AfkDropParticle = {
     key: number
     /** 图标路径（主窗口解析好写回状态） */
     icon: string
+    /** 物品名（悬停提示用） */
+    name: string
     /** 左上角坐标 */
     x: number
     y: number
@@ -44,6 +46,8 @@ export type AfkDropParticle = {
 export type AfkDropSpawn = {
     key: number
     icon: string
+    /** 物品名（悬停提示用） */
+    name: string
     /** 爆出点（中心坐标） */
     x: number
     y: number
@@ -63,6 +67,7 @@ export function createAfkDrop(spawn: AfkDropSpawn): AfkDropParticle {
     return {
         key: spawn.key,
         icon: spawn.icon,
+        name: spawn.name,
         x: spawn.x - spawn.size / 2,
         y: spawn.y - spawn.size / 2,
         // 左右各散开一点，纵向统一向上爆

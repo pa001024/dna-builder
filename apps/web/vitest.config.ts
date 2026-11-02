@@ -1,7 +1,10 @@
 import { resolve } from "node:path"
+import vue from "@vitejs/plugin-vue"
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
+    // 插件宿主（host.ts）直接导出 .vue 组件，单测 import 链会经过它们
+    plugins: [vue()],
     test: {
         setupFiles: [resolve(__dirname, "src/test/vitest-setup.ts")],
         // 只运行 Web 应用自身的测试；tools 的测试由仓库根 vitest.config.ts 负责，

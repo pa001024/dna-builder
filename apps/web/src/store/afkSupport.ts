@@ -13,10 +13,11 @@ import {
     onAfkEvent,
     onAfkStatus,
 } from "@/api/afkSupport"
+import { afkToAutomationEvent } from "@/automation/sources/afkPipe"
+import { useAutomationStore } from "@/automation/store"
 import { env } from "@/env"
 import { useAfkLedgerStore } from "@/store/afkLedger"
 import { notifySystem, useForgeAlarm } from "@/store/forgeAlarm"
-import { useMiHomeLinkStore } from "@/store/mihomeLink"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { patchAfkAnimState, readAfkAnimState } from "@/utils/afk-anim-state"
@@ -220,7 +221,8 @@ export const useAfkSupportStore = defineStore("afkSupport", {
             const replayed = this.connectedAt !== 0 && now - this.connectedAt < AFK_REPLAY_WINDOW_MS
             useAfkLedgerStore().record(event, replayed)
             if (replayed) return
-            useMiHomeLinkStore().maybeFire(event, replayed)
+            const automationEvent = afkToAutomationEvent(event)
+            if (automationEvent) void useAutomationStore().dispatch(automationEvent)
             this.announce(event)
         },
         /**

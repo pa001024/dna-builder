@@ -1531,8 +1531,8 @@ function clearAll() {
             </div>
         </template>
 
-        <!-- 米家联动：事件绑定到米家手动场景，空账本时也要能配置 -->
-        <section :data-scroll-title="$t('afk-mihome.title')">
+        <!-- 自动化：插件勾选与事件规则，空账本时也要能配置 -->
+        <section :data-scroll-title="$t('automation.title')">
             <AfkMiHomeSetting />
         </section>
 

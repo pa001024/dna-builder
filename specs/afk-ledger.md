@@ -174,20 +174,21 @@
 接收端与官方工具二选一（同一个管道名）。账本只消费本应用收到的实时事件；
 官方工具关闭后，进入/退出挂机场景即可让游戏连到本应用。详见 `specs/afk-support-protocol.md` §6。
 
-## 9. 米家联动
+## 9. 米家联动（插件化）
 
-- 协议是 vendored `mihome-api`（`crates/mihome-api`），扫码登录态落盘 `<app_data>/mihome/auth.json`，不依赖外部服务进程；仅桌面端可用（`env.isApp`，浏览器调用直接抛错）。
-- Tauri 命令只有六个：`mihome_status`（token 有效自动刷新）/ `mihome_qr_begin`（有效返回 `already`，否则返回 `login_url` + `lp`）/ `mihome_qr_wait`（最长阻塞约 2 分钟）/ `mihome_logout`（删登录态文件）/ `mihome_scenes`（手动场景列表，即米家 APP → 智能 → 手动控制）/ `mihome_run_scene`（按 `scene_id` + `home_id` 执行）。所有调用都在 `spawn_blocking` 里跑，不在 async 上下文持有服务实例。
-- 设置入口是账本页尾独立一节（`AfkMiHomeSetting`，空账本时也能配置），i18n 命名空间 `afk-mihome`：扫码登录（二维码前端自渲染，成功自动拉场景）/ 退出登录 / 刷新场景列表（live 为空时退回本地 `sceneCache`，离线可编辑）。
-- 事件绑定三种（`matchMiHomeRule` 判定）：`dungeon_complete`（可指定副本，空=任意）/ `item_drop`（物品名子串 + 最低品质 1..5，空名=任意）/ `craft_complete`（物品名子串）；命中即执行对应手动场景，规则行显示上次执行时刻与 `fireError`。
-- 自动触发：`afkSupport.handleEvent` → `maybeFire(event, replayed)`，连接瞬间回放窗内的历史事件只记录不触发；执行走 `mihomeRunScene`，错误记到 `fireError[ruleId]`。
-- 迁移：`localStorage` 老键 `setting_mijia_{enabled,rules,scenes}` 命中即搬到 `setting_mihome_*`；Rust 侧登录态文件 `mijia/auth.json` 存在即复制到 `mihome/auth.json`。
+- 打包与安装：`tools/automation-pack.ts` 把每个插件构建为单个 CJS bundle（js-only，无 vendor：`@dob/host` 与 vue 系全 external，`packages/mihome-api` 等工作区纯 TS 包打进包内；settings.vue 先编译再一起打包），产物为 zip（`<id>.js` + `plugin.json`，mock 镜像在 `apps/web/mock/plugins/`，不进应用包）。`upload` 模式上传到对象存储 `plugins/` 前缀并写 CDN 清单（含 size/sha256/url）。运行时（`automation/loader.ts`）只做两件事：读清单做市场发现、按用户手动安装下载 zip（开发走 `/mock/plugins`、线上走 CDN 主备，sha256 校验后解包执行注册）。启动只恢复已安装插件（本地持久化），从不全量自动加载；未安装插件的规则命中时记动作缺失错误。
+- 链路是「事件源 → 规则 → 动作」：`afkSupport.handleEvent` 经 `afkPipe.afkToAutomationEvent`、`mihan.checkNotify` 经 `sources/mihan.mihanToAutomationEvent` 分别转成 `AutomationEvent`（afk 的 `kind` 沿用 `dungeon/reward/craft/…`，密函订阅命中为 `commission_refresh`（整点刷新出想要的任务，不是完成），`data` 只留单层匹配字段）→ `automation` store 的 `dispatch` 按 `match{kind,when}` 命中规则（`kind` 单选，为空不限种类，存量多选 `kinds` 读时取首个兼容）→ 执行 `mihome.run-scene` 动作；`dispatch`/`fireRuleNow` 统一跳过被手动关闭的插件（`disabledPlugins`，动作 id 点分前缀即插件 id）。
+- 插件自带界面：`plugins/mihome` 除 `ActionDef`（`title` + `fields[scene_id/home_id]` + `execute`）外，还经 `plugin.json` 的 `settings` 字段提供 `settings.vue`（登录 + 场景选择框）；`AutomationPanel` 有插件界面就渲染它，无则回退通用字段表单（通用表单按 `fields[].required` 统一校验，面板内不再留插件特例）。
+- 登录态回文件：存储逻辑在插件内（`plugins/mihome/fileStore.ts`，宿主只提供 `runtime.appDataFile/readTextFile/writeTextFile` 原语），桌面端经 Tauri 命令 `app_data_file("mihome","auth.json")` 落盘（与原版同路径），首次读取顺带继承老 `mijia/auth.json` 并搬家；浏览器回退 `localStorage`。通讯走 TS 库 `packages/mihome-api`（`MiHomeClient` + 注入的 `fetch`），`ctx.runtime.fetch` 桌面端即 `tauriFetch`（Rust 侧发请求，不过 WebView CORS）。
+- 设置入口是账本页尾「自动化规则」一节（`AfkMiHomeSetting`，空账本时也能配置）：顶部插件勾选（`pluginTitles` + `isPluginEnabled/setPluginEnabled`，关闭后该插件规则不再触发）；仅勾选米家后才出现登录（插件自带界面 `account-only` 模式）与规则预设/面板（`action-filter="mihome.run-scene"`，场景选择框由插件界面提供）。
+- 老规则迁移：`store/automation-migrate.ts` 的 `migrateLegacyAutomation()` 在设置页初始化时跑一次（`dungeon_complete→{kind:dungeon,when:[status eq complete]+[id eq]}` / `item_drop→{kind:reward,when:[name contains]+[rarity gte]}` / `craft_complete→{kind:craft,when:[name contains]}`，旧全局开关与 `fireOnce` 下沉为单规则字段）；`setting_automation_migrated` 标记防重跑，旧键保留不动以便回滚。预设新增 `commission_refresh`（委托刷新：可选类型 + 任务名包含，`type` 取固定三选）。
 
-## 10. 仅一次开关 fireOnce
+## 10. 仅一次 fireOnce（单规则）
 
-- 默认开（`setting_mihome_fire_once` 初值 `true`）；开关在联动卡片头部（label 复用 `resizeableWindow.onlyOnce`），只桌面端可改。
-- 语义：首个命中的事件批次触发时先把总开关 `enabled` 置 false 再执行（对齐密函 `mihanNotifyOnce`），同一批次多条命中规则全部执行，之后事件不再触发，直到用户手动重开。
-- 只影响自动触发：手动「立即执行」（`fireRule`）不受 `fireOnce` 与 `enabled` 影响；回放事件不触发（与通知口径一致）；关闭时每次命中都执行。
+- 默认开：新建规则 `fireOnce` 初值 `true`，开关在每条规则行与编辑器内（badge `automation.only_once`）。
+- 语义：`dispatch` 整批命中规则执行完后统一把其中 `fireOnce` 的规则置 `enabled=false`（同一批次全部执行，不丢触发；对齐密函 `mihanNotifyOnce` 先关后通的口径）。
+- 只影响自动触发：手动「立即执行」（`fireRuleNow`）无视规则的 `enabled/fireOnce` 且永不翻转开关，但仍受插件总开关约束（插件关闭时返回 `plugin disabled`）；回放事件（`replayed`）不进 `dispatch`（与通知口径一致）；关闭 `fireOnce` 的规则每次命中都执行。
+- 触发记录在 `automation` store：`lastFiredAt[ruleId]` 展示上次执行时刻，`fireError[ruleId]` 展示最近一次错误（成功即清空），行内错误不弹整页提示。
 
 ## 11. 动画资源包缺失提示
 

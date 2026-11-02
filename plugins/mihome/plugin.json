@@ -1,0 +1,9 @@
+{
+    "id": "mihome",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "米家",
+    "desc": "扫码登录后按事件触发米家手动场景"
+}

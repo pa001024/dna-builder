@@ -6,6 +6,8 @@ import { t } from "i18next"
 import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
+import { mihanToAutomationEvent } from "@/automation/sources/mihan"
+import { useAutomationStore } from "@/automation/store"
 import { useSettingStore } from "@/store/setting"
 import { serializeTaskData } from "@/utils/dna-channel"
 import { type DNAHourSample, sampleDNAHour } from "@/utils/dna-hour-sample"
@@ -28,9 +30,10 @@ import { SHORT_NOTE_STORAGE_KEY } from "@/utils/screen-bar"
 import { env } from "../env"
 import { useUIStore } from "./ui"
 
-export const MIHAN_TYPES = ["角色", "武器", "魔之楔"] as const
+export { MIHAN_MISSIONS, MIHAN_TYPES }
+
 /** 委托任务名定义在无依赖模块里,便于屏幕信息条等纯逻辑模块直接引用。 */
-export { MIHAN_MISSIONS } from "@/utils/mihan-meta"
+import { MIHAN_MISSIONS, MIHAN_TYPES } from "@/utils/mihan-meta"
 /** 密函数据在 localStorage 中的键。悬浮条窗口按原始字符串比对做跨窗口同步。 */
 export const MIHAN_DATA_KEY = "mihanData"
 /** 关注任务列表在 localStorage 中的键。 */
@@ -358,14 +361,32 @@ function createMihanNotify() {
     }
 
     /**
+     * 当前命中的订阅任务（类型与任务名均为原文，供通知展示与自动化事件共用）。
+     */
+    function matchedMissions(): { name: string; type: string }[] {
+        const out: { name: string; type: string }[] = []
+        for (const [list, type] of (mihanData.value ?? []).map((list, type) => [list, type] as const)) {
+            if (!mihanNotifyTypes.value.includes(type)) continue
+            for (const name of list) {
+                if (mihanNotifyMissions.value.includes(name)) out.push({ name, type: MIHAN_TYPES[type] })
+            }
+        }
+        return out
+    }
+
+    /**
      * 检查并触发通知。
      *
      * 轮询现在还服务于屏幕信息条,即便订阅开关关闭也会刷新数据,
      * 因此这里必须再次确认订阅开关,否则未启用推送时也会误弹面板并播放提示音。
+     * 命中时同时向自动化引擎派发 commission_refresh 事件（规则按任务名/类型自行匹配）。
      */
     async function checkNotify() {
         if (!mihanEnableNotify.value) return
         if (shouldNotify()) {
+            for (const mission of matchedMissions()) {
+                void useAutomationStore().dispatch(mihanToAutomationEvent(mission))
+            }
             await showMihanNotification()
         }
     }

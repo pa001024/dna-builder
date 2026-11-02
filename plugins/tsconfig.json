@@ -1,0 +1,31 @@
+{
+    // 插件目录统一配置：编辑器提示 + bun 单测解析 @dob/host。
+    // settings.vue 也纳入（Volar 类型提示 @dob/host 导出的宿主组件）；
+    // 注意 SFC 构建由 tools/automation-pack.ts 编译，未导入的模板组件构建时直接报错。
+    // vue / @vueuse-core 指向 apps/web 的安装（插件不自带依赖，只借类型）。
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "types": [],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["../apps/web/src/*"],
+            "@dob/host": ["../apps/web/src/automation/host.ts"],
+            "@pa001024/mihome-api": ["../packages/mihome-api/src/index.ts"],
+            "vue": ["../apps/web/node_modules/vue"],
+            "@vueuse/core": ["../apps/web/node_modules/@vueuse/core"],
+            "bun:test": ["../node_modules/bun-types/test.d.ts"]
+        }
+    },
+    "include": ["*/index.ts", "*/account*.ts", "*/index.test.ts", "*/settings.vue"],
+    "exclude": ["node_modules", "dist"]
+}

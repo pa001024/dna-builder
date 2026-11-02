@@ -1,0 +1,9 @@
+{
+    "id": "run",
+    "version": "1.0.0",
+    "kind": "action",
+    "entry": "index.ts",
+    "settings": "settings.vue",
+    "title": "本地程序",
+    "desc": "在桌面端启动本地程序"
+}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
-import { buildsQuery } from "@/api/graphql"
+import { combinedQuery, typedQuery } from "@/api/query"
 import { type CharSettings, getModVariantIndex, MOD_VARIANT_LETTERS, type ModVariantLetter } from "@/composables/useCharSettings"
 import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
 
@@ -18,6 +18,51 @@ import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
  * 关联时还可以指定查看该构筑的哪一份 MOD 配置（A/B/C）：目标构筑没有所选配置时降级为 A。
  * 构筑挑选器是「选中 → 读描述 → 点确定」两步：同名构筑较多时，先看描述再决定关联哪一份。
  */
+
+/** 队友构筑挑选器用的轻量构筑信息：只取列表展示必需的字段，不取 charSettings 等大字段 */
+interface TeamBuildChoiceSource {
+    id: string
+    title: string
+    desc?: string
+    user?: { name?: string }
+}
+
+/**
+ * 单槽位构筑列表（合并查询的一半）：只取 id/标题/描述/作者名，不取 charSettings（单个可达 20KB，limit 200 时浪费流量）。
+ * 未选人（"-"）的槽位由 @include 跳过，避免空 charId 退化成无过滤的全量查询。
+ */
+const slot1BuildsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($charId1: Int, $hasSlot1: Boolean!, $limit: Int, $offset: Int) {
+            slot1: builds(charId: $charId1, limit: $limit, offset: $offset) @include(if: $hasSlot1) {
+                id
+                title
+                desc
+                user {
+                    name
+                }
+            }
+        }
+    ` as const
+)<TeamBuildChoiceSource[], { charId1?: number; hasSlot1: boolean; limit?: number; offset?: number }>()
+
+const slot2BuildsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($charId2: Int, $hasSlot2: Boolean!, $limit: Int, $offset: Int) {
+            slot2: builds(charId: $charId2, limit: $limit, offset: $offset) @include(if: $hasSlot2) {
+                id
+                title
+                desc
+                user {
+                    name
+                }
+            }
+        }
+    ` as const
+)<TeamBuildChoiceSource[], { charId2?: number | null; hasSlot2: boolean; limit?: number; offset?: number }>()
+
+/** 双槽位构筑列表合并查询：一次往返同时取回两个队友的列表 */
+const teamBuildChoicesQuery = combinedQuery(slot1BuildsQuery, slot2BuildsQuery)
 
 /** 协战下拉选项（角色按元素分组 / 武器按类型分组后由父级传入） */
 interface TeamSelectOption {
@@ -210,31 +255,42 @@ function weaponInfo(value: number | "-") {
 }
 
 /**
- * 拉取某个协战角色的公开构筑列表（懒加载 + 缓存）。
- * 队友未选择（"-"）时直接返回；请求失败不写缓存，下次打开挑选器会自然重试。
- * @param charId 协战角色 id
+ * 拉取协战构筑列表（懒加载 + 缓存）：两个槽位缺的列表一次请求取回。
+ * 队友未选择（"-"）的槽位直接跳过；请求失败不写缓存，下次打开挑选器会自然重试。
  */
-async function loadBuildOptions(charId: number | "-") {
-    if (typeof charId !== "number") return
-    if (buildOptions.value[charId] || loadingChars.value[charId]) return
-    loadingChars.value = { ...loadingChars.value, [charId]: true }
+async function loadBuildOptions() {
+    const missing = [...new Set([teamChar(1), teamChar(2)].filter((id): id is number => typeof id === "number"))].filter(
+        id => !buildOptions.value[id] && !loadingChars.value[id]
+    )
+    if (missing.length === 0) return
+    const [id1, id2] = missing
+    loadingChars.value = { ...loadingChars.value, ...Object.fromEntries(missing.map(id => [id, true])) }
     try {
-        const result = await buildsQuery({ charId, limit: 200, offset: 0 }, { requestPolicy: "network-only" })
-        buildOptions.value = {
-            ...buildOptions.value,
-            [charId]: (result || []).map(build => ({
-                id: build.id,
-                title: build.title,
-                author: build.user?.name ?? "",
-                desc: build.desc ?? "",
-            })),
+        // @include 跳过的槽位在响应里没有对应键，缺席即跳过；整体失败走 catch 不写缓存
+        const data = await teamBuildChoicesQuery(
+            { charId1: id1, hasSlot1: true, charId2: id2 ?? null, hasSlot2: id2 !== undefined, limit: 200, offset: 0 },
+            { requestPolicy: "network-only" }
+        )
+        const lists: [number, TeamBuildChoiceSource[] | undefined][] =
+            id2 === undefined ? [[id1, data?.slot1]] : [[id1, data?.slot1], [id2, data?.slot2]]
+        const next = { ...buildOptions.value }
+        for (const [id, list] of lists) {
+            if (list) {
+                next[id] = list.map(build => ({
+                    id: build.id,
+                    title: build.title,
+                    author: build.user?.name ?? "",
+                    desc: build.desc ?? "",
+                }))
+            }
         }
+        buildOptions.value = next
     } catch (error) {
         // 服务器不可用时保持空列表：构筑关联是可选增强，不应打断构筑编辑
         console.error("加载协战角色构筑列表失败", error)
     } finally {
         const next = { ...loadingChars.value }
-        delete next[charId]
+        for (const id of missing) delete next[id]
         loadingChars.value = next
     }
 }
@@ -264,7 +320,7 @@ function openPicker(kind: PickerKind, slot: TeamSlot) {
         // 以当前已关联的构筑/变体作为起点，用户只改想改的部分
         pickerBuild.value = teamBuild(slot)
         pickerVariant.value = teamBuildVariant(slot)
-        void loadBuildOptions(teamChar(slot))
+        void loadBuildOptions()
     }
 }
 
@@ -394,12 +450,11 @@ function commitBuild() {
     closePicker()
 }
 
-// 队友一经选定就预取其构筑列表，让预览里的构筑标题可以立即显示
+// 队友一经选定就预取其构筑列表，两个槽位缺的列表一次请求取回，让预览里的构筑标题可以立即显示
 watch(
     () => [props.charSettings.team1, props.charSettings.team2] as const,
-    ([team1, team2]) => {
-        void loadBuildOptions(team1)
-        void loadBuildOptions(team2)
+    () => {
+        void loadBuildOptions()
     },
     { immediate: true }
 )

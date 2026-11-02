@@ -1,0 +1,11 @@
+[
+    {
+        "did": "did1",
+        "name": "客厅灯",
+        "model": "philips.light.bulb",
+        "isOnline": true,
+        "spec_type": "urn:miot-spec-v2:device:light:00007802:philips-bulb:1",
+        "home_id": "12345"
+    },
+    { "did": "did2", "name": "", "model": "xiaomi.wifispeaker.l05c", "isOnline": false, "spec_type": "", "home_id": "12345" }
+]

@@ -1812,7 +1812,7 @@ async function handleTransfer(charName: string) {
                             <button type="button" class="btn btn-ghost btn-sm" @click="browse_open = false">关闭</button>
                         </div>
                         <div class="min-h-0 flex-1">
-                            <DOBGraphShow ref="graphShow" :active-graph-id="activeRemoteId" @use-graph="handleUseGraph" />
+                            <DOBGraphShow v-if="browse_open" ref="graphShow" :active-graph-id="activeRemoteId" @use-graph="handleUseGraph" />
                         </div>
                         <div v-if="activeRemoteId" class="mt-2 border-t border-base-content/10 pt-2">
                             <CommentSection :target-id="`graph_${activeRemoteId}`" />
