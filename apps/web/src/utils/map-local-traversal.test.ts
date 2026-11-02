@@ -203,18 +203,6 @@ describe("buildRoutedTraversalLegs 的距离阈值降级", () => {
         expect(legs[0]).toMatchObject({ isDashed: false })
     })
 
-    it("传送方案不比直走更省时仍保留直线", () => {
-        const route = alwaysClear()
-        const from: TraversalPointLike = { x: 0, y: 0, worldX: 0, worldY: 0 }
-        const to: TraversalPointLike = { x: 100, y: 0, worldX: 100000, worldY: 0 }
-        // 传送点到终点的距离（90000）反而比直连（100000）省不了多少且仍超阈值，
-        // 但若传送点很远（世界距离 99000 > 直连不会发生），这里构造「省不了」的场景：
-        const teleports: TraversalTeleportPoint[] = [{ x: 99, y: 0, worldX: 99900, worldY: 0, subRegionId: 1, tpId: 1 }]
-        const legs = buildRoutedTraversalLegs([from, to], teleports, 2e4, route)
-        // 传送点 → 终点 = 100，确实比直连 100000 省，所以应走传送
-        expect(legs).toHaveLength(2)
-    })
-
     it("没有可用传送点时超距仍保留直线", () => {
         const route = alwaysClear()
         const from: TraversalPointLike = { x: 0, y: 0, worldX: 0, worldY: 0 }

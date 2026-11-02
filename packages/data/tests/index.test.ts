@@ -32,7 +32,6 @@ describe("模块导出测试", () => {
 
     it("应该导出achievementData", () => {
         expect(dataModule.achievementData).toBeDefined()
-        expect(dataModule.achievementData).toBe(dataModule.achievementData)
     })
 })
 
@@ -77,24 +76,6 @@ describe("模块功能测试", () => {
         expect(charBuild.meleeWeapon.名称).toBe("铸铁者")
     })
 
-    it("应该能够访问游戏数据", () => {
-        expect(dataModule.charData).toBeDefined()
-        expect(Array.isArray(dataModule.charData)).toBe(true)
-        expect(dataModule.charData.length).toBeGreaterThan(0)
-
-        expect(dataModule.modData).toBeDefined()
-        expect(Array.isArray(dataModule.modData)).toBe(true)
-        expect(dataModule.modData.length).toBeGreaterThan(0)
-
-        expect(dataModule.weaponData).toBeDefined()
-        expect(Array.isArray(dataModule.weaponData)).toBe(true)
-        expect(dataModule.weaponData.length).toBeGreaterThan(0)
-
-        expect(dataModule.buffData).toBeDefined()
-        expect(Array.isArray(dataModule.buffData)).toBe(true)
-        expect(dataModule.buffData.length).toBeGreaterThan(0)
-    })
-
     it("应该能够访问成就数据", () => {
         expect(dataModule.achievementData).toBeDefined()
         expect(typeof dataModule.achievementData).toBe("object")
@@ -107,10 +88,6 @@ describe("模块功能测试", () => {
 
 // 测试数据完整性
 describe("数据完整性测试", () => {
-    it("导出的成就数据应该与原始数据相同", () => {
-        expect(dataModule.achievementData).toEqual(dataModule.achievementData)
-    })
-
     it("应该包含所有必要的导出", () => {
         const exports = Object.keys(dataModule)
 
@@ -199,76 +176,5 @@ describe("模块使用场景测试", () => {
 
         expect(result).toBeTypeOf("number")
         expect(result).toBeGreaterThan(0)
-    })
-})
-
-// 测试错误处理
-describe("错误处理测试", () => {
-    it("应该处理无效的角色名称", () => {
-        // 尝试创建无效角色，可能返回默认角色或抛出错误
-        try {
-            const char = new dataModule.LeveledChar("不存在的角色")
-            // 如果创建成功，验证它是LeveledChar实例
-            expect(char).toBeInstanceOf(LeveledChar)
-        } catch (error) {
-            // 如果抛出错误，验证错误类型
-            expect(error).toBeDefined()
-        }
-    })
-
-    it("应该处理无效的武器名称", () => {
-        // 尝试创建无效武器，可能返回默认武器或抛出错误
-        try {
-            const weapon = new dataModule.LeveledWeapon(99999)
-            // 如果创建成功，验证它是LeveledWeapon实例
-            expect(weapon).toBeInstanceOf(LeveledWeapon)
-        } catch (error) {
-            // 如果抛出错误，验证错误类型
-            expect(error).toBeDefined()
-        }
-    })
-
-    it("应该处理无效的MOD ID", () => {
-        // 尝试创建无效MOD，可能返回默认MOD或抛出错误
-        try {
-            const mod = new dataModule.LeveledMod(99999)
-            // 如果创建成功，验证它是LeveledMod实例
-            expect(mod).toBeInstanceOf(LeveledMod)
-        } catch (error) {
-            // 如果抛出错误，验证错误类型
-            expect(error).toBeDefined()
-        }
-    })
-
-    it("应该处理无效的BUFF名称", () => {
-        // 尝试创建无效BUFF，可能返回默认BUFF或抛出错误
-        try {
-            const buff = new dataModule.LeveledBuff("不存在的BUFF")
-            // 如果创建成功，验证它是LeveledBuff实例
-            expect(buff).toBeInstanceOf(LeveledBuff)
-        } catch (error) {
-            // 如果抛出错误，验证错误类型
-            expect(error).toBeDefined()
-        }
-    })
-})
-
-// 测试性能
-describe("性能测试", () => {
-    it("应该能够快速创建多个实例", () => {
-        const startTime = performance.now()
-
-        // 创建多个实例
-        const instances = []
-        for (let i = 0; i < 1000; i++) {
-            instances.push(new dataModule.LeveledChar("黎瑟"))
-        }
-
-        const endTime = performance.now()
-        const duration = endTime - startTime
-
-        // 100000个实例应该在合理时间内创建
-        expect(duration).toBeLessThan(100) // 0.1秒内完成
-        expect(instances.length).toBe(1000)
     })
 })

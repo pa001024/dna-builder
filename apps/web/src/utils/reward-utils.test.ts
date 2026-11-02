@@ -7,11 +7,6 @@ describe("getRewardDetails", () => {
         expect(result).toBeNull()
     })
 
-    it("应该处理循环引用", () => {
-        const result = getRewardDetails(1)
-        expect(result).toBeDefined()
-    })
-
     it("应该正确处理Independent模式的奖励", () => {
         const result = getRewardDetails(1)
         expect(result).not.toBeNull()
@@ -143,11 +138,6 @@ describe("getRewardDetails", () => {
                 expect(child.pp).toBeLessThanOrEqual(1)
             })
         }
-    })
-
-    it("应该正确处理空子奖励列表", () => {
-        const result = getRewardDetails(4)
-        expect(result).toBeDefined()
     })
 
     it("应该正确处理parentProbability参数", () => {

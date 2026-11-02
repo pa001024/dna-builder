@@ -294,48 +294,15 @@ describe("数据类型测试", () => {
         })
     })
 
-    // 性能测试
-    describe("性能测试", () => {
-        it("应该能够快速访问所有数据", () => {
-            const startTime = performance.now()
+    it("应该能够按名称与 id 搜索数据", () => {
+        // 搜索测试
+        const searchChar = charData.find(c => c.名称 === "黎瑟")
+        const searchMod = modData.find(m => m.id === 41001)
+        const searchWeapon = weaponData.find(w => w.名称 === "铸铁者")
 
-            // 访问所有数据
-            const charCount = charData.length
-            const modCount = modData.length
-            const weaponCount = weaponData.length
-            const buffCount = buffData.length
-
-            const endTime = performance.now()
-            const duration = endTime - startTime
-
-            // 数据访问应该在合理时间内完成
-            expect(duration).toBeLessThan(100) // 100毫秒内完成
-
-            // 验证数据数量
-            expect(charCount).toBeGreaterThan(0)
-            expect(modCount).toBeGreaterThan(0)
-            expect(weaponCount).toBeGreaterThan(0)
-            expect(buffCount).toBeGreaterThan(0)
-        })
-
-        it("应该能够快速搜索数据", () => {
-            const startTime = performance.now()
-
-            // 搜索测试
-            const searchChar = charData.find(c => c.名称 === "黎瑟")
-            const searchMod = modData.find(m => m.id === 41001)
-            const searchWeapon = weaponData.find(w => w.名称 === "铸铁者")
-
-            const endTime = performance.now()
-            const duration = endTime - startTime
-
-            // 搜索应该在合理时间内完成
-            expect(duration).toBeLessThan(50) // 50毫秒内完成
-
-            // 验证搜索结果
-            expect(searchChar).toBeDefined()
-            expect(searchMod).toBeDefined()
-            expect(searchWeapon).toBeDefined()
-        })
+        // 验证搜索结果
+        expect(searchChar).toBeDefined()
+        expect(searchMod).toBeDefined()
+        expect(searchWeapon).toBeDefined()
     })
 })

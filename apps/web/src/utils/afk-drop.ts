@@ -116,12 +116,3 @@ export function stepAfkDrop(particle: AfkDropParticle, dt: number, width: number
     particle.vx *= 0.7
     particle.bounces++
 }
-
-/**
- * 掉落是否全部停稳（停稳后可以停掉动画循环）。
- * @param particles 掉落列表
- * @returns 全部停住时为 true
- */
-export function afkDropsAtRest(particles: AfkDropParticle[]): boolean {
-    return particles.every(particle => particle.resting)
-}

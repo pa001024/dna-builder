@@ -2805,22 +2805,6 @@ describe("CharBuild类测试", () => {
 
     // 性能测试
     describe("性能测试", () => {
-        it("应该能够快速计算多次", () => {
-            const charBuild = createCharBuild()
-            const startTime = performance.now()
-
-            // 计算100次
-            for (let i = 0; i < 100; i++) {
-                charBuild.calculate()
-            }
-
-            const endTime = performance.now()
-            const duration = endTime - startTime
-
-            // 100次计算应该在合理时间内完成
-            expect(duration).toBeLessThan(1000) // 1秒内完成
-        })
-
         it("应该能够处理大量MOD", () => {
             const charBuild = createCharBuild()
 

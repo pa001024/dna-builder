@@ -124,49 +124,6 @@ export function afkSpriteFrame(sheet: AfkSpriteState, elapsedMs: number, once = 
     }
 }
 
-/**
- * 角色在画布上的摆放：水平居中，底部贴边（官方 anchorY = 1）。
- * @param canvasWidth 画布逻辑宽度
- * @param canvasHeight 画布逻辑高度
- * @param size 角色显示边长
- * @returns 左上角坐标
- */
-export function afkSpritePlacement(canvasWidth: number, canvasHeight: number, size: number) {
-    return { x: (canvasWidth - size) / 2, y: canvasHeight - size }
-}
-
-/**
- * 背景层的平铺位置：按地面图高度等比缩放到画布高度后横向重复。
- * @param imageWidth 原图宽度
- * @param imageHeight 原图高度
- * @param canvasWidth 画布逻辑宽度
- * @param canvasHeight 画布逻辑高度
- * @param offset 累计滚动距离
- * @param speed 该层速度系数
- * @returns 每块贴图的 left 坐标
- */
-export function afkBackgroundTiles(
-    imageWidth: number,
-    imageHeight: number,
-    canvasWidth: number,
-    canvasHeight: number,
-    offset: number,
-    speed: number
-) {
-    if (imageHeight <= 0 || imageWidth <= 0) {
-        return { tileWidth: 0, tiles: [] as { left: number; mirrored: boolean }[] }
-    }
-    const tileWidth = imageWidth * (canvasHeight / imageHeight)
-    const shift = (offset * speed) % tileWidth
-    // 官方用的是 ImageBrush 的平铺（TileMode），不做镜像：
-    // 镜像会让每块贴图左右翻转，滚动跨块时整幅画面「跳」一下
-    const tiles: { left: number }[] = []
-    for (let x = shift - tileWidth; x < canvasWidth; x += tileWidth) {
-        tiles.push({ left: x })
-    }
-    return { tileWidth, tiles }
-}
-
 /** 一张背景层贴图的原图尺寸。 */
 export type AfkBackgroundSize = { width: number; height: number }
 

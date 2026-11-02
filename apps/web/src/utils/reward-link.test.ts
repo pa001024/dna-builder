@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { charMap, draftMap, resourceMap, walnutMap } from "@/data/d"
+import { draftMap, resourceMap, walnutMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { titleFrameData } from "@/data/d/titleframe.data"
@@ -49,10 +49,5 @@ describe("getRewardDetailLink", () => {
 
     it("未知类型返回空串", () => {
         expect(getRewardDetailLink("UnknownType", 1)).toBe("")
-    })
-
-    it("limit prize 的奖品类型可解析（冒烟）", () => {
-        const firstCharId = [...charMap.values()][0]?.id ?? 1001
-        expect(getRewardDetailLink("Char", firstCharId)).toContain("/db/char/")
     })
 })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { AFK_DROP_GRAVITY, AFK_DROP_MAX_BOUNCES, afkDropsAtRest, createAfkDrop, stepAfkDrop } from "./afk-drop"
+import { AFK_DROP_GRAVITY, AFK_DROP_MAX_BOUNCES, createAfkDrop, stepAfkDrop } from "./afk-drop"
 
 describe("掉落贴图物理", () => {
     const spawn = () => createAfkDrop({ key: 1, icon: "a.webp", name: "坚守", x: 100, y: 40, size: 20, groundY: 80, random: () => 0.5 })
@@ -43,13 +43,5 @@ describe("掉落贴图物理", () => {
         stepAfkDrop(drop, 1 / 60, 366)
         expect(drop.x).toBe(0)
         expect(drop.vx).toBeGreaterThan(0)
-    })
-
-    it("全部停住时返回 true", () => {
-        const drop = spawn()
-        drop.resting = true
-        expect(afkDropsAtRest([drop])).toBe(true)
-        drop.resting = false
-        expect(afkDropsAtRest([drop])).toBe(false)
     })
 })

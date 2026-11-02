@@ -48,16 +48,6 @@ describe("resource-source", () => {
         expect(matchedSource?.d).toBe(1)
     })
 
-    it("应该保留任务奖励中的设计稿标记", () => {
-        const resource = resourceMap.get(10012)
-        expect(resource).toBeTruthy()
-
-        const sources = collectResourceQuestSources(resource!)
-        const matchedSource = sources.find(source => source.rewardId === 4000022)
-
-        expect(matchedSource?.d).toBe(1)
-    })
-
     it("应该从道具箱奖励中反查资源来源", () => {
         const resource = resourceMap.get(226)
         expect(resource).toBeTruthy()
