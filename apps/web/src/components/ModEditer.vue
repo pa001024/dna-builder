@@ -473,15 +473,15 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 <div class="modal-backdrop" @click="mod_model_show = false" />
             </dialog>
         </Teleport>
-        <!-- 顶部操作区：外层允许换行，移动端放不下时整组下移，避免按钮被挤出屏幕 -->
-        <div class="flex flex-wrap items-center gap-2 mb-3">
+        <!-- 顶部操作区：窄容器用图标替代文字，保证变体与操作按钮始终同一行 -->
+        <div class="flex flex-wrap items-center gap-2 mb-3 @lg:flex-nowrap">
             <!-- MOD变体切换（左上角）：同一构筑可保存多份MOD配置（A/B/C），加号按顺序追加下一份；右侧中枢（光环）随变体一起切换 -->
-            <div v-if="variantCount > 0" class="flex flex-wrap items-center gap-1.5" :title="$t('char-build.mod_variant')">
+            <div v-if="variantCount > 0" class="flex shrink-0 flex-wrap items-center gap-1.5" :title="$t('char-build.mod_variant')">
                 <button
                     v-for="(letter, index) in MOD_VARIANT_LETTERS.slice(0, variantCount)"
                     :key="letter"
                     type="button"
-                    class="btn btn-sm h-7 min-h-0 w-7 p-0"
+                    class="btn btn-sm btn-square"
                     :class="index === variantIndex ? 'btn-secondary' : 'btn-ghost border border-base-content/15'"
                     :title="$t('char-build.mod_variant_switch', { letter })"
                     @click="emit('variantSelect', index)"
@@ -492,7 +492,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 <button
                     v-if="variantCount < MOD_VARIANT_LETTERS.length"
                     type="button"
-                    class="btn btn-ghost btn-sm h-7 min-h-0 w-7 border border-dashed border-base-content/30 p-0 text-base-content/60"
+                    class="btn btn-ghost btn-sm btn-square border border-dashed border-base-content/30 text-base-content/60"
                     :title="$t('char-build.mod_variant_add')"
                     @click="emit('variantAdd')"
                 >
@@ -502,22 +502,22 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 <button
                     v-if="variantIndex > 0 && variantIndex === variantCount - 1"
                     type="button"
-                    class="btn btn-ghost btn-sm h-7 min-h-0 w-7 border border-base-content/15 p-0 text-base-content/45"
+                    class="btn btn-ghost btn-sm btn-square border border-base-content/15 text-base-content/45"
                     :title="$t('char-build.mod_variant_remove')"
                     @click="emit('variantRemove')"
                 >
                     <Icon icon="ri:close-line" class="size-4" />
                 </button>
             </div>
-            <div class="ml-auto flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+            <div class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 @lg:flex-nowrap">
                 <!-- 养成开销估算：点击展开/收起副本开销估算面板（默认隐藏） -->
                 <div
-                    class="btn btn-sm border"
+                    class="btn btn-sm btn-square border"
                     :class="showCostCalc ? 'btn-secondary' : 'btn-ghost border-base-content/15'"
                     title="估算当前魔之楔养成所需的副本次数与时间，可一键跳转完整计算器"
                     @click="showCostCalc = !showCostCalc"
                 >
-                    开销估算
+                    <Icon icon="ri:calculator-line" class="size-4" />
                 </div>
                 <ShowProps v-if="aMod" :mod="aMod" :eff="charBuild?.checkModEffective(aMod, true)">
                     <div class="flex items-center gap-2">
@@ -542,19 +542,29 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                         </span>
                     </div>
                 </ShowProps>
-                <!-- 导入/导出代码的三个按钮：作为整体换行（移动端整组独占一行并等宽铺满，桌面端保持同行右对齐） -->
-                <div class="flex w-full items-center gap-2 sm:w-auto">
-                    <div v-if="type !== '同律'" class="btn btn-secondary btn-sm flex-1 min-w-0 sm:flex-none" @click="$emit('sync')">
-                        {{ $t("char-build.sync_game") }}
-                    </div>
-                    <div class="btn btn-ghost btn-sm border border-base-content/15 flex-1 min-w-0 sm:flex-none" @click="handleImportCode()">
-                        {{ $t("char-build.import_code") }}
+                <!-- 导入/导出代码的三个按钮：与 A/B/C 一致使用 btn-square，文字走 title 提示 -->
+                <div class="flex items-center gap-2">
+                    <div
+                        v-if="type !== '同律'"
+                        class="btn btn-secondary btn-sm btn-square"
+                        :title="$t('char-build.sync_game')"
+                        @click="$emit('sync')"
+                    >
+                        <Icon icon="ri:download-cloud-2-line" class="size-4" />
                     </div>
                     <div
-                        class="btn btn-ghost btn-sm border border-base-content/15 flex-1 min-w-0 sm:flex-none"
+                        class="btn btn-ghost btn-sm btn-square border border-base-content/15"
+                        :title="$t('char-build.import_code')"
+                        @click="handleImportCode()"
+                    >
+                        <Icon icon="ri:import-line" class="size-4" />
+                    </div>
+                    <div
+                        class="btn btn-ghost btn-sm btn-square border border-base-content/15"
+                        :title="$t('char-build.export_code')"
                         @click="copyText(charBuild.getCode(type))"
                     >
-                        {{ $t("char-build.export_code") }}
+                        <Icon icon="ri:file-copy-line" class="size-4" />
                     </div>
                 </div>
             </div>
