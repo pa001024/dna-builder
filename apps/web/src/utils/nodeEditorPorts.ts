@@ -20,7 +20,6 @@ export enum PortType {
     DOT = "dot",
     ATTRS = "attrs",
     WEAPON_ATTRS = "weapon-attrs",
-    DAMAGE = "damage",
 }
 
 /** 端口类型元信息 */
@@ -47,7 +46,6 @@ export const PORT_META: Record<PortType, PortMeta> = {
     [PortType.DOT]: { label: "DOT 频率", color: "#f97316" },
     [PortType.ATTRS]: { label: "角色属性", color: "#10b981" },
     [PortType.WEAPON_ATTRS]: { label: "武器属性", color: "#d97706" },
-    [PortType.DAMAGE]: { label: "伤害", color: "#e11d48" },
 }
 
 /** 单个端口定义 */
@@ -200,7 +198,6 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.WEAPON_ATTR_CALC]: { inputs: [BUILD_INPUT], outputs: [output("attrs", PortType.WEAPON_ATTRS, "武器属性")] },
     [NodeType.ATTR_OUTPUT]: { inputs: [input("attrs", PortType.ATTRS, "角色属性")], outputs: [] },
     [NodeType.WEAPON_OUTPUT]: { inputs: [input("attrs", PortType.WEAPON_ATTRS, "武器属性")], outputs: [] },
-    [NodeType.DAMAGE_OUTPUT]: { inputs: [input("damage", PortType.DAMAGE, "伤害结果")], outputs: [] },
     // 目标函数除标量结果外还输出带标题的向量，供图表节点绘制
     [NodeType.AST_EXPRESSION_CALC]: {
         inputs: [BUILD_INPUT],

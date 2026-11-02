@@ -739,7 +739,6 @@ const nodeTypes = {
     "hub-calc": markRaw(HubNode),
     "attr-output": markRaw(OutputNode),
     "weapon-output": markRaw(OutputNode),
-    "damage-output": markRaw(OutputNode),
     chart: markRaw(ChartNode),
     group: markRaw(GroupNode),
     label: markRaw(LabelNode),

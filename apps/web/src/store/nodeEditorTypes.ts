@@ -36,7 +36,6 @@ export enum NodeType {
     // 输出节点
     ATTR_OUTPUT = "attr-output", // 显示 CharAttr
     WEAPON_OUTPUT = "weapon-output", // 显示 WeaponAttr
-    DAMAGE_OUTPUT = "damage-output", // 显示 DamageResult
     CHART = "chart", // 向量图表（折线 / 柱状图）
 
     // AST节点

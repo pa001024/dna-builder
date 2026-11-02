@@ -64,8 +64,8 @@ ${GRAPH_API_DTS}
   const char = await graph.addNode("char-input", { x: 100, y: 100 })
   const core = await graph.addNode("core-calc", { x: 400, y: 100 })
   await graph.connect(char.id, core.id)
-  const dmg = await graph.addNode("damage-output", { x: 700, y: 100 })
-  await graph.connect(core.id, dmg.id)
+  const target = await graph.addNode("ast-expression-calc", { x: 700, y: 100 })
+  await graph.connect(core.id, target.id)
   return { state: await graph.state(), eval: await graph.evaluate() }
   \`\`\`
 - 改某个节点的面板数据：

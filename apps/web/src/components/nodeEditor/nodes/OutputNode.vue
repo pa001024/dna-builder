@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { format1, format100, formatDamage } from "@/util"
+import { format1, format100 } from "@/util"
 import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
@@ -19,18 +19,7 @@ const result = computed<Record<string, any> | null>(() => {
 <template>
     <BaseNode v-bind="{ id, data, type, selected }">
         <div class="w-65 max-w-full text-[11px] tabular-nums">
-            <template v-if="type === 'damage-output'">
-                <div class="mb-0.5 text-[10px] text-base-content/45">{{ $t("伤害") }}</div>
-                <div v-if="result" class="space-y-0.5">
-                    <div>{{ $t("node-editor.skillDmg.expectedDamage") }}: {{ formatDamage(result.expectedDamage ?? 0) }}</div>
-                    <div>{{ $t("node-editor.skillDmg.noHpDamage") }}: {{ formatDamage(result.noHpDamage ?? 0) }}</div>
-                    <div>{{ $t("物理") }}: {{ formatDamage(result.physicalDamage ?? 0) }}</div>
-                    <div>{{ $t("元素") }}: {{ formatDamage(result.elementDamage ?? 0) }}</div>
-                </div>
-                <div v-else class="text-[10px] text-base-content/40">连接伤害节点后显示结果</div>
-            </template>
-
-            <template v-else-if="type === 'weapon-output'">
+            <template v-if="type === 'weapon-output'">
                 <div class="mb-0.5 text-[10px] text-base-content/45">{{ $t("node-editor.weaponAttr.result") }}</div>
                 <div v-if="result" class="grid grid-cols-2 gap-x-3 gap-y-0.5">
                     <div>{{ $t("攻击") }}: {{ format1(result.攻击 ?? 0, 2) }}</div>

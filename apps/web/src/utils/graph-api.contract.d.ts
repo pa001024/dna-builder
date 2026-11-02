@@ -35,7 +35,7 @@ export interface ConnectResult extends ApiResult {
 /** 图上的一个节点（data 为节点面板数据的纯数据快照） */
 export interface GraphNodeView {
     id: string
-    /** 节点类型，如 char-input / core-calc / damage-output（用 types() 查全表） */
+    /** 节点类型，如 char-input / core-calc / ast-expression-calc（用 types() 查全表） */
     type: string
     label: string
     x: number

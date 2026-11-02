@@ -84,7 +84,6 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.BUFF_MERGE]: "BUFF合并",
         [NodeType.ATTR_OUTPUT]: "属性输出",
         [NodeType.WEAPON_OUTPUT]: "武器输出",
-        [NodeType.DAMAGE_OUTPUT]: "伤害输出",
         [NodeType.CHART]: "图表",
         [NodeType.AST_EXPRESSION_CALC]: "目标函数",
         [NodeType.CUSTOM_EXPRESSION]: "自定义变量求值",
@@ -255,13 +254,6 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.OUTPUT,
         icon: "ri:bar-chart-line",
         description: "显示武器属性",
-    },
-    {
-        type: NodeType.DAMAGE_OUTPUT,
-        label: "伤害输出",
-        category: NodeCategory.OUTPUT,
-        icon: "ri:fire-line",
-        description: "显示伤害计算结果",
     },
     {
         type: NodeType.CHART,

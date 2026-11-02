@@ -119,7 +119,6 @@ const getIcon = (type: string): IconTypes => {
         "buff-merge": "ri:git-merge-line",
         "attr-output": "ri:bar-chart-line",
         "weapon-output": "ri:bar-chart-line",
-        "damage-output": "ri:more-line",
         chart: "ri:line-chart-line",
         "ast-expression-calc": "ri:function-line",
         "custom-expression": "ri:function-line",
