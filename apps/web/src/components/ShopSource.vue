@@ -131,7 +131,12 @@ function formatCutoffTime(timestamp: number) {
                                         </div>
                                     </div>
                                 </template>
-                                <span class="text-primary line-through">{{ source.cutoffInfo.originalPrice }}</span>
+                                <span
+                                    >{{ source.cutoffInfo.price }}
+                                    <span class="text-primary line-through">{{
+                                        source.cutoffInfo.originalPrice
+                                    }}</span></span
+                                >
                             </FullTooltip>
                         </span>
                         <span
