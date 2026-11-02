@@ -13,7 +13,7 @@ function partColor(index: number): string {
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel flex w-[1000px] gap-6 p-6">
+        <div class="help-panel flex w-250 gap-6 p-6">
             <div class="flex w-64 flex-none flex-col items-center border border-white/10 bg-white/3 py-5">
                 <div class="help-kicker">{{ tr(L("染色预览", "染色預覽", "DYE PREVIEW", "染色プレビュー", "염색 미리보기", "APERÇU")) }}</div>
                 <div class="mt-1 text-lg font-semibold">{{ tr(shot.character) }}</div>
@@ -22,11 +22,11 @@ function partColor(index: number): string {
                     <div class="absolute left-1/2 top-2 h-20 w-24 -translate-x-1/2 rounded-t-[44px]" :style="{ background: partColor(0) }" />
                     <div class="absolute left-1/2 top-9 h-16 w-14 -translate-x-1/2 rounded-full border border-black/20" :style="{ background: partColor(1) }" />
                     <div class="absolute left-1/2 top-24 h-24 w-24 -translate-x-1/2 rounded-t-[22px]" :style="{ background: partColor(2) }" />
-                    <div class="absolute left-[22%] top-28 h-20 w-5 rotate-12 rounded-b-[12px]" :style="{ background: partColor(3) }" />
-                    <div class="absolute right-[22%] top-28 h-20 w-5 -rotate-12 rounded-b-[12px]" :style="{ background: partColor(3) }" />
+                    <div class="absolute left-[22%] top-28 h-20 w-5 rotate-12 rounded-b-xl" :style="{ background: partColor(3) }" />
+                    <div class="absolute right-[22%] top-28 h-20 w-5 -rotate-12 rounded-b-xl" :style="{ background: partColor(3) }" />
                     <div class="absolute left-1/2 top-44 h-12 w-20 -translate-x-1/2" :style="{ background: partColor(4) }" />
-                    <div class="absolute left-[26%] bottom-1 h-9 w-7 rounded-b-[8px]" :style="{ background: partColor(5) }" />
-                    <div class="absolute right-[26%] bottom-1 h-9 w-7 rounded-b-[8px]" :style="{ background: partColor(5) }" />
+                    <div class="absolute left-[26%] bottom-1 h-9 w-7 rounded-b-lg" :style="{ background: partColor(5) }" />
+                    <div class="absolute right-[26%] bottom-1 h-9 w-7 rounded-b-lg" :style="{ background: partColor(5) }" />
                     <div class="absolute left-1/2 top-20 h-3 w-28 -translate-x-1/2 border border-black/20" :style="{ background: partColor(6) }" />
                 </div>
 

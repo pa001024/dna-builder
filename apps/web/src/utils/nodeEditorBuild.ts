@@ -1074,6 +1074,44 @@ export function normalizeLabeledVector(value: unknown, fallbackTitle = "向量")
     }
 }
 
+/** 向量输入端口的一路上游贡献 */
+export interface VectorInputContribution {
+    /** 来源节点名称：数值输入按它成为向量中的一项 */
+    label: string
+    value: unknown
+}
+
+/**
+ * 合成多路向量输入：按连线顺序拼接，数值按来源节点名成项，向量按分量展开并沿用自身标签。
+ * @param contributions 各路上游贡献
+ * @param fallbackTitle 只有多路输入时使用的标题
+ * @returns 合成后的带标题向量；没有有效数值时返回 undefined
+ */
+export function composeVectorInput(contributions: VectorInputContribution[], fallbackTitle = "向量"): LabeledVector | undefined {
+    const vectors: LabeledVector[] = []
+    contributions.forEach(({ label, value }) => {
+        const normalized = normalizeLabeledVector(value, label)
+        if (normalized) vectors.push(normalized)
+    })
+    if (vectors.length === 0) return undefined
+    const labels: string[] = []
+    const values: number[] = []
+    let valueLabel: string | undefined
+    vectors.forEach(vector => {
+        vector.values.forEach((value, index) => {
+            labels.push(vector.labels[index] ?? vector.title)
+            values.push(value)
+        })
+        valueLabel ??= vector.valueLabel
+    })
+    return {
+        title: vectors.length === 1 ? vectors[0].title : fallbackTitle,
+        labels,
+        values,
+        ...(valueLabel ? { valueLabel } : {}),
+    }
+}
+
 /**
  * 读取数值输出端口的单个值：支持数值输入节点、数学节点与逐项属性输出。
  * @param node 来源节点

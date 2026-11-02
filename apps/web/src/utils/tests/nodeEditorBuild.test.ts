@@ -8,6 +8,7 @@ import {
     collectCoreInputNodes,
     collectNumericParamVectors,
     collectVariableVectors,
+    composeVectorInput,
     computeVectorStat,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
@@ -679,6 +680,31 @@ describe("nodeEditorBuild", () => {
         expect(normalizeLabeledVector({ values: [Number.NaN] })).toBeUndefined()
         expect(normalizeLabeledVector({ values: [] })).toBeUndefined()
         expect(normalizeLabeledVector(null)).toBeUndefined()
+    })
+
+    it("多路向量输入按连线顺序合成，数值以来源节点名成项", () => {
+        expect(
+            composeVectorInput([
+                { label: "乘法计算", value: { value: 58596 } },
+                { label: "加法计算", value: { value: 628 } },
+            ])
+        ).toEqual({ title: "向量", labels: ["乘法计算", "加法计算"], values: [58596, 628] })
+        expect(
+            composeVectorInput(
+                [
+                    { label: "向量输入", value: { values: [1, 2], labels: ["一", "二"] } },
+                    { label: "数值输入", value: 3 },
+                ],
+                "向量分解"
+            )
+        ).toEqual({ title: "向量分解", labels: ["一", "二", "数值输入"], values: [1, 2, 3] })
+        // 单路输入保留来源向量的标题
+        expect(composeVectorInput([{ label: "向量输入", value: { title: "综合DPS", values: [1, 2] } }], "图表")).toEqual({
+            title: "综合DPS",
+            labels: ["1", "2"],
+            values: [1, 2],
+        })
+        expect(composeVectorInput([{ label: "空", value: null }])).toBeUndefined()
     })
 
     it("向量分解把各分量按端口顺序展开为数值", () => {

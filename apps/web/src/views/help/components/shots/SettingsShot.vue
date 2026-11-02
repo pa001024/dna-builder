@@ -9,7 +9,7 @@ const tr = useHelpText()
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel flex w-[980px] overflow-hidden" style="min-height: 470px">
+        <div class="help-panel flex w-245 overflow-hidden" style="min-height: 470px">
             <div class="w-52 flex-none border-r border-white/10 bg-black/20 p-3">
                 <div class="help-build-panel__title px-2 pb-2">{{ tr(shot.title) }}</div>
                 <div

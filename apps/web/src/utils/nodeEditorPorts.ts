@@ -68,6 +68,8 @@ const output = (id: string, type: PortType, label: string): PortDef => ({ id, ty
 
 const BUILD_INPUT = input("build", PortType.BUILD, "构筑")
 const NUMBER_OUTPUT = output("value", PortType.NUMBER, "数值")
+/** 向量消费端口的输入：允许多路数值 / 向量接入，按连线顺序合成一个向量 */
+const VECTOR_INPUT = input("vector", PortType.VECTOR, "向量", true)
 
 /** 输入节点上可被连线驱动的数值参数 */
 export interface NumericParamPort {
@@ -198,13 +200,13 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.WEAPON_ATTR_CALC]: { inputs: [BUILD_INPUT], outputs: [output("attrs", PortType.WEAPON_ATTRS, "武器属性")] },
     [NodeType.ATTR_OUTPUT]: { inputs: [input("attrs", PortType.ATTRS, "角色属性")], outputs: [] },
     [NodeType.WEAPON_OUTPUT]: { inputs: [input("attrs", PortType.WEAPON_ATTRS, "武器属性")], outputs: [] },
-    // 目标函数除标量结果外还输出带标题的向量，供图表节点绘制
+    // 目标函数的输出端口随构筑类型切换：标量构筑输出数值，向量构筑输出向量
     [NodeType.AST_EXPRESSION_CALC]: {
         inputs: [BUILD_INPUT],
-        outputs: [NUMBER_OUTPUT, output("vector", PortType.VECTOR, "向量")],
+        outputs: [NUMBER_OUTPUT],
     },
     [NodeType.CUSTOM_EXPRESSION]: { inputs: [BUILD_INPUT], outputs: [NUMBER_OUTPUT] },
-    [NodeType.CHART]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [] },
+    [NodeType.CHART]: { inputs: [VECTOR_INPUT], outputs: [] },
     [NodeType.HUB_CALC]: { inputs: [BUILD_INPUT], outputs: [output("build", PortType.BUILD, "构筑")] },
     [NodeType.BUFF_MERGE]: {
         inputs: [input(BUFF_MERGE_INPUT.left, PortType.BUFF, "BUFF A"), input(BUFF_MERGE_INPUT.right, PortType.BUFF, "BUFF B")],
@@ -217,8 +219,8 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     [NodeType.NUMBER_INPUT]: { inputs: [], outputs: [NUMBER_OUTPUT] },
     [NodeType.VECTOR_INPUT]: { inputs: [], outputs: [output("vector", PortType.VECTOR, "向量")] },
     // 输出端口数量由上游向量长度决定，在 getNodePorts 中按 vectorLabels 生成
-    [NodeType.VECTOR_DECOMPOSE]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [] },
-    [NodeType.VECTOR_CALC]: { inputs: [input("vector", PortType.VECTOR, "向量")], outputs: [NUMBER_OUTPUT] },
+    [NodeType.VECTOR_DECOMPOSE]: { inputs: [VECTOR_INPUT], outputs: [] },
+    [NodeType.VECTOR_CALC]: { inputs: [VECTOR_INPUT], outputs: [NUMBER_OUTPUT] },
     // 构筑来源：JSON 文本 / 在线构筑
     [NodeType.JSON_BUILD]: {
         inputs: [input("char", PortType.CHAR, "角色"), input("text", PortType.STRING, "构筑 JSON")],
@@ -329,6 +331,13 @@ function attributeOutputPorts(keys: readonly string[], vector: boolean): PortDef
  * @returns 端口集合
  */
 export function getNodePorts(type: string, data: Record<string, any> = {}): NodePortSchema {
+    if (type === NodeType.AST_EXPRESSION_CALC) {
+        // 向量构筑的目标函数只暴露向量输出，标量构筑只暴露数值输出
+        return {
+            inputs: [BUILD_INPUT],
+            outputs: [data.astOutputVector === true ? output("vector", PortType.VECTOR, "向量") : NUMBER_OUTPUT],
+        }
+    }
     if (type === NodeType.ATTR_CALC || type === NodeType.WEAPON_ATTR_CALC) {
         const base = NODE_PORTS[type]!
         const keys = type === NodeType.ATTR_CALC ? CHAR_ATTR_OUTPUT_KEYS : WEAPON_ATTR_OUTPUT_KEYS
@@ -349,7 +358,7 @@ export function getNodePorts(type: string, data: Record<string, any> = {}): Node
             ? data.vectorLabels.filter((label: unknown): label is string => typeof label === "string")
             : []
         return {
-            inputs: [input("vector", PortType.VECTOR, "向量")],
+            inputs: [VECTOR_INPUT],
             outputs: labels.map((label, index) => output(vectorDecomposePortId(index), PortType.NUMBER, label || `数值${index + 1}`)),
         }
     }

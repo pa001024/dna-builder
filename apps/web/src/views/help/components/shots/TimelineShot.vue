@@ -115,12 +115,12 @@ const playhead = computed(() => `${clamp01(progressAt(props.time, 0, props.durat
                         >
                             {{ tr(shot.dragLabel ?? L("技能", "技能", "Skill", "スキル", "스킬", "Compétence")) }}
                         </div>
-                        <div class="absolute left-[26%] top-[12px] h-[22px] w-[12%] border border-dashed border-white/25" />
+                        <div class="absolute left-[26%] top-3 h-5.5 w-[12%] border border-dashed border-white/25" />
                     </div>
 
                     <div
                         v-if="shot.phase === 'resize'"
-                        class="pointer-events-none absolute h-[22px] border border-white/70"
+                        class="pointer-events-none absolute h-5.5 border border-white/70"
                         :style="resizeBlockStyle"
                     >
                         <span class="absolute -right-1 top-1/2 h-4 w-2 -translate-y-1/2 bg-white" />

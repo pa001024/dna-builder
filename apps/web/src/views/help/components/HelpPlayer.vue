@@ -130,7 +130,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="h-full overflow-y-auto">
-        <div class="mx-auto w-full max-w-[1560px] px-3 py-4 sm:px-5 lg:px-8">
+        <div class="mx-auto w-full max-w-390 px-3 py-4 sm:px-5 lg:px-8">
             <div class="mb-3 flex items-center gap-3">
                 <button type="button" class="btn btn-ghost btn-sm shrink-0" @click="close">
                     <Icon icon="ri:arrow-left-line" class="size-4" />

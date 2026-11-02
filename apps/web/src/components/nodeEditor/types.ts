@@ -225,7 +225,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "向量计算",
         category: NodeCategory.CALCULATION,
         icon: "ri:bar-chart-line",
-        description: "对一维向量求和、平均、方差等并输出数值",
+        description: "对一维向量（或接入的多个数值）求和、平均、方差等并输出数值",
     },
     {
         type: NodeType.HUB_CALC,
@@ -260,7 +260,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "图表",
         category: NodeCategory.OUTPUT,
         icon: "ri:line-chart-line",
-        description: "把向量绘制为折线图或柱状图",
+        description: "把向量（或接入的多个数值）绘制为折线图或柱状图",
     },
     // 特殊节点
     {
@@ -318,7 +318,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "向量分解",
         category: NodeCategory.BASIC,
         icon: "ri:split-cells-horizontal",
-        description: "把向量的每个分量拆成独立的数值输出",
+        description: "把向量（或接入的多个数值）拆成独立的数值输出",
     },
     // 构筑来源
     {

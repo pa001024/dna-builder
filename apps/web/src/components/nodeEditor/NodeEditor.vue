@@ -19,6 +19,7 @@ import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
+import { resetNodeEditorPerf } from "@/utils/nodeEditorPerf"
 import { getNodePorts, isPortTypeCompatible, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
 import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
@@ -542,11 +543,6 @@ function redoFromMenu() {
     contextMenuVisible.value = false
 }
 
-function reloadPage() {
-    location.reload()
-}
-
-// 批量删除选中的节点和边
 function deleteSelectedItems() {
     // 删除选中的节点
     for (const node of getSelectedNodes.value) {
@@ -1263,6 +1259,8 @@ async function confirmDeleteGraph() {
 onMounted(async () => {
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("click", handleClickOutside)
+    // 每次挂载（含右键刷新重挂）都从零开始计数
+    resetNodeEditorPerf()
     // 加载所有图
     await store.loadAllGraphs()
     // 分享链接进来的优先加载分享图，否则恢复最后编辑的本地图
@@ -1307,6 +1305,8 @@ onUnmounted(() => {
     }
     // 落盘排队的自动保存
     store.flushAutoSave()
+    // 杀掉在途求值：重挂后图数据会整体替换，旧 debounce 回调不再有意义
+    store.cancelPendingEvaluations()
 })
 
 /** 当前载入的分享图 id（路由 /flow/:graphId 或浏览弹窗载入后设置，用于徽标与评论区） */
@@ -1395,6 +1395,16 @@ function handleNewGraph() {
     store.currentGraphId = null
     store.currentGraphName = "未命名图"
     selectedGraphId.value = ""
+}
+
+const emit = defineEmits<{
+    (e: "request-refresh"): void
+}>()
+
+/** 右键刷新：通知外层卸载重挂本组件，走完整挂载流程（加载图 + 正在加载遮罩），不碰整页 */
+function requestRefresh() {
+    contextMenuVisible.value = false
+    emit("request-refresh")
 }
 
 const transferDialogShow = ref(false)
@@ -2030,7 +2040,8 @@ async function handleTransfer(charName: string) {
                 </div>
                 <div
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="reloadPage"
+                    title="重载节点图，不刷新整页"
+                    @click="requestRefresh"
                 >
                     <Icon class="size-3.5" icon="ri:refresh-line" />
                     刷新

@@ -21,7 +21,7 @@ function copied(): boolean {
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel w-[840px] overflow-hidden">
+        <div class="help-panel w-210 overflow-hidden">
             <div class="flex items-center justify-between border-b border-white/10 px-5 py-3">
                 <div class="flex items-center gap-2">
                     <Icon icon="ri:code-s-slash-line" class="size-4 help-accent" />

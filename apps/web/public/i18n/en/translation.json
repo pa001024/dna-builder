@@ -2759,8 +2759,8 @@
         "title": "Fishing"
     },
     "flow": {
-        "desc": "Damage Calculator Node Version",
-        "title": "Node Editor"
+        "desc": "Turn builds into a visual data flow",
+        "title": "Build Node Graph"
     },
     "flow-block": {
         "clone": "Clone"

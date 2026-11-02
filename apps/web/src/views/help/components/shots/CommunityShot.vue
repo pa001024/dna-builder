@@ -11,7 +11,7 @@ const calendar = Array.from({ length: 28 }, (_, index) => index < 18 || [20, 21,
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel w-[900px] overflow-hidden">
+        <div class="help-panel w-225 overflow-hidden">
             <div class="flex items-center justify-between border-b border-white/10 px-5 py-3">
                 <div class="flex items-center gap-3">
                     <span class="flex size-8 items-center justify-center border border-(--accent)/40 bg-(--accent)/10">
@@ -62,7 +62,7 @@ const calendar = Array.from({ length: 28 }, (_, index) => index < 18 || [20, 21,
 
                 <template v-else-if="shot.mode === 'chat'">
                     <div class="grid grid-cols-[1fr_190px] gap-4">
-                        <div class="flex h-[360px] flex-col border border-white/10 bg-white/3">
+                        <div class="flex h-90 flex-col border border-white/10 bg-white/3">
                             <div class="flex-1 space-y-3 overflow-hidden p-4">
                                 <div v-for="(message, index) in shot.messages ?? []" :key="index" class="flex gap-2.5" :class="{ 'flex-row-reverse': message.from === 'me' }" :style="enterStyle(time, 0.3 + index * 0.18, 0.45, 10)">
                                     <span class="help-avatar size-8! text-[10px]">{{ (tr(message.author ?? L("我", "我", "ME", "自分", "나", "MOI"))).slice(0, 1) }}</span>

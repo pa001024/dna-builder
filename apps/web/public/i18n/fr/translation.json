@@ -2775,8 +2775,8 @@
         "title": "Pêche"
     },
     "flow": {
-        "desc": "Version nœud du calculateur de dégâts",
-        "title": "Éditeur de nœuds"
+        "desc": "Transformez un build en flux de données visuel",
+        "title": "Graphe de build"
     },
     "flow-block": {
         "clone": "Cloner"

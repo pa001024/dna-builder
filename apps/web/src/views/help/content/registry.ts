@@ -59,12 +59,12 @@ export const HELP_CATEGORIES: TutorialCategory[] = [
         id: "data",
         title: L("资料与工具", "資料與工具", "Data & tools", "データとツール", "데이터와 도구", "Données et outils"),
         desc: L(
-            "资料库、地图、节点编辑器与染色",
-            "資料庫、地圖、節點編輯器與染色",
-            "Database, maps, node editor, and dyeing",
-            "データベース・地図・ノード編集・染色",
-            "데이터베이스, 지도, 노드 편집기, 염색",
-            "Base de données, cartes, nœuds et teinture"
+            "资料库、地图、构筑节点图与染色",
+            "資料庫、地圖、構築節點圖與染色",
+            "Database, maps, build node graph, and dyeing",
+            "データベース・地図・構築ノードグラフ・染色",
+            "데이터베이스, 지도, 빌드 노드 그래프, 염색",
+            "Base de données, cartes, graphe de build et teinture"
         ),
         icon: "ri:database-2-line",
         accent: "#00c6ff",

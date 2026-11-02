@@ -105,16 +105,18 @@ describe("nodeEditorPorts", () => {
         expect(canConnectPorts(textOutput, numberInput)).toBe(false)
     })
 
-    it("目标函数输出数值与带标题向量，图表节点接收向量", () => {
-        const ast = getNodePorts(NodeType.AST_EXPRESSION_CALC)
-        expect(ast.outputs).toEqual([
-            { id: "value", type: PortType.NUMBER, label: "数值" },
-            { id: "vector", type: PortType.VECTOR, label: "向量" },
-        ])
+    it("目标函数按构筑类型动态输出数值或向量，图表节点接收向量", () => {
+        expect(getNodePorts(NodeType.AST_EXPRESSION_CALC).outputs).toEqual([{ id: "value", type: PortType.NUMBER, label: "数值" }])
+        const vectorAst = getNodePorts(NodeType.AST_EXPRESSION_CALC, { astOutputVector: true })
+        expect(vectorAst.outputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量" }])
+        expect(vectorAst.inputs).toEqual([{ id: "build", type: PortType.BUILD, label: "构筑", multiple: false }])
+
         const chart = getNodePorts(NodeType.CHART)
-        expect(chart.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }])
+        expect(chart.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: true }])
         expect(chart.outputs).toEqual([])
-        expect(canConnectPorts(ast.outputs[1], chart.inputs[0])).toBe(true)
+        expect(canConnectPorts(vectorAst.outputs[0], chart.inputs[0])).toBe(true)
+        // 标量构筑的数值输出按单元素向量接入图表
+        expect(canConnectPorts(getNodePorts(NodeType.AST_EXPRESSION_CALC).outputs[0], chart.inputs[0])).toBe(true)
 
         // 原始向量输入节点同样可以接入图表
         const rawVector = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
@@ -142,7 +144,7 @@ describe("nodeEditorPorts", () => {
 
     it("向量分解按向量长度生成逐项数值输出", () => {
         expect(getNodePorts(NodeType.VECTOR_DECOMPOSE)).toEqual({
-            inputs: [{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }],
+            inputs: [{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: true }],
             outputs: [],
         })
 
@@ -161,7 +163,7 @@ describe("nodeEditorPorts", () => {
 
     it("向量计算节点输入一维向量并输出数值", () => {
         const ports = getNodePorts(NodeType.VECTOR_CALC)
-        expect(ports.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: false }])
+        expect(ports.inputs).toEqual([{ id: "vector", type: PortType.VECTOR, label: "向量", multiple: true }])
         expect(ports.outputs).toEqual([{ id: "value", type: PortType.NUMBER, label: "数值" }])
         const vectorOutput = getNodePorts(NodeType.VECTOR_INPUT).outputs[0]
         expect(canConnectPorts(vectorOutput, ports.inputs[0])).toBe(true)

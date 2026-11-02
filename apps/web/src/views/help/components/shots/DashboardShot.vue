@@ -24,7 +24,7 @@ const linePoints = computed(() => {
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel w-[980px] px-6 py-5">
+        <div class="help-panel w-245 px-6 py-5">
             <div class="flex items-end justify-between">
                 <div>
                     <div class="help-kicker">{{ tr(shot.kicker ?? "") }}</div>

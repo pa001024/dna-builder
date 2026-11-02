@@ -87,6 +87,13 @@ const nodeClass = computed(() => {
 
 const resolvedPorts = computed(() => props.ports ?? getNodePorts(props.type, props.data))
 
+// 端口随数据动态增减（目标函数输出类型切换等）时，通知 VueFlow 重新测量连接点
+const portSignature = computed(() => {
+    const { inputs, outputs } = resolvedPorts.value
+    return [...inputs.map(port => port.id), ...outputs.map(port => port.id)].join("|")
+})
+watch(portSignature, () => requestAnimationFrame(() => updateNodeInternals([props.id])))
+
 // 输入与输出按行配对：同一行左侧放输入端口，右侧放输出端口，保证端口与具体行精确对齐
 const portRows = computed(() => {
     const { inputs, outputs } = resolvedPorts.value

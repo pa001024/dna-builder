@@ -38,7 +38,7 @@ watch(
     <BaseNode v-bind="{ id, data, type, selected }">
         <div class="w-60 max-w-full space-y-1">
             <div v-if="items.length === 0" class="text-[10px] leading-snug text-base-content/40">
-                连接向量输入后，按分量自动生成数值输出
+                连接向量或数值输入后，按分量自动生成数值输出
             </div>
             <template v-else>
                 <div class="flex items-center justify-between text-[10px] text-base-content/45">

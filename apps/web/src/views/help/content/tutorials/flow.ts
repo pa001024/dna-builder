@@ -248,7 +248,7 @@ export const flowTutorial: Tutorial = {
     id: "flow",
     number: "07",
     category: "data",
-    title: L("节点编辑器", "節點編輯器", "Node Editor", "ノードエディタ", "노드 편집기", "Éditeur de nœuds"),
+    title: L("构筑节点图", "構築節點圖", "Build Node Graph", "構築ノードグラフ", "빌드 노드 그래프", "Graphe de build"),
     subtitle: L(
         "把构筑做成可视化数据流",
         "把構築做成視覺化資料流",
@@ -269,12 +269,12 @@ export const flowTutorial: Tutorial = {
     accent: "#fc466b",
     route: "/flow",
     routeLabel: L(
-        "打开节点编辑器",
-        "開啟節點編輯器",
-        "Open Node Editor",
-        "ノードエディタを開く",
-        "노드 편집기 열기",
-        "Ouvrir l'éditeur de nœuds"
+        "打开构筑节点图",
+        "開啟構築節點圖",
+        "Open Build Node Graph",
+        "構築ノードグラフを開く",
+        "빌드 노드 그래프 열기",
+        "Ouvrir le graphe de build"
     ),
     platforms: ["web"],
     scenes: [
@@ -286,7 +286,7 @@ export const flowTutorial: Tutorial = {
                 type: "title",
                 variant: "intro",
                 kicker: L("EP 07 · 数据", "EP 07 · 資料", "EP 07 · DATA", "EP 07 · データ", "EP 07 · 데이터", "EP 07 · DONNÉES"),
-                title: L("节点编辑器", "節點編輯器", "Node Editor", "ノードエディタ", "노드 편집기", "Éditeur de nœuds"),
+                title: L("构筑节点图", "構築節點圖", "Build Node Graph", "構築ノードグラフ", "빌드 노드 그래프", "Graphe de build"),
                 subtitle: L(
                     "不写代码，也能把输入、计算、输出连成一张图。",
                     "不寫程式，也能把輸入、計算、輸出連成一張圖。",
@@ -852,12 +852,12 @@ export const flowTutorial: Tutorial = {
                 ],
                 route: "/flow",
                 routeLabel: L(
-                    "打开节点编辑器",
-                    "開啟節點編輯器",
-                    "Open Node Editor",
-                    "ノードエディタを開く",
-                    "노드 편집기 열기",
-                    "Ouvrir l'éditeur de nœuds"
+                    "打开构筑节点图",
+                    "開啟構築節點圖",
+                    "Open Build Node Graph",
+                    "構築ノードグラフを開く",
+                    "빌드 노드 그래프 열기",
+                    "Ouvrir le graphe de build"
                 ),
                 hint: L(
                     "重要节点图，记得按 Ctrl+S",

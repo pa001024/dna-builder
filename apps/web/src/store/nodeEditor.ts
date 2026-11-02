@@ -16,6 +16,7 @@ import {
     collectCoreInputNodes,
     collectNumericParamVectors,
     collectVariableVectors,
+    composeVectorInput,
     computeVectorStat,
     createBuildContextFromInputs,
     createBuildContextFromJSONText,
@@ -33,6 +34,7 @@ import {
     resolveBuffSourceNode,
     serializeBuildContext,
     sortDownstreamIds,
+    type VectorInputContribution,
     withExpressionSettings,
 } from "@/utils/nodeEditorBuild"
 import { recordSyncPhase } from "@/utils/nodeEditorPerf"
@@ -41,6 +43,7 @@ import {
     canConnectPorts,
     customVariableVectorPortId,
     getNodePorts,
+    isPortTypeCompatible,
     NUMERIC_PARAM_PORTS,
     PortType,
     parseCustomVariableVectorPortId,
@@ -781,10 +784,10 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                     usedNumberHandles.set(target.id, used)
                 }
             }
-            // 旧图里类型不匹配的连线直接丢弃，避免迁移后仍能跨类型传值
+            // 旧图里类型不匹配的连线直接丢弃；数值接入向量端口属于合法兼容，不能按类型严格相等丢弃
             const finalSourcePort = resolvePort(source.type ?? "", next.sourceHandle, "output", source.data)
             const finalTargetPort = resolvePort(target.type ?? "", next.targetHandle, "input", target.data)
-            if (finalSourcePort && finalTargetPort && finalSourcePort.type !== finalTargetPort.type) return
+            if (finalSourcePort && finalTargetPort && !isPortTypeCompatible(finalSourcePort.type, finalTargetPort.type)) return
             pushEdge(next)
         })
         return result
@@ -1160,6 +1163,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             edges.value = pruned.edges
             edges.value.forEach(decorateEdge)
             currentGraphId.value = graph.id
+            // 恢复图名：输入框直接绑定它，缺了这一步刷新后会退回默认名
+            currentGraphName.value = typeof graph.name === "string" && graph.name.trim() ? graph.name : "未命名图"
             markGraphDirty()
             resetHistory("加载图")
 
@@ -1622,21 +1627,70 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
+     * 读取来源节点的名称，作为合成向量中该路数值的标签。
+     * @param node 来源节点
+     * @returns 节点名称
+     */
+    function readInputLabel(node: EditorNode) {
+        return typeof node.data.label === "string" && node.data.label.trim() ? node.data.label.trim() : "输入"
+    }
+
+    /**
      * 收集节点的输入端口值：键为目标端口 id。
+     * 允许多路接入的向量端口按连线顺序合成一个向量，每路数值以来源节点名成项。
      * @param node 目标节点
      * @returns 端口值映射
      */
     function collectInputPortValues(node: EditorNode): Map<string, any> {
         const values = new Map<string, any>()
+        const vectorSources = new Map<string, { source: EditorNode; sourceHandle?: string | null }[]>()
         edges.value.forEach(edge => {
             if (edge.target !== node.id) return
             const source = nodes.value.find(item => item.id === edge.source)
             if (!source) return
+            const targetPort = resolvePort(node.type ?? "", edge.targetHandle, "input", node.data)
+            const handleId = edge.targetHandle ?? targetPort?.id ?? ""
+            if (targetPort?.multiple && targetPort.type === PortType.VECTOR) {
+                const inputs = vectorSources.get(handleId) ?? []
+                inputs.push({ source, sourceHandle: edge.sourceHandle })
+                vectorSources.set(handleId, inputs)
+                return
+            }
             const value = getNodeOutput(source, edge.sourceHandle)
             if (value === undefined || value === null) return
-            values.set(edge.targetHandle ?? "", value)
+            values.set(handleId, value)
+        })
+        vectorSources.forEach((inputs, handleId) => {
+            const contributions: VectorInputContribution[] = []
+            const seenLabels = new Map<string, number>()
+            inputs.forEach(({ source, sourceHandle }) => {
+                const value = getNodeOutput(source, sourceHandle)
+                if (value === undefined || value === null) return
+                const base = readInputLabel(source)
+                const count = (seenLabels.get(base) ?? 0) + 1
+                seenLabels.set(base, count)
+                contributions.push({ label: count === 1 ? base : `${base} #${count}`, value })
+            })
+            if (contributions.length === 0) return
+            // 单路保持原值，避免改变已有图的标签与标题
+            const fallbackTitle = typeof node.data.label === "string" ? node.data.label : "向量"
+            values.set(handleId, contributions.length === 1 ? contributions[0].value : composeVectorInput(contributions, fallbackTitle))
         })
         return values
+    }
+
+    /**
+     * 判断节点的某个输入端口是否接了上游。
+     * @param node 目标节点
+     * @param portId 输入端口 id
+     * @returns 是否已连线
+     */
+    function hasInputEdge(node: EditorNode, portId: string) {
+        return edges.value.some(edge => {
+            if (edge.target !== node.id) return false
+            const port = resolvePort(node.type ?? "", edge.targetHandle, "input", node.data)
+            return (port?.id ?? edge.targetHandle) === portId
+        })
     }
 
     /**
@@ -1706,6 +1760,16 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         const sourcePort = resolvePort(source.type ?? "", connection.sourceHandle, "output", source.data)
         const targetPort = resolvePort(target.type ?? "", connection.targetHandle, "input", target.data)
         if (!canConnectPorts(sourcePort, targetPort)) return false
+        // 同一输出端口到同一输入端口只保留一条边，多路向量输入也不重复成项
+        const duplicated = edges.value.some(
+            edge =>
+                edge.id !== connection.id &&
+                edge.source === connection.source &&
+                edge.sourceHandle === connection.sourceHandle &&
+                edge.target === connection.target &&
+                edge.targetHandle === connection.targetHandle
+        )
+        if (duplicated) return false
         if (!targetPort!.multiple && options.allowOccupiedTarget !== true) {
             // 校验已有边时忽略自身；校验新连接时才把已占用的端口判为无效
             const occupied = edges.value.some(
@@ -2247,6 +2311,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 return attributeOutputs(node)
             }
             case NodeType.AST_EXPRESSION_CALC: {
+                // 输出端口随构筑维度切换：向量构筑只出向量，标量构筑只出数值
+                node.data.astOutputVector = hasVector
                 const expression = typeof node.data.expression === "string" ? node.data.expression.trim() : ""
                 if (expression) {
                     const validation = context.charBuild.validateAST(expression)
@@ -2387,13 +2453,20 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             if (nodeType === NodeType.VECTOR_DECOMPOSE) {
                 const fallbackTitle = typeof node.data.label === "string" ? node.data.label : "向量"
                 const decomposed = createVectorDecomposeOutput(collectInputPortValues(node).get("vector"), fallbackTitle)
-                const labels = decomposed?.labels ?? []
-                const currentLabels = Array.isArray(node.data.vectorLabels) ? node.data.vectorLabels : []
-                // 输出端口随向量长度变化；标签随节点持久化，加载图时端口先于求值可用
-                if (labels.length !== currentLabels.length || labels.some((label, index) => label !== currentLabels[index])) {
-                    node.data.vectorLabels = labels
+                if (decomposed) {
+                    const labels = decomposed.labels
+                    const currentLabels = Array.isArray(node.data.vectorLabels) ? node.data.vectorLabels : []
+                    // 输出端口随向量长度变化；标签随节点持久化，加载图时端口先于求值可用
+                    if (labels.length !== currentLabels.length || labels.some((label, index) => label !== currentLabels[index])) {
+                        node.data.vectorLabels = labels
+                    }
+                    node.data.result = decomposed.outputs
+                } else if (!hasInputEdge(node, "vector")) {
+                    // 只有确实没有接入向量时才清空端口
+                    node.data.vectorLabels = []
+                    node.data.result = null
                 }
-                node.data.result = decomposed?.outputs ?? null
+                // 上游还在求值（暂时取不到值）时保留既有端口与结果，避免输出端口消失导致连线被 VueFlow 丢弃
                 node.data.error = undefined
                 calculationCache.set(nodeId, node.data.result)
                 return node.data.result

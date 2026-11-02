@@ -17,7 +17,7 @@ const status = computed(() => props.shot.status ?? (progressValue.value >= 100 ?
 
 <template>
     <div class="help-center-shot">
-        <div class="help-panel w-[760px] overflow-hidden">
+        <div class="help-panel w-190 overflow-hidden">
             <div class="flex items-center justify-between border-b border-white/10 px-6 py-3">
                 <div class="flex items-center gap-3">
                     <span class="flex size-8 items-center justify-center border border-(--accent)/40 bg-(--accent)/10">

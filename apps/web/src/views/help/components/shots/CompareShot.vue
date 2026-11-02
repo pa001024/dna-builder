@@ -9,7 +9,7 @@ const tr = useHelpText()
 
 <template>
     <div class="help-center-shot">
-        <div class="w-[1000px]">
+        <div class="w-250">
             <div class="mb-5 text-center">
                 <div class="help-kicker">{{ tr(shot.kicker ?? "") }}</div>
                 <h2 class="help-display mt-2 text-4xl">{{ tr(shot.title) }}</h2>
