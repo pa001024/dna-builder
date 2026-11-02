@@ -206,7 +206,14 @@ export const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/LevelUpCalculatorView.vue"),
         beforeEnter: () => setMinSize(320, 360),
     },
-    { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(320, 360) },
+    {
+        name: "help",
+        path: "/help",
+        component: () => import("./views/help/HelpView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        // 帮助中心不依赖游戏数据包：空环境 / 首次启动也能直接阅读
+        meta: { requireData: false },
+    },
     {
         name: "chat",
         path: "/chat",
