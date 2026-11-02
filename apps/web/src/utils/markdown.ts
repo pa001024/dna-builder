@@ -71,6 +71,16 @@ function richPlaceholderPlugin(instance: MarkdownIt): void {
 const RICH_ADJACENT_BREAK_RE = /(<!--rich:\d+-->)\s*<br\s*\/?>\s*(?=<!--rich:\d+-->)/g
 
 /**
+ * 相邻特殊组件段落合并。
+ *
+ * 模型若按「前后各空一行」把每张卡片写成独立段落（空行分隔），
+ * markdown 会渲染成多个 `<p><!--rich:N--></p>`，每张卡各占一行。
+ * 这里把「仅含占位注释的相邻段落」合并成一个段落，让多张卡片回到同一行并排展示；
+ * 中间夹着正文的段落不受影响。
+ */
+const RICH_ADJACENT_PARAGRAPH_RE = /(<!--rich:\d+-->)(?:\s*<br\s*\/?>)?\s*<\/p>\s*<p>\s*(?=<!--rich:\d+-->)/g
+
+/**
  * 渲染 markdown 文本为 HTML。
  *
  * `hashMode` 只影响站内链接的 href 形态：链接文本始终显示原始路径（不带 `#`），
@@ -85,7 +95,9 @@ export function renderMarkdown(text: string, hashMode = false): string {
     }
 
     try {
-        return renderInternalLinks(md.render(text), hashMode).replace(RICH_ADJACENT_BREAK_RE, "$1")
+        return renderInternalLinks(md.render(text), hashMode)
+            .replace(RICH_ADJACENT_BREAK_RE, "$1")
+            .replace(RICH_ADJACENT_PARAGRAPH_RE, "$1")
     } catch (error) {
         console.error("Markdown 渲染失败:", error)
         return md.utils.escapeHtml(text)

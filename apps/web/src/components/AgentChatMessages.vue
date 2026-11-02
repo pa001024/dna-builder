@@ -958,6 +958,49 @@ watch(
 )
 
 /**
+ * 会话切换信号：首条消息 id 变化即视为切会话（Dexie 自增 id 跨会话不会相同）。
+ * 只看 length 时，新旧会话条数一致就不会触发强制滚动，这就是「切换对话后没有滚到底部」的根因。
+ */
+const conversationSignal = computed(() => props.messages[0]?.id ?? 0)
+
+watch(conversationSignal, () => {
+    // 清掉上个会话残留的富组件实例与待办（宿主已随旧 DOM 移除，不清会泄漏）
+    const alive = new Set(props.messages.map(message => message.id))
+    for (const id of [...richMountRecords.keys()]) {
+        if (!alive.has(id)) {
+            dropRichMounts(id)
+        }
+    }
+    for (const id of [...richComponents.keys()]) {
+        if (!alive.has(id)) {
+            richComponents.delete(id)
+        }
+    }
+    for (const id of [...pendingRichMounts]) {
+        if (!alive.has(id)) {
+            pendingRichMounts.delete(id)
+        }
+    }
+
+    isAtBottom.value = true
+    void scrollAfterSwitch()
+})
+
+/**
+ * 切换会话后的滚动：等 DOM 落定 + 富组件挂载后再滚，异步组件与图片撑高后下一帧再补一次。
+ */
+async function scrollAfterSwitch() {
+    await scrollToBottom()
+    await flushRichMounts()
+    await scrollToBottom()
+    requestAnimationFrame(() => {
+        if (isAtBottom.value) {
+            void scrollToBottom()
+        }
+    })
+}
+
+/**
  * 渲染后再补一次挂载。
  *
  * `renderAssistant` 是在渲染过程中解析出特殊组件、把消息 id 记进待办的，

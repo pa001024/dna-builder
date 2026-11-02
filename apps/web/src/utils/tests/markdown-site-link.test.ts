@@ -154,6 +154,23 @@ describe("特殊组件占位注释", () => {
         expect(html).not.toContain("<!--rich:0--><br>")
     })
 
+    it("空行分隔的卡片段落也应合并到同一行（兼容旧口径的输出）", () => {
+        const { markdown } = parseRichComponents('<DBAICard kind="char" name="煜明" />\n\n<DBAICard kind="weapon" :id="10101" />')
+        const html = renderMarkdown(markdown)
+
+        expect(html).toContain("<!--rich:0--><!--rich:1-->")
+        expect(html.match(/<p>/g)).toHaveLength(1)
+    })
+
+    it("中间夹着正文的卡片段落不应合并", () => {
+        const { markdown } = parseRichComponents('<DBAICard kind="char" name="煜明" />\n\n正文\n\n<DBAICard kind="weapon" :id="10101" />')
+        const html = renderMarkdown(markdown)
+
+        expect(html).toContain("<p><!--rich:0--></p>")
+        expect(html).toContain("<p><!--rich:1--></p>")
+        expect(html).toContain("正文")
+    })
+
     it("普通换行不受影响", () => {
         const html = renderMarkdown("第一行\n第二行")
 
