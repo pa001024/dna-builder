@@ -50,6 +50,9 @@ export enum NodeType {
     VECTOR_INPUT = "vector-input", // 向量输入（一组数值）
     VECTOR_DECOMPOSE = "vector-decompose", // 向量分解（按分量输出数值）
 
+    // 思维导图（节点内嵌独立子画布，不参与构筑求值）
+    MIND_MAP = "mindmap",
+
     // 构筑来源
     JSON_BUILD = "json-build", // 从 JSON 文本解析构筑
     ONLINE_BUILD = "online-build", // 从在线构筑列表选择构筑

@@ -221,6 +221,8 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     // 输出端口数量由上游向量长度决定，在 getNodePorts 中按 vectorLabels 生成
     [NodeType.VECTOR_DECOMPOSE]: { inputs: [VECTOR_INPUT], outputs: [] },
     [NodeType.VECTOR_CALC]: { inputs: [VECTOR_INPUT], outputs: [NUMBER_OUTPUT] },
+    // 思维导图是内嵌独立子画布，不参与构筑连线
+    [NodeType.MIND_MAP]: { inputs: [], outputs: [] },
     // 构筑来源：JSON 文本 / 在线构筑
     [NodeType.JSON_BUILD]: {
         inputs: [input("char", PortType.CHAR, "角色"), input("text", PortType.STRING, "构筑 JSON")],

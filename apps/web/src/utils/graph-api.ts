@@ -13,6 +13,7 @@ import type {
     GraphNodeView,
     GraphState,
 } from "@/utils/graph-api.contract"
+import { createMindMapTree } from "@/utils/mindMap"
 
 export interface GraphApiHost {
     store: ReturnType<typeof useNodeEditorStore>
@@ -131,11 +132,12 @@ export function createGraphApi(host: GraphApiHost): GraphApi {
             const y = typeof options.y === "number" ? options.y : 120 + Math.floor(count / 8) * 60
             const id = `n${nanoid(8)}`
             const data = options.data && typeof options.data === "object" ? options.data : {}
+            const defaults = type === NodeType.MIND_MAP ? { tree: createMindMapTree(), layout: "mindmap" } : {}
             store.addNode({
                 id,
                 type,
                 position: { x, y },
-                data: { type, label: getDefaultLabel(type as NodeType), ...data },
+                data: { type, label: getDefaultLabel(type as NodeType), ...defaults, ...data },
             })
             record(`添加节点 ${type} (${id})`)
             return { ...ok(`已添加节点 ${type}，id=${id}`), id }

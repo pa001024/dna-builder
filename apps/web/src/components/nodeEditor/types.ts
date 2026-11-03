@@ -95,6 +95,7 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.VECTOR_DECOMPOSE]: "向量分解",
         [NodeType.VECTOR_CALC]: "向量计算",
         [NodeType.DOT_INPUT]: "DOT频率",
+        [NodeType.MIND_MAP]: "思维导图",
         [NodeType.JSON_BUILD]: "JSON构筑",
         [NodeType.ONLINE_BUILD]: "在线构筑",
         [NodeType.JSON_EXPORT]: "JSON导出",
@@ -319,6 +320,13 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.BASIC,
         icon: "ri:split-cells-horizontal",
         description: "把向量（或接入的多个数值）拆成独立的数值输出",
+    },
+    {
+        type: NodeType.MIND_MAP,
+        label: "思维导图",
+        category: NodeCategory.BASIC,
+        icon: "ri:node-tree",
+        description: "内嵌思维导图：七种布局、拖整枝改父子、多选框选",
     },
     // 构筑来源
     {

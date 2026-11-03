@@ -8,6 +8,7 @@ import type { CalcBuildEvaluation } from "@/data/Calc.worker"
 import type { CharBuild } from "@/data/CharBuild"
 import { env } from "@/env"
 import { requestBuildEvaluation, requestBuildPanels } from "@/utils/calc-worker"
+import { createMindMapTree, DEFAULT_FONT_SIZE, normalizeMindMapTree } from "@/utils/mindMap"
 import {
     type BuildVector,
     type BuildVectorDimension,
@@ -183,8 +184,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 仅影响节点自身展示、不参与构筑计算的字段：改动时不失效缓存、不触发重算。
      * 标题不在此列：向量输出的维度/标签读取 `data.label`，需按下游是否消费向量决定。
+     * 思维导图是内嵌子画布，其内容与布局字段不参与构筑求值。
      */
-    const DISPLAY_ONLY_NODE_KEYS = new Set(["isCollapsed"])
+    const DISPLAY_ONLY_NODE_KEYS = new Set(["isCollapsed", "tree", "layout", "baseFontSize", "baseColor", "canvasWidth", "canvasHeight"])
 
     /**
      * 判断节点标题是否参与计算：只有向量展示会读取输入节点标题。
@@ -248,6 +250,13 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (node.type === NodeType.BUFF_INPUT && Array.isArray(data.teamBuffs)) {
             data.buffs = migrateLegacyTeamBuffs(readNodeBuffEntries(data), data.teamBuffs)
             delete data.teamBuffs
+        }
+        // 思维导图节点：补齐树结构与布局默认值，保证旧图 / 手工 JSON 也能渲染
+        if (node.type === NodeType.MIND_MAP) {
+            const tree = normalizeMindMapTree(data.tree)
+            data.tree = tree ?? createMindMapTree()
+            if (typeof data.layout !== "string") data.layout = "mindmap"
+            if (typeof data.baseFontSize !== "number") data.baseFontSize = DEFAULT_FONT_SIZE
         }
         const normalized: EditorNode = {
             ...node,
@@ -486,6 +495,22 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (locked) node.selected = false
         markGraphDirty()
         commitHistory(locked ? "锁定节点" : "解锁节点")
+    }
+
+    /**
+     * 调整节点在 nodes 数组中的顺序：数组越靠后，画布上的绘制层级越靠前。
+     * @param fromIndex 原下标
+     * @param toIndex 移除后插入的目标下标
+     */
+    function moveNode(fromIndex: number, toIndex: number) {
+        const list = nodes.value
+        if (fromIndex === toIndex) return
+        if (fromIndex < 0 || fromIndex >= list.length || toIndex < 0 || toIndex >= list.length) return
+        const next = [...list]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(toIndex, 0, moved)
+        nodes.value = next
+        commitHistory("调整节点层级")
     }
 
     /**
@@ -2345,6 +2370,11 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         const nodeType = node.type ?? ""
         const startedAt = performance.now()
         try {
+            // 思维导图是内嵌子画布，不参与构筑求值
+            if (nodeType === NodeType.MIND_MAP) {
+                calculationCache.set(nodeId, null)
+                return null
+            }
             // 输入节点：直接返回节点数据
             if (nodeType.includes("input")) {
                 calculationCache.set(nodeId, node.data)
@@ -2609,6 +2639,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         updateNodeData,
         setNodeHidden,
         setNodeLocked,
+        moveNode,
         addNode,
         removeNode,
         addEdge,

@@ -19,6 +19,7 @@ import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
+import { createMindMapTree } from "@/utils/mindMap"
 import { resetNodeEditorPerf } from "@/utils/nodeEditorPerf"
 import { getNodePorts, isPortTypeCompatible, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
@@ -41,6 +42,7 @@ import JSONBuildNode from "./nodes/JSONBuildNode.vue"
 import JSONExportNode from "./nodes/JSONExportNode.vue"
 import LabelNode from "./nodes/LabelNode.vue"
 import MeleeWeaponInputNode from "./nodes/MeleeWeaponInputNode.vue"
+import MindMapNode from "./nodes/MindMapNode.vue"
 import ModInputNode from "./nodes/ModInputNode.vue"
 import MultiplyCalcNode from "./nodes/MultiplyCalcNode.vue"
 import NumberInputNode from "./nodes/NumberInputNode.vue"
@@ -271,7 +273,7 @@ function chooseConnectCandidate(candidate: ConnectCandidate) {
     const position = screenToFlowCoordinate({ x: menu.clientX, y: menu.clientY })
     const nodeId = nanoid()
     // 图源节点带上默认值，保证首次重算就能读到这次连线
-    const data: Record<string, any> = { label: candidate.item.label }
+    const data: Record<string, any> = { label: candidate.item.label, ...paletteNodeDefaults(candidate.item.type) }
     if (candidate.item.type === NodeType.VECTOR_INPUT) data.values = [0]
     if (candidate.item.type === NodeType.NUMBER_INPUT) data.value = 0
     store.addNode({
@@ -611,10 +613,16 @@ function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
         id: nanoid(),
         type: item.type as string,
         position,
-        data: { label: item.label },
+        data: { label: item.label, ...paletteNodeDefaults(item.type) },
     })
     // 移动端侧栏是整屏面板，放完节点直接收起露出画布
     if (window.innerWidth < 1024) sidebarCollapsed.value = true
+}
+
+/** 部分节点首次落图时需要预置数据，保证节点组件挂载即有内容 */
+function paletteNodeDefaults(type: string): Record<string, unknown> {
+    if (type === NodeType.MIND_MAP) return { tree: createMindMapTree(), layout: "mindmap" }
+    return {}
 }
 
 /**
@@ -743,6 +751,7 @@ const nodeTypes = {
     "vector-input": markRaw(VectorInputNode),
     "vector-decompose": markRaw(VectorDecomposeNode),
     "vector-calc": markRaw(VectorCalcNode),
+    mindmap: markRaw(MindMapNode),
     "json-build": markRaw(JSONBuildNode),
     "json-export": markRaw(JSONExportNode),
     "online-build": markRaw(OnlineBuildNode),
@@ -773,8 +782,11 @@ function getCategoryLabel(category: string): string {
     return labels[category] || category
 }
 
-const graphNodes = computed(() =>
-    store.nodes.map(node => {
+/** 拖动排序期间的本地预览顺序：只存在内存里，松手才写回 store */
+const graphNodeDragOrder = ref<string[] | null>(null)
+
+const graphNodes = computed(() => {
+    const mapped = store.nodes.map(node => {
         const palette = PALETTE_ITEMS.find(item => item.type === node.type)
         const label = typeof node.data?.label === "string" ? node.data.label.trim() : ""
         return {
@@ -786,7 +798,16 @@ const graphNodes = computed(() =>
             selected: isItemSelected("node", node.id),
         }
     })
-)
+    const order = graphNodeDragOrder.value
+    if (!order) return mapped
+    const byId = new Map(mapped.map(node => [node.id, node]))
+    const ordered = order.map(id => byId.get(id)).filter((node): node is (typeof mapped)[number] => node !== undefined)
+    const orderedIds = new Set(order)
+    for (const node of mapped) {
+        if (!orderedIds.has(node.id)) ordered.push(node)
+    }
+    return ordered
+})
 
 /** 隐藏节点先自动显示；锁定节点不可选中 */
 function selectGraphNode(id: string, event?: MouseEvent) {
@@ -825,6 +846,261 @@ function toggleGraphNodeLocked(id: string) {
     if (!target) return
     store.setNodeLocked(id, !(target.data?.locked === true))
 }
+
+/** 画布列表拖拽排序：按住手柄实时换位，数组越靠后画布层级越靠前 */
+const graphNodeDragId = ref<string | null>(null)
+const graphNodeListEl = ref<HTMLElement | null>(null)
+
+interface GraphNodeDragSession {
+    id: string
+    pointerId: number
+    startX: number
+    startY: number
+    /** 按住点相对行顶部的偏移 */
+    offsetY: number
+    pointerY: number
+    rowEl: HTMLElement
+    listEl: HTMLElement
+    scrollEl: HTMLElement | null
+    ghostEl: HTMLElement | null
+    rowHeight: number
+    rowLeft: number
+    rowWidth: number
+    /** 拖动开始时行所在下标与槽位中心（视口坐标），用于按槽位换算目标位置 */
+    originIndex: number
+    originCenterY: number
+    initialScrollTop: number
+    /** 相邻两行的布局间距（行高 + 外边距），行等高 */
+    slotHeight: number
+    /** 超过阈值后才进入拖拽，避免普通点击触发换位 */
+    started: boolean
+    frame: number
+}
+
+let graphNodeDrag: GraphNodeDragSession | null = null
+/** 各节点进行中的换位补间：只重启动真正换位的行，避免整列动画被反复重置 */
+const graphNodeSwapAnimations = new Map<string, Animation>()
+let graphNodeDragBodyCursor = ""
+let graphNodeDragBodyUserSelect = ""
+
+const GRAPH_NODE_DRAG_EDGE = 28
+const GRAPH_NODE_DRAG_MAX_SCROLL = 12
+/** 换位补间时长（毫秒） */
+const GRAPH_NODE_SWAP_DURATION = 160
+
+function onGraphNodePointerDown(event: PointerEvent, id: string) {
+    if (event.button !== 0 || graphNodeDrag) return
+    const rowEl = (event.currentTarget as HTMLElement | null)?.closest<HTMLElement>("[data-graph-node-row]")
+    const listEl = graphNodeListEl.value
+    if (!rowEl || !listEl) return
+    // 阻止按下时选中文本或触发原生拖拽
+    event.preventDefault()
+    // 清掉上一次拖拽残留的补间，保证以最终布局为基准
+    for (const animation of graphNodeSwapAnimations.values()) animation.cancel()
+    graphNodeSwapAnimations.clear()
+    const rect = rowEl.getBoundingClientRect()
+    const scrollEl = listEl.closest<HTMLElement>("[data-reka-scroll-area-viewport]")
+    const rows = listEl.querySelectorAll<HTMLElement>("[data-graph-node-row]")
+    const slotHeight = rows.length > 1 ? rows[1].offsetTop - rows[0].offsetTop : rect.height
+    graphNodeDrag = {
+        id,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        offsetY: event.clientY - rect.top,
+        pointerY: event.clientY,
+        rowEl,
+        listEl,
+        scrollEl,
+        ghostEl: null,
+        rowHeight: rect.height,
+        rowLeft: rect.left,
+        rowWidth: rect.width,
+        originIndex: store.nodes.findIndex(node => node.id === id),
+        originCenterY: rect.top + rect.height / 2,
+        initialScrollTop: scrollEl?.scrollTop ?? 0,
+        slotHeight: slotHeight > 0 ? slotHeight : rect.height,
+        started: false,
+        frame: 0,
+    }
+    window.addEventListener("pointermove", onGraphNodePointerMove)
+    window.addEventListener("pointerup", onGraphNodePointerUp)
+    window.addEventListener("pointercancel", onGraphNodePointerUp)
+    window.addEventListener("blur", finishGraphNodeDrag)
+}
+
+function onGraphNodePointerMove(event: PointerEvent) {
+    const drag = graphNodeDrag
+    if (!drag || event.pointerId !== drag.pointerId) return
+    drag.pointerY = event.clientY
+    if (drag.started) return
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4) return
+    startGraphNodeDrag(drag)
+}
+
+/**
+ * 克隆整行作为拖动预览：X 轴固定在原行位置，只跟随 Y 轴；
+ * 换位只改本地预览顺序，松手时才一次性写回 store。
+ */
+function startGraphNodeDrag(drag: GraphNodeDragSession) {
+    drag.started = true
+    graphNodeDragId.value = drag.id
+    graphNodeDragOrder.value = store.nodes.map(node => node.id)
+    // 拖动期间保持抓取光标，并禁止选中文本
+    graphNodeDragBodyCursor = document.body.style.cursor
+    graphNodeDragBodyUserSelect = document.body.style.userSelect
+    document.body.style.cursor = "grabbing"
+    document.body.style.userSelect = "none"
+    const ghost = drag.rowEl.cloneNode(true) as HTMLElement
+    ghost.removeAttribute("data-graph-node-row")
+    ghost.removeAttribute("data-node-id")
+    ghost.classList.remove("opacity-40", "border-primary/40")
+    ghost.classList.add("border-primary/60", "bg-base-100", "shadow-lg")
+    Object.assign(ghost.style, {
+        position: "fixed",
+        left: `${drag.rowLeft}px`,
+        top: `${drag.rowEl.getBoundingClientRect().top}px`,
+        width: `${drag.rowWidth}px`,
+        margin: "0",
+        zIndex: "60",
+        pointerEvents: "none",
+        boxSizing: "border-box",
+    })
+    document.body.appendChild(ghost)
+    drag.ghostEl = ghost
+    drag.frame = requestAnimationFrame(graphNodeDragTick)
+}
+
+/** 每帧统一处理自动滚动、预览跟随与换位判定，避免高频 pointermove 反复触发布局 */
+function graphNodeDragTick() {
+    const drag = graphNodeDrag
+    if (!drag?.started) return
+    autoscrollGraphNodeList(drag)
+    positionGraphNodeGhost(drag)
+    updateGraphNodeDragIndex(drag)
+    drag.frame = requestAnimationFrame(graphNodeDragTick)
+}
+
+/** 预览贴住列表可视区上下边界，不允许拖出面板 */
+function positionGraphNodeGhost(drag: GraphNodeDragSession) {
+    const ghost = drag.ghostEl
+    if (!ghost) return
+    const listRect = drag.listEl.getBoundingClientRect()
+    const viewportRect = drag.scrollEl?.getBoundingClientRect()
+    const minTop = viewportRect ? Math.max(viewportRect.top, listRect.top) : listRect.top
+    const bottom = viewportRect ? Math.min(viewportRect.bottom, listRect.bottom) : listRect.bottom
+    const maxTop = Math.max(minTop, bottom - drag.rowHeight)
+    const top = Math.min(Math.max(drag.pointerY - drag.offsetY, minTop), maxTop)
+    ghost.style.top = `${top}px`
+}
+
+/** 指针跨过相邻槽位中线时立即换位；按槽位换算，不受进行中的动画影响 */
+function updateGraphNodeDragIndex(drag: GraphNodeDragSession) {
+    const order = graphNodeDragOrder.value
+    if (!order || drag.slotHeight <= 0) return
+    const currentIndex = order.indexOf(drag.id)
+    if (currentIndex < 0) return
+    const scrolled = (drag.scrollEl?.scrollTop ?? 0) - drag.initialScrollTop
+    // 锚点取自原槽位，当前槽位要减去起始下标，否则按别的行起拖会整体偏移
+    const slotCenter = drag.originCenterY - scrolled + (currentIndex - drag.originIndex) * drag.slotHeight
+    const steps = Math.trunc((drag.pointerY - slotCenter) / drag.slotHeight)
+    if (steps === 0) return
+    const nextIndex = Math.min(order.length - 1, Math.max(0, currentIndex + steps))
+    if (nextIndex === currentIndex) return
+    const nextOrder = order.filter(id => id !== drag.id)
+    nextOrder.splice(nextIndex, 0, drag.id)
+    applyGraphNodeDragOrder(drag, nextOrder)
+}
+
+/** 用 FLIP 让被拖动行与让位行一起平滑地上下滑动 */
+function applyGraphNodeDragOrder(drag: GraphNodeDragSession, nextOrder: string[]) {
+    const order = graphNodeDragOrder.value
+    if (!order) return
+    const rows = [...drag.listEl.querySelectorAll<HTMLElement>("[data-graph-node-row]")]
+    const previousTops = new Map<string, number>()
+    for (const row of rows) {
+        const id = row.dataset.nodeId
+        if (id) previousTops.set(id, row.getBoundingClientRect().top)
+    }
+    // 只重启动真正换了位置的行；其余行的补间照常滑到终点，避免快速拖动时整列抖动
+    const oldIndexes = new Map(order.map((id, index) => [id, index]))
+    const affected = new Set<string>()
+    nextOrder.forEach((id, index) => {
+        if (oldIndexes.get(id) !== index) affected.add(id)
+    })
+    for (const id of affected) {
+        graphNodeSwapAnimations.get(id)?.cancel()
+        graphNodeSwapAnimations.delete(id)
+    }
+    graphNodeDragOrder.value = nextOrder
+    void nextTick(() => {
+        const rowsById = new Map<string, HTMLElement>()
+        for (const row of drag.listEl.querySelectorAll<HTMLElement>("[data-graph-node-row]")) {
+            if (row.dataset.nodeId) rowsById.set(row.dataset.nodeId, row)
+        }
+        for (const id of affected) {
+            const row = rowsById.get(id)
+            const before = previousTops.get(id)
+            if (!row || before === undefined) continue
+            const delta = before - row.getBoundingClientRect().top
+            if (Math.abs(delta) < 0.5) continue
+            graphNodeSwapAnimations.set(
+                id,
+                row.animate([{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }], {
+                    duration: GRAPH_NODE_SWAP_DURATION,
+                    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                })
+            )
+        }
+    })
+}
+
+/** 拖到列表上下边缘时自动滚动，便于跨屏换位 */
+function autoscrollGraphNodeList(drag: GraphNodeDragSession) {
+    const scrollEl = drag.scrollEl
+    if (!scrollEl) return
+    const rect = scrollEl.getBoundingClientRect()
+    const topGap = drag.pointerY - rect.top
+    const bottomGap = rect.bottom - drag.pointerY
+    let delta = 0
+    if (topGap < GRAPH_NODE_DRAG_EDGE) delta = -(GRAPH_NODE_DRAG_EDGE - topGap) / 3
+    else if (bottomGap < GRAPH_NODE_DRAG_EDGE) delta = (GRAPH_NODE_DRAG_EDGE - bottomGap) / 3
+    delta = Math.max(-GRAPH_NODE_DRAG_MAX_SCROLL, Math.min(GRAPH_NODE_DRAG_MAX_SCROLL, delta))
+    if (delta !== 0) scrollEl.scrollTop += delta
+}
+
+function onGraphNodePointerUp(event: PointerEvent) {
+    if (!graphNodeDrag || event.pointerId !== graphNodeDrag.pointerId) return
+    finishGraphNodeDrag()
+}
+
+function finishGraphNodeDrag() {
+    const drag = graphNodeDrag
+    if (!drag) return
+    graphNodeDrag = null
+    window.removeEventListener("pointermove", onGraphNodePointerMove)
+    window.removeEventListener("pointerup", onGraphNodePointerUp)
+    window.removeEventListener("pointercancel", onGraphNodePointerUp)
+    window.removeEventListener("blur", finishGraphNodeDrag)
+    if (drag.frame) cancelAnimationFrame(drag.frame)
+    drag.ghostEl?.remove()
+    // 最后一次换位的补间继续播完，下一次按下时再统一清掉
+    if (drag.started) {
+        document.body.style.cursor = graphNodeDragBodyCursor
+        document.body.style.userSelect = graphNodeDragBodyUserSelect
+    }
+    const order = graphNodeDragOrder.value
+    graphNodeDragOrder.value = null
+    graphNodeDragId.value = null
+    // 拖动全程只改本地预览顺序，松手时一次性提交
+    if (drag.started && order) {
+        const fromIndex = store.nodes.findIndex(node => node.id === drag.id)
+        const toIndex = order.indexOf(drag.id)
+        if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) store.moveNode(fromIndex, toIndex)
+    }
+}
+
+onUnmounted(finishGraphNodeDrag)
 
 /**
  * 定位到图中某个节点：只移动视图，不改变选中；
@@ -905,10 +1181,14 @@ function handleKeyDown(event: KeyboardEvent) {
         return
     }
 
-    // Delete 键删除选中的节点或边
-    if (event.key === "Delete") {
-        // 使用store的方法删除选中的节点或边
-        if (selectedNode.value) {
+    // Delete 键删除选中的节点或边：框选 / Shift 多选时删除整个选中集合
+    if (event.key === "Delete" || event.key === "Backspace") {
+        const selectedNodes = getSelectedNodes.value
+        const selectedEdges = getSelectedEdges.value
+        if (selectedNodes.length > 0 || selectedEdges.length > 0) {
+            event.preventDefault()
+            deleteSelectedItems()
+        } else if (selectedNode.value) {
             deleteSelectedNode()
         } else if (selectedEdge.value) {
             deleteSelectedEdge()
@@ -1477,8 +1757,8 @@ async function handleTransfer(charName: string) {
                         </div>
                     </div>
                 </div>
-                <!-- 画布：当前图里的全部节点，点击选中并定位 -->
-                <div v-else-if="activePane === 'canvas'" class="p-1.5">
+                <!-- 画布：当前图里的全部节点，点击选中并定位；拖动手柄实时调整层级 -->
+                <div v-else-if="activePane === 'canvas'" ref="graphNodeListEl" class="p-1.5">
                     <div class="flex items-center gap-1.5 px-1 py-1">
                         <Icon icon="ri:artboard-2-line" class="size-3.5 text-base-content/50" />
                         <span class="text-[11px] tracking-wide text-base-content/55">画布</span>
@@ -1488,9 +1768,23 @@ async function handleTransfer(charName: string) {
                     <div
                         v-for="node in graphNodes"
                         :key="node.id"
+                        data-graph-node-row
+                        :data-node-id="node.id"
                         class="group mb-0.5 flex w-full items-center gap-0.5 border px-1 py-0.5 transition-colors duration-150"
-                        :class="node.selected ? 'border-primary/40 bg-primary/5' : 'border-transparent hover:border-primary/40 hover:bg-primary/5'"
+                        :class="[
+                            node.selected ? 'border-primary/40 bg-primary/5' : 'border-transparent hover:border-primary/40 hover:bg-primary/5',
+                            graphNodeDragId === node.id ? 'opacity-40' : '',
+                        ]"
                     >
+                        <button
+                            type="button"
+                            class="grid size-5 shrink-0 cursor-grab touch-none place-items-center text-base-content/30 transition-colors duration-150 select-none hover:text-primary active:cursor-grabbing"
+                            title="拖动调整层级（越靠下越靠前）"
+                            aria-label="拖动调整节点层级"
+                            @pointerdown="onGraphNodePointerDown($event, node.id)"
+                        >
+                            <Icon icon="ri:draggable" class="size-3.5" />
+                        </button>
                         <button
                             type="button"
                             class="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-0.5 text-left"
@@ -1886,6 +2180,7 @@ async function handleTransfer(charName: string) {
                 :selection-mode="SelectionMode.Partial"
                 multi-selection-key-code="Shift"
                 :is-valid-connection="isValidCanvasConnection"
+                :delete-key-code="null"
                 @connect="handleCanvasConnect"
                 @node-click="handleNodeClick"
                 @edge-click="handleEdgeClick"
