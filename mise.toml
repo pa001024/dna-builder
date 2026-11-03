@@ -1,0 +1,25 @@
+# dna-builder 项目工具链（mise 管理）
+#
+# 安装 mise:
+#   Windows (scoop):  scoop install mise
+#   Windows (winget): winget install -e --id jdx.mise
+#   macOS:            brew install mise
+#   Linux:            curl https://mise.run | sh
+#
+# 首次进项目:
+#   mise trust && mise install
+#
+# 用法: 新开 shell 即自动生效 (hook 了 cd); 非交互/脚本里用 `mise exec -- <cmd>`.
+
+[tools]
+node = "24.11.1"
+pnpm = "10.28.1"
+bun = "1.4.4"
+mr-boxington = "latest"
+
+# Rust 刻意不在此 pin: 本机已有 rustup stable, VSCode rust-analyzer 也指着它,
+# 另下一套 toolchain 既重复又容易让 IDE 错乱。
+# mbx 试用直接跑 `mbx build`(不 wrapp cargo, 零侵入); 如需 plain `cargo` 自动走缓存, 二选一:
+#   1) 上面加一行 rust = { version = "stable", mr_boxington = true } (要 mise 2026.9.2+,
+#      会在 ~/.local/share/mise 下另装一套 Rust, 只在 mise shell 内生效)
+#   2) 跑一次 mbx setup (给当前 rustup 的 cargo 加 shim, 全局生效, 见 https://mr-boxington.jdx.dev/setup)
