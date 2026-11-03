@@ -23,6 +23,7 @@ import {
     detectMissingAbyssWeaponSlots,
 } from "@/utils/abyss-upload"
 import { imgRemoteToLocal } from "@/utils/remoteImg"
+import { getRewardDetailLink } from "@/utils/reward-link"
 import { SHORT_NOTE_STORAGE_KEY } from "@/utils/screen-bar"
 import { formatTimeOnly } from "@/utils/time"
 
@@ -113,7 +114,7 @@ function toggleForgeAlarm(draft: any) {
         ui.showErrorMessage(t("dna-game-info.forge_alarm_completed"))
         return
     }
-    const name = gt(draft.productName)
+    const name = gt(getDraftProductName(draft))
     if (forgeAlarm.isArmed(endTimeMs)) {
         forgeAlarm.cancel()
         ui.showSuccessMessage(t("dna-game-info.forge_alarm_cancelled"))
@@ -165,6 +166,37 @@ function getDraftInfo(productId: number) {
     } else if (resourceDraftMap.has(productId)) {
         return resourceDraftMap.get(productId)
     }
+}
+
+/**
+ * 获取铸造产物的展示名（服务端可能不下发 productName）。
+ * @param draft 进行中的铸造条目
+ * @returns 服务端名称；缺失时按 productId 查表回填，仍无则回退为 id
+ */
+function getDraftProductName(draft: { productId: number; productName?: string | null }): string {
+    if (typeof draft.productName === "string" && draft.productName.trim() !== "") {
+        return draft.productName
+    }
+    const info = getDraftInfo(draft.productId)
+    if (info?.n) return info.n
+    const mod = modMap.get(draft.productId)
+    if (mod?.名称) return mod.名称
+    const weapon = weaponMap.get(draft.productId)
+    if (weapon?.名称) return weapon.名称
+    const resource = resourceMap.get(draft.productId)
+    if (resource?.name) return resource.name
+    return String(draft.productId)
+}
+
+/**
+ * 获取铸造产物成品的详情页链接。
+ * @param draft 进行中的铸造条目
+ * @returns 成品详情页路由；查不到设计稿或无对应页面时返回空串（调用方回退为纯文本）
+ */
+function getDraftProductLink(draft: { productId: number }): string {
+    const info = getDraftInfo(draft.productId)
+    if (!info) return ""
+    return getRewardDetailLink(info.t, info.p)
 }
 
 const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
@@ -726,7 +758,7 @@ async function generateScreenshot() {
                                 <div class="shrink-0">
                                     <img
                                         :src="getProductImageUrl(getDraftInfo(draft.productId))"
-                                        :alt="draft.productName"
+                                        :alt="getDraftProductName(draft)"
                                         class="h-14 w-14 rounded-xs border border-base-content/10 object-cover"
                                     />
                                 </div>
@@ -734,7 +766,15 @@ async function generateScreenshot() {
                                 <!-- 锻造信息 -->
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-start justify-between gap-2">
-                                        <h4 class="truncate text-sm font-semibold">{{ draft.productName }}</h4>
+                                        <h4 class="truncate text-sm font-semibold">
+                                            <SRouterLink
+                                                v-if="getDraftProductLink(draft)"
+                                                :to="getDraftProductLink(draft)"
+                                                class="cursor-pointer hover:underline"
+                                                >{{ getDraftProductName(draft) }}</SRouterLink
+                                            >
+                                            <span v-else>{{ getDraftProductName(draft) }}</span>
+                                        </h4>
                                         <span
                                             class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tabular-nums text-primary"
                                         >
