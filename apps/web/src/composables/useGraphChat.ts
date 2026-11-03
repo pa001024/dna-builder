@@ -66,6 +66,10 @@ function normalizeStoredMessage(raw: unknown, index: number): GraphAgentChatMess
         message.tokenUsage = source.tokenUsage as MessageTokenUsage
     }
 
+    if (typeof source.costMicros === "number" && Number.isFinite(source.costMicros)) {
+        message.costMicros = source.costMicros
+    }
+
     if (source.compaction && typeof source.compaction === "object") {
         message.compaction = source.compaction as MessageCompaction
     }

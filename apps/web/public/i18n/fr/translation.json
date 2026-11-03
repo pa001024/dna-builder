@@ -2336,7 +2336,7 @@
             "stopSearch": "Arrêter la recherche",
             "thinking": "Réflexion",
             "thinkingLive": "Réflexion en cours",
-            "tokenNote": "Contexte {{context}} · Sortie {{output}}",
+            "tokenNote": "Entrée {{input}} / Sortie {{output}}",
             "toolsUsed": "{{total}} appels · {{tools}}",
             "traceCollapse": "Masquer les détails de recherche",
             "traceExpand": "Détails de recherche",

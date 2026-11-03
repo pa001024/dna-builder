@@ -2347,7 +2347,7 @@
             "stopSearch": "停止检索",
             "thinking": "思考",
             "thinkingLive": "思考中",
-            "tokenNote": "上下文 {{context}} · 输出 {{output}}",
+            "tokenNote": "输入 {{input}} / 输出 {{output}}",
             "toolsUsed": "使用了 {{total}} 个 {{tools}}",
             "traceCollapse": "收起检索详情",
             "traceExpand": "检索详情",

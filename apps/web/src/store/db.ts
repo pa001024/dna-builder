@@ -238,6 +238,11 @@ export interface Message {
     pendingAsk?: MessagePendingAsk
     /** 该条回复的真实 token 用量（上游回传时落库；容量面板与命中率统计据此恢复） */
     tokenUsage?: MessageTokenUsage
+    /**
+     * 该条回复的费用（微元，按后端同口径在本地逐次请求累计）。
+     * 旧消息与关闭用量回传的上游可能没有此字段，界面据此退化为只显示 token。
+     */
+    costMicros?: number
     /** 上下文压缩边界（仅 system 角色消息携带；普通消息没有此字段） */
     compaction?: MessageCompaction
     createdAt: number
@@ -289,6 +294,8 @@ export interface BuildAgentChatMessage {
     pendingAsk?: MessagePendingAsk
     /** 该条回复的真实 token 用量（上游回传时落库） */
     tokenUsage?: MessageTokenUsage
+    /** 该条回复的费用（微元，按后端同口径在本地累计） */
+    costMicros?: number
     /** 上下文压缩边界（仅 system 角色消息携带） */
     compaction?: MessageCompaction
     createdAt: number
@@ -327,6 +334,8 @@ export interface GraphAgentChatMessage {
     pendingAsk?: MessagePendingAsk
     /** 该条回复的真实 token 用量（上游回传时落库） */
     tokenUsage?: MessageTokenUsage
+    /** 该条回复的费用（微元，按后端同口径在本地累计） */
+    costMicros?: number
     /** 上下文压缩边界（仅 system 角色消息携带） */
     compaction?: MessageCompaction
     createdAt: number

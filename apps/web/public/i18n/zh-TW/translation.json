@@ -2296,7 +2296,7 @@
             "stopSearch": "停止檢索",
             "thinking": "思考",
             "thinkingLive": "思考中",
-            "tokenNote": "上下文 {{context}} · 輸出 {{output}}",
+            "tokenNote": "輸入 {{input}} / 輸出 {{output}}",
             "toolsUsed": "使用了 {{total}} 個 {{tools}}",
             "traceCollapse": "收起檢索詳情",
             "traceExpand": "檢索詳情",

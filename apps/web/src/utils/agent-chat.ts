@@ -108,6 +108,8 @@ export interface AgentChatMessage {
     pendingAsk?: AgentChatPendingAsk
     /** 该条回复的真实 token 用量（上游回传时落库；渲染成消息下方的统计小字） */
     tokenUsage?: AgentChatTokenUsage
+    /** 该条回复的费用（微元，按后端同口径累计；渲染成消息下方的统计小字） */
+    costMicros?: number
     /** 上下文压缩边界（仅 system 角色消息携带；渲染成一条分隔线） */
     compaction?: unknown
     /**

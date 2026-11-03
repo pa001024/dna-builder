@@ -15,6 +15,7 @@
  * 本文件只做「序列化 + 流式翻译」，工具执行与多轮循环在 `dbAgent.ts`。
  */
 
+import { isPeakPricing } from "@/utils/ai-pricing"
 import {
     AGENT_PROXY_BASE_URL_SUFFIX,
     type AgentFinishReason,
@@ -477,6 +478,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
      * @param isInterrupted 中断判据
      * @param context 流式运行态（空闲计时器与超时标记）
      * @param abort 中止底层请求（空闲超时时由计时器调用）
+     * @param peak 本次请求发出时是否处于高峰计费时段
      * @returns 本轮汇总
      */
     async function readStream(
@@ -484,7 +486,8 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
         handlers: AgentStreamHandlers,
         isInterrupted: () => boolean,
         context: StreamContext,
-        abort: () => void
+        abort: () => void,
+        peak: boolean
     ): Promise<AgentRoundResult> {
         const reader = body.getReader()
         const decoder = new TextDecoder()
@@ -562,6 +565,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
             throw new Error(`上游 ${options.timeout} 毫秒内没有新内容，已中断本次请求`)
         }
 
+        usage.peak = peak
         return assembleRound(blocks, finishReason, usage)
     }
 
@@ -585,6 +589,8 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
         const controller = new AbortController()
         const context: StreamContext = { idleTimer: null, idleTimedOut: false }
         const connectTimer = options.timeout > 0 ? setTimeout(() => controller.abort(), options.timeout) : null
+        // 峰谷价在请求发出时定档（与服务端记账口径一致），流式结束时间不参与判定
+        const peak = isPeakPricing(new Date())
 
         try {
             const response = await fetch(endpoint!, {
@@ -631,7 +637,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
                 return { ok: false, error: new Error("上游未返回响应体"), retryable: true }
             }
 
-            const result = await readStream(response.body, handlers, isInterrupted, context, () => controller.abort())
+            const result = await readStream(response.body, handlers, isInterrupted, context, () => controller.abort(), peak)
 
             return { ok: true, result }
         } catch (error) {

@@ -1,12 +1,13 @@
 import i18next from "i18next"
 import { ref } from "vue"
-import { type AgentCompactionOutcome, MIN_ROUNDS_FOR_COMPACT, resolveAutoCompactThreshold } from "@/api/agent/compact"
+import { type AgentCompactionOutcome, CompactionUsageError, MIN_ROUNDS_FOR_COMPACT, resolveAutoCompactThreshold } from "@/api/agent/compact"
 import { buildContextEstimate } from "@/api/agent/context-usage"
 import type { AgentCallbacks, AgentHistoryMessage, AgentKernel, AgentRunResult } from "@/api/agent/kernel"
 import { toWireMessages } from "@/api/agent/kernel"
 import type { AgentRoundUsage } from "@/api/agent/wire"
 import type { MessageReasoning, MessageTokenUsage, MessageToolTrace } from "@/store/db"
-import { resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
+import { isCustomAgentUpstream, resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
+import { computeUsageCostMicros, isPeakPricing } from "@/utils/ai-pricing"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
 
@@ -43,6 +44,8 @@ export interface AgentChatCoreMessage {
     processMs?: number
     pendingAsk?: AskUserRequest
     tokenUsage?: MessageTokenUsage
+    /** 该条回复的费用（微元，按后端同口径累计） */
+    costMicros?: number
 }
 
 /** 容量面板分类的 key（无 MCP 工具；meta_user 技能清单计入 systemPrompt 一类，分类收敛为三种） */
@@ -120,6 +123,16 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
     const cacheAggregate = { input: 0, cacheRead: 0, count: 0 }
     /** 最近一次真实请求的上下文占用（输入 + 输出）；null 表示尚无真实用量 */
     let lastProviderUsed: number | null = null
+    /**
+     * 跨轮压缩产生、尚未归到某条回复上的费用（微元）。
+     * 压缩请求不经过普通对话回调，由下一次运行的收尾函数一并计入该条回复。
+     */
+    let pendingCompactionCostMicros = 0
+    /**
+     * 用量代际：切会话 / 重置用量时自增。压缩是异步的，回来时代际变了说明
+     * 用户已经切走，不能再把费用记到新会话头上。
+     */
+    let usageEpoch = 0
 
     /**
      * 注入「发送新提问」的实现（宿主的 send）。
@@ -152,14 +165,19 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
      * （输入是上下文规模的口径，不是各轮之和），同时更新容量面板的缓存命中率。
      * @param message 本轮的助手消息（流式内容直接追加到它上面）
      * @param reasonings 本轮已固化的思考分段
-     * @returns Agent 回调与「收取本次运行用量」的收集器
+     * @returns Agent 回调与「收取本次运行用量 / 费用」的收集器
      */
     function buildCallbacks(
         message: M,
         reasonings: MessageReasoning[]
-    ): { callbacks: AgentCallbacks; collectTokenUsage: () => MessageTokenUsage | null } {
+    ): { callbacks: AgentCallbacks; collectTokenUsage: () => MessageTokenUsage | null; collectCostMicros: () => number } {
         /** 本次运行累计的输出 tokens（多轮工具调用求和） */
         let outputTokens = 0
+        /** 本次运行累计的费用（按每次模型请求的后端同口径单价求和）；先接上跨轮压缩的待结算费用 */
+        let costMicros = pendingCompactionCostMicros
+        pendingCompactionCostMicros = 0
+        /** 自定义上游的单价未知，不能按服务端反代的 DeepSeek-Flash 口径计费 */
+        const priceUsage = !isCustomAgentUpstream()
         /** 末次真实用量（输入与缓存命中取末次口径） */
         let lastUsage: AgentRoundUsage | null = null
 
@@ -195,12 +213,28 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
             onUsage: usage => {
                 outputTokens += usage.outputTokens
                 lastUsage = usage
+                if (priceUsage) {
+                    // 峰谷档由传输层在请求发出时定下；传输层没给（第三方实现）时按当前时刻兜底
+                    costMicros += computeUsageCostMicros(usage, usage.peak ?? isPeakPricing(new Date()))
+                }
 
                 cacheAggregate.input += usage.inputTokens
                 cacheAggregate.cacheRead += usage.cacheReadTokens
                 cacheAggregate.count += 1
                 lastProviderUsed = usage.inputTokens + usage.outputTokens
                 publishUsageUpdate()
+            },
+            onCompaction: info => {
+                // 运行内压缩是额外一次模型请求：只计入费用，不并入上下文面板的 token 口径
+                if (priceUsage) {
+                    costMicros += sumCompactionCost(info.usages)
+                }
+            },
+            onCompactionUsage: usages => {
+                // 压缩失败但请求已产生 token：同样计入当轮费用
+                if (priceUsage) {
+                    costMicros += sumCompactionCost(usages)
+                }
             },
         }
 
@@ -217,6 +251,7 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
                     ...(lastUsage?.cacheReadTokens ? { cacheRead: lastUsage.cacheReadTokens } : {}),
                 }
             },
+            collectCostMicros: () => costMicros,
         }
     }
 
@@ -230,6 +265,63 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
 
         if (usage) {
             message.tokenUsage = mergeTokenUsage(message.tokenUsage, usage)
+        }
+    }
+
+    /**
+     * 把本次运行产生的费用累加到消息上（挂起续跑时与已有费用求和）。
+     * @param message 助手消息
+     * @param collect 费用收集器（回调构建失败等场景下可能为 null，此时保持原值）
+     */
+    function recordCostMicros(message: M, collect: (() => number) | null): void {
+        const cost = collect?.() ?? 0
+
+        if (cost > 0) {
+            message.costMicros = (message.costMicros ?? 0) + cost
+        }
+    }
+
+    /**
+     * 汇总一次压缩请求链路的费用（压缩失败重试时每次请求各自计费）。
+     * @param usages 各次摘要请求的用量；没有回传用量时为空
+     * @returns 费用（微元）
+     */
+    function sumCompactionCost(usages: readonly AgentRoundUsage[] | undefined): number {
+        if (!usages?.length) {
+            return 0
+        }
+
+        return usages.reduce((sum, usage) => sum + computeUsageCostMicros(usage, usage.peak ?? isPeakPricing(new Date())), 0)
+    }
+
+    /**
+     * 生成本轮用量 / 费用 / 耗时的幂等收尾函数。
+     *
+     * 成功路径与失败路径都会调用：正常收尾后再落库失败进入 catch 时，不能重复累加
+     * 已计入的用量与费用（否则费用和输出 tokens 会翻倍）。
+     * @param message 本轮的助手消息
+     * @param collectTokenUsage 用量收集器
+     * @param collectCostMicros 费用收集器
+     * @param startedAt 本次运行开始的毫秒时间戳
+     * @returns 只生效一次的收尾函数
+     */
+    function createUsageSettler(
+        message: M,
+        collectTokenUsage: () => MessageTokenUsage | null,
+        collectCostMicros: () => number,
+        startedAt: number
+    ): () => void {
+        let settled = false
+
+        return () => {
+            if (settled) {
+                return
+            }
+
+            settled = true
+            recordTokenUsage(message, collectTokenUsage)
+            recordCostMicros(message, collectCostMicros)
+            addProcessMs(message, startedAt)
         }
     }
 
@@ -324,8 +416,8 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
         const reasonings: MessageReasoning[] = []
         message.reasonings = reasonings
 
-        /** 用量收集器：回调构建后才可用；失败路径也要能收取已到达的真实用量 */
-        let collectTokenUsage: (() => MessageTokenUsage | null) | null = null
+        /** 本轮收尾（幂等）：成功路径先结算，consumeResult 落库失败进入 catch 时不会重复累加 */
+        let settleUsage: (() => void) | null = null
 
         try {
             // 既没有自己的密钥又未登录时服务端代理不可用，直接给出可操作提示，不打无谓的请求
@@ -334,10 +426,9 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
             }
 
             const built = buildCallbacks(message, reasonings)
-            collectTokenUsage = built.collectTokenUsage
+            settleUsage = createUsageSettler(message, built.collectTokenUsage, built.collectCostMicros, startedAt)
             const result = await run(built.callbacks)
-            recordTokenUsage(message, collectTokenUsage)
-            addProcessMs(message, startedAt)
+            settleUsage()
             hooks?.onSuccess?.()
             await consumeResult(message, result)
         } catch (error) {
@@ -345,8 +436,7 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
             message.content = message.content || i18next.t(errorKeys.requestFailed, { message: reason })
 
             // 失败前可能已经收到过真实用量（流式中途断开等），照常合并
-            recordTokenUsage(message, collectTokenUsage)
-            addProcessMs(message, startedAt)
+            settleUsage?.()
             hooks?.onFail?.()
             await persist(message)
         } finally {
@@ -428,6 +518,7 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
 
         const built = buildCallbacks(target, reasonings)
         const startedAt = Date.now()
+        const settleUsage = createUsageSettler(target, built.collectTokenUsage, built.collectCostMicros, startedAt)
 
         try {
             if (!resolveSharedAgentUpstream()) {
@@ -435,15 +526,13 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
             }
 
             const result = await agent.answerPending(response, built.callbacks)
-            recordTokenUsage(target, built.collectTokenUsage)
-            addProcessMs(target, startedAt)
+            settleUsage()
             await consumeResult(target, result)
         } catch (error) {
             const reason = error instanceof Error ? error.message : i18next.t(errorKeys.unknown)
             target.content = target.content || i18next.t(errorKeys.requestFailed, { message: reason })
 
-            recordTokenUsage(target, built.collectTokenUsage)
-            addProcessMs(target, startedAt)
+            settleUsage()
             await persist(target)
         } finally {
             isBusy.value = false
@@ -556,6 +645,9 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
         cacheAggregate.cacheRead = 0
         cacheAggregate.count = 0
         contextUsage.value = null
+        // 切会话后旧的压缩费用不应记到新会话的第一条回复上
+        pendingCompactionCostMicros = 0
+        usageEpoch += 1
     }
 
     /**
@@ -613,11 +705,26 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
         }
 
         isCompacting.value = true
+        const epoch = usageEpoch
 
         try {
             // 压缩失败向上抛出：发送路径的预检会兜住并降级为「本次不压缩」，
             // 手动压缩路径据此给用户失败反馈
-            return await agent.compactHistory(history)
+            const outcome = await agent.compactHistory(history)
+
+            // 压缩是额外一次模型请求：费用先挂起，由下一条回复的收尾函数并入该条消息；
+            // 期间切换了会话（代际变化）就丢弃，避免记到新会话
+            if (outcome && epoch === usageEpoch && !isCustomAgentUpstream()) {
+                pendingCompactionCostMicros += sumCompactionCost(outcome.usages)
+            }
+
+            return outcome
+        } catch (error) {
+            // 全部重试失败也会消耗 token：同样挂起，由下一条回复结算
+            if (error instanceof CompactionUsageError && epoch === usageEpoch && !isCustomAgentUpstream()) {
+                pendingCompactionCostMicros += sumCompactionCost(error.usages)
+            }
+            throw error
         } finally {
             isCompacting.value = false
         }
