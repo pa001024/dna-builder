@@ -75,7 +75,7 @@ md5 = "0.8.0"
 axum = "0.8.6"
 uuid = { version = "1", features = ["v4"] }
 # 局域网同步 HTTPS：axum-server(rustls) 提 TLS，rcgen 签发自签证书链，sha2 算 CA 指纹
-axum-server = { version = "0.7", default-features = false, features = ["tls-rustls"] }
+axum-server = { version = "0.7", default-features = false, features = ["tls-rustls-no-provider"] }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 rcgen = "0.13"
 sha2 = "0.10"
