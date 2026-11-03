@@ -110,7 +110,7 @@ crates/               # Rust crates（buildhub-core 解释器+wasm ABI、buildhu
 2. **COMMENTS**: Limit the amount of comments you put in the code to astrict minimum. You should almost never add comments,except sometimes on non-trivial code, or for complex function (>100 lines) (Chinese JSDoc format). 1-3 line summary.
 3. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
 4. **Consistency**: Check sibling files before writing to match existing patterns
-5. **Always verify**: Run `pnpm lint` and `pnpm test` after frontend changes / `cargo check` after backend changes
+5. **Always verify**: Run `pnpm lint` and `pnpm test`(if modified test related files) after frontend changes / `cargo check` after backend changes
 6. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
 7. **Prefer native APIs** over adding new library dependencies
 8. **Use `bun -e "code"`** for inline code execution

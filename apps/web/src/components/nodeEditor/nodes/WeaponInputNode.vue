@@ -36,6 +36,9 @@ const context = computed(() => store.getBuildContext(props.id))
 const charBuild = computed(() => context.value?.charBuild)
 const settings = computed(() => context.value?.settings)
 
+/** 沉浸查看：只保留武器名片，隐藏精炼 / 等级输入 */
+const focusMode = computed(() => props.data.focusMode === true)
+
 const isMelee = computed(() => props.kind === "melee")
 const labels = computed(() =>
     isMelee.value
@@ -109,7 +112,7 @@ function handleWeaponSelection(melee: number, ranged: number) {
 </script>
 
 <template>
-    <BaseNode v-bind="{ id, data, type, selected }">
+    <BaseNode v-bind="{ id, data, type, selected }" :focusable="true">
         <template #ports>
             <!-- 展开时参数端口跟随各行，收起时回到端口区，保证收起后仍可接线 -->
             <NodePortRow :output="outputPort" />
@@ -151,28 +154,30 @@ function handleWeaponSelection(melee: number, ranged: number) {
                 <Icon icon="radix-icons:chevron-right" class="mt-1 size-3.5 shrink-0 text-base-content/30" />
             </button>
 
-            <NumberRowInput
-                :model-value="refineLevel"
-                :label="$t(labels.refine)"
-                handle-id="refine"
-                :min="0"
-                :max="5"
-                :precision="0"
-                :disabled="isDriven('refine')"
-                :hint="isDriven('refine') ? '连线' : undefined"
-                @update:model-value="setRefineLevel"
-            />
-            <NumberRowInput
-                :model-value="weaponLevel"
-                :label="$t(labels.level)"
-                handle-id="level"
-                :min="1"
-                :max="90"
-                :precision="0"
-                :disabled="isDriven('level')"
-                :hint="isDriven('level') ? '连线' : undefined"
-                @update:model-value="setWeaponLevel"
-            />
+            <template v-if="!focusMode">
+                <NumberRowInput
+                    :model-value="refineLevel"
+                    :label="$t(labels.refine)"
+                    handle-id="refine"
+                    :min="0"
+                    :max="5"
+                    :precision="0"
+                    :disabled="isDriven('refine')"
+                    :hint="isDriven('refine') ? '连线' : undefined"
+                    @update:model-value="setRefineLevel"
+                />
+                <NumberRowInput
+                    :model-value="weaponLevel"
+                    :label="$t(labels.level)"
+                    handle-id="level"
+                    :min="1"
+                    :max="90"
+                    :precision="0"
+                    :disabled="isDriven('level')"
+                    :hint="isDriven('level') ? '连线' : undefined"
+                    @update:model-value="setWeaponLevel"
+                />
+            </template>
         </div>
 
         <Teleport to="body">

@@ -184,9 +184,30 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     /**
      * 仅影响节点自身展示、不参与构筑计算的字段：改动时不失效缓存、不触发重算。
      * 标题不在此列：向量输出的维度/标签读取 `data.label`，需按下游是否消费向量决定。
-     * 思维导图是内嵌子画布，其内容与布局字段不参与构筑求值。
+     * 思维导图 / 图片 / 卡片是内嵌展示组件，其内容与尺寸字段不参与构筑求值。
      */
-    const DISPLAY_ONLY_NODE_KEYS = new Set(["isCollapsed", "tree", "layout", "baseFontSize", "baseColor", "canvasWidth", "canvasHeight"])
+    const DISPLAY_ONLY_NODE_KEYS = new Set([
+        "isCollapsed",
+        "tree",
+        "layout",
+        "baseFontSize",
+        "baseColor",
+        "canvasWidth",
+        "canvasHeight",
+        "imageMode",
+        "imageUrl",
+        "imageData",
+        "imageMime",
+        "imageName",
+        "imageWidth",
+        "imageHeight",
+        "cardKind",
+        "cardCharId",
+        "cardWeaponId",
+        "cardModId",
+        "cardWidth",
+        "focusMode",
+    ])
 
     /**
      * 判断节点标题是否参与计算：只有向量展示会读取输入节点标题。
@@ -257,6 +278,22 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             data.tree = tree ?? createMindMapTree()
             if (typeof data.layout !== "string") data.layout = "mindmap"
             if (typeof data.baseFontSize !== "number") data.baseFontSize = DEFAULT_FONT_SIZE
+        }
+        // 图片节点：补齐模式与显示尺寸，手工 JSON / 旧图也能直接打开
+        if (node.type === NodeType.IMAGE) {
+            if (data.imageMode !== "url" && data.imageMode !== "embed") data.imageMode = "embed"
+            if (typeof data.imageWidth !== "number" || !Number.isFinite(data.imageWidth) || data.imageWidth <= 0) data.imageWidth = 320
+            if (typeof data.imageHeight !== "number" || !Number.isFinite(data.imageHeight) || data.imageHeight <= 0) data.imageHeight = 200
+        }
+        // 卡片节点：补齐类型与宽度，并过滤非法的条目 id
+        if (node.type === NodeType.CARD) {
+            if (data.cardKind !== "char" && data.cardKind !== "weapon" && data.cardKind !== "mod") data.cardKind = "char"
+            if (typeof data.cardWidth !== "number" || !Number.isFinite(data.cardWidth) || data.cardWidth <= 0) data.cardWidth = 224
+            for (const key of ["cardCharId", "cardWeaponId", "cardModId"]) {
+                const value = Number(data[key])
+                if (Number.isFinite(value) && value > 0) data[key] = value
+                else delete data[key]
+            }
         }
         const normalized: EditorNode = {
             ...node,

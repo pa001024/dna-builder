@@ -96,6 +96,8 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.VECTOR_CALC]: "向量计算",
         [NodeType.DOT_INPUT]: "DOT频率",
         [NodeType.MIND_MAP]: "思维导图",
+        [NodeType.IMAGE]: "图片",
+        [NodeType.CARD]: "卡片",
         [NodeType.JSON_BUILD]: "JSON构筑",
         [NodeType.ONLINE_BUILD]: "在线构筑",
         [NodeType.JSON_EXPORT]: "JSON导出",
@@ -327,6 +329,20 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         category: NodeCategory.BASIC,
         icon: "ri:node-tree",
         description: "内嵌思维导图：七种布局、拖整枝改父子、多选框选",
+    },
+    {
+        type: NodeType.IMAGE,
+        label: "图片",
+        category: NodeCategory.BASIC,
+        icon: "ri:image-line",
+        description: "内嵌本地图片或使用 URL 引用图片",
+    },
+    {
+        type: NodeType.CARD,
+        label: "卡片",
+        category: NodeCategory.BASIC,
+        icon: "ri:id-card-line",
+        description: "用资料库卡片展示角色 / 武器 / 魔之楔，点击卡片更换",
     },
     // 构筑来源
     {

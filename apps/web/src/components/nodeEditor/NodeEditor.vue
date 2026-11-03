@@ -27,6 +27,7 @@ import ASTExpressionNode from "./nodes/ASTExpressionNode.vue"
 import AttrCalcNode from "./nodes/AttrCalcNode.vue"
 import BuffInputNode from "./nodes/BuffInputNode.vue"
 import BuffMergeNode from "./nodes/BuffMergeNode.vue"
+import CardNode from "./nodes/CardNode.vue"
 import CharInputNode from "./nodes/CharInputNode.vue"
 import ChartNode from "./nodes/ChartNode.vue"
 import CoreCalcNode from "./nodes/CoreCalcNode.vue"
@@ -38,6 +39,7 @@ import EnemyInputNode from "./nodes/EnemyInputNode.vue"
 import ExpressionCalcNode from "./nodes/ExpressionCalcNode.vue"
 import GroupNode from "./nodes/GroupNode.vue"
 import HubNode from "./nodes/HubNode.vue"
+import ImageNode from "./nodes/ImageNode.vue"
 import JSONBuildNode from "./nodes/JSONBuildNode.vue"
 import JSONExportNode from "./nodes/JSONExportNode.vue"
 import LabelNode from "./nodes/LabelNode.vue"
@@ -622,6 +624,8 @@ function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
 /** 部分节点首次落图时需要预置数据，保证节点组件挂载即有内容 */
 function paletteNodeDefaults(type: string): Record<string, unknown> {
     if (type === NodeType.MIND_MAP) return { tree: createMindMapTree(), layout: "mindmap" }
+    if (type === NodeType.IMAGE) return { imageMode: "embed", imageWidth: 320, imageHeight: 200 }
+    if (type === NodeType.CARD) return { cardKind: "char" }
     return {}
 }
 
@@ -752,6 +756,8 @@ const nodeTypes = {
     "vector-decompose": markRaw(VectorDecomposeNode),
     "vector-calc": markRaw(VectorCalcNode),
     mindmap: markRaw(MindMapNode),
+    image: markRaw(ImageNode),
+    card: markRaw(CardNode),
     "json-build": markRaw(JSONBuildNode),
     "json-export": markRaw(JSONExportNode),
     "online-build": markRaw(OnlineBuildNode),

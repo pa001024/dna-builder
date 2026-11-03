@@ -3,30 +3,19 @@ import { t } from "i18next"
 import { computed, ref, watch } from "vue"
 import { requestBuildIncomes } from "@/composables/useBuildIncomeWorker"
 import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
-import { LeveledMod, LeveledModHelper, RModTypeMap } from "@/data"
+import { LeveledMod, LeveledModHelper } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
 import { copyText, pasteText } from "@/util"
-import { getRaritySwatchClass } from "@/utils/rarity-utils"
-
-interface ModOption {
-    value: number
-    label: string
-    type: string
-    elm?: string
-    quality: string
-    ser?: string
-    count?: number
-    bufflv?: number
-    lv?: number
-}
+import type { ModPickerOption } from "@/utils/modPicker"
+import ModPickerDialog from "./ModPickerDialog.vue"
 
 interface Props {
     mods: (LeveledMod | null)[]
     /** 同一生效配置下另一部分已装槽位（如对比页“基础已装 + 追加”）：同时生效才参与互斥；变体 A/B/C 是替代关系，绝不能传其他变体 */
     otherMods?: (LeveledMod | null)[]
-    modOptions: ModOption[]
+    modOptions: ModPickerOption[]
     charBuild: CharBuild
     type: string
     auraMod?: number
@@ -45,9 +34,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { variantIndex: 0, variantCount: 0, incomeMode: "replace" })
 const inv = useInvStore()
 
-const sortByIncome = ref(true)
-const selectedProperty = ref("")
-const selectedQuality = ref("金")
 const incomeMap = ref<Record<string, number>>({})
 let workerRequestId = 0
 const mod_model_show = ref(false)
@@ -86,46 +72,6 @@ const auraModOptions = computed(() => {
     }
     return options
 })
-const filteredModOptions = computed(() => {
-    // 可装备口径收敛到 CharBuild 原生能力：槽位兼容 + 系列/名称互斥 + 库存数量，同一规则供自动构筑共用
-    const key = RModTypeMap[props.type as keyof typeof RModTypeMap]
-    const paired = props.modOptions.map(option => ({
-        option,
-        mod: LeveledModHelper.fromId(option.value, option.lv, option.bufflv),
-    }))
-    const allowed = new Set(
-        props.charBuild
-            .filterEquipableMods(
-                paired.map(item => item.mod),
-                key,
-                {
-                    equipped: [props.mods, props.otherMods],
-                    getAvailableCount: mod => inv.getModCount(mod.id, mod.品质),
-                }
-            )
-    )
-    // 属性筛选（纯展示层文本过滤，不影响可装备口径）
-    return paired
-        .filter(item => allowed.has(item.mod))
-        .map(item => item.option)
-        .filter(option => {
-            if (!selectedProperty.value) return true
-            // 获取mod的所有属性文本，包括描述、属性等
-            const modText = JSON.stringify(LeveledModHelper.fromId(option.value, option.lv, option.bufflv))
-            // 判断选择的属性是否在mod文本中
-            return modText.includes(selectedProperty.value)
-        })
-})
-
-/**
- * 获取待选魔之楔的 worker 收益键。
- * @param option 魔之楔选项
- * @returns 收益键
- */
-function getModIncomeKey(option: ModOption) {
-    return `mod:${option.value}:${option.lv ?? ""}:${option.bufflv ?? ""}`
-}
-
 /**
  * 获取已装备魔之楔的 worker 收益键。
  * @param index 槽位索引
@@ -133,15 +79,6 @@ function getModIncomeKey(option: ModOption) {
  */
 function getEquippedModIncomeKey(index: number) {
     return `equipped:${props.type}:${index}`
-}
-
-/**
- * 读取待选魔之楔收益。
- * @param option 魔之楔选项
- * @returns 收益值
- */
-function getModIncome(option: ModOption) {
-    return incomeMap.value[getModIncomeKey(option)] ?? 0
 }
 
 /**
@@ -153,28 +90,6 @@ function getEquippedModIncome(index: number) {
     return incomeMap.value[getEquippedModIncomeKey(index)] ?? 0
 }
 
-const sortedModOptions = computed(() => {
-    const filteredOptions = filteredModOptions.value
-
-    if (!sortByIncome.value) {
-        return filteredOptions
-    }
-
-    // 按收益降序排序
-    return filteredOptions
-        .map(option => ({ income: getModIncome(option), option }))
-        .sort((a, b) => b.income - a.income)
-        .map(item => item.option)
-})
-
-const visibleModOptions = computed(() =>
-    sortedModOptions.value.filter(option => selectedQuality.value === "全部" || option.quality === selectedQuality.value)
-)
-
-const workerModOptions = computed(() =>
-    filteredModOptions.value.filter(option => selectedQuality.value === "全部" || option.quality === selectedQuality.value)
-)
-
 /**
  * 将 Vue proxy 与类实例快照转为 worker 可克隆的普通 JSON 数据。
  * @param value 原始数据
@@ -184,25 +99,13 @@ function cloneForWorker<T>(value: T): T {
     return JSON.parse(JSON.stringify(value)) as T
 }
 
-/**
- * 刷新当前魔之楔收益。
- */
+/** 刷新已装备魔之楔的收益（候选收益由选择弹窗自行计算） */
 function refreshIncomes() {
     const id = ++workerRequestId
-    const options = mod_model_show.value ? workerModOptions.value : []
     requestBuildIncomes(
         cloneForWorker({
             build: createWorkerSnapshot(props.charBuild),
-            mods: options.map(option => {
-                const mod = LeveledModHelper.fromId(option.value, option.lv, option.bufflv)
-                return {
-                    key: getModIncomeKey(option),
-                    data: mod.originalModData,
-                    level: mod.等级,
-                    buffLv: mod.buffLv,
-                    effect: mod.buff?._originalBuffData,
-                }
-            }),
+            mods: [],
             equippedMods: props.mods.flatMap((mod, index) =>
                 mod
                     ? [
@@ -214,8 +117,6 @@ function refreshIncomes() {
                       ]
                     : []
             ),
-            // 候选落槽位置：替换口径下 worker 按替换该槽位求收益，避免同系列互斥把附加的新楔恒算成 0
-            ...(props.incomeMode === "replace" ? { replaceSlot: { type: props.type, index: localSelectedSlot.value } } : {}),
         })
     )
         .then(result => {
@@ -225,18 +126,7 @@ function refreshIncomes() {
         .catch(error => console.error("MOD收益worker计算失败", error))
 }
 
-watch(
-    () => [
-        props.charBuild,
-        props.mods,
-        props.type,
-        mod_model_show.value,
-        localSelectedSlot.value,
-        mod_model_show.value ? workerModOptions.value : [],
-    ],
-    () => refreshIncomes(),
-    { immediate: true, deep: true }
-)
+watch(() => [props.charBuild, props.mods, props.type], () => refreshIncomes(), { immediate: true, deep: true })
 
 // 定义组件事件
 const emit = defineEmits<{
@@ -336,17 +226,11 @@ function handleLevelChange(index: number, level: number) {
 
 /**
  * 选MOD弹窗确认。
- * @param index 槽位索引
- * @param value MOD id
- * @param lv 等级
+ * @param option 候选项
  */
-function handleSelectMod(index: number, value: number, lv: number) {
-    emit("selectMod", [index, value, lv])
+function handleSelectMod(option: ModPickerOption) {
+    emit("selectMod", [localSelectedSlot.value, option.value, option.lv ?? 10])
     mod_model_show.value = false
-}
-
-function toggleSortByIncome() {
-    sortByIncome.value = !sortByIncome.value
 }
 
 /**
@@ -403,76 +287,18 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
 <template>
     <!-- @container：槽位列数按 ModEditer 自身宽度算，嵌入节点或构筑页都不受外层容器影响 -->
     <div class="@container">
-        <Teleport v-if="mod_model_show" to="body">
-            <dialog class="modal" :class="{ 'modal-open': mod_model_show }">
-                <div class="modal-box max-w-11/12 h-11/12 relative">
-                    <!-- 选择新MOD -->
-                    <SectionHeader
-                        number="01"
-                        kicker="MOD"
-                        :title="`${$t('char-build.select_mod_slot')} ${localSelectedSlot + 1}`"
-                        no-animate
-                        compact
-                    >
-                        <template #trailing>
-                            <!-- 关闭按钮 -->
-                            <button class="btn btn-ghost btn-sm btn-square" @click="mod_model_show = false">
-                                <Icon bold icon="codicon:chrome-close" />
-                            </button>
-                        </template>
-                    </SectionHeader>
-
-                    <!-- 品质筛选 -->
-                    <div class="tabs tabs-box bg-transparent">
-                        <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
-                            <label class="tab">
-                                <input
-                                    v-model="selectedQuality"
-                                    type="radio"
-                                    :name="`mod_select_${type}`"
-                                    :value="quality"
-                                    :aria-label="quality === '全部' ? $t('common.all') : quality"
-                                />
-                                <span v-if="quality === '全部'">{{ $t("common.all") }}</span>
-                                <span v-else :class="getRaritySwatchClass(quality)" :title="quality" />
-                            </label>
-                            <div v-if="selectedQuality === quality" class="tab-content py-2">
-                                <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
-                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
-                                        <ModItem
-                                            v-for="mod in visibleModOptions"
-                                            :key="mod.value"
-                                            :mod="LeveledModHelper.fromId(mod.value, mod.lv, mod.bufflv)"
-                                            :income="getModIncome(mod)"
-                                            :noremove="true"
-                                            :char-build="charBuild"
-                                            @click="handleSelectMod(localSelectedSlot, mod.value, mod.lv ?? 10)"
-                                        />
-                                    </div>
-                                </ScrollArea>
-                            </div>
-                        </template>
-
-                        <!-- 属性筛选下拉框 -->
-                        <Combobox
-                            v-model="selectedProperty"
-                            class="w-40 mx-4"
-                            placeholder="搜索属性/描述"
-                            :options="
-                                ['攻击', '生命', '防御', '护盾', '威力', '耐久', '范围', '效益', '增伤'].map(prop => ({
-                                    label: prop,
-                                    value: prop,
-                                }))
-                            "
-                        />
-                        <button class="btn btn-sm" :class="sortByIncome ? 'btn-secondary' : 'btn-outline'" @click="toggleSortByIncome">
-                            {{ sortByIncome ? "收益排序：高→低" : "默认排序" }}
-                        </button>
-                    </div>
-                </div>
-                <div class="modal-backdrop" @click="mod_model_show = false" />
-            </dialog>
-        </Teleport>
+        <ModPickerDialog
+            :open="mod_model_show"
+            :mod-options="modOptions"
+            :char-build="charBuild"
+            :slot-type="type"
+            :mods="mods"
+            :other-mods="otherMods"
+            :slot-index="localSelectedSlot"
+            :income-mode="incomeMode"
+            @update:open="mod_model_show = $event"
+            @select="handleSelectMod"
+        />
         <!-- 顶部操作区：窄容器用图标替代文字，保证变体与操作按钮始终同一行 -->
         <div class="flex flex-wrap items-center gap-2 mb-3 @lg:flex-nowrap">
             <!-- MOD变体切换（左上角）：同一构筑可保存多份MOD配置（A/B/C），加号按顺序追加下一份；右侧中枢（光环）随变体一起切换 -->

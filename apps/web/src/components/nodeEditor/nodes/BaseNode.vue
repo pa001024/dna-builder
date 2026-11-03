@@ -12,6 +12,8 @@ const props = defineProps<{
     type: string
     selected: boolean
     ports?: NodePortSchema
+    /** 是否提供沉浸查看按钮：只保留主体内容，隐藏标题栏、端口与外框 */
+    focusable?: boolean
 }>()
 
 // 获取store实例
@@ -27,6 +29,13 @@ watch(
 // 切换收缩状态
 const toggleCollapse = () => {
     store.updateNodeData(props.id, { isCollapsed: !props.data.isCollapsed })
+}
+
+/** 沉浸查看：与收起不同，连外框、标题栏和端口一起隐藏，只留主体内容 */
+const focusMode = computed(() => props.focusable === true && props.data.focusMode === true)
+
+function toggleFocus() {
+    store.updateNodeData(props.id, { focusMode: !focusMode.value })
 }
 
 // 标题点击编辑：记录按下位置，拖动节点时不误触编辑
@@ -75,7 +84,9 @@ function cancelTitle() {
 
 // 节点样式类
 const nodeClass = computed(() => {
-    const classes = ["min-w-[200px]"]
+    // 沉浸查看不显示外框与选中环，仅保留内容本体
+    if (focusMode.value) return "group/node w-fit"
+    const classes = ["group/node min-w-[200px] rounded-xs border border-base-content/15 bg-base-100/80 shadow-sm backdrop-blur-sm"]
     if (props.selected) {
         classes.push("border-primary/70", "ring-1", "ring-primary/30")
     }
@@ -136,6 +147,8 @@ const getIcon = (type: string): IconTypes => {
         "vector-input": "ri:sort-number-asc",
         "vector-decompose": "ri:split-cells-horizontal",
         "vector-calc": "ri:bar-chart-line",
+        image: "ri:image-line",
+        card: "ri:id-card-line",
         "json-build": "ri:file-code-line",
         "online-build": "ri:cloud-line",
         "json-export": "ri:file-copy-line",
@@ -145,7 +158,7 @@ const getIcon = (type: string): IconTypes => {
 </script>
 
 <template>
-    <div class="relative rounded-xs border border-base-content/15 bg-base-100/80 shadow-sm backdrop-blur-sm" :class="nodeClass">
+    <div class="relative" :class="nodeClass">
         <!-- 锁定覆盖层：吞掉节点内全部指针事件，解锁请用画布列表的锁图标 -->
         <div
             v-if="data.locked"
@@ -158,7 +171,7 @@ const getIcon = (type: string): IconTypes => {
             @contextmenu.stop.prevent
             @pointerdown.stop
         />
-        <div class="flex h-7 items-center gap-1.5 px-2">
+        <div v-if="!focusMode" class="flex h-7 items-center gap-1.5 px-2">
             <Icon :icon="getIcon(type)" class="size-3.5 shrink-0 text-base-content/55" />
             <Icon v-if="data.locked" icon="ri:lock-line" class="size-3 shrink-0 text-warning" />
             <input
@@ -183,25 +196,48 @@ const getIcon = (type: string): IconTypes => {
             >
                 {{ data.label }}
             </span>
-            <button
-                type="button"
-                class="nodrag ml-auto grid size-5 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/10 hover:text-base-content"
-                @click.stop="toggleCollapse"
-            >
-                <Icon :icon="data.isCollapsed ? 'radix-icons:chevron-down' : 'radix-icons:chevron-up'" class="size-3.5" />
-            </button>
+            <div class="ml-auto flex shrink-0 items-center gap-0.5">
+                <button
+                    v-if="focusable"
+                    type="button"
+                    class="nodrag grid size-5 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/10 hover:text-base-content"
+                    title="沉浸查看（隐藏其它控件）"
+                    @click.stop="toggleFocus"
+                >
+                    <Icon icon="ri:fullscreen-line" class="size-3.5" />
+                </button>
+                <button
+                    type="button"
+                    class="nodrag grid size-5 cursor-pointer place-items-center text-base-content/55 transition-colors duration-150 hover:bg-base-content/10 hover:text-base-content"
+                    :title="data.isCollapsed ? '展开内容' : '收起内容'"
+                    @click.stop="toggleCollapse"
+                >
+                    <Icon :icon="data.isCollapsed ? 'radix-icons:chevron-down' : 'radix-icons:chevron-up'" class="size-3.5" />
+                </button>
+            </div>
         </div>
 
         <!-- 端口行始终显示：折叠时仍保留连接点，且每个端口固定在对应行上 -->
-        <div v-if="portRows.length > 0 || $slots.ports" class="space-y-px px-2 pb-0.5">
+        <div v-if="!focusMode && (portRows.length > 0 || $slots.ports)" class="space-y-px px-2 pb-0.5">
             <slot name="ports">
                 <NodePortRow v-for="(row, index) in portRows" :key="index" :input="row.input" :output="row.output" />
             </slot>
         </div>
 
-        <!-- 插槽：节点主体内容（非迷你模式下显示） -->
-        <div v-if="!data.isCollapsed" class="px-2 pb-2 pt-1.5">
+        <!-- 插槽：节点主体内容（非迷你模式下显示；沉浸查看时忽略折叠状态） -->
+        <div v-if="!data.isCollapsed || focusMode" :class="focusMode ? '' : 'px-2 pb-2 pt-1.5'">
             <slot></slot>
         </div>
+
+        <!-- 沉浸查看的退出按钮：平时隐藏，悬停节点右上角时出现 -->
+        <button
+            v-if="focusMode"
+            type="button"
+            class="nodrag absolute right-1 top-1 z-20 grid size-5 cursor-pointer place-items-center rounded-xs border border-base-content/15 bg-base-100/90 text-base-content/60 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover/node:opacity-100 hover:text-primary pointer-events-none group-hover/node:pointer-events-auto"
+            title="退出沉浸查看"
+            @click.stop="toggleFocus"
+        >
+            <Icon icon="ri:fullscreen-exit-line" class="size-3.5" />
+        </button>
     </div>
 </template>

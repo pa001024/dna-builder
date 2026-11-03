@@ -51,6 +51,11 @@ function toNodeView(node: { id: string; type?: string; position: { x: number; y:
     } catch {
         data = {}
     }
+    // 内嵌图片可能有数 MB，state() 只报告是否存在，完整数据走 export()
+    if (node.type === NodeType.IMAGE && typeof data.imageData === "string") {
+        delete data.imageData
+        data.hasImageData = true
+    }
     return {
         id: node.id,
         type: node.type ?? "",
@@ -132,7 +137,18 @@ export function createGraphApi(host: GraphApiHost): GraphApi {
             const y = typeof options.y === "number" ? options.y : 120 + Math.floor(count / 8) * 60
             const id = `n${nanoid(8)}`
             const data = options.data && typeof options.data === "object" ? options.data : {}
-            const defaults = type === NodeType.MIND_MAP ? { tree: createMindMapTree(), layout: "mindmap" } : {}
+            const defaults =
+                type === NodeType.MIND_MAP
+                    ? { tree: createMindMapTree(), layout: "mindmap" }
+                    : type === NodeType.IMAGE
+                      ? {
+                            imageMode: typeof data.imageUrl === "string" && data.imageUrl.length > 0 ? "url" : "embed",
+                            imageWidth: 320,
+                            imageHeight: 200,
+                        }
+                      : type === NodeType.CARD
+                        ? { cardKind: "char" }
+                        : {}
             store.addNode({
                 id,
                 type,

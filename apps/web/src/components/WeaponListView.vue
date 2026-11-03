@@ -397,12 +397,10 @@ function unequipCurrentWeapon() {
                                     <span class="truncate">{{ $t(weapon.名称) }}</span>
                                 </h3>
 
-                                <!-- 伤害类型 + 熔炼：元信息行 -->
-                                <p
-                                    class="flex min-h-5 items-center justify-between gap-2 text-[0.625rem] tracking-wide text-base-content/40"
-                                >
-                                    <span v-if="weapon.伤害类型" class="truncate">{{ $t(weapon.伤害类型) }}</span>
-                                    <span v-if="weapon.熔炼" class="shrink-0 truncate">{{ gpt(weapon.熔炼, 5) }}</span>
+                                <!-- 伤害类型 + 熔炼：元信息行；伤害类型固定占位，熔炼文案过长时省略 -->
+                                <p class="flex min-h-5 items-center gap-2 text-[0.625rem] tracking-wide text-base-content/40">
+                                    <span v-if="weapon.伤害类型" class="shrink-0">{{ $t(weapon.伤害类型) }}</span>
+                                    <span v-if="weapon.熔炼" class="min-w-0 truncate">{{ gpt(weapon.熔炼, 5) }}</span>
                                 </p>
 
                                 <!-- 配装收益 -->

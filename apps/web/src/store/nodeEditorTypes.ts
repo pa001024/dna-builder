@@ -53,6 +53,12 @@ export enum NodeType {
     // 思维导图（节点内嵌独立子画布，不参与构筑求值）
     MIND_MAP = "mindmap",
 
+    // 图片（内嵌本地图片或引用 URL，不参与构筑求值）
+    IMAGE = "image",
+
+    // 资料库卡片（角色 / 武器 / 魔之楔，不参与构筑求值）
+    CARD = "card",
+
     // 构筑来源
     JSON_BUILD = "json-build", // 从 JSON 文本解析构筑
     ONLINE_BUILD = "online-build", // 从在线构筑列表选择构筑

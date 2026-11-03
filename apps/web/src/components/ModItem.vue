@@ -178,7 +178,7 @@ function handleMouseUp(event: MouseEvent) {
 <template>
     <!-- 方形卡片：固定高度（aspect-square），底部信息半透明叠加，hover 无位移动画，避免闪烁 -->
     <div
-        class="nodrag group relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
+        class="nodrag group/mod relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
         :class="[mod ? ['border-base-content/15', getQualityHoverBorder(mod.品质)] : 'border-dashed border-base-content/25']"
         :style="dragStyle"
         :data-index="index"
@@ -189,7 +189,7 @@ function handleMouseUp(event: MouseEvent) {
                 <!-- MOD 图 -->
                 <img class="h-full w-full object-cover" :src="mod.url" :alt="mod.名称" />
                 <!-- 悬停遮罩 -->
-                <div class="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/15" />
+                <div class="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover/mod:bg-black/15" />
                 <!-- 极性 + 耐受：极化槽位绿色半价，异极性惩罚槽位红色×1.5 -->
                 <div
                     class="pointer-events-none absolute top-2 left-2 z-10 flex items-center text-xs"
@@ -212,7 +212,7 @@ function handleMouseUp(event: MouseEvent) {
                             class="absolute inset-0 flex items-center justify-between gap-1"
                             :class="
                                 control && (selected || selected === undefined)
-                                    ? 'transition-opacity duration-200 group-hover:opacity-0'
+                                    ? 'transition-opacity duration-200 group-hover/mod:opacity-0'
                                     : ''
                             "
                         >
@@ -228,7 +228,7 @@ function handleMouseUp(event: MouseEvent) {
                 <!-- 悬停等级/数量输入：绝对定位叠加于底部，不撑高 -->
                 <div
                     v-if="control && (selected || selected === undefined)"
-                    class="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-0.5 bg-base-100/25 px-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    class="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-0.5 bg-base-100/25 px-1 opacity-0 transition-opacity duration-200 group-hover/mod:opacity-100"
                 >
                     <NumberInput
                         v-if="!nolv"
