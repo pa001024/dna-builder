@@ -40,11 +40,9 @@ const portChar = computed(() => {
     const edge = store.edges.find(item => item.target === props.id && item.targetHandle === "char")
     if (!edge) return null
     const node = store.nodes.find(item => item.id === edge.source)
-    const name = typeof node?.data.charName === "string" ? node.data.charName : ""
-    const explicitId = Number(node?.data.charId)
-    const char = charMap.get(name) ?? (Number.isFinite(explicitId) && explicitId > 0 ? charMap.get(explicitId) : undefined)
-    if (char) return { id: char.id, name: char.名称 }
-    return name ? { id: 0, name } : null
+    const charId = Number(node?.data.charId)
+    const char = Number.isFinite(charId) && charId > 0 ? charMap.get(charId) : undefined
+    return char ? { id: char.id, name: char.名称 } : null
 })
 
 const portIcon = computed(() => (portChar.value?.id ? LeveledCharHelper.idToUrl(portChar.value.id) : ""))

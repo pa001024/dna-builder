@@ -1,4 +1,4 @@
-import { buffData, charData, charMap, LeveledModHelper } from "@/data"
+import { buffData, charData, LeveledModHelper } from "@/data"
 import { type CharBuild, type DotFrequencySettings, defaultDotFrequencySettings } from "@/data/CharBuild"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import {
@@ -832,9 +832,7 @@ export function createSettingsFromNodeInputs(
         base.dotSettings = { ...defaultDotFrequencySettings }
     }
 
-    const charName = typeof data.charName === "string" ? data.charName : ""
-    const explicitCharId = toFiniteNumber(data.charId, 0)
-    const resolvedCharId = charIdFromNode(charName, explicitCharId)
+    const resolvedCharId = toFiniteNumber(data.charId, 0)
     const charId = resolvedCharId > 0 ? resolvedCharId : options.fallbackChar ? (charData[0]?.id ?? 0) : (options.baseBuild?.charId ?? 0)
     if (charId <= 0) missing.push("角色")
 
@@ -937,14 +935,6 @@ export function createSettingsFromNodeInputs(
         missing.push(`重复输入: ${[...new Set(inputs.duplicates)].join("、")}`)
     }
     return { charId, settings: base, missing }
-}
-
-function charIdFromNode(charName: string, explicitId: number): number {
-    if (charName) {
-        const char = charMap.get(charName)
-        if (char) return char.id
-    }
-    return explicitId
 }
 
 /**
@@ -1639,16 +1629,16 @@ export function createBuildContextsFromInputs(
  * 从标准 charSettings JSON 文本创建构筑上下文。
  * 角色必须由角色端口提供，不再从 JSON 读取 charId。
  * @param text 标准 charSettings 文本
- * @param char 角色端口提供的角色（名称 / id）
+ * @param char 角色端口提供的角色 id
  * @returns 构筑上下文或错误
  */
 export function createBuildContextFromJSONText(
     text: string,
-    char: { charName?: string; charId?: number } = {}
+    char: { charId?: number } = {}
 ): { context?: NodeBuildContext; error?: string } {
     const trimmed = text.trim()
     if (!trimmed) return {}
-    const portCharId = charIdFromNode(typeof char.charName === "string" ? char.charName : "", toFiniteNumber(char.charId, 0))
+    const portCharId = toFiniteNumber(char.charId, 0)
     if (!(portCharId > 0)) return { error: "缺少角色：请连接角色输入" }
     try {
         const parsed = JSON.parse(trimmed)

@@ -11,7 +11,7 @@ import {
     unlikeGraphMutation,
     updateGraphMutation,
 } from "@/api/graphql"
-import { weaponMap } from "@/data"
+import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
@@ -51,18 +51,41 @@ const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 interface GraphSummary {
     nodeCount: number
     edgeCount: number
-    chars: string[]
+    chars: number[]
     weapons: number[]
+}
+
+/** 卡片预览条目：头像 + 悬停卡片的等级化数据源 */
+interface GraphPreviewEntry {
+    key: string
+    kind: "char" | "weapon"
+    id: number
+    name: string
+    icon: string
+    /** 与当前类型对应的悬停卡片数据源 */
+    char?: LeveledChar
+    weapon?: LeveledWeapon
+    /** 角色组与武器组之间的分隔线 */
+    dividerBefore?: boolean
 }
 
 function parseGraphSummary(graphInfo: string): GraphSummary | null {
     try {
-        const parsed = JSON.parse(graphInfo) as Partial<GraphSummary>
+        const parsed = JSON.parse(graphInfo) as {
+            nodeCount?: unknown
+            edgeCount?: unknown
+            chars?: unknown
+            weapons?: unknown
+        }
         return {
             nodeCount: typeof parsed.nodeCount === "number" ? parsed.nodeCount : 0,
             edgeCount: typeof parsed.edgeCount === "number" ? parsed.edgeCount : 0,
-            chars: Array.isArray(parsed.chars) ? parsed.chars.filter((c): c is string => typeof c === "string") : [],
-            weapons: Array.isArray(parsed.weapons) ? parsed.weapons.filter((w): w is number => typeof w === "number") : [],
+            chars: Array.isArray(parsed.chars)
+                ? [...new Set(parsed.chars.filter((id): id is number => typeof id === "number" && Number.isFinite(id)))]
+                : [],
+            weapons: Array.isArray(parsed.weapons)
+                ? [...new Set(parsed.weapons.filter((id): id is number => typeof id === "number" && Number.isFinite(id)))]
+                : [],
         }
     } catch {
         return null
@@ -88,16 +111,40 @@ function edgeCountOf(graph: Graph): number | null {
     return graphSummaryOf(graph)?.edgeCount ?? null
 }
 
-/** 卡片上的角色 / 武器一行，没有摘要信息时返回空 */
-function summaryLineOf(graph: Graph): string {
+const previewCache = new Map<string, GraphPreviewEntry[]>()
+
+/**
+ * 解析卡片预览：角色在前、武器在后，供头像行与悬停卡片共用。
+ * @param graph 节点图列表项
+ * @returns 已解析出静态数据的头像条目
+ */
+function graphPreviewOf(graph: Graph): GraphPreviewEntry[] {
     const summary = graphSummaryOf(graph)
-    if (!summary) return ""
-    const parts: string[] = []
-    if (summary.chars.length > 0) parts.push(`角色：${summary.chars.join("、")}`)
-    if (summary.weapons.length > 0) {
-        parts.push(`武器：${summary.weapons.map(id => weaponMap.get(id)?.名称 || `#${id}`).join("、")}`)
+    if (!summary) return []
+    const cacheKey = `${graph.id}|${graph.graphInfo ?? ""}|${charMap.size}|${weaponMap.size}`
+    const cached = previewCache.get(cacheKey)
+    if (cached) return cached
+
+    const charEntries: GraphPreviewEntry[] = []
+    for (const id of summary.chars) {
+        const data = charMap.get(id)
+        if (!data) continue
+        const char = new LeveledChar(data)
+        charEntries.push({ key: `char-${id}`, kind: "char", id, name: char.名称, icon: char.url, char })
     }
-    return parts.join(" · ")
+    const weaponEntries: GraphPreviewEntry[] = []
+    for (const id of summary.weapons) {
+        const data = weaponMap.get(id)
+        if (!data) continue
+        const weapon = new LeveledWeapon(data)
+        weaponEntries.push({ key: `weapon-${id}`, kind: "weapon", id, name: weapon.名称, icon: weapon.url, weapon })
+    }
+    const entries = [
+        ...charEntries,
+        ...weaponEntries.map((entry, index) => (index === 0 && charEntries.length > 0 ? { ...entry, dividerBefore: true } : entry)),
+    ]
+    previewCache.set(cacheKey, entries)
+    return entries
 }
 
 function formatDate(timestamp: number) {
@@ -439,8 +486,30 @@ defineExpose({
                             <span class="text-xs text-base-content/70">{{ graph.user.name }}</span>
                         </div>
 
-                        <div v-if="summaryLineOf(graph)" class="mb-2 truncate text-xs text-base-content/60" :title="summaryLineOf(graph)">
-                            {{ summaryLineOf(graph) }}
+                        <div v-if="graphPreviewOf(graph).length" class="mb-2 flex min-w-0 items-center gap-0.5">
+                            <template v-for="entry in graphPreviewOf(graph)" :key="entry.key">
+                                <span v-if="entry.dividerBefore" class="h-4 w-px shrink-0 bg-base-content/15" />
+                                <ShowProps v-if="entry.char" :char="entry.char">
+                                    <ImageFallback
+                                        :src="entry.icon"
+                                        :alt="entry.name"
+                                        class="size-6 rounded-full bg-base-200 object-cover"
+                                        loading="lazy"
+                                    >
+                                        <Icon icon="ri:user-line" class="size-6 opacity-40" />
+                                    </ImageFallback>
+                                </ShowProps>
+                                <ShowProps v-else-if="entry.weapon" :weapon="entry.weapon">
+                                    <ImageFallback
+                                        :src="entry.icon"
+                                        :alt="entry.name"
+                                        class="size-6 rounded-full bg-base-200 object-cover"
+                                        loading="lazy"
+                                    >
+                                        <Icon icon="ri:sword-line" class="size-6 opacity-30" />
+                                    </ImageFallback>
+                                </ShowProps>
+                            </template>
                         </div>
 
                         <div class="mb-3 flex items-center justify-between gap-2">

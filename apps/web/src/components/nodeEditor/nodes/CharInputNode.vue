@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { t } from "i18next"
-import { computed } from "vue"
+import { computed, ref } from "vue"
+import CardEntityPickerDialog from "@/components/CardEntityPickerDialog.vue"
 import { charMap, LeveledCharHelper } from "@/data"
 import { normalizeCharSkillLevels } from "@/data/charSettings"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
@@ -23,8 +24,14 @@ const store = useNodeEditorStore()
 /** 沉浸查看：只保留角色名片，隐藏数值输入等控件 */
 const focusMode = computed(() => props.data.focusMode === true)
 
+/** 角色 id（节点数据的唯一角色标识） */
+const charId = computed(() => {
+    const id = Number(props.data.charId)
+    return Number.isFinite(id) && id > 0 ? id : 0
+})
+
 /** 角色数据与卡片展示信息 */
-const char = computed(() => charMap.get(typeof props.data.charName === "string" ? props.data.charName : ""))
+const char = computed(() => charMap.get(charId.value))
 const charIcon = computed(() => (char.value ? LeveledCharHelper.idToUrl(char.value.id) : ""))
 const charBg = computed(() => (char.value ? getElementSoftBgClass(char.value.属性) : "bg-base-content/4"))
 const charAccent = computed(() => (char.value ? getElementAccentColor(char.value.属性) : undefined))
@@ -34,19 +41,22 @@ const charMeta = computed(() => {
     return [t(`${item.属性}属性`, item.属性), t(item.精通?.[0])].filter(Boolean).join(" · ")
 })
 
-// 本地状态
-const charName = computed({
-    get: () => props.data.charName,
-    set: value => {
-        const patch: Record<string, any> = { charName: value }
-        // 切换角色后，旧角色的额外精通不再适用
-        const nextChar = charMap.get(value)
-        if (value !== props.data.charName && props.data.extraMastery && !nextChar?.额外精通?.includes(props.data.extraMastery)) {
-            patch.extraMastery = ""
-        }
-        store.updateNodeData(props.id, patch)
-    },
-})
+const charName = computed(() => char.value?.名称 ?? "")
+const charDialogShow = ref(false)
+
+/**
+ * 选择角色：写入角色 id；旧角色的额外精通不再适用时一并清空。
+ * @param id 角色 id
+ */
+function selectChar(id: number) {
+    const nextChar = charMap.get(id)
+    if (!nextChar || id === charId.value) return
+    const patch: Record<string, any> = { charId: id }
+    if (props.data.extraMastery && !nextChar.额外精通?.includes(props.data.extraMastery)) {
+        patch.extraMastery = ""
+    }
+    store.updateNodeData(props.id, patch)
+}
 
 const charLevel = computed({
     get: () => {
@@ -126,13 +136,17 @@ const outputPort = computed(() => ports.value.outputs[0])
             </template>
         </template>
         <div class="w-75 max-w-full space-y-1.5">
-            <!-- 角色名片：沿用资料库条目卡片的图像区 + 名称/属性层级 -->
-            <div class="flex items-stretch gap-2 border border-base-content/10 bg-base-100/60 p-1.5">
+            <!-- 角色名片：与武器输入一致，点击整张卡片打开角色选择弹窗 -->
+            <button
+                type="button"
+                class="nodrag flex w-full min-w-0 items-stretch gap-2 border border-base-content/10 bg-base-100/60 p-1.5 text-left transition-colors duration-150 hover:border-primary/40"
+                @click="charDialogShow = true"
+            >
                 <div class="relative h-14 w-14 shrink-0 overflow-hidden" :class="charBg">
                     <img
                         v-if="charIcon"
                         :src="charIcon"
-                        :alt="data.charName"
+                        :alt="charName"
                         class="absolute inset-0 h-full w-full object-cover object-top"
                     />
                     <div v-else class="grid h-full place-items-center text-base-content/25">
@@ -143,13 +157,16 @@ const outputPort = computed(() => ports.value.outputs[0])
                     </span>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <CharSelect v-model="charName" />
+                    <div class="truncate text-[13px] font-semibold" :class="charName ? 'text-base-content' : 'text-base-content/40'">
+                        {{ charName ? $t(charName) : $t("char-build.select_character") }}
+                    </div>
                     <div class="mt-1 flex items-center gap-1 text-[10px] text-base-content/45">
                         <span v-if="charAccent" class="size-1.5 shrink-0" :style="{ backgroundColor: charAccent }" />
                         <span class="truncate">{{ charMeta || "选择角色以查看属性" }}</span>
                     </div>
                 </div>
-            </div>
+                <Icon icon="radix-icons:chevron-right" class="mt-1 size-3.5 shrink-0 text-base-content/30" />
+            </button>
 
             <template v-if="!focusMode">
                 <NumberRowInput
@@ -240,5 +257,14 @@ const outputPort = computed(() => ports.value.outputs[0])
                 </div>
             </template>
         </div>
+
+        <CardEntityPickerDialog
+            v-if="charDialogShow"
+            :open="charDialogShow"
+            kind="char"
+            :selected-id="charId"
+            @update:open="charDialogShow = $event"
+            @select="selectChar"
+        />
     </BaseNode>
 </template>

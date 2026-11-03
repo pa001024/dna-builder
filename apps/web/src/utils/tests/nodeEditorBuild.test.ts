@@ -47,7 +47,7 @@ function createInputs() {
     const charNode: BuildGraphNode = {
         id: "char",
         type: NodeType.CHAR_INPUT,
-        data: { charId: CHAR_ID, charName: "法露茜", charLevel: 80 },
+        data: { charId: CHAR_ID, charLevel: 80 },
     }
     const customVarsNode: BuildGraphNode = {
         id: "vars",
@@ -401,7 +401,7 @@ describe("nodeEditorBuild", () => {
         expect(context?.charId).toBe(CHAR_ID)
         expect(context?.settings.baseName).toBe("潜入夜色")
 
-        expect(createBuildContextFromJSONText("{not json}", { charName: "法露茜" }).error).toContain("JSON 解析失败")
+        expect(createBuildContextFromJSONText("{not json}", { charId: CHAR_ID }).error).toContain("JSON 解析失败")
     })
 
     it("JSON 构筑只接受标准 charSettings 文本，角色必须由角色端口提供", () => {
@@ -412,7 +412,7 @@ describe("nodeEditorBuild", () => {
         const wrapped = JSON.stringify({ charId: CHAR_ID, charSettings: json })
         expect(createBuildContextFromJSONText(wrapped).error).toContain("角色")
         // 端口提供角色时解析成功；JSON 内携带的 charId 被忽略，端口非法 id 时报错
-        const { context, error } = createBuildContextFromJSONText(json, { charName: "法露茜" })
+        const { context, error } = createBuildContextFromJSONText(json, { charId: CHAR_ID })
         expect(error).toBeUndefined()
         expect(context?.charId).toBe(CHAR_ID)
         expect(context?.settings.baseName).toBe("潜入夜色")
@@ -431,7 +431,7 @@ describe("nodeEditorBuild", () => {
         expect(parsed.charSettings).toBeUndefined()
         expect(parsed.baseName).toBe("潜入夜色")
         // 导出的标准文本配合角色端口可重新解析为同一构筑
-        const { context, error } = createBuildContextFromJSONText(text, { charName: "法露茜" })
+        const { context, error } = createBuildContextFromJSONText(text, { charId: CHAR_ID })
         expect(error).toBeUndefined()
         expect(context?.charId).toBe(CHAR_ID)
         expect(context?.settings.baseName).toBe("潜入夜色")

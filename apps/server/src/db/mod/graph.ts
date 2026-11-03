@@ -80,7 +80,7 @@ const GRAPH_INFO_WEAPON_TYPES = new Set(["melee-weapon-input", "ranged-weapon-in
  * 一次性摘要计算：写入时从图 JSON 里提取角色 / 武器（去重）与节点 / 边数。
  * 结果存进 graphs.graph_info，列表请求直接读它，不再下载完整图 JSON。
  * @param graphData 图 JSON 文本
- * @returns 摘要 JSON 文本（{ nodeCount, edgeCount, chars[], weapons[] }）
+ * @returns 摘要 JSON 文本（{ nodeCount, edgeCount, chars: number[], weapons: number[] }）
  */
 function buildGraphInfo(graphData: string): string {
     let nodes: unknown[] = []
@@ -92,15 +92,15 @@ function buildGraphInfo(graphData: string): string {
     } catch {
         // 解析失败也落库一条空摘要，读侧按缺失处理
     }
-    const chars = new Set<string>()
+    const chars = new Set<number>()
     const weapons = new Set<number>()
     for (const node of nodes) {
         if (!node || typeof node !== "object") continue
         const { type, data } = node as { type?: unknown; data?: Record<string, unknown> }
         if (typeof type !== "string" || !data || typeof data !== "object") continue
         if (GRAPH_INFO_CHAR_TYPES.has(type)) {
-            const name = data.charName
-            if (typeof name === "string" && name.trim()) chars.add(name.trim())
+            const charId = Number(data.charId)
+            if (Number.isFinite(charId) && charId > 0) chars.add(charId)
         } else if (GRAPH_INFO_WEAPON_TYPES.has(type)) {
             const raw = data.weapon ?? data.meleeWeapon ?? data.rangedWeapon
             const id = typeof raw === "number" ? raw : Number(raw)
@@ -110,7 +110,7 @@ function buildGraphInfo(graphData: string): string {
     return JSON.stringify({
         nodeCount: nodes.length,
         edgeCount: edges.length,
-        chars: [...chars].sort((a, b) => a.localeCompare(b, "zh")),
+        chars: [...chars].sort((a, b) => a - b),
         weapons: [...weapons].sort((a, b) => a - b),
     })
 }

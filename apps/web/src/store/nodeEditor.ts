@@ -2441,7 +2441,6 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 const charPort = portValues.get("char")
                 const portCharId = Number(charPort?.charId)
                 const { context, error } = createBuildContextFromJSONText(text, {
-                    charName: typeof charPort?.charName === "string" ? charPort.charName : undefined,
                     charId: Number.isFinite(portCharId) ? portCharId : undefined,
                 })
                 node.data.build = context ? markRaw(context) : undefined

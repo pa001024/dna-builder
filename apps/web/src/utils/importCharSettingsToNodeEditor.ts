@@ -3,6 +3,7 @@ import { nanoid } from "nanoid"
 import { nextTick } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { normalizeCharSkillLevels } from "@/composables/useCharSettings"
+import { charMap } from "@/data"
 import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 import { clonePlain } from "@/utils/nodeEditorBuild"
 import { CORE_INPUT } from "@/utils/nodeEditorPorts"
@@ -159,7 +160,7 @@ export function createImportedGraphSpec(charName: string, settings: CharSettings
         type: NodeType.CHAR_INPUT,
         data: {
             label: "角色输入",
-            charName,
+            charId: charMap.get(charName)?.id ?? 0,
             charLevel: settings.charLevel,
             hpPercent: settings.hpPercent,
             resonanceGain: settings.resonanceGain,
