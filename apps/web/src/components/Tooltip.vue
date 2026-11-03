@@ -22,14 +22,14 @@ const forceOpen = ref(false)
             </TooltipTrigger>
             <TooltipPortal>
                 <TooltipContent
-                    class="z-10000 bg-base-100 shadow-lg shadow-base-content/20 px-3.75 py-2.5 text-[15px] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade select-none rounded-sm leading-none will-change-[transform,opacity]"
+                    class="z-10000 max-w-80 rounded-xs border border-base-content/15 bg-base-100/85 px-3 py-2 text-[13px] leading-tight text-base-content shadow-lg backdrop-blur-md select-none will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade"
                     :side-offset="5"
                     :side="side"
                 >
                     <div class="whitespace-pre-wrap">
                         {{ tooltip }}
                     </div>
-                    <TooltipArrow class="fill-base-100" :width="8" />
+                    <TooltipArrow class="fill-base-100/85" :width="8" />
                 </TooltipContent>
             </TooltipPortal>
         </TooltipRoot>

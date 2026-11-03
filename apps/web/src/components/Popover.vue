@@ -20,7 +20,7 @@ const model = defineModel<boolean>()
                 :side="side ?? 'bottom'"
                 :side-offset="sideOffset ?? 5"
                 style="z-index: 20"
-                class="rounded p-2 w-80 bg-base-100 shadow-lg will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
+                class="w-80 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
             >
                 <div class="flex flex-col justify-center">
                     <div v-if="title" class="flex justify-between items-center">
@@ -44,7 +44,7 @@ const model = defineModel<boolean>()
                     </div>
                     <slot name="content" />
                 </div>
-                <PopoverArrow class="fill-base-100" />
+                <PopoverArrow class="fill-base-100/85" />
             </PopoverContent>
         </PopoverPortal>
     </PopoverRoot>

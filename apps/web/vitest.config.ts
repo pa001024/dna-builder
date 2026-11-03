@@ -7,6 +7,8 @@ export default defineConfig({
     plugins: [vue()],
     test: {
         setupFiles: [resolve(__dirname, "src/test/vitest-setup.ts")],
+        // 124+ 文件并发 transform + import 极吃内存，封顶 4 worker（峰值约 2GB）
+        maxWorkers: 4,
         // 只运行 Web 应用自身的测试；tools 的测试由仓库根 vitest.config.ts 负责，
         // node_modules、apps/server、packages、e2e 等自动排除
         include: ["src/**/*.test.ts"],
