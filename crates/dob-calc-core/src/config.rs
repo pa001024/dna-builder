@@ -430,6 +430,14 @@ impl CharSettings {
 
     /// 取指定槽位类型在激活变体下的数组；变体越界时回落到配置 A。
     fn slots_of(&self, slot: usize) -> &Vec<ModSlot> {
+        self.active_slots(slot)
+    }
+
+    /// 取指定槽位类型在激活变体下的数组（`slots_of` 的公开别名，供收益/配装复用）。
+    ///
+    /// 上游 `getModVariantSlots` 口径：变体存在即命中，哪怕其向量为空（自动配装清空待填的中间态）；
+    /// 仅变体越界（序号超出已有变体数）时回落到配置 A。
+    pub fn active_slots(&self, slot: usize) -> &Vec<ModSlot> {
         let legacy = match slot {
             0 => &self.char_mods,
             1 => &self.melee_mods,
@@ -442,16 +450,46 @@ impl CharSettings {
         let Some(variant) = self.mod_variants.get(self.mod_variant_index - 1) else {
             return legacy;
         };
-        let candidate = match slot {
+        match slot {
             0 => &variant.char_mods,
             1 => &variant.melee_mods,
             2 => &variant.ranged_mods,
             _ => &variant.skill_mods,
-        };
-        if candidate.is_empty() {
-            legacy
-        } else {
-            candidate
+        }
+    }
+
+    /// 取指定槽位类型在激活变体下的可变数组；仅变体越界时回落到配置 A。
+    ///
+    /// 上游 `getModVariantSlots` 口径：变体存在即命中，空向量是自动配装清空待填的中间态，
+    /// 仍归属该 B/C 变体，不得回落配置 A（否则清空后读写会污染配置 A）。
+    ///
+    /// 与 `active_slots` 同口径：收益试算与自动配装的写操作必须落到读口径命中的那份数组，
+    /// 否则变体 B/C 下的追加/移除/替换会改到配置 A，导致收益恒为 0。
+    pub fn active_slots_mut(&mut self, slot: usize) -> &mut Vec<ModSlot> {
+        let index = self.mod_variant_index;
+        if index == 0 {
+            return self.legacy_slots_mut(slot);
+        }
+        if self.mod_variants.get(index - 1).is_none() {
+            return self.legacy_slots_mut(slot);
+        }
+        // 上方已确认变体存在，此处下标必合法。
+        let variant = &mut self.mod_variants[index - 1];
+        match slot {
+            0 => &mut variant.char_mods,
+            1 => &mut variant.melee_mods,
+            2 => &mut variant.ranged_mods,
+            _ => &mut variant.skill_mods,
+        }
+    }
+
+    /// 配置 A 的可变槽位（变体回落目标）。
+    fn legacy_slots_mut(&mut self, slot: usize) -> &mut Vec<ModSlot> {
+        match slot {
+            0 => &mut self.char_mods,
+            1 => &mut self.melee_mods,
+            2 => &mut self.ranged_mods,
+            _ => &mut self.skill_mods,
         }
     }
 
@@ -672,13 +710,13 @@ mod tests {
     }
 
     #[test]
-    fn variant_falls_back_to_config_a() {
+    fn variant_falls_back_to_config_a_only_when_out_of_range() {
         let mut settings = CharSettings {
             char_mods: vec![Some((1, 10.0)); 8],
             mod_variant_index: 2,
             ..Default::default()
         };
-        // 没有 B/C 变体时回落 A
+        // 没有 B/C 变体（序号越界）时回落 A
         assert_eq!(settings.char_slots()[0], Some((1, 10.0)));
         settings.mod_variants.push(ModVariant {
             char_mods: vec![Some((2, 5.0)); 8],
@@ -688,9 +726,9 @@ mod tests {
         // 变体 B 有效
         settings.mod_variant_index = 1;
         assert_eq!(settings.char_slots()[0], Some((2, 5.0)));
-        // 变体 C 的空数组回落 A
+        // 变体 C 存在但槽位为空：仍属于 C，不回落 A
         settings.mod_variant_index = 2;
-        assert_eq!(settings.char_slots()[0], Some((1, 10.0)));
+        assert!(settings.char_slots().is_empty());
     }
 
     #[test]
@@ -706,6 +744,37 @@ mod tests {
         // 变体设置了中枢 → 用它
         settings.mod_variants[0].aura = Some(12345);
         assert_eq!(settings.variant_aura(), 12345);
+    }
+
+    #[test]
+    fn active_slots_mut_writes_to_active_variant() {
+        let mut settings = CharSettings {
+            char_mods: vec![Some((1, 10.0)); 8],
+            mod_variant_index: 1,
+            ..Default::default()
+        };
+        settings.mod_variants.push(ModVariant {
+            char_mods: vec![Some((2, 5.0)); 8],
+            ..Default::default()
+        });
+        // 读命中变体 B
+        assert_eq!(settings.active_slots(0)[0], Some((2, 5.0)));
+        // 写同样落到变体 B，配置 A 不受影响
+        settings.active_slots_mut(0)[0] = Some((3, 7.0));
+        assert_eq!(settings.mod_variants[0].char_mods[0], Some((3, 7.0)));
+        assert_eq!(settings.char_mods[0], Some((1, 10.0)));
+        // 空变体（存在但槽位为空）仍属于变体 B/C：读写都不回落到配置 A
+        settings.mod_variant_index = 2;
+        settings.mod_variants.push(ModVariant::default());
+        assert!(settings.active_slots(0).is_empty());
+        settings.active_slots_mut(0).push(Some((4, 1.0)));
+        assert_eq!(settings.mod_variants[1].char_mods, vec![Some((4, 1.0))]);
+        assert_eq!(settings.char_mods[0], Some((1, 10.0)));
+        // 只有变体越界（序号超过已有变体数）才回落到配置 A
+        settings.mod_variant_index = 9;
+        assert_eq!(settings.active_slots(0)[0], Some((1, 10.0)));
+        settings.active_slots_mut(0)[0] = Some((5, 2.0));
+        assert_eq!(settings.char_mods[0], Some((5, 2.0)));
     }
 
     #[test]
