@@ -2297,7 +2297,7 @@
             "stopSearch": "検索を停止",
             "thinking": "思考",
             "thinkingLive": "思考中",
-            "tokenNote": "コンテキスト {{context}} · 出力 {{output}}",
+            "tokenNote": "入力 {{input}} / 出力 {{output}}",
             "toolsUsed": "{{tools}} を {{total}} 回使用",
             "traceCollapse": "検索詳細を閉じる",
             "traceExpand": "検索詳細",

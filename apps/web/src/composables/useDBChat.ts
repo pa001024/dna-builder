@@ -274,6 +274,7 @@ export function useDBChat() {
             processMs: assistantMessage.processMs,
             pendingAsk: assistantMessage.pendingAsk,
             tokenUsage: assistantMessage.tokenUsage,
+            costMicros: assistantMessage.costMicros,
         })
     }
 

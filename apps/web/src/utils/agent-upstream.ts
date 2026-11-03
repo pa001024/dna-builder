@@ -16,6 +16,17 @@ import { useUserStore } from "@/store/user"
 import { parseTokenCount, resolveAiMaxTokens } from "@/utils/ai-config"
 
 /**
+ * @description 当前是否直连用户自己的模型上游（自定义模型开关打开且填了密钥）。
+ * 该上游的单价未知，前端无法按服务端反代的 DeepSeek-Flash 口径计费。
+ * @returns 使用自定义上游时返回 true
+ */
+export function isCustomAgentUpstream(): boolean {
+    const setting = useSettingStore()
+
+    return Boolean(setting.aiCustomModel && setting.aiApiKey?.trim())
+}
+
+/**
  * @description 解析当前可用的 Agent 上游配置。
  *
  * 自定义模型开关是总闸：只有开关打开且填了密钥才直连用户自己的上游，

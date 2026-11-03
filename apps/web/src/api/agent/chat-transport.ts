@@ -11,6 +11,7 @@
 
 import OpenAI from "openai"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import { isPeakPricing } from "@/utils/ai-pricing"
 import type {
     AgentFinishReason,
     AgentRoundRequest,
@@ -192,6 +193,8 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
         isInterrupted: () => boolean
     ): Promise<AgentRoundResult> {
         const slots = new Map<number, { id: string; name: string; args: string }>()
+        // 峰谷价在请求发出时定档（与服务端记账口径一致），流式结束时间不参与判定
+        const peak = isPeakPricing(new Date())
 
         let text = ""
         let thinking = ""
@@ -277,6 +280,7 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
                 arguments: slot.args || "{}",
             }))
 
+        usage.peak = peak
         return {
             text,
             thinking,

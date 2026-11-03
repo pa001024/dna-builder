@@ -21,7 +21,13 @@
  */
 
 import { agentI18nText } from "@/utils/agent-chat"
-import { type AgentCompactionOutcome, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS, compactWireMessages, resolveAutoCompactThreshold } from "./compact"
+import {
+    type AgentCompactionOutcome,
+    COMPACT_SUMMARY_MAX_OUTPUT_TOKENS,
+    CompactionUsageError,
+    compactWireMessages,
+    resolveAutoCompactThreshold,
+} from "./compact"
 import { type AgentUpstreamConfig, createAgentTransport, normalizeAgentUpstreamConfig } from "./config"
 import { estimateMessagesTokens, estimateTextTokens, estimateToolTokens, resolveAgentContextWindow } from "./context-usage"
 import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "./tool"
@@ -74,7 +80,16 @@ export interface AgentCallbacks {
      * 运行中发生了一次就地上下文压缩（内核替换了消息现场）。
      * 只播报运行内的压缩；跨轮压缩与落库由组合式函数编排。
      */
-    onCompaction?: (info: { preTokens: number; postTokens: number; summarizedCount: number; keptCount: number }) => void
+    onCompaction?: (info: {
+        preTokens: number
+        postTokens: number
+        summarizedCount: number
+        keptCount: number
+        /** 各次摘要请求的真实用量（失败重试的请求同样计费） */
+        usages?: AgentRoundUsage[]
+    }) => void
+    /** 运行内压缩失败时仍产生的用量（失败请求同样计费，供费用统计） */
+    onCompactionUsage?: (usages: AgentRoundUsage[]) => void
 }
 
 /** Agent 侧的历史消息（来自 Dexie 的会话记录） */
@@ -679,10 +694,14 @@ export class AgentKernel<TPayload> {
                 postTokens: outcome.postTokens,
                 summarizedCount: outcome.summarizedCount,
                 keptCount: outcome.keptCount,
+                ...(outcome.usages ? { usages: outcome.usages } : {}),
             })
             console.warn(this.describe(`上下文接近窗口上限，已就地压缩（约 ${outcome.preTokens} → ${outcome.postTokens} tokens）`))
         } catch (error) {
             // 压缩失败不阻断正常问答：保持原上下文继续，超限的错误由上游给出
+            if (error instanceof CompactionUsageError && error.usages.length) {
+                callbacks.onCompactionUsage?.(error.usages)
+            }
             console.warn(this.describe(`就地压缩失败：${error instanceof Error ? error.message : String(error)}`))
         }
     }

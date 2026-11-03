@@ -8,7 +8,7 @@ import type { IconTypes } from "@/components/Icon.vue"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { type AgentChatMessage, type AgentChatReasoning, type AgentChatToolTrace, scopedI18nKey } from "@/utils/agent-chat"
-import { formatCount } from "@/utils/ai-log-format"
+import { formatCost, formatCount, formatDuration } from "@/utils/ai-log-format"
 import { chatImageDataUrl } from "@/utils/chat-image"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
@@ -618,22 +618,28 @@ function toggleToolGroup(messageId: number, groupKey: string) {
 }
 
 /**
- * 消息自带的 token 用量统计小字（上游回传了真实用量时才有）。
- * 「上下文」是末次请求的输入规模（即该轮收尾时的上下文大小），「输出」是本轮累计输出。
+ * 消息自带的统计小字：输入 / 输出 tokens、费用、耗时，字段与后台 AI 调用日志一致。
+ * 输入是末次请求的上下文规模，输出是本轮累计输出；费用按每次模型请求的后端同口径累计。
  * @param message 助手消息
- * @returns 统计文案；没有真实用量时为空串
+ * @returns 统计文案；没有任何可展示项时为空串
  */
-function usageNoteOf(message: AgentChatMessage): string {
+function statsNoteOf(message: AgentChatMessage): string {
+    const parts: string[] = []
     const usage = message.tokenUsage
 
-    if (!usage || (!usage.input && !usage.output)) {
-        return ""
+    if (usage && (usage.input || usage.output)) {
+        parts.push(t(label("tokenNote"), { input: formatCount(usage.input), output: formatCount(usage.output) }))
     }
 
-    return t(label("tokenNote"), {
-        context: formatCount(usage.input),
-        output: formatCount(usage.output),
-    })
+    if (message.costMicros) {
+        parts.push(formatCost(message.costMicros))
+    }
+
+    if (message.processMs) {
+        parts.push(formatDuration(message.processMs))
+    }
+
+    return parts.join(" · ")
 }
 
 /** 思考段落的折叠键：消息 id + 段落序号，保证每条思考独立展开/收起 */
@@ -1331,9 +1337,9 @@ onBeforeUnmount(() => {
                                 <span class="text-[10px] tabular-nums text-base-content/35">
                                     {{ formatMessageTime(message.createdAt) }}
                                 </span>
-                                <!-- 本条回复的真实 token 用量：与时间同行的小字（含中文，不用 font-mono） -->
-                                <span v-if="usageNoteOf(message)" class="text-[10px] tabular-nums text-base-content/35">
-                                    {{ usageNoteOf(message) }}
+                                <!-- 本条回复的输入 / 输出、费用与耗时：与时间同行的小字（含中文，不用 font-mono） -->
+                                <span v-if="statsNoteOf(message)" class="text-[10px] tabular-nums text-base-content/35">
+                                    {{ statsNoteOf(message) }}
                                 </span>
                                 <button
                                     type="button"

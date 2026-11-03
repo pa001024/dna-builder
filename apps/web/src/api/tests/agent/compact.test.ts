@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
     buildCompactedMessageText,
+    CompactionUsageError,
     compactWireMessages,
     formatCompactSummary,
     groupRoundStartIndexes,
@@ -14,7 +15,9 @@ import type { AgentRoundRequest, AgentRoundResult, AgentTransport, AgentWireMess
  * @param responses 逐次请求的返回（耗尽后重复最后一条）
  * @returns 传输实现与收到的请求记录
  */
-function createSummaryTransport(responses: Array<{ text: string; toolCalls?: AgentRoundResult["toolCalls"] }>): {
+function createSummaryTransport(
+    responses: Array<{ text: string; toolCalls?: AgentRoundResult["toolCalls"]; usage?: AgentRoundResult["usage"] }>
+): {
     transport: AgentTransport
     requests: AgentRoundRequest[]
 } {
@@ -28,7 +31,13 @@ function createSummaryTransport(responses: Array<{ text: string; toolCalls?: Age
             const response = responses[Math.min(index, responses.length - 1)]
             index += 1
 
-            return { text: response.text, thinking: "", toolCalls: response.toolCalls ?? [], finishReason: "stop" }
+            return {
+                text: response.text,
+                thinking: "",
+                toolCalls: response.toolCalls ?? [],
+                finishReason: "stop",
+                ...(response.usage ? { usage: response.usage } : {}),
+            }
         },
     }
 
@@ -165,6 +174,32 @@ describe("compactWireMessages", () => {
         await expect(compactWireMessages(toolsAnd({ transport, messages: textHistory("问1", "答1", "问2", "答2") }))).rejects.toThrow(
             "模型未返回摘要文本"
         )
+    })
+
+    it("全部重试失败时错误仍携带已产生的用量", async () => {
+        const usage = { inputTokens: 120, outputTokens: 8, cacheReadTokens: 40 }
+        const { transport } = createSummaryTransport([{ text: "", usage }])
+
+        const error = await compactWireMessages(toolsAnd({ transport, messages: textHistory("问1", "答1", "问2", "答2") })).catch(
+            (reason: unknown) => reason
+        )
+
+        expect(error).toBeInstanceOf(CompactionUsageError)
+        expect((error as CompactionUsageError).usages).toHaveLength(4)
+        expect((error as CompactionUsageError).usages[0]).toEqual(usage)
+    })
+
+    it("重试链路里每次摘要请求的用量都并入结果（供费用统计）", async () => {
+        const { transport } = createSummaryTransport([
+            { text: "", usage: { inputTokens: 100, outputTokens: 5, cacheReadTokens: 0 } },
+            { text: "<summary>摘要</summary>", usage: { inputTokens: 90, outputTokens: 10, cacheReadTokens: 50 } },
+        ])
+        const messages = textHistory("问1", "答1", "问2", "答2", "问3")
+
+        const outcome = await compactWireMessages(toolsAnd({ transport, messages }))
+
+        expect(outcome?.usages).toHaveLength(2)
+        expect(outcome?.usages?.[1]).toMatchObject({ inputTokens: 90, outputTokens: 10, cacheReadTokens: 50 })
     })
 
     it("压缩后上下文估算显著下降", async () => {

@@ -111,6 +111,11 @@ export interface AgentRoundUsage {
     outputTokens: number
     /** 输入中命中上游上下文缓存的 tokens（上游不支持缓存时为 0） */
     cacheReadTokens: number
+    /**
+     * 本次请求发出时是否处于高峰计费时段（传输层在请求前判定）。
+     * 只用于前端按后端同口径估算费用；直连上游时同样有值。
+     */
+    peak?: boolean
 }
 
 /** 单轮请求。 */

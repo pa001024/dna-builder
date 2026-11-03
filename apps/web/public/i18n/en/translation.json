@@ -2321,7 +2321,7 @@
             "stopSearch": "Stop retrieval",
             "thinking": "Thinking",
             "thinkingLive": "Thinking",
-            "tokenNote": "Context {{context}} · Output {{output}}",
+            "tokenNote": "Input {{input}} / Output {{output}}",
             "toolsUsed": "Used {{total}} tool calls · {{tools}}",
             "traceCollapse": "Hide retrieval details",
             "traceExpand": "Retrieval details",

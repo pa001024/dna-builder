@@ -15,7 +15,7 @@
  */
 
 import { estimateMessagesTokens } from "./context-usage"
-import type { AgentRoundResult, AgentToolDefinition, AgentTransport, AgentWireMessage } from "./wire"
+import type { AgentRoundResult, AgentRoundUsage, AgentToolDefinition, AgentTransport, AgentWireMessage } from "./wire"
 
 /** 自动压缩的输出预留（tokens）：与输出上限取较小值，保证阈值触发后仍有一轮完整的作答空间 */
 export const AUTOCOMPACT_OUTPUT_RESERVE_TOKENS = 21_000
@@ -132,6 +132,8 @@ export interface AgentCompactionOutcome {
     keptCount: number
     /** 压缩后的完整消息序列（运行内压缩直接用它替换现场） */
     messages: AgentWireMessage[]
+    /** 各次摘要请求的真实用量（失败重试的请求同样计费；上游未回传时为空） */
+    usages?: AgentRoundUsage[]
 }
 
 /** 执行一次压缩所需的装配 */
@@ -161,6 +163,21 @@ export interface WireCompactionInput {
 const RETRY_KEEP_ROUND_STEPS = [1, 2, 4, 8]
 
 /**
+ * 压缩全部重试失败时的错误。
+ * 失败请求同样消耗 token，错误对象携带用量供调用方计入费用。
+ */
+export class CompactionUsageError extends Error {
+    /** 各次失败摘要请求的真实用量 */
+    readonly usages: AgentRoundUsage[]
+
+    constructor(message: string, usages: AgentRoundUsage[]) {
+        super(message)
+        this.name = "CompactionUsageError"
+        this.usages = usages
+    }
+}
+
+/**
  * @description 执行一次上下文压缩。
  *
  * 消息不足两轮、或除尾部保留轮外没有可摘要的内容时返回 null（无需压缩）；
@@ -179,6 +196,8 @@ export async function compactWireMessages(input: WireCompactionInput): Promise<A
     }
 
     let lastError: Error | null = null
+    /** 摘要请求链路的总用量：格式不合格的重试请求同样会产生费用 */
+    const usages: AgentRoundUsage[] = []
 
     for (const keepRounds of RETRY_KEEP_ROUND_STEPS) {
         /** 原样保留的轮数（不超过总轮数，且至少给摘要留一轮） */
@@ -193,7 +212,15 @@ export async function compactWireMessages(input: WireCompactionInput): Promise<A
         }
 
         try {
-            const summary = await requestCompactionSummary(input, summarized)
+            const response = await requestCompactionSummary(input, summarized)
+            if (response.usage) {
+                usages.push(response.usage)
+            }
+            const summary = formatCompactSummary(response.text)
+            if (!summary) {
+                // 模型没给正文（常见于抢着调工具）：按失败处理，交给重试梯子
+                throw new Error("模型未返回摘要文本")
+            }
             const compactedText = buildCompactedMessageText(summary)
             const compactedMessages: AgentWireMessage[] = [{ role: "user", text: compactedText }, ...keptMessages]
 
@@ -204,22 +231,26 @@ export async function compactWireMessages(input: WireCompactionInput): Promise<A
                 summarizedCount: summarized.length,
                 keptCount: keptMessages.length,
                 messages: compactedMessages,
+                ...(usages.length ? { usages } : {}),
             }
         } catch (error) {
             lastError = error instanceof Error ? error : new Error(String(error))
         }
     }
 
-    throw lastError ?? new Error("上下文压缩失败")
+    throw new CompactionUsageError(lastError?.message ?? "上下文压缩失败", usages)
 }
 
 /**
- * @description 就一批消息请求摘要正文。
+ * @description 就一批消息请求摘要正文（返回原始文本与用量，格式校验交给调用方）。
  * @param input 压缩装配
  * @param summarized 待摘要的消息
- * @returns 整理后的摘要正文
+ * @returns 模型原始输出与本轮真实用量
  */
-async function requestCompactionSummary(input: WireCompactionInput, summarized: readonly AgentWireMessage[]): Promise<string> {
+async function requestCompactionSummary(
+    input: WireCompactionInput,
+    summarized: readonly AgentWireMessage[]
+): Promise<{ text: string; usage?: AgentRoundUsage }> {
     const result: AgentRoundResult = await input.transport.runRound({
         model: input.model,
         system: input.system,
@@ -231,12 +262,5 @@ async function requestCompactionSummary(input: WireCompactionInput, summarized: 
         ...(input.sessionId ? { sessionId: input.sessionId } : {}),
     })
 
-    const summary = formatCompactSummary(result.text)
-
-    if (!summary) {
-        // 模型没给正文（常见于抢着调工具）：按失败处理，交给重试梯子
-        throw new Error("模型未返回摘要文本")
-    }
-
-    return summary
+    return { text: result.text, usage: result.usage }
 }

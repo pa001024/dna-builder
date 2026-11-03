@@ -2298,7 +2298,7 @@
             "stopSearch": "검색 중지",
             "thinking": "생각",
             "thinkingLive": "생각 중",
-            "tokenNote": "컨텍스트 {{context}} · 출력 {{output}}",
+            "tokenNote": "입력 {{input}} / 출력 {{output}}",
             "toolsUsed": "{{tools}} {{total}}회 사용",
             "traceCollapse": "검색 상세 접기",
             "traceExpand": "검색 상세",
