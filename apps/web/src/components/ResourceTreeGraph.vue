@@ -4,9 +4,14 @@ import { ExtensionCategory, Graph, register, treeToGraphData } from "@antv/g6"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 import type { ResourceTreeNode } from "@/utils/LevelUpCalculator"
 import { VueNode } from "@/utils/vue-node"
+import ResourceCostItem from "./ResourceCostItem.vue"
 
-// 注册 VueNode 扩展
-register(ExtensionCategory.NODE, "vue-node", VueNode)
+// 注册 VueNode 扩展。HMR/重复求值时 G6 会抛“已注册”错误，吞掉即可复用已有注册。
+try {
+    register(ExtensionCategory.NODE, "vue-node", VueNode)
+} catch (error) {
+    console.debug("VueNode 扩展已注册，跳过重复注册", error)
+}
 
 // 定义组件属性
 const props = defineProps<{
@@ -17,24 +22,31 @@ const props = defineProps<{
 const graphContainer = ref<HTMLElement | null>(null)
 let graph: Graph | null = null
 
-// 构建图表数据
+// 构建图表数据。整棵树一次性转换；
+// 多魔之楔时 mergeResults 会在外层包一个 id 为 root 的“总资源依赖”假根（纯容器），
+// 图中跳过它、直接把各魔之楔子树排成森林，避免多出一个看不懂的节点。
+// 边统一从父节点右侧端口连到子节点左侧端口，否则默认连到节点中心，看起来像没连对。
 function buildGraphData(tree: ResourceTreeNode | null) {
     if (!tree) return { nodes: [] as NodeData[], edges: [] as EdgeData[] }
-    const childData = tree.children?.map(child => treeToGraphData(child)) || []
-    return {
-        nodes: [
-            ...childData.flatMap(data =>
-                (data.nodes || []).map(node => {
-                    return {
-                        ...node,
-                        // style: {
-                        //     collapsed: node.depth! > 0,
-                        // },
-                    }
-                })
-            ),
-        ],
-        edges: [...childData.flatMap(data => data.edges || [])],
+    try {
+        const forest = tree.id === "root" && Array.isArray(tree.children) ? tree.children : [tree]
+        const parts = forest.map(root =>
+            treeToGraphData(root as never, {
+                getEdgeData: (source, target) => ({
+                    source: source.id,
+                    target: target.id,
+                    sourcePort: "right",
+                    targetPort: "left",
+                }),
+            })
+        )
+        return {
+            nodes: parts.flatMap(part => part.nodes || []),
+            edges: parts.flatMap(part => part.edges || []),
+        }
+    } catch (error) {
+        console.error("资源关系图数据转换失败", error)
+        return { nodes: [] as NodeData[], edges: [] as EdgeData[] }
     }
 }
 
@@ -42,12 +54,16 @@ function buildGraphData(tree: ResourceTreeNode | null) {
 async function renderGraph() {
     if (!graph) return
 
-    // 获取图表数据
-    const data = buildGraphData(props.tree)
-    graph.setData(data)
+    try {
+        // 获取图表数据
+        const data = buildGraphData(props.tree)
+        graph.setData(data)
 
-    // 渲染
-    await graph.render()
+        // 渲染
+        await graph.render()
+    } catch (error) {
+        console.error("资源关系图渲染失败", error)
+    }
 }
 
 // 监听树数据变化，更新图表
@@ -106,7 +122,8 @@ onMounted(() => {
         node: {
             type: "vue-node",
             style: {
-                size: [256, 64],
+                // 与节点内容 ResourceCostItem 的 w-70（280px）同宽，否则内容溢出、连线锚点看起来偏了
+                size: [280, 64],
                 ports: [
                     { key: "left", placement: [0, 0.5] },
                     { key: "right", placement: [1, 0.5] },

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
 import {
     type CharPlanItem,
     createDefaultCharConfig,
@@ -672,6 +672,18 @@ const handleBatchAddMods = () => {
 
 const isOpenGraph = ref(false)
 
+// 资源关系图体积大（含 @antv/g6），懒加载避免拖慢养成计算首屏。
+const ResourceTreeGraph = defineAsyncComponent(() => import("./ResourceTreeGraph.vue"))
+
+// 只有魔之楔计划会生成 resourceTree：无树时给提示而不是静默无反应。
+function openResourceGraph() {
+    if (!result.value?.resourceTree) {
+        ui.showErrorMessage("当前计划没有可展示的资源关系图，先添加魔之楔")
+        return
+    }
+    isOpenGraph.value = true
+}
+
 // 养成计划活动页签：角色 / 武器 / 魔之楔 / 估算配置 合并管理
 type PlanTab = "chars" | "weapons" | "mods" | "settings"
 const activePlanTab = useSearchParam<PlanTab>("tab", "chars")
@@ -1124,9 +1136,10 @@ const dungeonTimeFields = [
                                 <template #trailing>
                                     <button
                                         type="button"
-                                        class="inline-flex cursor-pointer items-center gap-1 text-xs text-base-content/50 transition-colors duration-150 hover:text-primary"
-                                        @click="isOpenGraph = true"
+                                        class="inline-flex cursor-pointer items-center gap-1 text-xs transition-colors duration-150 hover:text-primary" :class="result?.resourceTree ? 'text-base-content/50' : 'text-base-content/30'"
+                                        @click="openResourceGraph"
                                         aria-label="查看资源关系图"
+                                        :title="result?.resourceTree ? '查看资源关系图' : '仅魔之楔计划可展示关系图'"
                                     >
                                         <Icon icon="ri:git-branch-line" class="h-3.5 w-3.5" />
                                         资源关系图
@@ -1374,7 +1387,14 @@ const dungeonTimeFields = [
                     <Icon icon="ri:close-line" class="h-5 w-5 text-error" />
                 </div>
             </div>
-            <ResourceTreeGraph :tree="result.resourceTree" />
+            <Suspense>
+                <ResourceTreeGraph :tree="result.resourceTree" />
+                <template #fallback>
+                    <div class="flex h-full w-full items-center justify-center">
+                        <span class="loading loading-spinner loading-lg text-primary" />
+                    </div>
+                </template>
+            </Suspense>
         </div>
     </div>
 

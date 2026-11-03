@@ -97,6 +97,13 @@ setCurrentVersionLimit(getCurrentVersionLimit())
  * 启动主应用。
  */
 async function bootstrap() {
+    // HMR 会在同页上下文里重执行入口模块（如启动时文件有改动）：#app 已有实例时跳过，
+    // 否则重复 mount 会把旧树卸成坏 DOM（nextSibling of null）直接黑屏。
+    const host =
+        typeof document !== "undefined" ? (document.querySelector("#app") as (HTMLElement & { __vue_app__?: unknown }) | null) : null
+    if (host?.__vue_app__) {
+        return
+    }
     if (env.isApp) {
         document.documentElement.classList.add("is-app-font")
     }
@@ -108,6 +115,7 @@ async function bootstrap() {
 
     const [{ default: App }, { router }] = await Promise.all([import("./App.vue"), import("./router")])
     appRouter = router
+    ;(window as unknown as { __dna_router?: Router }).__dna_router = router
     const app = createApp(App)
     app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
@@ -202,12 +210,14 @@ async function bootstrap() {
 }
 
 export function renderVueNode(vnode: VNode, container: HTMLElement) {
-    if (!appRouter) {
+    // HMR 重执行后本模块的 appRouter 会回到 null，用全局兜底的已就绪路由，保证 G6 节点仍可渲染。
+    const router = appRouter ?? (window as unknown as { __dna_router?: Router }).__dna_router ?? null
+    if (!router) {
         throw new Error("路由尚未初始化")
     }
 
     const appInstance = createApp(vnode)
-    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(appRouter)
+    appInstance.use(createPinia()).use(I18NextVue, { i18next }).use(router)
     appInstance.mount(container)
     return appInstance
 }
