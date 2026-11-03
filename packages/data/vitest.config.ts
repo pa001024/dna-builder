@@ -5,6 +5,9 @@ export default defineConfig({
     test: {
         include: ["**/*.test.ts"],
         exclude: ["node_modules/**"],
+        // 数据集（d/ 约 70MB TS）每个 worker 都要加载一份，不封顶会同时起十几个
+        // worker 冲到 6GB+；4 并发峰值约 2GB，wall 时间基本不变（瓶颈在 import）
+        maxWorkers: 4,
         coverage: {
             provider: "v8",
             reporter: ["text", "json", "html"],
