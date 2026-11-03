@@ -21,17 +21,20 @@ const onlyCalamity = useSearchParam<boolean>("ca", false)
 /** 灾厄副本：100 级的探险和扼守副本（91601~91606 + 91701~91706） */
 const CALAMITY_DUNGEON_IDS = new Set([91601, 91602, 91603, 91604, 91605, 91606, 91701, 91702, 91703, 91704, 91705, 91706])
 
-/** 夜航手册 / 灾厄副本单选互斥切换：选中一个时取消另一个 */
+/** 夜航手册 / 灾厄副本单选互斥切换：选中一个时取消另一个（useSearchParam 写回是异步批量的，
+ * 不能先赋值再读回判断，必须用本地 next 做分支，否则切过去时旧值仍在导致两边同时选中） */
 function toggleNightHandbook() {
-    onlyNightHandbook.value = !onlyNightHandbook.value
-    if (onlyNightHandbook.value) {
+    const next = !onlyNightHandbook.value
+    onlyNightHandbook.value = next
+    if (next) {
         onlyCalamity.value = false
     }
 }
 
 function toggleCalamity() {
-    onlyCalamity.value = !onlyCalamity.value
-    if (onlyCalamity.value) {
+    const next = !onlyCalamity.value
+    onlyCalamity.value = next
+    if (next) {
         onlyNightHandbook.value = false
     }
 }

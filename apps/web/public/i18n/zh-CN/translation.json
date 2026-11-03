@@ -1674,7 +1674,7 @@
     },
     "db-dungeon-list": {
         "dungeon_count": "个副本",
-        "no_match": "未找到匹配的 NPC",
+        "no_match": "未找到匹配的副本",
         "search_placeholder": "搜索（支持拼音）..."
     },
     "db-dynquest-detail": {
