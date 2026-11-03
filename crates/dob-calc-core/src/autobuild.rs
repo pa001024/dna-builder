@@ -470,23 +470,13 @@ fn is_equipable(
     occupancy.counts.get(&candidate.id).copied().unwrap_or(0.0) < candidate.count
 }
 
-/// 槽位读写。
+/// 槽位读写（变体感知：命中激活变体 B/C，否则回落配置 A）。
 fn slots_of(settings: &CharSettings, key: ModSlotKey) -> &[Option<(i64, f64)>] {
-    match key {
-        ModSlotKey::Char => &settings.char_mods,
-        ModSlotKey::Melee => &settings.melee_mods,
-        ModSlotKey::Ranged => &settings.ranged_mods,
-        ModSlotKey::Skill => &settings.skill_mods,
-    }
+    settings.active_slots(key_index(key))
 }
 
 fn slots_of_mut(settings: &mut CharSettings, key: ModSlotKey) -> &mut Vec<Option<(i64, f64)>> {
-    match key {
-        ModSlotKey::Char => &mut settings.char_mods,
-        ModSlotKey::Melee => &mut settings.melee_mods,
-        ModSlotKey::Ranged => &mut settings.ranged_mods,
-        ModSlotKey::Skill => &mut settings.skill_mods,
-    }
+    settings.active_slots_mut(key_index(key))
 }
 
 /// 槽位在 `init_counts` 数组中的下标。
@@ -513,11 +503,11 @@ fn build_signature(settings: &CharSettings) -> String {
         "{}|{}|{}|{}|{}|{}|{}",
         settings.melee_weapon,
         settings.ranged_weapon,
-        settings.aura_mod,
-        ids(&settings.char_mods),
-        ids(&settings.melee_mods),
-        ids(&settings.ranged_mods),
-        ids(&settings.skill_mods),
+        settings.variant_aura(),
+        ids(settings.active_slots(0)),
+        ids(settings.active_slots(1)),
+        ids(settings.active_slots(2)),
+        ids(settings.active_slots(3)),
     )
 }
 
@@ -562,10 +552,10 @@ pub fn autobuild(tables: &BuildTables, request: &AutobuildRequest) -> AutobuildR
 
     // preserve 槽数（`initBuild[key].length`，`sortByIcome` 只排其后部分）。
     let init_counts = [
-        settings.char_mods.iter().flatten().count(),
-        settings.melee_mods.iter().flatten().count(),
-        settings.ranged_mods.iter().flatten().count(),
-        settings.skill_mods.iter().flatten().count(),
+        settings.active_slots(0).iter().flatten().count(),
+        settings.active_slots(1).iter().flatten().count(),
+        settings.active_slots(2).iter().flatten().count(),
+        settings.active_slots(3).iter().flatten().count(),
     ];
     let mut visited: HashSet<String> = HashSet::new();
     let mut iters = 0usize;

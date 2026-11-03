@@ -587,6 +587,8 @@ fn fingerprint_settings(
         &settings.ranged_mods,
         &settings.skill_mods,
     ] {
+        // 先写长度再写内容，避免 [Some(m)], [] 与 [], [Some(m)] 编码成同一段字节
+        mix!(&(slots.len() as u64).to_le_bytes());
         for slot in slots {
             match slot {
                 Some((id, level)) => {
@@ -606,6 +608,26 @@ fn fingerprint_settings(
                 mix!(&id.to_le_bytes());
             }
             None => mix!(&[0]),
+        }
+        // 变体槽位同样参与指纹：否则 B/C 内容不同但光环相同时会误命中缓存。
+        for slots in [
+            &variant.char_mods,
+            &variant.melee_mods,
+            &variant.ranged_mods,
+            &variant.skill_mods,
+        ] {
+            // 变体四个向量长度可以不同，不写长度会让不同槽位组合的指纹相撞
+            mix!(&(slots.len() as u64).to_le_bytes());
+            for slot in slots {
+                match slot {
+                    Some((id, level)) => {
+                        mix!(&[1]);
+                        mix!(&id.to_le_bytes());
+                        num!(*level);
+                    }
+                    None => mix!(&[0]),
+                }
+            }
         }
     }
     for (name, level, coverage) in &settings.buffs {

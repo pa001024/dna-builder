@@ -77,13 +77,18 @@ pub fn income_effect_key(id: i64) -> String {
     id.to_string()
 }
 
-/// 槽位数组可变引用。
+/// 槽位数组可变引用（变体感知：命中激活变体 B/C，否则回落配置 A）。
 fn slot_vec_mut(settings: &mut CharSettings, key: ModSlotKey) -> &mut Vec<ModSlot> {
+    settings.active_slots_mut(key_index(key))
+}
+
+/// `ModSlotKey` → 变体槽位下标（`config.rs: active_slots` 口径：0/1/2/3）。
+fn key_index(key: ModSlotKey) -> usize {
     match key {
-        ModSlotKey::Char => &mut settings.char_mods,
-        ModSlotKey::Melee => &mut settings.melee_mods,
-        ModSlotKey::Ranged => &mut settings.ranged_mods,
-        ModSlotKey::Skill => &mut settings.skill_mods,
+        ModSlotKey::Char => 0,
+        ModSlotKey::Melee => 1,
+        ModSlotKey::Ranged => 2,
+        ModSlotKey::Skill => 3,
     }
 }
 

@@ -1707,6 +1707,16 @@ impl<'a> BuildContext<'a> {
     }
 }
 
+/// `ModSlotKey` → 变体槽位下标（`config.rs: active_slots` 口径：0/1/2/3）。
+fn active_slot_index(key: crate::income::ModSlotKey) -> usize {
+    match key {
+        crate::income::ModSlotKey::Char => 0,
+        crate::income::ModSlotKey::Melee => 1,
+        crate::income::ModSlotKey::Ranged => 2,
+        crate::income::ModSlotKey::Skill => 3,
+    }
+}
+
 impl<'a> BuildContext<'a> {
     /// 追加一个 MOD 候选并重建派生状态；返回新上下文（共享不可变数据，克隆廉价）。
     ///
@@ -1742,12 +1752,8 @@ impl<'a> BuildContext<'a> {
         let source_version = self.memo.source_version;
         let mods_len = self.mods.len();
         let skill_lists = self.skill_lists.get().cloned();
-        let slots = match key {
-            crate::income::ModSlotKey::Char => self.settings.char_mods.clone(),
-            crate::income::ModSlotKey::Melee => self.settings.melee_mods.clone(),
-            crate::income::ModSlotKey::Ranged => self.settings.ranged_mods.clone(),
-            crate::income::ModSlotKey::Skill => self.settings.skill_mods.clone(),
-        };
+        // 变体感知：快照/恢复必须命中激活变体（B/C），否则探针回滚会 corrupt 配置 A。
+        let slots = self.settings.active_slots(active_slot_index(key)).clone();
         let effect_len = self.settings.effect_config.len();
         let scoped_flag = self.scoped_code_computing;
         let vec_len = match key {
@@ -1782,12 +1788,7 @@ impl<'a> BuildContext<'a> {
         if let Some(lists) = skill_lists {
             let _ = self.skill_lists.set(lists);
         }
-        match key {
-            crate::income::ModSlotKey::Char => self.settings.char_mods = slots,
-            crate::income::ModSlotKey::Melee => self.settings.melee_mods = slots,
-            crate::income::ModSlotKey::Ranged => self.settings.ranged_mods = slots,
-            crate::income::ModSlotKey::Skill => self.settings.skill_mods = slots,
-        }
+        *self.settings.active_slots_mut(active_slot_index(key)) = slots;
         self.settings.effect_config.truncate(effect_len);
         self.conditional_props_cache = None;
         self.scoped_code_computing = scoped_flag;
@@ -1808,12 +1809,8 @@ impl<'a> BuildContext<'a> {
         let source_version = self.memo.source_version;
         let mods_index = self.mods.clone();
         let skill_lists = self.skill_lists.get().cloned();
-        let slots = match key {
-            crate::income::ModSlotKey::Char => self.settings.char_mods.clone(),
-            crate::income::ModSlotKey::Melee => self.settings.melee_mods.clone(),
-            crate::income::ModSlotKey::Ranged => self.settings.ranged_mods.clone(),
-            crate::income::ModSlotKey::Skill => self.settings.skill_mods.clone(),
-        };
+        // 变体感知：同 `with_mod_probe`，快照激活变体槽位。
+        let slots = self.settings.active_slots(active_slot_index(key)).clone();
         let scoped_flag = self.scoped_code_computing;
         let removed = match key {
             crate::income::ModSlotKey::Char => self.char_mods.get(index).cloned(),
@@ -1848,12 +1845,7 @@ impl<'a> BuildContext<'a> {
         if let Some(lists) = skill_lists {
             let _ = self.skill_lists.set(lists);
         }
-        match key {
-            crate::income::ModSlotKey::Char => self.settings.char_mods = slots,
-            crate::income::ModSlotKey::Melee => self.settings.melee_mods = slots,
-            crate::income::ModSlotKey::Ranged => self.settings.ranged_mods = slots,
-            crate::income::ModSlotKey::Skill => self.settings.skill_mods = slots,
-        }
+        *self.settings.active_slots_mut(active_slot_index(key)) = slots;
         self.conditional_props_cache = None;
         self.scoped_code_computing = scoped_flag;
         Some(result)
@@ -1878,19 +1870,19 @@ impl<'a> BuildContext<'a> {
         match key {
             crate::income::ModSlotKey::Char => {
                 self.char_mods.push(instance.clone());
-                self.settings.char_mods.push(Some((id, level)));
+                self.settings.active_slots_mut(0).push(Some((id, level)));
             }
             crate::income::ModSlotKey::Melee => {
                 self.melee_mods.push(instance.clone());
-                self.settings.melee_mods.push(Some((id, level)));
+                self.settings.active_slots_mut(1).push(Some((id, level)));
             }
             crate::income::ModSlotKey::Ranged => {
                 self.ranged_mods.push(instance.clone());
-                self.settings.ranged_mods.push(Some((id, level)));
+                self.settings.active_slots_mut(2).push(Some((id, level)));
             }
             crate::income::ModSlotKey::Skill => {
                 self.skill_mods.push(instance.clone());
-                self.settings.skill_mods.push(Some((id, level)));
+                self.settings.active_slots_mut(3).push(Some((id, level)));
             }
         }
         if let Some(level) = buff_level {
@@ -1921,12 +1913,8 @@ impl<'a> BuildContext<'a> {
             return false;
         }
         mods.remove(index);
-        let slots = match key {
-            crate::income::ModSlotKey::Char => &mut self.settings.char_mods,
-            crate::income::ModSlotKey::Melee => &mut self.settings.melee_mods,
-            crate::income::ModSlotKey::Ranged => &mut self.settings.ranged_mods,
-            crate::income::ModSlotKey::Skill => &mut self.settings.skill_mods,
-        };
+        // 变体感知：`index` 为已方阵 compact 序号，对应激活变体稀疏槽位中第 `index` 个非空槽。
+        let slots = self.settings.active_slots_mut(active_slot_index(key));
         if let Some(slot) = slots.iter_mut().filter(|slot| slot.is_some()).nth(index) {
             *slot = None;
         }
