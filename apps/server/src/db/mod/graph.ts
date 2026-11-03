@@ -14,6 +14,7 @@ export const typeDefs = /* GraphQL */ `
         title: String!
         desc: String
         graphData: String!
+        graphInfo: String!
         userId: String!
         views: Int!
         likes: Int!
@@ -68,6 +69,52 @@ function validateGraphData(graphData: string): string | null {
     return null
 }
 
+/** 空摘要：存量老数据在回填完成前兜底，保证 graphInfo 永不为 null。 */
+const EMPTY_GRAPH_INFO = '{"nodeCount":0,"edgeCount":0,"chars":[],"weapons":[]}'
+
+/** 摘要关心的节点类型：角色输入 / 武器输入（含旧版 weapon-input）。 */
+const GRAPH_INFO_CHAR_TYPES = new Set(["char-input"])
+const GRAPH_INFO_WEAPON_TYPES = new Set(["melee-weapon-input", "ranged-weapon-input", "weapon-input"])
+
+/**
+ * 一次性摘要计算：写入时从图 JSON 里提取角色 / 武器（去重）与节点 / 边数。
+ * 结果存进 graphs.graph_info，列表请求直接读它，不再下载完整图 JSON。
+ * @param graphData 图 JSON 文本
+ * @returns 摘要 JSON 文本（{ nodeCount, edgeCount, chars[], weapons[] }）
+ */
+function buildGraphInfo(graphData: string): string {
+    let nodes: unknown[] = []
+    let edges: unknown[] = []
+    try {
+        const parsed = JSON.parse(graphData) as { nodes?: unknown; edges?: unknown }
+        if (Array.isArray(parsed?.nodes)) nodes = parsed.nodes
+        if (Array.isArray(parsed?.edges)) edges = parsed.edges
+    } catch {
+        // 解析失败也落库一条空摘要，读侧按缺失处理
+    }
+    const chars = new Set<string>()
+    const weapons = new Set<number>()
+    for (const node of nodes) {
+        if (!node || typeof node !== "object") continue
+        const { type, data } = node as { type?: unknown; data?: Record<string, unknown> }
+        if (typeof type !== "string" || !data || typeof data !== "object") continue
+        if (GRAPH_INFO_CHAR_TYPES.has(type)) {
+            const name = data.charName
+            if (typeof name === "string" && name.trim()) chars.add(name.trim())
+        } else if (GRAPH_INFO_WEAPON_TYPES.has(type)) {
+            const raw = data.weapon ?? data.meleeWeapon ?? data.rangedWeapon
+            const id = typeof raw === "number" ? raw : Number(raw)
+            if (Number.isFinite(id) && id > 0) weapons.add(id)
+        }
+    }
+    return JSON.stringify({
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+        chars: [...chars].sort((a, b) => a.localeCompare(b, "zh")),
+        weapons: [...weapons].sort((a, b) => a - b),
+    })
+}
+
 export const resolvers = {
     Query: {
         graphs: async (_parent, args, context, info) => {
@@ -92,6 +139,7 @@ export const resolvers = {
                 orderBy,
                 limit,
                 offset,
+                columns: getSubSelection(info, "graphData") ? undefined : { graphData: false },
                 with: { user: getSubSelection(info, "user") ? true : undefined },
             })
 
@@ -115,6 +163,7 @@ export const resolvers = {
                 createdAt: graph.createdAt ?? 0,
                 updateAt: graph.updateAt ?? 0,
                 isLiked: likedGraphIds.has(graph.id),
+                graphInfo: graph.graphInfo ?? EMPTY_GRAPH_INFO,
             }))
         },
         graphsCount: async (_parent, args) => {
@@ -136,6 +185,7 @@ export const resolvers = {
                 where: eq(schema.graphs.isRecommended, true),
                 orderBy: [desc(schema.graphs.createdAt)],
                 limit,
+                columns: getSubSelection(info, "graphData") ? undefined : { graphData: false },
                 with: { user: getSubSelection(info, "user") ? true : undefined },
             })
 
@@ -159,6 +209,7 @@ export const resolvers = {
                 createdAt: graph.createdAt ?? 0,
                 updateAt: graph.updateAt ?? 0,
                 isLiked: likedGraphIds.has(graph.id),
+                graphInfo: graph.graphInfo ?? EMPTY_GRAPH_INFO,
             }))
         },
         trendingGraphs: async (_parent, args, context, info) => {
@@ -166,6 +217,7 @@ export const resolvers = {
             const result = await db.query.graphs.findMany({
                 orderBy: [desc(schema.graphs.views), desc(schema.graphs.likes)],
                 limit,
+                columns: getSubSelection(info, "graphData") ? undefined : { graphData: false },
                 with: { user: getSubSelection(info, "user") ? true : undefined },
             })
 
@@ -189,6 +241,7 @@ export const resolvers = {
                 createdAt: graph.createdAt ?? 0,
                 updateAt: graph.updateAt ?? 0,
                 isLiked: likedGraphIds.has(graph.id),
+                graphInfo: graph.graphInfo ?? EMPTY_GRAPH_INFO,
             }))
         },
         graph: async (_parent, args, context, info) => {
@@ -202,9 +255,16 @@ export const resolvers = {
                 throw createGraphQLError("节点图不存在")
             }
 
+            // 老数据没有摘要：下载时顺手补算一次，之后列表直接读 graphInfo
+            const healedGraphInfo = !graph.graphInfo && graph.graphData ? buildGraphInfo(graph.graphData) : undefined
+
             await db
                 .update(schema.graphs)
-                .set({ views: sql`${schema.graphs.views} + 1` })
+                .set(
+                    healedGraphInfo
+                        ? { views: sql`${schema.graphs.views} + 1`, graphInfo: healedGraphInfo }
+                        : { views: sql`${schema.graphs.views} + 1` }
+                )
                 .where(eq(schema.graphs.id, id))
 
             const likedGraphIds = context.user
@@ -220,6 +280,7 @@ export const resolvers = {
 
             return {
                 ...graph,
+                graphInfo: healedGraphInfo ?? graph.graphInfo ?? EMPTY_GRAPH_INFO,
                 views: (graph.views ?? 0) + 1,
                 likes: graph.likes ?? 0,
                 isRecommended: graph.isRecommended ?? false,
@@ -245,6 +306,7 @@ export const resolvers = {
                 .insert(schema.graphs)
                 .values({
                     ...input,
+                    graphInfo: buildGraphInfo(input.graphData),
                     userId: context.user.id,
                     updateAt: schema.now(),
                 })
@@ -272,6 +334,7 @@ export const resolvers = {
                 createdAt: result.createdAt ?? 0,
                 updateAt: result.updateAt ?? 0,
                 isLiked: false,
+                graphInfo: result.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
         updateGraph: async (_parent, args, context, info) => {
@@ -298,7 +361,7 @@ export const resolvers = {
 
             const [updated] = await db
                 .update(schema.graphs)
-                .set({ ...input, updateAt: schema.now() })
+                .set({ ...input, graphInfo: buildGraphInfo(input.graphData), updateAt: schema.now() })
                 .where(eq(schema.graphs.id, id))
                 .returning()
 
@@ -335,6 +398,7 @@ export const resolvers = {
                 createdAt: result.createdAt ?? 0,
                 updateAt: result.updateAt ?? 0,
                 isLiked: likedGraphIds.has(id),
+                graphInfo: result.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
         deleteGraph: async (_parent, args, context) => {
@@ -409,6 +473,7 @@ export const resolvers = {
                 createdAt: updated.createdAt ?? 0,
                 updateAt: updated.updateAt ?? 0,
                 isLiked: true,
+                graphInfo: updated.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
         unlikeGraph: async (_parent, args, context, info) => {
@@ -450,6 +515,7 @@ export const resolvers = {
                 createdAt: updated.createdAt ?? 0,
                 updateAt: updated.updateAt ?? 0,
                 isLiked: false,
+                graphInfo: updated.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
         recommendGraph: async (_parent, args, context, info) => {
@@ -501,6 +567,7 @@ export const resolvers = {
                 createdAt: result.createdAt ?? 0,
                 updateAt: result.updateAt ?? 0,
                 isLiked: likedGraphIds.has(id),
+                graphInfo: result.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
         pinGraph: async (_parent, args, context, info) => {
@@ -552,6 +619,7 @@ export const resolvers = {
                 createdAt: result.createdAt ?? 0,
                 updateAt: result.updateAt ?? 0,
                 isLiked: likedGraphIds.has(id),
+                graphInfo: result.graphInfo ?? EMPTY_GRAPH_INFO,
             }
         },
     },

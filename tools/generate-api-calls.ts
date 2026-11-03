@@ -258,7 +258,12 @@ function graphqlTypeToTsType(type: TypeNode): string {
 
 /**
  * 生成GraphQL字段的查询字符串，包括嵌套字段
+ *
+ * User 子查询默认只取 id/name/qq：列表与卡片只需要作者名和头像，
+ * 全量展开又大又容易把 experience/roles 等字段带到不需要的地方。
+ * 例外（me 等本人档案）请在生成后手动补字段，脚本会保留手写选择不再覆盖。
  */
+const SLIM_USER_FIELDS = ["id", "name", "qq"]
 function generateGraphQLFields(typeName: string, allObjectTypes: Map<string, ObjectTypeDefinitionNode>, indent: number = 3): string {
     const objType = allObjectTypes.get(typeName)
     if (!objType) {
@@ -300,6 +305,13 @@ function generateGraphQLFields(typeName: string, allObjectTypes: Map<string, Obj
         // 标量、自定义标量（如 JSON）以及未定义的对象类型都按叶子处理，不能展开选择集
         if (graphqlScalarTypes.has(fieldTypeName) || !allObjectTypes.has(fieldTypeName)) {
             fieldsStr += `${indentStr}${fieldName}\n`
+        } else if (fieldTypeName === "User") {
+            // User 类型默认精简，见 SLIM_USER_FIELDS
+            fieldsStr += `${indentStr}${fieldName} {\n`
+            for (const slimField of SLIM_USER_FIELDS) {
+                fieldsStr += `${indentStr}    ${slimField}\n`
+            }
+            fieldsStr += `${indentStr}}\n`
         } else {
             // 如果是对象类型，递归生成嵌套字段
             fieldsStr += `${indentStr}${fieldName} {\n`

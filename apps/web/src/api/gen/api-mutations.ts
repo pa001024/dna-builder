@@ -913,35 +913,7 @@ export const createGraphMutation = typedMutation<Types.Graph, { input: Types.Gra
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -965,35 +937,7 @@ export const updateGraphMutation = typedMutation<Types.Graph, { id: string; inpu
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -1023,35 +967,7 @@ export const likeGraphMutation = typedMutation<Types.Graph, { id: string }>(/* G
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -1075,35 +991,7 @@ export const unlikeGraphMutation = typedMutation<Types.Graph, { id: string }>(/*
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -1127,35 +1015,7 @@ export const recommendGraphMutation = typedMutation<Types.Graph, { id: string; r
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -1179,35 +1039,7 @@ export const pinGraphMutation = typedMutation<Types.Graph, { id: string; pinned:
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
             isLiked
         }
@@ -1239,35 +1071,7 @@ export const updateGameModMutation = typedMutation<Types.GameMod, { id: string; 
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1310,35 +1114,7 @@ export const recommendGameModMutation = typedMutation<Types.GameMod, { id: strin
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1369,35 +1145,7 @@ export const pinGameModMutation = typedMutation<Types.GameMod, { id: string; pin
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1428,35 +1176,7 @@ export const setGameModActiveMutation = typedMutation<Types.GameMod, { id: strin
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1489,35 +1209,7 @@ export const approveGameModMutation = typedMutation<Types.GameMod, { id: string 
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1550,35 +1242,7 @@ export const rejectGameModMutation = typedMutation<Types.GameMod, { id: string }
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }
@@ -1676,35 +1340,7 @@ export const createCommentMutation = typedMutation<Types.Comment, { targetId: st
             user {
                 id
                 name
-                email
                 qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                currentTitleText
-                currentTitleClass
-                nameEffectClass
-                dailyExperienceStatus {
-                    todayAwardedExp
-                    totalAvailableExp
-                    dailyLaunchProgress
-                    dailyLaunchLimit
-                    dailyOnlineHourProgress
-                    dailyOnlineHourLimit
-                    dailyMessageProgress
-                    dailyMessageLimit
-                    dailyOnlineHourRetryAfterMs
-                }
-                abyssUsageUploadStatus {
-                    uploadedThisSeason
-                }
-                createdAt
-                updateAt
             }
         }
     }

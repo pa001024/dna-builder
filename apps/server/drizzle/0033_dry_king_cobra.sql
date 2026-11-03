@@ -1,0 +1,1 @@
+ALTER TABLE `graphs` ADD `graph_info` text;

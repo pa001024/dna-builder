@@ -723,6 +723,7 @@ export const graphs = sqliteTable(
         title: text("title").notNull(),
         desc: text("desc"),
         graphData: text("graph_data").notNull(),
+        graphInfo: text("graph_info"),
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),

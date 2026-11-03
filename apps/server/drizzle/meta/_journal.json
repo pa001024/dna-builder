@@ -232,6 +232,13 @@
             "when": 1793451757033,
             "tag": "0032_huge_iron_man",
             "breakpoints": true
+        },
+        {
+            "idx": 33,
+            "version": "6",
+            "when": 1793702886163,
+            "tag": "0033_dry_king_cobra",
+            "breakpoints": true
         }
     ]
 }

@@ -11,6 +11,7 @@ import {
     unlikeGraphMutation,
     updateGraphMutation,
 } from "@/api/graphql"
+import { weaponMap } from "@/data"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
@@ -46,25 +47,57 @@ const recommendingGraph = ref<string | null>(null)
 const expandedGraphIds = ref<Record<string, boolean>>({})
 const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
-/** 解析一次拿节点/边数，失败返回 null */
-function graphCounts(graph: Graph): { nodes: number; edges: number } | null {
+/** 列表摘要（后端写入时一次算好存在 graphInfo 里，列表不再解析完整图 JSON） */
+interface GraphSummary {
+    nodeCount: number
+    edgeCount: number
+    chars: string[]
+    weapons: number[]
+}
+
+function parseGraphSummary(graphInfo: string): GraphSummary | null {
     try {
-        const parsed = JSON.parse(graph.graphData) as { nodes?: unknown[]; edges?: unknown[] }
+        const parsed = JSON.parse(graphInfo) as Partial<GraphSummary>
         return {
-            nodes: Array.isArray(parsed.nodes) ? parsed.nodes.length : 0,
-            edges: Array.isArray(parsed.edges) ? parsed.edges.length : 0,
+            nodeCount: typeof parsed.nodeCount === "number" ? parsed.nodeCount : 0,
+            edgeCount: typeof parsed.edgeCount === "number" ? parsed.edgeCount : 0,
+            chars: Array.isArray(parsed.chars) ? parsed.chars.filter((c): c is string => typeof c === "string") : [],
+            weapons: Array.isArray(parsed.weapons) ? parsed.weapons.filter((w): w is number => typeof w === "number") : [],
         }
     } catch {
         return null
     }
 }
 
+const summaryCache = new Map<string, GraphSummary | null>()
+
+function graphSummaryOf(graph: Graph): GraphSummary | null {
+    const key = `${graph.id}|${graph.graphInfo ?? ""}`
+    const cached = summaryCache.get(key)
+    if (cached !== undefined) return cached
+    const summary = graph.graphInfo ? parseGraphSummary(graph.graphInfo) : null
+    summaryCache.set(key, summary)
+    return summary
+}
+
 function nodeCountOf(graph: Graph): number | null {
-    return graphCounts(graph)?.nodes ?? null
+    return graphSummaryOf(graph)?.nodeCount ?? null
 }
 
 function edgeCountOf(graph: Graph): number | null {
-    return graphCounts(graph)?.edges ?? null
+    return graphSummaryOf(graph)?.edgeCount ?? null
+}
+
+/** 卡片上的角色 / 武器一行，没有摘要信息时返回空 */
+function summaryLineOf(graph: Graph): string {
+    const summary = graphSummaryOf(graph)
+    if (!summary) return ""
+    const parts: string[] = []
+    if (summary.chars.length > 0) parts.push(`角色：${summary.chars.join("、")}`)
+    if (summary.weapons.length > 0) {
+        parts.push(`武器：${summary.weapons.map(id => weaponMap.get(id)?.名称 || `#${id}`).join("、")}`)
+    }
+    return parts.join(" · ")
 }
 
 function formatDate(timestamp: number) {
@@ -158,12 +191,22 @@ async function confirmEdit() {
     updatingGraph.value = editingGraphId.value
     const savedId = editingGraphId.value
     try {
+        // 列表不再下发 graphData：缺失时按需拉一次单图再更新
+        let graphData = editingGraph.value.graphData
+        if (!graphData) {
+            const full = await graphQuery({ id: savedId }, { requestPolicy: "network-only" })
+            graphData = full?.graphData ?? ""
+        }
+        if (!graphData) {
+            ui.showErrorMessage("节点图数据缺失，无法更新")
+            return
+        }
         const result = await updateGraphMutation({
             id: savedId,
             input: {
                 title: editTitle.value,
                 desc: editDesc.value,
-                graphData: editingGraph.value.graphData,
+                graphData,
             },
         })
 
@@ -394,6 +437,10 @@ defineExpose({
                                 </div>
                             </div>
                             <span class="text-xs text-base-content/70">{{ graph.user.name }}</span>
+                        </div>
+
+                        <div v-if="summaryLineOf(graph)" class="mb-2 truncate text-xs text-base-content/60" :title="summaryLineOf(graph)">
+                            {{ summaryLineOf(graph) }}
                         </div>
 
                         <div class="mb-3 flex items-center justify-between gap-2">

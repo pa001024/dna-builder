@@ -928,7 +928,7 @@ export const graphsQuery = typedQuery(
                 id
                 title
                 desc
-                graphData
+                graphInfo
                 userId
                 views
                 likes
@@ -939,35 +939,7 @@ export const graphsQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
                 isLiked
             }
@@ -990,7 +962,7 @@ export const recommendedGraphsQuery = typedQuery(
                 id
                 title
                 desc
-                graphData
+                graphInfo
                 userId
                 views
                 likes
@@ -1001,35 +973,7 @@ export const recommendedGraphsQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
                 isLiked
             }
@@ -1044,7 +988,7 @@ export const trendingGraphsQuery = typedQuery(
                 id
                 title
                 desc
-                graphData
+                graphInfo
                 userId
                 views
                 likes
@@ -1055,35 +999,7 @@ export const trendingGraphsQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
                 isLiked
             }
@@ -1099,6 +1015,7 @@ export const graphQuery = typedQuery(
                 title
                 desc
                 graphData
+                graphInfo
                 userId
                 views
                 likes
@@ -1109,35 +1026,7 @@ export const graphQuery = typedQuery(
                 user {
                     id
                     name
-                    email
                     qq
-                    pic
-                    uid
-                    roles
-                    experience
-                    points
-                    level
-                    selectedTitleAssetId
-                    selectedNameCardAssetId
-                    currentTitleText
-                    currentTitleClass
-                    nameEffectClass
-                    dailyExperienceStatus {
-                        todayAwardedExp
-                        totalAvailableExp
-                        dailyLaunchProgress
-                        dailyLaunchLimit
-                        dailyOnlineHourProgress
-                        dailyOnlineHourLimit
-                        dailyMessageProgress
-                        dailyMessageLimit
-                        dailyOnlineHourRetryAfterMs
-                    }
-                    abyssUsageUploadStatus {
-                        uploadedThisSeason
-                    }
-                    createdAt
-                    updateAt
                 }
                 isLiked
             }

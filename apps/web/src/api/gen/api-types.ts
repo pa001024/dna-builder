@@ -333,6 +333,7 @@ export interface Graph {
     title: string
     desc?: string
     graphData: string
+    graphInfo: string
     userId: string
     views: number
     likes: number
