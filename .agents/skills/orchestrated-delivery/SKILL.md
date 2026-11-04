@@ -1,155 +1,155 @@
 ---
 name: orchestrated-delivery
-description: 完整的多 agent 交付流程：主 agent 只读写文档、拆任务、调度，不读源码、不改代码、不跑测试；调研交给 subagent，具体实现交给独立 T3 顶层会话（不是 subagent），单 unit 的实现 + 自测 + 自审 + PR 交给 wt-review-pr 的编排模式。当用户明确要求这种编排（如「你负责调度，别自己写代码」「调研用 subagent，实现另开会话」「拆成几个会话并行」），或任务需要先调研 + 多文件改动 + 独立 worktree 实现时使用；一行修复/普通小改动不要用。
+description: Multi-agent delivery workflow - main agent only handles docs, task breakdown, and orchestration; research delegated to subagents, implementation to isolated T3 top-level sessions; single-unit work (implementation + testing + review + PR) follows wt-review-pr orchestrated mode. Use when user explicitly requests orchestration (e.g., "you coordinate, don't write code yourself", "research with subagents, implement in separate sessions", "split into parallel sessions") or task requires research + multi-file changes + isolated worktree implementation. Do NOT use for one-line fixes or simple changes.
 agent_created: true
 ---
 
-# Agent 编排交付（主 agent 只做调度与文档）
+# Orchestrated Agent Delivery (Main Agent as Coordinator)
 
-## 0. 角色契约（硬性）
+## 0. Role Contract (Hard Rules)
 
-| 角色 | 谁 | 只做什么 | 绝对不做什么 |
+| Role | Who | Only Does | Absolutely Does NOT |
 |---|---|---|---|
-| **主 agent（你）** | 当前会话 | 读写 Markdown 文档、拆任务、调度、向用户确认 | 读源码、编辑代码、跑构建/测试/lint/git、解冲突 |
-| **调研 subagent** | `Agent(Explore)` | 只读调研代码/文档/网络，返回结论 + `path:line` | 改代码 |
-| **实现会话** | T3 顶层 thread（`t3_thread_launch` / `t3 thread start`） | 在自己的 worktree/分支里改代码、跑命令、提交 | 创建新的顶层会话（除非主 agent 明确要求） |
-| **审查 subagent** | `Agent(Explore)` | 读 diff、对照 spec 找问题 | 改代码 |
-| **验证 subagent** | `Agent(general-purpose)` | 在 worktree 跑 lint/test/build，回报原始输出 | 改代码 |
+| **Main Agent (You)** | Current session | Read/write Markdown docs, break down tasks, orchestrate, confirm with user | Read source code, edit code, run build/test/lint/git, resolve conflicts |
+| **Research Subagent** | `Agent(Explore)` | Read-only research of code/docs/web, return findings + `path:line` | Edit code |
+| **Implementation Session** | T3 top-level thread (`t3_thread_launch` / `t3 thread start`) | Edit code in own worktree/branch, run commands, commit | Create new top-level sessions (unless main agent explicitly requests) |
+| **Review Subagent** | `Agent(Explore)` | Read diff, check against spec for issues | Edit code |
+| **Verification Subagent** | `Agent(general-purpose)` | Run lint/test/build in worktree, report raw output | Edit code |
 
-### 主 agent 的违规信号
+### Main Agent Violation Signals
 
-出现以下念头时停下来，改派角色：
+Stop and reassign when you have these thoughts:
 
-- 「我先读一下这个文件」→ 派调研 subagent。
-- 「我 grep / glob 一下源码」→ 派调研 subagent。
-- 「这个改动很小我直接改」→ 开实现会话（小任务可以缩短流程，但不要自己改）。
-- 「我跑一下测试确认」→ 派验证 subagent。
-- 「我 `git diff` 看一下」→ 派审查 subagent。
-- 「我修一下这个冲突」→ 开集成会话。
+- "Let me read this file" → Dispatch research subagent
+- "Let me grep/glob the source" → Dispatch research subagent
+- "This change is small, I'll do it directly" → Launch implementation session (tasks can be smaller, but don't do it yourself)
+- "Let me run tests to confirm" → Dispatch verification subagent
+- "Let me `git diff` to check" → Dispatch review subagent
+- "Let me fix this conflict" → Launch integration session
 
-主 agent 的 `Bash` 只允许文档目录操作（`mkdir` / `ls` / `cat *.md`）；
-任何代码、构建、测试、git 命令都交给 subagent。
+Main agent's `Bash` tool is only allowed for documentation directory operations (`mkdir` / `ls` / `cat *.md`);
+Any code, build, test, or git commands must be delegated to subagents.
 
-**允许读的文档**：`AGENTS.md`、`README*`、`specs/`、`.agents/docs/`、`.tmp/<slug>/` 下的 Markdown。
-**写操作范围**：`.tmp/<slug>/`、`specs/`、必要的 Markdown 文档；不要编辑源码、配置或脚本。
+**Allowed reads**: `AGENTS.md`, `README*`, `specs/`, `.agents/docs/`, Markdown under `.tmp/<slug>/`.
+**Write scope**: `.tmp/<slug>/`, `specs/`, necessary Markdown documentation; do NOT edit source code, configs, or scripts.
 
-## 流程总览
+## Workflow Overview
 
 ```text
-用户需求
+User Requirements
   → BRIEF.md
-  → 调研 subagent × N  →  RESEARCH.md
-  → PLAN.md（用户确认）
-  → 实现会话 × N（worktree/branch）  →  BOARD.md
-  → 审查 subagent  →  REVIEW-<unit>.md
-  → 验证 subagent  →  VERIFY-<unit>.md
-  → 集成会话（合并/解冲突/PR）
+  → Research subagents × N  →  RESEARCH.md
+  → PLAN.md (user confirmation)
+  → Implementation sessions × N (worktree/branch)  →  BOARD.md
+  → Review subagents  →  REVIEW-<unit>.md
+  → Verification subagents  →  VERIFY-<unit>.md
+  → Integration session (merge/resolve conflicts/PR)
   → FINAL.md
 ```
 
-## 与 wt-review-pr 的分工
+## Division of Work with wt-review-pr
 
-- **`wt-review-pr`** = 单个 unit 的执行工作流：实现 → 自测 → 自审 → commit/push/PR。
-- **本技能** = 项目级编排：需求 → 调研 → 计划 → 拆 unit → 派发 → 独立审查/验证 → 集成。
-- 主 agent **不直接执行 `wt-review-pr`**；它把该技能交给实现会话，并要求按「编排模式」执行。
-- 实现会话的任务书必须写：`按 .agents/skills/wt-review-pr/SKILL.md 的「编排模式」执行`。
-- 编排模式的覆盖（`wt-review-pr` 里有对应说明）：
-  - 需求/规格以 `PLAN.md` + `TASKS/<unit>.md` 为准，跳过交互式需求确认。
-  - worktree 已由 `t3_thread_launch` 创建，跳过 `git worktree add`。
-  - 完成后**不清理 worktree**；由集成会话/主 agent 决定。
-  - 有问题回报主 agent，不直接找用户。
-- **PR 策略在任务书里明确**：
-  - 单 unit / 单 PR：实现会话按 `wt-review-pr` 第 7 步开 PR。
-  - 多 unit / 单 PR：实现会话只提交到分支，不开 PR；集成会话统一开。
-  - 多 unit / 多 PR：每个实现会话开自己的 PR。
-- **审查/验证双门**：
-  - `wt-review-pr` 的自测/自审是第一道门。
-  - 本技能的审查/验证 subagent 是第二道门；低风险 unit 可抽查，高风险/跨 unit 必做。
+- **`wt-review-pr`** = Single unit execution workflow: implementation → self-test → self-review → commit/push/PR.
+- **This skill** = Project-level orchestration: requirements → research → planning → break into units → dispatch → independent review/verification → integration.
+- Main agent **does NOT directly execute `wt-review-pr`**; it delegates this skill to implementation sessions and requires "orchestrated mode" execution.
+- Implementation session task specs must state: `Follow "Orchestrated Mode" in .agents/skills/wt-review-pr/SKILL.md`.
+- Orchestrated mode overrides (corresponding section in `wt-review-pr`):
+  - Requirements/spec from `PLAN.md` + `TASKS/<unit>.md`, skip interactive requirements gathering.
+  - Worktree already created by `t3_thread_launch`, skip `git worktree add`.
+  - On completion, **do NOT clean up worktree**; integration session/main agent decides.
+  - Report issues to main agent, do NOT directly ask user.
+- **PR strategy specified in task spec**:
+  - Single unit / single PR: Implementation session creates PR per `wt-review-pr` step 7.
+  - Multiple units / single PR: Implementation sessions only commit to branch, no PR; integration session creates unified PR.
+  - Multiple units / multiple PRs: Each implementation session creates own PR.
+- **Dual review gates**:
+  - `wt-review-pr` self-test/self-review is the first gate.
+  - This skill's review/verification subagents are the second gate; low-risk units can be spot-checked, high-risk/cross-unit must be reviewed.
 
-## 1. 产物（单一事实来源）
+## 1. Artifacts (Single Source of Truth)
 
-所有工作文档放**主 checkout** 的 `.tmp/<slug>/`（gitignored）；需要长期保留时再复制到 `specs/`。
+All working documents in **main checkout** `.tmp/<slug>/` (gitignored); copy to `specs/` when long-term preservation needed.
 
-> 实现会话如果在独立 worktree 里，未跟踪的 `.tmp` 不会被复制过去。交接时给**主 checkout 的绝对路径**
-> （如 `E:/dev/dna-builder/.tmp/<slug>/PLAN.md`），不要用 worktree 相对路径。
+> Implementation sessions in isolated worktrees won't have untracked `.tmp` copied over. When handing off, provide **absolute path in main checkout**
+> (e.g., `E:/dev/dna-builder/.tmp/<slug>/PLAN.md`), not worktree-relative paths.
 
 ```text
 .tmp/<slug>/
-├── BRIEF.md            需求、约束、验收、非目标
-├── RESEARCH-BRIEF.md   给调研 subagent 的问题清单
-├── RESEARCH.md         调研结论（主 agent 汇总）
-├── PLAN.md             方案、任务拆分、接口、测试策略
-├── BOARD.md            任务板（状态/线程/分支/产物）
-├── TASKS/<unit>.md     每个实现会话的任务书
-├── REVIEW-<unit>.md    审查结论
-├── VERIFY-<unit>.md    验证记录
-└── FINAL.md            最终交付报告
+├── BRIEF.md            Requirements, constraints, acceptance criteria, non-goals
+├── RESEARCH-BRIEF.md   Question list for research subagents
+├── RESEARCH.md         Research findings (main agent summary)
+├── PLAN.md             Solution, task breakdown, interfaces, test strategy
+├── BOARD.md            Task board (status/thread/branch/artifacts)
+├── TASKS/<unit>.md     Task spec for each implementation session
+├── REVIEW-<unit>.md    Review conclusion
+├── VERIFY-<unit>.md    Verification record
+└── FINAL.md            Final delivery report
 ```
 
-所有决策写进文档；每次交接给文档路径，不靠聊天上下文。
+All decisions go into documents; every handoff provides document paths, not relying on chat context.
 
-`BOARD.md` 任务板模板：
+`BOARD.md` task board template:
 
 ```markdown
-| Unit | 目标 | 会话/链接 | 分支/worktree | 状态 | 产物 |
+| Unit | Goal | Session/Link | Branch/Worktree | Status | Artifacts |
 |---|---|---|---|---|---|
 | u1 | ... | `t3-thread://...` | `<slug>/u1` | running | TASKS/u1.md |
 ```
 
-状态：`planned` / `running` / `waiting` / `review` / `verify` / `done` / `blocked`。
+Status: `planned` / `running` / `waiting` / `review` / `verify` / `done` / `blocked`.
 
-## 2. 流程
+## 2. Workflow Phases
 
-### 阶段 0：Intake（主 agent）
+### Phase 0: Intake (Main Agent)
 
-1. 和用户确认：目标、验收标准、非目标、约束、优先级。
-2. 写 `BRIEF.md`。
-3. 判断是否适用本流程：一行修复 / 纯问答 → 不走编排，直接说明并结束。
-4. **不要在这一步读源码。**
+1. Confirm with user: goals, acceptance criteria, non-goals, constraints, priority.
+2. Write `BRIEF.md`.
+3. Determine if this workflow applies: one-line fix / pure Q&A → skip orchestration, explain and end.
+4. **Do NOT read source code at this phase.**
 
-### 阶段 1：Research（subagent）
+### Phase 1: Research (Subagents)
 
-1. 写 `RESEARCH-BRIEF.md`：要回答的问题、范围、禁止事项、返回格式。
-2. 用 `Agent(subagent_type:"Explore")` 并行派 1–3 个调研 subagent；问题彼此独立才并行。
-3. 主 agent 只读它们返回的报告，汇总成 `RESEARCH.md`；**不读源码**。
-4. 结论互相矛盾时，追加一个调研 subagent 裁决，不要自己翻代码。
+1. Write `RESEARCH-BRIEF.md`: questions to answer, scope, prohibitions, return format.
+2. Use `Agent(subagent_type:"Explore")` to dispatch 1-3 research subagents in parallel; only parallelize truly independent questions.
+3. Main agent only reads their returned reports, summarizes into `RESEARCH.md`; **do NOT read source code**.
+4. If findings contradict, dispatch additional research subagent to arbitrate; do NOT check code yourself.
 
-调研 subagent 的返回格式：
+Research subagent return format:
 
 ```markdown
-## 结论
-## 关键位置
-- path:line — 现状/行为
-## 约束与坑
-## 建议
-## 未决问题
+## Conclusion
+## Key Locations
+- path:line — current state/behavior
+## Constraints & Gotchas
+## Recommendations
+## Open Questions
 ```
 
-### 阶段 2：Plan（主 agent + 可选 plan review）
+### Phase 2: Planning (Main Agent + Optional Plan Review)
 
-1. 写 `PLAN.md`：
-   - 方案与取舍
-   - 任务拆分（每个 unit 的目标、允许改的文件、依赖关系）
-   - 接口/数据结构变化
-   - 测试与验证命令
-   - 风险与回滚
-2. 可选：派一个只读 subagent 审 `PLAN.md`，返回漏洞和遗漏。
-3. **用户确认点**：大改动/架构变化必须先让用户确认 `PLAN.md`。
+1. Write `PLAN.md`:
+   - Solution and tradeoffs
+   - Task breakdown (each unit's goals, allowed files, dependencies)
+   - Interface/data structure changes
+   - Testing and verification commands
+   - Risks and rollback strategy
+2. Optional: Dispatch read-only subagent to review `PLAN.md`, return gaps and omissions.
+3. **User confirmation point**: Major changes/architectural changes must get user approval of `PLAN.md` first.
 
-### 阶段 3：Dispatch（主 agent → 独立会话）
+### Phase 3: Dispatch (Main Agent → Independent Sessions)
 
-对每个 unit：
+For each unit:
 
-1. 写 `TASKS/<unit>.md`（模板见第 3 节）。
-2. 选择隔离与后端：
-   - 多个 unit 并行 → 每个 unit 一个 worktree/branch。
-   - 单个 unit → root 或 worktree 均可。
-   - worktree 从 `baseRef` 创建，**未提交改动不会带过去**；需要基于当前工作区时用 root。
-   - provider/model 按任务难度选；用 `orchestrator_capabilities` 查准确值。
-3. 启动独立会话：
-   - 有 T3 MCP 工具：`t3_thread_launch`（`projectId`/`scratch`、`title`、`message`、
-     `modelSelection`、`workspaceStrategy`、`clientRequestId`）。
-   - 只有 shell：`t3 thread start ...`。
+1. Write `TASKS/<unit>.md` (template in section 3).
+2. Choose isolation and backend:
+   - Multiple units in parallel → each unit gets one worktree/branch.
+   - Single unit → root or worktree both acceptable.
+   - Worktree created from `baseRef`, **uncommitted changes won't carry over**; use root when needing current working directory.
+   - Provider/model selected by task difficulty; use `orchestrator_capabilities` to check accurate values.
+3. Launch independent session:
+   - With T3 MCP tools: `t3_thread_launch` (`projectId`/`scratch`, `title`, `message`,
+     `modelSelection`, `workspaceStrategy`, `clientRequestId`).
+   - Shell only: `t3 thread start ...`.
 
 ```jsonc
 t3_thread_launch {
@@ -162,197 +162,198 @@ t3_thread_launch {
 }
 ```
 
-4. 记录 `threadId`、`link`、`runId`、分支/ worktree 到 `BOARD.md`。
-5. 不要在 prompt 里粘贴整份 plan；让子会话自己读 `PLAN.md` + `TASKS/<unit>.md`。
+4. Record `threadId`, `link`, `runId`, branch/worktree to `BOARD.md`.
+5. Do NOT paste entire plan in prompt; let child session read `PLAN.md` + `TASKS/<unit>.md` itself.
 
-### 阶段 4：Monitor & steer（主 agent）
+### Phase 4: Monitor & Steer (Main Agent)
 
-- `t3_thread_wait`：一次给足超时，**不要 sleep 轮询**。
-- `t3_thread_read`：`view:"messages"` 或 `"activity"`，低 `limit`。
-- `pendingRequestCount > 0` → `t3_pending_request` list/read/respond；产品决策问用户。
-- 跑偏 → `t3_thread_send`（`mode:"steer"` 或 `"queue"`）。
-- 更新 `BOARD.md` 状态。
-- unit 失败：读错误 → 修任务书 → 重发/重开会话；**不要自己改代码**。
+- `t3_thread_wait`: Give sufficient timeout at once, **do NOT poll with sleep**.
+- `t3_thread_read`: `view:"messages"` or `"activity"`, low `limit`.
+- `pendingRequestCount > 0` → `t3_pending_request` list/read/respond; ask user for product decisions.
+- Going off track → `t3_thread_send` (`mode:"steer"` or `"queue"`).
+- Update `BOARD.md` status.
+- Unit failure: Read error → fix task spec → resend/relaunch session; **do NOT edit code yourself**.
 
-### 阶段 5：Review（subagent）
+### Phase 5: Review (Subagents)
 
-1. 实现会话报告完成后，派审查 subagent：给它 `PLAN.md`、`TASKS/<unit>.md`、diff 范围
-   （`base...branch`）。
-2. 审查 subagent 只读，返回：
+1. After implementation session reports completion, dispatch review subagent: give it `PLAN.md`, `TASKS/<unit>.md`, diff range
+   (`base...branch`).
+2. Review subagent read-only, returns:
 
 ```markdown
 ## Findings
-- [P0/P1/P2] path:line — 问题 — 为什么 — 建议修法
-## Spec 缺口
-## 缺失测试
+- [P0/P1/P2] path:line — issue — why — suggested fix
+## Spec Gaps
+## Missing Tests
 ```
 
-3. 主 agent 写 `REVIEW-<unit>.md`，把问题清单发给实现会话（`t3_thread_send`）或开修复会话。
-4. 修复后重新审查（新的 subagent，不要复用旧结论）。
+3. Main agent writes `REVIEW-<unit>.md`, sends issue list to implementation session (`t3_thread_send`) or launches fix session.
+4. After fixes, re-review (new subagent, don't reuse old conclusions).
 
-### 阶段 6：Verify（subagent）
+### Phase 6: Verification (Subagents)
 
-1. 派验证 subagent 在目标 worktree 跑 `PLAN.md` 里的命令（lint/test/build）。
-2. 返回命令、退出码、失败日志摘要；主 agent 写 `VERIFY-<unit>.md`。
-3. 失败 → 发回实现会话；通过 → 进入集成。
+1. Dispatch verification subagent to run commands from `PLAN.md` in target worktree (lint/test/build).
+2. Returns commands, exit codes, failure log excerpts; main agent writes `VERIFY-<unit>.md`.
+3. Failure → send back to implementation session; pass → proceed to integration.
 
-### 阶段 7：Integrate / PR（集成会话）
+### Phase 7: Integration / PR (Integration Session)
 
-- 多 worktree：开一个独立集成会话，给它分支列表和 `PLAN.md`，让它合并/解冲突/跑最终检查/开 PR；
-  合并完成后由它清理已合并的 worktree。
-- 单 worktree：可以让原实现会话提交并开 PR（在任务书里预先要求）。
-- 主 agent 只记录 PR 链接和结果；**不执行 git**。
+- Multiple worktrees: Launch separate integration session, give it branch list and `PLAN.md`, let it merge/resolve conflicts/run final checks/create PR;
+  after merge completion, it cleans up merged worktrees.
+- Single worktree: Can let original implementation session commit and create PR (pre-specify in task spec).
+- Main agent only records PR link and result; **does NOT execute git**.
 
-### 阶段 8：Final（主 agent）
+### Phase 8: Final (Main Agent)
 
-1. 写 `FINAL.md`：改了什么、为什么、验证证据、风险、线程/PR 链接。
-2. 归档已完成会话（`t3_thread_organize`）。
-3. 需要长期保留的设计复制到 `specs/`。
+1. Write `FINAL.md`: what changed, why, verification evidence, risks, thread/PR links.
+2. Archive completed sessions (`t3_thread_organize`).
+3. Copy designs needing long-term preservation to `specs/`.
 
-## 3. 任务书模板（`TASKS/<unit>.md`）
+## 3. Task Spec Template (`TASKS/<unit>.md`)
 
 ````markdown
-# Unit: <id> — <标题>
+# Unit: <id> — <title>
 
-## 目标
-<一句话>
+## Goal
+<one sentence>
 
-## 必读
+## Required Reading
 - <main-checkout>/.tmp/<slug>/PLAN.md
 - <main-checkout>/.tmp/<slug>/TASKS/<unit>.md
-（用绝对路径；worktree 里没有主 checkout 的未跟踪 .tmp）
+(Use absolute paths; worktree doesn't have main checkout's untracked .tmp)
 
-## 执行方式
-- 按 `.agents/skills/wt-review-pr/SKILL.md` 的「编排模式」执行。
-- 需求/规格以本任务书 + PLAN.md 为准；worktree 已提供，跳过创建/清理。
-- PR 策略：<本 unit 自己开 PR / 只提交到分支，由集成会话统一开 / 不开 PR>
-- 不要直接问用户；问题写进最终报告。
+## Execution Mode
+- Follow "Orchestrated Mode" in `.agents/skills/wt-review-pr/SKILL.md`.
+- Requirements/spec from this task spec + PLAN.md; worktree already provided, skip creation/cleanup.
+- PR strategy: <this unit creates own PR / only commit to branch, integration session creates unified PR / no PR>
+- Do NOT ask user directly; write questions into final report.
 
-## 允许修改
-- <文件/目录>
+## Allowed Modifications
+- <files/directories>
 
-## 禁止
-- 不要改 <范围外文件>
-- 不要创建新的顶层会话
-- 不要 push / 开 PR（除非本任务明确要求）
+## Prohibitions
+- Do NOT modify <out-of-scope files>
+- Do NOT create new top-level sessions
+- Do NOT push / create PR (unless explicitly required by this task)
 
-## 验收
+## Acceptance Criteria
 - [ ] ...
 - [ ] ...
 
-## 验证命令
+## Verification Commands
 ```bash
 ...
 ```
 
-## 交付
-- 改了哪些文件
-- 跑了哪些命令 + 结果
-- 未决问题/风险
+## Deliverables
+- Which files changed
+- Which commands run + results
+- Open questions/risks
 ````
 
-## 4. 调研 brief 模板
+## 4. Research Brief Template
 
 ```markdown
 # Research brief: <slug>
 
-## 要回答的问题
+## Questions to Answer
 1. ...
 2. ...
 
-## 范围
-- 只看 <目录/模块>；不要看无关子系统
-- 不要修改任何文件
+## Scope
+- Only examine <directories/modules>; do NOT look at unrelated subsystems
+- Do NOT modify any files
 
-## 返回格式
-- 结论（先给答案）
-- 关键位置：path:line — 现状/行为
-- 约束与坑
-- 建议
-- 未决问题
+## Return Format
+- Conclusion (answer first)
+- Key locations: path:line — current state/behavior
+- Constraints & gotchas
+- Recommendations
+- Open questions
 ```
 
-## 5. 审查 brief 模板
+## 5. Review Brief Template
 
 ```markdown
 # Review brief: <unit>
 
-## 必读
+## Required Reading
 - <main-checkout>/.tmp/<slug>/PLAN.md
 - <main-checkout>/.tmp/<slug>/TASKS/<unit>.md
 
 ## Diff
-- 在 <worktree> 执行：git diff <base>...<branch>
-- 只读；不要修改任何文件
+- Execute in <worktree>: git diff <base>...<branch>
+- Read-only; do NOT modify any files
 
-## 关注
-- 是否符合 PLAN 和验收标准
-- 正确性、边界条件、错误处理
-- 测试是否覆盖关键路径
-- 是否改到范围外文件
+## Focus Areas
+- Compliance with PLAN and acceptance criteria
+- Correctness, edge cases, error handling
+- Test coverage of critical paths
+- Any out-of-scope file modifications
 
-## 返回
-- [P0/P1/P2] path:line — 问题 — 为什么 — 建议修法
-- Spec 缺口
-- 缺失测试
+## Return Format
+- [P0/P1/P2] path:line — issue — why — suggested fix
+- Spec gaps
+- Missing tests
 ```
 
-## 6. 验证 brief 模板
+## 6. Verification Brief Template
 
 ````markdown
 # Verify brief: <unit>
 
-## 工作目录
-<worktree 绝对路径>
+## Working Directory
+<worktree absolute path>
 
-## 要执行的命令
+## Commands to Execute
 ```bash
 ...
 ```
 
-## 规则
-- 只读；不要修改文件
-- 逐条执行并保留退出码
-- 失败时保留关键日志（截断到必要长度）
+## Rules
+- Read-only; do NOT modify files
+- Execute each command and preserve exit codes
+- On failure, preserve key logs (truncate to necessary length)
 
-## 返回
-- 每条命令：命令、退出码、通过/失败
-- 失败摘要与相关日志
+## Return Format
+- Each command: command, exit code, pass/fail
+- Failure summary and relevant logs
 ````
 
-## 7. 调度规则
+## 7. Orchestration Rules
 
-- **并行边界**：只有 worktree 互不重叠才并行；共享文件/接口的 unit 串行。
-- **一个 unit 一个实现会话**；不要让一个会话同时改多个 unit。
-- **实现只能用独立 T3 会话**：不要用 `Agent(general-purpose)` 或其他 subagent 改代码。
-- **实现会话不得再创建顶层会话**；可以在自己范围内用 subagent 做局部调研。
-- 当前 harness 没有 `Agent` 工具时，调研 subagent 可用 T3 的 `delegate_task`（`mode:"wait"` 拿结果）
-  代替；实现仍然只能用顶层会话。
-- 每次状态变化更新 `BOARD.md`。
-- 用户确认点：`PLAN.md` 批准、范围变更、合并/PR、破坏性操作。
-- 主 agent 的上下文只装文档和报告，不装源码/长日志。
-- 主 agent 只通过文档和 T3 工具与 agent 交互；不直接操作代码。
-- **跨环境**（`environmentId` 指向另一台机器）时，主 checkout 的 `.tmp` 在那边不可读；把任务书
-  内容直接写进 `message`，或在目标环境先落一份文档。
+- **Parallelization boundary**: Only parallelize when worktrees don't overlap; units sharing files/interfaces must be serial.
+- **One unit one implementation session**; do NOT let one session modify multiple units.
+- **Implementation only in independent T3 sessions**: Do NOT use `Agent(general-purpose)` or other subagents to edit code.
+- **Implementation sessions must NOT create top-level sessions**; may use subagents within own scope for local research.
+- When current harness lacks `Agent` tool, research subagents can use T3's `delegate_task` (`mode:"wait"` to get results)
+  instead; implementation still only uses top-level sessions.
+- Update `BOARD.md` on every state change.
+- User confirmation points: `PLAN.md` approval, scope changes, merge/PR, destructive operations.
+- Main agent's context only holds documents and reports, not source code/long logs.
+- Main agent only interacts with agents through documents and T3 tools; does NOT directly manipulate code.
+- **Cross-environment** (`environmentId` pointing to another machine): main checkout's `.tmp` unreadable there; write task spec
+  content directly into `message`, or drop a copy of docs in target environment.
 
-## 8. 会话工具速查
+## 8. Session Tool Quick Reference
 
-| 目的 | MCP 工具 | CLI |
+| Purpose | MCP Tool | CLI |
 |---|---|---|
-| 新建独立会话 | `t3_thread_launch` / `create_threads` | `t3 thread start` |
-| 发消息 | `t3_thread_send` | `t3 thread send` |
-| 等待 | `t3_thread_wait` | `--wait` |
-| 读会话 | `t3_thread_read` | `t3 thread show` |
-| 换后端/模型 | `t3_thread_configure` | 无（用 MCP） |
-| 打断 | `t3_thread_interrupt` | 无 |
-| 归档 | `t3_thread_organize` | 无 |
-| 回答问题 | `t3_pending_request` | 无 |
+| Create independent session | `t3_thread_launch` / `create_threads` | `t3 thread start` |
+| Send message | `t3_thread_send` | `t3 thread send` |
+| Wait | `t3_thread_wait` | `--wait` |
+| Read session | `t3_thread_read` | `t3 thread show` |
+| Change backend/model | `t3_thread_configure` | None (use MCP) |
+| Interrupt | `t3_thread_interrupt` | None |
+| Archive | `t3_thread_organize` | None |
+| Answer questions | `t3_pending_request` | None |
 
-- 后端/模型选择、协议细节、原始 RPC：见 `references/t3-agent-rpc.md`。
-- 独立会话必须是顶层 thread，不要用 `delegate_task` / subagent 冒充。
+- Backend/model selection, protocol details, raw RPC: see `references/t3-agent-rpc.md`.
+- Independent sessions must be top-level threads, do NOT impersonate with `delegate_task` / subagents.
 
-## 9. 适用 / 不适用
+## 9. Applicable / Not Applicable
 
-**适用**：多文件功能、重构、复杂 bug、需要先调研再落地的任务、需要并行多个 agent 的任务。
+**Applicable**: Multi-file features, refactoring, complex bugs, tasks requiring research before implementation, tasks needing parallel agents.
 
-**不适用**：一行修复、纯问答、紧急热修、只需要读文档回答的问题——直接做，不要走编排。
+**Not applicable**: One-line fixes, pure Q&A, urgent hotfixes, questions answerable by reading docs alone—do it directly, don't orchestrate.
+
