@@ -13,6 +13,7 @@ import { publishDynamic, readCredentials } from "./bilibili.ts"
 import { captureFullPage } from "./browser.ts"
 import { CARD_MIN_HEIGHT, CARD_WIDTH, renderCardHtml } from "./card.ts"
 import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL, fallbackCardContent, finalizeBody, generateCardContent } from "./deepseek.ts"
+import { ConfigError } from "./errors.ts"
 import { buildDynamicText, summarizeCommits } from "./summary.ts"
 import type { CardContent, VersionMeta } from "./types.ts"
 
@@ -79,11 +80,11 @@ function printUsage(): void {
   --no-ai            不使用 DeepSeek，直接走规则摘要
   --ai-model <name>  覆盖 DeepSeek 模型
   --dry-run          只生成图片与正文，不发布
-  --strict           缺少 B 站凭据时直接失败（默认跳过）
+  --strict           配置缺失/无效时改为失败（默认跳过并留痕）
   --help             显示本帮助
 
 环境变量：
-  DEEPSEEK_API_KEY   DeepSeek API Key；缺失时回退到规则摘要
+  DEEPSEEK_API_KEY   DeepSeek API Key；缺失或无效时跳过发布
   DEEPSEEK_BASE_URL  DeepSeek 接口地址（默认 ${DEFAULT_DEEPSEEK_BASE_URL}）
   DEEPSEEK_MODEL     模型名（默认 ${DEFAULT_DEEPSEEK_MODEL}）
   BILI_COOKIE        登录后的完整 Cookie（推荐）
@@ -223,10 +224,7 @@ async function main(): Promise<void> {
         console.log("\n--no-ai：使用规则摘要")
         content = fallbackCardContent(summary, meta)
     } else if (!apiKey) {
-        // CI 里 secret 名写错或漏配会让整步静默退化成机械摘要，必须显式失败
-        if (process.env.GITHUB_ACTIONS === "true") throw new Error("未配置 DEEPSEEK_API_KEY，无法生成富文本更新内容")
-        console.warn("\n未配置 DEEPSEEK_API_KEY，回退到规则摘要")
-        content = fallbackCardContent(summary, meta)
+        throw new ConfigError("未配置 DEEPSEEK_API_KEY，无法生成富文本更新内容")
     } else {
         console.log(`\n=== DeepSeek 生成（${model}）===`)
         try {
@@ -243,6 +241,8 @@ async function main(): Promise<void> {
             contentSource = `DeepSeek · ${generated.model}`
             console.log(`  模型：${generated.model}，tokens：${generated.tokens}`)
         } catch (error) {
+            // Key / 地址配错属于配置问题，直接跳过；接口临时故障才回退规则摘要
+            if (error instanceof ConfigError) throw error
             console.warn(`DeepSeek 生成失败，回退到规则摘要：${error instanceof Error ? error.message : error}`)
             content = fallbackCardContent(summary, meta)
             contentSource = "规则摘要（DeepSeek 失败）"
@@ -306,14 +306,8 @@ async function main(): Promise<void> {
     }
 
     const state = readCredentials(process.env)
-    if (state.status === "none") {
-        if (options.strict) throw new Error("未配置 B 站凭据（BILI_COOKIE 或 BILI_SESSDATA/BILI_JCT）")
-        console.warn("\n未配置 B 站凭据，跳过发布（配置方法见 .agents/docs/bili-dynamic.md）")
-        return
-    }
-    if (state.status === "partial") {
-        throw new Error(`B 站凭据不完整，缺少：${state.missing.join("、")}`)
-    }
+    if (state.status === "none") throw new ConfigError("未配置 B 站凭据（BILI_COOKIE 或 BILI_SESSDATA/BILI_JCT）")
+    if (state.status === "partial") throw new ConfigError(`B 站凭据不完整，缺少：${state.missing.join("、")}`)
 
     console.log("\n=== 发布到 B 站 ===")
     const result = await publishDynamic({ imagePath, text: content.body, credentials: state.credentials })
@@ -328,6 +322,16 @@ async function main(): Promise<void> {
 }
 
 main().catch(error => {
+    // 配置问题默认只跳过并留痕，不让 release 步骤变红；--strict 时才失败
+    if (error instanceof ConfigError) {
+        console.warn(`\n跳过发布：${error.message}`)
+        console.warn("配置方法见 .agents/docs/bili-dynamic.md")
+        if (process.env.GITHUB_STEP_SUMMARY) {
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n> [!WARNING]\n> B 站动态已跳过：${error.message}\n`)
+        }
+        if (parseArgs(process.argv.slice(2)).strict) process.exitCode = 1
+        return
+    }
     console.error(`\n失败：${error instanceof Error ? error.message : error}`)
     process.exitCode = 1
 })

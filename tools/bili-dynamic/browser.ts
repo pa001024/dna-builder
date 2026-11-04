@@ -6,6 +6,7 @@ import { type ChildProcess, execFileSync, spawn } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
+import { ConfigError } from "./errors.ts"
 import type { ScreenshotResult } from "./types.ts"
 
 interface CdpMessage {
@@ -61,7 +62,7 @@ class CdpClient {
 
     static connect(url: string): Promise<CdpClient> {
         const WebSocketCtor = (globalThis as { WebSocket?: new (url: string) => WsLike }).WebSocket
-        if (!WebSocketCtor) throw new Error("当前 Node.js 没有内置 WebSocket，请升级到 Node.js 22+")
+        if (!WebSocketCtor) throw new ConfigError("当前 Node.js 没有内置 WebSocket，请升级到 Node.js 22+")
 
         return new Promise((resolve, reject) => {
             const socket = new WebSocketCtor(url)
@@ -160,7 +161,7 @@ export function findBrowser(): string {
         }
     }
 
-    throw new Error("找不到 Chrome/Edge，请设置 CHROME_PATH 指向浏览器可执行文件")
+    throw new ConfigError("找不到 Chrome/Edge，请设置 CHROME_PATH 指向浏览器可执行文件")
 }
 
 function pngSize(buffer: Buffer): { width: number; height: number } | null {

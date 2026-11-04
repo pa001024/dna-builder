@@ -49,12 +49,27 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 
 - DeepSeek 只输出 JSON（标题 / 副标题 / 亮点 / 分组 / 正文），卡片 HTML 由固定模板渲染，所有文本都会转义，模型无法注入 HTML 或脚本。
 - 正文由脚本补齐 release 链接，并压到 1900 字以内（B 站上限 2000）。
-- 本地没有 Key 或 `--no-ai` 时回退到规则摘要；CI 里缺少 `DEEPSEEK_API_KEY` 会直接失败，避免静默发布机械摘要。
+- 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；DeepSeek 临时故障才回退到规则摘要。`--no-ai` 可强制走规则摘要。
 - 分组上限：4 组、合计 9 条；每条 description 会按长度截断，保证卡片高度可控。
 - 渲染默认使用 Chrome；找不到时用 Edge。Node.js 需要 23.6+（原生运行 `.ts`），CI 的 `lts/*` 满足要求。
 
-## 发布失败时
+## 配置缺失 / 配错时
 
-- 缺少 B 站凭据：打印警告并跳过，release 不受影响（`--strict` 可改为失败）。
-- 凭据不完整 / 接口报错：步骤失败，但 `publish.yml` 里该步骤是 `continue-on-error: true`，不会阻塞 release。
+默认**只跳过发布，不让 release 变红**（exit 0），并在 Step Summary 写一条警告说明缺什么：
+
+| 情况 | 行为 |
+| --- | --- |
+| 没有 `DEEPSEEK_API_KEY` | 跳过发布（不生成机械摘要） |
+| DeepSeek 返回 401/403/404 | 跳过发布，日志带上游错误 |
+| 没有 / 只配了部分 B 站凭据 | 跳过发布 |
+| B 站登录态失效（`-101`/`-111`） | 跳过发布 |
+| 找不到浏览器、Node 缺 WebSocket | 跳过发布 |
+| DeepSeek 5xx / 网络超时 | 回退规则摘要，继续发布 |
+
+需要把配置问题当失败时加 `--strict`。
+
+## 运行期故障
+
+- 配置问题见上一节：跳过发布并留痕。
+- 接口临时故障（DeepSeek 5xx、B 站 5xx）：步骤失败，但 `publish.yml` 里该步骤是 `continue-on-error: true`，不会阻塞 release。
 - 图片渲染失败：检查 `CHROME_PATH`，或在本机打开 `.tmp/bili-dynamic/<tag>.html` 查看排版。

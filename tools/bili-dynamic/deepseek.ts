@@ -3,6 +3,7 @@
  * 输出走 JSON 模式，卡片 HTML 由固定模板渲染，避免模型直接产出不可控的 HTML。
  */
 
+import { ConfigError } from "./errors.ts"
 import { buildDynamicText } from "./summary.ts"
 import type { CardContent, CardSection, CommitSummary, Highlight, VersionMeta } from "./types.ts"
 
@@ -230,6 +231,8 @@ export async function generateCardContent(options: GenerateOptions): Promise<Gen
 
     if (!response.ok) {
         const detail = (await response.text()).slice(0, 300)
+        // 401/403 是 Key 配错，404 是地址配错，其余才算接口故障
+        if ([401, 403, 404].includes(response.status)) throw new ConfigError(`DeepSeek 配置无效（HTTP ${response.status}）：${detail}`)
         throw new Error(`DeepSeek 接口 HTTP ${response.status}：${detail}`)
     }
 

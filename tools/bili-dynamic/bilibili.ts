@@ -6,6 +6,7 @@
 import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
 import path from "node:path"
+import { ConfigError } from "./errors.ts"
 import type { BiliCredentials, CredentialState, PublishResult } from "./types.ts"
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
@@ -149,7 +150,7 @@ function keyOf(url: string): string {
 
 function buildWbiQuery(wbiImg: NavData["wbi_img"]): string {
     const wts = Math.round(Date.now() / 1000)
-    if (!wbiImg?.img_url || !wbiImg.sub_url) throw new Error("登录接口未返回 wbi_img，无法签名（通常是风控拦截）")
+    if (!wbiImg?.img_url || !wbiImg.sub_url) throw new ConfigError("登录接口未返回 wbi_img，无法签名（通常是风控拦截）")
     const raw = keyOf(wbiImg.img_url) + keyOf(wbiImg.sub_url)
     const mixin = MIXIN_TAB.map(index => raw[index] ?? "")
         .join("")
@@ -168,7 +169,10 @@ async function getNav(cookie: string): Promise<NavData> {
         "检查登录态"
     )
     if (json.code !== 0 || !json.data?.isLogin) {
-        throw new Error(`B 站登录态无效（code=${json.code} ${json.message ?? json.msg ?? ""}），请重新获取 Cookie`)
+        // -101 / -111 是登录态失效，属于凭据配置问题；其余码才是接口故障
+        const expired = [-101, -111].includes(json.code)
+        const message = `B 站登录态无效（code=${json.code} ${json.message ?? json.msg ?? ""}），请重新获取 Cookie`
+        throw expired ? new ConfigError(message) : new Error(message)
     }
     return json.data
 }
