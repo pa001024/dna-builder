@@ -85,9 +85,11 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 
 `--tag HEAD` 时版本号取 `package.json`；正式发布时传 `v*` tag。仓库名默认取 `GITHUB_REPOSITORY`（本地回退到 `pa001024/dna-builder`），fork 上也能用。
 
+`--previous`（或 `PREVIOUS_TAG`）会先校验：tag 必须存在且是当前 tag 的祖先，否则回退到自动查找，避免重跑旧 tag 时把别的版本提交算进来。`--title` 会覆盖卡片大标题；agent 生成的 HTML 无法改写标题，此时改用兜底模板渲染，保证截图与标题一致。
+
 ## 生成口径
 
-- 卡片 HTML 由 agent 自己写，代码只做安全校验（完整文档 / 无脚本 / 无外链资源）。
+- 卡片 HTML 由 agent 自己写，代码只做安全校验：必须是完整文档，且不含脚本、内联事件属性、`iframe`/`object`/`link`/`meta`/`base`、`@import`，也不引用 `github.com` / `dna-builder.cn` / `dobapp.cc` 之外的外部资源。
 - 正文由脚本补齐 release 链接，并压到 1900 字以内（B 站上限 2000）。
 - 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；接口临时故障才回退到规则模板。`--no-ai` 可强制走规则模板。
 - 规则模板（`card.ts` + `fallback.ts`）只是兜底：按提交类型分组、限制 4 组 9 条，保证任何情况下都有一张能看的卡片。

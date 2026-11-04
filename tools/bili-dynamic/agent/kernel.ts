@@ -174,6 +174,8 @@ export class CardAgent {
                 budgetWarned = true
                 this.log(`  ! 工具轮次预算已用尽（${maxToolRounds}），要求收尾`)
             }
+            // 预算用尽后模型若仍反复调用非 finish 工具，这里必须硬停，否则会一直烧 token 到 CI 超时
+            if (rounds > maxToolRounds + maxContinuations) throw new Error("agent 超出轮次预算仍未调用 finish")
 
             const results = await this.executeCalls(calls, rounds, overBudget, toolSequence)
             messages.push({ role: "user", text: "", toolResults: results })

@@ -140,6 +140,35 @@ function findPreviousTag(revision: string, currentTag: string): string {
     return tags[0] ?? ""
 }
 
+/**
+ * 校验传入的上一版本 tag：必须存在且是当前版本的祖先。
+ * 工作流的「Get previous tag」按创建时间取第二个 tag，重跑旧 tag 时会指错版本。
+ */
+function resolvePreviousTag(candidate: string, revision: string, currentTag: string): string {
+    const tag = candidate.trim()
+    if (!tag) return findPreviousTag(revision, currentTag)
+    if (!tryGit(["rev-parse", "--verify", `${tag}^{commit}`])) {
+        console.warn(`  上一版本 tag 不存在：${tag}，改为自动查找`)
+        return findPreviousTag(revision, currentTag)
+    }
+    // tag 不是 revision 的祖先时，区间会把别的版本的提交算进来
+    if (!isAncestorOf(tag, revision)) {
+        console.warn(`  上一版本 tag ${tag} 不是 ${currentTag} 的祖先，改为自动查找`)
+        return findPreviousTag(revision, currentTag)
+    }
+    return tag
+}
+
+/** git merge-base --is-ancestor 用退出码表达结果，tryGit 吞掉了非零码，这里单独判定 */
+function isAncestorOf(tag: string, revision: string): boolean {
+    try {
+        execFileSync("git", ["merge-base", "--is-ancestor", tag, revision], { cwd: ROOT, stdio: "ignore" })
+        return true
+    } catch {
+        return false
+    }
+}
+
 function readCommitData(revision: string, previousTag: string): CommitData {
     const args = ["log", "--no-merges", "--pretty=format:%x1e%h%x09%s%n%b"]
     if (previousTag) {
@@ -211,7 +240,7 @@ async function main(): Promise<void> {
     const { version, tag } = resolveVersion(revision, pkg.version)
     // HEAD 预览时 package.json 的版本往往还没跟上，区间取「最近 tag 之后」；正式发布仍用当前 tag 作上界
     const upperTag = revision === "HEAD" ? "HEAD" : tag
-    const previousTag = options.previous || process.env.PREVIOUS_TAG || findPreviousTag(revision, tag)
+    const previousTag = resolvePreviousTag(options.previous || process.env.PREVIOUS_TAG || "", revision, tag)
     const previousVersion = previousTag ? previousTag.replace(/^v/i, "") : ""
     const repo = options.repo || process.env.GITHUB_REPOSITORY || DEFAULT_REPO
     const meta: VersionMeta = {
@@ -272,7 +301,14 @@ async function main(): Promise<void> {
         }
     }
 
-    if (options.title) content.title = options.title
+    if (options.title) {
+        content.title = options.title
+        // --title 要落到实际截图用的 HTML 上；agent 的 HTML 无法改写标题，只能退回模板
+        if (html) {
+            console.warn("  --title 已指定：agent 生成的 HTML 无法改写标题，改用兜底模板渲染")
+            html = null
+        }
+    }
     if (options.text) content.body = options.text
     content.body = finalizeBody(content.body, meta)
     printContent(content, contentSource)

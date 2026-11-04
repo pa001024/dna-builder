@@ -3,7 +3,7 @@
  * 对齐 apps/web/src/api/dbAgent.ts 的写法——内核只负责循环，装配只负责注入。
  */
 
-import { ConfigError, DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "../errors.ts"
+import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "../errors.ts"
 import { DESIGN_REFERENCE } from "../style.ts"
 import type { VersionMeta } from "../types.ts"
 import { CardAgent, MAX_CONTINUATIONS, MAX_TOOL_ROUNDS } from "./kernel.ts"
@@ -90,15 +90,43 @@ function buildSystemPrompt(meta: VersionMeta): string {
 ${DESIGN_REFERENCE}`
 }
 
-/** 校验 agent 产出的 HTML：必须是完整文档、无脚本、无外链资源 */
+/** 允许出现的外部主机：本仓库与站点（按主机名结尾精确匹配，避免 github.com.evil.example 混进来） */
+const ALLOWED_HOSTS = ["github.com", "dna-builder.cn", "dobapp.cc"]
+
+/** 校验 agent 产出的 HTML：必须是完整文档、无脚本、无事件属性、无外部资源 */
 export function validateGeneratedHtml(html: string): string {
     const text = html.trim()
     if (!/<\/html>/i.test(text) || !/<body/i.test(text)) throw new Error("agent 返回的不是完整 HTML 文档")
     if (/<script\b/i.test(text)) throw new Error("agent 返回的 HTML 含 <script>，已拒绝")
-    if (/https?:\/\/(?!github\.com|dna-builder)[^"')\s]+\.(png|jpg|jpeg|gif|webp|svg|woff2?|ttf|otf)/i.test(text)) {
-        throw new Error("agent 返回的 HTML 引用了外部图片或字体，已拒绝")
+    // 内联事件处理器同样能执行脚本（<img src=x onerror=...>）
+    if (/\son[a-z]+\s*=/i.test(text)) throw new Error("agent 返回的 HTML 含事件属性，已拒绝")
+    // 会主动加载外部资源的元素与 CSS 指令
+    if (/<(iframe|object|embed|link|meta|base)\b/i.test(text) || /@import\b/i.test(text)) {
+        throw new Error("agent 返回的 HTML 含不允许的元素或 CSS 指令，已拒绝")
     }
+    if (hasExternalResource(text)) throw new Error("agent 返回的 HTML 引用了外部资源，已拒绝")
     return text
+}
+
+/** 找出指向允许主机之外的外部资源引用（含协议相对 URL 与不带扩展名的写法） */
+function hasExternalResource(text: string): boolean {
+    const urlPattern = /(?:https?:)?\/\/[^\s"'()]+/gi
+    for (const match of text.matchAll(urlPattern)) {
+        const raw = match[0]
+        let host: string
+        try {
+            host = new URL(raw.startsWith("//") ? `https:${raw}` : raw).hostname.toLowerCase()
+        } catch {
+            return true
+        }
+        if (!ALLOWED_HOSTS.some(allowed => host === allowed || host.endsWith(`.${allowed}`))) return true
+    }
+    // url(...) 里的 data: 内联是允许的，其余一律拒绝
+    for (const match of text.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
+        const value = match[2].trim()
+        if (value && !value.startsWith("data:") && !value.startsWith("#")) return true
+    }
+    return false
 }
 
 /** 校验 release 正文：必须是 markdown 纯文本，不能带 HTML 标签或自己包 details */
@@ -142,7 +170,8 @@ export async function runCardAgent(options: CardAgentRunOptions): Promise<CardAg
 
     const html = validateGeneratedHtml(String(result.output.html ?? ""))
     const body = String(result.output.body ?? "").trim()
-    if (!body) throw new ConfigError("agent 未提供动态正文")
+    // 产出不合格属于生成失败，走规则模板降级；ConfigError 只留给上游配置问题
+    if (!body) throw new Error("agent 未提供动态正文")
     if (body.includes("<")) throw new Error("agent 返回的正文含 HTML 标记，已拒绝")
     const releaseNotes = validateReleaseNotes(String(result.output.release_notes ?? ""))
 

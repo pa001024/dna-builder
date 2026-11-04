@@ -42,7 +42,8 @@ function isBlocked(relative: string): boolean {
 function resolveInside(root: string, relative: string): string {
     const resolved = path.resolve(root, relative)
     const normalized = path.relative(root, resolved).replaceAll("\\", "/")
-    if (!normalized || normalized.startsWith("..") || path.isAbsolute(normalized)) throw new Error(`路径不在仓库内：${relative}`)
+    // "." 解析成仓库根，normalized 为空串是合法的；越界要按父目录段精确判断，别误伤 "..foo" 这类文件名
+    if (path.isAbsolute(normalized) || normalized.split("/")[0] === "..") throw new Error(`路径不在仓库内：${relative}`)
     if (isBlocked(normalized)) throw new Error(`该路径不提供给模型：${relative}`)
     return resolved
 }
@@ -119,9 +120,11 @@ export function createRepoAgentTools(root: string, skills: Map<string, SkillEntr
             if (!pattern) throw new Error("pattern 不能为空")
             const globArgs = args.glob ? ["--glob", String(args.glob)] : []
             try {
+                // pattern 来自模型（可能被仓库里的文本注入），必须用 --regexp 传值并以 -- 结束选项解析，
+                // 否则以 "-" 开头的模式会被 rg 当成参数（如 --pre=... 可执行外部命令）
                 const output = execFileSync(
                     "rg",
-                    ["--line-number", "--no-heading", "--color", "never", "--max-count", "8", ...globArgs, pattern, "."],
+                    ["--line-number", "--no-heading", "--color", "never", "--max-count", "8", ...globArgs, "--regexp", pattern, "--", "."],
                     { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 8 * 1024 * 1024, timeout: 20_000 }
                 )
                 const lines = output
@@ -152,6 +155,18 @@ export function createRepoAgentTools(root: string, skills: Map<string, SkillEntr
             if (gitArgs.length === 0) throw new Error("args 不能为空")
             if (!ALLOWED_GIT.has(gitArgs[0])) throw new Error(`不支持的 git 子命令：${gitArgs[0]}`)
             if (gitArgs.some(arg => /^--output/.test(arg))) throw new Error("不允许写文件的 git 参数")
+            // --no-index 能让 git 读仓库外的任意文件（如 /proc/self/environ 里的 CI 密钥）
+            if (gitArgs.some(arg => arg === "--no-index")) throw new Error("不允许读取仓库外文件的 git 参数")
+            // tag 只保留列表用法：git tag <name> / -d 会改动仓库状态
+            if (gitArgs[0] === "tag" && !gitArgs.slice(1).some(arg => arg === "-l" || arg === "--list")) {
+                throw new Error("tag 只允许列表模式（需带 -l 或 --list）")
+            }
+            // show/diff 的 rev:path 参数绕过了 resolveInside，这里对路径部分再走一次屏蔽规则
+            for (const arg of gitArgs.slice(1)) {
+                if (arg.startsWith("-")) continue
+                const pathPart = arg.includes(":") ? arg.split(":").slice(1).join(":") : arg
+                if (pathPart && isBlocked(pathPart.replace(/^\.\//, ""))) throw new Error(`该路径不提供给模型：${arg}`)
+            }
             try {
                 return clip(
                     execFileSync("git", gitArgs, {
