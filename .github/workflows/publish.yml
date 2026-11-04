@@ -276,6 +276,7 @@ jobs:
                   gh release upload $env:TAG_NAME update.json --repo $env:GITHUB_REPOSITORY --clobber
 
             - name: Publish update dynamic to Bilibili
+              id: bili_dynamic
               if: success() && github.event_name != 'pull_request'
               continue-on-error: true
               timeout-minutes: 10
@@ -301,11 +302,17 @@ jobs:
             - name: Add summary
               if: success() && github.event_name != 'pull_request'
               shell: pwsh
+              env:
+                  # continue-on-error 的步骤失败/超时时 release 仍然成功，这里要如实标注动态是否发出
+                  BILI_OUTCOME: ${{ steps.bili_dynamic.outcome }}
               run: |
                   $summary = "
                   > [!TIP]
                   > 发布成功
-                  > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/) 
+                  > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/)
                   "
+                  if ($env:BILI_OUTCOME -ne "success") {
+                      $summary += "`n> [!WARNING]`n> B 站动态未发布（步骤结果: $env:BILI_OUTCOME），详见该步骤日志`n"
+                  }
 
                   echo $summary >> $Env:GITHUB_STEP_SUMMARY

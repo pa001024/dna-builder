@@ -127,10 +127,13 @@ function findPreviousTag(revision: string, currentTag: string): string {
     // 本地用 HEAD 预览时 currentTag 取自 package.json，不能与自身比较（区间会退化成 X..X 空集）
     const described = tryGit(["describe", "--tags", "--abbrev=0", `${revision}^`])
     if (described) return described
+    // 按提交而不是 tag 名过滤：--tag HEAD 时发布 tag 恰好指向当前提交，按名字比会把它当成上一版本
+    const currentCommit = tryGit(["rev-parse", "--verify", `${revision}^{commit}`])
     const tags = tryGit(["tag", "--sort=-creatordate"])
         .split(/\r?\n/)
         .map(tag => tag.trim())
         .filter(tag => /^v\d/.test(tag) && tag !== revision && tag !== currentTag)
+        .filter(tag => (currentCommit ? tryGit(["rev-parse", "--verify", `${tag}^{commit}`]) !== currentCommit : true))
     return tags[0] ?? ""
 }
 
