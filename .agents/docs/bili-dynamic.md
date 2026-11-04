@@ -2,11 +2,35 @@
 
 发布 `v*` tag 时，`publish.yml` 在 release 资产上传完成后调用 `tools/bili-dynamic/index.ts`：
 
-1. 收集上一版本 tag 到当前 tag 的提交标题、正文和 `git diff --stat`；
-2. 调 DeepSeek 生成玩家向的标题、副标题、亮点、分组说明和动态正文；
-3. 用固定 HTML 模板渲染 1080px 卡片，通过本机 Chrome/Edge 的 CDP 量出真实高度后整页截图（2x）；
+1. 收集上一版本 tag 到当前 tag的提交与 `git diff --stat`，用于规则兜底；
+2. 启动**卡片生成 agent**（见下节）：它能读整个仓库，自己调研改动、自己设计并写出整页 HTML 与动态正文；
+3. 用本机 Chrome/Edge 的 CDP 量出真实页面高度后整页截图（2x）；
 4. 调 B 站图文动态接口上传图片并发布；
 5. 动态链接写入 GitHub Actions Step Summary。
+
+## 卡片生成 agent
+
+`tools/bili-dynamic/agent/` 是一套与 `apps/web/src/api/agent` 同构的通用内核，不是一次性循环：
+
+| 文件 | 职责 |
+| --- | --- |
+| `kernel.ts` | 主循环：工具声明全程在场、轮次预算、输出上限续写、上下文自适应压缩、并发调度、finish 重试 |
+| `compact.ts` | 上下文压缩：绝对阈值触发，按助手轮切分，最近一轮原样保留，失败逐级多保留近轮重试 |
+| `context.ts` | tokens 估算（CJK 权重 2、其余 1，除以 3）与按模型名解析上下文窗口 |
+| `tool.ts` | 工具契约与并发分组（`concurrentSafe` 工具并行，串行工具是屏障） |
+| `transport.ts` | Chat Completions 传输，归一化工具调用与 usage |
+| `repo-tools.ts` | 只读工具：`list_dir` / `read_file` / `search_code` / `git` / `read_skill` |
+| `skills.ts` | 读取 `.agents/skills/*/SKILL.md` 的 frontmatter，清单注入提示词 |
+| `index.ts` | 装配层：工具 + 技能 + 提示词 + `finish`，并校验产出 |
+
+关键行为：
+
+- **不是固定模板**：页面结构由模型自己设计，代码只提供 `style.ts` 的设计参考（主题色、圆角、字体、间距）。
+- **能读整个仓库**：除密钥、`node_modules`、`dist`、`target`、日志与数据库外，源码/文档/spec 都可读；`git` 只允许 `log/show/diff/status/ls-files/describe/rev-parse/tag`。
+- **技能**：`.agents/skills/` 下的技能会被列进提示词，模型可用 `read_skill` 按需读取正文（例如 `db-style` 的设计规范）。
+- **上下文管理**：每轮请求前估算 tokens，超过 `窗口 − 输出预留 − 安全缓冲` 就压缩历史；`deepseek-flash` 按 1M 窗口。
+- **轮次与输出**：工具轮次上限 30，单轮输出上限 16000 tokens；触达上限自动续写，`finish` 的 JSON 被截断会要求模型精简后重发（最多 2 次）。
+- **安全**：产出的 HTML 必须是完整文档、无 `<script>`、不引用外部图片/字体；正文不得含 HTML 标记。
 
 ## Secrets / Variables
 
@@ -14,7 +38,7 @@
 
 | 名称 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `DEEPSEEK_API_KEY` | Secret | 建议 | DeepSeek API Key。缺失时回退到规则摘要（只按提交类型分组，不做润色） |
+| `DEEPSEEK_API_KEY` | Secret | 建议 | DeepSeek API Key。缺失时跳过发布（不会静默降级成机械摘要） |
 | `BILI_COOKIE` | Secret | 二选一 | 登录 B 站后的完整 Cookie，推荐；至少包含 `SESSDATA`、`bili_jct`、`buvid3` |
 | `BILI_SESSDATA` | Secret | 二选一 | 单独配置时与 `BILI_JCT` 一起使用 |
 | `BILI_JCT` | Secret | 二选一 | Cookie 中的 `bili_jct`（32 位十六进制） |
@@ -32,7 +56,7 @@
 # 只渲染卡片和正文，不发布（不需要任何密钥）；--tag 传当前分支名，版本号才取 package.json
 node tools/bili-dynamic/index.ts --tag HEAD --dry-run
 
-# 不用 DeepSeek，走规则摘要
+# 不用 DeepSeek agent，走规则模板
 node tools/bili-dynamic/index.ts --tag HEAD --dry-run --no-ai
 
 # 真正发布（PowerShell 示例）
@@ -47,10 +71,10 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 
 ## 生成口径
 
-- DeepSeek 只输出 JSON（标题 / 副标题 / 亮点 / 分组 / 正文），卡片 HTML 由固定模板渲染，所有文本都会转义，模型无法注入 HTML 或脚本。
+- 卡片 HTML 由 agent 自己写，代码只做安全校验（完整文档 / 无脚本 / 无外链资源）。
 - 正文由脚本补齐 release 链接，并压到 1900 字以内（B 站上限 2000）。
-- 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；DeepSeek 临时故障才回退到规则摘要。`--no-ai` 可强制走规则摘要。
-- 分组上限：4 组、合计 9 条；每条 description 会按长度截断，保证卡片高度可控。
+- 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；接口临时故障才回退到规则模板。`--no-ai` 可强制走规则模板。
+- 规则模板（`card.ts` + `fallback.ts`）只是兜底：按提交类型分组、限制 4 组 9 条，保证任何情况下都有一张能看的卡片。
 - 渲染默认使用 Chrome；找不到时用 Edge。Node.js 需要 23.6+（原生运行 `.ts`），CI 的 `lts/*` 满足要求。
 
 ## 配置缺失 / 配错时

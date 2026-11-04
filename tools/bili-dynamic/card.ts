@@ -1,5 +1,6 @@
 /**
- * @file 更新卡片 HTML 模板。内容来自 DeepSeek（或规则回退），这里只负责排版与转义。
+ * @file 卡片兜底模板：agent 不可用或产出无效时使用。
+ * 正常路径由 agent.ts 自己写 HTML，这里只保证始终有一张能看的卡片。
  */
 
 import type { CardContent, CardSection, Highlight } from "./types.ts"
@@ -54,7 +55,8 @@ function sectionHtml(section: CardSection): string {
     </section>`
 }
 
-export function renderCardHtml(data: {
+/** 把兜底内容渲染成 HTML，供 agent 失败时使用 */
+export function renderFallbackHtml(data: {
     content: CardContent
     version: string
     previousVersion: string

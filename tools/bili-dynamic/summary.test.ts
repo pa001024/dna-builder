@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { finalizeBody } from "./deepseek.ts"
+import { finalizeBody } from "./fallback.ts"
 import { buildDynamicText, parseCommitSubject, summarizeCommits } from "./summary.ts"
 
 const META = { version: "1.6.0", previousVersion: "1.5.2", tag: "v1.6.0", previousTag: "v1.5.2", repo: "pa001024/dna-builder" }

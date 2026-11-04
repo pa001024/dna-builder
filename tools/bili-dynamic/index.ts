@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @file 版本更新 → DeepSeek 富文本内容 → HTML 卡片 → PNG → B 站图文动态。
+ * @file 版本更新 → 卡片生成 agent → PNG → B 站图文动态。
  * 用法与 Secrets 配置见 .agents/docs/bili-dynamic.md。
  */
 
@@ -9,12 +9,13 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFil
 import path from "node:path"
 import process from "node:process"
 import { fileURLToPath } from "node:url"
+import { runCardAgent } from "./agent/index.ts"
 import { publishDynamic, readCredentials } from "./bilibili.ts"
 import { captureFullPage } from "./browser.ts"
-import { CARD_MIN_HEIGHT, CARD_WIDTH, renderCardHtml } from "./card.ts"
-import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL, fallbackCardContent, finalizeBody, generateCardContent } from "./deepseek.ts"
-import { ConfigError } from "./errors.ts"
-import { buildDynamicText, summarizeCommits } from "./summary.ts"
+import { CARD_MIN_HEIGHT, CARD_WIDTH, renderFallbackHtml } from "./card.ts"
+import { ConfigError, DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./errors.ts"
+import { fallbackCardContent, finalizeBody } from "./fallback.ts"
+import { summarizeCommits } from "./summary.ts"
 import type { CardContent, VersionMeta } from "./types.ts"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
@@ -122,13 +123,14 @@ function resolveVersion(revision: string, pkgVersion: string): { revision: strin
     return { revision, version, tag: revision.startsWith("v") ? revision : `v${version}` }
 }
 
-function findPreviousTag(revision: string): string {
+function findPreviousTag(revision: string, currentTag: string): string {
+    // 本地用 HEAD 预览时 currentTag 取自 package.json，不能与自身比较（区间会退化成 X..X 空集）
     const described = tryGit(["describe", "--tags", "--abbrev=0", `${revision}^`])
     if (described) return described
     const tags = tryGit(["tag", "--sort=-creatordate"])
         .split(/\r?\n/)
         .map(tag => tag.trim())
-        .filter(tag => /^v\d/.test(tag) && tag !== revision)
+        .filter(tag => /^v\d/.test(tag) && tag !== revision && tag !== currentTag)
     return tags[0] ?? ""
 }
 
@@ -194,7 +196,7 @@ async function main(): Promise<void> {
     if (!tryGit(["rev-parse", "--verify", revision])) throw new Error(`git 中找不到版本：${revision}`)
 
     const { version, tag } = resolveVersion(revision, pkg.version)
-    const previousTag = options.previous || process.env.PREVIOUS_TAG || findPreviousTag(revision)
+    const previousTag = options.previous || process.env.PREVIOUS_TAG || findPreviousTag(revision, tag)
     const previousVersion = previousTag ? previousTag.replace(/^v/i, "") : ""
     const repo = options.repo || process.env.GITHUB_REPOSITORY || DEFAULT_REPO
     const meta: VersionMeta = {
@@ -209,7 +211,6 @@ async function main(): Promise<void> {
 
     const commitData = readCommitData(revision, previousTag)
     const summary = summarizeCommits(commitData.subjects)
-    const fallbackBody = buildDynamicText(summary, meta)
 
     console.log("=== 版本 ===")
     console.log(`${previousTag ? `${previousTag} → ` : ""}${tag}（${commitData.subjects.length} 个提交）`)
@@ -219,33 +220,37 @@ async function main(): Promise<void> {
     const model = options.aiModel || process.env.DEEPSEEK_MODEL || process.env.AI_MODEL || DEFAULT_DEEPSEEK_MODEL
 
     let content: CardContent
+    let html: string | null = null
     let contentSource = "规则摘要"
     if (options.noAi) {
         console.log("\n--no-ai：使用规则摘要")
         content = fallbackCardContent(summary, meta)
     } else if (!apiKey) {
-        throw new ConfigError("未配置 DEEPSEEK_API_KEY，无法生成富文本更新内容")
+        throw new ConfigError("未配置 DEEPSEEK_API_KEY，无法生成更新卡片")
     } else {
-        console.log(`\n=== DeepSeek 生成（${model}）===`)
+        console.log(`\n=== 卡片生成 agent（${model}）===`)
         try {
-            const generated = await generateCardContent({
+            const generated = await runCardAgent({
                 apiKey,
                 baseUrl,
                 model,
-                commitLog: commitData.log,
-                diffStat: commitData.diffStat,
+                root: ROOT,
                 meta,
-                fallbackBody,
+                log: line => console.log(line),
             })
-            content = generated.content
-            contentSource = `DeepSeek · ${generated.model}`
-            console.log(`  模型：${generated.model}，tokens：${generated.tokens}`)
+            html = generated.html
+            content = {
+                ...fallbackCardContent(summary, meta),
+                title: generated.title || `v${version} 更新`,
+                body: generated.body,
+            }
+            contentSource = `agent · ${generated.rounds} 轮 / ${generated.compactions} 次压缩 / ${generated.tokens} tokens`
         } catch (error) {
-            // Key / 地址配错属于配置问题，直接跳过；接口临时故障才回退规则摘要
+            // Key / 地址配错属于配置问题，直接跳过；接口临时故障才回退规则模板
             if (error instanceof ConfigError) throw error
-            console.warn(`DeepSeek 生成失败，回退到规则摘要：${error instanceof Error ? error.message : error}`)
+            console.warn(`卡片生成 agent 失败，回退到规则模板：${error instanceof Error ? error.message : error}`)
             content = fallbackCardContent(summary, meta)
-            contentSource = "规则摘要（DeepSeek 失败）"
+            contentSource = "规则模板（agent 失败）"
         }
     }
 
@@ -270,15 +275,16 @@ async function main(): Promise<void> {
         const textPath = `${basePath}.txt`
         writeFileSync(
             htmlPath,
-            renderCardHtml({
-                content,
-                version,
-                previousVersion,
-                date: meta.date,
-                iconDataUrl: iconDataUrl(),
-                repo,
-                site: SITE,
-            }),
+            html ??
+                renderFallbackHtml({
+                    content,
+                    version,
+                    previousVersion,
+                    date: meta.date,
+                    iconDataUrl: iconDataUrl(),
+                    repo,
+                    site: SITE,
+                }),
             "utf8"
         )
         writeFileSync(textPath, `${content.body}\n`, "utf8")
