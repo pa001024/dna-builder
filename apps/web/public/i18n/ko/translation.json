@@ -2311,6 +2311,68 @@
     "dev-components": {
         "title": "컴포넌트"
     },
+    "diagnostics": {
+        "copied": "복사됨",
+        "copy": "전체 복사",
+        "copyHint": "복사해서 고객센터나 개발자에게 보내면 문제 파악이 빨라집니다",
+        "field": {
+            "appVersion": "앱 버전",
+            "cpuBrand": "모델",
+            "cpuCores": "코어 수(물리 / 논리)",
+            "cpuFrequency": "클럭",
+            "cpuVendor": "제조사",
+            "displayAdapter": "어댑터",
+            "displayMode": "표시 모드",
+            "displayPrimary": "기본 디스플레이",
+            "elevated": "관리자 권한",
+            "gpuDriver": "드라이버 버전",
+            "gpuError": "열거 오류",
+            "gpuIds": "제조사 / 장치 ID",
+            "gpuName": "이름",
+            "gpuSharedMemory": "공유 메모리",
+            "gpuVram": "전용 VRAM",
+            "locale": "로캘",
+            "memoryAvailable": "사용 가능 메모리",
+            "memoryTotal": "전체 메모리",
+            "os": "OS",
+            "osArch": "시스템 아키텍처",
+            "osBuild": "OS 빌드",
+            "osVersion": "OS 버전",
+            "processArch": "프로세스 아키텍처",
+            "webview2Error": "감지 오류",
+            "webview2Recommended": "권장 최소 버전",
+            "webview2Version": "버전"
+        },
+        "install": "자동 설치",
+        "installDone": "WebView2 {{version}} 설치 완료. 앱을 다시 시작하면 적용됩니다.",
+        "installDoneUnknown": "설치가 완료되었습니다. 앱을 다시 시작하면 적용됩니다.",
+        "installing": "설치 중…",
+        "loadFailed": "실행 환경을 읽지 못했습니다: {{error}}",
+        "loading": "실행 환경을 읽는 중…",
+        "officialLink": "공식 다운로드",
+        "refresh": "새로고침",
+        "section": {
+            "cpu": "프로세서",
+            "display": "디스플레이",
+            "gpu": "GPU",
+            "memory": "메모리",
+            "system": "시스템",
+            "webview2": "WebView2 런타임"
+        },
+        "title": "진단 도구",
+        "value": {
+            "no": "아니요",
+            "software": "소프트웨어",
+            "yes": "예"
+        },
+        "warning": {
+            "lowMemory": "물리 메모리가 8 GB 미만입니다. 백그라운드 프로그램이 많으면 끊길 수 있습니다.",
+            "noHardwareGpu": "하드웨어 GPU를 찾을 수 없습니다. 소프트웨어 렌더링으로 전환되어 눈에 띄는 끊김이 발생할 수 있습니다.",
+            "oldOsBuild": "OS 빌드 {{build}}이(가) 오래되었습니다. Windows 10 2004 이상으로 업데이트하는 것이 좋습니다.",
+            "webview2Missing": "WebView2 런타임을 감지할 수 없습니다(미설치 또는 로드 실패). 화면이 정상적으로 표시되지 않을 수 있습니다.",
+            "webview2Outdated": "WebView2 버전 {{version}}이(가) 낮아(권장 {{minVersion}} 이상) 렌더링 성능이 제한될 수 있습니다."
+        }
+    },
     "dialog-model": {
         "ok": "확인"
     },
@@ -4342,6 +4404,9 @@
         "defaultFont": "기본 글꼴",
         "depth": "깊이",
         "desc": "맞춤형 애플리케이션 설정",
+        "diagnostics": "진단 도구",
+        "diagnosticsOpen": "진단 정보 보기",
+        "diagnosticsTip": "시스템·하드웨어·WebView2 실행 정보를 확인해 끊김을 진단합니다",
         "download": "다운로드",
         "downloaded": "다운로드됨",
         "female": "여성",

@@ -2360,6 +2360,68 @@
     "dev-components": {
         "title": "组件调试"
     },
+    "diagnostics": {
+        "copied": "已复制",
+        "copy": "复制全部信息",
+        "copyHint": "可复制后发送给客服或开发者排查",
+        "field": {
+            "appVersion": "应用版本",
+            "cpuBrand": "型号",
+            "cpuCores": "核心数（物理 / 逻辑）",
+            "cpuFrequency": "主频",
+            "cpuVendor": "厂商",
+            "displayAdapter": "适配器",
+            "displayMode": "显示模式",
+            "displayPrimary": "主显示器",
+            "elevated": "管理员权限",
+            "gpuDriver": "驱动版本",
+            "gpuError": "枚举错误",
+            "gpuIds": "厂商 / 设备 ID",
+            "gpuName": "名称",
+            "gpuSharedMemory": "共享内存",
+            "gpuVram": "专用显存",
+            "locale": "区域",
+            "memoryAvailable": "可用内存",
+            "memoryTotal": "总内存",
+            "os": "操作系统",
+            "osArch": "系统架构",
+            "osBuild": "内部版本",
+            "osVersion": "系统版本",
+            "processArch": "进程架构",
+            "webview2Error": "检测错误",
+            "webview2Recommended": "建议最低版本",
+            "webview2Version": "版本"
+        },
+        "install": "自动安装",
+        "installDone": "已安装 WebView2 {{version}}，请重启应用后生效。",
+        "installDoneUnknown": "安装已完成，请重启应用后生效。",
+        "installing": "安装中…",
+        "loadFailed": "读取运行环境失败：{{error}}",
+        "loading": "正在读取运行环境…",
+        "officialLink": "官方下载页",
+        "refresh": "刷新",
+        "section": {
+            "cpu": "处理器",
+            "display": "显示器",
+            "gpu": "显卡",
+            "memory": "内存",
+            "system": "系统",
+            "webview2": "WebView2 运行时"
+        },
+        "title": "诊断工具",
+        "value": {
+            "no": "否",
+            "software": "软件渲染",
+            "yes": "是"
+        },
+        "warning": {
+            "lowMemory": "物理内存低于 8 GB，后台程序较多时可能卡顿。",
+            "noHardwareGpu": "未检测到硬件显卡，界面将由软件渲染，可能出现明显卡顿。",
+            "oldOsBuild": "系统版本较旧（build {{build}}），建议升级到 Windows 10 2004 及以上。",
+            "webview2Missing": "无法检测到 WebView2 运行时（可能未安装或加载失败），界面可能显示异常。",
+            "webview2Outdated": "WebView2 版本 {{version}} 偏低（建议不低于 {{minVersion}}），渲染性能可能受限。"
+        }
+    },
     "dialog-model": {
         "ok": "确定"
     },
@@ -4389,6 +4451,9 @@
         "defaultFont": "默认字体",
         "depth": "阴影深度",
         "desc": "自定义应用程序设置",
+        "diagnostics": "诊断工具",
+        "diagnosticsOpen": "查看诊断信息",
+        "diagnosticsTip": "查看系统、硬件与 WebView2 等运行信息，用于排查卡顿",
         "download": "下载",
         "downloaded": "已下载",
         "female": "女",

@@ -2309,6 +2309,68 @@
     "dev-components": {
         "title": "元件除錯"
     },
+    "diagnostics": {
+        "copied": "已複製",
+        "copy": "複製全部資訊",
+        "copyHint": "可複製後傳送給客服或開發者排查",
+        "field": {
+            "appVersion": "應用程式版本",
+            "cpuBrand": "型號",
+            "cpuCores": "核心數（實體 / 邏輯）",
+            "cpuFrequency": "時脈",
+            "cpuVendor": "廠商",
+            "displayAdapter": "介面卡",
+            "displayMode": "顯示模式",
+            "displayPrimary": "主顯示器",
+            "elevated": "系統管理員權限",
+            "gpuDriver": "驅動程式版本",
+            "gpuError": "列舉錯誤",
+            "gpuIds": "廠商 / 裝置 ID",
+            "gpuName": "名稱",
+            "gpuSharedMemory": "共用記憶體",
+            "gpuVram": "專用視訊記憶體",
+            "locale": "地區設定",
+            "memoryAvailable": "可用記憶體",
+            "memoryTotal": "總記憶體",
+            "os": "作業系統",
+            "osArch": "系統架構",
+            "osBuild": "組建編號",
+            "osVersion": "系統版本",
+            "processArch": "處理程序架構",
+            "webview2Error": "偵測錯誤",
+            "webview2Recommended": "建議最低版本",
+            "webview2Version": "版本"
+        },
+        "install": "自動安裝",
+        "installDone": "已安裝 WebView2 {{version}}，請重新啟動應用程式後生效。",
+        "installDoneUnknown": "安裝已完成，請重新啟動應用程式後生效。",
+        "installing": "安裝中…",
+        "loadFailed": "讀取執行環境失敗：{{error}}",
+        "loading": "正在讀取執行環境…",
+        "officialLink": "官方下載頁",
+        "refresh": "重新整理",
+        "section": {
+            "cpu": "處理器",
+            "display": "顯示器",
+            "gpu": "顯示卡",
+            "memory": "記憶體",
+            "system": "系統",
+            "webview2": "WebView2 執行階段"
+        },
+        "title": "診斷工具",
+        "value": {
+            "no": "否",
+            "software": "軟體轉譯",
+            "yes": "是"
+        },
+        "warning": {
+            "lowMemory": "實體記憶體低於 8 GB，背景程式較多時可能卡頓。",
+            "noHardwareGpu": "未偵測到硬體顯示卡，介面將由軟體轉譯，可能出現明顯卡頓。",
+            "oldOsBuild": "系統版本較舊（組建 {{build}}），建議升級至 Windows 10 2004 以上。",
+            "webview2Missing": "無法偵測到 WebView2 執行階段（可能未安裝或載入失敗），介面可能顯示異常。",
+            "webview2Outdated": "WebView2 版本 {{version}} 偏低（建議不低於 {{minVersion}}），轉譯效能可能受限。"
+        }
+    },
     "dialog-model": {
         "ok": "確定"
     },
@@ -4339,6 +4401,9 @@
         "defaultFont": "預設字型",
         "depth": "陰影深度",
         "desc": "自定義應用程序設置",
+        "diagnostics": "診斷工具",
+        "diagnosticsOpen": "檢視診斷資訊",
+        "diagnosticsTip": "檢視系統、硬體與 WebView2 等執行資訊，用於排查卡頓",
         "download": "下載",
         "downloaded": "已下載",
         "female": "女",

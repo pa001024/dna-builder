@@ -198,6 +198,9 @@ pub fn run() {
         commands::system::list_system_fonts,
         commands::system::is_launch_at_startup_enabled,
         commands::system::set_launch_at_startup_enabled,
+        // 运行环境诊断
+        commands::diagnostics::get_diagnostics,
+        commands::diagnostics::install_webview2,
         // 小小狩月人奖励管道
         commands::afk_support::afk_bridge_start,
         commands::afk_support::afk_bridge_stop,

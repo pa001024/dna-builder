@@ -2349,6 +2349,68 @@
     "dev-components": {
         "title": "Composants"
     },
+    "diagnostics": {
+        "copied": "Copié",
+        "copy": "Tout copier",
+        "copyHint": "Copiez le rapport et envoyez-le au support pour faciliter le diagnostic",
+        "field": {
+            "appVersion": "Version de l'application",
+            "cpuBrand": "Modèle",
+            "cpuCores": "Cœurs (physiques / logiques)",
+            "cpuFrequency": "Fréquence",
+            "cpuVendor": "Fabricant",
+            "displayAdapter": "Adaptateur",
+            "displayMode": "Mode d'affichage",
+            "displayPrimary": "Écran principal",
+            "elevated": "Droits administrateur",
+            "gpuDriver": "Version du pilote",
+            "gpuError": "Erreur d'énumération",
+            "gpuIds": "ID vendeur / périphérique",
+            "gpuName": "Nom",
+            "gpuSharedMemory": "Mémoire partagée",
+            "gpuVram": "VRAM dédiée",
+            "locale": "Paramètres régionaux",
+            "memoryAvailable": "Mémoire disponible",
+            "memoryTotal": "Mémoire totale",
+            "os": "Système d'exploitation",
+            "osArch": "Architecture système",
+            "osBuild": "Build du système",
+            "osVersion": "Version du système",
+            "processArch": "Architecture du processus",
+            "webview2Error": "Erreur de détection",
+            "webview2Recommended": "Version minimale recommandée",
+            "webview2Version": "Version"
+        },
+        "install": "Installation automatique",
+        "installDone": "WebView2 {{version}} installé. Redémarrez l'application pour appliquer.",
+        "installDoneUnknown": "Installation terminée. Redémarrez l'application pour appliquer.",
+        "installing": "Installation…",
+        "loadFailed": "Échec de la lecture des informations système : {{error}}",
+        "loading": "Lecture des informations système…",
+        "officialLink": "Téléchargement officiel",
+        "refresh": "Actualiser",
+        "section": {
+            "cpu": "Processeur",
+            "display": "Écran",
+            "gpu": "Carte graphique",
+            "memory": "Mémoire",
+            "system": "Système",
+            "webview2": "Runtime WebView2"
+        },
+        "title": "Outils de diagnostic",
+        "value": {
+            "no": "Non",
+            "software": "logiciel",
+            "yes": "Oui"
+        },
+        "warning": {
+            "lowMemory": "La mémoire physique est inférieure à 8 Go ; l'application peut saccader avec de nombreux programmes ouverts.",
+            "noHardwareGpu": "Aucun GPU physique détecté ; l'interface sera rendue par logiciel et peut saccader.",
+            "oldOsBuild": "La build {{build}} est ancienne ; une mise à niveau vers Windows 10 2004 ou plus récent est recommandée.",
+            "webview2Missing": "Le runtime WebView2 est introuvable (non installé ou échec de chargement) ; l'interface risque de ne pas s'afficher correctement.",
+            "webview2Outdated": "WebView2 {{version}} est ancien ({{minVersion}} ou plus recommandé) ; les performances de rendu peuvent en souffrir."
+        }
+    },
     "dialog-model": {
         "ok": "OK"
     },
@@ -4380,6 +4442,9 @@
         "defaultFont": "Police par défaut",
         "depth": "Profondeur",
         "desc": "Paramètres personnalisés de l'application",
+        "diagnostics": "Outils de diagnostic",
+        "diagnosticsOpen": "Voir les détails",
+        "diagnosticsTip": "Consultez les informations système, matérielles et WebView2 pour diagnostiquer les ralentissements",
         "download": "Télécharger",
         "downloaded": "Téléchargé",
         "female": "Femme",
