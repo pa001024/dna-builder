@@ -275,14 +275,95 @@ jobs:
                   $feed | ConvertTo-Json -Depth 6 | Out-File -FilePath "update.json" -Encoding utf8
                   gh release upload $env:TAG_NAME update.json --repo $env:GITHUB_REPOSITORY --clobber
 
+            - name: Resolve Chrome for card rendering
+              id: chrome
+              if: success() && github.event_name != 'pull_request'
+              shell: pwsh
+              run: |
+                  # 托管 runner 预装 Chrome/Edge，但路径不进 PATH；显式定位后写进环境变量，避免截图阶段才报找不到
+                  $candidates = @(
+                      "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+                      "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+                      "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+                      "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+                  ) | Where-Object { Test-Path $_ }
+
+                  if (-not $candidates) {
+                      # 自托管 runner 上可能装在别处，交给脚本自己的查找逻辑
+                      Write-Host "::warning::未在默认路径找到 Chrome/Edge，交给脚本自行查找"
+                      exit 0
+                  }
+
+                  "CHROME_PATH=$($candidates[0])" >> $env:GITHUB_ENV
+                  Write-Host "浏览器: $($candidates[0])"
+
+            - name: Publish update dynamic to Bilibili
+              id: bili_dynamic
+              if: success() && github.event_name != 'pull_request'
+              continue-on-error: true
+              timeout-minutes: 10
+              shell: pwsh
+              env:
+                  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+                  DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+                  DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL }}
+                  BILI_COOKIE: ${{ secrets.BILI_COOKIE }}
+                  BILI_SESSDATA: ${{ secrets.BILI_SESSDATA }}
+                  BILI_JCT: ${{ secrets.BILI_JCT }}
+                  BILI_BUVID3: ${{ secrets.BILI_BUVID3 }}
+                  BILI_DEDEUSERID: ${{ secrets.BILI_DEDEUSERID }}
+                  TAG_NAME: ${{ github.ref_name }}
+                  PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
+                  DELTA_LINE: ${{ steps.update_mode.outputs.delta_line }}
+                  INSTALLER_URL: https://cdn.dna-builder.cn/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi
+              run: |
+                  # 用一个数组传参，避免上一版本为空时 PowerShell 把空字符串吞掉
+                  $scriptArgs = @("tools/bili-dynamic/index.ts", "--tag", $env:TAG_NAME, "--repo", $env:GITHUB_REPOSITORY)
+                  if ($env:PREVIOUS_TAG) { $scriptArgs += @("--previous", $env:PREVIOUS_TAG) }
+                  node @scriptArgs
+
+            - name: Update release notes from agent
+              id: release_notes
+              # agent 没产出 markdown 时脚本不会输出 release_notes_path，这一步直接跳过，保留原版正文
+              if: success() && github.event_name != 'pull_request' && steps.bili_dynamic.outputs.release_notes_path
+              # 资产已上传，改正文失败不该把整个 release 判红；失败情况交给 Add summary 标注
+              continue-on-error: true
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAG_NAME: ${{ github.ref_name }}
+                  NOTES_PATH: ${{ steps.bili_dynamic.outputs.release_notes_path }}
+              run: |
+                  gh release edit $env:TAG_NAME --repo $env:GITHUB_REPOSITORY --notes-file $env:NOTES_PATH
+
             - name: Add summary
               if: success() && github.event_name != 'pull_request'
               shell: pwsh
+              env:
+                  # continue-on-error 的步骤失败/超时时 release 仍然成功，这里要如实标注动态是否发出
+                  BILI_OUTCOME: ${{ steps.bili_dynamic.outcome }}
+                  DYN_STATUS: ${{ steps.bili_dynamic.outputs.dyn_status }}
+                  DYN_URL: ${{ steps.bili_dynamic.outputs.dyn_url }}
+                  DYN_AUTHOR: ${{ steps.bili_dynamic.outputs.dyn_author }}
+                  DYN_REASON: ${{ steps.bili_dynamic.outputs.dyn_reason }}
+                  NOTES_OUTCOME: ${{ steps.release_notes.outcome }}
               run: |
                   $summary = "
                   > [!TIP]
                   > 发布成功
-                  > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/) 
+                  > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/)
                   "
+                  if ($env:DYN_STATUS -eq "published" -and $env:DYN_URL) {
+                      $author = if ($env:DYN_AUTHOR) { "（$env:DYN_AUTHOR）" } else { "" }
+                      $summary += "`n> B 站动态$author：[查看]($env:DYN_URL)`n"
+                  } elseif ($env:BILI_OUTCOME -eq "success" -and $env:DYN_STATUS -eq "skipped") {
+                      $reason = if ($env:DYN_REASON) { "：$env:DYN_REASON" } else { "" }
+                      $summary += "`n> [!WARNING]`n> B 站动态已跳过$reason`n"
+                  } elseif ($env:BILI_OUTCOME -ne "success") {
+                      $summary += "`n> [!WARNING]`n> B 站动态未发布（步骤结果: $env:BILI_OUTCOME），详见该步骤日志`n"
+                  }
+                  if ($env:NOTES_OUTCOME -eq "failure") {
+                      $summary += "`n> [!WARNING]`n> 发行说明更新失败，保留原版正文`n"
+                  }
 
                   echo $summary >> $Env:GITHUB_STEP_SUMMARY

@@ -44,6 +44,7 @@
         "pp": "bun tools/deploy.ts",
         "update-pack": "bun tools/update-pack.ts",
         "update-server": "bun tools/update-server.ts",
+        "bili": "node tools/bili-dynamic/index.ts",
         "icon": "bun run tools/icon-tool.ts",
         "i18n": "bun tools/i18n.ts",
         "importdata": "bun run tools/import-i18n-data.ts",
