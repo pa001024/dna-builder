@@ -113,16 +113,6 @@ export const updateUserMutation = typedMutation<Types.User, { id: string; email?
     mutation ($id: String!, $email: String, $roles: String) {
         updateUser(id: $id, email: $email, roles: $roles) {
             id
-            name
-            email
-            qq
-            pic
-            uid
-            roles
-            experience
-            level
-            createdAt
-            updateAt
         }
     }
 `)
@@ -175,15 +165,6 @@ export const updateTodoMutation = typedMutation<Types.Todo, { id: string; input:
     mutation ($id: String!, $input: TodoInput!) {
         updateTodo(id: $id, input: $input) {
             id
-            title
-            description
-            startTime
-            endTime
-            type
-            userId
-            createdAt
-            updateAt
-            isCompleted
         }
     }
 `)
@@ -220,7 +201,6 @@ export const completeTodoMutation = typedMutation<Types.Todo, { id: string }>(/*
     mutation ($id: String!) {
         completeTodo(id: $id) {
             id
-            isCompleted
         }
     }
 `)
@@ -339,32 +319,6 @@ export const redeemShopProductMutation = typedMutation<Types.ShopRedeemResult, {
         redeemShopProduct(productId: $productId) {
             success
             message
-            awardedAsset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
-            user {
-                id
-                name
-                email
-                qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -374,42 +328,6 @@ export const equipShopAssetMutation = typedMutation<Types.ShopEquipResult, { ass
         equipShopAsset(assetId: $assetId) {
             success
             message
-            user {
-                id
-                name
-                email
-                qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                createdAt
-                updateAt
-            }
-            selectedTitleAsset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
-            selectedNameCardAsset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -419,32 +337,6 @@ export const adminGrantShopProductMutation = typedMutation<Types.ShopRedeemResul
         adminGrantShopProduct(userId: $userId, productId: $productId) {
             success
             message
-            awardedAsset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
-            user {
-                id
-                name
-                email
-                qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -454,32 +346,6 @@ export const adminRevokeShopProductMutation = typedMutation<Types.ShopRedeemResu
         adminRevokeShopProduct(userId: $userId, productId: $productId) {
             success
             message
-            awardedAsset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
-            user {
-                id
-                name
-                email
-                qq
-                pic
-                uid
-                roles
-                experience
-                points
-                level
-                selectedTitleAssetId
-                selectedNameCardAssetId
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -488,31 +354,6 @@ export const createShopProductMutation = typedMutation<Types.ShopProduct, { data
     mutation ($data: ShopProductInput!) {
         createShopProduct(data: $data) {
             id
-            name
-            description
-            assetId
-            rewardType
-            rewardKey
-            rewardName
-            displayClass
-            displayCss
-            pointsCost
-            sortOrder
-            isActive
-            startTime
-            endTime
-            createdAt
-            updateAt
-            asset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -521,31 +362,6 @@ export const updateShopProductMutation = typedMutation<Types.ShopProduct, { id: 
     mutation ($id: String!, $data: ShopProductInput!) {
         updateShopProduct(id: $id, data: $data) {
             id
-            name
-            description
-            assetId
-            rewardType
-            rewardKey
-            rewardName
-            displayClass
-            displayCss
-            pointsCost
-            sortOrder
-            isActive
-            startTime
-            endTime
-            createdAt
-            updateAt
-            asset {
-                id
-                rewardType
-                rewardKey
-                rewardName
-                displayClass
-                displayCss
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -560,10 +376,6 @@ export const createScriptCategoryMutation = typedMutation<Types.ScriptCategory, 
     mutation ($input: ScriptCategoryInput!) {
         createScriptCategory(input: $input) {
             id
-            name
-            description
-            createdAt
-            updateAt
         }
     }
 `)
@@ -573,10 +385,6 @@ export const updateScriptCategoryMutation = typedMutation<Types.ScriptCategory, 
         mutation ($id: String!, $input: ScriptCategoryInput!) {
             updateScriptCategory(id: $id, input: $input) {
                 id
-                name
-                description
-                createdAt
-                updateAt
             }
         }
     `
@@ -594,6 +402,7 @@ export const createScriptMutation = typedMutation<Types.Script, { input: Types.S
             id
             updateAt
             user {
+                id
                 name
             }
         }
@@ -606,6 +415,7 @@ export const updateScriptMutation = typedMutation<Types.Script, { id: string; in
             id
             updateAt
             user {
+                id
                 name
             }
         }
@@ -717,19 +527,6 @@ export const createRankingListMutation = typedMutation<Types.RankingList, { inpu
     mutation ($input: RankingListInput!) {
         createRankingList(input: $input) {
             id
-            name
-            desc
-            createdAt
-            updateAt
-            items {
-                id
-                rankingListId
-                charId
-                buildId
-                sortOrder
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -738,19 +535,6 @@ export const updateRankingListMutation = typedMutation<Types.RankingList, { id: 
     mutation ($id: String!, $input: RankingListInput!) {
         updateRankingList(id: $id, input: $input) {
             id
-            name
-            desc
-            createdAt
-            updateAt
-            items {
-                id
-                rankingListId
-                charId
-                buildId
-                sortOrder
-                createdAt
-                updateAt
-            }
         }
     }
 `)
@@ -783,28 +567,6 @@ export const editMessageMutation = typedMutation<Types.Msg, { msgId: string; con
     mutation ($msgId: String!, $content: String!) {
         editMessage(msgId: $msgId, content: $content) {
             id
-            roomId
-            userId
-            content
-            edited
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            reactions {
-                id
-                msgId
-                count
-                users {
-                    id
-                    name
-                    qq
-                }
-                createdAt
-            }
         }
     }
 `)
@@ -813,27 +575,6 @@ export const addReactionMutation = typedMutation<Types.Msg, { msgId: string; rea
     mutation ($msgId: String!, $reaction: String!) {
         addReaction(msgId: $msgId, reaction: $reaction) {
             id
-            roomId
-            userId
-            content
-            edited
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            reactions {
-                id
-                count
-                users {
-                    id
-                    name
-                    qq
-                }
-                createdAt
-            }
         }
     }
 `)
@@ -900,22 +641,6 @@ export const createGraphMutation = typedMutation<Types.Graph, { input: Types.Gra
     mutation ($input: GraphInput!) {
         createGraph(input: $input) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
         }
     }
 `)
@@ -924,22 +649,8 @@ export const updateGraphMutation = typedMutation<Types.Graph, { id: string; inpu
     mutation ($id: String!, $input: GraphInput!) {
         updateGraph(id: $id, input: $input) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
+            graphInfo
             updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
         }
     }
 `)
@@ -954,22 +665,8 @@ export const likeGraphMutation = typedMutation<Types.Graph, { id: string }>(/* G
     mutation ($id: String!) {
         likeGraph(id: $id) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
             isLiked
+            likes
         }
     }
 `)
@@ -978,22 +675,8 @@ export const unlikeGraphMutation = typedMutation<Types.Graph, { id: string }>(/*
     mutation ($id: String!) {
         unlikeGraph(id: $id) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
             isLiked
+            likes
         }
     }
 `)
@@ -1002,22 +685,7 @@ export const recommendGraphMutation = typedMutation<Types.Graph, { id: string; r
     mutation ($id: String!, $recommended: Boolean!) {
         recommendGraph(id: $id, recommended: $recommended) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
             isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
         }
     }
 `)
@@ -1026,22 +694,7 @@ export const pinGraphMutation = typedMutation<Types.Graph, { id: string; pinned:
     mutation ($id: String!, $pinned: Boolean!) {
         pinGraph(id: $id, pinned: $pinned) {
             id
-            title
-            desc
-            graphData
-            userId
-            views
-            likes
-            isRecommended
             isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
-            isLiked
         }
     }
 `)
@@ -1050,29 +703,6 @@ export const updateGameModMutation = typedMutation<Types.GameMod, { id: string; 
     mutation ($id: String!, $input: GameModInput!) {
         updateGameMod(id: $id, input: $input) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
-            isActive
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1093,29 +723,7 @@ export const recommendGameModMutation = typedMutation<Types.GameMod, { id: strin
     mutation ($id: String!, $recommended: Boolean!) {
         recommendGameMod(id: $id, recommended: $recommended) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
-            isActive
             isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1124,29 +732,7 @@ export const pinGameModMutation = typedMutation<Types.GameMod, { id: string; pin
     mutation ($id: String!, $pinned: Boolean!) {
         pinGameMod(id: $id, pinned: $pinned) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
-            isActive
-            isRecommended
             isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1155,29 +741,7 @@ export const setGameModActiveMutation = typedMutation<Types.GameMod, { id: strin
     mutation ($id: String!, $active: Boolean!) {
         setGameModActive(id: $id, active: $active) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
             isActive
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1186,31 +750,7 @@ export const approveGameModMutation = typedMutation<Types.GameMod, { id: string 
     mutation ($id: String!) {
         approveGameMod(id: $id) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            images
             status
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
-            isActive
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1219,31 +759,7 @@ export const rejectGameModMutation = typedMutation<Types.GameMod, { id: string }
     mutation ($id: String!) {
         rejectGameMod(id: $id) {
             id
-            name
-            description
-            category
-            entity
-            fileName
-            fileSize
-            coverUrl
-            images
             status
-            modJson
-            requires
-            userId
-            downloads
-            views
-            likes
-            isActive
-            isRecommended
-            isPinned
-            createdAt
-            updateAt
-            user {
-                id
-                name
-                qq
-            }
         }
     }
 `)
@@ -1427,13 +943,6 @@ export const adminCreateRechargeBatchMutation = typedMutation<
             batch {
                 id
                 amountMicros
-                total
-                redeemed
-                revoked
-                unused
-                expiresAt
-                createdBy
-                createdAt
             }
             codes
         }
@@ -1473,15 +982,6 @@ export const createActivityMutation = typedMutation<Types.Activity, { server: st
     mutation ($server: String!, $input: ActivityInput!) {
         createActivity(server: $server, input: $input) {
             id
-            server
-            postId
-            startTime
-            endTime
-            name
-            icon
-            desc
-            createdAt
-            updateAt
         }
     }
 `)
@@ -1491,15 +991,6 @@ export const updateActivityMutation = typedMutation<Types.Activity, { server: st
         mutation ($server: String!, $id: Int!, $input: ActivityUpdateInput!) {
             updateActivity(server: $server, id: $id, input: $input) {
                 id
-                server
-                postId
-                startTime
-                endTime
-                name
-                icon
-                desc
-                createdAt
-                updateAt
             }
         }
     `
@@ -1518,15 +1009,6 @@ export const upsertActivitiesIngameMutation = typedMutation<
     mutation ($token: String, $server: String!, $activities: [ActivityInput!]!) {
         upsertActivitiesIngame(token: $token, server: $server, activities: $activities) {
             id
-            server
-            postId
-            startTime
-            endTime
-            name
-            icon
-            desc
-            createdAt
-            updateAt
         }
     }
 `)
@@ -1536,17 +1018,9 @@ export const submitAbyssUsageMutation = typedMutation<Types.AbyssUsageSubmission
         mutation ($input: AbyssUsageSubmissionInput!) {
             submitAbyssUsage(input: $input) {
                 id
-                level
                 reward {
-                    success
-                    message
-                    source
                     awardedExp
                     awardedPoints
-                    retryAfterMs
-                    user {
-                        id
-                    }
                 }
             }
         }

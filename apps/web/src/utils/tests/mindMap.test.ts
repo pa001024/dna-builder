@@ -12,6 +12,7 @@ import {
     measureMindMapText,
     normalizeMindMapTree,
     readLayoutMeta,
+    remapMindMapTreeNodeIds,
     resolveMindMapStyles,
 } from "@/utils/mindMap"
 import { layoutFishbone, layoutTimeline } from "@/utils/mindMapCustomLayouts"
@@ -92,6 +93,17 @@ describe("mindMap 树模型", () => {
         const clone = cloneMindMapTree(makeTree())
         expect(clone.id).not.toBe("root")
         expect(countMindMapNodes(clone)).toBe(6)
+    })
+
+    it("重映射绑定 id：已复制的指向新副本，未复制的解绑", () => {
+        const tree = makeTree()
+        tree.children[0].nodeId = "canvas-a"
+        tree.children[1].nodeId = "canvas-b"
+        const remapped = remapMindMapTreeNodeIds(tree, nodeId => (nodeId === "canvas-a" ? "canvas-a-copy" : undefined))
+        expect(remapped.children[0].nodeId).toBe("canvas-a-copy")
+        expect(remapped.children[1].nodeId).toBeUndefined()
+        // 原树不受影响
+        expect(tree.children[0].nodeId).toBe("canvas-a")
     })
 
     it("规范化丢弃无效节点", () => {

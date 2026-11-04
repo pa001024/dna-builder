@@ -6,20 +6,20 @@
  * 都降级为「技能不可用」，绝不抛出到工具调用之外。
  */
 
-import { downloadAgentSkillPackage, listAgentSkills, type AgentSkillMeta } from "@/api/agentSkill"
+import { type AgentSkillMeta, downloadAgentSkillPackage, listAgentSkills } from "@/api/agentSkill"
 import type { AgentSkillPromptEntry } from "@/shared/skill-prompt"
 import { stripSkillFrontmatter } from "./frontmatter"
 import { readStoredSkill, removeStoredSkill, writeStoredSkill } from "./skill-store"
 import {
+    type GrepOptions,
     grepSkillFiles,
     listVfsChildren,
     normalizeVfsPath,
+    type ReadFileParams,
+    type ReadFileResult,
     renderReadFile,
     vfsRelativePath,
     vfsSkillName,
-    type GrepOptions,
-    type ReadFileParams,
-    type ReadFileResult,
 } from "./vfs"
 import { sha256Hex, unpackSkillPackage } from "./zip"
 

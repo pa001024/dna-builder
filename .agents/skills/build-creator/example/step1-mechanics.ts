@@ -1,4 +1,4 @@
-import { charMap, weaponMap, modMap } from "./lib"
+import { charMap, modMap, weaponMap } from "./lib"
 
 const charId = Number(process.argv[2] ?? 0)
 if (!charId) {
@@ -35,7 +35,7 @@ console.log("\n--- 可用的表达式命名空间 ---")
 console.log("角色:: / 近战:: / 远程:: 前缀 + 以下技能名::字段名（表达式里用 `!` 取面板值）")
 for (const s of c.技能 as any[]) console.log(`  ${s.名称}::${(s.字段 ?? []).map((f: any) => f.名称).join(" / ")}`)
 
-const meleeId = (c.专武 && (weaponMap.get(c.专武) as any)?.类型?.includes("近战")) ? c.专武 : undefined
+const meleeId = c.专武 && (weaponMap.get(c.专武) as any)?.类型?.includes("近战") ? c.专武 : undefined
 if (meleeId) dumpWeapon(meleeId)
 const 关键字 = process.env.WEAPON_KEYWORD || "灾厄"
 for (const w of weaponMap.values() as any) {

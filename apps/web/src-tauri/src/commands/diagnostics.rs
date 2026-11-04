@@ -177,7 +177,9 @@ fn collect(app_version: &str) -> DiagnosticsInfo {
         locale: current_locale(),
         elevated: is_elevated(),
         cpu_brand: cpu.map(|cpu| cpu.brand().to_string()).unwrap_or_default(),
-        cpu_vendor: cpu.map(|cpu| cpu.vendor_id().to_string()).unwrap_or_default(),
+        cpu_vendor: cpu
+            .map(|cpu| cpu.vendor_id().to_string())
+            .unwrap_or_default(),
         cpu_physical_cores: System::physical_core_count().unwrap_or(0),
         cpu_logical_cores: system.cpus().len(),
         cpu_frequency_mhz: cpu.map(|cpu| cpu.frequency()).unwrap_or(0),
@@ -202,7 +204,10 @@ fn normalize_arch(arch: &str) -> String {
 /// 截断到首个 NUL 的宽字符串转 UTF-8。
 #[cfg(target_os = "windows")]
 fn from_wide_lossy(value: &[u16]) -> String {
-    let len = value.iter().position(|item| *item == 0).unwrap_or(value.len());
+    let len = value
+        .iter()
+        .position(|item| *item == 0)
+        .unwrap_or(value.len());
     String::from_utf16_lossy(&value[..len])
 }
 
@@ -286,11 +291,11 @@ fn driver_version(adapter: &windows::Win32::Graphics::Dxgi::IDXGIAdapter1) -> Op
 /// 枚举接到桌面上的显示输出及其当前模式（分辨率 / 刷新率 / 色深）。
 #[cfg(target_os = "windows")]
 fn collect_displays() -> Vec<DisplayInfo> {
-    use windows::core::PCWSTR;
     use windows::Win32::Graphics::Gdi::{
-        EnumDisplayDevicesW, EnumDisplaySettingsW, DEVMODEW, DISPLAY_DEVICE_ATTACHED_TO_DESKTOP,
-        DISPLAY_DEVICE_PRIMARY_DEVICE, DISPLAY_DEVICEW, ENUM_CURRENT_SETTINGS,
+        DEVMODEW, DISPLAY_DEVICE_ATTACHED_TO_DESKTOP, DISPLAY_DEVICE_PRIMARY_DEVICE,
+        DISPLAY_DEVICEW, ENUM_CURRENT_SETTINGS, EnumDisplayDevicesW, EnumDisplaySettingsW,
     };
+    use windows::core::PCWSTR;
 
     let mut displays = Vec::new();
     unsafe {
@@ -323,7 +328,8 @@ fn collect_displays() -> Vec<DisplayInfo> {
                 width: if readable { mode.dmPelsWidth } else { 0 },
                 height: if readable { mode.dmPelsHeight } else { 0 },
                 // 0 / 1 表示「硬件默认」，不是真实刷新率
-                refresh_rate_hz: (readable && mode.dmDisplayFrequency > 1).then_some(mode.dmDisplayFrequency),
+                refresh_rate_hz: (readable && mode.dmDisplayFrequency > 1)
+                    .then_some(mode.dmDisplayFrequency),
                 bits_per_pixel: (readable && mode.dmBitsPerPel > 0).then_some(mode.dmBitsPerPel),
                 primary: device.StateFlags.0 & DISPLAY_DEVICE_PRIMARY_DEVICE.0 != 0,
             });
@@ -374,7 +380,10 @@ async fn download_bootstrapper() -> Result<TempInstaller, String> {
         .duration_since(UNIX_EPOCH)
         .map(|elapsed| elapsed.as_nanos())
         .unwrap_or(0);
-    let dir = std::env::temp_dir().join(format!("dna-builder-webview2-{}-{stamp}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!(
+        "dna-builder-webview2-{}-{stamp}",
+        std::process::id()
+    ));
     std::fs::create_dir_all(&dir).map_err(|error| format!("创建临时目录失败: {error}"))?;
     let installer = TempInstaller {
         path: dir.join("MicrosoftEdgeWebview2Setup.exe"),
@@ -392,7 +401,10 @@ async fn download_bootstrapper() -> Result<TempInstaller, String> {
     if !response.status().is_success() {
         return Err(format!("下载安装器失败: HTTP {}", response.status()));
     }
-    if response.content_length().is_some_and(|length| length > MAX_BOOTSTRAPPER_BYTES) {
+    if response
+        .content_length()
+        .is_some_and(|length| length > MAX_BOOTSTRAPPER_BYTES)
+    {
         return Err("安装器体积异常，已取消安装".to_string());
     }
 
@@ -403,7 +415,11 @@ async fn download_bootstrapper() -> Result<TempInstaller, String> {
         .await
         .map_err(|error| format!("写入安装器失败: {error}"))?;
     let mut written = 0u64;
-    while let Some(chunk) = response.chunk().await.map_err(|error| format!("读取安装器失败: {error}"))? {
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|error| format!("读取安装器失败: {error}"))?
+    {
         written += chunk.len() as u64;
         if written > MAX_BOOTSTRAPPER_BYTES {
             return Err("安装器体积异常，已取消安装".to_string());
@@ -412,7 +428,9 @@ async fn download_bootstrapper() -> Result<TempInstaller, String> {
             .await
             .map_err(|error| format!("写入安装器失败: {error}"))?;
     }
-    file.flush().await.map_err(|error| format!("写入安装器失败: {error}"))?;
+    file.flush()
+        .await
+        .map_err(|error| format!("写入安装器失败: {error}"))?;
     Ok(installer)
 }
 
@@ -421,11 +439,16 @@ async fn download_bootstrapper() -> Result<TempInstaller, String> {
 fn verify_authenticode(path: &std::path::Path) -> Result<(), String> {
     use std::os::windows::ffi::OsStrExt;
     use windows::Win32::Security::WinTrust::{
-        WINTRUST_ACTION_GENERIC_VERIFY_V2, WINTRUST_DATA, WINTRUST_DATA_0, WINTRUST_FILE_INFO, WTD_CHOICE_FILE,
-        WTD_REVOKE_NONE, WTD_STATEACTION_CLOSE, WTD_STATEACTION_VERIFY, WTD_UI_NONE, WinVerifyTrust,
+        WINTRUST_ACTION_GENERIC_VERIFY_V2, WINTRUST_DATA, WINTRUST_DATA_0, WINTRUST_FILE_INFO,
+        WTD_CHOICE_FILE, WTD_REVOKE_NONE, WTD_STATEACTION_CLOSE, WTD_STATEACTION_VERIFY,
+        WTD_UI_NONE, WinVerifyTrust,
     };
 
-    let mut wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+    let mut wide: Vec<u16> = path
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
     let mut file_info = WINTRUST_FILE_INFO {
         cbStruct: std::mem::size_of::<WINTRUST_FILE_INFO>() as u32,
         pcwszFilePath: windows::core::PCWSTR(wide.as_mut_ptr()),
@@ -436,7 +459,9 @@ fn verify_authenticode(path: &std::path::Path) -> Result<(), String> {
         dwUIChoice: WTD_UI_NONE,
         fdwRevocationChecks: WTD_REVOKE_NONE,
         dwUnionChoice: WTD_CHOICE_FILE,
-        Anonymous: WINTRUST_DATA_0 { pFile: &mut file_info },
+        Anonymous: WINTRUST_DATA_0 {
+            pFile: &mut file_info,
+        },
         dwStateAction: WTD_STATEACTION_VERIFY,
         ..Default::default()
     };
@@ -457,7 +482,9 @@ fn verify_authenticode(path: &std::path::Path) -> Result<(), String> {
         );
     }
     if status != 0 {
-        return Err(format!("安装器数字签名校验失败（0x{status:08X}），已取消安装"));
+        return Err(format!(
+            "安装器数字签名校验失败（0x{status:08X}），已取消安装"
+        ));
     }
     Ok(())
 }
@@ -494,6 +521,9 @@ fn run_bootstrapper(installer: &std::path::Path) -> Result<(), String> {
     // 3010 = 安装成功但需要重启，1641 = 安装成功并已安排重启
     match status.code() {
         Some(0) | Some(3010) | Some(1641) => Ok(()),
-        code => Err(format!("安装器返回错误码 {}", code.map_or_else(|| "未知".to_string(), |code| code.to_string()))),
+        code => Err(format!(
+            "安装器返回错误码 {}",
+            code.map_or_else(|| "未知".to_string(), |code| code.to_string())
+        )),
     }
 }

@@ -1,4 +1,4 @@
-import { chosenBuffs, dumpMods, legal, loadSpec, makeBuild, modPool, modMap, overCost, panel, settingsOf, withTeam, 亿 } from "./lib"
+import { chosenBuffs, dumpMods, legal, loadSpec, makeBuild, modMap, modPool, overCost, panel, settingsOf, withTeam, 亿 } from "./lib"
 
 const spec = loadSpec()
 const patch = withTeam(spec, chosenBuffs())
@@ -23,13 +23,18 @@ for (const [name, expr] of 变量) {
 }
 const target = settings.targetFunction
 console.log(`\ntargetFunction = ${target}  →  ${亿(build.calculate())} 亿`)
-if (变量.length && !变量.some(([n]) => n === target)) console.log("（提示）targetFunction 不是 customVariables 的键，应指向一个已存在的技能字段或变量名。")
+if (变量.length && !变量.some(([n]) => n === target))
+    console.log("（提示）targetFunction 不是 customVariables 的键，应指向一个已存在的技能字段或变量名。")
 
 console.log("\n=== 面板 ===")
 console.log(JSON.stringify(panel(build), null, 1))
 
 console.log("\n=== 必带 MOD 合法性 ===")
-for (const [key, 类型] of [["charMods", "角色"], ["meleeMods", "近战"], ["rangedMods", "远程"]] as const) {
+for (const [key, 类型] of [
+    ["charMods", "角色"],
+    ["meleeMods", "近战"],
+    ["rangedMods", "远程"],
+] as const) {
     const ids = (spec.required as any)?.[key] ?? []
     if (!ids.length) {
         console.log(`  ${key}: 未指定必带件`)
@@ -37,7 +42,9 @@ for (const [key, 类型] of [["charMods", "角色"], ["meleeMods", "近战"], ["
     }
     const 池 = modPool(spec, 类型)
     const 槽 = ids.map((id: number) => 池.find(m => m.id === id) ?? null)
-    const 缺 = ids.filter((id: number) => !池.some(m => m.id === id)).map((id: number) => `${id}(${(modMap.get(id) as any)?.名称 ?? "不存在"})`)
+    const 缺 = ids
+        .filter((id: number) => !池.some(m => m.id === id))
+        .map((id: number) => `${id}(${(modMap.get(id) as any)?.名称 ?? "不存在"})`)
     console.log(`  ${key}: ${ids.length} 件，名称互斥+系列互斥 = ${legal(槽) ? "✓" : "✗ 违规"}，池外件 ${缺.join(",") || "无"}`)
     console.log(`     ${槽.map(m => (m ? `${m.名称}(${m.系列}/${m.极性 ?? "无"}/${m.耐受})` : "✗")).join("  ")}`)
 }

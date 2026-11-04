@@ -1,5 +1,6 @@
 import type { Node } from "@vue-flow/core"
 import { NodeType } from "@/store/nodeEditor"
+import { createMindMapTree } from "@/utils/mindMap"
 import type { IconTypes } from "../Icon.vue"
 
 /**
@@ -103,6 +104,25 @@ export function getDefaultLabel(type: NodeType): string {
         [NodeType.JSON_EXPORT]: "JSON导出",
     }
     return labels[type] || type
+}
+
+/**
+ * 调色板 / API 建节点时的预置数据：保证节点组件挂载即有内容。
+ * @param type 节点类型
+ * @param data 调用方已提供的节点数据（图片节点据此决定默认模式）
+ * @returns 默认数据
+ */
+export function paletteNodeDefaults(type: string, data: Record<string, any> = {}): Record<string, unknown> {
+    if (type === NodeType.MIND_MAP) return { tree: createMindMapTree(), layout: "mindmap" }
+    if (type === NodeType.IMAGE) {
+        return {
+            imageMode: typeof data.imageUrl === "string" && data.imageUrl.length > 0 ? "url" : "embed",
+            imageWidth: 320,
+            imageHeight: 200,
+        }
+    }
+    if (type === NodeType.CARD) return { cardKind: "char" }
+    return {}
 }
 
 /**

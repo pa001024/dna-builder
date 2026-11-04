@@ -16,7 +16,9 @@ const EP = "https://api.dna-builder.cn/graphql"
 const OUT_DIR = ".tmp/online-builds"
 
 const gql = (query: string, variables: Record<string, unknown>) =>
-    fetch(EP, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables }) }).then(r => r.json())
+    fetch(EP, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables }) }).then(r =>
+        r.json()
+    )
 
 function usage() {
     console.log("用法见文件头注释：list <charId> [--limit N] [--sort likes|views|latest] / download <id> [id...]")
@@ -40,11 +42,13 @@ if (cmd === "list") {
     const list = (
         await gql(
             `query($c:Int!,$n:Int!,$s:String){builds(charId:$c,limit:$n,sortBy:$s){id title desc views likes isRecommended isPinned updateAt user{name}}}`,
-            { c: charId, n: limit, s: sort === "latest" ? null : sort },
+            { c: charId, n: limit, s: sort === "latest" ? null : sort }
         )
     ).data.builds
     for (const [i, b] of list.entries()) {
-        console.log(`${String(i + 1).padStart(3)} ${b.isRecommended ? "★" : " "}${b.isPinned ? "置顶" : "  "} ${b.likes}赞 ${b.id} ${b.title}（${b.user?.name}）`)
+        console.log(
+            `${String(i + 1).padStart(3)} ${b.isRecommended ? "★" : " "}${b.isPinned ? "置顶" : "  "} ${b.likes}赞 ${b.id} ${b.title}（${b.user?.name}）`
+        )
     }
     await Bun.write(`${OUT_DIR}/list-${charId}.json`, JSON.stringify(list, null, 1))
     const more = list.length < count ? `（未拉全，--limit 可加）` : ""

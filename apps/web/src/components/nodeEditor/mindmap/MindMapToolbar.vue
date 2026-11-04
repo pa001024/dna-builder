@@ -15,6 +15,7 @@ const emit = defineEmits<{
     (e: "add-sibling"): void
     (e: "font-size", delta: number): void
     (e: "color", color: string | undefined): void
+    (e: "toggle-focus"): void
 }>()
 
 /** 浮层锚点：布局菜单与色板都渲染到 body，避免被节点裁剪或压在别的节点下面 */
@@ -100,6 +101,9 @@ onBeforeUnmount(() => window.removeEventListener("pointerdown", handleOutside, t
             <button ref="paletteAnchor" type="button" class="tool-btn nodrag" title="分支色" @click.stop="togglePalette">
                 <Icon icon="ri:palette-line" class="size-3" />
             </button>
+            <button type="button" class="tool-btn nodrag" title="沉浸查看（隐藏其它控件）" @click="emit('toggle-focus')">
+                <Icon icon="ri:fullscreen-line" class="size-3" />
+            </button>
         </div>
 
         <Teleport to="body">
@@ -107,7 +111,7 @@ onBeforeUnmount(() => window.removeEventListener("pointerdown", handleOutside, t
                 v-if="layoutOpen"
                 ref="layoutPanel"
                 data-mind-map-popover
-                class="fixed z-[100] w-44 border border-base-content/10 bg-base-100 py-1 shadow-lg"
+                class="fixed z-100 w-44 border border-base-content/10 bg-base-100 py-1 shadow-lg"
                 :style="layoutPosition"
                 @pointerdown.stop
                 @click.stop
@@ -130,7 +134,7 @@ onBeforeUnmount(() => window.removeEventListener("pointerdown", handleOutside, t
                 v-if="paletteOpen"
                 ref="palettePanel"
                 data-mind-map-popover
-                class="fixed z-[100] flex w-30 flex-wrap gap-1 border border-base-content/10 bg-base-100 p-1.5 shadow-lg"
+                class="fixed z-100 flex w-30 flex-wrap gap-1 border border-base-content/10 bg-base-100 p-1.5 shadow-lg"
                 :style="palettePosition"
                 @pointerdown.stop
                 @click.stop

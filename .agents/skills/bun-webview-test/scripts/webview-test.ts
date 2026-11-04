@@ -12,9 +12,9 @@
  * - console 选项必须为函数，否则会抛 ERR_INVALID_ARG_TYPE。
  */
 
-import { WebView } from "bun"
 // 注意：Bun 1.4 未提供 Bun.mkdir，目录创建统一使用 node:fs/promises
 import { mkdir } from "node:fs/promises"
+import { WebView } from "bun"
 
 // ---------------------------------------------------------------------------
 // 类型
@@ -119,7 +119,9 @@ export async function expectEval(ctx: TestContext, expr: string, expected: unkno
 export async function expectNoConsoleErrors(options: { ignore?: (RegExp | string)[] } = {}): Promise<void> {
     // 忽略已知无害的输出（如无头 profile 没有自定义底图时的「读取自定义底图失败」warning）
     const ignore = options.ignore ?? []
-    const hits = consoleErrors.filter(line => !ignore.some(pattern => (typeof pattern === "string" ? line.includes(pattern) : pattern.test(line))))
+    const hits = consoleErrors.filter(
+        line => !ignore.some(pattern => (typeof pattern === "string" ? line.includes(pattern) : pattern.test(line)))
+    )
     if (hits.length > 0) {
         throw new Error(`存在 ${hits.length} 条浏览器控制台错误:\n  ${hits.join("\n  ")}`)
     }

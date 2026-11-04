@@ -8,8 +8,14 @@ const props = defineProps<{
     editing: boolean
     hasChildren: boolean
     collapsed: boolean
+    /** 子主题数量：折叠后显示在圆点里 */
+    childCount?: number
+    /** 指针悬停在此主题上（绑定卡片的悬停需要由导图单独跟踪） */
+    hovered?: boolean
     /** 拖拽落点高亮 */
     dropTarget?: boolean
+    /** 绑定了画布节点：只画定位框，真实节点由 Vue Flow 渲染 */
+    bound?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -73,12 +79,43 @@ const skinStyle = computed(() => {
     if (isBranch.value) return { borderColor: color.value }
     return {}
 })
+
+/** 绑定主题的定位框：完全不画边框/底色，只保留折叠开关与落点高亮 */
+const boundFrameStyle = computed(() => ({ color: color.value }))
 </script>
 
 <template>
+    <!-- 绑定画布节点的主题：盒子本身透明，真实节点由 Vue Flow 画在同一位置 -->
     <div
+        v-if="bound"
+        class="mind-node mind-node--bound absolute rounded-xs"
+        :class="{ 'mind-node--drop': dropTarget, 'mind-node--hovered': hovered }"
+        :style="{ ...boxStyle, ...boundFrameStyle }"
+        :data-mind-id="node.id"
+    >
+        <!-- 展开/折叠圆点：位于节点下方，悬停时出现；折叠后带子主题数量常驻 -->
+        <button
+            v-if="hasChildren"
+            type="button"
+            class="mind-toggle nodrag nopan absolute grid cursor-pointer place-items-center rounded-full border leading-none"
+            :class="[{ 'mind-toggle--collapsed': collapsed }, collapsed ? 'size-4 text-[9px]' : 'size-3']"
+            :style="{ borderColor: color, color, background: 'var(--color-base-100)' }"
+            :title="collapsed ? `展开 ${childCount ?? 0} 个子主题` : '折叠子主题'"
+            @pointerdown.stop
+            @mousedown.stop
+            @click.stop="emit('toggle-collapse', node.id)"
+        >
+            <span v-if="collapsed">{{ childCount ?? 0 }}</span>
+        </button>
+    </div>
+
+    <div
+        v-else
         class="mind-node absolute flex cursor-grab items-center justify-center rounded-xs transition-shadow duration-150"
-        :class="[skinClass, { 'mind-node--selected': selected, 'mind-node--drop': dropTarget, 'mind-node--editing': editing }]"
+        :class="[
+            skinClass,
+            { 'mind-node--selected': selected, 'mind-node--hovered': hovered, 'mind-node--drop': dropTarget, 'mind-node--editing': editing },
+        ]"
         :style="{ ...boxStyle, ...skinStyle }"
         :data-mind-id="node.id"
     >
@@ -101,18 +138,19 @@ const skinStyle = computed(() => {
             </div>
         </div>
 
-        <!-- 折叠开关：有子级时才出现 -->
+        <!-- 展开/折叠圆点：位于节点下方，悬停或选中时出现；折叠后带子主题数量常驻 -->
         <button
             v-if="hasChildren"
             type="button"
-            class="nodrag nopan absolute -right-2 top-1/2 grid size-4 cursor-pointer place-items-center rounded-full border text-[9px] leading-none"
+            class="mind-toggle nodrag nopan absolute grid cursor-pointer place-items-center rounded-full border leading-none"
+            :class="[{ 'mind-toggle--collapsed': collapsed }, collapsed ? 'size-4 text-[9px]' : 'size-3']"
             :style="{ borderColor: color, color, background: 'var(--color-base-100)' }"
-            :title="collapsed ? '展开子树' : '折叠子树'"
+            :title="collapsed ? `展开 ${childCount ?? 0} 个子主题` : '折叠子主题'"
             @pointerdown.stop
             @mousedown.stop
             @click.stop="emit('toggle-collapse', node.id)"
         >
-            <Icon :icon="collapsed ? 'ri:add-line' : 'ri:subtract-line'" class="size-2.5" />
+            <span v-if="collapsed">{{ childCount ?? 0 }}</span>
         </button>
     </div>
 </template>
@@ -147,5 +185,29 @@ const skinStyle = computed(() => {
     cursor: text;
     background: var(--color-base-100);
     box-shadow: 0 0 0 2px var(--color-primary);
+}
+.mind-node--bound {
+    cursor: default;
+    background: transparent;
+    border: 1px solid transparent;
+    /* 盒子只承载折叠圆点与落点高亮，节点本体接管指针事件 */
+    pointer-events: none;
+}
+/* 节点下方的展开/折叠圆点：默认隐藏，悬停、选中或折叠后常驻 */
+.mind-toggle {
+    top: 100%;
+    left: 50%;
+    z-index: 2;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+.mind-node:hover .mind-toggle,
+.mind-node--selected .mind-toggle,
+.mind-node--hovered .mind-toggle,
+.mind-toggle--collapsed {
+    opacity: 1;
+    pointer-events: auto;
 }
 </style>

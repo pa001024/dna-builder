@@ -16,7 +16,8 @@ interface Props {
     /** 同一生效配置下另一部分已装槽位（如对比页“基础已装 + 追加”）：同时生效才参与互斥；变体 A/B/C 是替代关系，绝不能传其他变体 */
     otherMods?: (LeveledMod | null)[]
     modOptions: ModPickerOption[]
-    charBuild: CharBuild
+    /** 构筑上下文；节点未接入构筑时不传，此时槽位仍可编辑但无法按角色过滤 */
+    charBuild?: CharBuild
     type: string
     auraMod?: number
     polset?: number[]
@@ -37,6 +38,8 @@ const inv = useInvStore()
 const incomeMap = ref<Record<string, number>>({})
 let workerRequestId = 0
 const mod_model_show = ref(false)
+// 中枢（光环）选择弹窗是否打开
+const auraDialogShow = ref(false)
 // 当前打开选MOD弹窗的槽位索引
 const localSelectedSlot = ref(-1)
 // 养成开销估算面板是否展开（默认隐藏）
@@ -44,9 +47,13 @@ const showCostCalc = ref(false)
 const auraModOptions = computed(() => {
     const options = props.modOptions.filter(option => {
         if (option.ser !== "羽蛇") return false
+        // 未接入构筑（节点未连线）时没有角色属性，中枢候选不做兼容性过滤
+        if (!props.charBuild) return true
         try {
             return props.charBuild.isAuraCompatible(LeveledModHelper.fromId(option.value))
-        } catch {
+        } catch (error) {
+            // 兼容性未知时保留候选，避免已装光环从列表消失
+            console.error("光环兼容性判断失败", error)
             return true
         }
     })
@@ -101,6 +108,11 @@ function cloneForWorker<T>(value: T): T {
 
 /** 刷新已装备魔之楔的收益（候选收益由选择弹窗自行计算） */
 function refreshIncomes() {
+    // 未接入构筑时没有收益口径，清空旧值避免显示过期数据
+    if (!props.charBuild) {
+        incomeMap.value = {}
+        return
+    }
     const id = ++workerRequestId
     requestBuildIncomes(
         cloneForWorker({
@@ -245,7 +257,7 @@ async function handleImportCode() {
         console.error("导入代码失败:", error)
     }
     if (!charCode) return
-    const result = props.charBuild.importCode(charCode, props.type)
+    const result = props.charBuild?.importCode(charCode, props.type)
     if (!result) return
     for (let i = 0; i < result.mods.length; i++) {
         const modId = result.mods[i]
@@ -268,7 +280,7 @@ const aMod = computed(() => {
 /**
  * 需要极化的MOD槽位索引（半价削减耐受，含光环极化）。
  */
-const polsetIndices = computed(() => props.charBuild.getModCostTransfer(props.type))
+const polsetIndices = computed(() => props.charBuild?.getModCostTransfer(props.type) ?? [])
 
 /**
  * 判断槽位是否需要极化。
@@ -282,7 +294,9 @@ function isPolset(index: number) {
 /**
  * 光环槽是否被极化（光环极化）。
  */
-const auraPolset = computed(() => props.type === "角色" && polsetIndices.value.includes(props.charBuild.getMods(props.type).length - 1))
+const auraPolset = computed(
+    () => props.type === "角色" && !!props.charBuild && polsetIndices.value.includes(props.charBuild.getMods(props.type).length - 1)
+)
 </script>
 <template>
     <!-- @container：槽位列数按 ModEditer 自身宽度算，嵌入节点或构筑页都不受外层容器影响 -->
@@ -345,29 +359,22 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 >
                     <Icon icon="ri:calculator-line" class="size-4" />
                 </div>
-                <ShowProps v-if="aMod" :mod="aMod" :eff="charBuild?.checkModEffective(aMod, true)">
-                    <div class="flex items-center gap-2">
-                        <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
-                        <Select
-                            class="w-30 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            :model-value="auraMod"
-                            @update:model-value="handleSelectAuraMod($event)"
-                        >
-                            <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                                {{ $t(m.quality) }} - {{ $t(m.label) }}
-                            </SelectItem>
-                        </Select>
-                        <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价耐受 -->
-                        <span
-                            v-if="aMod.极性"
-                            class="badge badge-sm gap-1"
-                            :class="auraPolset ? 'badge-success text-green-800' : 'badge-soft text-base-content/80'"
-                        >
-                            <Icon class="inline-block" :icon="`po-${aMod.极性}`" />
-                            {{ auraPolset ? Math.ceil(aMod.耐受 / 2) : aMod.耐受 }}
-                        </span>
-                    </div>
-                </ShowProps>
+                <!-- 中枢（光环）槽：与其他槽位一致的卡片 + 弹窗交互，未装备时显示虚线空槽；宽度随内容自适应 -->
+                <div
+                    v-if="type === '角色'"
+                    class="nodrag nopan flex max-w-40 shrink-0 cursor-pointer select-none items-stretch"
+                    :title="$t('char-build.simple_aura')"
+                    @click="auraDialogShow = true"
+                >
+                    <ModItem
+                        variant="bar"
+                        size="sm"
+                        :mod="aMod ?? null"
+                        :polset="auraPolset"
+                        :char-build="charBuild"
+                        :noremove="true"
+                    />
+                </div>
                 <!-- 导入/导出代码的三个按钮：与 A/B/C 一致使用 btn-square，文字走 title 提示 -->
                 <div class="flex items-center gap-2">
                     <div
@@ -380,6 +387,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                     </div>
                     <div
                         class="btn btn-ghost btn-sm btn-square border border-base-content/15"
+                        :class="{ 'pointer-events-none opacity-40': !charBuild }"
                         :title="$t('char-build.import_code')"
                         @click="handleImportCode()"
                     >
@@ -387,14 +395,27 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                     </div>
                     <div
                         class="btn btn-ghost btn-sm btn-square border border-base-content/15"
+                        :class="{ 'pointer-events-none opacity-40': !charBuild }"
                         :title="$t('char-build.export_code')"
-                        @click="copyText(charBuild.getCode(type))"
+                        @click="charBuild && copyText(charBuild.getCode(type))"
                     >
                         <Icon icon="ri:file-copy-line" class="size-4" />
                     </div>
                 </div>
             </div>
         </div>
+        <!-- 中枢选择弹窗：与普通槽位的选 MOD 弹窗同构，卸载也在这里完成 -->
+        <ModPickerDialog
+            v-model:open="auraDialogShow"
+            :mod-options="auraModOptions"
+            :char-build="charBuild"
+            slot-type="角色"
+            aura-only
+            :equipped-aura="auraMod"
+            :mods="mods"
+            :title="$t('char-build.simple_aura')"
+            @select="handleSelectAuraMod($event.value)"
+        />
         <div class="grid grid-cols-2 gap-4 @xs:grid-cols-4 @6xl:grid-cols-8">
             <ModItem
                 v-for="(mod, index) in mods"

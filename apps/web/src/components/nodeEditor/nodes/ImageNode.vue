@@ -436,7 +436,7 @@ onBeforeUnmount(() => {
         <Teleport to="body">
             <div
                 v-if="previewOpen"
-                class="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 p-6"
+                class="fixed inset-0 z-200 flex items-center justify-center bg-black/75 p-6"
                 @pointerdown.stop
                 @click.self="closePreview"
             >

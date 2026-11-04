@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * @file 旁白一次性产出音频 + 时间轴：逐句 TTS → 裁掉边缘静音 → 按固定间隔拼接 voice.wav → 写 subs.json。
  *
@@ -10,12 +11,12 @@
  *     --script script.tsv --out .tmp --ref refs/story_story_1002_101002_1948E9DE.wav
  */
 
+import { createHash } from "node:crypto"
 import { existsSync } from "node:fs"
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
-import { createHash } from "node:crypto"
-import { modelverseInferOnce, readModelverseConfig } from "../../../../tools/voice/modelverse-client"
 import { readGptSoVitsConfig, synthesizeOnce } from "../../../../tools/voice/gpt-sovits"
+import { modelverseInferOnce, readModelverseConfig } from "../../../../tools/voice/modelverse-client"
 
 interface Cue {
     zh: string
@@ -270,7 +271,23 @@ async function main(): Promise<void> {
     const voicePath = path.join(outDir, "voice.wav")
     await rm(voicePath, { force: true })
     await run(
-        ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", listPath, "-c:a", "pcm_s16le", "-ar", String(sampleRate), "-ac", "1", voicePath],
+        [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            listPath,
+            "-c:a",
+            "pcm_s16le",
+            "-ar",
+            String(sampleRate),
+            "-ac",
+            "1",
+            voicePath,
+        ],
         outDir
     )
 

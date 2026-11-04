@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { CharBuild, LeveledMod } from "@/data"
 import { format100r } from "@/util"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 /**
  * 根据品质返回右上角斜切楔形的背景色，用于区分稀有度。
@@ -60,6 +61,16 @@ const props = defineProps<{
     polset?: boolean
     /** 槽位受异极性惩罚（×1.5），显示为红色 */
     penalized?: boolean
+    /**
+     * 展示模式：`card`（默认）为方形卡片；
+     * `bar` 为横向条状，用于顶栏等窄条位置（如中枢槽）。
+     */
+    variant?: "card" | "bar"
+    /**
+     * 条状模式的尺寸档位，与 dob-ui 按钮的 `btn-xs/sm/md/lg` 同口径：
+     * 高度 = `--size-field`（0.25rem）× 6/8/10/12，用来与同排按钮精确对齐。
+     */
+    size?: "xs" | "sm" | "md" | "lg"
 }>()
 
 const emit = defineEmits<{
@@ -69,6 +80,25 @@ const emit = defineEmits<{
     dragStart: [event: MouseEvent, index: number]
     dragEnd: [event: MouseEvent, targetElement: Element | null]
 }>()
+
+// 条状模式尺寸档位：与 dob-ui 的 btn-xs/sm/md/lg 完全同口径（--size-field × 6/8/10/12）
+// pad 取与图标上下留白相同的值（高度 - 图标 - 上下边框）/ 2，使左右边距与上下边距一致
+const BAR_SIZE = {
+    xs: { factor: 6, icon: 14, font: "0.6875rem", pad: 4 },
+    sm: { factor: 8, icon: 18, font: "0.75rem", pad: 6 },
+    md: { factor: 10, icon: 22, font: "0.875rem", pad: 8 },
+    lg: { factor: 12, icon: 28, font: "1.125rem", pad: 9 },
+} as const
+
+/** 当前条状模式的尺寸档位 */
+const barMetrics = computed(() => BAR_SIZE[props.size ?? "sm"])
+
+/** 条状模式的内联样式：高度与 dob-ui 按钮同一 `--size-field` 口径，随主题缩放；横向留白对齐上下留白 */
+const barStyle = computed(() => ({
+    height: `calc(var(--size-field, 0.25rem) * ${barMetrics.value.factor})`,
+    paddingInline: `${barMetrics.value.pad}px`,
+    fontSize: barMetrics.value.font,
+}))
 
 // 拖动状态
 const isDragging = ref(false)
@@ -176,8 +206,50 @@ function handleMouseUp(event: MouseEvent) {
 }
 </script>
 <template>
+    <!-- 条状模式：横向一行（图标 + 名称/等级 + 耐受），高度与 dob-ui 按钮同档位，可与同排按钮对齐 -->
+    <div
+        v-if="variant === 'bar'"
+        class="nodrag group/mod relative flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border transition-colors duration-200"
+        :class="[mod ? ['border-base-content/15', getQualityHoverBorder(mod.品质)] : 'border-dashed border-base-content/25']"
+        :style="[barStyle, dragStyle]"
+        :data-index="index"
+        @mousedown="handleMouseDown"
+    >
+        <ShowProps v-if="mod" :mod="mod" :eff="charBuild?.checkModEffective(mod) || mod.getCondition()">
+            <div class="flex min-w-0 items-center gap-1.5">
+                <span
+                    class="grid shrink-0 place-items-center overflow-hidden rounded-xs border border-base-content/10 bg-linear-to-br"
+                    :style="{ width: `${barMetrics.icon}px`, height: `${barMetrics.icon}px` }"
+                    :class="getRarityGradientClass(mod.品质)"
+                >
+                    <img class="size-full object-cover" :src="mod.url" :alt="mod.名称" />
+                </span>
+                <!-- 名称 / 等级 / 耐受共用一条基线，避免不同字体（等宽等级）在 flex 居中时上下错位 -->
+                <span class="flex min-w-0 items-baseline gap-1.5">
+                    <span class="min-w-0 truncate text-[0.9em] font-semibold leading-none text-base-content/80">{{ $t(mod.名称) }}</span>
+                    <span v-if="!nolv" class="shrink-0 font-mono text-[0.85em] leading-none tabular-nums text-base-content/50">Lv.{{ mod.等级 }}</span>
+                    <span
+                        class="shrink-0 whitespace-nowrap text-[0.85em] leading-none tabular-nums"
+                        :class="{ 'text-green-500': polset, 'text-red-500': penalized }"
+                    >
+                        <Icon
+                            v-if="mod.极性"
+                            class="mr-0.5 inline-block align-[-0.125em]"
+                            :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`"
+                        />{{ penalized ? Math.ceil(mod.耐受 * 1.5) : polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
+                    </span>
+                </span>
+            </div>
+        </ShowProps>
+        <!-- 空槽位：虚线占位 -->
+        <span v-else class="flex min-w-0 items-center gap-1 text-base-content/40">
+            <Icon icon="ri:add-line" :style="{ width: `${barMetrics.icon}px`, height: `${barMetrics.icon}px` }" class="shrink-0" />
+            <span class="truncate text-[0.9em] leading-none">{{ $t("char-build.simple_aura") }}</span>
+        </span>
+    </div>
     <!-- 方形卡片：固定高度（aspect-square），底部信息半透明叠加，hover 无位移动画，避免闪烁 -->
     <div
+        v-else
         class="nodrag group/mod relative flex aspect-square w-full cursor-pointer items-center justify-center rounded-xs border bg-base-200/60 backdrop-blur-sm transition-colors duration-200"
         :class="[mod ? ['border-base-content/15', getQualityHoverBorder(mod.品质)] : 'border-dashed border-base-content/25']"
         :style="dragStyle"

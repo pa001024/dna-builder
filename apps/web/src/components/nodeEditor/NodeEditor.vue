@@ -19,7 +19,7 @@ import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
-import { createMindMapTree } from "@/utils/mindMap"
+import { collectMindMapNodeIds, normalizeMindMapTree, walkMindMap } from "@/utils/mindMap"
 import { resetNodeEditorPerf } from "@/utils/nodeEditorPerf"
 import { getNodePorts, isPortTypeCompatible, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
@@ -57,7 +57,7 @@ import VectorCalcNode from "./nodes/VectorCalcNode.vue"
 import VectorDecomposeNode from "./nodes/VectorDecomposeNode.vue"
 import VectorInputNode from "./nodes/VectorInputNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
-import { type NodeData, PALETTE_ITEMS, type PaletteItem } from "./types"
+import { type NodeData, PALETTE_ITEMS, type PaletteItem, paletteNodeDefaults } from "./types"
 
 // Store
 const store = useNodeEditorStore()
@@ -438,6 +438,23 @@ function handleEdgeClick(event: EdgeMouseEvent) {
     selectedNode.value = null
 }
 
+/**
+ * 打开节点右键菜单：画布节点与侧栏画布列表共用。
+ * @param nodeId 节点 id
+ * @param position 菜单弹出位置（屏幕坐标）
+ */
+function openNodeContextMenu(nodeId: string, position: { x: number; y: number }) {
+    // 锁定节点不弹出菜单
+    const node = store.nodes.find(item => item.id === nodeId)
+    if (!node || node.data?.locked === true) return
+    closeConnectMenu()
+    selectedNode.value = { id: node.id, data: node.data as NodeData }
+    selectedEdge.value = null
+    contextMenuTarget.value = resolveContextMenuTarget("node", node.id)
+    contextMenuPosition.value = position
+    contextMenuVisible.value = true
+}
+
 // 节点右键菜单事件
 function handleNodeContextMenu(event: NodeMouseEvent) {
     // 阻止默认右键菜单
@@ -445,27 +462,23 @@ function handleNodeContextMenu(event: NodeMouseEvent) {
         event.event.preventDefault()
     }
 
-    // 锁定节点不弹出菜单
-    if ((event.node.data as Record<string, any>)?.locked === true) return
-    closeConnectMenu()
-    selectedNode.value = event.node as unknown as { id: string; data: NodeData }
-    selectedEdge.value = null
-    contextMenuTarget.value = resolveContextMenuTarget("node", event.node.id)
-
     // 使用event的absolutePosition或clientX/clientY（根据事件类型）
-    if ("clientX" in event.event) {
-        contextMenuPosition.value = { x: event.event.clientX, y: event.event.clientY }
-    } else if ("touches" in event.event && event.event.touches.length > 0) {
-        contextMenuPosition.value = {
-            x: event.event.touches[0].clientX,
-            y: event.event.touches[0].clientY,
-        }
+    const source = event.event
+    if ("clientX" in source) {
+        openNodeContextMenu(event.node.id, { x: source.clientX, y: source.clientY })
+    } else if ("touches" in source && source.touches.length > 0) {
+        openNodeContextMenu(event.node.id, { x: source.touches[0].clientX, y: source.touches[0].clientY })
     } else {
         // 作为 fallback，使用画布中心
-        contextMenuPosition.value = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+        openNodeContextMenu(event.node.id, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
     }
+}
 
-    contextMenuVisible.value = true
+/** 侧栏画布列表右键：与画布节点的右键菜单等价 */
+function handleGraphNodeContextMenu(event: MouseEvent, nodeId: string) {
+    event.preventDefault()
+    event.stopPropagation()
+    openNodeContextMenu(nodeId, { x: event.clientX, y: event.clientY })
 }
 
 // 边右键菜单事件
@@ -622,13 +635,6 @@ function addPaletteNode(item: PaletteItem, position: { x: number; y: number }) {
 }
 
 /** 部分节点首次落图时需要预置数据，保证节点组件挂载即有内容 */
-function paletteNodeDefaults(type: string): Record<string, unknown> {
-    if (type === NodeType.MIND_MAP) return { tree: createMindMapTree(), layout: "mindmap" }
-    if (type === NodeType.IMAGE) return { imageMode: "embed", imageWidth: 320, imageHeight: 200 }
-    if (type === NodeType.CARD) return { cardKind: "char" }
-    return {}
-}
-
 /**
  * 移动端侧栏占满整屏，画布被挤到 0 宽、量不出尺寸，落点改用现有节点包围盒中心，
  * 保证收起侧栏后新节点就在视野里。
@@ -658,6 +664,11 @@ function screenPointToFlow(point: { x: number; y: number }) {
 
 // 鼠标按下事件 - 开始拖拽
 function onMouseDown(event: MouseEvent, item: PaletteItem) {
+    // 只有左键才进入拖拽，右键留给菜单 / 上下文操作；顺带清掉可能残留的拖拽状态
+    if (event.button !== 0) {
+        resetDragState()
+        return
+    }
     // 记录拖拽的节点项
     draggingItem.value = item
     draggingPosition.value = { x: event.clientX, y: event.clientY }
@@ -676,6 +687,11 @@ function onMouseDown(event: MouseEvent, item: PaletteItem) {
 // 鼠标移动事件 - 更新拖拽位置
 function onMouseMove(event: MouseEvent) {
     if (!draggingItem.value) return
+    // 左键已在窗口外松开等情况下收不到 mouseup：发现左键未按下就结束拖拽，避免拖影残留
+    if ((event.buttons & 1) === 0) {
+        resetDragState()
+        return
+    }
     if (paletteDragStart && Math.hypot(event.clientX - paletteDragStart.x, event.clientY - paletteDragStart.y) > 4) {
         paletteDragMoved = true
     }
@@ -791,7 +807,22 @@ function getCategoryLabel(category: string): string {
 /** 拖动排序期间的本地预览顺序：只存在内存里，松手才写回 store */
 const graphNodeDragOrder = ref<string[] | null>(null)
 
+/** 思维导图主题绑定关系：绑定节点 id → 所属导图节点 id */
+const mindMapBindings = computed(() => {
+    const bindings = new Map<string, string>()
+    for (const node of store.nodes) {
+        if (node.type !== NodeType.MIND_MAP) continue
+        const tree = normalizeMindMapTree(node.data?.tree)
+        if (!tree) continue
+        walkMindMap(tree, topic => {
+            if (topic.nodeId) bindings.set(topic.nodeId, node.id)
+        })
+    }
+    return bindings
+})
+
 const graphNodes = computed(() => {
+    const bindings = mindMapBindings.value
     const mapped = store.nodes.map(node => {
         const palette = PALETTE_ITEMS.find(item => item.type === node.type)
         const label = typeof node.data?.label === "string" ? node.data.label.trim() : ""
@@ -802,18 +833,58 @@ const graphNodes = computed(() => {
             hidden: node.hidden === true,
             locked: node.data?.locked === true,
             selected: isItemSelected("node", node.id),
+            // 思维导图主题绑定的节点按树形缩进展示
+            parentId: bindings.get(node.id),
         }
     })
     const order = graphNodeDragOrder.value
-    if (!order) return mapped
+    const base = order ? reorderGraphNodes(mapped, order) : mapped
+    return flattenGraphNodeTree(base)
+})
+
+/** 按本地预览顺序重排节点（只影响拖动中的显示顺序） */
+function reorderGraphNodes<T extends { id: string }>(mapped: T[], order: string[]): T[] {
     const byId = new Map(mapped.map(node => [node.id, node]))
-    const ordered = order.map(id => byId.get(id)).filter((node): node is (typeof mapped)[number] => node !== undefined)
+    const ordered = order.map(id => byId.get(id)).filter((node): node is T => node !== undefined)
     const orderedIds = new Set(order)
     for (const node of mapped) {
         if (!orderedIds.has(node.id)) ordered.push(node)
     }
     return ordered
-})
+}
+
+/**
+ * 把节点列表按父子关系摊平：父节点后面紧跟它的子节点，并带上缩进层级。
+ * 父级不在列表里的节点按顶层处理，避免子节点被漏掉。
+ * @param list 原始节点列表
+ * @returns 带 depth 的展示列表
+ */
+function flattenGraphNodeTree<T extends { id: string; parentId?: string }>(list: T[]): (T & { depth: number })[] {
+    const byParent = new Map<string, T[]>()
+    const topLevel: T[] = []
+    const ids = new Set(list.map(node => node.id))
+    for (const node of list) {
+        if (node.parentId && ids.has(node.parentId)) {
+            const children = byParent.get(node.parentId) ?? []
+            children.push(node)
+            byParent.set(node.parentId, children)
+        } else {
+            topLevel.push(node)
+        }
+    }
+    const result: (T & { depth: number })[] = []
+    const visited = new Set<string>()
+    const visit = (node: T, depth: number) => {
+        if (visited.has(node.id)) return
+        visited.add(node.id)
+        result.push({ ...node, depth })
+        byParent.get(node.id)?.forEach(child => visit(child, depth + 1))
+    }
+    topLevel.forEach(node => visit(node, 0))
+    // 兜底：成环等异常情况漏掉的节点仍要出现在列表里
+    list.forEach(node => visit(node, 0))
+    return result
+}
 
 /** 隐藏节点先自动显示；锁定节点不可选中 */
 function selectGraphNode(id: string, event?: MouseEvent) {
@@ -1361,6 +1432,9 @@ function syncDuplicateDrag(point: { x: number; y: number }) {
 /** 拖动分组时记录的起始位置与框内节点偏移 */
 let groupDrag: { id: string; children: { id: string; offsetX: number; offsetY: number }[] } | null = null
 
+/** 拖动思维导图时记录的上一帧位置：绑定节点按位移跟随 */
+let mindMapDrag: { id: string; lastX: number; lastY: number } | null = null
+
 function measureNodeElement(nodeId: string) {
     const element = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${nodeId}"]`)
     return { width: element?.offsetWidth ?? 0, height: element?.offsetHeight ?? 0 }
@@ -1392,7 +1466,13 @@ onNodeDragStart(({ event, node, nodes: draggedNodes }) => {
         duplicateDragZoom = viewport.value.zoom || 1
     }
     groupDrag = null
+    mindMapDrag = null
     if (duplicateDrag) return
+    // 思维导图：绑定节点用绝对坐标，拖动时按位移一起移动
+    if (node.type === NodeType.MIND_MAP) {
+        mindMapDrag = { id: node.id, lastX: node.position.x, lastY: node.position.y }
+        return
+    }
     if (node.type !== NodeType.GROUP) return
     const group = store.nodes.find(item => item.id === node.id)
     if (!group) return
@@ -1414,6 +1494,12 @@ onNodeDrag(({ event, node }) => {
         syncDuplicateDrag(getEventClientPoint(event))
         return
     }
+    if (mindMapDrag && node.id === mindMapDrag.id) {
+        moveMindMapBoundNodes(node.id, { x: node.position.x - mindMapDrag.lastX, y: node.position.y - mindMapDrag.lastY })
+        mindMapDrag.lastX = node.position.x
+        mindMapDrag.lastY = node.position.y
+        return
+    }
     if (!groupDrag || node.id !== groupDrag.id) return
     groupDrag.children.forEach(child => {
         const target = store.nodes.find(item => item.id === child.id)
@@ -1421,6 +1507,24 @@ onNodeDrag(({ event, node }) => {
         target.position = { x: node.position.x + child.offsetX, y: node.position.y + child.offsetY }
     })
 })
+
+/**
+ * 拖动思维导图节点时，把主题绑定的节点按相同位移一起移动。
+ * 绑定节点不可单独拖动，位置由导图布局驱动，跟随父级保持视觉关系。
+ * @param mindMapId 导图节点 id
+ * @param delta 本次拖动产生的位移
+ */
+function moveMindMapBoundNodes(mindMapId: string, delta: { x: number; y: number }) {
+    if (delta.x === 0 && delta.y === 0) return
+    const tree = normalizeMindMapTree(store.nodes.find(node => node.id === mindMapId)?.data?.tree)
+    if (!tree) return
+    const boundIds = collectMindMapNodeIds(tree)
+    for (const nodeId of boundIds) {
+        const target = store.nodes.find(node => node.id === nodeId)
+        if (!target) continue
+        target.position = { x: target.position.x + delta.x, y: target.position.y + delta.y }
+    }
+}
 
 onNodeDragStop(({ event, node }) => {
     if (duplicateDrag) {
@@ -1431,6 +1535,7 @@ onNodeDragStop(({ event, node }) => {
     }
     duplicatePointerOrigin = null
     if (groupDrag?.id === node.id) groupDrag = null
+    mindMapDrag = null
     if (duplicateHistoryBatch) {
         duplicateHistoryBatch = false
         store.endHistoryBatch("复制节点")
@@ -1781,6 +1886,7 @@ async function handleTransfer(charName: string) {
                             node.selected ? 'border-primary/40 bg-primary/5' : 'border-transparent hover:border-primary/40 hover:bg-primary/5',
                             graphNodeDragId === node.id ? 'opacity-40' : '',
                         ]"
+                        @contextmenu="handleGraphNodeContextMenu($event, node.id)"
                     >
                         <button
                             type="button"
@@ -1791,6 +1897,9 @@ async function handleTransfer(charName: string) {
                         >
                             <Icon icon="ri:draggable" class="size-3.5" />
                         </button>
+                        <!-- 嵌套节点（思维导图主题绑定的节点）缩进一级并标注父级 -->
+                        <span v-if="node.depth > 0" class="w-3 shrink-0" aria-hidden="true" />
+                        <Icon v-if="node.depth > 0" icon="ri:node-tree" class="size-3 shrink-0 text-base-content/25" :title="`思维导图子节点`" />
                         <button
                             type="button"
                             class="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 py-0.5 text-left"

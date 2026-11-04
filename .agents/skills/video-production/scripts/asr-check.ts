@@ -62,9 +62,7 @@ function parseArgs(): Record<string, string> {
  * @returns 归一化后的字符数
  */
 function normalizedLength(text: string): number {
-    return text
-        .normalize("NFKC")
-        .replace(/[\s，。？！、,.?!~～—…·"'“”‘’()（）<>/\\|｜_*-]/g, "").length
+    return text.normalize("NFKC").replace(/[\s，。？！、,.?!~～—…·"'“”‘’()（）<>/\\|｜_*-]/g, "").length
 }
 
 /**

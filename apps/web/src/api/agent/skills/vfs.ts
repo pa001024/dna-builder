@@ -150,7 +150,12 @@ function mergeHitWindows(hits: readonly number[], context: number, totalLines: n
 }
 
 /** 渲染一个带全局行号的行窗口（cat -n 风格）；超出预算时截断并报告实际消耗的字符数。 */
-function renderWindow(lines: readonly string[], start: number, end: number, budget: number = MAX_READ_CHARS): { text: string; chars: number; hitCharCap: boolean } {
+function renderWindow(
+    lines: readonly string[],
+    start: number,
+    end: number,
+    budget: number = MAX_READ_CHARS
+): { text: string; chars: number; hitCharCap: boolean } {
     const parts: string[] = []
     let chars = 0
     let hitCharCap = false
@@ -189,7 +194,10 @@ export function renderReadFile(content: string, params: ReadFileParams): ReadFil
     // slice：正数取头部 N 行、负数取尾部 N 行（优先级最高）
     if (typeof params.slice === "number" && Number.isFinite(params.slice) && params.slice !== 0) {
         const count = Math.min(Math.abs(Math.trunc(params.slice)), MAX_READ_LINES)
-        const window = params.slice > 0 ? renderWindow(lines, 0, Math.min(count, totalLines)) : renderWindow(lines, Math.max(0, totalLines - count), totalLines)
+        const window =
+            params.slice > 0
+                ? renderWindow(lines, 0, Math.min(count, totalLines))
+                : renderWindow(lines, Math.max(0, totalLines - count), totalLines)
 
         if (window.hitCharCap) {
             notice = `输出因超过 ${MAX_READ_CHARS} 字符被截断，请用更小的 slice 或改用 line / search 定位。`

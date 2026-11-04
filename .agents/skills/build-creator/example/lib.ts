@@ -1,10 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
-import { CharBuild, ModTypeMap, ModTypeMaxSlot, buffMap, charMap, modData, modMap, weaponMap, type ModTypeKey } from "dna-builder-data"
+import { buffMap, CharBuild, charMap, type ModTypeKey, ModTypeMap, ModTypeMaxSlot, modData, modMap, weaponMap } from "dna-builder-data"
 import { createCharBuildFromSettings } from "dna-builder-data/CharBuildHelper"
 import { createDefaultCharSettings } from "dna-builder-data/charSettings"
-import { normalizeCharSettings } from "@/composables/useCharSettings"
 import { LeveledModHelper, LeveledWeaponHelper } from "dna-builder-data/leveled/LeveledHelpers"
 import { getPetBuffData, getPetTraits } from "dna-builder-data/petTrait"
+import { normalizeCharSettings } from "@/composables/useCharSettings"
 
 export type SlotKey = "charMods" | "meleeMods" | "rangedMods"
 export type ModSlotType = "角色" | "近战" | "远程"
@@ -60,7 +60,8 @@ export function baseSettings(spec: Spec): any {
     const c = charOf(spec)
     const 专武 = c.专武 as number | undefined
     const w: any = 专武 ? weaponMap.get(专武) : undefined
-    const sig = w && (w.类型 as string[])?.includes("近战") ? { id: 专武!, type: "近战" as const } : w ? { id: 专武!, type: "远程" as const } : null
+    const sig =
+        w && (w.类型 as string[])?.includes("近战") ? { id: 专武!, type: "近战" as const } : w ? { id: 专武!, type: "远程" as const } : null
     return { ...createDefaultCharSettings(sig as any), ...spec.base }
 }
 
@@ -127,7 +128,17 @@ export function modPool(spec: Spec, 类型: ModSlotType, opts: { aura?: boolean;
         } else if (m.系列 === "羽蛇") continue
         if (m.属性 && m.属性 !== c.属性) continue
         if (!限定允许(spec, m, 类型)) continue
-        out.push({ id, 名称: m.名称, 系列: m.系列, 品质: m.品质, 极性: m.极性, 耐受: m.耐受 ?? 0, 最大耐受: m.最大耐受, 属性: m.属性, 限定: m.限定 })
+        out.push({
+            id,
+            名称: m.名称,
+            系列: m.系列,
+            品质: m.品质,
+            极性: m.极性,
+            耐受: m.耐受 ?? 0,
+            最大耐受: m.最大耐受,
+            属性: m.属性,
+            限定: m.限定,
+        })
     }
     return out
 }
@@ -312,7 +323,9 @@ export function traitGreedy(spec: Spec, patch: Record<string, any>) {
                     for (const b of 池.values()) {
                         if (a.bid === b.bid) continue
                         if ((slots[i] as any)?.bid === a.bid && (slots[j] as any)?.bid === b.bid) continue
-                        const clash = slots.some((s, k) => s && k !== i && k !== j && ((s as any).bid === a.bid || (s as any).bid === b.bid))
+                        const clash = slots.some(
+                            (s, k) => s && k !== i && k !== j && ((s as any).bid === a.bid || (s as any).bid === b.bid)
+                        )
                         if (clash) continue
                         试(i, a, j, b)
                     }
@@ -335,20 +348,18 @@ export function petActiveInfo(petId: number) {
 
 function rng(seed: number) {
     let q = seed
-    return () => ((q = (q * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff)
+    return () => (q = (q * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff
 }
 
 export function optimize(
     spec: Spec,
     patch: Record<string, any>,
-    opts: { seeds?: number; rounds?: number; passes?: number; log?: boolean } = {},
+    opts: { seeds?: number; rounds?: number; passes?: number; log?: boolean } = {}
 ) {
     const { seeds = 6, rounds = 4, passes = 10, log = true } = opts
     const 光环排除 = 光环自装排除((patch.buffs ?? spec.base.buffs ?? []) as [string, number][])
     if (log) {
-        console.log(
-            `  队友光环已覆盖、自装会重复的 MOD：${光环排除.map(id => `${id}(${modMap.get(id)?.名称})`).join(", ") || "无"}`,
-        )
+        console.log(`  队友光环已覆盖、自装会重复的 MOD：${光环排除.map(id => `${id}(${modMap.get(id)?.名称})`).join(", ") || "无"}`)
     }
     const 角色池 = modPool(spec, "角色", { exclude: 光环排除 })
     const 近战池 = modPool(spec, "近战")
@@ -363,7 +374,13 @@ export function optimize(
     const req = spec.required ?? {}
     const 必带 = (key: SlotKey) => (req[key] ?? []).map(id => byId.get(id)!).filter(Boolean) as Cand[]
 
-    const patchFor = (s: State) => ({ ...patch, charMods: toIds(s.charMods), meleeMods: toIds(s.meleeMods), rangedMods: toIds(s.rangedMods), auraMod: s.aura?.id ?? patch.auraMod })
+    const patchFor = (s: State) => ({
+        ...patch,
+        charMods: toIds(s.charMods),
+        meleeMods: toIds(s.meleeMods),
+        rangedMods: toIds(s.rangedMods),
+        auraMod: s.aura?.id ?? patch.auraMod,
+    })
 
     const sigOf = (s: State) =>
         `${s.aura?.id ?? 0}|${s.charMods.map(m => m?.id ?? 0).join(",")}|${s.meleeMods.map(m => m?.id ?? 0).join(",")}|${s.rangedMods.map(m => m?.id ?? 0).join(",")}`
@@ -389,7 +406,12 @@ export function optimize(
         return out
     }
 
-    const clone = (s: State): State => ({ charMods: [...s.charMods], meleeMods: [...s.meleeMods], rangedMods: [...s.rangedMods], aura: s.aura })
+    const clone = (s: State): State => ({
+        charMods: [...s.charMods],
+        meleeMods: [...s.meleeMods],
+        rangedMods: [...s.rangedMods],
+        aura: s.aura,
+    })
 
     function climb(start: State, tag: string) {
         let cur = clone(start)
@@ -480,11 +502,7 @@ export function stateToPatch(s: State) {
     return { charMods: toIds(s.charMods), meleeMods: toIds(s.meleeMods), rangedMods: toIds(s.rangedMods), auraMod: s.aura?.id }
 }
 
-export function ablation(
-    spec: Spec,
-    patch: Record<string, any>,
-    items: { label: string; patch: Record<string, any> }[],
-) {
+export function ablation(spec: Spec, patch: Record<string, any>, items: { label: string; patch: Record<string, any> }[]) {
     const base = evaluate(spec, patch)
     const rows = items.map(it => {
         const v = evaluate(spec, { ...patch, ...it.patch })
@@ -501,8 +519,23 @@ export function printAblation(title: string, res: { base: number; rows: { label:
     }
 }
 
-export { CharBuild, ModTypeMap, ModTypeMaxSlot, charMap, modData, modMap, weaponMap, createCharBuildFromSettings, createDefaultCharSettings, normalizeCharSettings, LeveledModHelper, LeveledWeaponHelper, getPetBuffData, getPetTraits }
 export type { ModTypeKey }
+export {
+    CharBuild,
+    charMap,
+    createCharBuildFromSettings,
+    createDefaultCharSettings,
+    getPetBuffData,
+    getPetTraits,
+    LeveledModHelper,
+    LeveledWeaponHelper,
+    ModTypeMap,
+    ModTypeMaxSlot,
+    modData,
+    modMap,
+    normalizeCharSettings,
+    weaponMap,
+}
 export function writeBuild(path: string, settings: any) {
     writeFileSync(path, JSON.stringify(settings, null, 1))
     console.log(`已写入 ${path}`)

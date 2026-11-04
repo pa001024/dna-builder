@@ -14,6 +14,7 @@ import {
 import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
+import { useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText } from "@/util"
@@ -238,12 +239,9 @@ async function confirmEdit() {
     updatingGraph.value = editingGraphId.value
     const savedId = editingGraphId.value
     try {
-        // 列表不再下发 graphData：缺失时按需拉一次单图再更新
-        let graphData = editingGraph.value.graphData
-        if (!graphData) {
-            const full = await graphQuery({ id: savedId }, { requestPolicy: "network-only" })
-            graphData = full?.graphData ?? ""
-        }
+        // 与构筑编辑同口径：保存当前画布内容，而非回传旧远端数据
+        const nodeEditor = useNodeEditorStore()
+        const graphData = nodeEditor.exportGraphJson(editTitle.value.trim() || nodeEditor.currentGraphName || editingGraph.value.title)
         if (!graphData) {
             ui.showErrorMessage("节点图数据缺失，无法更新")
             return
@@ -262,6 +260,8 @@ async function confirmEdit() {
             if (index > -1) {
                 graphs.value[index].title = editTitle.value
                 graphs.value[index].desc = editDesc.value
+                if (result.graphInfo) graphs.value[index].graphInfo = result.graphInfo
+                if (result.updateAt) graphs.value[index].updateAt = result.updateAt
             }
             ui.showSuccessMessage("节点图已更新")
         }

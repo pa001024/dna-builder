@@ -24,7 +24,7 @@ interface TeamBuildChoiceSource {
     id: string
     title: string
     desc?: string
-    user?: { name?: string }
+    user?: { id: string; name?: string }
 }
 
 /**
@@ -39,6 +39,7 @@ const slot1BuildsQuery = typedQuery(
                 title
                 desc
                 user {
+                    id
                     name
                 }
             }
@@ -54,6 +55,7 @@ const slot2BuildsQuery = typedQuery(
                 title
                 desc
                 user {
+                    id
                     name
                 }
             }

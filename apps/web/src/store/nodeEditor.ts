@@ -8,18 +8,23 @@ import type { CalcBuildEvaluation } from "@/data/Calc.worker"
 import type { CharBuild } from "@/data/CharBuild"
 import { env } from "@/env"
 import { requestBuildEvaluation, requestBuildPanels } from "@/utils/calc-worker"
-import { createMindMapTree, DEFAULT_FONT_SIZE, normalizeMindMapTree } from "@/utils/mindMap"
+import {
+    createMindMapTree,
+    DEFAULT_FONT_SIZE,
+    type MindMapNode,
+    normalizeMindMapTree,
+    remapMindMapTreeNodeIds,
+    walkMindMap,
+} from "@/utils/mindMap"
 import {
     type BuildVector,
     type BuildVectorDimension,
     clonePlain,
-    collectAllInputs,
     collectCoreInputNodes,
     collectNumericParamVectors,
     collectVariableVectors,
     composeVectorInput,
     computeVectorStat,
-    createBuildContextFromInputs,
     createBuildContextFromJSONText,
     createBuildContextFromSettings,
     createBuildContextsFromInputs,
@@ -98,6 +103,10 @@ interface EditorNode {
     draggable?: boolean
     selectable?: boolean
     connectable?: HandleConnectable
+    /** 绘制层级：绑定到思维导图主题的节点需要压在选中的导图节点之上 */
+    zIndex?: number
+    /** 由导图折叠造成的隐藏：展开时只撤销这一种，不影响用户手动隐藏 */
+    hiddenByMindMap?: boolean
 }
 
 /**
@@ -123,6 +132,9 @@ interface EditorNodeInput extends Omit<EditorNode, "data"> {
 
 const NODE_DATA_HISTORY_THROTTLE_MS = 400
 
+/** 绑定到思维导图主题的节点层级：压在选中导图节点的 1000 之上 */
+const BOUND_NODE_Z_INDEX = 1001
+
 export const useNodeEditorStore = defineStore("nodeEditor", () => {
     // 节点和边
     const nodes = ref<EditorNode[]>([])
@@ -131,10 +143,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     // 计算缓存（防止重复计算）
     const calculationCache = new Map<string, any>()
 
-    // 图数据版本号：节点/边变化时递增，用于失效 MOD/BUFF 编辑器的预览构筑
+    // 图数据版本号：节点/边变化时递增，用于失效 MOD/BUFF 编辑器的构筑上下文
     const graphRevision = ref(0)
-    /** 预览构筑缓存：非响应式，避免在组件渲染期间写入 ref 触发递归更新 */
-    let previewCache: { revision: number; context: NodeBuildContext | null } | null = null
     // 求值请求防抖与乱序保护
     const evaluationTimers = new Map<string, ReturnType<typeof setTimeout>>()
     const evaluationRequestIds = new Map<string, number>()
@@ -559,6 +569,77 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         commitHistory(`添加节点: ${node.type}`)
     }
 
+    /**
+     * 标记一组节点由思维导图主题绑定：位置由导图布局驱动，禁止单独拖动。
+     * 坐标一律用画布绝对坐标，父子关系只体现在主题树上（见 data.tree 的 nodeId），
+     * 这样 Vue Flow 不必重解析节点也能正确落位。
+     * @param nodeIds 绑定节点的 id
+     */
+    function markBoundNodes(nodeIds: string[]) {
+        let changed = false
+        for (const nodeId of nodeIds) {
+            const target = nodes.value.find(node => node.id === nodeId)
+            if (!target) continue
+            // 导图节点被选中时会抬到 z=1000：绑定节点必须压在它之上，否则会被半透明背景盖住
+            if (target.zIndex !== BOUND_NODE_Z_INDEX) {
+                target.zIndex = BOUND_NODE_Z_INDEX
+                changed = true
+            }
+            // 锁定节点本身就是不可拖动，不需要再标记
+            if (target.data?.locked === true || target.draggable === false) continue
+            target.draggable = false
+            changed = true
+        }
+        if (changed) markGraphDirty()
+    }
+
+    /**
+     * 解除节点的绑定状态：恢复可拖动与显示（锁定节点保持不可拖动）。
+     * @param nodeId 节点 id
+     */
+    function releaseBoundNode(nodeId: string) {
+        const node = nodes.value.find(item => item.id === nodeId)
+        if (!node) return
+        const boundZ = node.zIndex === BOUND_NODE_Z_INDEX
+        const boundDrag = node.draggable === false && node.data?.locked !== true
+        const boundHidden = node.hiddenByMindMap === true
+        if (!boundZ && !boundDrag && !boundHidden) return
+        if (boundZ) node.zIndex = undefined
+        if (boundDrag) node.draggable = undefined
+        if (boundHidden) {
+            node.hiddenByMindMap = undefined
+            node.hidden = false
+        }
+        markGraphDirty()
+    }
+
+    /**
+     * 导图折叠分支里的绑定节点应当隐藏：不渲染也不画连线，但仍参与计算与保存。
+     * 与手动隐藏分开标记，展开时只撤销导图造成的隐藏。
+     * @param nodeId 节点 id
+     * @param hidden 是否隐藏
+     * @returns 是否发生显隐变化（用于触发重新测量尺寸）
+     */
+    function setBoundNodeHidden(nodeId: string, hidden: boolean): boolean {
+        const node = nodes.value.find(item => item.id === nodeId)
+        if (!node) return false
+        if (hidden) {
+            if (node.hiddenByMindMap) return false
+            node.hiddenByMindMap = true
+            if (node.hidden) return false
+            node.hidden = true
+            node.selected = false
+            markGraphDirty()
+            return true
+        }
+        if (!node.hiddenByMindMap) return false
+        node.hiddenByMindMap = undefined
+        if (!node.hidden) return false
+        node.hidden = false
+        markGraphDirty()
+        return true
+    }
+
     /** 输入节点类型 → 核心节点输入端口 */
     const CORE_HANDLE_BY_INPUT_TYPE: Record<string, string> = {
         [NodeType.CHAR_INPUT]: CORE_INPUT.char,
@@ -861,15 +942,44 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     function removeNode(nodeId: string) {
         // 先记下被删节点的原下游：它们少一路输入，需要重算
         const downstreamIds = edges.value.filter(edge => edge.source === nodeId).map(edge => edge.target)
-        nodes.value = nodes.value.filter(n => n.id !== nodeId)
-        edges.value = edges.value.filter(e => e.source !== nodeId && e.target !== nodeId)
-        const pendingTimer = evaluationTimers.get(nodeId)
-        if (pendingTimer) clearTimeout(pendingTimer)
-        evaluationTimers.delete(nodeId)
-        evaluationRequestIds.delete(nodeId)
+        const removeIds = new Set([nodeId])
+        // 删除导图节点时释放它绑定的画布节点，避免残留隐藏 / 锁定状态
+        nodes.value
+            .filter(node => removeIds.has(node.id) && node.type === NodeType.MIND_MAP)
+            .forEach(node => {
+                const tree = node.data?.tree as MindMapNode | undefined
+                if (!tree) return
+                walkMindMap(tree, topic => {
+                    if (topic.nodeId) releaseBoundNode(topic.nodeId)
+                })
+            })
+        nodes.value = nodes.value.filter(n => !removeIds.has(n.id))
+        edges.value = edges.value.filter(e => !removeIds.has(e.source) && !removeIds.has(e.target))
+        for (const id of removeIds) {
+            const pendingTimer = evaluationTimers.get(id)
+            if (pendingTimer) clearTimeout(pendingTimer)
+            evaluationTimers.delete(id)
+            evaluationRequestIds.delete(id)
+        }
+        // 删除的节点若被思维导图主题引用，解绑对应主题，避免标题条指向不存在的节点
+        nodes.value
+            .filter(node => node.type === NodeType.MIND_MAP)
+            .forEach(node => unbindMissingTopics(node.data?.tree as MindMapNode | undefined, removeIds))
         markGraphDirty()
         recalculateFromSeeds(downstreamIds)
         commitHistory("删除节点")
+    }
+
+    /**
+     * 清理主题树里指向已不存在节点的绑定。
+     * @param tree 思维导图主题树
+     * @param removedIds 已删除的节点 id
+     */
+    function unbindMissingTopics(tree: MindMapNode | undefined, removedIds: Set<string>) {
+        if (!tree) return
+        walkMindMap(tree, node => {
+            if (node.nodeId && removedIds.has(node.nodeId)) delete node.nodeId
+        })
     }
 
     /**
@@ -1009,6 +1119,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             return {
                 ...node,
                 id: newId,
+                // 副本与原图同源：绑定标记不能带过去，否则副本无法拖动
+                draggable: undefined,
                 position: {
                     x: (node.position as { x: number; y: number }).x + offset.x,
                     y: (node.position as { x: number; y: number }).y + offset.y,
@@ -1031,6 +1143,14 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         // 过滤掉连接到外部节点的边（只保留内部连接）
         const newNodeIds = new Set(newNodes.map(node => node.id))
         const filteredEdges = newEdges.filter(edge => newNodeIds.has(edge.source) && newNodeIds.has(edge.target))
+
+        // 粘贴导图副本：主题绑定的旧节点 id 跟随映射指向新副本，未一起复制的解绑，避免副本驱动原节点
+        for (const node of newNodes) {
+            if (node.type !== NodeType.MIND_MAP) continue
+            const tree = normalizeMindMapTree(node.data?.tree)
+            if (!tree) continue
+            node.data = { ...node.data, tree: remapMindMapTreeNodeIds(tree, nodeId => idMap.get(nodeId)) }
+        }
 
         // 添加新节点和边
         nodes.value.push(...newNodes)
@@ -1089,6 +1209,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                 id: node.id,
                 type: node.type,
                 position: node.position,
+                // 绑定节点的只读标记（draggable=false / zIndex）随图持久化，重开后仍由导图布局驱动
+                ...(node.draggable === false ? { draggable: false as const } : null),
+                ...(typeof node.zIndex === "number" ? { zIndex: node.zIndex } : null),
                 // 显隐与锁定是纯展示状态：持久化以便重开图 / 撤销 / 复制粘贴后保持一致
                 ...(node.hidden === true ? { hidden: true as const } : null),
                 ...(node.data?.locked === true ? { draggable: false, selectable: false, connectable: false } : null),
@@ -1191,7 +1314,6 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
             node.data.evalSignature = undefined
             if (node.data.evalPending) node.data.evalPending = false
         })
-        previewCache = null
     }
 
     /**
@@ -1582,32 +1704,23 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
     }
 
     /**
-     * 读取节点可用的构筑上下文：优先使用相连的核心节点，
-     * 其次任一已构建的核心节点，最后用整张图的输入节点生成预览构筑。
+     * 读取节点可用的构筑上下文：只使用与本节点连线可达的输入，
+     * 未连线的节点拿不到任何构筑上下文（不得借用画布上其他节点的角色或核心节点）。
      * @param nodeId 发起读取的节点（MOD / BUFF / AST 等编辑节点）
-     * @returns 构筑上下文
+     * @returns 构筑上下文；节点未接入构筑时返回 null
      */
     function getBuildContext(nodeId?: string): NodeBuildContext | null {
         // 订阅图版本：节点变更后重新计算缓存
         graphRevision.value
-        if (nodeId) {
-            const related = findConnectedCore(nodeId, "downstream") ?? findConnectedCore(nodeId, "upstream")
-            if (related) {
-                // 这里会在节点渲染期间被调用：核心尚未计算时只做只读解析，不写回节点数据
-                const context =
-                    (related.data.build as NodeBuildContext | undefined) ??
-                    resolveCoreBuild(related, { readStoredBuildInput: true }).contexts[0]
-                if (context) return context
-            }
-        }
-        const anyCore = nodes.value.find(node => node.type === NodeType.CORE_CALC && node.data.build)
-        if (anyCore) return anyCore.data.build as NodeBuildContext
-        if (!previewCache || previewCache.revision !== graphRevision.value) {
-            const inputs = collectAllInputs(nodes.value)
-            const { context } = createBuildContextFromInputs(inputs, {}, { fallbackChar: true })
-            previewCache = { revision: graphRevision.value, context: context ? markRaw(context) : null }
-        }
-        return previewCache.context
+        if (!nodeId) return null
+        const related = findConnectedCore(nodeId, "downstream") ?? findConnectedCore(nodeId, "upstream")
+        if (!related) return null
+        // 这里会在节点渲染期间被调用：核心尚未计算时只做只读解析，不写回节点数据
+        return (
+            (related.data.build as NodeBuildContext | undefined) ??
+            resolveCoreBuild(related, { readStoredBuildInput: true }).contexts[0] ??
+            null
+        )
     }
 
     /** 查找节点构筑输入端口的来源节点 */
@@ -2677,6 +2790,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         setNodeLocked,
         moveNode,
         addNode,
+        markBoundNodes,
+        releaseBoundNode,
+        setBoundNodeHidden,
         removeNode,
         addEdge,
         removeEdge,

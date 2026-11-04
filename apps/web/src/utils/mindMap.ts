@@ -17,6 +17,8 @@ export interface MindMapNode {
     bg?: string
     /** 备注文字（悬浮展示） */
     note?: string
+    /** 关联的画布节点 id：该主题由真实节点渲染，位置随导图布局 */
+    nodeId?: string
     children: MindMapNode[]
 }
 
@@ -113,6 +115,12 @@ export function readLayoutMeta(kind: unknown): MindMapLayoutMeta {
 /** 主题字号基准（根节点未指定时使用） */
 export const DEFAULT_FONT_SIZE = 14
 
+/** 导图节点顶部工具栏高度：绑定节点的绝对位置需要叠加它 */
+export const MIND_MAP_TOOLBAR_HEIGHT = 32
+
+/** 绑定节点的兜底尺寸：真实尺寸由 DOM 测量后覆盖 */
+export const MIND_MAP_BOUND_DEFAULT_SIZE = { width: 240, height: 90 } as const
+
 /** 主题盒子的内边距与行高参数（与 MindNodeBox 的 CSS 保持一致） */
 export const MIND_MAP_BOX = {
     paddingX: 10,
@@ -156,6 +164,23 @@ export type MindMapMeasure = (
     depth: number
 ) => { lines: string[]; width: number; height: number }
 
+/**
+ * 绑定节点的尺寸测量：真实节点由 DOM 决定尺寸，这里读测量表；
+ * 尚未测到尺寸时用兜底值，保证首帧布局仍然完整。
+ * @param getMeasuredSize 已测得的节点尺寸查询
+ * @returns 测量回调
+ */
+export function createBoundNodeMeasure(getMeasuredSize: (nodeId: string) => { width: number; height: number } | undefined): MindMapMeasure {
+    return node => {
+        const measured = node.nodeId ? getMeasuredSize(node.nodeId) : undefined
+        return {
+            lines: [],
+            width: Math.max(MIND_MAP_BOX.minWidth, Math.ceil(measured?.width ?? MIND_MAP_BOUND_DEFAULT_SIZE.width)),
+            height: Math.ceil(measured?.height ?? MIND_MAP_BOUND_DEFAULT_SIZE.height),
+        }
+    }
+}
+
 /** 主题可选配色（分支色） */
 export const MIND_MAP_COLORS = ["#3b82f6", "#22c55e", "#eab308", "#f97316", "#ef4444", "#ec4899", "#a855f7", "#14b8a6", "#64748b"]
 
@@ -175,8 +200,9 @@ export function createMindMapTree(text = "中心主题"): MindMapNode {
  * @returns 副本
  */
 export function cloneMindMapTree(node: MindMapNode): MindMapNode {
+    const { nodeId: _omitted, ...rest } = node
     return {
-        ...node,
+        ...rest,
         id: nanoid(8),
         children: node.children.map(cloneMindMapTree),
     }
@@ -204,6 +230,7 @@ export function normalizeMindMapTree(raw: unknown): MindMapNode | null {
     if (typeof source.color === "string" && source.color) node.color = source.color
     if (typeof source.bg === "string" && source.bg) node.bg = source.bg
     if (typeof source.note === "string" && source.note) node.note = source.note
+    if (typeof source.nodeId === "string" && source.nodeId) node.nodeId = source.nodeId
     return node
 }
 
@@ -216,6 +243,51 @@ export function walkMindMap(
 ) {
     visit(node, parent, depth)
     node.children.forEach(child => walkMindMap(child, visit, node, depth + 1))
+}
+
+/**
+ * 收集主题树上绑定的画布节点 id（含折叠分支里的主题）。
+ * @param root 根主题
+ * @returns 节点 id 集合
+ */
+export function collectMindMapNodeIds(root: MindMapNode): Set<string> {
+    const ids = new Set<string>()
+    walkMindMap(root, node => {
+        if (node.nodeId) ids.add(node.nodeId)
+    })
+    return ids
+}
+
+/**
+ * 重映射主题树上绑定的画布节点 id：粘贴导图副本时，已一起复制的节点指向新副本，未复制的解绑，避免副本驱动原节点。
+ * @param root 根主题
+ * @param resolve 旧节点 id → 新节点 id；返回 undefined 表示解绑
+ * @returns 新主题树（主题 id 保持不变）
+ */
+export function remapMindMapTreeNodeIds(root: MindMapNode, resolve: (nodeId: string) => string | undefined): MindMapNode {
+    return {
+        ...root,
+        nodeId: root.nodeId ? resolve(root.nodeId) : undefined,
+        children: root.children.map(child => remapMindMapTreeNodeIds(child, resolve)),
+    }
+}
+
+/**
+ * 遍历可见主题：折叠主题的子级不参与布局与渲染。
+ * @param node 起始主题
+ * @param visit 访问函数
+ * @param parent 父主题
+ * @param depth 层级
+ */
+export function walkVisibleMindMap(
+    node: MindMapNode,
+    visit: (node: MindMapNode, parent: MindMapNode | null, depth: number) => void,
+    parent: MindMapNode | null = null,
+    depth = 0
+) {
+    visit(node, parent, depth)
+    if (node.collapsed === true) return
+    node.children.forEach(child => walkVisibleMindMap(child, visit, node, depth + 1))
 }
 
 /** 统计主题数量 */

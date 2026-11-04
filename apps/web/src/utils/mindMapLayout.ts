@@ -11,6 +11,7 @@ import {
 } from "./mindMap"
 import { layoutFishbone, layoutTimeline } from "./mindMapCustomLayouts"
 
+export { createBoundNodeMeasure } from "./mindMap"
 export { MIND_MAP_BOX, type MindMapLayoutNode, type MindMapLayoutResult, type MindMapMeasure }
 
 /** 连线样式：肘形 / 直线 / 大圆角括号 */
@@ -313,7 +314,8 @@ export function layoutMindMap(
     const textByNode = new Map<string, string[]>()
     const tree = buildMindMapTreeData(root, styles, (node, style, depth) => {
         const size = measure(node, style, depth)
-        textByNode.set(node.id, size.lines)
+        // 绑定节点没有文字：标题条占位，否则盒子会按零行塌陷
+        textByNode.set(node.id, node.nodeId ? [node.text] : size.lines)
         return size
     })
     const run = (kind: MindMapLayoutMeta) => treeLayouts[kind.g6Type]?.(tree, buildTreeLayoutOptions(kind, root))

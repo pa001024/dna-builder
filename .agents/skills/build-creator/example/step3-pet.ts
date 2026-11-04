@@ -19,7 +19,7 @@ if (!spec.pets?.length) {
     }
 }
 
-const petId = spec.pets?.length ? petCandidates(spec, patch, 1).best[0]?.petId ?? 0 : spec.base.petId ?? 0
+const petId = spec.pets?.length ? (petCandidates(spec, patch, 1).best[0]?.petId ?? 0) : (spec.base.petId ?? 0)
 const { traits, v } = traitGreedy(spec, { ...patch, petId })
 console.log(`\n=== 潜质贪心（魔灵 ${petId}）===\n最终 ${亿(v)} 亿`)
 console.log(`traits = ${JSON.stringify(traits)}   ← 槽位存 [基础潜质 id(bid), 等级]，4 槽互不相同`)

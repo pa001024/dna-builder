@@ -26,7 +26,9 @@ function createNodeMeasurer(styles: Map<string, MindMapEffectiveStyle>, measure:
         if (cached) return cached
         const style = styles.get(node.id) ?? FALLBACK_STYLE
         const size = measure(node, style, depth)
-        const measured: MeasuredMindNode = { style, lines: size.lines, width: size.width, height: size.height }
+        // 绑定节点没有文字：用标题条占位，避免按零行渲染时高度塌陷
+        const lines = node.nodeId ? [node.text] : size.lines
+        const measured: MeasuredMindNode = { style, lines, width: size.width, height: size.height }
         cache.set(node.id, measured)
         return measured
     }

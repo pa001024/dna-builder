@@ -24,6 +24,10 @@ const props = withDefaults(
         slotIndex?: number
         incomeMode?: "replace" | "append"
         title?: string
+        /** 中枢（光环）选择：候选项已由调用方按中枢口径过滤，跳过普通槽位的兼容性与收益计算 */
+        auraOnly?: boolean
+        /** 当前已装备的中枢 id：非 0 时在弹窗顶部提供卸载入口 */
+        equippedAura?: number
     }>(),
     { slotIndex: 0, incomeMode: "replace" }
 )
@@ -42,7 +46,7 @@ let workerRequestId = 0
 
 /** 与构筑页一致的可装备口径：槽位兼容、同系列互斥、库存数量 */
 const equipableOptions = computed(() => {
-    if (!props.charBuild || !props.slotType) return props.modOptions
+    if (!props.charBuild || !props.slotType || props.auraOnly) return props.modOptions
     const key = RModTypeMap[props.slotType as keyof typeof RModTypeMap]
     const paired = props.modOptions.map(option => ({
         option,
@@ -160,6 +164,12 @@ function pick(option: ModPickerOption) {
 
 const dialogTitle = computed(() => props.title ?? `${t("char-build.select_mod_slot")} ${props.slotIndex + 1}`)
 
+/** 卸载当前中枢：作为一次选择事件上报 0，与普通槽位的移除口径一致 */
+function clearAura() {
+    emit("select", { value: 0, label: "", type: "角色", quality: "" })
+    close()
+}
+
 const propertyOptions = ["攻击", "生命", "防御", "护盾", "威力", "耐久", "范围", "效益", "增伤"].map(prop => ({
     label: prop,
     value: prop,
@@ -172,6 +182,15 @@ const propertyOptions = ["攻击", "生命", "防御", "护盾", "威力", "耐�
             <div class="modal-box max-w-11/12 h-11/12 relative">
                 <SectionHeader number="01" kicker="MOD" :title="dialogTitle" no-animate compact>
                     <template #trailing>
+                        <button
+                            v-if="auraOnly && equippedAura"
+                            class="btn btn-ghost btn-sm gap-1 text-base-content/60"
+                            :title="$t('common.delete')"
+                            @click="clearAura"
+                        >
+                            <Icon icon="ri:delete-bin-line" class="size-4" />
+                            {{ $t("common.delete") }}
+                        </button>
                         <button class="btn btn-ghost btn-sm btn-square" @click="close">
                             <Icon bold icon="codicon:chrome-close" />
                         </button>

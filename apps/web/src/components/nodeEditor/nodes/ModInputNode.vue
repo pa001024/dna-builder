@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import type { ModSlotType, ModVariant } from "@/composables/useCharSettings"
-import { LeveledMod, LeveledModHelper, type ModTypeKey, modData } from "@/data"
+import { LeveledMod, LeveledModHelper, type ModTypeKey, ModTypeMap, modData } from "@/data"
 import { getModBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
 import { useNodeEditorStore } from "@/store/nodeEditor"
@@ -89,11 +89,13 @@ const activeAuraMod = computed(() => {
 const tabs = computed(() =>
     MOD_TABS.map(name => ({
         name,
+        // 未接入构筑时没有角色 / 武器信息，只有角色槽可编辑，且不按属性过滤候选
         disabled:
-            !charBuild.value ||
-            (name === "近战" && charBuild.value.meleeWeapon.isEmpty) ||
-            (name === "远程" && charBuild.value.rangedWeapon.isEmpty) ||
-            (name === "同律" && (!charBuild.value.skillWeapon || Boolean(charBuild.value.skillWeapon.inherit))),
+            name !== "角色" &&
+            (!charBuild.value ||
+                (name === "近战" && charBuild.value.meleeWeapon.isEmpty) ||
+                (name === "远程" && charBuild.value.rangedWeapon.isEmpty) ||
+                (name === "同律" && (!charBuild.value.skillWeapon || Boolean(charBuild.value.skillWeapon.inherit))))
     }))
 )
 
@@ -126,17 +128,30 @@ const modOptions = computed(() => {
 
 /**
  * 按槽位过滤 MOD 选项：与构筑页共用 `CharBuild.isModSlotCompatible` 口径。
+ * 未接入构筑（节点未连线）时没有角色，只按 MOD 类型 / 系列过滤，不限制属性与限定。
  * @param key 槽位类型
  * @returns 可选 MOD
  */
 function filterModOptionsBySlot(key: ModTypeKey) {
     const rawById = new Map(modData.map(mod => [mod.id, mod]))
+    const build = charBuild.value
     return modOptions.value.filter(option => {
         const raw = rawById.get(option.value)
         if (!raw) return false
-        if (key === "charMods" && raw.系列 === "羽蛇") return charBuild.value?.isAuraCompatible(raw) ?? false
-        return charBuild.value?.isModSlotCompatible(raw, key) ?? false
+        if (raw.系列 === "羽蛇") return key === "charMods" && (!build || build.isAuraCompatible(raw))
+        if (!build) return isModTypeCompatible(raw.类型, key)
+        return build.isModSlotCompatible(raw, key)
     })
+}
+
+/**
+ * 未接入构筑时按 MOD 类型判定槽位兼容（与 isModSlotCompatible 的类型分支同口径）。
+ * @param modType MOD 的 `类型` 字段
+ * @param key 槽位类型
+ * @returns 是否可装入该槽位
+ */
+function isModTypeCompatible(modType: string, key: ModTypeKey) {
+    return key === "skillMods" ? modType.startsWith("同律") : modType === ModTypeMap[key]
 }
 
 /** 写回节点数据并触发下游重算 */
@@ -232,14 +247,13 @@ const modCost = computed(() => {
             </div>
 
             <ModEditer
-                v-if="charBuild"
                 :key="activeTab"
                 :mods="mods"
                 :mod-options="filterModOptionsBySlot(SLOT_TYPE_KEYS[activeTab])"
                 :char-build="charBuild"
                 :aura-mod="activeAuraMod"
                 :type="activeTab"
-                :polset="charBuild.getModCostTransfer(activeTab)"
+                :polset="charBuild?.getModCostTransfer(activeTab) ?? []"
                 :variant-index="modSettings.modVariantIndex"
                 :variant-count="variantCount"
                 @remove-mod="removeMod"
@@ -251,7 +265,6 @@ const modCost = computed(() => {
                 @variant-add="addVariant"
                 @variant-remove="removeVariant"
             />
-            <div v-else class="text-[10px] text-yellow-500">{{ $t("node-editor.astExpression.missingCore") }}</div>
         </div>
     </BaseNode>
 </template>

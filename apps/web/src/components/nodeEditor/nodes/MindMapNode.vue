@@ -2,12 +2,36 @@
 import type { TreeData } from "@antv/g6"
 import { CompactBoxLayout, DendrogramLayout, IndentedLayout, MindmapLayout } from "@antv/g6"
 import { useVueFlow } from "@vue-flow/core"
-import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
+import { nanoid } from "nanoid"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
-import { DEFAULT_FONT_SIZE, MIND_MAP_COLORS, MIND_MAP_LAYOUTS, type MindMapNode, measureMindMapText, readLayoutMeta, resolveMindMapStyles } from "@/utils/mindMap"
-import { buildMindMapEdgePath, layoutMindMap, MIND_MAP_BOX, type MindMapLayoutNode, type MindMapLayoutResult, type MindMapTreeLayoutOptions } from "@/utils/mindMapLayout"
+import { NodeType } from "@/store/nodeEditorTypes"
+import { detectImageFormat, encodeImageBytes, imageMimeForFormat } from "@/utils/imagePack"
+import {
+    DEFAULT_FONT_SIZE,
+    MIND_MAP_COLORS,
+    MIND_MAP_LAYOUTS,
+    MIND_MAP_TOOLBAR_HEIGHT,
+    type MindMapEffectiveStyle,
+    type MindMapNode,
+    measureMindMapText,
+    readLayoutMeta,
+    resolveMindMapStyles,
+    walkMindMap,
+    walkVisibleMindMap,
+} from "@/utils/mindMap"
+import {
+    buildMindMapEdgePath,
+    createBoundNodeMeasure,
+    layoutMindMap,
+    MIND_MAP_BOX,
+    type MindMapLayoutNode,
+    type MindMapLayoutResult,
+    type MindMapTreeLayoutOptions,
+} from "@/utils/mindMapLayout"
 import MindMapToolbar from "../mindmap/MindMapToolbar.vue"
 import MindNodeBox from "../mindmap/MindNodeBox.vue"
+import { PALETTE_ITEMS, paletteNodeDefaults } from "../types"
 
 const props = defineProps<{
     id: string
@@ -40,6 +64,61 @@ const dropTargetId = ref<string | null>(null)
 /** 指针是否停在本节点上：键盘快捷键据此判断作用对象 */
 const hovered = ref(false)
 
+/** 沉浸展开：与角色节点同一口径，隐藏工具栏与外框，导图直接画在画布上 */
+const focusMode = computed(() => props.data.focusMode === true)
+
+function toggleFocus() {
+    store.updateNodeData(props.id, { focusMode: !focusMode.value })
+    // 沉浸查看会去掉工具栏与边框，绑定节点需要按新偏移重排
+    nextTick(() => refreshBoundNodes())
+}
+
+/** 主题 id → 绑定的画布节点 id（只看可见主题，折叠分支里的主题不参与渲染） */
+const boundTopics = computed(() => {
+    const topics = new Map<string, string>()
+    walkVisibleMindMap(root.value, node => {
+        if (node.nodeId) topics.set(node.id, node.nodeId)
+    })
+    return topics
+})
+
+/** 绑定的画布节点 id → 主题 id（拖拽时反查主题） */
+const boundTopicIds = computed(() => {
+    const ids = new Map<string, string>()
+    for (const [topicId, nodeId] of boundTopics.value) ids.set(nodeId, topicId)
+    return ids
+})
+
+/** 绑定节点的实测尺寸（DOM 测量，键为画布节点 id） */
+const boundSizes = ref(new Map<string, { width: number; height: number }>())
+
+/** 绑定节点的实测尺寸：尚未测量时用兜底尺寸 */
+function boundNodeSize(nodeId: string): { width: number; height: number } | undefined {
+    return boundSizes.value.get(nodeId)
+}
+
+/** 测量绑定节点的真实尺寸，尺寸变化时写回响应式表触发重排 */
+function measureBoundNodes() {
+    let changed = false
+    const next = new Map<string, { width: number; height: number }>()
+    for (const nodeId of boundTopics.value.values()) {
+        const element = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${nodeId}"]`)
+        const width = element?.offsetWidth ?? 0
+        const height = element?.offsetHeight ?? 0
+        if (width <= 0 || height <= 0) continue
+        next.set(nodeId, { width, height })
+        const previous = boundSizes.value.get(nodeId)
+        if (!previous || previous.width !== width || previous.height !== height) changed = true
+    }
+    // 折叠隐藏的节点保留上次尺寸：展开首帧就能按真实大小排版，不必等重新测量
+    walkMindMap(root.value, topic => {
+        if (!topic.nodeId || next.has(topic.nodeId)) return
+        const previous = boundSizes.value.get(topic.nodeId)
+        if (previous) next.set(topic.nodeId, previous)
+    })
+    if (changed || next.size !== boundSizes.value.size) boundSizes.value = next
+}
+
 /**
  * 主题盒子测量：文字按最大宽度折行后加上盒子内边距与边框，保证量出的尺寸与 CSS 渲染一致。
  * 根主题是加粗文本，需按粗体测宽，否则文字会被裁掉。
@@ -50,17 +129,32 @@ const hovered = ref(false)
  */
 function measureBox(node: MindMapNode, style: { fontSize: number }, depth: number) {
     const text = measureMindMapText(node.text, style.fontSize, MIND_MAP_BOX.maxTextWidth, depth === 0)
-    return {
-        lines: text.lines,
-        width: Math.max(MIND_MAP_BOX.minWidth, text.width + MIND_MAP_BOX.paddingX * 2 + 2),
-        height: text.height + MIND_MAP_BOX.paddingY * 2 + 2,
-    }
+    return { lines: text.lines, width: Math.max(MIND_MAP_BOX.minWidth, text.width + MIND_MAP_BOX.paddingX * 2 + 2), height: text.height + MIND_MAP_BOX.paddingY * 2 + 2 }
 }
+
+/**
+ * 盒子测量：绑定主题用真实节点尺寸，普通主题按文字折行测量。
+ * @param node 主题
+ * @param style 生效样式
+ * @param depth 层级
+ */
+function measureLayoutBox(node: MindMapNode, style: { fontSize: number }, depth: number) {
+    if (node.nodeId) return boundMeasure(node, style as MindMapEffectiveStyle, depth)
+    return measureBox(node, style, depth)
+}
+
+/** 绑定节点的尺寸测量：真实节点由 DOM 决定尺寸 */
+const boundMeasure = createBoundNodeMeasure(boundNodeSize)
 
 /** 排版结果：节点位置 + 连线路径 */
 const layout = computed<MindMapLayoutResult>(() => {
     const styles = resolveMindMapStyles(root.value, baseFontSize.value, baseColor.value)
-    return layoutMindMap(root.value, layoutMeta.value, styles, measureBox, TREE_LAYOUTS)
+    return layoutMindMap(root.value, layoutMeta.value, styles, measureLayoutBox, TREE_LAYOUTS)
+})
+
+/** 绑定节点尺寸测量完成后再排一次版，首帧用兜底尺寸保证布局完整 */
+watch(boundSizes, () => {
+    if (boundTopics.value.size > 0) requestAnimationFrame(() => syncBoundNodes())
 })
 
 /** 画布尺寸 = 内容包围盒 + 内边距；下限与工具栏同宽，避免小图被工具栏撑出空白 */
@@ -83,6 +177,9 @@ const canvasSize = computed(() => ({
     width: Math.max(contentSize.value.width, readCanvasExtent("canvasWidth")),
     height: Math.max(contentSize.value.height, readCanvasExtent("canvasHeight")),
 }))
+
+/** 实际渲染的画布尺寸：沉浸查看时贴合内容，不保留手动撑出的空白 */
+const renderSize = computed(() => (focusMode.value ? contentSize.value : canvasSize.value))
 
 /** 右下角手柄拖动缩放：实时写回节点数据，松手时记一条历史 */
 let resizeStart: { x: number; y: number; width: number; height: number; changed: boolean } | null = null
@@ -126,11 +223,20 @@ const nodes = computed(() =>
 /** 主题 id → 布局节点 */
 const nodeMap = computed(() => new Map(nodes.value.map(node => [node.id, node])))
 
-/** 主题 id → 是否有子级 / 是否折叠 */
+/** 子树节点总数（不含自身）：折叠圆点上的数字要反映被隐藏的全部主题 */
+function countDescendants(node: MindMapNode): number {
+    return node.children.reduce((total, child) => total + 1 + countDescendants(child), 0)
+}
+
+/** 主题 id → 是否有子级 / 是否折叠 / 被折叠隐藏的主题数 */
 const nodeFlags = computed(() => {
-    const flags = new Map<string, { hasChildren: boolean; collapsed: boolean }>()
+    const flags = new Map<string, { hasChildren: boolean; collapsed: boolean; childCount: number }>()
     const visit = (node: MindMapNode) => {
-        flags.set(node.id, { hasChildren: node.children.length > 0, collapsed: node.collapsed === true })
+        flags.set(node.id, {
+            hasChildren: node.children.length > 0,
+            collapsed: node.collapsed === true,
+            childCount: countDescendants(node),
+        })
         node.children.forEach(visit)
     }
     visit(root.value)
@@ -189,6 +295,162 @@ function commitTree(description: string, mutate: (rootNode: MindMapNode) => void
     mutate(root.value)
     store.commitHistory(description)
 }
+
+/** 画布内边距偏移：nodes 已把内容平移到画布内边距处，这里直接取画布坐标 */
+const offsetOf = (node: MindMapLayoutNode) => ({ x: node.x, y: node.y })
+
+/** 导图节点外框占位：边框 1px + 工具栏（沉浸查看两者都没有） */
+const frameOffset = computed(() => (focusMode.value ? { x: 0, y: 0 } : { x: 1, y: MIND_MAP_TOOLBAR_HEIGHT + 1 }))
+
+/**
+ * 把绑定节点的位置同步到导图布局：节点用画布绝对坐标，
+ * 由导图节点位置 + 外框 / 工具栏 / 内边距 + 主题盒子位置算出，标题条占据盒子顶部。
+ */
+function syncBoundNodes() {
+    const boundIds = new Set<string>()
+    const own = store.nodes.find(node => node.id === props.id)?.position ?? { x: 0, y: 0 }
+    // 折叠分支里的绑定主题：主题不可见，但节点仍属于导图，需要隐藏而不是解绑
+    const hiddenBound = new Set<string>()
+    walkMindMap(root.value, topic => {
+        if (topic.nodeId) hiddenBound.add(topic.nodeId)
+    })
+    for (const [topicId, nodeId] of boundTopics.value) {
+        const layoutNode = nodeMap.value.get(topicId)
+        const target = store.nodes.find(item => item.id === nodeId)
+        if (!layoutNode || !target) continue
+        const offset = offsetOf(layoutNode)
+        const position = {
+            x: own.x + frameOffset.value.x + offset.x,
+            y: own.y + frameOffset.value.y + offset.y,
+        }
+        boundIds.add(nodeId)
+        if (target.position.x !== position.x || target.position.y !== position.y) target.position = position
+    }
+    store.markBoundNodes([...boundIds])
+    // 展开后节点才重新挂载，需要等 DOM 出现后再测量一次真实尺寸
+    let revealed = false
+    for (const nodeId of boundIds) {
+        if (store.setBoundNodeHidden(nodeId, false)) revealed = true
+    }
+    if (revealed) requestAnimationFrame(() => refreshBoundNodes())
+    // 解绑的节点恢复可拖动；位置保持不动，用户可继续自由摆放
+    for (const node of store.nodes) {
+        if (node.draggable === false && !boundIds.has(node.id) && !hiddenBound.has(node.id)) store.releaseBoundNode(node.id)
+    }
+    // 折叠的绑定节点保持绑定并隐藏，展开后重新跟随布局
+    for (const nodeId of hiddenBound) {
+        if (boundIds.has(nodeId)) continue
+        store.markBoundNodes([nodeId])
+        store.setBoundNodeHidden(nodeId, true)
+    }
+}
+
+/** 绑定节点的尺寸观察器：沉浸切换 / 折叠 / 内容变化都会改变真实节点尺寸，需要重排 */
+let boundResizeObserver: ResizeObserver | null = null
+const observedBoundElements = new Map<Element, string>()
+
+/** 只观察当前可见的绑定节点，节点解绑或被折叠时停止观察 */
+function observeBoundNodes() {
+    if (typeof ResizeObserver === "undefined") return
+    if (!boundResizeObserver) {
+        boundResizeObserver = new ResizeObserver(() => refreshBoundNodes())
+    }
+    const live = new Map<Element, string>()
+    for (const nodeId of boundTopics.value.values()) {
+        const element = document.querySelector(`.vue-flow__node[data-id="${nodeId}"]`)
+        if (element) live.set(element, nodeId)
+    }
+    for (const element of observedBoundElements.keys()) {
+        if (!live.has(element)) boundResizeObserver.unobserve(element)
+    }
+    for (const element of live.keys()) {
+        if (!observedBoundElements.has(element)) boundResizeObserver.observe(element)
+    }
+    observedBoundElements.clear()
+    for (const [element, nodeId] of live) observedBoundElements.set(element, nodeId)
+}
+
+/**
+ * 全量同步：测量真实节点尺寸 → 重排布局 → 写回位置。
+ * 尺寸变化与布局变化都经由这里，避免两个方向互相触发抖动。
+ */
+function refreshBoundNodes() {
+    measureBoundNodes()
+    observeBoundNodes()
+    syncBoundNodes()
+    requestAnimationFrame(() => updateNodeInternals([props.id]))
+}
+
+/**
+ * 给主题插入一个新节点并绑定。
+ * @param topicId 主题 id
+ * @param type 节点类型
+ * @param data 节点数据（会与调色板默认值合并）
+ */
+function insertNodeAsTopic(topicId: string, type: string, data: Record<string, any> = {}) {
+    const item = PALETTE_ITEMS.find(entry => entry.type === type)
+    const label = data.label ?? item?.label ?? String(type)
+    const nodeId = nanoid()
+    store.beginHistoryBatch()
+    store.addNode({
+        id: nodeId,
+        type,
+        position: { x: 0, y: 0 },
+        data: { label, ...paletteNodeDefaults(type), ...data },
+    })
+    commitTree("绑定节点", rootNode => {
+        const topic = findNode(rootNode, topicId)
+        if (!topic) return
+        topic.nodeId = nodeId
+        // 占位主题改用节点标题，避免标题条写着“新主题”
+        if (!topic.text.trim() || topic.text === "新主题") topic.text = label
+    })
+    store.endHistoryBatch("绑定节点")
+    selectOnly(topicId)
+    nextTick(() => {
+        refreshBoundNodes()
+        // 节点首次挂载后尺寸才有值，再同步一次把布局对齐真实尺寸
+        requestAnimationFrame(() => refreshBoundNodes())
+    })
+}
+
+/**
+ * 把画布节点拖入主题：在落点主题下新建子主题并绑定，
+ * 与导图内部拖拽一致——只增加子级，不改动落点主题本身。
+ * @param topicId 落点主题 id
+ * @param nodeId 画布节点 id
+ */
+function bindNodeToTopic(topicId: string, nodeId: string) {
+    const node = store.nodes.find(item => item.id === nodeId)
+    const topic = findNode(root.value, topicId)
+    if (!node || !topic) return
+    const label =
+        (typeof node.data?.label === "string" && node.data.label.trim()) ||
+        PALETTE_ITEMS.find(item => item.type === node.type)?.label ||
+        "新主题"
+    const childId = nanoid(8)
+    commitTree("绑定节点", rootNode => {
+        const target = findNode(rootNode, topicId)
+        if (!target) return
+        delete target.collapsed
+        target.children.push({ id: childId, text: label, nodeId, children: [] })
+    })
+    selectOnly(childId)
+    nextTick(() => {
+        refreshBoundNodes()
+        requestAnimationFrame(() => refreshBoundNodes())
+    })
+}
+
+/** 解绑主题：节点归还画布，主题退回纯文字 */
+function unbindTopic(topicId: string) {
+    commitTree("解除绑定", rootNode => {
+        const topic = findNode(rootNode, topicId)
+        if (topic) delete topic.nodeId
+    })
+    nextTick(() => refreshBoundNodes())
+}
+
 /** 选中单个主题（清空其它选择） */
 function selectOnly(id: string) {
     selectedIds.value = new Set([id])
@@ -211,13 +473,19 @@ function handleNodeDoubleClick(id: string) {
     editingId.value = id
 }
 
-/** 提交文字编辑 */
+/**
+ * 提交文字编辑；绑定主题的标题同步到真实节点，避免两处标题不一致。
+ * @param id 主题 id
+ * @param text 新文字
+ */
 function commitText(id: string, text: string) {
     editingId.value = null
+    const nodeId = boundTopics.value.get(id)
     commitTree("编辑主题", rootNode => {
         const target = findNode(rootNode, id)
         if (target) target.text = text
     })
+    if (nodeId) store.updateNodeData(nodeId, { label: text })
 }
 
 /** 取消编辑 */
@@ -297,6 +565,7 @@ function findParent(node: MindMapNode, id: string): { parent: MindMapNode; node:
 function removeSelected() {
     const ids = [...activeIds.value].filter(id => id !== root.value.id)
     if (ids.length === 0) return
+    // 被删主题绑定的节点留在画布原位，只解除绑定（refreshBoundNodes 会恢复可拖动）
     commitTree("删除主题", rootNode => {
         ids.forEach(id => {
             const located = findParent(rootNode, id)
@@ -305,6 +574,7 @@ function removeSelected() {
     })
     selectedIds.value = new Set()
     editingId.value = null
+    nextTick(() => refreshBoundNodes())
 }
 
 /** 生成新主题 id */
@@ -348,22 +618,35 @@ function changeLayout(kind: string) {
     if (props.data.layout === kind) return
     props.data.layout = kind
     store.commitHistory("切换布局")
+    nextTick(() => refreshBoundNodes())
 }
 
-/** 主题树变化后通知 Vue Flow 重新测量节点尺寸 */
+/** 主题树 / 布局变化后通知 Vue Flow 重新测量节点尺寸，并让绑定节点跟随新布局 */
 watch(
-    () => [canvasSize.value.width, canvasSize.value.height],
-    () => requestAnimationFrame(() => updateNodeInternals([props.id]))
+    () => [renderSize.value.width, renderSize.value.height, layout.value],
+    () => {
+        requestAnimationFrame(() => {
+            updateNodeInternals([props.id])
+            refreshBoundNodes()
+        })
+    }
 )
 
 /** 框选矩形（画布坐标系，仅拖动超过阈值后出现） */
 const selectionRect = ref<{ x: number; y: number; width: number; height: number } | null>(null)
 
+/** 指针是否落在本导图绑定的真实节点上（这类节点自己接管事件，导图不接管框选） */
+function isBoundNodeTarget(target: HTMLElement | null): boolean {
+    const host = target?.closest<HTMLElement>(".vue-flow__node")
+    return Boolean(host?.dataset.id && host.dataset.id !== props.id)
+}
+
 /** 画布空白处按下：开始框选 */
 function handleCanvasPointerDown(event: PointerEvent) {
     if (event.button !== 0 || editingId.value) return
-    // 点在主题上时由主题自己接管
+    // 点在主题上时由主题自己接管；点在绑定主题的真实节点上时交给节点本身
     if ((event.target as HTMLElement).closest(".mind-node")) return
+    if (isBoundNodeTarget(event.target as HTMLElement | null)) return
     event.preventDefault()
     const start = canvasPoint(event)
     let moved = false
@@ -390,7 +673,7 @@ function handleCanvasPointerDown(event: PointerEvent) {
             selectedIds.value = new Set()
             return
         }
-        const hit = nodes.value.filter(node => intersects(rect, node)).map(node => node.id)
+        const hit = nodes.value.filter(node => !boundTopics.value.has(node.id) && intersects(rect, node)).map(node => node.id)
         selectedIds.value = new Set(hit)
     }
     window.addEventListener("pointermove", onMove)
@@ -414,26 +697,216 @@ function intersects(rect: { x: number; y: number; width: number; height: number 
 
 // 拖拽：拖整枝 + 落到主题上改父子。位置始终由布局算，拖动只表达结构关系。
 // 画布内的一切指针操作都归本导图（Vue Flow 只在标题栏可拖整块），所以这里不需要 stopPropagation。
-let dragState: { id: string; startX: number; startY: number; moved: boolean } | null = null
+let dragState: {
+    id: string
+    startX: number
+    startY: number
+    moved: boolean
+    fromNode: boolean
+    /** 从绑定卡片发起时的画布节点 id */
+    nodeId?: string
+    /** 指针已拖出导图：节点解绑并跟随指针自由移动 */
+    detached?: boolean
+    /** 解绑瞬间指针相对节点左上角的偏移（画布坐标） */
+    grab?: { x: number; y: number }
+} | null = null
+
+/** 绑定节点上不参与主题拖拽的区域：表单控件、链接、连线端口、内层导图 */
+const DRAG_IGNORE_SELECTOR = "input, textarea, select, a[href], [contenteditable='true'], .vue-flow__handle, .mind-canvas"
+/** 非沉浸模式下的额外禁拖区域：保留按钮与 nodrag 控件的原生交互（沉浸模式没有标题栏，整卡都要能拖） */
+const DRAG_IGNORE_CONTROL_SELECTOR = `${DRAG_IGNORE_SELECTOR}, button, .nodrag`
 
 /**
  * 按下主题开始拖拽（编辑中不拖）。
+ * 绑定主题拖的是它自己的真实节点（不拖整枝），其余主题照旧拖整枝。
  * @param event 指针事件
  * @param id 主题 id
+ * @param fromNode 是否从绑定节点卡片发起
+ * @param nodeId 绑定卡片对应的画布节点 id
  */
-function handlePointerDown(event: PointerEvent, id: string) {
+function handlePointerDown(event: PointerEvent, id: string, fromNode = false, nodeId?: string) {
     if (event.button !== 0 || editingId.value) return
     event.preventDefault()
-    dragState = { id, startX: event.clientX, startY: event.clientY, moved: false }
+    let grab: { x: number; y: number } | undefined
+    if (fromNode && nodeId) {
+        // 卡片从一开始就跟随指针，拖出画布时不会因为位置滞后而错位
+        const node = store.nodes.find(item => item.id === nodeId)
+        if (node) {
+            const flow = clientToFlow(event.clientX, event.clientY)
+            grab = { x: flow.x - node.position.x, y: flow.y - node.position.y }
+        }
+    }
+    dragState = { id, startX: event.clientX, startY: event.clientY, moved: false, fromNode, nodeId, grab }
     window.addEventListener("pointermove", handlePointerMove)
     window.addEventListener("pointerup", handlePointerUp)
 }
 
-/** 拖动中：命中其它主题时高亮落点 */
+/** 拖过卡片后吞掉随后的一次 click，避免拖动结束顺带触发卡片的点击行为（如打开选择弹窗） */
+function swallowNextClick() {
+    const swallow = (event: MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
+        window.removeEventListener("click", swallow, true)
+    }
+    window.addEventListener("click", swallow, true)
+    setTimeout(() => window.removeEventListener("click", swallow, true), 300)
+}
+
+/**
+ * 绑定节点渲染在导图之外的 Vue Flow 节点里，捕获阶段把按在卡片上的指针事件接管成主题拖拽：
+ * 拖动卡片等价于拖动对应主题（落点改父子），同时 preventDefault 抑制画布平移。
+ * @param event 指针事件
+ */
+function handleBoundNodePointerDown(event: PointerEvent) {
+    if (event.button !== 0 || editingId.value) return
+    const target = event.target as HTMLElement | null
+    if (!target) return
+    const host = target.closest<HTMLElement>(".vue-flow__node")
+    const nodeId = host?.dataset.id
+    const topicId = nodeId ? boundTopicIds.value.get(nodeId) : undefined
+    if (!topicId) return
+    const node = store.nodes.find(item => item.id === nodeId)
+    if (node?.data?.locked === true) return
+    // 沉浸模式没有标题栏，整块内容都可能被标成 nodrag 或包在 button 里，只保留表单控件的原生交互
+    const focusMode = node?.data?.focusMode === true
+    if (target.closest(focusMode ? DRAG_IGNORE_SELECTOR : DRAG_IGNORE_CONTROL_SELECTOR)) return
+    handlePointerDown(event, topicId, true, nodeId)
+}
+
+/** 从画布拖动普通节点到本导图主题上的落点跟踪 */
+let externalDrag: {
+    nodeId: string
+    startX: number
+    startY: number
+    moved: boolean
+    /** 沉浸模式内容整块是 nodrag，Vue Flow 不会拖，由这里接管移动 */
+    manual: boolean
+    grab?: { x: number; y: number }
+} | null = null
+
+/**
+ * 画布普通节点按下：跟踪它是否会被拖到本导图的主题上（落点以指针位置判定）。
+ * 普通节点交给 Vue Flow 拖动；沉浸模式卡片自己接管移动。
+ * @param event 指针事件
+ */
+function handleExternalNodePointerDown(event: PointerEvent) {
+    if (event.button !== 0 || editingId.value) return
+    const target = event.target as HTMLElement | null
+    if (!target) return
+    const host = target.closest<HTMLElement>(".vue-flow__node")
+    const nodeId = host?.dataset.id
+    if (!nodeId || nodeId === props.id || boundTopicIds.value.has(nodeId)) return
+    const node = store.nodes.find(item => item.id === nodeId)
+    if (!node || node.draggable === false || node.data?.locked === true) return
+    // 沉浸模式没有标题栏，整块内容都可能被标成 nodrag 或包在 button 里，只保留表单控件的原生交互
+    const focusMode = node.data?.focusMode === true
+    if (target.closest(focusMode ? DRAG_IGNORE_SELECTOR : DRAG_IGNORE_CONTROL_SELECTOR)) return
+    const manual = Boolean(target.closest(".nodrag"))
+    let grab: { x: number; y: number } | undefined
+    if (manual) {
+        // 抑制 mousedown：挡掉画布平移与 Vue Flow 拖动，改为自己移动节点
+        event.preventDefault()
+        const flow = clientToFlow(event.clientX, event.clientY)
+        grab = { x: flow.x - node.position.x, y: flow.y - node.position.y }
+    }
+    externalDrag = { nodeId, startX: event.clientX, startY: event.clientY, moved: false, manual, grab }
+    window.addEventListener("pointermove", handleExternalNodePointerMove)
+    window.addEventListener("pointerup", handleExternalNodePointerUp)
+}
+
+/** 拖动普通节点中：指针落在主题上时显示虚线落点；接管移动的节点实时跟随指针 */
+function handleExternalNodePointerMove(event: PointerEvent) {
+    const state = externalDrag
+    if (!state) return
+    if (!state.moved && Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 4) state.moved = true
+    if (!state.moved) return
+    if (state.manual && state.grab) {
+        const node = store.nodes.find(item => item.id === state.nodeId)
+        if (node) {
+            const flow = clientToFlow(event.clientX, event.clientY)
+            node.position = { x: flow.x - state.grab.x, y: flow.y - state.grab.y }
+        }
+    }
+    dropTargetId.value = findTopicAtClientPoint({ x: event.clientX, y: event.clientY })
+}
+
+/** 松开普通节点：落在主题上则作为子主题绑定，否则保持原样（接管移动时提交一次历史） */
+function handleExternalNodePointerUp() {
+    const state = externalDrag
+    const target = dropTargetId.value
+    externalDrag = null
+    dropTargetId.value = null
+    window.removeEventListener("pointermove", handleExternalNodePointerMove)
+    window.removeEventListener("pointerup", handleExternalNodePointerUp)
+    if (!state || !state.moved) return
+    if (state.manual) swallowNextClick()
+    if (target) {
+        bindNodeToTopic(target, state.nodeId)
+        return
+    }
+    if (state.manual) store.commitHistory("移动节点")
+}
+
+/** 屏幕坐标 → 画布坐标（node.position 的坐标系） */
+function clientToFlow(clientX: number, clientY: number) {
+    const pane = document.querySelector<HTMLElement>(".vue-flow__transformationpane")
+    const rect = pane?.getBoundingClientRect()
+    if (!pane || !rect) return { x: 0, y: 0 }
+    const zoom = new DOMMatrix(getComputedStyle(pane).transform).a || 1
+    return { x: (clientX - rect.left) / zoom, y: (clientY - rect.top) / zoom }
+}
+
+/** 指针是否已经完全离开导图节点（含工具栏与外框） */
+function isOutsideMindMap(event: PointerEvent) {
+    const host = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${props.id}"]`)
+    const rect = host?.getBoundingClientRect()
+    if (!rect) return false
+    return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom
+}
+
+/**
+ * 绑定卡片拖出导图：立即解绑，节点转为普通节点（位置已在跟随指针）。
+ * 历史在松手时统一提交，撤销可以一次还原绑定与位置。
+ * @param state 拖拽状态
+ */
+function detachBoundNode(state: NonNullable<typeof dragState>) {
+    const topic = findNode(root.value, state.id)
+    if (!topic) return
+    if (state.id === root.value.id) {
+        // 根主题不能删除，退回普通文字主题
+        delete topic.nodeId
+    } else {
+        // 其余绑定主题随节点一起移除，用户给它加的子主题上移一级
+        const located = findParent(root.value, state.id)
+        if (located) {
+            const index = located.parent.children.indexOf(located.node)
+            located.parent.children.splice(index, 1, ...located.node.children)
+        }
+    }
+    state.detached = true
+    dropTargetId.value = null
+}
+
+/** 让卡片节点跟随指针移动 */
+function moveCardNode(state: NonNullable<typeof dragState>, event: PointerEvent) {
+    const node = state.nodeId ? store.nodes.find(item => item.id === state.nodeId) : undefined
+    if (!node || !state.grab) return
+    const flow = clientToFlow(event.clientX, event.clientY)
+    node.position = { x: flow.x - state.grab.x, y: flow.y - state.grab.y }
+}
+
+/** 拖动中：卡片实时跟随指针，命中主题时高亮落点；拖出导图则解绑成普通节点 */
 function handlePointerMove(event: PointerEvent) {
-    if (!dragState) return
-    if (Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY) > 4) dragState.moved = true
-    if (!dragState.moved) return
+    const state = dragState
+    if (!state) return
+    if (!state.moved && Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 4) state.moved = true
+    if (!state.moved) return
+    if (state.fromNode && state.nodeId) {
+        moveCardNode(state, event)
+        if (!state.detached && isOutsideMindMap(event)) detachBoundNode(state)
+        dropTargetId.value = findTopicAtClientPoint({ x: event.clientX, y: event.clientY })
+        return
+    }
     dropTargetId.value = findDropTarget(event)
 }
 
@@ -445,7 +918,21 @@ function handlePointerUp() {
     dropTargetId.value = null
     window.removeEventListener("pointermove", handlePointerMove)
     window.removeEventListener("pointerup", handlePointerUp)
-    if (!state || !state.moved || !target) return
+    if (!state) return
+    if (state.moved && state.fromNode) swallowNextClick()
+    if (state.detached) {
+        // 拖出后落在主题上则重新绑定，否则保持普通节点；历史在这里一次提交
+        if (state.moved && target && state.nodeId) bindNodeToTopic(target, state.nodeId)
+        else if (state.moved) store.commitHistory("拖出导图")
+        return
+    }
+    if (!state.moved) return
+    if (!target) {
+        // 没落到主题：卡片回到导图布局位置
+        if (state.fromNode && state.nodeId) refreshBoundNodes()
+        return
+    }
+    if (state.fromNode && state.nodeId) syncBoundNodes()
     const moving = selectedIds.value.has(state.id) ? [...selectedIds.value] : [state.id]
     reparent(moving, target)
 }
@@ -457,6 +944,15 @@ function handlePointerUp() {
  * @returns 命中的主题 id
  */
 function findDropTarget(event: PointerEvent): string | null {
+    return findTopicAtClientPoint({ x: event.clientX, y: event.clientY })
+}
+
+/**
+ * 按屏幕坐标命中主题盒子。
+ * @param point 屏幕坐标
+ * @returns 命中的主题 id
+ */
+function findTopicAtClientPoint(point: { x: number; y: number }): string | null {
     const host = document.querySelector<HTMLElement>(`.vue-flow__node[data-id="${props.id}"]`)
     const canvas = host?.querySelector<HTMLElement>(".mind-canvas")
     if (!host || !canvas) return null
@@ -464,11 +960,16 @@ function findDropTarget(event: PointerEvent): string | null {
     const pane = document.querySelector<HTMLElement>(".vue-flow__transformationpane")
     const matrix = new DOMMatrix(pane ? getComputedStyle(pane).transform : "matrix(1,0,0,1,0,0)")
     const zoom = matrix.a || 1
-    const x = (event.clientX - rect.left) / zoom
-    const y = (event.clientY - rect.top) / zoom
-    // 命中检测必须用偏移后的坐标：nodes 已把内容平移到画布内边距处
+    const x = (point.x - rect.left) / zoom
+    const y = (point.y - rect.top) / zoom
+    // 命中检测必须用偏移后的坐标：nodes 已把内容平移到画布内边距处。
+    // 绑定主题的实际内容由真实节点接管指针事件，只有标题条参与导图内部拖拽
+    const hit = (node: MindMapLayoutNode) => node.x <= x && x <= node.x + node.width && node.y <= y && y <= node.y + node.height
     for (const node of nodes.value) {
-        if (node.x <= x && x <= node.x + node.width && node.y <= y && y <= node.y + node.height) return node.id
+        if (boundTopics.value.has(node.id) && hit(node)) return node.id
+    }
+    for (const node of nodes.value) {
+        if (!boundTopics.value.has(node.id) && hit(node)) return node.id
     }
     return null
 }
@@ -495,6 +996,7 @@ function reparent(sourceIds: string[], targetId: string) {
         })
     })
     selectOnly(movable[0])
+    nextTick(() => refreshBoundNodes())
 }
 
 /** 判断 candidate 是否为 ancestor 的后代 */
@@ -526,6 +1028,14 @@ function handleKeyDown(event: KeyboardEvent) {
     }
     if (editingId.value) return
 
+    // Esc 退出沉浸查看
+    if (event.key === "Escape" && focusMode.value) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        toggleFocus()
+        return
+    }
+
     // 没有选中主题时不接管 Delete，交给外层删除整个导图节点
     if (event.key === "Delete" || event.key === "Backspace") {
         if (selectedIds.value.size === 0) return
@@ -535,8 +1045,8 @@ function handleKeyDown(event: KeyboardEvent) {
         return
     }
 
-    // Tab / Enter：指针停在这张导图上，或内部已有选中主题（点击主题后鼠标可能已移开）
-    if (!hovered.value && selectedIds.value.size === 0) return
+    // Tab / Enter：指针停在这张导图上、处于沉浸查看，或内部已有选中主题（点击主题后鼠标可能已移开）
+    if (!hovered.value && !focusMode.value && selectedIds.value.size === 0) return
     if (event.key === "Tab") {
         event.preventDefault()
         event.stopImmediatePropagation()
@@ -566,10 +1076,51 @@ function handleOutsidePointerDown(event: PointerEvent) {
 }
 
 window.addEventListener("pointerdown", handleOutsidePointerDown, true)
+window.addEventListener("pointerdown", handleBoundNodePointerDown, true)
+window.addEventListener("pointerdown", handleExternalNodePointerDown, true)
+
+/** 指针当前悬停的主题；绑定卡片渲染在导图节点之外，需要单独跟踪才能显示折叠圆点 */
+const hoveredTopicId = ref<string | null>(null)
+
+/**
+ * 跟踪指针悬停的主题：绑定卡片是独立的 Vue Flow 节点，按节点 id 反查主题。
+ * @param event 指针事件
+ */
+function handlePointerOver(event: PointerEvent) {
+    const target = event.target as HTMLElement | null
+    if (!target) return
+    const host = target.closest<HTMLElement>(".vue-flow__node")
+    if (host?.dataset.id === props.id) {
+        hoveredTopicId.value = target.closest<HTMLElement>("[data-mind-id]")?.dataset.mindId ?? null
+        return
+    }
+    hoveredTopicId.value = host?.dataset.id ? (boundTopicIds.value.get(host.dataset.id) ?? null) : null
+}
+
+/** 指针移出窗口时清除悬停态，否则圆点会一直挂着 */
+function handlePointerOut(event: PointerEvent) {
+    if (!event.relatedTarget) hoveredTopicId.value = null
+}
+
+window.addEventListener("pointerover", handlePointerOver, true)
+window.addEventListener("pointerout", handlePointerOut, true)
+
+/** 挂载后先同步一次绑定关系：旧图里的绑定节点需要重新挂到本导图下 */
+onMounted(() => {
+    nextTick(() => refreshBoundNodes())
+})
 
 onBeforeUnmount(() => {
+    boundResizeObserver?.disconnect()
+    observedBoundElements.clear()
     window.removeEventListener("keydown", handleKeyDown, true)
     window.removeEventListener("pointerdown", handleOutsidePointerDown, true)
+    window.removeEventListener("pointerdown", handleBoundNodePointerDown, true)
+    window.removeEventListener("pointerdown", handleExternalNodePointerDown, true)
+    window.removeEventListener("pointermove", handleExternalNodePointerMove)
+    window.removeEventListener("pointerup", handleExternalNodePointerUp)
+    window.removeEventListener("pointerover", handlePointerOver, true)
+    window.removeEventListener("pointerout", handlePointerOut, true)
     window.removeEventListener("pointermove", handlePointerMove)
     window.removeEventListener("pointerup", handlePointerUp)
     window.removeEventListener("pointermove", handleCanvasResize)
@@ -650,8 +1201,116 @@ function menuRemove() {
     runMenuAction(() => removeSelected())
 }
 
+/** 右键主题的绑定状态：已绑定时菜单显示解绑，否则显示插入节点 */
+const menuBound = computed(() => Boolean(menu.value && findNode(root.value, menu.value.id)?.nodeId))
+
+/** 可作为主题插入的节点：能独立展示且不依赖上游的节点类型 */
+const MIND_MAP_INSERT_TYPES = [
+    NodeType.NUMBER_INPUT,
+    NodeType.TEXT_INPUT,
+    NodeType.CHAR_INPUT,
+    NodeType.MELEE_WEAPON_INPUT,
+    NodeType.RANGED_WEAPON_INPUT,
+    NodeType.MOD_INPUT,
+    NodeType.BUFF_INPUT,
+    NodeType.EFFECT_INPUT,
+    NodeType.PET_INPUT,
+    NodeType.ENEMY_INPUT,
+    NodeType.CUSTOM_VARS_INPUT,
+    NodeType.DOT_INPUT,
+    NodeType.ADD_CALC,
+    NodeType.MULTIPLY_CALC,
+    NodeType.EXPRESSION_CALC,
+    NodeType.VECTOR_CALC,
+    NodeType.ATTR_CALC,
+    NodeType.WEAPON_ATTR_CALC,
+    NodeType.AST_EXPRESSION_CALC,
+    NodeType.CUSTOM_EXPRESSION,
+    NodeType.BUFF_MERGE,
+    NodeType.ATTR_OUTPUT,
+    NodeType.WEAPON_OUTPUT,
+    NodeType.CHART,
+    NodeType.VECTOR_INPUT,
+    NodeType.VECTOR_DECOMPOSE,
+    NodeType.CARD,
+    NodeType.IMAGE,
+    NodeType.LABEL,
+    NodeType.JSON_BUILD,
+    NodeType.ONLINE_BUILD,
+    NodeType.JSON_EXPORT,
+]
+
+/** 插入菜单项：按调色板顺序取标签与图标，过滤掉不适用的类型 */
+const MIND_MAP_INSERT_ITEMS = PALETTE_ITEMS.filter(item => MIND_MAP_INSERT_TYPES.includes(item.type))
+
+/** 插入菜单折叠：类型太多，默认只展开常用项 */
+const insertMenuExpanded = ref(false)
+const INSERT_ITEM_PREVIEW = 6
+const visibleInsertItems = computed(() =>
+    insertMenuExpanded.value ? MIND_MAP_INSERT_ITEMS : MIND_MAP_INSERT_ITEMS.slice(0, INSERT_ITEM_PREVIEW)
+)
+
+function menuInsertNode(type: string) {
+    const id = menu.value?.id
+    if (id) runMenuAction(() => insertNodeAsTopic(id, type))
+}
+
+function menuUnbind() {
+    const id = menu.value?.id
+    if (id) runMenuAction(() => unbindTopic(id))
+}
+
+/** 粘贴图片：图片文件编码成内嵌数据，作为新的绑定节点挂到选中主题下 */
+const MAX_EMBED_BYTES = 2 * 1024 * 1024
+
+/**
+ * 把剪贴板里的图片插成主题的绑定节点。
+ * @param topicId 目标主题 id
+ * @param file 图片文件
+ */
+async function pasteImageAsTopic(topicId: string, file: File) {
+    if (file.size > MAX_EMBED_BYTES) return
+    try {
+        const bytes = new Uint8Array(await file.arrayBuffer())
+        const format = detectImageFormat(bytes)
+        const { encoded } = encodeImageBytes(bytes)
+        insertNodeAsTopic(topicId, NodeType.IMAGE, {
+            label: file.name || "图片",
+            imageMode: "embed",
+            imageData: encoded,
+            imageMime: file.type || imageMimeForFormat(format) || "application/octet-stream",
+            imageName: file.name,
+            imageWidth: 320,
+            imageHeight: 200,
+        })
+    } catch {
+        // 解码失败时不插入节点，剪贴板内容交给其它节点处理
+    }
+}
+
+/**
+ * Ctrl+V：指针在导图上或主题有选中时，把剪贴板图片插成绑定节点。
+ * 没有图片时不拦截，保证普通节点粘贴照常工作。
+ * @param event 剪贴板事件
+ */
+function handlePaste(event: ClipboardEvent) {
+    if (!hovered.value && !focusMode.value && selectedIds.value.size === 0) return
+    const target = event.target as HTMLElement | null
+    if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
+    const file = Array.from(event.clipboardData?.files ?? []).find(item => item.type.startsWith("image/"))
+    if (!file) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    const topicId = [...activeIds.value][0] ?? root.value.id
+    void pasteImageAsTopic(topicId, file)
+}
+
+window.addEventListener("paste", handlePaste)
 window.addEventListener("pointerdown", closeMenu)
-onBeforeUnmount(() => window.removeEventListener("pointerdown", closeMenu))
+onBeforeUnmount(() => {
+    window.removeEventListener("paste", handlePaste)
+    window.removeEventListener("pointerdown", closeMenu)
+})
 
 /** 主题数量，用于工具栏统计 */
 const nodeCount = computed(() => nodes.value.length)
@@ -674,12 +1333,14 @@ defineExpose({ fitMindMap })
 <template>
     <div
         ref="rootRef"
-        class="relative rounded-xs border border-base-content/15 bg-base-100/85 shadow-sm backdrop-blur-sm"
-        :class="selected ? 'border-primary/70 ring-1 ring-primary/30' : ''"
+        class="group/node relative"
+        :class="focusMode ? 'w-fit' : ['rounded-xs border border-base-content/15 bg-base-100/85 shadow-sm backdrop-blur-sm', selected ? 'border-primary/70 ring-1 ring-primary/30' : '']"
         @pointerenter="hovered = true"
         @pointerleave="hovered = false"
     >
+        <!-- 沉浸查看只留导图本体：工具栏、外框与背景都隐藏 -->
         <MindMapToolbar
+            v-if="!focusMode"
             :layout="props.data.layout"
             :node-count="nodeCount"
             :layouts="MIND_MAP_LAYOUTS"
@@ -688,14 +1349,15 @@ defineExpose({ fitMindMap })
             @add-sibling="addSibling"
             @font-size="changeFontSize"
             @color="changeColor"
+            @toggle-focus="toggleFocus"
         />
         <!-- 内层画布没有滚动/缩放，滚轮交给外层 Vue Flow，避免形成滚轮死区 -->
         <div
             class="mind-canvas nodrag relative overflow-hidden"
-            :style="{ width: `${canvasSize.width}px`, height: `${canvasSize.height}px` }"
+            :style="{ width: `${renderSize.width}px`, height: `${renderSize.height}px` }"
             @pointerdown="handleCanvasPointerDown"
         >
-            <svg class="pointer-events-none absolute inset-0" :width="canvasSize.width" :height="canvasSize.height">
+            <svg class="pointer-events-none absolute inset-0" :width="renderSize.width" :height="renderSize.height">
                 <path
                     v-for="edge in edges"
                     :key="edge.id"
@@ -722,10 +1384,13 @@ defineExpose({ fitMindMap })
                 v-for="node in nodes"
                 :key="node.id"
                 :node="node"
+                :bound="boundTopics.has(node.id)"
                 :selected="selectedIds.has(node.id)"
                 :editing="editingId === node.id"
                 :has-children="nodeFlags.get(node.id)?.hasChildren ?? false"
                 :collapsed="nodeFlags.get(node.id)?.collapsed ?? false"
+                :child-count="nodeFlags.get(node.id)?.childCount ?? 0"
+                :hovered="hoveredTopicId === node.id"
                 :drop-target="dropTargetId === node.id"
                 @click="handleNodeClick($event, node.id)"
                 @dblclick="handleNodeDoubleClick(node.id)"
@@ -737,6 +1402,7 @@ defineExpose({ fitMindMap })
             />
             <!-- 右下角缩放手柄：自由调整画布大小，内容放不下时仍会自动撑大 -->
             <div
+                v-if="!focusMode"
                 class="nodrag nopan absolute bottom-0 right-0 z-10 size-4 cursor-se-resize text-base-content/30 transition-colors duration-150 hover:text-primary"
                 title="拖动调整画布大小"
                 @pointerdown="startCanvasResize"
@@ -747,13 +1413,24 @@ defineExpose({ fitMindMap })
             </div>
         </div>
 
+        <!-- 沉浸查看的退出按钮：平时隐藏，悬停导图右上角时出现 -->
+        <button
+            v-if="focusMode"
+            type="button"
+            class="nodrag absolute right-1 top-1 z-20 grid size-5 cursor-pointer place-items-center rounded-xs border border-base-content/15 bg-base-100/90 text-base-content/60 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover/node:opacity-100 hover:text-primary pointer-events-none group-hover/node:pointer-events-auto"
+            title="退出沉浸查看"
+            @click.stop="toggleFocus"
+        >
+            <Icon icon="ri:fullscreen-exit-line" class="size-3.5" />
+        </button>
+
         <!-- 主题右键菜单：Teleport 到 body，避免被节点 transform 缩放/偏移 -->
         <Teleport to="body">
             <div
                 v-if="menu"
                 ref="menuEl"
                 data-mind-map-popover
-                class="fixed z-[100] w-52 rounded-xs border border-base-content/10 bg-base-100 p-1 shadow-lg"
+                class="fixed z-100 w-52 rounded-xs border border-base-content/10 bg-base-100 p-1 shadow-lg"
                 :style="{ left: `${menu.x}px`, top: `${menu.y}px` }"
                 @pointerdown.stop
                 @contextmenu.prevent.stop
@@ -772,6 +1449,25 @@ defineExpose({ fitMindMap })
                 <button v-if="menuFlags?.hasChildren" class="menu-item" @click="menuToggleCollapse()">
                     {{ menuFlags?.collapsed ? "展开子主题" : "折叠子主题" }}
                 </button>
+
+                <div class="my-1 h-px bg-base-content/10" />
+                <!-- 绑定真实节点：插入任意节点 / 解绑，绑定后位置由导图布局驱动 -->
+                <template v-if="!menuBound">
+                    <div class="px-2 py-1 text-[10px] text-base-content/40">插入节点作为此主题</div>
+                    <div class="max-h-52 overflow-y-auto">
+                        <button v-for="item in visibleInsertItems" :key="item.type" class="menu-item" @click="menuInsertNode(item.type)">
+                            <Icon v-if="item.icon" :icon="item.icon" class="size-3 shrink-0 opacity-60" />
+                            {{ item.label }}
+                        </button>
+                    </div>                    <button
+                        v-if="MIND_MAP_INSERT_ITEMS.length > INSERT_ITEM_PREVIEW"
+                        class="menu-item"
+                        @click="insertMenuExpanded = !insertMenuExpanded"
+                    >
+                        {{ insertMenuExpanded ? "收起节点类型" : `更多节点类型（${MIND_MAP_INSERT_ITEMS.length - INSERT_ITEM_PREVIEW}）` }}
+                    </button>
+                </template>
+                <button v-else class="menu-item" @click="menuUnbind()">解除节点绑定<span class="menu-hint">留空</span></button>
 
                 <div class="my-1 h-px bg-base-content/10" />
                 <button class="menu-item" @click="menuFontSize(-2)">减小字号<span class="menu-hint">A−</span></button>

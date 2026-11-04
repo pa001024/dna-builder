@@ -1,24 +1,24 @@
 import { writeFileSync } from "node:fs"
 import {
-    ModTypeMap,
-    ModTypeMaxSlot,
     chosenBuffs,
     dumpMods,
+    LeveledModHelper,
     legal,
     loadSpec,
+    type ModTypeKey,
+    ModTypeMap,
+    ModTypeMaxSlot,
     makeBuild,
     modData,
     modPool,
+    optimize,
     overCost,
     requiredSlots,
-    optimize,
+    type Spec,
     settingsOf,
     stateToPatch,
     withTeam,
-    LeveledModHelper,
     亿,
-    type ModTypeKey,
-    type Spec,
 } from "./lib"
 
 const spec = loadSpec()
@@ -32,7 +32,9 @@ const includeTypes: ModTypeKey[] = ["charMods", "meleeMods", "rangedMods"]
 function modOptions(types: ModTypeKey[]) {
     const set = new Set(types.map(t => ModTypeMap[t] as string))
     const exclude: number[] = (spec as any).excludeMods ?? []
-    return modData.filter((m: any) => set.has(m.类型) && !exclude.includes(m.id)).map((m: any) => LeveledModHelper.withCount(m, undefined, 0, 8))
+    return modData
+        .filter((m: any) => set.has(m.类型) && !exclude.includes(m.id))
+        .map((m: any) => LeveledModHelper.withCount(m, undefined, 0, 8))
 }
 
 console.log("=== 1) autoBuild（必带件当种子保留）===")
@@ -64,7 +66,7 @@ const 无效件 = includeTypes.flatMap(key =>
     (nb[key] as any[])
         .map((m, i) => ({ key, i, m }))
         .filter(x => x.m && !(nb.checkModEffective(x.m)?.isEffective ?? true))
-        .map(x => `${x.key}[${x.i}] ${x.m.名称}（条件不生效）`),
+        .map(x => `${x.key}[${x.i}] ${x.m.名称}（条件不生效）`)
 )
 console.log(`  条件不生效件：${无效件.join(" ") || "无 ✓"}`)
 for (const key of includeTypes) {
@@ -100,5 +102,5 @@ if (!best.state) {
 function 从patch取池(p: any, key: ModTypeKey, s: Spec) {
     const 类型 = key === "charMods" ? "角色" : key === "meleeMods" ? "近战" : "远程"
     const 池 = modPool(s, 类型 as any)
-    return (p[key] as any[]).map(x => (x ? 池.find(m => m.id === x[0]) ?? null : null))
+    return (p[key] as any[]).map(x => (x ? (池.find(m => m.id === x[0]) ?? null) : null))
 }
