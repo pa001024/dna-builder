@@ -46,7 +46,7 @@ fi
 
 if [ -n "$EXISTING_FILES" ]; then
     # -s 7000：xargs 默认按 ARG_MAX 分块（上百 KB），Windows cmd 上限 8k 会直接报错跳过格式化
-    printf '%s\n' "$EXISTING_FILES" | xargs -s 7000 pnpm exec biome check --write --linter-enabled=false --
+    printf '%s\n' "$EXISTING_FILES" | xargs -s 7000 pnpm exec biome check --write --linter-enabled=false --no-errors-on-unmatched --
 fi
 
 # 只有 Rust 文件有变更时才运行 cargo fmt
