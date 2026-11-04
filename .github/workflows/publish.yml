@@ -275,6 +275,28 @@ jobs:
                   $feed | ConvertTo-Json -Depth 6 | Out-File -FilePath "update.json" -Encoding utf8
                   gh release upload $env:TAG_NAME update.json --repo $env:GITHUB_REPOSITORY --clobber
 
+            - name: Resolve Chrome for card rendering
+              id: chrome
+              if: success() && github.event_name != 'pull_request'
+              shell: pwsh
+              run: |
+                  # 托管 runner 预装 Chrome/Edge，但路径不进 PATH；显式定位后写进环境变量，避免截图阶段才报找不到
+                  $candidates = @(
+                      "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+                      "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+                      "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+                      "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+                  ) | Where-Object { Test-Path $_ }
+
+                  if (-not $candidates) {
+                      # 自托管 runner 上可能装在别处，交给脚本自己的查找逻辑
+                      Write-Host "::warning::未在默认路径找到 Chrome/Edge，交给脚本自行查找"
+                      exit 0
+                  }
+
+                  "CHROME_PATH=$($candidates[0])" >> $env:GITHUB_ENV
+                  Write-Host "浏览器: $($candidates[0])"
+
             - name: Publish update dynamic to Bilibili
               id: bili_dynamic
               if: success() && github.event_name != 'pull_request'
@@ -290,7 +312,6 @@ jobs:
                   BILI_JCT: ${{ secrets.BILI_JCT }}
                   BILI_BUVID3: ${{ secrets.BILI_BUVID3 }}
                   BILI_DEDEUSERID: ${{ secrets.BILI_DEDEUSERID }}
-                  CHROME_PATH: ${{ vars.CHROME_PATH }}
                   TAG_NAME: ${{ github.ref_name }}
                   PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
               run: |

@@ -46,7 +46,7 @@
 | `BILI_DEDEUSERID` | Secret | 否 | Cookie 中的 `DedeUserID` |
 | `DEEPSEEK_MODEL` | Variable | 否 | 默认 `deepseek-flash` |
 | `DEEPSEEK_BASE_URL` | Variable | 否 | 默认 `https://api.deepseek.com` |
-| `CHROME_PATH` | Variable | 否 | 自托管 runner 上 Chrome/Edge 的路径；GitHub 托管 runner 会自动查找 |
+| `CHROME_PATH` | Variable | 否 | 仅在自托管 runner 且浏览器不在默认路径时需要；托管 runner 由 `Resolve Chrome` 步骤自动写入 |
 
 `BILI_COOKIE` 的取法：浏览器登录 `bilibili.com` → DevTools → Network → 任意 `api.bilibili.com` 请求 → 复制请求头里的 `Cookie`。`SESSDATA` 会过期，失效后日志会报 `code=-101`，重新获取即可。
 
@@ -76,6 +76,9 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 - 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；接口临时故障才回退到规则模板。`--no-ai` 可强制走规则模板。
 - 规则模板（`card.ts` + `fallback.ts`）只是兜底：按提交类型分组、限制 4 组 9 条，保证任何情况下都有一张能看的卡片。
 - 渲染默认使用 Chrome；找不到时用 Edge。Node.js 需要 23.6+（原生运行 `.ts`），CI 的 `lts/*` 满足要求。
+- 浏览器不需要额外安装：GitHub 托管 Windows runner 镜像自带 Chrome 与 Edge（只是不在 `PATH` 里），
+  工作流的 `Resolve Chrome for card rendering` 步骤会定位到默认安装路径并写进 `CHROME_PATH`；
+  找不到时脚本仍会自行遍历常见路径与 `where` 查找。
 
 ## 配置缺失 / 配错时
 
