@@ -316,9 +316,6 @@ importers:
       '@tauri-apps/plugin-process':
         specifier: ~2.4.0
         version: 2.4.0
-      '@tauri-apps/plugin-updater':
-        specifier: ~2.13.1
-        version: 2.13.1
       '@urql/exchange-graphcache':
         specifier: ^9.0.2
         version: 9.0.2(@urql/core@6.0.3(graphql@16.14.2))(graphql@16.14.2)
@@ -3132,9 +3129,6 @@ packages:
 
   '@tauri-apps/plugin-process@2.4.0':
     resolution: {integrity: sha512-GddrmsSLAYrLa/yTXlXK/YRDzUgYeeOnUXTbiyvJWkmI424RmDPD3FVLeqcon7rv6O6ZfhBilcrHWnSo7o6hIQ==}
-
-  '@tauri-apps/plugin-updater@2.13.1':
-    resolution: {integrity: sha512-+STDzJ0sdQLImjc63zkv6Nncimqeo6jyCWoTQtbSwgGLNj1qbP9I6LC4p5R5ocBk3gNKAZs6i/AJz0jxysytiw==}
 
   '@tokenizer/inflate@0.5.2':
     resolution: {integrity: sha512-3AZIuReWQ7i916s/UWAzy4V4k2wrkAZLW2sTi448W3w7Hz5uoc+Y7h+cnwzr0cwrwf3PsC5xKsH8MOl0NRltlg==}
@@ -9883,10 +9877,6 @@ snapshots:
       '@tauri-apps/api': 2.12.4
 
   '@tauri-apps/plugin-process@2.4.0':
-    dependencies:
-      '@tauri-apps/api': 2.12.4
-
-  '@tauri-apps/plugin-updater@2.13.1':
     dependencies:
       '@tauri-apps/api': 2.12.4
 

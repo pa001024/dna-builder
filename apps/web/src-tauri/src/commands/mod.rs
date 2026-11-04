@@ -12,5 +12,6 @@ pub mod net;
 pub mod pak;
 pub mod script_cmds;
 pub mod system;
+pub mod update;
 pub mod websocket;
 pub mod window;

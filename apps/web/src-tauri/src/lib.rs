@@ -3,6 +3,7 @@
 
 mod commands;
 mod submodules;
+mod update;
 mod util;
 
 use tauri::Manager;
@@ -10,6 +11,11 @@ use tauri::Manager;
 /// 应用主入口：注册插件、装配托盘并启动 Tauri 应用。
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // 更新 helper / 命令行模式必须在 Tauri 初始化前截获，避免注册单实例、抢占窗口
+    if let Some(exit_code) = update::handle_process_modes() {
+        std::process::exit(exit_code);
+    }
+
     let mut app = tauri::Builder::default();
     // 单实例必须最先注册：插件按注册顺序运行，它要在 deep-link 插件就绪前接管二次启动
     // （对应 dob-app 的 launchMode=singleTop；deep-link 特性把新实例的参数先喂给 deep-link 插件）
@@ -32,8 +38,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_updater::Builder::new().build());
+        .plugin(tauri_plugin_clipboard_manager::init());
     #[cfg(target_os = "windows")]
     {
         app = app
@@ -41,6 +46,11 @@ pub fn run() {
             .plugin(tauri_plugin_window_state::Builder::default().build());
     }
     app.setup(|app| {
+        // helper 退出后旧 exe 的锁才会释放，启动时顺手清理
+        if let Ok(current_exe) = std::env::current_exe() {
+            update::cleanup_old_install(&current_exe);
+        }
+
         let handle = app.handle();
         let window = app.get_webview_window("main").unwrap();
         // window.set_shadow(true).expect("Unsupported platform!");
@@ -166,6 +176,10 @@ pub fn run() {
         Ok(())
     })
     .invoke_handler(tauri::generate_handler![
+        // 应用更新（exe 差量包）
+        commands::update::update_check,
+        commands::update::update_download,
+        commands::update::update_install,
         // 窗口
         commands::window::apply_material,
         commands::window::set_window_style,
