@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { openUrl } from "@tauri-apps/plugin-opener"
 import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
@@ -58,7 +59,7 @@ const hasNewPack = computed(() => {
 
 // ---------- 流程编排：应用更新 -> 数据包 -> 更新日志 ----------
 type Step =
-    | { kind: "app-new-version"; version: string; body: string }
+    | { kind: "app-new-version"; version: string; body: string; requiresFullInstall: boolean; installerUrl?: string }
     | { kind: "app-update" }
     | { kind: "pack-install"; version: string; notes: string }
     | { kind: "pack-update"; from: string; to: string; notes: string }
@@ -73,6 +74,9 @@ const isBusy = computed(() => step.value.kind === "app-update" || step.value.kin
 
 const appNewVersion = computed(() => (step.value.kind === "app-new-version" ? step.value.version : ""))
 const appNewBody = computed(() => (step.value.kind === "app-new-version" ? step.value.body : ""))
+const appNewRequiresFullInstall = computed(() =>
+    step.value.kind === "app-new-version" ? step.value.requiresFullInstall : false
+)
 
 /**
  * 应用更新说明条目：将 release body 按逗号/换行切分为列表项（与更新日志版本说明展示一致）。
@@ -177,7 +181,13 @@ async function checkAppUpdateOnly(): Promise<boolean> {
     if (env.isApp) {
         const updateInfo = await checkUpdate()
         if (updateInfo?.available) {
-            openStep({ kind: "app-new-version", version: updateInfo.latestVersion, body: updateInfo.body || "" })
+            openStep({
+                kind: "app-new-version",
+                version: updateInfo.latestVersion,
+                body: updateInfo.body || "",
+                requiresFullInstall: updateInfo.requiresFullInstall,
+                installerUrl: updateInfo.installerUrl,
+            })
             return true
         }
     } else if (await siteCheck()) {
@@ -197,6 +207,24 @@ async function runAppUpdateFlow(): Promise<void> {
 }
 
 async function applyUpdate(): Promise<void> {
+    // DLL / resources 有变化的版本只能走完整安装包：打开下载页，由用户重新安装
+    if (step.value.kind === "app-new-version" && step.value.requiresFullInstall) {
+        const url = step.value.installerUrl
+        if (!url) {
+            await ui.showDialog(t("updater.updateFailed"), t("updater.updateErrorMessage"))
+            return
+        }
+        try {
+            await openUrl(url)
+        } catch (error) {
+            console.error("打开安装包下载页失败:", error)
+            await ui.showDialog(t("updater.updateFailed"), error instanceof Error ? error.message : String(error))
+            return
+        }
+        skipAppUpdate()
+        return
+    }
+
     openStep({ kind: "app-update" })
     try {
         await downloadAndInstallUpdate(progress => {
@@ -439,6 +467,9 @@ declare global {
                                 </li>
                             </ul>
                         </div>
+                        <p v-if="appNewRequiresFullInstall" class="mt-3 text-xs leading-5 text-base-content/60">
+                            {{ $t("updater.fullInstallHint") }}
+                        </p>
                         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                             <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="skipAppUpdate">{{ $t('startup-modal.later') }}</button>
                             <button class="btn btn-primary w-full min-w-36 sm:w-auto" @click="applyUpdate">

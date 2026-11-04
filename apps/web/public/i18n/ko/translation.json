@@ -4809,6 +4809,7 @@
     },
     "updater": {
         "downloadUpdate": "지금 업데이트",
+        "fullInstallHint": "이 버전은 전체 설치 패키지가 필요합니다. 다운로드 페이지에서 다시 설치해 주세요",
         "newVersionFound": "새 버전 v{{version}}이(가) 발견되었습니다",
         "newVersionMessage": "\n\n{{body}}\n\n업데이트를 자동으로 다운로드하여 설치하시겠습니까?",
         "newVersionTitle": "새 버전",

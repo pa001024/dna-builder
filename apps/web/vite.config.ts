@@ -165,7 +165,6 @@ export default defineConfig(async () => ({
             "@lezer/highlight",
             "gsap",
             "js-ini",
-            "@tauri-apps/plugin-updater",
             "@tauri-apps/plugin-process",
             "@tauri-apps/api/path",
             "zod",

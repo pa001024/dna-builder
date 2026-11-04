@@ -2,6 +2,15 @@ name: "publish"
 
 on:
     workflow_dispatch:
+        inputs:
+            full_install:
+                description: "本版本改动了 DLL / resources，跳过 exe 差量包，让客户端下载完整安装包"
+                type: boolean
+                default: false
+            delta_base:
+                description: "差量包可安全套用的最低已安装版本（不带 v，如 1.6.0）；低于它的客户端改走完整安装包"
+                type: string
+                default: ""
     push:
         tags:
             - "v*"
@@ -37,6 +46,17 @@ jobs:
             LIBCLANG_PATH: C:\Program Files\LLVM\bin
             OPENCV_BIN_PATHS: C:\opencv\build\x64\vc16\bin
         steps:
+            - name: Require release tag
+              shell: pwsh
+              env:
+                  REF_TYPE: ${{ github.ref_type }}
+                  REF_NAME: ${{ github.ref_name }}
+              run: |
+                  # tagName / release 查询 / 资产上传都以 github.ref_name 为准；分支或非 v* tag 会发到错误的版本上
+                  if ($env:REF_TYPE -ne "tag" -or $env:REF_NAME -notlike "v*") {
+                      throw "publish 只能从 tag 触发；手动运行时请在 Run workflow 里选择对应的 v* tag（当前: $env:REF_NAME）"
+                  }
+
             - uses: actions/checkout@v5
               with:
                   fetch-depth: 0
@@ -130,6 +150,29 @@ jobs:
                       echo "commit_diff=" >> $env:GITHUB_OUTPUT
                   }
 
+            - name: Resolve update mode
+              id: update_mode
+              shell: pwsh
+              env:
+                  FULL_INSTALL: ${{ inputs.full_install }}
+                  DELTA_BASE: ${{ inputs.delta_base }}
+                  TAG_NAME: ${{ github.ref_name }}
+              run: |
+                  $fullInstall = $env:FULL_INSTALL -eq "true"
+                  # 跳过整包版本的客户端无法直接套用 exe 差量：feed 里用 delta_base 标出最低基线
+                  $deltaBase = "$env:DELTA_BASE".Trim().TrimStart("v")
+                  if ($deltaBase -and $deltaBase -notmatch '^\d+\.\d+\.\d+$') {
+                      throw "delta_base 必须是不带 v 的 semver，如 1.6.0（当前: $deltaBase）"
+                  }
+                  echo "delta_base=$deltaBase" >> $env:GITHUB_OUTPUT
+                  if ($fullInstall) {
+                      echo "full_install=true" >> $env:GITHUB_OUTPUT
+                      echo "delta_line=> 本版本改动了 DLL / resources，需下载完整安装包更新。" >> $env:GITHUB_OUTPUT
+                  } else {
+                      echo "full_install=false" >> $env:GITHUB_OUTPUT
+                      echo "delta_line=> 差量更新包（仅 exe）: [dna-builder-x64.exe.zip](https://github.com/pa001024/dna-builder/releases/download/$env:TAG_NAME/dna-builder-x64.exe.zip)" >> $env:GITHUB_OUTPUT
+                  }
+
             - uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -151,11 +194,86 @@ jobs:
                       > 夸克网盘链接：https://pan.quark.cn/s/1419bbc8aa2d
 
                       > 直接下载: [${{ github.ref_name }}](https://cdn.dna-builder.cn/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi)
+
+                      ${{ steps.update_mode.outputs.delta_line }}
                       "
                   releaseDraft: false
                   prerelease: false
                   projectPath: apps/web
                   args: ${{ matrix.args }}
+
+            - name: Package exe delta update
+              if: success() && github.event_name != 'pull_request'
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  VERSION: ${{ steps.commit_diff.outputs.version }}
+                  RELEASE_NOTES: ${{ steps.commit_diff.outputs.commit_diff }}
+                  TAG_NAME: ${{ github.ref_name }}
+                  FULL_INSTALL: ${{ steps.update_mode.outputs.full_install }}
+                  DELTA_BASE: ${{ steps.update_mode.outputs.delta_base }}
+              run: |
+                  $feed = [ordered]@{
+                      version = $env:VERSION
+                      notes = $env:RELEASE_NOTES
+                      pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+                  }
+
+                  # release 里的 MSI：整包版本必填；差量版本在设置 delta_base 时也必须有，
+                  # 供跳过整包版本的客户端回退
+                  $installerUrl = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$env:TAG_NAME" `
+                      --jq '[.assets[].browser_download_url | select(endswith(".msi"))][0]'
+                  if (-not $installerUrl -or $installerUrl -eq "null") {
+                      $installerUrl = $null
+                  } else {
+                      $installerUrl = $installerUrl.Trim()
+                  }
+
+                  if ($env:FULL_INSTALL -eq "true") {
+                      # DLL / resources 有变化：不发布 exe 差量包，feed 直接指向 release 里的 MSI
+                      if (-not $installerUrl) { throw "release 中找不到 MSI 资产" }
+                      $feed.requires_full_install = $true
+                      $feed.installer_url = $installerUrl
+                  } else {
+                      $exe = "apps/web/src-tauri/target/release/dna-builder.exe"
+                      if (-not (Test-Path $exe)) { throw "exe 不存在: $exe" }
+
+                      $zipName = "dna-builder-x64.exe.zip"
+                      $zipPath = Join-Path (Get-Location) $zipName
+                      Remove-Item $zipPath -ErrorAction SilentlyContinue
+
+                      # 只把 exe 放进包根目录，DLL 等固定文件留在安装目录不参与更新
+                      Push-Location (Split-Path $exe)
+                      try {
+                          7z a -tzip -mx=9 $zipPath "dna-builder.exe" | Out-Null
+                          if ($LASTEXITCODE -ne 0) { throw "7z 打包失败" }
+                      } finally {
+                          Pop-Location
+                      }
+
+                      $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash.ToLower()
+                      $size = (Get-Item $zipPath).Length
+                      $url = "https://github.com/pa001024/dna-builder/releases/download/$env:TAG_NAME/$zipName"
+
+                      $feed.platforms = [ordered]@{
+                          "windows-x86_64-exe" = [ordered]@{
+                              url = $url
+                              size = $size
+                              sha256 = $hash
+                          }
+                      }
+                      if ($installerUrl) { $feed.installer_url = $installerUrl }
+                      if ($env:DELTA_BASE) {
+                          if (-not $installerUrl) { throw "设置 delta_base 时 release 中必须有 MSI 资产作为完整安装回退" }
+                          $feed.delta_base = $env:DELTA_BASE
+                      }
+
+                      gh release upload $env:TAG_NAME $zipName --repo $env:GITHUB_REPOSITORY --clobber
+                      Write-Host "exe 差量包: $([math]::Round($size / 1MB, 2)) MB, sha256=$hash"
+                  }
+
+                  $feed | ConvertTo-Json -Depth 6 | Out-File -FilePath "update.json" -Encoding utf8
+                  gh release upload $env:TAG_NAME update.json --repo $env:GITHUB_REPOSITORY --clobber
 
             - name: Add summary
               if: success() && github.event_name != 'pull_request'

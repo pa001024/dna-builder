@@ -19,6 +19,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 |Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具）|[agent-skills.md](.agents/docs/agent-skills.md)|
 |dob-ui 组件库（daisyUI fork、db-style 覆写层、类名无前缀）|[dob-ui.md](.agents/docs/dob-ui.md)|
 |深链（`dobapp://` 协议注册、解析口径、中转页、平台差异）|[deep-link.md](.agents/docs/deep-link.md)|
+|桌面端自动更新（exe 差量包、feed 格式、本地测试、发布流程）|[updater.md](.agents/docs/updater.md)|
 
 其他冷路径不列出 `.agents/docs/*.md`
 

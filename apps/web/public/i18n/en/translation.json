@@ -4836,6 +4836,7 @@
     },
     "updater": {
         "downloadUpdate": "Update Now",
+        "fullInstallHint": "This version requires the full installer; open the download page and reinstall",
         "newVersionFound": "New version v{{version}} found",
         "newVersionMessage": "\n\n{{body}}\n\nDo you want to automatically download and install the update?",
         "newVersionTitle": "New Version Available",

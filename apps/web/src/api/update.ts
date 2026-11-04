@@ -1,71 +1,73 @@
-import { relaunch } from "@tauri-apps/plugin-process"
-import { check, type Update } from "@tauri-apps/plugin-updater"
+import { invoke } from "@tauri-apps/api/core"
+import type { UnlistenFn } from "@tauri-apps/api/event"
+import { listen } from "@tauri-apps/api/event"
 
 export interface UpdateInfo {
     available: boolean
     currentVersion: string
     latestVersion: string
     body?: string
-    update: Update
+    /** 该版本改动过 DLL / resources，只能下载完整安装包 */
+    requiresFullInstall: boolean
+    installerUrl?: string
+}
+
+interface NativeUpdateInfo {
+    version: string
+    notes: string
+    pubDate?: string
+    url: string
+    size: number
+    sha256: string
+    currentVersion: string
+    requiresFullInstall: boolean
+    installerUrl?: string
+}
+
+interface UpdateProgress {
+    downloaded: number
+    total: number | null
 }
 
 export async function checkUpdate(): Promise<UpdateInfo | null> {
     try {
-        const update = await check({ timeout: 10000 })
-
-        if (update) {
-            return {
-                available: true,
-                currentVersion: update.currentVersion,
-                latestVersion: update.version,
-                body: update.body,
-                update,
-            }
+        const info = await invoke<NativeUpdateInfo | null>("update_check")
+        if (!info) {
+            return null
         }
-
-        return null
+        return {
+            available: true,
+            currentVersion: info.currentVersion,
+            latestVersion: info.version,
+            body: info.notes,
+            requiresFullInstall: info.requiresFullInstall,
+            installerUrl: info.installerUrl,
+        }
     } catch (error) {
         console.error("检查更新失败:", error)
         return null
     }
 }
 
+/**
+ * 下载 exe 差量包并安装：下载完成后启动 helper 替换 exe 并重启应用。
+ * @param onProgress 下载进度回调（0-100）
+ */
 export async function downloadAndInstallUpdate(onProgress?: (progress: number) => void): Promise<void> {
+    let unlisten: UnlistenFn | undefined
     try {
-        const update = await check({ timeout: 10000 })
-
-        if (!update) {
-            throw new Error("没有可用的更新")
-        }
-
-        let downloaded = 0
-        let total = 0
-
-        await update.downloadAndInstall(event => {
-            switch (event.event) {
-                case "Started":
-                    downloaded = 0
-                    total = event.data.contentLength!
-                    if (onProgress) onProgress(0)
-                    break
-                case "Progress":
-                    if (event.data && "chunkLength" in event.data && typeof event.data.chunkLength === "number") {
-                        downloaded += event.data.chunkLength!
-                    }
-                    if (onProgress && total > 0) {
-                        const progress = Math.min(100, Math.round((downloaded / total) * 100))
-                        onProgress(progress)
-                    }
-                    break
-                case "Finished":
-                    if (onProgress) onProgress(100)
-                    break
+        unlisten = await listen<UpdateProgress>("update-progress", event => {
+            const { downloaded, total } = event.payload
+            if (onProgress && total && total > 0) {
+                onProgress(Math.min(100, Math.round((downloaded / total) * 100)))
             }
         })
 
-        await relaunch()
-    } catch (error) {
-        console.error("下载安装更新失败:", error)
-        throw error
+        const version = await invoke<string>("update_download")
+        onProgress?.(100)
+        // 安装成功后进程会被 helper 关闭并重启；失败时错误会抛到调用方
+        await invoke("update_install", { version })
+    } finally {
+        unlisten?.()
     }
 }

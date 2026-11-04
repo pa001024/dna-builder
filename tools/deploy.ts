@@ -1,11 +1,13 @@
 #!/usr/bin/env bun
 
 /**
- * 发布脚本：Web 端部署（打包 dist → scp → 远端解压）与桌面端 App 发布（MSI + latest.json + 夸克网盘）。
+ * 发布脚本：Web 端部署（打包 dist → scp → 远端解压）与桌面端 App 发布
+ * （MSI + exe 差量包 + latest.json + 夸克网盘）。
  *
- * latest.json 需要内嵌 MSI 的下载地址，而两个存储端各有自己的公开域名，
+ * latest.json 需要内嵌 MSI / exe 包的下载地址，而两个存储端各有自己的公开域名，
  * 因此**按端分别生成**：写入 OSS 的清单指向 CDN_URL，写入 R2 的指向 R2_URL，
  * 这样任一端的客户端都能从自己那一端直接下载，不会跨端回源。
+ * 差量包只含 exe（DLL 不变），旧客户端仍按 `windows-x86_64` 的 MSI 更新。
  *
  * 桌面端发布最后还会把 MSI 传到夸克网盘（`QUARK_APP_DIR` 目录，默认 `Duet Night Abyss Builder`），
  * 并把同目录下的历史版本 MSI 移进 `老版本` 子目录。夸克令牌未配置时跳过该步（`--skip-quark` 强制跳过）。
@@ -15,6 +17,8 @@
  *   pnpm deploy app skip-build    # 跳过构建，直接用现有产物
  *   pnpm deploy app -v            # 额外把每端清单内容打印出来
  *   pnpm deploy app --skip-quark  # 跳过夸克网盘上传与归档
+ *   pnpm deploy app --full-install # 本次改动了 DLL / resources：不生成 exe 差量包
+ *   pnpm deploy app --delta-base 1.6.0 # 上一个是整包版本：低于 1.6.0 的客户端改走完整 MSI
  *   pnpm deploy json              # 只生成 latest.json 内容，不做任何上传
  */
 
@@ -24,6 +28,7 @@ import { fileURLToPath } from "node:url"
 import { $ } from "bun"
 import { isQuarkConfigured, QuarkClient, readQuarkConfig, resolveDirFid } from "../apps/server/src/util/quark"
 import { envConfig, getActiveBackends, getPublicUrlOn, isObjectStorageConfigured, putFile, putGenerated } from "./object-storage"
+import { EXE_ZIP_NAME, type ExeAssetInfo, packExeZip } from "./update-pack"
 
 const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
@@ -32,6 +37,15 @@ const skipBuild = args.includes("skip-build")
 const skipQuark = args.includes("--skip-quark")
 const printJson = args.includes("-v")
 const generateOnly = args.includes("json")
+/** DLL / resources 有变化的版本不发布 exe 差量包，客户端回退到完整 MSI */
+const fullInstall = args.includes("--full-install")
+/** 差量包可安全套用的最低已安装版本；跳过整包版本的客户端改走完整 MSI */
+const deltaBaseIndex = args.indexOf("--delta-base")
+const deltaBase = deltaBaseIndex >= 0 ? args[deltaBaseIndex + 1]?.replace(/^v/, "") : undefined
+if (deltaBaseIndex >= 0 && (!deltaBase || !/^\d+\.\d+\.\d+$/.test(deltaBase))) {
+    console.error("--delta-base 需要不带 v 的 semver，如 1.6.0")
+    process.exit(1)
+}
 
 /** 仓库根：发布脚本一律从仓库根运行，所有产物路径都锚定到它 */
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -56,6 +70,9 @@ const CONFIG = {
     app: {
         msiPath: `./apps/web/src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi`,
         sigPath: `./apps/web/src-tauri/target/release/bundle/msi/DNA Builder_${version}_x64_zh-CN.msi.sig`,
+        /** 差量更新只替换 exe，DLL 等固定文件不参与打包 */
+        exePath: "./apps/web/src-tauri/target/release/dna-builder.exe",
+        exeZipPath: `./.tmp/${EXE_ZIP_NAME}`,
         /** 夸克网盘投放目录：fid 或路径（apps/server/.env 的 QUARK_APP_DIR 覆盖，缺省 `Duet Night Abyss Builder`） */
         quarkDir: envConfig.QUARK_APP_DIR || "Duet Night Abyss Builder",
         /** 历史版本归档子目录名 */
@@ -77,32 +94,58 @@ async function uploadToStorage(filePath: string, objectKey: string): Promise<voi
 }
 
 /**
- * 生成 tauri updater 格式的 latest.json 内容。
+ * 生成 updater 清单：保留旧客户端使用的 MSI 字段，同时附带 exe 差量包。
  * @param version 版本号
- * @param signature 签名
+ * @param signature MSI 签名（旧版 tauri updater 校验用）
  * @param msiUrl MSI 文件下载链接（由调用方按存储端给出）
+ * @param exeUrl exe 差量包下载链接；未生成差量包时省略
+ * @param exeAsset exe 差量包大小与摘要
+ * @param requiresFullInstall 是否要求客户端走完整 MSI 安装
+ * @param deltaBase 差量包可安全套用的最低已安装版本
  * @returns 清单对象
  */
-function generateLatestJson(version: string, signature: string, msiUrl: string): object {
+function generateLatestJson(
+    version: string,
+    signature: string,
+    msiUrl: string,
+    exeUrl?: string,
+    exeAsset?: ExeAssetInfo,
+    requiresFullInstall = false,
+    deltaBase?: string
+): object {
     const versionsPath = path.resolve(WEB_DIR, "public/versions.json")
     const versionsData = JSON.parse(fs.readFileSync(versionsPath, "utf-8"))
     const versionInfo = versionsData.find((v: { version: string }) => v.version === `v${version}`)
     const notes = versionInfo ? `更新内容: ${versionInfo.msg}` : ""
 
+    const platforms: Record<string, object> = {
+        "windows-x86_64": {
+            signature: signature,
+            url: msiUrl,
+        },
+        "windows-x86_64-msi": {
+            signature: signature,
+            url: msiUrl,
+        },
+    }
+    if (exeUrl && exeAsset) {
+        // 旧版 tauri updater 会把 platforms 里的每一项都按 { url, signature } 解析，
+        // 缺少 signature 会导致整个 latest.json 反序列化失败，因此这里必须带上 MSI 的签名。
+        platforms["windows-x86_64-exe"] = {
+            signature: signature,
+            url: exeUrl,
+            size: exeAsset.size,
+            sha256: exeAsset.sha256,
+        }
+    }
+
     return {
         version: version,
         notes,
         pub_date: new Date().toISOString(),
-        platforms: {
-            "windows-x86_64": {
-                signature: signature,
-                url: msiUrl,
-            },
-            "windows-x86_64-msi": {
-                signature: signature,
-                url: msiUrl,
-            },
-        },
+        platforms,
+        ...(requiresFullInstall ? { requires_full_install: true } : {}),
+        ...(deltaBase ? { delta_base: deltaBase } : {}),
     }
 }
 
@@ -125,19 +168,39 @@ function readSignature(options: { allowMock: boolean }): string {
 }
 
 /**
- * 按存储端生成并上传 latest.json：每端清单里的 MSI 地址指向该端自己的公开域名。
+ * 按存储端生成并上传 latest.json：每端清单里的 MSI / exe 地址指向该端自己的公开域名。
  * @param msiKey MSI 的对象 key
  * @param signature 签名内容
+ * @param exeKey exe 差量包的对象 key；为空表示本次没有差量包
+ * @param exeAsset exe 差量包大小与摘要
+ * @param requiresFullInstall 是否要求客户端走完整 MSI 安装
+ * @param deltaBase 差量包可安全套用的最低已安装版本
  * @param options.print 是否打印每端生成的清单
  */
-async function uploadLatestJsonPerBackend(msiKey: string, signature: string, options: { print: boolean }): Promise<void> {
-    console.log("4. 按存储端生成并上传 latest.json...")
+async function uploadLatestJsonPerBackend(
+    msiKey: string,
+    signature: string,
+    exeKey: string | null,
+    exeAsset: ExeAssetInfo | null,
+    requiresFullInstall: boolean,
+    deltaBase: string | undefined,
+    options: { print: boolean }
+): Promise<void> {
+    console.log("5. 按存储端生成并上传 latest.json...")
     const backends = getActiveBackends()
 
     await putGenerated(
         "latest.json",
         backend => {
-            const latestJson = generateLatestJson(version, signature, getPublicUrlOn(backend, msiKey))
+            const latestJson = generateLatestJson(
+                version,
+                signature,
+                getPublicUrlOn(backend, msiKey),
+                exeKey ? getPublicUrlOn(backend, exeKey) : undefined,
+                exeAsset ?? undefined,
+                requiresFullInstall,
+                deltaBase
+            )
             if (options.print) {
                 console.log(`\n📋 [${backend.label}] latest.json:`)
                 console.log(JSON.stringify(latestJson, null, 2))
@@ -298,8 +361,37 @@ function isPathUnderDir(fullPath: unknown, dirName: string): boolean {
     return false
 }
 
+/** 差量包的对象 key（带版本号，避免 CDN 命中旧文件） */
+function exeObjectKey(): string {
+    return `exe/dna-builder_${version}_x64.exe.zip`
+}
+
 /**
- * 桌面端发布：构建（可选）→ 上传 MSI → 按端生成并上传 latest.json → 夸克网盘。
+ * 打包并上传 exe 差量包；exe 不存在时跳过（仍发布整包 MSI）。
+ * @returns 对象 key（跳过时为 null）与包信息
+ */
+async function uploadExeZip(): Promise<{ exeKey: string | null; exeAsset: ExeAssetInfo | null }> {
+    const exeAbsPath = path.resolve(REPO_ROOT, CONFIG.app.exePath)
+    if (!fs.existsSync(exeAbsPath)) {
+        console.warn(`⚠️  未找到 exe（${exeAbsPath}），本次不发布差量更新包`)
+        return { exeKey: null, exeAsset: null }
+    }
+
+    const zipAbsPath = path.resolve(REPO_ROOT, CONFIG.app.exeZipPath)
+    const exeAsset = await packExeZip(exeAbsPath, zipAbsPath)
+    console.log(`✅ 差量包已生成: ${(exeAsset.size / 1024 / 1024).toFixed(2)} MB (sha256=${exeAsset.sha256})`)
+
+    const exeKey = exeObjectKey()
+    try {
+        await uploadToStorage(zipAbsPath, exeKey)
+    } finally {
+        fs.rmSync(zipAbsPath, { force: true })
+    }
+    return { exeKey, exeAsset }
+}
+
+/**
+ * 桌面端发布：构建（可选）→ 上传 MSI 与 exe 差量包 → 按端生成并上传 latest.json → 夸克网盘。
  */
 async function deployApp() {
     try {
@@ -325,13 +417,26 @@ async function deployApp() {
         const msiKey = `msi/${path.basename(msiAbsPath)}`
         await uploadToStorage(msiAbsPath, msiKey)
 
-        console.log("3. 读取签名文件...")
+        let exeKey: string | null = null
+        let exeAsset: ExeAssetInfo | null = null
+        if (fullInstall) {
+            console.log("3. --full-install：跳过 exe 差量包，客户端将回退到完整 MSI...")
+        } else {
+            console.log("3. 生成并上传 exe 差量包...")
+            const uploaded = await uploadExeZip()
+            exeKey = uploaded.exeKey
+            exeAsset = uploaded.exeAsset
+        }
+
+        console.log("4. 读取签名文件...")
         const signature = readSignature({ allowMock: false })
 
-        // latest.json 内嵌的 MSI 地址必须与所在端的域名一致，故按端分别生成
-        await uploadLatestJsonPerBackend(msiKey, signature, { print: printJson })
+        // latest.json 内嵌的 MSI / exe 地址必须与所在端的域名一致，故按端分别生成
+        await uploadLatestJsonPerBackend(msiKey, signature, exeKey, exeAsset, fullInstall, fullInstall ? undefined : deltaBase, {
+            print: printJson,
+        })
 
-        console.log("5. 上传MSI到夸克网盘并归档老版本...")
+        console.log("6. 上传MSI到夸克网盘并归档老版本...")
         await deployQuarkMsi(msiAbsPath)
 
         console.log("=== App部署流程完成 ===")
@@ -344,14 +449,30 @@ async function deployApp() {
 /**
  * 仅生成 latest.json 内容并打印，不做任何上传。
  */
-function generateJsonOnly(): void {
+async function generateJsonOnly(): Promise<void> {
     console.log("=== 开始仅生成JSON流程 ===")
 
     const signature = readSignature({ allowMock: true })
     const msiKey = `msi/DNA Builder_${version}_x64_zh-CN.msi`
+    const exeKey = exeObjectKey()
+    const exeAbsPath = path.resolve(REPO_ROOT, CONFIG.app.exePath)
+    let exeAsset: ExeAssetInfo | null = null
+    if (!fullInstall && fs.existsSync(exeAbsPath)) {
+        const zipAbsPath = path.resolve(REPO_ROOT, CONFIG.app.exeZipPath)
+        exeAsset = await packExeZip(exeAbsPath, zipAbsPath)
+        fs.rmSync(zipAbsPath, { force: true })
+    }
 
     for (const backend of getActiveBackends()) {
-        const latestJson = generateLatestJson(version, signature, getPublicUrlOn(backend, msiKey))
+        const latestJson = generateLatestJson(
+            version,
+            signature,
+            getPublicUrlOn(backend, msiKey),
+            exeAsset ? getPublicUrlOn(backend, exeKey) : undefined,
+            exeAsset ?? undefined,
+            fullInstall,
+            fullInstall ? undefined : deltaBase
+        )
         console.log(`\n📋 [${backend.label}] 生成的latest.json内容:`)
         console.log(JSON.stringify(latestJson, null, 2))
     }
@@ -362,7 +483,7 @@ function generateJsonOnly(): void {
  */
 async function main() {
     if (generateOnly) {
-        generateJsonOnly()
+        await generateJsonOnly()
         return
     }
 
