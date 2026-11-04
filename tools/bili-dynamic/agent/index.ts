@@ -129,6 +129,25 @@ function hasExternalResource(text: string): boolean {
     return false
 }
 
+/** Release 正文长度上限：超过后按 markdown 边界截断 */
+const MAX_RELEASE_NOTES_CHARS = 4000
+
+/**
+ * 在安全的 markdown 边界截断：先退到最近的空行，再丢掉未闭合的代码块，
+ * 否则自动追加的下载链接与 Full Changelog 会被吞进代码块里。
+ */
+function truncateReleaseNotes(text: string, limit: number): string {
+    const head = text.slice(0, limit)
+    const boundary = head.lastIndexOf("\n\n")
+    let candidate = boundary > limit / 2 ? head.slice(0, boundary) : head
+    // 奇数个 ``` 说明最后一个代码块没闭合，整段丢掉
+    if (((candidate.match(/^```/gm) ?? []).length & 1) === 1) {
+        const lastFence = candidate.lastIndexOf("```")
+        if (lastFence > 0) candidate = candidate.slice(0, lastFence)
+    }
+    return `${candidate.trimEnd()}…`
+}
+
 /** 校验 release 正文：必须是 markdown 纯文本，不能带 HTML 标签或自己包 details */
 export function validateReleaseNotes(raw: string): string {
     const text = raw
@@ -137,8 +156,19 @@ export function validateReleaseNotes(raw: string): string {
         .trim()
     if (!text) throw new Error("agent 未提供 Release 正文")
     if (/<details|<summary|<script|<iframe|<style/i.test(text)) throw new Error("Release 正文含不允许的 HTML 标签")
-    if (text.length > 4000) return `${text.slice(0, 4000).trimEnd()}…`
-    return text
+    return text.length > MAX_RELEASE_NOTES_CHARS ? truncateReleaseNotes(text, MAX_RELEASE_NOTES_CHARS) : text
+}
+
+/**
+ * 取 finish 参数里的字符串字段。
+ * 传输层没有强制 tool schema，模型可能返回对象/数组，直接 String() 会得到 "[object Object]"，
+ * 所以这里只接受真正的字符串（允许缺省为 undefined）。
+ */
+function readStringField(output: Record<string, unknown>, key: string): string {
+    const value = output[key]
+    if (value == null) return ""
+    if (typeof value !== "string") throw new Error(`finish 参数 ${key} 不是字符串，已拒绝`)
+    return value
 }
 
 /**
@@ -168,17 +198,17 @@ export async function runCardAgent(options: CardAgentRunOptions): Promise<CardAg
         `本次改动范围是 ${options.meta.previousTag ? `${options.meta.previousTag}..${options.meta.upperTag}` : options.meta.upperTag}。请调研这个区间的改动，然后生成更新卡片。`
     )
 
-    const html = validateGeneratedHtml(String(result.output.html ?? ""))
-    const body = String(result.output.body ?? "").trim()
+    const html = validateGeneratedHtml(readStringField(result.output, "html"))
+    const body = readStringField(result.output, "body").trim()
     // 产出不合格属于生成失败，走规则模板降级；ConfigError 只留给上游配置问题
     if (!body) throw new Error("agent 未提供动态正文")
     if (body.includes("<")) throw new Error("agent 返回的正文含 HTML 标记，已拒绝")
-    const releaseNotes = validateReleaseNotes(String(result.output.release_notes ?? ""))
+    const releaseNotes = validateReleaseNotes(readStringField(result.output, "release_notes"))
 
     return {
         html,
         body,
-        title: String(result.output.title ?? "").trim(),
+        title: readStringField(result.output, "title").trim(),
         releaseNotes,
         rounds: result.rounds,
         compactions: result.compactions,

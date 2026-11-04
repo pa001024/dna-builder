@@ -5,7 +5,7 @@ import path from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { formatCompactSummary, groupRoundStartIndexes, resolveAutoCompactThreshold } from "./agent/compact.ts"
 import { estimateMessagesTokens, estimateTextTokens, resolveModelContextWindow } from "./agent/context.ts"
-import { validateGeneratedHtml } from "./agent/index.ts"
+import { validateGeneratedHtml, validateReleaseNotes } from "./agent/index.ts"
 import { createRepoAgentTools } from "./agent/repo-tools.ts"
 import type { AgentTool } from "./agent/tool.ts"
 import { scheduleToolCalls } from "./agent/tool.ts"
@@ -150,6 +150,28 @@ describe("validateGeneratedHtml", () => {
             )
         ).not.toThrow()
         expect(() => validateGeneratedHtml("<html><body><p>https: 不是 URL</p></body></html>")).not.toThrow()
+    })
+})
+
+describe("validateReleaseNotes", () => {
+    it("拒绝 HTML 标签与 details 折叠块", () => {
+        expect(() => validateReleaseNotes("<details><summary>x</summary></details>")).toThrow()
+        expect(() => validateReleaseNotes("## 更新\n<script>alert(1)</script>")).toThrow()
+    })
+
+    it("超长时按段落边界截断，不把内容切成半句", () => {
+        const notes = validateReleaseNotes("## 更新内容\n\n".repeat(500))
+        expect(notes.length).toBeLessThanOrEqual(4001)
+        expect(notes.endsWith("…")).toBe(true)
+        expect(notes).not.toContain("\n\n…")
+    })
+
+    it("未闭合的代码块整段丢弃，避免后续链接被吞进代码块", () => {
+        // 代码块有几千字符，截断点落在块内；丢弃后不能留下孤立的开围栏
+        const notes = validateReleaseNotes(`## 更新\n\n正文段落。\n\n\`\`\`ts\n${"// 示例\n\n".repeat(800)}`)
+        expect((notes.match(/^```/gm) ?? []).length % 2).toBe(0)
+        expect(notes.endsWith("…")).toBe(true)
+        expect(notes).toContain("正文段落。")
     })
 })
 

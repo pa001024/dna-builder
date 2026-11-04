@@ -192,6 +192,18 @@ function readCommitData(revision: string, previousTag: string): CommitData {
     return { subjects, log: records.join("\n\n"), diffStat }
 }
 
+/** 读取完整提交标题列表：Release 正文的折叠区不能截断，否则会丢版本内的提交 */
+function readAllSubjects(revision: string, previousTag: string): string[] {
+    const args = ["log", "--no-merges", "--pretty=format:%s"]
+    // 有上一版本时按区间取全量；没有区间就退回卡片同样的上限，避免把整个历史塞进 release
+    if (previousTag) args.push(`${previousTag}..${revision}`)
+    else args.push("-n", "30", revision)
+    return tryGit(args)
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+}
+
 function todayInShanghai(): string {
     return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" })
         .format(new Date())
@@ -350,7 +362,8 @@ async function main(): Promise<void> {
             previousTag,
             repo,
             generated: releaseNotes,
-            commitSubjects: commitData.subjects,
+            // 卡片摘要只需要代表性提交，折叠区则要完整列表，所以这里单独取一次
+            commitSubjects: readAllSubjects(upperTag, previousTag),
             deltaLine: process.env.DELTA_LINE || undefined,
             installerUrl: process.env.INSTALLER_URL || undefined,
         })

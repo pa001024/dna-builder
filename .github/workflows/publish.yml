@@ -323,8 +323,11 @@ jobs:
                   node @scriptArgs
 
             - name: Update release notes from agent
+              id: release_notes
               # agent 没产出 markdown 时脚本不会输出 release_notes_path，这一步直接跳过，保留原版正文
               if: success() && github.event_name != 'pull_request' && steps.bili_dynamic.outputs.release_notes_path
+              # 资产已上传，改正文失败不该把整个 release 判红；失败情况交给 Add summary 标注
+              continue-on-error: true
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -343,6 +346,7 @@ jobs:
                   DYN_URL: ${{ steps.bili_dynamic.outputs.dyn_url }}
                   DYN_AUTHOR: ${{ steps.bili_dynamic.outputs.dyn_author }}
                   DYN_REASON: ${{ steps.bili_dynamic.outputs.dyn_reason }}
+                  NOTES_OUTCOME: ${{ steps.release_notes.outcome }}
               run: |
                   $summary = "
                   > [!TIP]
@@ -357,6 +361,9 @@ jobs:
                       $summary += "`n> [!WARNING]`n> B 站动态已跳过$reason`n"
                   } elseif ($env:BILI_OUTCOME -ne "success") {
                       $summary += "`n> [!WARNING]`n> B 站动态未发布（步骤结果: $env:BILI_OUTCOME），详见该步骤日志`n"
+                  }
+                  if ($env:NOTES_OUTCOME -eq "failure") {
+                      $summary += "`n> [!WARNING]`n> 发行说明更新失败，保留原版正文`n"
                   }
 
                   echo $summary >> $Env:GITHUB_STEP_SUMMARY

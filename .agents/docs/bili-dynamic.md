@@ -91,6 +91,8 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 
 - 卡片 HTML 由 agent 自己写，代码只做安全校验：必须是完整文档，且不含脚本、内联事件属性、`iframe`/`object`/`link`/`meta`/`base`、`@import`，也不引用 `github.com` / `dna-builder.cn` / `dobapp.cc` 之外的外部资源。
 - 正文由脚本补齐 release 链接，并压到 1900 字以内（B 站上限 2000）。
+- Release 正文超过 4000 字符时按空行边界截断，未闭合的代码块整段丢弃，避免后续追加的下载链接被当成代码。
+- Release 折叠区列出区间内**全部**提交（卡片摘要仍有 60 条上限，避免正文过长）；更新正文失败不会让 release 判红，只在 Summary 标一条警告。
 - 生成失败分两类：Key / 地址 / 凭据配错属于**配置问题**，跳过发布并在 Step Summary 留一条警告；接口临时故障才回退到规则模板。`--no-ai` 可强制走规则模板。
 - 规则模板（`card.ts` + `fallback.ts`）只是兜底：按提交类型分组、限制 4 组 9 条，保证任何情况下都有一张能看的卡片。
 - 渲染默认使用 Chrome；找不到时用 Edge。Node.js 需要 23.6+（原生运行 `.ts`），CI 的 `lts/*` 满足要求。
