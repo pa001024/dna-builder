@@ -1,19 +1,23 @@
 # 桌面端自动更新（exe 差量包）
 
-桌面端不再使用 `tauri-plugin-updater` 的整包 MSI 更新（约 50 MB），而是自研了一套 magpie 风格的
-更新流程：只下载 `dna-builder.exe` 的 zip（约 30 MB），安装目录里的 `opencv_world490.dll`、
-`DirectML.dll` 与 `resources/` 保持原样。
+桌面端默认走自研的 magpie 风格差量更新：只下载 `dna-builder.exe` 的 zip（约 30 MB），
+安装目录里的 `opencv_world490.dll`、`DirectML.dll` 与 `resources/` 保持原样。
 
-前端入口仍是 `apps/web/src/api/update.ts` 的 `checkUpdate` / `downloadAndInstallUpdate`，
-`StartupModal.vue` 无需感知实现变化。
+**整包 / 降级路径仍然保留**：`tauri-plugin-updater` 继续注册在运行时。改动了 DLL / resources
+的版本、或客户端版本低于 feed 的 `delta_base` 时，自动改走插件的 MSI 整包安装（等价于改动前的
+更新流程）；只有插件源里找不到该版本时才退回打开安装页手动安装。
+
+前端入口是 `apps/web/src/api/update.ts` 的 `checkUpdate`、`downloadAndInstallUpdate`（差量）
+与 `downloadAndInstallFullUpdate`（整包）。
 
 ## 流程
 
 ```
 feed(latest.json / update.json)
   → 版本比较（semver）
-  → feed 标记 requires_full_install 时：不下载差量包，UI 引导打开 installer_url（完整 MSI）
-  → 下载 exe.zip（Range 断点续传 + 5 次重试）
+  → requires_full_install / 低于 delta_base：tauri updater 下载并安装 MSI（签名校验 + 提权）
+      └ 插件源无该版本 → 打开 installer_url 手动安装
+  → 否则下载 exe.zip（Range 断点续传 + 5 次重试）
   → SHA-256 校验
   → 解压 dna-builder.exe 到 %LOCALAPPDATA%\com.pa.dna-builder\updates\<version>\
   → 启动 helper（当前 exe 的 --update-apply 模式）并退出
@@ -106,10 +110,12 @@ DNA_BUILDER_UPDATE_FEED=http://127.0.0.1:8791/latest.json
 >   普通 tag push 不带头部信息，只适合紧接上一个差量版本的常规发版。
 > - CDN：`pnpm deploy app --delta-base 1.6.0`。
 >
-> 客户端收到该标记后只提示、不下载，点击更新会打开完整安装包地址。
+> 客户端收到该标记后不下载 exe，改为调用 **`tauri-plugin-updater` 的整包 MSI 安装**
+> （`downloadAndInstallFullUpdate`：签名校验、MSI 安装、提权都由插件完成，与本次改动前的
+> 更新流程一致）。只有插件源里拿不到该版本时，才退回打开 `installer_url` 手动下载。
 
-> `tauri.conf.json` 仍保留 `plugins.updater` 与 `bundle.createUpdaterArtifacts`：打包器需要它生成
-> MSI 的 `.sig` 与旧客户端读取的 `latest.json`；运行时不再注册 `tauri-plugin-updater`。
+> `tauri.conf.json` 的 `plugins.updater` 与 `bundle.createUpdaterArtifacts` 必须保留，运行时也
+> **继续注册 `tauri-plugin-updater`**：整包 / 低于差量基线的版本都靠它完成 MSI 自动安装。
 
 ## 本地联调
 

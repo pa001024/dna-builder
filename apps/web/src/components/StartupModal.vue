@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
+import { checkUpdate, downloadAndInstallFullUpdate, downloadAndInstallUpdate } from "@/api/update"
 import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
@@ -207,37 +207,45 @@ async function runAppUpdateFlow(): Promise<void> {
 }
 
 async function applyUpdate(): Promise<void> {
-    // DLL / resources 有变化的版本只能走完整安装包：打开下载页，由用户重新安装
-    if (step.value.kind === "app-new-version" && step.value.requiresFullInstall) {
-        const url = step.value.installerUrl
-        if (!url) {
-            await ui.showDialog(t("updater.updateFailed"), t("updater.updateErrorMessage"))
-            return
-        }
-        try {
-            await openUrl(url)
-        } catch (error) {
-            console.error("打开安装包下载页失败:", error)
-            await ui.showDialog(t("updater.updateFailed"), error instanceof Error ? error.message : String(error))
-            return
-        }
-        skipAppUpdate()
-        return
-    }
+    // DLL / resources 有变化的版本走 tauri updater 的整包 MSI 安装（与改动前的更新流程一致）
+    const requiresFullInstall = step.value.kind === "app-new-version" && step.value.requiresFullInstall
+    /** 插件源里没有该版本，已改为打开下载页交给用户手动安装 */
+    let handedOff = false
 
     openStep({ kind: "app-update" })
     try {
-        await downloadAndInstallUpdate(progress => {
-            updateProgress.value = progress
-        })
+        if (requiresFullInstall) {
+            const installed = await downloadAndInstallFullUpdate(progress => {
+                updateProgress.value = progress
+            })
+            if (!installed) {
+                await openFullInstaller()
+                handedOff = true
+            }
+        } else {
+            await downloadAndInstallUpdate(progress => {
+                updateProgress.value = progress
+            })
+        }
     } catch (error: any) {
         console.error("更新失败:", error)
         await ui.showDialog(t("updater.updateFailed"), error || t("updater.updateErrorMessage"))
     } finally {
         updateProgress.value = 0
         appUpdateChecked.value = true
-        await runPackFlow()
+        // 交接到下载页时走 skipAppUpdate（关弹窗并继续数据包流程），避免与 runPackFlow 重复
+        if (handedOff) skipAppUpdate()
+        else await runPackFlow()
     }
+}
+
+/** 整包版本无法用插件安装时，打开安装包下载页让用户手动安装。 */
+async function openFullInstaller(): Promise<void> {
+    const url = step.value.kind === "app-new-version" ? step.value.installerUrl : undefined
+    if (!url) {
+        throw new Error(t("updater.updateErrorMessage"))
+    }
+    await openUrl(url)
 }
 
 function skipAppUpdate(): void {

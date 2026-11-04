@@ -4808,7 +4808,7 @@
     },
     "updater": {
         "downloadUpdate": "今すぐ更新",
-        "fullInstallHint": "このバージョンは完全なインストーラーが必要です。ダウンロードページから再インストールしてください",
+        "fullInstallHint": "このバージョンは同梱ファイルが変更されているため、完全なインストーラーをダウンロードして自動でインストールします",
         "newVersionFound": "新しいバージョン v{{version}}が見つかりました",
         "newVersionMessage": "\n\n{{body}}\n\n更新を自動的にダウンロードしてインストールしますか？",
         "newVersionTitle": "新しいバージョン",

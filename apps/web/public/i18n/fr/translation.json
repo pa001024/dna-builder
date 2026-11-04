@@ -4853,7 +4853,7 @@
     },
     "updater": {
         "downloadUpdate": "Mettre à jour",
-        "fullInstallHint": "Cette version nécessite l'installateur complet ; ouvrez la page de téléchargement et réinstallez",
+        "fullInstallHint": "Cette version modifie des fichiers intégrés ; l'installateur complet sera téléchargé et installé automatiquement",
         "newVersionFound": "Nouvelle version v{{version}} trouvée",
         "newVersionMessage": "\n\n{{body}}\n\nVoulez-vous télécharger et installer automatiquement la mise à jour ?",
         "newVersionTitle": "Nouvelle version disponible",

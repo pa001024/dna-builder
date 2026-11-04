@@ -4806,7 +4806,7 @@
     },
     "updater": {
         "downloadUpdate": "立即更新",
-        "fullInstallHint": "此版本需要完整安裝包，點擊下載後請在瀏覽器中安裝",
+        "fullInstallHint": "此版本改動了依賴檔案，將下載完整安裝包自動安裝",
         "newVersionFound": "發現新版本 v{{version}}",
         "newVersionMessage": "\n\n{{body}}\n\n是否自動下載並安裝更新？",
         "newVersionTitle": "有新版本",
