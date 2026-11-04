@@ -23,7 +23,7 @@ pub async fn update_download(app: AppHandle) -> Result<String, String> {
         .ok_or_else(|| "当前已是最新版本".to_string())?;
     if info.requires_full_install {
         return Err(format!(
-            "该版本需要完整安装包，请在浏览器打开 {}",
+            "该版本需要完整安装包（tauri updater 整包安装），差量下载不可用：{}",
             info.installer_url.as_deref().unwrap_or(&info.url)
         ));
     }
