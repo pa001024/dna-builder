@@ -50,6 +50,13 @@ class CdpClient {
                 for (const listener of this.listeners.get(message.method) ?? []) listener(message.params)
             }
         })
+        // 浏览器崩溃/退出时 WebSocket 会关掉，挂起的调用必须立刻失败，否则 await 永远不返回
+        const failAll = () => {
+            for (const waiter of this.pending.values()) waiter.reject(new Error("浏览器调试连接已关闭"))
+            this.pending.clear()
+        }
+        socket.addEventListener("close", failAll)
+        socket.addEventListener("error", failAll)
     }
 
     static connect(url: string): Promise<CdpClient> {
@@ -70,10 +77,23 @@ class CdpClient {
         })
     }
 
-    send<T = unknown>(method: string, params?: Record<string, unknown>): Promise<T> {
+    send<T = unknown>(method: string, params?: Record<string, unknown>, timeoutMs = 30_000): Promise<T> {
         const id = this.nextId++
         return new Promise<T>((resolve, reject) => {
-            this.pending.set(id, { resolve: value => resolve(value as T), reject })
+            const timer = setTimeout(() => {
+                this.pending.delete(id)
+                reject(new Error(`CDP 调用超时：${method}`))
+            }, timeoutMs)
+            this.pending.set(id, {
+                resolve: value => {
+                    clearTimeout(timer)
+                    resolve(value as T)
+                },
+                reject: error => {
+                    clearTimeout(timer)
+                    reject(error)
+                },
+            })
             this.socket.send(JSON.stringify({ id, method, params }))
         })
     }

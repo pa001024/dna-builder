@@ -278,6 +278,7 @@ jobs:
             - name: Publish update dynamic to Bilibili
               if: success() && github.event_name != 'pull_request'
               continue-on-error: true
+              timeout-minutes: 10
               shell: pwsh
               env:
                   DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
