@@ -314,11 +314,24 @@ jobs:
                   BILI_DEDEUSERID: ${{ secrets.BILI_DEDEUSERID }}
                   TAG_NAME: ${{ github.ref_name }}
                   PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
+                  DELTA_LINE: ${{ steps.update_mode.outputs.delta_line }}
+                  INSTALLER_URL: https://cdn.dna-builder.cn/msi/DNA%20Builder_${{ steps.commit_diff.outputs.version }}_x64_zh-CN.msi
               run: |
                   # 用一个数组传参，避免上一版本为空时 PowerShell 把空字符串吞掉
                   $scriptArgs = @("tools/bili-dynamic/index.ts", "--tag", $env:TAG_NAME, "--repo", $env:GITHUB_REPOSITORY)
                   if ($env:PREVIOUS_TAG) { $scriptArgs += @("--previous", $env:PREVIOUS_TAG) }
                   node @scriptArgs
+
+            - name: Update release notes from agent
+              # agent 没产出 markdown 时脚本不会输出 release_notes_path，这一步直接跳过，保留原版正文
+              if: success() && github.event_name != 'pull_request' && steps.bili_dynamic.outputs.release_notes_path
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAG_NAME: ${{ github.ref_name }}
+                  NOTES_PATH: ${{ steps.bili_dynamic.outputs.release_notes_path }}
+              run: |
+                  gh release edit $env:TAG_NAME --repo $env:GITHUB_REPOSITORY --notes-file $env:NOTES_PATH
 
             - name: Add summary
               if: success() && github.event_name != 'pull_request'
@@ -326,13 +339,23 @@ jobs:
               env:
                   # continue-on-error 的步骤失败/超时时 release 仍然成功，这里要如实标注动态是否发出
                   BILI_OUTCOME: ${{ steps.bili_dynamic.outcome }}
+                  DYN_STATUS: ${{ steps.bili_dynamic.outputs.dyn_status }}
+                  DYN_URL: ${{ steps.bili_dynamic.outputs.dyn_url }}
+                  DYN_AUTHOR: ${{ steps.bili_dynamic.outputs.dyn_author }}
+                  DYN_REASON: ${{ steps.bili_dynamic.outputs.dyn_reason }}
               run: |
                   $summary = "
                   > [!TIP]
                   > 发布成功
                   > [下载最新的稳定版本](https://github.com/pa001024/dna-builder/releases/latest/)
                   "
-                  if ($env:BILI_OUTCOME -ne "success") {
+                  if ($env:DYN_STATUS -eq "published" -and $env:DYN_URL) {
+                      $author = if ($env:DYN_AUTHOR) { "（$env:DYN_AUTHOR）" } else { "" }
+                      $summary += "`n> B 站动态$author：[查看]($env:DYN_URL)`n"
+                  } elseif ($env:BILI_OUTCOME -eq "success" -and $env:DYN_STATUS -eq "skipped") {
+                      $reason = if ($env:DYN_REASON) { "：$env:DYN_REASON" } else { "" }
+                      $summary += "`n> [!WARNING]`n> B 站动态已跳过$reason`n"
+                  } elseif ($env:BILI_OUTCOME -ne "success") {
                       $summary += "`n> [!WARNING]`n> B 站动态未发布（步骤结果: $env:BILI_OUTCOME），详见该步骤日志`n"
                   }
 

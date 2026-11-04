@@ -15,6 +15,7 @@ import { captureFullPage } from "./browser.ts"
 import { CARD_MIN_HEIGHT, CARD_WIDTH, renderFallbackHtml } from "./card.ts"
 import { ConfigError, DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./errors.ts"
 import { fallbackCardContent, finalizeBody } from "./fallback.ts"
+import { buildReleaseNotes } from "./release-notes.ts"
 import { summarizeCommits } from "./summary.ts"
 import type { CardContent, VersionMeta } from "./types.ts"
 
@@ -95,7 +96,9 @@ function printUsage(): void {
   BILI_DEDEUSERID    Cookie 中的 DedeUserID（可选）
   CHROME_PATH        Chrome/Edge 可执行文件路径（默认自动查找）
   BILI_DRY_RUN=1     等价于 --dry-run
-  BILI_SKIP=1        跳过发布（仍会渲染卡片）`)
+  BILI_SKIP=1        跳过发布（仍会渲染卡片）
+  DELTA_LINE         release 正文里的差量更新说明（由工作流传入）
+  INSTALLER_URL      完整安装包地址（由工作流传入）`)
 }
 
 function git(args: string[]): string {
@@ -172,6 +175,13 @@ function iconDataUrl(): string {
     return `data:image/png;base64,${readFileSync(iconPath).toString("base64")}`
 }
 
+/** 把结果写进 GitHub Actions 的步骤 output，供后续步骤渲染 summary */
+function writeStepOutput(lines: string): void {
+    const file = process.env.GITHUB_OUTPUT
+    if (!file) return
+    appendFileSync(file, lines.endsWith("\n") ? lines : `${lines}\n`)
+}
+
 function printContent(content: CardContent, source: string): void {
     console.log(`\n=== 更新内容（${source}）===`)
     console.log(`标题：${content.title}`)
@@ -199,6 +209,8 @@ async function main(): Promise<void> {
     if (!tryGit(["rev-parse", "--verify", revision])) throw new Error(`git 中找不到版本：${revision}`)
 
     const { version, tag } = resolveVersion(revision, pkg.version)
+    // HEAD 预览时 package.json 的版本往往还没跟上，区间取「最近 tag 之后」；正式发布仍用当前 tag 作上界
+    const upperTag = revision === "HEAD" ? "HEAD" : tag
     const previousTag = options.previous || process.env.PREVIOUS_TAG || findPreviousTag(revision, tag)
     const previousVersion = previousTag ? previousTag.replace(/^v/i, "") : ""
     const repo = options.repo || process.env.GITHUB_REPOSITORY || DEFAULT_REPO
@@ -206,13 +218,14 @@ async function main(): Promise<void> {
         version,
         previousVersion,
         tag,
+        upperTag,
         previousTag,
         date: todayInShanghai(),
         repo,
         site: SITE,
     }
 
-    const commitData = readCommitData(revision, previousTag)
+    const commitData = readCommitData(upperTag, previousTag)
     const summary = summarizeCommits(commitData.subjects)
 
     console.log("=== 版本 ===")
@@ -224,6 +237,7 @@ async function main(): Promise<void> {
 
     let content: CardContent
     let html: string | null = null
+    let releaseNotes = ""
     let contentSource = "规则摘要"
     if (options.noAi) {
         console.log("\n--no-ai：使用规则摘要")
@@ -242,6 +256,7 @@ async function main(): Promise<void> {
                 log: line => console.log(line),
             })
             html = generated.html
+            releaseNotes = generated.releaseNotes
             content = {
                 ...fallbackCardContent(summary, meta),
                 title: generated.title || `v${version} 更新`,
@@ -292,6 +307,22 @@ async function main(): Promise<void> {
         )
         writeFileSync(textPath, `${content.body}\n`, "utf8")
 
+        // release 页正文：agent 生成的 markdown + 折叠的原始提交；没有生成结果时走原版
+        const releasePath = `${basePath}.release.md`
+        const releaseBody = buildReleaseNotes({
+            tag,
+            previousTag,
+            repo,
+            generated: releaseNotes,
+            commitSubjects: commitData.subjects,
+            deltaLine: process.env.DELTA_LINE || undefined,
+            installerUrl: process.env.INSTALLER_URL || undefined,
+        })
+        writeFileSync(releasePath, releaseBody, "utf8")
+        // 只有 agent 真的产出了 markdown 才让工作流去覆盖 release 正文；否则保留原版
+        if (releaseNotes) writeStepOutput(`release_notes_path=${releasePath}\n`)
+        console.log(`  Release 正文：${path.relative(ROOT, releasePath)}（${releaseNotes ? "agent 生成" : "原版 git log"}）`)
+
         console.log("\n=== 渲染卡片 ===")
         const shot = await captureFullPage({
             htmlPath,
@@ -307,10 +338,12 @@ async function main(): Promise<void> {
 
     if (options.dryRun || process.env.BILI_DRY_RUN === "1") {
         console.log("\n[dry-run] 未发布到 B 站")
+        writeStepOutput("dyn_status=dry-run\n")
         return
     }
     if (process.env.BILI_SKIP === "1") {
         console.log("\nBILI_SKIP=1，跳过发布")
+        writeStepOutput("dyn_status=skipped\ndyn_reason=BILI_SKIP=1\n")
         return
     }
 
@@ -322,7 +355,9 @@ async function main(): Promise<void> {
     const result = await publishDynamic({ imagePath, text: content.body, credentials: state.credentials })
     console.log(`\n发布成功：${result.url}`)
 
-    if (process.env.GITHUB_STEP_SUMMARY) {
+    // 交给工作流的 Add summary 步骤统一渲染；本地/单独运行时才自己写一条
+    writeStepOutput(`dyn_status=published\ndyn_url=${result.url}\ndyn_author=${result.uname}\n`)
+    if (!process.env.GITHUB_OUTPUT && process.env.GITHUB_STEP_SUMMARY) {
         appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n- [B站动态](${result.url})（${result.uname}）\n`)
     }
 
@@ -335,7 +370,9 @@ main().catch(error => {
     if (error instanceof ConfigError) {
         console.warn(`\n跳过发布：${error.message}`)
         console.warn("配置方法见 .agents/docs/bili-dynamic.md")
-        if (process.env.GITHUB_STEP_SUMMARY) {
+        // 让工作流的 summary 知道是「跳过」而不是「发布成功」
+        writeStepOutput(`dyn_status=skipped\ndyn_reason=${error.message.replace(/\r?\n/g, " ")}\n`)
+        if (!process.env.GITHUB_OUTPUT && process.env.GITHUB_STEP_SUMMARY) {
             appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n> [!WARNING]\n> B 站动态已跳过：${error.message}\n`)
         }
         if (parseArgs(process.argv.slice(2)).strict) process.exitCode = 1

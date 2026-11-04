@@ -79,6 +79,8 @@ export interface VersionMeta {
     version: string
     previousVersion: string
     tag: string
+    /** 版本区间的上界：正式发布等于 tag；本地 HEAD 预览时是 HEAD（package.json 版本常未跟上） */
+    upperTag: string
     previousTag: string
     date: string
     repo: string

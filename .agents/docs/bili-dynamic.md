@@ -1,12 +1,27 @@
-# B 站动态自动发布
+# B 站动态与 Release 正文自动生成
 
 发布 `v*` tag 时，`publish.yml` 在 release 资产上传完成后调用 `tools/bili-dynamic/index.ts`：
 
-1. 收集上一版本 tag 到当前 tag的提交与 `git diff --stat`，用于规则兜底；
-2. 启动**卡片生成 agent**（见下节）：它能读整个仓库，自己调研改动、自己设计并写出整页 HTML 与动态正文；
+1. 收集上一版本 tag 到当前 tag 的提交与 `git diff --stat`，用于规则兜底；
+2. 启动**发布编辑 agent**（见下节）：它能读整个仓库，自己调研改动，一次产出三样东西：
+   - 1080px 整页 HTML（卡片）；
+   - B 站动态正文；
+   - GitHub Release 正文（markdown）；
 3. 用本机 Chrome/Edge 的 CDP 量出真实页面高度后整页截图（2x）；
 4. 调 B 站图文动态接口上传图片并发布；
-5. 动态链接写入 GitHub Actions Step Summary。
+5. agent 产出了 release markdown 时，工作流用 `gh release edit --notes-file` 覆盖 release 正文；
+   没产出（配置缺失 / 生成失败 / `--no-ai`）则**保留原版正文**，不覆盖。
+
+## Release 正文结构
+
+无论 agent 是否成功，正文末尾都统一追加（`release-notes.ts`）：
+
+- 下载入口（直接下载 + 差量更新说明）与网盘提示；
+- `<details>` 折叠的**原始提交记录**（agent 成功时折叠，失败时原版标题 + 同一份折叠列表，不重复展示）；
+- `**Full Changelog**` 对比链接。
+
+agent 成功时开头是它写的 markdown（`##` 分组、列表、加粗），失败时开头是原版的
+`## 本次更新内容 (上一版本 → 当前版本)`。
 
 ## 卡片生成 agent
 
@@ -30,7 +45,8 @@
 - **技能**：`.agents/skills/` 下的技能会被列进提示词，模型可用 `read_skill` 按需读取正文（例如 `db-style` 的设计规范）。
 - **上下文管理**：每轮请求前估算 tokens，超过 `窗口 − 输出预留 − 安全缓冲` 就压缩历史；`deepseek-flash` 按 1M 窗口。
 - **轮次与输出**：工具轮次上限 30，单轮输出上限 16000 tokens；触达上限自动续写，`finish` 的 JSON 被截断会要求模型精简后重发（最多 2 次）。
-- **安全**：产出的 HTML 必须是完整文档、无 `<script>`、不引用外部图片/字体；正文不得含 HTML 标记。
+- **安全**：产出的 HTML 必须是完整文档、无 `<script>`、不引用外部图片/字体；正文不得含 HTML 标记；
+  release markdown 不得带 `<details>` / `<summary>` / `<script>`（折叠区由脚本统一加）。
 
 ## Secrets / Variables
 

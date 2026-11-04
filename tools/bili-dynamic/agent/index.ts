@@ -12,11 +12,13 @@ import { loadSkills, renderSkillSection } from "./skills.ts"
 import type { AgentTool } from "./tool.ts"
 import { createChatTransport } from "./transport.ts"
 
-/** 生成结果：agent 自己写的 HTML 与动态正文 */
+/** 生成结果：agent 自己写的 HTML、动态正文与 release 页 markdown */
 export interface CardAgentOutput {
     html: string
     body: string
     title: string
+    /** GitHub Release 正文（markdown） */
+    releaseNotes: string
     rounds: number
     compactions: number
     tokens: number
@@ -35,25 +37,28 @@ export interface CardAgentRunOptions {
 const FINISH_TOOL: AgentTool = {
     definition: {
         name: "finish",
-        description: "提交最终结果：整页 HTML 与 B 站动态正文。调研完成后必须调用它。",
+        description: "提交最终结果：整页 HTML、B 站动态正文与 Release 页 markdown。调研完成后必须调用它。",
         parameters: {
             type: "object",
             properties: {
                 html: { type: "string", description: "完整 HTML 文档（含 <style>），1080px 宽，高度自适应" },
                 body: { type: "string", description: "B 站动态正文，450 字以内，不要放链接" },
                 title: { type: "string", description: "卡片大标题，12-22 字" },
+                release_notes: { type: "string", description: "GitHub Release 页正文（markdown），300-800 字" },
             },
-            required: ["html", "body", "title"],
+            required: ["html", "body", "title", "release_notes"],
         },
     },
     execute(args) {
-        return { content: `已收到结果：html ${String(args.html ?? "").length} 字符，body ${String(args.body ?? "").length} 字符` }
+        return {
+            content: `已收到结果：html ${String(args.html ?? "").length} 字符，body ${String(args.body ?? "").length} 字符，release_notes ${String(args.release_notes ?? "").length} 字符`,
+        }
     },
 }
 
 function buildSystemPrompt(meta: VersionMeta): string {
     const versionLine = meta.previousVersion ? `v${meta.previousVersion} → v${meta.version}` : `v${meta.version}`
-    const range = meta.previousTag ? `${meta.previousTag}..${meta.tag}` : meta.tag
+    const range = meta.previousTag ? `${meta.previousTag}..${meta.upperTag}` : meta.upperTag
     return `你是 DNA Builder 的发布编辑 agent，可以直接读取这个仓库来搞清楚每个改动到底做了什么。
 
 仓库：${meta.repo}
@@ -75,6 +80,10 @@ function buildSystemPrompt(meta: VersionMeta): string {
   必须包含：品牌标识（DNA BUILDER）、版本号、日期、本次更新内容、页脚（github.com/${meta.repo} 与 ${meta.site}）。
 - body：B 站动态正文，450 字以内，口语化，可用 emoji，不要放链接。
 - title：卡片大标题，12-22 字，有主题感。
+- release_notes：GitHub Release 页正文（markdown），300-800 字。
+  用 ## 小标题分组、列表、必要的加粗；面向玩家，写清楚"更新了什么 / 解决什么问题"。
+  不要重复卡片上的同一套措辞，可以更详细；不要出现开发者术语；
+  不要写下载链接与完整更新链接（工作流会自动补），也不要自己加 <details> 折叠块（原始提交由工作流附在末尾）。
 
 只写提交里能证明的内容，不要编造功能、数值或日期。忽略 docs / test / chore / ci 等内部改动，除非它直接影响用户。
 
@@ -89,6 +98,18 @@ export function validateGeneratedHtml(html: string): string {
     if (/https?:\/\/(?!github\.com|dna-builder)[^"')\s]+\.(png|jpg|jpeg|gif|webp|svg|woff2?|ttf|otf)/i.test(text)) {
         throw new Error("agent 返回的 HTML 引用了外部图片或字体，已拒绝")
     }
+    return text
+}
+
+/** 校验 release 正文：必须是 markdown 纯文本，不能带 HTML 标签或自己包 details */
+export function validateReleaseNotes(raw: string): string {
+    const text = raw
+        .replace(/\r\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+    if (!text) throw new Error("agent 未提供 Release 正文")
+    if (/<details|<summary|<script|<iframe|<style/i.test(text)) throw new Error("Release 正文含不允许的 HTML 标签")
+    if (text.length > 4000) return `${text.slice(0, 4000).trimEnd()}…`
     return text
 }
 
@@ -116,18 +137,20 @@ export async function runCardAgent(options: CardAgentRunOptions): Promise<CardAg
     })
 
     const result = await agent.run(
-        `本次改动范围是 ${options.meta.previousTag ? `${options.meta.previousTag}..${options.meta.tag}` : options.meta.tag}。请调研这个区间的改动，然后生成更新卡片。`
+        `本次改动范围是 ${options.meta.previousTag ? `${options.meta.previousTag}..${options.meta.upperTag}` : options.meta.upperTag}。请调研这个区间的改动，然后生成更新卡片。`
     )
 
     const html = validateGeneratedHtml(String(result.output.html ?? ""))
     const body = String(result.output.body ?? "").trim()
     if (!body) throw new ConfigError("agent 未提供动态正文")
     if (body.includes("<")) throw new Error("agent 返回的正文含 HTML 标记，已拒绝")
+    const releaseNotes = validateReleaseNotes(String(result.output.release_notes ?? ""))
 
     return {
         html,
         body,
         title: String(result.output.title ?? "").trim(),
+        releaseNotes,
         rounds: result.rounds,
         compactions: result.compactions,
         tokens: result.usage.inputTokens + result.usage.outputTokens,
