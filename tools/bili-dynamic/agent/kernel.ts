@@ -38,6 +38,8 @@ export interface CardAgentOptions {
     contextWindow?: number
     temperature?: number
     maxToolConcurrency?: number
+    /** finish 参数语义校验：返回错误文案时要求模型修正后重发 */
+    validateFinish?: (output: Record<string, unknown>) => string | null
     onLog?: (line: string) => void
     onUsage?: (usage: AgentRoundUsage) => void
 }
@@ -146,9 +148,9 @@ export class CardAgent {
             const finishCall = calls.find(call => call.name === "finish")
             if (finishCall) {
                 toolSequence.push("finish")
+                let output: Record<string, unknown>
                 try {
-                    const output = parseFinishArguments(finishCall.arguments)
-                    return { output, rounds, usage, compactions, toolSequence }
+                    output = parseFinishArguments(finishCall.arguments)
                 } catch (error) {
                     // 参数被截断是常态：让模型自己精简后重发，而不是直接判定失败
                     finishRetries += 1
@@ -167,6 +169,29 @@ export class CardAgent {
                     })
                     continue
                 }
+
+                // 语义错误（HTML 含被禁元素等）和 JSON 截断一样，应该让模型在同一轮内改完再交
+                const invalid = this.options.validateFinish?.(output) ?? null
+                if (invalid) {
+                    finishRetries += 1
+                    this.log(`  ! finish 结果未通过校验（${invalid}），要求修正（${finishRetries}/${MAX_FINISH_RETRIES}）`)
+                    if (finishRetries > MAX_FINISH_RETRIES) throw new Error(`finish 结果多次未通过校验：${invalid}`)
+                    messages.push({
+                        role: "user",
+                        text: "",
+                        toolResults: calls.map(call => ({
+                            toolCallId: call.id,
+                            content:
+                                call.name === "finish"
+                                    ? `finish 结果未通过校验：${invalid}。请修正后重新调用 finish，其余字段保持不变。`
+                                    : "未执行：本次已提交 finish。",
+                            isError: call.name === "finish",
+                        })),
+                    })
+                    continue
+                }
+
+                return { output, rounds, usage, compactions, toolSequence }
             }
 
             const overBudget = rounds > maxToolRounds

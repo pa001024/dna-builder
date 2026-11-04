@@ -118,5 +118,7 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 ## 运行期故障
 
 - 配置问题见上一节：跳过发布并留痕。
+- 发布返回 `code=-111 CSRF 校验失败`：`create/dyn` 只认**查询参数**里的 `csrf`（图片上传则是表单字段），
+  且必须参与 WBI 签名；只放进 JSON 正文会被忽略。凭据本身有效时先查这里。
 - 接口临时故障（DeepSeek 5xx、B 站 5xx）：步骤失败，但 `publish.yml` 里该步骤是 `continue-on-error: true`，不会阻塞 release。
 - 图片渲染失败：检查 `CHROME_PATH`，或在本机打开 `.tmp/bili-dynamic/<tag>.html` 查看排版。

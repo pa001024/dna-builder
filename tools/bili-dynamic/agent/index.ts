@@ -107,15 +107,23 @@ export function validateGeneratedHtml(html: string): string {
     // 内联事件处理器同样能执行脚本（<img src=x onerror=...>）
     if (/\son[a-z]+\s*=/i.test(text)) throw new Error("agent 返回的 HTML 含事件属性，已拒绝")
     // 会主动加载外部资源的元素与 CSS 指令
-    if (/<(iframe|object|embed|link|meta|base)\b/i.test(text) || /@import\b/i.test(text)) {
-        throw new Error("agent 返回的 HTML 含不允许的元素或 CSS 指令，已拒绝")
+    const forbidden = /<(iframe|object|embed|link|base)\b/i.exec(text)
+    if (forbidden) throw new Error(`agent 返回的 HTML 含不允许的 <${forbidden[1].toLowerCase()}>，已拒绝`)
+    if (/@import\b/i.test(text)) throw new Error("agent 返回的 HTML 含 @import，已拒绝")
+    // meta 只放行 charset / viewport：http-equiv=refresh 可以把页面导航到外站
+    for (const match of text.matchAll(/<meta\b[^>]*>/gi)) {
+        const tag = match[0]
+        if (!/\bcharset\s*=/i.test(tag) && !/\bname\s*=\s*["']viewport["']/i.test(tag)) {
+            throw new Error(`agent 返回的 HTML 含不允许的 <meta>（仅允许 charset / viewport）：${tag.slice(0, 80)}`)
+        }
     }
-    if (hasExternalResource(text)) throw new Error("agent 返回的 HTML 引用了外部资源，已拒绝")
+    const external = findExternalResource(text)
+    if (external) throw new Error(`agent 返回的 HTML 引用了外部资源（${external.slice(0, 80)}），已拒绝`)
     return text
 }
 
 /** 找出指向允许主机之外的外部资源引用（含协议相对 URL 与不带扩展名的写法） */
-function hasExternalResource(text: string): boolean {
+function findExternalResource(text: string): string | null {
     const urlPattern = /(?:https?:)?\/\/[^\s"'()]+/gi
     for (const match of text.matchAll(urlPattern)) {
         const raw = match[0]
@@ -123,16 +131,30 @@ function hasExternalResource(text: string): boolean {
         try {
             host = new URL(raw.startsWith("//") ? `https:${raw}` : raw).hostname.toLowerCase()
         } catch {
-            return true
+            return raw
         }
-        if (!ALLOWED_HOSTS.some(allowed => host === allowed || host.endsWith(`.${allowed}`))) return true
+        if (!ALLOWED_HOSTS.some(allowed => host === allowed || host.endsWith(`.${allowed}`))) return raw
     }
     // url(...) 里的 data: 内联是允许的，其余一律拒绝
     for (const match of text.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
         const value = match[2].trim()
-        if (value && !value.startsWith("data:") && !value.startsWith("#")) return true
+        if (value && !value.startsWith("data:") && !value.startsWith("#")) return value
     }
-    return false
+    return null
+}
+
+/** finish 产出的语义校验：通过返回 null，否则返回可回灌给模型的错误文案 */
+function validateFinishOutput(output: Record<string, unknown>): string | null {
+    try {
+        validateGeneratedHtml(readStringField(output, "html"))
+        const body = readStringField(output, "body")
+        if (!body.trim()) return "body 不能为空"
+        if (body.includes("<")) return "body 不能包含 HTML 标记"
+        validateReleaseNotes(readStringField(output, "release_notes"))
+        return null
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error)
+    }
 }
 
 /** Release 正文长度上限：超过后按 markdown 边界截断 */
@@ -197,6 +219,7 @@ export async function runCardAgent(options: CardAgentRunOptions): Promise<CardAg
         metaUserPrefix: renderSkillSection(skills),
         maxToolRounds: MAX_TOOL_ROUNDS,
         maxContinuations: MAX_CONTINUATIONS,
+        validateFinish: validateFinishOutput,
         onLog: options.log,
     })
 

@@ -48,6 +48,90 @@ function resolveInside(root: string, relative: string): string {
     return resolved
 }
 
+let ripgrepAvailable: boolean | undefined
+
+/** CI 的 Windows runner 不带 ripgrep（spawnSync rg ENOENT），探一次后决定用哪个引擎 */
+function hasRipgrep(): boolean {
+    if (ripgrepAvailable === undefined) {
+        try {
+            execFileSync("rg", ["--version"], { stdio: "ignore" })
+            ripgrepAvailable = true
+        } catch {
+            ripgrepAvailable = false
+        }
+    }
+    return ripgrepAvailable
+}
+
+function escapeRegExp(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/** 把模型给的 glob 转成正则；只支持 ** * ? {a,b}，不支持的写法返回 null */
+export function globToRegExp(glob: string): RegExp | null {
+    const normalized = normalize(glob)
+    let source = ""
+    for (let index = 0; index < normalized.length; index += 1) {
+        const char = normalized[index]
+        if (char === "*") {
+            if (normalized[index + 1] === "*") {
+                if (normalized[index + 2] === "/") {
+                    // **/ 匹配零层或多层目录
+                    source += "(?:[^/]+/)*"
+                    index += 2
+                } else {
+                    source += ".*"
+                    index += 1
+                }
+            } else {
+                source += "[^/]*"
+            }
+        } else if (char === "?") {
+            source += "[^/]"
+        } else if (char === "{") {
+            const end = normalized.indexOf("}", index)
+            if (end === -1) return null
+            const options = normalized.slice(index + 1, end).split(",")
+            if (options.some(option => !option)) return null
+            source += `(?:${options.map(escapeRegExp).join("|")})`
+            index = end
+        } else {
+            source += escapeRegExp(char)
+        }
+    }
+    return new RegExp(`^${source}$`)
+}
+
+/** glob 的非通配前缀，作为 git grep 的搜索路径，避免整仓扫描 */
+function globBase(glob: string): string {
+    const normalized = normalize(glob)
+    const wildcard = normalized.search(/[*?{]/)
+    const head = wildcard === -1 ? normalized : normalized.slice(0, wildcard)
+    const slash = head.lastIndexOf("/")
+    return slash <= 0 ? "." : head.slice(0, slash)
+}
+
+/**
+ * @description 没有 ripgrep 时的回退：用 git grep 搜已跟踪文件（输出同样是 path:line:text）。
+ * @param root 仓库根目录
+ * @param pattern 正则（ERE）
+ * @param glob 可选的路径 glob，仅用来缩小搜索范围
+ * @returns 原始匹配行；无匹配返回空串
+ */
+export function searchWithGitGrep(root: string, pattern: string, glob: string): string {
+    try {
+        return execFileSync(
+            "git",
+            ["grep", "--line-number", "--no-color", "-I", "-E", "--no-textconv", "-e", pattern, "--", globBase(glob)],
+            { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 8 * 1024 * 1024, timeout: 20_000 }
+        )
+    } catch (error) {
+        // 1 = 没有匹配，属于正常结果
+        if ((error as { status?: number }).status === 1) return ""
+        throw error
+    }
+}
+
 /**
  * @description 构造只读仓库工具集。
  * @param root 仓库根目录
@@ -118,25 +202,50 @@ export function createRepoAgentTools(root: string, skills: Map<string, SkillEntr
         execute(args) {
             const pattern = String(args.pattern ?? "")
             if (!pattern) throw new Error("pattern 不能为空")
-            const globArgs = args.glob ? ["--glob", String(args.glob)] : []
+            const glob = args.glob ? normalize(String(args.glob)) : ""
+            const matcher = glob ? globToRegExp(glob) : null
+            if (glob && !matcher) throw new Error(`不支持的 glob：${glob}`)
+
+            let output: string
             try {
-                // pattern 来自模型（可能被仓库里的文本注入），必须用 --regexp 传值并以 -- 结束选项解析，
-                // 否则以 "-" 开头的模式会被 rg 当成参数（如 --pre=... 可执行外部命令）
-                const output = execFileSync(
-                    "rg",
-                    ["--line-number", "--no-heading", "--color", "never", "--max-count", "8", ...globArgs, "--regexp", pattern, "--", "."],
-                    { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 8 * 1024 * 1024, timeout: 20_000 }
-                )
-                const lines = output
-                    .split(/\r?\n/)
-                    .filter(line => !isBlocked((line.split(":")[0] ?? "").replace(/^\.\//, "")))
-                    .slice(0, 100)
-                return clip(lines.join("\n") || "（无匹配）")
+                if (hasRipgrep()) {
+                    // pattern 来自模型（可能被仓库里的文本注入），必须用 --regexp 传值并以 -- 结束选项解析，
+                    // 否则以 "-" 开头的模式会被 rg 当成参数（如 --pre=... 可执行外部命令）
+                    const globArgs = glob ? ["--glob", glob] : []
+                    output = execFileSync(
+                        "rg",
+                        [
+                            "--line-number",
+                            "--no-heading",
+                            "--color",
+                            "never",
+                            "--max-count",
+                            "8",
+                            ...globArgs,
+                            "--regexp",
+                            pattern,
+                            "--",
+                            ".",
+                        ],
+                        { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 8 * 1024 * 1024, timeout: 20_000 }
+                    )
+                } else {
+                    output = searchWithGitGrep(root, pattern, glob)
+                }
             } catch (error) {
                 const status = (error as { status?: number }).status
-                if (status === 1) return "（无匹配）"
-                throw new Error(`搜索失败：${error instanceof Error ? error.message : error}`)
+                if (status === 1) output = ""
+                else throw new Error(`搜索失败：${error instanceof Error ? error.message : error}`)
             }
+
+            const lines = output.split(/\r?\n/).filter(line => {
+                const separator = line.indexOf(":")
+                if (separator < 1) return false
+                const file = normalize(line.slice(0, separator))
+                if (isBlocked(file)) return false
+                return !matcher || matcher.test(file)
+            })
+            return clip(lines.slice(0, 100).join("\n") || "（无匹配）")
         },
     }
 

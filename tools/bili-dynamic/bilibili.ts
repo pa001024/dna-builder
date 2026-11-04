@@ -148,14 +148,18 @@ function keyOf(url: string): string {
     }
 }
 
-function buildWbiQuery(wbiImg: NavData["wbi_img"]): string {
-    const wts = Math.round(Date.now() / 1000)
+/** WBI 签名覆盖查询参数里的全部字段（含 csrf），否则服务端重算签名会对不上 */
+function buildWbiQuery(params: Record<string, string>, wbiImg: NavData["wbi_img"]): string {
     if (!wbiImg?.img_url || !wbiImg.sub_url) throw new ConfigError("登录接口未返回 wbi_img，无法签名（通常是风控拦截）")
     const raw = keyOf(wbiImg.img_url) + keyOf(wbiImg.sub_url)
     const mixin = MIXIN_TAB.map(index => raw[index] ?? "")
         .join("")
         .slice(0, 32)
-    const query = `wts=${wts}`
+    const entries: Record<string, string> = { ...params, wts: String(Math.round(Date.now() / 1000)) }
+    const query = Object.keys(entries)
+        .sort()
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(entries[key].replace(/[!'()*]/g, ""))}`)
+        .join("&")
     const signature = createHash("md5")
         .update(query + mixin)
         .digest("hex")
@@ -220,12 +224,13 @@ async function createDynamic(
     }
     if (text) dynReq.content = { contents: [{ raw_text: text, type: 1, biz_id: "" }] }
 
+    // create/dyn 的 csrf 只认查询参数；放进正文会被忽略并返回 -111
     const { json } = await requestJson<CreateData>(
-        `${CREATE_URL}?${buildWbiQuery(wbiImg)}`,
+        `${CREATE_URL}?${buildWbiQuery({ csrf: credentials.csrf }, wbiImg)}`,
         {
             method: "POST",
             headers: { ...BASE_HEADERS, origin: ORIGIN, "content-type": "application/json", cookie },
-            body: JSON.stringify({ dyn_req: dynReq, csrf: credentials.csrf }),
+            body: JSON.stringify({ dyn_req: dynReq }),
         },
         "发布动态",
         90_000
