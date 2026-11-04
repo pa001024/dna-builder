@@ -2334,6 +2334,68 @@
     "dev-components": {
         "title": "Component Lab"
     },
+    "diagnostics": {
+        "copied": "Copied",
+        "copy": "Copy all",
+        "copyHint": "Copy the report and send it to support when reporting issues",
+        "field": {
+            "appVersion": "App version",
+            "cpuBrand": "Model",
+            "cpuCores": "Cores (physical / logical)",
+            "cpuFrequency": "Frequency",
+            "cpuVendor": "Vendor",
+            "displayAdapter": "Adapter",
+            "displayMode": "Mode",
+            "displayPrimary": "Primary",
+            "elevated": "Elevated",
+            "gpuDriver": "Driver version",
+            "gpuError": "Enumeration error",
+            "gpuIds": "Vendor / device ID",
+            "gpuName": "Name",
+            "gpuSharedMemory": "Shared memory",
+            "gpuVram": "Dedicated VRAM",
+            "locale": "Locale",
+            "memoryAvailable": "Available memory",
+            "memoryTotal": "Total memory",
+            "os": "OS",
+            "osArch": "System architecture",
+            "osBuild": "OS build",
+            "osVersion": "OS version",
+            "processArch": "Process architecture",
+            "webview2Error": "Detection error",
+            "webview2Recommended": "Recommended minimum",
+            "webview2Version": "Version"
+        },
+        "install": "Auto install",
+        "installDone": "WebView2 {{version}} installed. Restart the app to apply.",
+        "installDoneUnknown": "Installation complete. Restart the app to apply.",
+        "installing": "Installing…",
+        "loadFailed": "Failed to read system information: {{error}}",
+        "loading": "Reading system information…",
+        "officialLink": "Official download",
+        "refresh": "Refresh",
+        "section": {
+            "cpu": "Processor",
+            "display": "Display",
+            "gpu": "GPU",
+            "memory": "Memory",
+            "system": "System",
+            "webview2": "WebView2 runtime"
+        },
+        "title": "Diagnostics",
+        "value": {
+            "no": "No",
+            "software": "software",
+            "yes": "Yes"
+        },
+        "warning": {
+            "lowMemory": "Physical memory is below 8 GB; the app may stutter when many programs run in the background.",
+            "noHardwareGpu": "No hardware GPU detected; the interface will be software-rendered and may lag noticeably.",
+            "oldOsBuild": "The OS build {{build}} is old; upgrading to Windows 10 2004 or newer is recommended.",
+            "webview2Missing": "WebView2 runtime could not be detected (not installed or failed to load); the interface may not render correctly.",
+            "webview2Outdated": "WebView2 {{version}} is outdated (recommended {{minVersion}} or newer); rendering performance may suffer."
+        }
+    },
     "dialog-model": {
         "ok": "OK"
     },
@@ -4363,6 +4425,9 @@
         "defaultFont": "Default Font",
         "depth": "Depth",
         "desc": "Custom application settings",
+        "diagnostics": "Diagnostics",
+        "diagnosticsOpen": "View details",
+        "diagnosticsTip": "Inspect system, hardware and WebView2 runtime info to troubleshoot slowdowns",
         "download": "Download",
         "downloaded": "Downloaded",
         "female": "Female",

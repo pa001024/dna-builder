@@ -106,6 +106,8 @@ windows = { version = "0.62.2", features = [
     "Win32_System_Threading",
     "Win32_System_ProcessStatus",
     "Win32_Security",
+    "Win32_Security_Cryptography",
+    "Win32_Security_WinTrust",
     "Win32_UI_Shell",
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Gdi",

@@ -65,6 +65,7 @@ async function onLanSyncToggle(event: Event) {
 const { t } = useTranslation()
 const isUpdatingLaunchAtStartup = ref(false)
 const safeModeQuizOpen = ref(false)
+const diagnosticsOpen = ref(false)
 const dataPackFileInput = ref<HTMLInputElement | null>(null)
 const dataPackSourceBaseUrl = ref("")
 const dataPackSourceKind = ref<DataPackSourceKind>("auto")
@@ -1802,17 +1803,32 @@ onUnmounted(() => {
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                     :style="{ animationDelay: '0.2s' }"
                 >
-                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                        <span class="label-text">
-                            {{ $t("setting.reset") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
-                        </span>
-                        <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">{{ $t("setting.confirm") }}</div>
+                    <div class="flex flex-col gap-2">
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.diagnostics") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.diagnosticsTip") }}</div>
+                            </span>
+                            <div class="btn btn-secondary w-40" @click="diagnosticsOpen = true">
+                                {{ $t("setting.diagnosticsOpen") }}
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                            <span class="label-text">
+                                {{ $t("setting.reset") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>
+                            </span>
+                            <div class="btn btn-secondary w-40" @click="openResetConfirmDialog">{{ $t("setting.confirm") }}</div>
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
     </ScrollSpyLayout>
 
+    <DiagnosticsDialog v-if="diagnosticsOpen" v-model="diagnosticsOpen" />
     <SafeModeQuizDialog v-model="safeModeQuizOpen" @passed="onSafeModeQuizPassed" @cancelled="onSafeModeQuizCancelled" />
 </template>
