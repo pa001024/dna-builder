@@ -12,7 +12,7 @@
 # 用法: 新开 shell 即自动生效 (hook 了 cd); 非交互/脚本里用 `mise exec -- <cmd>`.
 
 [tools]
-node = "24.11.1"
+node = "26.13.0"
 pnpm = "10.28.1"
 bun = "1.4.4"
 mr-boxington = "latest"
