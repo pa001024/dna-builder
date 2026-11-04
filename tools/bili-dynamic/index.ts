@@ -15,6 +15,7 @@ import { captureFullPage } from "./browser.ts"
 import { CARD_MIN_HEIGHT, CARD_WIDTH, renderFallbackHtml } from "./card.ts"
 import { ConfigError, DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL } from "./errors.ts"
 import { fallbackCardContent, finalizeBody } from "./fallback.ts"
+import { type PreviousTagDeps, resolvePreviousTag } from "./previous-tag.ts"
 import { buildReleaseNotes } from "./release-notes.ts"
 import { summarizeCommits } from "./summary.ts"
 import type { CardContent, VersionMeta } from "./types.ts"
@@ -126,39 +127,6 @@ function resolveVersion(revision: string, pkgVersion: string): { revision: strin
     return { revision, version, tag: revision.startsWith("v") ? revision : `v${version}` }
 }
 
-function findPreviousTag(revision: string, currentTag: string): string {
-    // 本地用 HEAD 预览时 currentTag 取自 package.json，不能与自身比较（区间会退化成 X..X 空集）
-    const described = tryGit(["describe", "--tags", "--abbrev=0", `${revision}^`])
-    if (described) return described
-    // 按提交而不是 tag 名过滤：--tag HEAD 时发布 tag 恰好指向当前提交，按名字比会把它当成上一版本
-    const currentCommit = tryGit(["rev-parse", "--verify", `${revision}^{commit}`])
-    const tags = tryGit(["tag", "--sort=-creatordate"])
-        .split(/\r?\n/)
-        .map(tag => tag.trim())
-        .filter(tag => /^v\d/.test(tag) && tag !== revision && tag !== currentTag)
-        .filter(tag => (currentCommit ? tryGit(["rev-parse", "--verify", `${tag}^{commit}`]) !== currentCommit : true))
-    return tags[0] ?? ""
-}
-
-/**
- * 校验传入的上一版本 tag：必须存在且是当前版本的祖先。
- * 工作流的「Get previous tag」按创建时间取第二个 tag，重跑旧 tag 时会指错版本。
- */
-function resolvePreviousTag(candidate: string, revision: string, currentTag: string): string {
-    const tag = candidate.trim()
-    if (!tag) return findPreviousTag(revision, currentTag)
-    if (!tryGit(["rev-parse", "--verify", `${tag}^{commit}`])) {
-        console.warn(`  上一版本 tag 不存在：${tag}，改为自动查找`)
-        return findPreviousTag(revision, currentTag)
-    }
-    // tag 不是 revision 的祖先时，区间会把别的版本的提交算进来
-    if (!isAncestorOf(tag, revision)) {
-        console.warn(`  上一版本 tag ${tag} 不是 ${currentTag} 的祖先，改为自动查找`)
-        return findPreviousTag(revision, currentTag)
-    }
-    return tag
-}
-
 /** git merge-base --is-ancestor 用退出码表达结果，tryGit 吞掉了非零码，这里单独判定 */
 function isAncestorOf(tag: string, revision: string): boolean {
     try {
@@ -168,6 +136,8 @@ function isAncestorOf(tag: string, revision: string): boolean {
         return false
     }
 }
+
+const PREVIOUS_TAG_DEPS: PreviousTagDeps = { tryGit, isAncestor: isAncestorOf }
 
 function readCommitData(revision: string, previousTag: string): CommitData {
     const args = ["log", "--no-merges", "--pretty=format:%x1e%h%x09%s%n%b"]
@@ -252,7 +222,7 @@ async function main(): Promise<void> {
     const { version, tag } = resolveVersion(revision, pkg.version)
     // HEAD 预览时 package.json 的版本往往还没跟上，区间取「最近 tag 之后」；正式发布仍用当前 tag 作上界
     const upperTag = revision === "HEAD" ? "HEAD" : tag
-    const previousTag = resolvePreviousTag(options.previous || process.env.PREVIOUS_TAG || "", revision, tag)
+    const previousTag = resolvePreviousTag(options.previous || process.env.PREVIOUS_TAG || "", revision, tag, PREVIOUS_TAG_DEPS)
     const previousVersion = previousTag ? previousTag.replace(/^v/i, "") : ""
     const repo = options.repo || process.env.GITHUB_REPOSITORY || DEFAULT_REPO
     const meta: VersionMeta = {
@@ -270,7 +240,9 @@ async function main(): Promise<void> {
     const summary = summarizeCommits(commitData.subjects)
 
     console.log("=== 版本 ===")
-    console.log(`${previousTag ? `${previousTag} → ` : ""}${tag}（${commitData.subjects.length} 个提交）`)
+    // HEAD 预览时 tag 由 package.json 推导，上一版本可能同名，此时写成 "v1.5.2 → v1.5.2" 会误导
+    const rangeLine = previousTag && previousTag !== tag ? `${previousTag} → ${tag}` : `${previousTag ? `${previousTag} 之后` : tag}`
+    console.log(`${rangeLine}（${commitData.subjects.length} 个提交）`)
 
     const apiKey = process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY || ""
     const baseUrl = process.env.DEEPSEEK_BASE_URL || process.env.AI_BASE_URL || DEFAULT_DEEPSEEK_BASE_URL

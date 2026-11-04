@@ -57,7 +57,13 @@ const FINISH_TOOL: AgentTool = {
 }
 
 function buildSystemPrompt(meta: VersionMeta): string {
-    const versionLine = meta.previousVersion ? `v${meta.previousVersion} → v${meta.version}` : `v${meta.version}`
+    // 本地 HEAD 预览时上一版本 tag 可能与 package.json 版本同名，此时不能写成 "v1.5.2 → v1.5.2"
+    const versionLine =
+        meta.previousVersion && meta.previousVersion !== meta.version
+            ? `v${meta.previousVersion} → v${meta.version}`
+            : meta.previousTag
+              ? `v${meta.version}（${meta.previousTag} 之后的改动）`
+              : `v${meta.version}`
     const range = meta.previousTag ? `${meta.previousTag}..${meta.upperTag}` : meta.upperTag
     return `你是 DNA Builder 的发布编辑 agent，可以直接读取这个仓库来搞清楚每个改动到底做了什么。
 

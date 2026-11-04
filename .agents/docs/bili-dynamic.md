@@ -85,7 +85,7 @@ node tools/bili-dynamic/index.ts --tag v1.6.0 --previous v1.5.2
 
 `--tag HEAD` 时版本号取 `package.json`；正式发布时传 `v*` tag。仓库名默认取 `GITHUB_REPOSITORY`（本地回退到 `pa001024/dna-builder`），fork 上也能用。
 
-`--previous`（或 `PREVIOUS_TAG`）会先校验：tag 必须存在且是当前 tag 的祖先，否则回退到自动查找，避免重跑旧 tag 时把别的版本提交算进来。`--title` 会覆盖卡片大标题；agent 生成的 HTML 无法改写标题，此时改用兜底模板渲染，保证截图与标题一致。
+`--previous`（或 `PREVIOUS_TAG`）会先校验：tag 必须存在、是当前 tag 的祖先，且与最近的上一个 tag 指向同一提交，否则回退到自动查找——重跑旧 tag 时工作流按创建时间给出的值往往指错版本，只判断「是祖先」会把中间版本的提交算进本次区间。`--title` 会覆盖卡片大标题；agent 生成的 HTML 无法改写标题，此时改用兜底模板渲染，保证截图与标题一致。
 
 ## 生成口径
 

@@ -66,7 +66,11 @@ export function renderFallbackHtml(data: {
     site: string
 }): string {
     const { content, version, previousVersion, date, iconDataUrl, repo, site } = data
-    const versionLine = previousVersion ? `v${escapeHtml(previousVersion)} → v${escapeHtml(version)}` : `v${escapeHtml(version)}`
+    // HEAD 预览时上一版本可能与 package.json 版本同名，此时写成 "v1.5.2 → v1.5.2" 会让人以为没更新
+    const versionLine =
+        previousVersion && previousVersion !== version
+            ? `v${escapeHtml(previousVersion)} → v${escapeHtml(version)}`
+            : `v${escapeHtml(version)}`
     const icon = iconDataUrl ? `<img class="icon" src="${iconDataUrl}" alt="">` : `<div class="icon icon-fallback"><span>DOB</span></div>`
 
     return `<!doctype html>
