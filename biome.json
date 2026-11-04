@@ -14,7 +14,7 @@
             "!!packages/dob-ui/imports.js",
             "!!packages/dob-ui/index.js",
             "!!**/target",
-            "!!**/skills",
+            "!!.agents/skills/victor-design",
             "!!apps/web/src-tauri/target",
             "!!packages/data/d/translations.data.ts"
         ],

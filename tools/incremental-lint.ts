@@ -109,7 +109,7 @@ const LINT_IGNORES = [
     "**/output/**",
     "**/docs/**",
     "**/mock/**",
-    "**/skills/**",
+    ".agents/skills/victor-design/**",
     "**/weixin/**",
     "**/.claude/**",
     "**/.codex/**",
