@@ -275,6 +275,28 @@ jobs:
                   $feed | ConvertTo-Json -Depth 6 | Out-File -FilePath "update.json" -Encoding utf8
                   gh release upload $env:TAG_NAME update.json --repo $env:GITHUB_REPOSITORY --clobber
 
+            - name: Publish update dynamic to Bilibili
+              if: success() && github.event_name != 'pull_request'
+              continue-on-error: true
+              shell: pwsh
+              env:
+                  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+                  DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+                  DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL }}
+                  BILI_COOKIE: ${{ secrets.BILI_COOKIE }}
+                  BILI_SESSDATA: ${{ secrets.BILI_SESSDATA }}
+                  BILI_JCT: ${{ secrets.BILI_JCT }}
+                  BILI_BUVID3: ${{ secrets.BILI_BUVID3 }}
+                  BILI_DEDEUSERID: ${{ secrets.BILI_DEDEUSERID }}
+                  CHROME_PATH: ${{ vars.CHROME_PATH }}
+                  TAG_NAME: ${{ github.ref_name }}
+                  PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
+              run: |
+                  # 用一个数组传参，避免上一版本为空时 PowerShell 把空字符串吞掉
+                  $scriptArgs = @("tools/bili-dynamic/index.ts", "--tag", $env:TAG_NAME, "--repo", $env:GITHUB_REPOSITORY)
+                  if ($env:PREVIOUS_TAG) { $scriptArgs += @("--previous", $env:PREVIOUS_TAG) }
+                  node @scriptArgs
+
             - name: Add summary
               if: success() && github.event_name != 'pull_request'
               shell: pwsh
