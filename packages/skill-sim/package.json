@@ -1,0 +1,27 @@
+{
+    "name": "dna-builder-skill-sim",
+    "version": "0.1.0",
+    "private": true,
+    "description": "DNA 技能行为 IR：导出器 SkillAssetDoc 的校验、引用解析与可运行 manifest 生成",
+    "type": "module",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./schema": "./src/schema/index.ts",
+        "./pipeline": "./src/pipeline/index.ts",
+        "./data-index": "./src/pipeline/data-index.ts",
+        "./package.json": "./package.json"
+    },
+    "scripts": {
+        "test": "bun test",
+        "typecheck": "tsc --noEmit",
+        "lint": "tsc --noEmit"
+    },
+    "dependencies": {
+        "dna-builder-data": "file:../../packages/data"
+    },
+    "devDependencies": {
+        "typescript": "~5.9.3"
+    }
+}

@@ -1,0 +1,10 @@
+// data-index 单独出口：它会加载 packages/data，运行时 / 前端入口不得经由此索引
+export * from "./build"
+export * from "./check"
+export * from "./ingest"
+export * from "./lua"
+export * from "./manifest"
+export * from "./native-map"
+export * from "./resolve"
+export * from "./types"
+export * from "./verify"

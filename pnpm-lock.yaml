@@ -670,6 +670,16 @@ importers:
         specifier: ^4.0.15
         version: 4.1.12(@types/node@26.6.6)(@vitest/coverage-v8@4.0.15)(vite@7.3.7(@types/node@26.6.6)(jiti@2.7.0)(less@4.9.1)(lightningcss@1.32.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
 
+  packages/skill-sim:
+    dependencies:
+      dna-builder-data:
+        specifier: file:../../packages/data
+        version: file:packages/data
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
   packages/vscode-bhl: {}
 
   tools/data-mapper: {}
