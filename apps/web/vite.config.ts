@@ -18,6 +18,8 @@ const mockDataPackDir = resolve(__dirname, "mock/data-pack")
 const mockPluginsDir = resolve(__dirname, "mock/plugins")
 const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
 const isDisableRewrite = process.env.DISABLE_REWRITE === "1"
+/** 每次构建唯一：注册 sw.js 时带在 URL 上，绕过 CDN 对 SW 脚本的缓存 */
+const buildId = Date.now().toString(36)
 
 /**
  * 从构建产物中剔除 public/imgs 资源。
@@ -45,6 +47,7 @@ export default defineConfig(async () => ({
         "import.meta.vitest": "undefined",
         __APP_BUILD__: JSON.stringify(isAppBuild),
         __WEB_BUILD__: JSON.stringify(!isAppBuild),
+        __BUILD_ID__: JSON.stringify(buildId),
     },
     resolve: {
         alias: [
@@ -89,7 +92,10 @@ export default defineConfig(async () => ({
         }),
         VitePWA({
             registerType: "autoUpdate",
+            // 注册逻辑在 main.ts 里手写（需要给 sw.js 加构建号查询参数），禁止插件再注入一份
+            injectRegister: false,
             includeAssets: [],
+            includeManifestIcons: false,
             manifest: {
                 name: "DNA Builder",
                 short_name: "DNA Builder",
@@ -115,10 +121,45 @@ export default defineConfig(async () => ({
                 ],
             },
             workbox: {
-                navigateFallbackDenylist: [/^\/graphql/, /^\/api/],
-                maximumFileSizeToCacheInBytes: 12000000,
-                globPatterns: ["**/*.{js,css,html,json}"],
+                // 只预缓存一个稳定的小文件：预缓存全量产物会让每次发版重下约 40MB，
+                // 且新 SW 激活时会清掉旧 chunk，仍开着旧页面的标签页随后加载懒模块就会白屏。
+                // 保留一条清单也为了让生成器输出 cleanupOutdatedCaches()，清掉旧版留下的全量缓存。
+                globPatterns: ["manifest.webmanifest"],
+                // 关闭导航回退：导航交给下面的 NetworkFirst，在线时永远拿到最新 index.html
+                navigateFallback: undefined,
+                skipWaiting: true,
+                clientsClaim: true,
                 runtimeCaching: [
+                    {
+                        // 页面导航：优先网络（发版后立即生效），断网时回退到最近一次访问的 HTML
+                        urlPattern: ({ request, url }) =>
+                            request.mode === "navigate" && !url.pathname.startsWith("/api") && !url.pathname.startsWith("/graphql"),
+                        handler: "NetworkFirst",
+                        options: {
+                            cacheName: "page-cache",
+                            networkTimeoutSeconds: 3,
+                            expiration: {
+                                maxEntries: 30,
+                                maxAgeSeconds: 60 * 60 * 24 * 7,
+                            },
+                        },
+                    },
+                    {
+                        // 构建产物文件名带内容哈希，同一 URL 的内容不会变：按需缓存，
+                        // 且不随版本清理，旧页面的旧 chunk 仍能命中，避免发版后白屏
+                        urlPattern: ({ url }) => url.pathname.startsWith("/assets/"),
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "assets-cache",
+                            expiration: {
+                                maxEntries: 600,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                            cacheableResponse: {
+                                statuses: [200],
+                            },
+                        },
+                    },
                     {
                         urlPattern: /\.json$/,
                         handler: "StaleWhileRevalidate",
@@ -131,7 +172,7 @@ export default defineConfig(async () => ({
                         },
                     },
                     {
-                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/,
                         handler: "CacheFirst",
                         options: {
                             cacheName: "image-cache",

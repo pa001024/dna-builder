@@ -53,6 +53,52 @@ async function registerImgsServiceWorker(): Promise<void> {
 }
 
 /**
+ * 注册网页版 Service Worker。
+ *
+ * sw.js 的响应头允许 CDN 缓存数小时，固定地址会让新版本迟迟不生效；
+ * URL 带上本次构建号，每次发版都是新的缓存键。
+ */
+async function registerWebServiceWorker(): Promise<void> {
+    if (!import.meta.env.PROD || typeof navigator === "undefined" || !navigator.serviceWorker) {
+        return
+    }
+
+    const swUrl = new URL("/sw.js", window.location.origin)
+    swUrl.searchParams.set("v", __BUILD_ID__)
+    try {
+        await navigator.serviceWorker.register(swUrl.toString(), {
+            scope: "/",
+            // 主脚本本来就不走 HTTP 缓存；导入的 workbox 运行时文件名带哈希，可以走缓存
+            updateViaCache: "imports",
+        })
+    } catch (error) {
+        console.error("PWA 注册失败", error)
+    }
+}
+
+/**
+ * 懒加载 chunk 失败（发版后旧文件已被清理）时整页刷新一次；10 秒内只重试一次，避免刷新循环。
+ */
+function installChunkReloadGuard(): void {
+    window.addEventListener("vite:preloadError", event => {
+        const storageKey = "dna-builder:chunk-reload-at"
+        let lastReloadAt = 0
+        try {
+            lastReloadAt = Number(sessionStorage.getItem(storageKey)) || 0
+        } catch {}
+        if (Date.now() - lastReloadAt < 10_000) {
+            return
+        }
+
+        event.preventDefault()
+        try {
+            sessionStorage.setItem(storageKey, String(Date.now()))
+        } catch {}
+        window.location.reload()
+    })
+}
+
+/**
  * 初始化数据包、图片缓存与 App 图片 Service Worker。
  *
  * 重写插件关闭时数据直读源码，不碰数据包存储。
@@ -203,15 +249,7 @@ async function bootstrap() {
 
     // 仅在非应用环境下注册 Service Worker
     if (!env.isApp) {
-        void import("virtual:pwa-register")
-            .then(({ registerSW }) => {
-                registerSW({
-                    immediate: true,
-                })
-            })
-            .catch(error => {
-                console.error("PWA 注册失败", error)
-            })
+        void registerWebServiceWorker()
     }
 }
 
@@ -228,4 +266,5 @@ export function renderVueNode(vnode: VNode, container: HTMLElement) {
     return appInstance
 }
 
+installChunkReloadGuard()
 void bootstrap()

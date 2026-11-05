@@ -60,6 +60,23 @@ HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description /
 - 新增需要被搜索引擎收录的页面：把它加进 `tools/ssg.mjs` 的 `PAGES`（含 SEO 文案）。
 - 单个路由渲染失败只会退化成「SEO 头 + 空 `#app`」的 SPA 外壳并在日志里告警，不会中断构建。
 
+## Service Worker（网页版）
+
+`sw.js` 由 vite-plugin-pwa 生成，**不做整站预缓存**，策略见 `apps/web/vite.config.ts` 的 `workbox`：
+
+- 预缓存只有 `manifest.webmanifest` 一条（让生成器输出 `cleanupOutdatedCaches()`，清掉旧版留下的全量预缓存）；
+- 导航请求 `NetworkFirst`（`page-cache`）：在线永远取最新 `index.html`，发版后立即生效；
+- `/assets/` 产物 `CacheFirst`（`assets-cache`，600 条 / 30 天）：文件名带内容哈希，URL 与内容一一对应，
+  不随版本清理——旧标签页的旧 chunk 仍能命中，避免新 SW 激活清缓存后白屏；
+- JSON 走 `StaleWhileRevalidate`（`res-cache`），图片 `CacheFirst`（`image-cache`）。
+
+不要改回 `globPatterns: ["**/*.{js,css,html,json}"]`：那会让每次发版重下约 37MB（529 条，含两个 10MB worker），
+并且新 SW 激活时会清掉旧 chunk，仍开着旧页面的标签页随后加载懒模块就会白屏。
+
+线上 `sw.js` 的响应头允许 Cloudflare 缓存 4 小时，所以注册 URL 带构建号（`main.ts` 的 `__BUILD_ID__`，
+vite.config.ts 注入），`injectRegister: false` 且由 `main.ts` 手工注册。
+`main.ts` 另监听 `vite:preloadError`：懒加载 chunk 404 时整页刷新一次（10 秒内不重复），兜住发版窗口。
+
 ## 前端构建的数据包改写（动手前必读）
 
 ## 桌面端版本同步（Tauri）

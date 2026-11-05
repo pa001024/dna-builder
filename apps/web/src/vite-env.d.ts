@@ -7,18 +7,9 @@ declare module "*.vue" {
     export default component
 }
 
-declare module "virtual:pwa-register" {
-    export interface RegisterSWOptions {
-        immediate?: boolean
-        onRegistered?: (registration: ServiceWorkerRegistration) => void
-        onRegisterError?: (error: Error) => void
-    }
-
-    export function registerSW(options?: RegisterSWOptions): (onUpdateReady: (registration: ServiceWorkerRegistration) => void) => void
-}
-
 declare const __APP_BUILD__: boolean
 declare const __WEB_BUILD__: boolean
+declare const __BUILD_ID__: string
 
 declare module "prismjs" {
     interface PrismGrammar {
