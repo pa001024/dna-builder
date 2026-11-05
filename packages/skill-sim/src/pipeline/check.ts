@@ -107,7 +107,7 @@ export function checkManifest(manifest: SkillBehaviorManifest | SkillBehaviorDoc
     }
 }
 
-/** `--simulated` 既可写角色 id（展开为该角色全部技能），也可写技能 id */
+/** `--simulated` 既可写角色 id（按覆盖表口径展开主 E/Q），也可写技能 id */
 function expandSimulated(manifest: SkillBehaviorDoc, values: (number | string)[], errors: Diagnostic[]): string[] {
     const result = new Set<string>()
     for (const value of values) {
@@ -121,11 +121,11 @@ function expandSimulated(manifest: SkillBehaviorDoc, values: (number | string)[]
             errors.push(diagnostic("error", "gate.missing-behavior", `skills.${id}`, `--simulated 引用的 ${id} 既不是技能也不是角色`))
             continue
         }
-        // 角色 id 只展开主 E/Q/P；子技能（slot unknown）不参与 simulated 门禁。
-        const owned = character.skills.map(String).filter(skillId => {
-            const slot = manifest.skills[skillId]?.slot
-            return slot === "E" || slot === "Q" || slot === "P"
-        })
+        // 角色 id 只展开主 E/Q（与 `scripts/coverage-report.ts` 的 simulated 口径一致）；
+        // 被动 P 多为 native-only、子技能 slot 为 unknown，都不参与 simulated 门禁。
+        const owned = character.skills
+            .map(String)
+            .filter(skillId => manifest.skills[skillId]?.slot === "E" || manifest.skills[skillId]?.slot === "Q")
         if (owned.length === 0) {
             errors.push(
                 diagnostic("error", "gate.missing-behavior", `characters.${id}`, `--simulated 角色 ${id} 在 manifest 中没有任何技能`)
@@ -173,6 +173,9 @@ function checkDuplicates(manifest: SkillBehaviorDoc, errors: Diagnostic[]): void
                 )
             }
             seen.add(skillId)
+            // 共享协战 / 被动主技能的 slot 为 unknown，本就允许挂在多个角色下（U7 覆盖表口径），
+            // 只有可施放槽位的技能跨角色重复才算冲突。
+            if (manifest.skills[String(skillId)]?.slot === "unknown") continue
             const previous = owner.get(skillId)
             if (previous !== undefined && previous !== character.id) {
                 errors.push(

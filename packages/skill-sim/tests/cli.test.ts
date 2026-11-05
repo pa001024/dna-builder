@@ -61,7 +61,8 @@ describe("tools/skill-workflow.ts", () => {
         expect(result.code).toBe(0)
         const payload = JSON.parse(result.stdout)
         expect(payload.ok).toBe(true)
-        expect(payload.stats.simulatedSatisfied).toBe(3)
+        // 角色 id 展开主 E/Q，被动 P 不参与
+        expect(payload.stats.simulatedSatisfied).toBe(2)
     })
 
     test("check --simulated 未知 id → 1", () => {

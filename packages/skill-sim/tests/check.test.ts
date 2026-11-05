@@ -23,8 +23,9 @@ describe("checkManifest", () => {
         const result = checkManifest(manifest, { simulated: ["4101"], strict: true, index: createGameDataIndex() })
         expect(result.errors).toEqual([])
         expect(result.ok).toBe(true)
-        expect(result.stats.simulatedRequested).toBe(3)
-        expect(result.stats.simulatedSatisfied).toBe(3)
+        // 角色 id 只展开主 E/Q，被动 P 不参与门禁
+        expect(result.stats.simulatedRequested).toBe(2)
+        expect(result.stats.simulatedSatisfied).toBe(2)
         expect(result.stats.skillsWithActions).toBe(3)
     })
 
@@ -65,6 +66,19 @@ describe("checkManifest", () => {
         const result = checkManifest(broken)
         expect(result.ok).toBe(false)
         expect(result.errors.some(item => item.code === "gate.duplicate-skill")).toBe(true)
+    })
+
+    test("共享子技能（slot unknown）跨角色不算重复，可施放槽位仍报错", () => {
+        const shared = clone(manifest) as SkillBehaviorManifest
+        shared.skills["410103"]!.slot = "unknown"
+        shared.characters.push({ id: 900001, nameKey: "a", skills: [410103] }, { id: 900002, nameKey: "b", skills: [410103] })
+        const result = checkManifest(shared)
+        expect(result.errors.some(item => item.code === "gate.duplicate-skill")).toBe(false)
+
+        const conflicted = clone(manifest) as SkillBehaviorManifest
+        conflicted.characters.push({ id: 900003, nameKey: "c", skills: [410101] })
+        const conflict = checkManifest(conflicted)
+        expect(conflict.errors.some(item => item.code === "gate.duplicate-skill" && item.path === "skills.410101")).toBe(true)
     })
 
     test("未知角色引用 → gate.unknown-character", () => {
