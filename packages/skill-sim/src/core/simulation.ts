@@ -135,6 +135,24 @@ export class Simulation {
         for (const command of commands) this.schedule(at, command)
     }
 
+    /**
+     * 在精确时刻执行回调（U5 additive 扩展）。
+     *
+     * 与 `schedule` 走同一事件队列与时间校验，因此回调在 `drainAt` 内执行：**先于该时刻的帧采样**，
+     * 回调内 `schedule` 的命令同刻立即执行。U5 用它做「执行时刻求值」的条件相位与分支。
+     */
+    scheduleCallback(at: number, callback: () => void, priority = 0): void {
+        if (this.finished) throw new Error(`模拟已结束，不能再调度回调（at=${at}）`)
+        if (!Number.isFinite(at) || at < 0) throw new Error(`回调时刻非法：${at}`)
+        if (at > this.clock.duration + TIME_EPS) {
+            throw new Error(`回调时刻 ${at} 超出模拟时长 ${this.clock.duration}`)
+        }
+        if (at < this.clock.now - TIME_EPS) {
+            throw new Error(`回调时刻 ${at} 早于当前时钟 ${this.clock.now}`)
+        }
+        this.queue.push(at, callback, priority)
+    }
+
     /** 单步推进（暂停 = 停止调用；返回是否还有后续步） */
     step(): boolean {
         if (this.finished) return false

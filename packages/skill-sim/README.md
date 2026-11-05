@@ -1,7 +1,8 @@
 # dna-builder-skill-sim
 
 技能行为数据流水线（U3）：把导出器的 `SkillAssetDoc` 与 `packages/data` 归一成可运行的
-`SkillBehaviorIR`，并生成 manifest + 覆盖率报告。**不含运行时**（U4/U5）与全量数据（U7）。
+`SkillBehaviorIR`，并生成 manifest + 覆盖率报告；`src/runtime/`（U5）把 IR 解释成 U4 的模拟命令。
+**不含全量数据**（U7）。
 
 ```text
 SkillAssetDoc (导出器 monage / bytecode / lua 证据)
@@ -30,6 +31,56 @@ bun tools/skill-workflow.ts verify --manifest <manifest.json> --fixtures <file> 
   覆盖率提示（`build.no-actions`）与导出器新增字段（`schema.unknown-field`）不升级。
 - `--simulated` 可写技能 id，也可写角色 id（展开为该角色全部技能）。
 - 目录输入按 `*.json` 分片合并，文件名含 `override` 的文件会被跳过（避免把 overrides 当分片）。
+
+## 运行时（U5）
+
+`src/runtime/` 使用 `SkillBehaviorDoc` 驱动 U4 的 `Simulation`：不渲染、不读导出器 JSON、不 import `./data-index`。
+所有无法执行的东西都进 `RuntimeDiagnostic`，不静默跳过。
+
+```ts
+import { createSimulation } from "dna-builder-skill-sim"
+import { createSkillRuntime } from "dna-builder-skill-sim/runtime"
+
+const simulation = createSimulation({ duration: 10, dt: 1 / 60, seed: 7, actors, enemies, oracle })
+const runtime = createSkillRuntime({ simulation, doc, actorId: "lise", recastPolicy: "toggle-off" })
+runtime.cast(410102, 0) // 校验资源 / 冷却 / 重复施放并排程；at 可晚于当前时钟（延后校验）
+runtime.run()           // 内部逐帧 step，返回 SimResult
+runtime.diagnostics()   // 不可执行项清单（同类去重，带 occurrences）
+```
+
+- `cast()` 的 `at` 是绝对秒数；`Phase.at/until` 相对施法开始（IR 契约），由运行时换算。
+- 条件与分支谓词在**动作执行时刻**求值（经 `Simulation.scheduleCallback` 插入同刻事件，先于该刻帧采样），
+  因此前面动作产生的 buff / 资源对后面的分支可见。
+- `recastPolicy`：`fail`（默认，重复施放报 `active`）/ `toggle-off`（关闭旧实例，用于开关型技能）。
+- 确定性：随机只用 `core/rng` 的 seeded Rng（缺省按 actor fork），不调用 `Math.random` / `Date.now`。
+
+### IR → SimCommand 映射
+
+| IR | 运行时行为 |
+|---|---|
+| `cast.time` / `cooldown` / 一次性 `costs` | 发 core `cast` 命令（core 扣资源、设冷却、发 `cast` 事件） |
+| `cast.costs[].perSecond` | **不扣**，提交时记 `sustained-cost`；由 IR 的 tick 相位（`resource` 动作）建模 |
+| `Phase.at/until/tick` | 展开为绝对时刻调用序列（闭区间；`count` 优先；超出时长裁剪并记 `phase-clipped`） |
+| `Phase.condition` | 该次调用执行时刻求值；`opaque` → 跳过整次调用 + `opaque-condition` |
+| `damage` | `damage` 命令；`hits.count × interval` 逐段结算；目标 primary/nearest/random/all/stored |
+| `applyBuff` / `removeBuff` | `applyBuff` / `removeBuff` 命令；duration 缺省取 `doc.buffs` |
+| `resource` | `resource` 命令 |
+| `select` | `selectTargets` 命令并写入 `stored`，供后续 `{kind:"stored"}` 目标引用 |
+| `branch` | 执行时刻求值；未知谓词两侧都不执行 + `opaque-condition` |
+| `summon` | 生成占位实体（id/owner/duration）+ `summon` 诊断，不模拟 AI / 属性 / 阵营 |
+| `native` | 只按 `provenance.nativeCalls` 记 `native` 诊断（`known/mapped`），**不假装执行** |
+
+### 已知未建模（运行时不臆造，遇到时诊断）
+
+- IR 无 `timeline`：取消窗 / 连段窗 / 位移窗只有 `ActiveSkill.windows` 的形状，数据侧为空；
+- 无移动 / 位移动作：黎瑟 Q 的电荷吸附、目标跟随不执行；
+- 无死亡钩子：目标死亡时电荷转移 / 换目标不执行；
+- `TargetFilter` 无法同时排除多个 buff（黎瑟 Q 旧实现的「优先未充能目标」只能近似）；
+- `RemoveWhenSpZero` 这类 Lua 终止条件不入 IR：资源为 0 后 tick 仍按 IR 继续；
+- 召唤物无 AI / 阵营 / 属性，只有 `spawn` 占位；
+- 多目标 `applyBuff`：按 IR 逐目标处理，不做「同一目标只挂一次」的语义去重。
+
+性能（测试实测，3 个敌人、1s tick）：黎瑟 Q 10s ≈ 0.8ms，60s 同构负载 ≈ 5–6ms（`tests/runtime/lise-q.test.ts`）。
 
 ## 契约
 

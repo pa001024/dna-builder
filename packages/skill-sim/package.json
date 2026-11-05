@@ -11,6 +11,7 @@
         "./core": "./src/core/index.ts",
         "./schema": "./src/schema/index.ts",
         "./pipeline": "./src/pipeline/index.ts",
+        "./runtime": "./src/runtime/index.ts",
         "./data-index": "./src/pipeline/data-index.ts",
         "./package.json": "./package.json"
     },

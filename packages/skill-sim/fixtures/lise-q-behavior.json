@@ -1,0 +1,186 @@
+{
+    "schemaVersion": 1,
+    "gameVersion": "1.7.227.1",
+    "exporter": {
+        "gitCommit": "fixture-synthetic-lise-q",
+        "parserVersion": 1,
+        "gameVersion": "1.7.227.1"
+    },
+    "characters": [
+        {
+            "id": 4101,
+            "nameKey": "黎瑟",
+            "skills": [410102]
+        }
+    ],
+    "skills": {
+        "410102": {
+            "id": 410102,
+            "characterId": 4101,
+            "slot": "Q",
+            "cast": {
+                "time": 0.45,
+                "cooldown": 2,
+                "canMove": true,
+                "costs": [{ "resource": "神智", "amount": 10 }, { "resource": "神智", "amount": 20, "perSecond": true }]
+            },
+            "phases": [
+                {
+                    "at": 0,
+                    "actions": [
+                        { "kind": "applyBuff", "buffId": 410111, "target": { "kind": "self" } },
+                        { "kind": "applyBuff", "buffId": 410123, "target": { "kind": "self" } },
+                        {
+                            "kind": "damage",
+                            "field": "伤害",
+                            "tag": "技能,终结技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "nearest", "count": 3, "radius": 10 }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:field-open"
+                },
+                {
+                    "at": 1,
+                    "until": 10,
+                    "tick": { "interval": 1 },
+                    "condition": { "kind": "hasBuff", "buffId": 410111 },
+                    "actions": [
+                        { "kind": "resource", "resource": "神智", "delta": -20 },
+                        {
+                            "kind": "select",
+                            "filter": { "kind": "random", "count": 1, "radius": 50 },
+                            "store": "chargeTarget"
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电场爆发]选取敌人伤害",
+                            "tag": "技能,终结技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "stored", "ref": "chargeTarget" }
+                        },
+                        {
+                            "kind": "branch",
+                            "on": "random",
+                            "then": [
+                                {
+                                    "kind": "applyBuff",
+                                    "buffId": 410121,
+                                    "duration": 6,
+                                    "target": { "kind": "stored", "ref": "chargeTarget" }
+                                }
+                            ],
+                            "else": [
+                                {
+                                    "kind": "applyBuff",
+                                    "buffId": 410122,
+                                    "duration": 6,
+                                    "target": { "kind": "stored", "ref": "chargeTarget" }
+                                }
+                            ]
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:charge-cycle"
+                },
+                {
+                    "at": 3,
+                    "until": 10,
+                    "tick": { "interval": 3 },
+                    "condition": { "kind": "hasBuff", "buffId": 410111 },
+                    "actions": [
+                        {
+                            "kind": "select",
+                            "filter": { "kind": "random", "count": 1, "radius": 20, "requiresBuff": 410121 },
+                            "store": "positiveCharge"
+                        },
+                        {
+                            "kind": "select",
+                            "filter": { "kind": "random", "count": 1, "radius": 20, "requiresBuff": 410122 },
+                            "store": "negativeCharge"
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电荷]伤害",
+                            "tag": "技能,终结技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "stored", "ref": "positiveCharge" }
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电荷]伤害",
+                            "tag": "技能,终结技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "stored", "ref": "negativeCharge" }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:charge-reaction"
+                }
+            ],
+            "sources": ["montage", "lua", "manual"],
+            "provenance": {
+                "bpPackages": ["EM/Content/BluePrints/Combat/Skill/SpLise/BP_SpLise_Skill02"],
+                "nativeCalls": [
+                    { "fn": "AddBuff", "args": [{ "BuffId": 410111, "LastTime": -1 }], "known": true, "mapped": true, "source": "lua" },
+                    { "fn": "CutToughness", "args": [90], "known": true, "mapped": false, "source": "lua" },
+                    { "fn": "K2_PlayUnknownEffect", "args": [410102], "known": false, "mapped": false, "source": "blueprint" }
+                ],
+                "unmatchedNotify": [],
+                "inertNotifies": ["BP_SkillCancel_C"],
+                "montageLength": 3.9,
+                "branchingPoints": [{ "time": 0.45, "type": "Begin" }, { "time": 3.5, "type": "End" }]
+            }
+        }
+    },
+    "buffs": {
+        "410111": {
+            "id": 410111,
+            "name": "电场爆发",
+            "duration": 10,
+            "props": {
+                "RemoveWhenSpZero": true,
+                "ActivateSkills": { "410102": 410121 },
+                "DotDatas": [{ "DotDelay": 2, "Interval": 1, "Type": "SpChange", "Value": -20 }]
+            },
+            "dots": [{ "delay": 2, "interval": 1, "resource": "神智", "delta": -20 }],
+            "sources": ["lua"]
+        },
+        "410121": {
+            "id": 410121,
+            "name": "正电荷",
+            "duration": 6,
+            "props": { "BuffTypeImgPath": "Common_Debuff", "BuffType": [20] },
+            "sources": ["lua"]
+        },
+        "410122": {
+            "id": 410122,
+            "name": "负电荷",
+            "duration": 6,
+            "props": { "BuffTypeImgPath": "Common_Debuff", "BuffType": [20] },
+            "sources": ["lua"]
+        },
+        "410123": {
+            "id": 410123,
+            "name": "电场爆发：移速",
+            "duration": 10,
+            "props": { "AddAttrs": [{ "AttrName": "WalkSpeedModifier", "Value": 0.25 }] },
+            "sources": ["lua"]
+        }
+    },
+    "coverage": {
+        "charactersTotal": 1,
+        "skillsTotal": 1,
+        "skillsWithMontage": 1,
+        "skillsWithBlueprint": 1,
+        "skillsWithAnimBP": 1,
+        "skillsWithLua": 1,
+        "skillsAuthored": 1,
+        "skillsWithBehavior": 1,
+        "nativeCallsTotal": 3,
+        "nativeCallsUnknown": ["K2_PlayUnknownEffect"],
+        "unknownTaskFunctions": [],
+        "unmatchedNotifies": []
+    }
+}
