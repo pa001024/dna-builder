@@ -18,7 +18,13 @@ import {
     TIME_EPS,
     type Vec2,
 } from "dna-builder-skill-sim/core"
-import { type CastResult, createSkillRuntime, type RuntimeDiagnostic, type SkillRuntime } from "dna-builder-skill-sim/runtime"
+import {
+    type CastResult,
+    createSkillRuntime,
+    type RecastPolicy,
+    type RuntimeDiagnostic,
+    type SkillRuntime,
+} from "dna-builder-skill-sim/runtime"
 import type { SkillBehavior, SkillSlot } from "dna-builder-skill-sim/schema"
 import type { CharBuild } from "@/data"
 import { CharBuildDamager } from "./char-build-oracle"
@@ -44,6 +50,8 @@ export interface SimDriverOptions {
     seed?: number
     duration?: number
     dt?: number
+    /** 每技能重施策略；缺省 `defaultRecastPolicy`（持续型 toggle-off，瞬时型 fail） */
+    recastPolicy?: (skill: SkillBehavior) => RecastPolicy
     /** 视图设置的热更读取器：神智自然回复 */
     regen?: () => { amount: number; interval: number } | undefined
     onDiagnostic?: (diagnostic: RuntimeDiagnostic) => void
@@ -66,6 +74,16 @@ export interface CastOutcome {
     slot?: SkillSlot
     reason?: string
     message?: string
+    /** `toggle-off` 技能再次施放时关闭了已激活实例 */
+    toggledOff?: boolean
+}
+
+/**
+ * 每技能重施策略：有 tick / until 的持续型技能（黎瑟 Q、赛琪 Q）再按关闭，
+ * 瞬时技能拒绝重复施放（core 的 `cast` 不会排队）。
+ */
+export function defaultRecastPolicy(skill: SkillBehavior): RecastPolicy {
+    return skill.phases.some(phase => phase.tick !== undefined || phase.until !== undefined) ? "toggle-off" : "fail"
 }
 
 export class SimDriver {
@@ -76,10 +94,12 @@ export class SimDriver {
 
     private readonly sessionDt: number
     private _simulation: Simulation
-    private _runtime: SkillRuntime
+    /** 每个技能一个 runtime：重施策略（toggle-off / fail）按技能而非全局生效 */
+    private readonly runtimes = new Map<string, SkillRuntime>()
     private readonly oracle?: DamageOracle
     private readonly manifest: CompiledManifest
     private readonly damager?: CharBuildDamager
+    private readonly policyFor: (skill: SkillBehavior) => RecastPolicy
     private readonly regen?: () => { amount: number; interval: number } | undefined
     private readonly onDiagnostic?: (diagnostic: RuntimeDiagnostic) => void
     private readonly resourceInit: Record<string, ResourceInit>
@@ -99,6 +119,7 @@ export class SimDriver {
         this.seed = options.seed ?? 1
         this.regen = options.regen
         this.onDiagnostic = options.onDiagnostic
+        this.policyFor = options.recastPolicy ?? defaultRecastPolicy
         this.resourceInit = options.resources ?? defaultResources(options.charBuild)
 
         if (options.charBuild) {
@@ -121,7 +142,6 @@ export class SimDriver {
         this.oracle = options.oracle ?? this.damager?.oracle
         this.sessionDt = options.dt ?? DEFAULT_SIM_DT
         this._simulation = this.createSession()
-        this._runtime = this.createRuntime(this._simulation)
         this.scheduleRegen(0)
     }
 
@@ -129,8 +149,10 @@ export class SimDriver {
         return this._simulation
     }
 
-    get runtime(): SkillRuntime {
-        return this._runtime
+    /** 该技能的运行时（懒创建：策略按技能决定，且未使用的技能不占调度） */
+    runtimeFor(skillId: number | string): SkillRuntime | undefined {
+        const skill = skillForId(this.manifest, skillId)
+        return skill ? this.ensureRuntime(skill) : undefined
     }
 
     get now(): number {
@@ -202,9 +224,9 @@ export class SimDriver {
             return { ok: false, skillId, reason: "unknown-skill", message: `技能 ${skillId} 不在 manifest 中` }
         }
         this.damager?.setActiveSkill(skill.id)
-        const result: CastResult = this._runtime.cast(skill.id)
+        const result: CastResult = this.ensureRuntime(skill).cast(skill.id)
         if (!result.ok) return { ok: false, skillId: skill.id, slot: skill.slot, reason: result.reason, message: result.message }
-        return { ok: true, skillId: skill.id, slot: skill.slot }
+        return { ok: true, skillId: skill.id, slot: skill.slot, toggledOff: result.toggledOff }
     }
 
     /** 普通攻击 / 射击等通用伤害入口：`skillName` 是 packages/data 的技能（武器）基名 */
@@ -277,7 +299,7 @@ export class SimDriver {
     /** 会话到点后重建：保留当前视图中的敌人（按满状态重新入场） */
     restart(enemies: readonly SimEnemyInit[] = []): void {
         this._simulation = this.createSession()
-        this._runtime = this.createRuntime(this._simulation)
+        this.runtimes.clear()
         this.timeTarget = 0
         this.eventCursor = 0
         this.lastPositionSync = Number.NEGATIVE_INFINITY
@@ -296,14 +318,22 @@ export class SimDriver {
         })
     }
 
-    private createRuntime(simulation: Simulation): SkillRuntime {
-        return createSkillRuntime({
-            simulation,
-            doc: this.manifest.doc,
-            actorId: this.actorId,
-            recastPolicy: "toggle-off",
-            onDiagnostic: diagnostic => this.report(diagnostic),
-        })
+    private ensureRuntime(skill: SkillBehavior): SkillRuntime {
+        const key = String(skill.id)
+        let runtime = this.runtimes.get(key)
+        if (!runtime) {
+            runtime = createSkillRuntime({
+                simulation: this._simulation,
+                doc: this.manifest.doc,
+                actorId: this.actorId,
+                // 每个技能独立 RNG 子流：同 seed 仍逐位复现，不同技能之间不相关
+                rng: this._simulation.rng.fork(`skill-runtime:${this.actorId}:${skill.id}`),
+                recastPolicy: this.policyFor(skill),
+                onDiagnostic: diagnostic => this.report(diagnostic),
+            })
+            this.runtimes.set(key, runtime)
+        }
+        return runtime
     }
 
     private report(diagnostic: RuntimeDiagnostic): void {
@@ -349,7 +379,7 @@ export class SimDriver {
 
     private refreshSkillContext(): void {
         if (!this.damager) return
-        const active = this._runtime.active()
+        const active = [...this.runtimes.values()].flatMap(runtime => runtime.active())
         if (active.length === 0) return
         const latest = active.reduce((left, right) => (left.castAt >= right.castAt ? left : right))
         this.damager.setActiveSkill(latest.skillId)

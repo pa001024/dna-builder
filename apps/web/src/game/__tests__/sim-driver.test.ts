@@ -56,6 +56,15 @@ describe("SimDriver", () => {
         expect(driver().castSkill(999999).ok).toBe(false)
     })
 
+    it("重施策略按技能区分：瞬时技能拒绝，持续技能再按关闭", () => {
+        const instance = driver()
+        expect(instance.castSlot("E").ok).toBe(true)
+        expect(instance.castSlot("E")).toMatchObject({ ok: false, reason: "active" })
+
+        expect(instance.castSlot("Q").ok).toBe(true)
+        expect(instance.castSlot("Q")).toMatchObject({ ok: true, toggledOff: true })
+    })
+
     it("黎瑟 E：施法 → 伤害 → 电能量分支与增益都来自 IR", () => {
         const instance = driver()
         instance.spawnEnemy({ id: "e1", level: 80, hp: 1000, position: { x: 1, y: 0 } })

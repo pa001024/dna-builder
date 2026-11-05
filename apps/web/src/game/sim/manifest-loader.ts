@@ -78,6 +78,8 @@ export function compileManifest(sources: readonly ManifestSource[]): CompiledMan
             .map(id => skills.get(String(id)))
             .filter((skill): skill is SkillBehavior => !!skill)
             .sort((a, b) => SLOT_ORDER[a.slot] - SLOT_ORDER[b.slot] || a.id - b.id)
+        // 同槽位 first-wins：`own` 已按 (slot, id) 升序，主 E/Q 的 id 小于子技能，
+        // 因此子技能（如 410121）不会顶掉真正的 Q（410102）。冲突必须显式告警，不静默覆盖。
         const bySlot: Partial<Record<SkillSlot, SkillBehavior>> = {}
         for (const skill of own) {
             const existing = bySlot[skill.slot]
@@ -87,8 +89,9 @@ export function compileManifest(sources: readonly ManifestSource[]): CompiledMan
                     severity: "warn",
                     path: `characters.${characterId}.slot.${skill.slot}`,
                     code: "manifest.slot-conflict",
-                    message: `槽位 ${skill.slot} 同时被技能 ${existing.id} 与 ${skill.id} 占用，保留后者`,
+                    message: `槽位 ${skill.slot} 已由技能 ${existing.id} 占用，忽略 ${skill.id}`,
                 })
+                continue
             }
             bySlot[skill.slot] = skill
         }

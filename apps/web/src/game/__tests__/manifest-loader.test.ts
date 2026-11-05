@@ -1,6 +1,7 @@
 import type { SkillBehavior, SkillBehaviorDoc } from "dna-builder-skill-sim/schema"
 import { describe, expect, it } from "vitest"
 import { buffName, characterSkills, compileManifest, skillForId, skillForSlot, slotsOf } from "../sim/manifest-loader"
+import { loadSkillManifest, resolveManifestSources } from "../sim/manifest-source"
 
 function skill(id: number, characterId: number, slot: SkillBehavior["slot"], field = "伤害"): SkillBehavior {
     return {
@@ -88,17 +89,33 @@ describe("compileManifest", () => {
         expect(manifest.doc.coverage.skillsTotal).toBe(0)
     })
 
-    it("同槽位冲突时后者覆盖并给出 warning", () => {
+    it("同槽位冲突时保留先出现（id 最小）的技能并给出 warning", () => {
         const conflict = doc(draft => {
-            draft.characters.push({ id: 3, nameKey: "C", skills: [31, 32] })
+            draft.characters.push({ id: 3, nameKey: "C", skills: [32, 31] })
             draft.skills["31"] = skill(31, 3, "E")
             draft.skills["32"] = skill(32, 3, "E")
         })
 
         const manifest = compileManifest([{ id: "conflict", doc: conflict }])
 
-        expect(skillForSlot(manifest, 3, "E")?.id).toBe(32)
-        expect(manifest.issues.some(issue => issue.code === "manifest.slot-conflict")).toBe(true)
+        expect(skillForSlot(manifest, 3, "E")?.id).toBe(31)
+        const issue = manifest.issues.find(item => item.code === "manifest.slot-conflict")
+        expect(issue?.message).toContain("忽略 32")
+    })
+
+    it("重复 E/Q 时子技能不会顶掉主技能（4101 Q 必须是 410102 而不是 410121）", () => {
+        const duplicate = doc(draft => {
+            draft.characters.push({ id: 4101, nameKey: "黎瑟", skills: [410121, 410102, 410122, 410101] })
+            draft.skills["410101"] = skill(410101, 4101, "E", "快速出击")
+            draft.skills["410102"] = skill(410102, 4101, "Q", "涡旋电场")
+            draft.skills["410121"] = skill(410121, 4101, "Q", "正电荷")
+            draft.skills["410122"] = skill(410122, 4101, "Q", "负电荷")
+        })
+
+        const manifest = compileManifest([{ id: "duplicate-slots", doc: duplicate }])
+
+        expect(skillForSlot(manifest, 4101, "E")?.id).toBe(410101)
+        expect(skillForSlot(manifest, 4101, "Q")?.id).toBe(410102)
     })
 
     it("未知角色 / 技能返回 undefined", () => {
@@ -106,5 +123,29 @@ describe("compileManifest", () => {
         expect(skillForSlot(manifest, 999, "E")).toBeUndefined()
         expect(skillForId(manifest, 999)).toBeUndefined()
         expect(characterSkills(manifest, 999)).toEqual([])
+    })
+})
+
+describe("U7 生成清单来源", () => {
+    it("生成清单排在回退之后合并：覆盖同名技能，同时保留回退的其它槽位", () => {
+        const generated = doc(draft => {
+            draft.characters.push({ id: 4101, nameKey: "黎瑟", skills: [410102] })
+            draft.skills["410102"] = skill(410102, 4101, "Q", "生成字段")
+        })
+
+        const sources = resolveManifestSources(generated)
+        expect(sources.at(-1)).toMatchObject({ id: "generated:skill-sim" })
+
+        const manifest = loadSkillManifest([], generated)
+        expect(skillForSlot(manifest, 4101, "Q")?.phases[0].actions[0]).toMatchObject({ field: "生成字段" })
+        // 回退清单补足生成清单缺的槽位
+        expect(skillForSlot(manifest, 4101, "E")?.id).toBe(410101)
+        expect(skillForSlot(manifest, 5301, "Q")?.id).toBe(530102)
+    })
+
+    it("生成清单缺席时只有回退来源", () => {
+        const sources = resolveManifestSources(null)
+        expect(sources.some(source => source.id === "generated:skill-sim")).toBe(false)
+        expect(sources.map(source => source.id)).toEqual(["web-dev-fallback", "u5-fixture:lise-q"])
     })
 })

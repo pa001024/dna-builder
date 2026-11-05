@@ -2,9 +2,10 @@ import { createRng, type Rng } from "dna-builder-skill-sim/core"
 import * as THREE from "three"
 import { type CharBuild, LeveledMonsterHelper } from "@/data/index"
 import { EventView } from "../sim/event-view"
+import { FixedStepAccumulator } from "../sim/fixed-step"
 import { buffName, type CompiledManifest } from "../sim/manifest-loader"
 import { loadSkillManifest } from "../sim/manifest-source"
-import { SimDriver } from "../sim/sim-driver"
+import { DEFAULT_SIM_DT, SimDriver } from "../sim/sim-driver"
 import type { FloatingText, GameSettings, Monster, PlayerStats, VoxelData } from "../types"
 import { Generators } from "../utils/voxelGenerators"
 
@@ -60,6 +61,8 @@ export class VoxelEngine {
     private readonly driver: SimDriver
     private readonly view: EventView
     private readonly rng: Rng
+    /** rAF 可变 dt → 固定步：移动 / AI / 攻击 / 位置同步都只在固定步里发生 */
+    private readonly fixedClock = new FixedStepAccumulator(DEFAULT_SIM_DT)
     private readonly monsterById = new Map<string, Monster>()
     private castPulse = 0
     private chargeAttackTime = 0
@@ -147,6 +150,10 @@ export class VoxelEngine {
         }
 
         this.manifest = loadSkillManifest()
+        const manifestErrors = this.manifest.issues.filter(issue => issue.severity === "error")
+        if (manifestErrors.length > 0) {
+            console.warn("[game] skill manifest 存在校验错误，相关来源已被跳过：", manifestErrors.slice(0, 5))
+        }
         this.view = new EventView({
             buffName: buffId => buffName(this.manifest, buffId),
             damageColor: () => this.getElementClass(this.charBuild.char.属性),
@@ -791,35 +798,22 @@ export class VoxelEngine {
     private animate = () => {
         this.animationId = requestAnimationFrame(this.animate)
 
-        const dt = Math.min(this.clock.getDelta(), 0.25)
+        const frameDt = Math.min(this.clock.getDelta(), 0.25)
 
-        this.updatePlayer(dt)
+        // 战斗与位置同步只走固定步：帧率只影响「这一帧跑几步」，不影响步内状态
+        const steps = this.fixedClock.add(frameDt)
+        for (let index = 0; index < steps; index++) this.fixedUpdate()
 
-        // 会话到点先重建，再处理刷怪 / 走位，避免怪物只存在于视图而没有模拟实体
-        if (this.driver.finished) {
-            this.driver.restart(this.monsters.map(m => this.enemyInitFor(m)))
-            this.view.reset()
-            this.spawnFloatingText("模拟会话已重置", this.playerMesh.position.clone().add(new THREE.Vector3(0, 5, 0)), "#66ccff")
-        }
-
-        this.updateMonsters(dt)
-        this.updateProjectiles(dt)
-
-        this.driver.syncPositions(
-            { x: this.u2m(this.playerMesh.position.x), y: this.u2m(this.playerMesh.position.z) },
-            this.monsters.map(m => ({ id: m.id, position: { x: this.u2m(m.position.x), y: this.u2m(m.position.z) } }))
-        )
-        this.driver.advance(dt)
         this.applySimEvents(this.driver.drainEvents())
         this.applyFrame(this.driver.latestFrame())
         this.updateMarkers()
-        this.updateCastRing(dt)
+        this.updateCastRing(frameDt)
         this.emitMonsters()
 
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const t = this.floatingTexts[i]
-            t.life -= dt
-            t.position.y += 3 * dt
+            t.life -= frameDt
+            t.position.y += 3 * frameDt
             if (t.life <= 0) {
                 this.floatingTexts.splice(i, 1)
             }
@@ -838,6 +832,29 @@ export class VoxelEngine {
         this.onStatsUpdate({ ...this.playerStats })
 
         this.renderer.render(this.scene, this.camera)
+    }
+
+    /** 单次固定步：视图态推进 → 同步位置 → 推进模拟；不含任何 rAF 可变 dt */
+    private fixedUpdate() {
+        const step = this.fixedClock.step
+
+        this.updatePlayer(step)
+
+        // 会话到点先重建，再处理刷怪 / 走位，避免怪物只存在于视图而没有模拟实体
+        if (this.driver.finished) {
+            this.driver.restart(this.monsters.map(m => this.enemyInitFor(m)))
+            this.view.reset()
+            this.spawnFloatingText("模拟会话已重置", this.playerMesh.position.clone().add(new THREE.Vector3(0, 5, 0)), "#66ccff")
+        }
+
+        this.updateMonsters(step)
+        this.updateProjectiles(step)
+
+        this.driver.syncPositions(
+            { x: this.u2m(this.playerMesh.position.x), y: this.u2m(this.playerMesh.position.z) },
+            this.monsters.map(m => ({ id: m.id, position: { x: this.u2m(m.position.x), y: this.u2m(m.position.z) } }))
+        )
+        this.driver.advance(step)
     }
 
     private enemyInitFor(monster: Monster) {
