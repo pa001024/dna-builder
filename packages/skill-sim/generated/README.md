@@ -31,7 +31,8 @@ bun packages/skill-sim/scripts/build-generated.ts \
 | `coverage-matrix.json` | 298 KB | 角色/技能覆盖矩阵（状态、来源、逐技能 montage/BP/AnimBP 缺口、U2 对照） |
 | `COVERAGE.md` | 70 KB | 人读覆盖表 |
 
-单文件 < 20 MB，**不需要按角色分片**；U8 直接加载 `manifest.json` 即可。
+单文件 < 20 MB，**不需要按角色分片**；Web 侧由 `apps/web/src/game/sim/manifest-source.ts` 通过 Vite
+`import.meta.glob`（eager）加载，优先级高于 `web-dev-fallback`（详见 `../README.md` 的「Web 接入」）。
 
 ## 覆盖摘要
 

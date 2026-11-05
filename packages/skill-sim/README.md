@@ -30,7 +30,7 @@ bun tools/skill-workflow.ts verify --manifest <manifest.json> --fixtures <file> 
 - `build` 写出 `<out>/manifest.json`（完整 IR）与 `<out>/coverage.json`（覆盖率 + 诊断）。
 - `check --strict` 把 `ref.*` / `gate.*` / `schema.reference` 类 warn 升级为失败；
   覆盖率提示（`build.no-actions`）与导出器新增字段（`schema.unknown-field`）不升级。
-- `--simulated` 可写技能 id，也可写角色 id（展开为该角色全部技能）。
+- `--simulated` 可写技能 id，也可写角色 id（按覆盖表口径展开主 E/Q；被动 P 与子技能不参与门禁）。
 - 目录输入按 `*.json` 分片合并，文件名含 `override` 的文件会被跳过（避免把 overrides 当分片）。
 
 ## 运行时（U5）
@@ -137,6 +137,41 @@ bun test packages/skill-sim/tests/parity
   + `fixtures/overrides/authored-buffs.json`。
 - 覆盖表：`generated/COVERAGE.md`（人读）/ `generated/coverage-matrix.json`（机器读）。
 - 已知缺口与 U8 集成说明见 `generated/README.md`。
+
+## Web 接入（U6/U8）
+
+沙盒视图（`apps/web/src/game`）只消费 IR，不再包含角色专属技能逻辑：
+
+```text
+导出器 final/skill-behavior.json
+        │  bun packages/skill-sim/scripts/build-generated.ts --input <file>
+        ▼
+packages/skill-sim/generated/manifest.json        ← 提交到仓库，勿手改
+        │  apps/web/src/game/sim/manifest-source.ts（Vite `import.meta.glob`，eager）
+        ▼
+compileManifest（校验 → 合并 → 按角色/槽位索引）
+        │  apps/web/src/game/sim/sim-driver.ts → Simulation + SkillRuntime
+        ▼
+SimEvent[] / FrameSample[] → VoxelEngine（Three.js 仅视图）
+```
+
+- 合并优先级：`generated:skill-sim` > `u5-fixture:lise-q` > `web-dev-fallback`（`apps/web/src/game/manifest/dev-manifest.json`，
+  仅作缺数据兜底；生成清单存在时同名技能以生成数据为准）。
+- 生成清单 3.4 MB，目前由 `import.meta.glob(..., { eager: true })` 打进引用它的 chunk（进入构筑页时解析一次）。
+  若后续需减小首屏体积，可改为按需 `import()` 并在 `VoxelEngine` 创建前 await。
+- 槽位索引对同一角色的 E/Q 采用 **first-wins**（id 小者优先，子技能不会顶掉主技能），冲突记 `manifest.slot-conflict`；
+  `unknown` 槽位（子技能 / 共享协战 / 被动）不建索引。
+- 重新生成后跑 `bun test packages/skill-sim` 与 `cd apps/web && bunx vitest run src/game/__tests__`；
+  Web 测试直接读 `generated/manifest.json` 并断言 4101 / 5301 的 E/Q 槽位。
+
+### 覆盖与已知缺口（U7 产物）
+
+- 角色 34：**simulated 11 / unsupported 23**；技能 385：simulated 60 / data-only 131 / unsupported 194。
+  主技能引用 169（每角色 E/Q/P 各 1，其余为共享协战/被动，slot `unknown`）。
+- simulated 11：1101 / 1201 / 1501 / 1504 / 3103 / 3201 / 4101 / 4102 / 4103 / 5301 / 5401；其余角色只有数据证据，不冒充可执行。
+- 未建模：召唤物无 AI / 属性 / 攻击（只生成占位实体）、位移/吸附、玩家死亡、蓝图事件入口 offset 不映射到时间
+  （动作统一在 t=0）、Montage section 不用于 phase 分段、125 个未知 native 调用。
+- `--simulated` 角色 id 只展开主 E/Q（与覆盖表口径一致）；被动 P 与子技能不参与门禁。
 
 ## 测试
 

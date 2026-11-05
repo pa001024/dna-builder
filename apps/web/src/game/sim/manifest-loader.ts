@@ -82,6 +82,8 @@ export function compileManifest(sources: readonly ManifestSource[]): CompiledMan
         // 因此子技能（如 410121）不会顶掉真正的 Q（410102）。冲突必须显式告警，不静默覆盖。
         const bySlot: Partial<Record<SkillSlot, SkillBehavior>> = {}
         for (const skill of own) {
+            // `unknown` 不是可施放槽位：多个子技能 / 被动共享它，不建索引也不告警
+            if (skill.slot === "unknown") continue
             const existing = bySlot[skill.slot]
             if (existing) {
                 issues.push({

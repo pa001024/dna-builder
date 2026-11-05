@@ -2,8 +2,10 @@ import type { DamageOracle, SimEvent } from "dna-builder-skill-sim/core"
 import { describe, expect, it } from "vitest"
 import { loadSkillManifest } from "../sim/manifest-source"
 import { SimDriver } from "../sim/sim-driver"
+import { generatedManifest } from "./generated-manifest"
 
-const manifest = loadSkillManifest()
+// 显式注入 U7 生成清单，保证 vitest / bun test 看到同一份技能数据
+const manifest = loadSkillManifest([], generatedManifest)
 
 function fakeOracle(damage = 100): DamageOracle {
     return { apply: () => ({ damage, kind: "test" }) }
@@ -50,7 +52,8 @@ describe("SimDriver", () => {
 
     it("未知技能返回 unknown-skill 而不是抛异常", () => {
         const instance = driver()
-        const outcome = instance.castSlot("P")
+        // 生成清单里 4101 有 E/Q/P；R 槽位仍为空
+        const outcome = instance.castSlot("R")
         expect(outcome.ok).toBe(false)
         expect(outcome.reason).toBe("unknown-skill")
         expect(driver().castSkill(999999).ok).toBe(false)
@@ -65,7 +68,7 @@ describe("SimDriver", () => {
         expect(instance.castSlot("Q")).toMatchObject({ ok: true, toggledOff: true })
     })
 
-    it("黎瑟 E：施法 → 伤害 → 电能量分支与增益都来自 IR", () => {
+    it("黎瑟 E：施法 → 位移伤害与神智消耗来自生成清单", () => {
         const instance = driver()
         instance.spawnEnemy({ id: "e1", level: 80, hp: 1000, position: { x: 1, y: 0 } })
         advance(instance, 0.05)
@@ -77,12 +80,37 @@ describe("SimDriver", () => {
         const events = instance.drainEvents()
         expect(kinds(events)).toContain("cast")
         expect(kinds(events)).toContain("damage")
-        expect(kinds(events)).toContain("buff-apply")
 
         const actor = instance.simulation.getActor(instance.actorId)
         expect(actor?.resources["神智"].current).toBe(80)
-        expect(actor?.resources["电能量"].current).toBe(15)
         expect(instance.simulation.getTarget("e1")?.hp).toBe(900)
+        // 电能回复 / 攻速 buff 未建模（见 fixtures/overrides/lise-saiqi.json 的 410101 note）
+        expect(kinds(events)).not.toContain("buff-apply")
+        expect(actor?.resources["电能量"].current).toBe(40)
+    })
+
+    it("黎瑟 Q：生成清单驱动 buff / 选敌 / 资源 / 分支", () => {
+        const instance = driver()
+        instance.spawnEnemy({ id: "e1", level: 80, hp: 5000, position: { x: 1, y: 0 } })
+        instance.spawnEnemy({ id: "e2", level: 80, hp: 5000, position: { x: 2, y: 0 } })
+        advance(instance, 0.05)
+
+        const outcome = instance.castSlot("Q")
+        expect(outcome).toMatchObject({ ok: true, skillId: 410102, slot: "Q" })
+
+        advance(instance, 1.2)
+        const events = instance.drainEvents()
+        const eventKinds = kinds(events)
+        expect(eventKinds).toContain("cast")
+        expect(eventKinds).toContain("buff-apply")
+        expect(eventKinds).toContain("damage")
+        expect(eventKinds).toContain("target-select")
+        expect(eventKinds).toContain("resource")
+
+        const actor = instance.simulation.getActor(instance.actorId)
+        // 施法 10 神智 + 电场每秒 20 神智
+        expect(actor?.resources["神智"].current).toBe(70)
+        expect(instance.simulation.getTarget("e1")?.hp).toBeLessThan(5000)
     })
 
     it("同 seed + 同输入两次运行事件流逐位一致", () => {

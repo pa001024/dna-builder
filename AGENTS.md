@@ -22,6 +22,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 |桌面端自动更新（exe 差量包、feed 格式、本地测试、发布流程）|[updater.md](.agents/docs/updater.md)|
 |桌面分身（Windows child session、ActiveX 嵌入、投送/输入、排障与限制）|[desktop-clone.md](.agents/docs/desktop-clone.md)|
 |B 站动态自动发布（DeepSeek 富文本、卡片渲染、Secrets 配置）|[bili-dynamic.md](.agents/docs/bili-dynamic.md)|
+|技能模拟（导出 IR / 全角色 manifest / 沙盒视图接线、重生成命令）|[skill-sim/README.md](packages/skill-sim/README.md)|
 
 其他冷路径不列出 `.agents/docs/*.md`
 
@@ -87,6 +88,7 @@ packages/
 ├── data/              # dna-builder-data：游戏数据模型与计算（原 src/data）
 ├── dna-api/           # BBS API 客户端（原 externals/dna-api，workspace 包）
 ├── graphql-mobius/    # GraphQL 类型安全客户端（原 externals/graphql-mobius）
+├── skill-sim/         # 技能行为 IR + 运行时 + 全角色 manifest（generated/，导出器产物派生）
 └── dob-script/        # dob-script CLI 的 npm 包装
 tools/                # 仓库级 Dev tools（i18n.ts、icon-tool.ts、data-pack.ts…），cwd 无关
 crates/               # Rust crates（buildhub-core 解释器+wasm ABI、buildhub-aot 编译器+运行库、
