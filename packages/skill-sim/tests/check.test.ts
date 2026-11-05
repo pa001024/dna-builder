@@ -93,6 +93,8 @@ describe("checkManifest", () => {
         expect(isStrictFatal({ severity: "warn", code: "build.no-actions", path: "", message: "" })).toBe(false)
         expect(isStrictFatal({ severity: "warn", code: "schema.unknown-field", path: "", message: "" })).toBe(false)
         expect(isStrictFatal({ severity: "warn", code: "schema.reference", path: "", message: "" })).toBe(true)
+        expect(isStrictFatal({ severity: "warn", code: "ref.unknown-skill", path: "", message: "" })).toBe(false)
+        expect(isStrictFatal({ severity: "error", code: "ref.unknown-skill", path: "", message: "" })).toBe(true)
         expect(isStrictFatal({ severity: "warn", code: "ref.unknown-buff", path: "", message: "" })).toBe(true)
     })
 

@@ -140,6 +140,9 @@ function expandSimulated(manifest: SkillBehaviorDoc, values: (number | string)[]
 /** --strict 的升级口径：引用 / 门禁 / 数据自洽类 warn 失败；覆盖率与未知字段类 warn 只提示 */
 export function isStrictFatal(item: Diagnostic): boolean {
     if (item.severity === "error") return true
+    // 主 E/Q/P 缺数据已是 error；unknown-skill 的 warn 只代表子技能/武器/MOD 等非角色资产，
+    // 按 U7 评审口径不参与 strict 门禁。
+    if (item.code === "ref.unknown-skill" || item.code === "gate.unknown-skill") return false
     return (
         item.code.startsWith("ref.") ||
         item.code.startsWith("gate.") ||
