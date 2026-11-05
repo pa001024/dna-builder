@@ -2308,6 +2308,183 @@
     "deep-link": {
         "open_in_app": "앱에서 열기"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "취소",
+            "close": "닫기",
+            "close_and_logoff": "닫고 로그아웃",
+            "control_center": "제어 센터",
+            "copied": "복사됨",
+            "copy_diagnostic": "진단 복사",
+            "diagnose": "진단",
+            "hide": "숨기기",
+            "maximize": "최대화",
+            "minimize": "최소화",
+            "mouse_degraded": "이 환경에서는 상대 마우스를 지원하지 않아 일반 모드로 전환했습니다.",
+            "mouse_game": "게임",
+            "mouse_game_hint": "게임 모드에서는 커서를 고정하고 숨깁니다. Alt를 누르고 있는 동안 일시적으로 해제됩니다.",
+            "mouse_mode": "마우스 모드",
+            "mouse_normal": "일반",
+            "pin": "항상 위",
+            "reconnect": "다시 연결",
+            "restore": "이전 크기로",
+            "retry": "다시 시도",
+            "start": "시작 및 연결",
+            "switch_window": "창 전환",
+            "unpin": "항상 위 해제",
+            "view_menu": "창 옵션"
+        },
+        "capability": {
+            "activex": "원격 데스크톱 컨트롤",
+            "child_sessions": "자식 세션 지원",
+            "edition": "시스템 버전",
+            "elevated": "관리자 권한",
+            "term_service": "원격 데스크톱 서비스",
+            "title": "실행 환경 확인"
+        },
+        "close": {
+            "message": "닫고 로그아웃하면 자식 세션의 모든 프로그램이 종료되며 되돌릴 수 없습니다. 백그라운드에서 계속하려면 \"숨기기\"를 선택하세요.",
+            "title": "데스크톱 클론을 닫을까요?"
+        },
+        "control": {
+            "actions": "빠른 작업",
+            "add_program": "프로그램 추가",
+            "args": "실행 인수(선택)",
+            "degraded": "컨트롤 채널을 사용할 수 없어 로컬로 키를 보냈습니다. 시스템 단축키를 \"자식 세션\"으로 전환하세요.",
+            "done": "전송됨",
+            "elevated": "관리자 권한으로 실행",
+            "empty": "아직 구성된 프로그램이 없습니다. 추가하면 자식 세션에서 바로 실행할 수 있습니다.",
+            "launch": "실행",
+            "launch_failed": "실행 실패: {{message}}",
+            "launched": "자식 세션으로 보냈습니다.",
+            "name": "이름",
+            "not_connected": "연결 후 프로그램을 실행할 수 있습니다.",
+            "programs": "프로그램",
+            "remove": "삭제",
+            "save_failed": "프로그램 목록 저장 실패: {{message}}",
+            "show_desktop": "바탕 화면 표시",
+            "switch_window": "창 전환",
+            "task_manager": "작업 관리자",
+            "title": "제어 센터"
+        },
+        "credentials": {
+            "description": "자격 증명은 이 연결의 메모리에만 사용되며 저장되지 않습니다.",
+            "password": "비밀번호",
+            "password_hint": "비워 두면 자동 로그인 시도",
+            "required": "자식 세션에 다시 로그인해야 합니다.",
+            "submit": "연결",
+            "title": "로그인 정보 입력",
+            "username": "계정",
+            "username_hint": "비워 두면 현재 사용자 사용"
+        },
+        "disconnected": {
+            "description": "기존 자식 세션에 다시 연결할 수 있습니다.",
+            "title": "연결이 끊겼습니다"
+        },
+        "error": {
+            "account_disabled": "계정이 비활성화되었습니다.",
+            "account_restricted": "계정 제한으로 로그인할 수 없습니다(빈 암호 또는 로그온 시간 제한).",
+            "bad_credentials": "계정 또는 비밀번호가 올바르지 않습니다. 다시 시도하세요.",
+            "code": "오류 코드: {{code}}",
+            "connect_failed": "원격 데스크톱 연결을 시작할 수 없습니다.",
+            "credentials_required": "세션이 끊겼습니다. 자격 증명을 다시 입력하세요.",
+            "disconnected": "연결이 예기치 않게 끊겼습니다.",
+            "fatal": "원격 데스크톱 컨트롤에서 치명적 오류가 발생했습니다.",
+            "logon_failed": "하위 세션 로그인에 실패했습니다. 자격 증명을 확인한 뒤 다시 시도하세요.",
+            "no_remote_permission": "계정에 원격 로그인 권한이 없습니다.",
+            "password_change_required": "첫 로그인 전에 비밀번호를 변경해야 합니다.",
+            "password_expired": "비밀번호가 만료되었습니다. 먼저 Windows에서 변경하세요.",
+            "prepare_failed": "실행 환경 준비에 실패했습니다.",
+            "title": "연결 실패",
+            "window_failed": "클론 창 생성에 실패했습니다."
+        },
+        "idle": {
+            "description": "별도의 자식 세션에서 원격 데스크톱을 열어 현재 데스크톱에 영향을 주지 않고 게임이나 프로그램을 실행합니다."
+        },
+        "options": {
+            "always_on_top": "창 항상 위",
+            "aspect_lock": "16:9 비율 고정",
+            "aspect_lock_desc": "창 크기를 수동으로 조정하면 높이를 자동으로 보정합니다.",
+            "keyboard_hook": "시스템 단축키",
+            "keyboard_hook_desc": "Win 키 등 시스템 단축키를 어디로 보낼지 정합니다. 변경하려면 다시 연결해야 합니다.",
+            "keyboard_hook_local": "로컬",
+            "keyboard_hook_remote": "자식 세션",
+            "mouse_mode": "마우스 모드",
+            "mouse_mode_desc": "게임 모드는 커서를 고정합니다. Alt를 누르면 일시적으로 해제됩니다.",
+            "mute": "음소거",
+            "mute_desc": "자식 세션의 소리 출력을 끕니다.",
+            "reconnect_hint": "연결 중 시스템 단축키나 음소거를 변경하면 다시 연결해야 합니다.",
+            "scaling": "화면 배율",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "켜면 자동 맞춤, 끄면 1:1.",
+            "scaling_fit": "자동 맞춤",
+            "small_window": "창 크기",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "일반"
+        },
+        "progress": {
+            "cancel_hint": "이 연결을 취소할 수 있습니다.",
+            "closing": "세션을 종료하는 중…",
+            "connecting": "자식 세션에 연결하는 중…",
+            "preparing": "실행 환경을 준비하는 중…",
+            "step_connect": "데스크톱 연결",
+            "step_env": "환경 준비",
+            "step_session": "세션 생성"
+        },
+        "reconnect": {
+            "later": "나중에(설정 되돌리기)",
+            "message": "이 옵션을 적용하려면 다시 연결해야 합니다. 지금 다시 연결할까요?",
+            "now": "지금 다시 연결",
+            "reason": {
+                "keyboard_hook": "변경 항목: 시스템 단축키 라우팅",
+                "mute": "변경 항목: 음소거"
+            },
+            "title": "다시 연결 필요"
+        },
+        "section_title": "데스크톱 클론",
+        "session_id": "세션 {{id}}",
+        "settings": {
+            "close_hint": "클론 창을 닫고 로그아웃하면 자식 세션의 모든 프로그램이 종료됩니다.",
+            "copy_failed": "복사 실패: {{message}}",
+            "description": "별도의 자식 세션에서 원격 데스크톱을 실행해 게임이나 프로그램이 현재 데스크톱을 방해하지 않게 합니다.",
+            "diagnostics": "진단",
+            "diagnostics_desc": "시작 실패를 조사하기 위한 읽기 전용 보고서이며 자격 증명은 포함되지 않습니다.",
+            "elevated_option": "관리자",
+            "load_failed": "데스크톱 클론 상태 읽기 실패: {{message}}",
+            "open": "데스크톱 클론 열기",
+            "open_failed": "데스크톱 클론 열기 실패: {{message}}",
+            "opened": "데스크톱 클론 창을 열었습니다.",
+            "options": "현재 옵션",
+            "programs": "구성된 프로그램",
+            "programs_count": "프로그램 {{total}}개",
+            "programs_empty": "아직 프로그램이 없습니다. 클론 창의 제어 센터에서 추가하세요.",
+            "reconnect_hint": "단축키와 음소거 변경은 연결 중 다시 연결해야 적용됩니다.",
+            "refresh": "상태 새로 고침",
+            "requirements": "Windows Pro 이상(홈 미지원), 관리자 권한, 원격 데스크톱 컨트롤이 필요합니다.",
+            "save_failed": "옵션 적용 실패: {{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "로그인 대기 중",
+            "closing": "종료 중",
+            "connected": "연결됨",
+            "connecting": "연결 중",
+            "disconnected": "연결 끊김",
+            "error": "오류",
+            "idle": "연결 안 됨",
+            "load_failed": "데스크톱 아바타 상태를 읽을 수 없습니다.",
+            "preparing": "준비 중",
+            "unsupported": "지원되지 않음"
+        },
+        "title": "데스크톱 클론",
+        "unsupported": {
+            "activex": "필요한 원격 데스크톱 컨트롤이 없습니다(mstscax.dll / atl.dll).",
+            "generic": "이 시스템에서는 데스크톱 클론을 사용할 수 없습니다.",
+            "home_edition": "Windows 홈 에디션은 자식 세션을 지원하지 않습니다. Pro 이상을 사용하세요.",
+            "not_elevated": "데스크톱 클론은 관리자 권한으로 실행해야 합니다.",
+            "unknown_build": "Windows 빌드 번호를 확인할 수 없습니다."
+        }
+    },
     "dev-components": {
         "title": "컴포넌트"
     },

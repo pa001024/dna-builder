@@ -2346,6 +2346,183 @@
     "deep-link": {
         "open_in_app": "Ouvrir dans l'App"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "Annuler",
+            "close": "Fermer",
+            "close_and_logoff": "Fermer et se déconnecter",
+            "control_center": "Centre de contrôle",
+            "copied": "Copié",
+            "copy_diagnostic": "Copier le diagnostic",
+            "diagnose": "Diagnostic",
+            "hide": "Masquer",
+            "maximize": "Agrandir",
+            "minimize": "Réduire",
+            "mouse_degraded": "La souris relative n'est pas prise en charge sur cet appareil ; retour au mode normal.",
+            "mouse_game": "Jeu",
+            "mouse_game_hint": "Le mode jeu capture et masque le curseur. Maintenez Alt pour le libérer temporairement.",
+            "mouse_mode": "Mode souris",
+            "mouse_normal": "Normal",
+            "pin": "Garder au premier plan",
+            "reconnect": "Reconnecter",
+            "restore": "Restaurer",
+            "retry": "Réessayer",
+            "start": "Démarrer et connecter",
+            "switch_window": "Changer de fenêtre",
+            "unpin": "Ne plus garder au premier plan",
+            "view_menu": "Options de fenêtre"
+        },
+        "capability": {
+            "activex": "Contrôle Bureau à distance",
+            "child_sessions": "Sessions enfants",
+            "edition": "Version de Windows",
+            "elevated": "Droits d'administrateur",
+            "term_service": "Service Bureau à distance",
+            "title": "Vérification de l'environnement"
+        },
+        "close": {
+            "message": "Fermer et se déconnecter arrête tous les programmes de la session enfant, sans possibilité d'annulation. Choisissez « Masquer » pour la laisser tourner en arrière-plan.",
+            "title": "Fermer Clone de bureau ?"
+        },
+        "control": {
+            "actions": "Actions rapides",
+            "add_program": "Ajouter un programme",
+            "args": "Arguments (facultatif)",
+            "degraded": "Le canal du contrôle est indisponible ; les touches ont été injectées localement. Réglez les raccourcis système sur « Session enfant ».",
+            "done": "Envoyé",
+            "elevated": "Exécuter en tant qu'administrateur",
+            "empty": "Aucun programme configuré. Ajoutez-en un pour le lancer dans la session enfant.",
+            "launch": "Lancer",
+            "launch_failed": "Échec du lancement : {{message}}",
+            "launched": "Envoyé à la session enfant.",
+            "name": "Nom",
+            "not_connected": "Connectez-vous d'abord pour lancer des programmes.",
+            "programs": "Programmes",
+            "remove": "Supprimer",
+            "save_failed": "Échec de l'enregistrement de la liste : {{message}}",
+            "show_desktop": "Afficher le bureau",
+            "switch_window": "Changer de fenêtre",
+            "task_manager": "Gestionnaire des tâches",
+            "title": "Centre de contrôle"
+        },
+        "credentials": {
+            "description": "Les identifiants restent en mémoire pour cette connexion uniquement et ne sont jamais enregistrés.",
+            "password": "Mot de passe",
+            "password_hint": "Laisser vide pour tenter une connexion automatique",
+            "required": "La session enfant nécessite une nouvelle connexion.",
+            "submit": "Connecter",
+            "title": "Se connecter",
+            "username": "Compte",
+            "username_hint": "Laisser vide pour utiliser l'utilisateur actuel"
+        },
+        "disconnected": {
+            "description": "Vous pouvez vous reconnecter à la session enfant existante.",
+            "title": "Connexion perdue"
+        },
+        "error": {
+            "account_disabled": "Le compte est désactivé.",
+            "account_restricted": "La connexion est bloquée par une restriction de compte (mot de passe vide ou horaires).",
+            "bad_credentials": "Compte ou mot de passe incorrect. Réessayez.",
+            "code": "Code d'erreur : {{code}}",
+            "connect_failed": "Impossible de démarrer la connexion au bureau à distance.",
+            "credentials_required": "La session a été déconnectée. Saisissez à nouveau vos identifiants.",
+            "disconnected": "La connexion a été interrompue de manière inattendue.",
+            "fatal": "Le contrôle Bureau à distance a signalé une erreur fatale.",
+            "logon_failed": "Échec de la connexion à la session enfant. Vérifiez les identifiants et réessayez.",
+            "no_remote_permission": "Le compte n'est pas autorisé à se connecter à distance.",
+            "password_change_required": "Le mot de passe doit être modifié avant la première connexion.",
+            "password_expired": "Le mot de passe a expiré. Modifiez-le d'abord dans Windows.",
+            "prepare_failed": "Échec de la préparation de l'environnement.",
+            "title": "Échec de la connexion",
+            "window_failed": "Échec de la création de la fenêtre clone."
+        },
+        "idle": {
+            "description": "Ouvrez un bureau à distance dans une session enfant séparée et lancez jeux ou applications sans perturber votre bureau."
+        },
+        "options": {
+            "always_on_top": "Garder la fenêtre au premier plan",
+            "aspect_lock": "Verrouiller le format 16:9",
+            "aspect_lock_desc": "Corrige automatiquement la hauteur lors du redimensionnement manuel.",
+            "keyboard_hook": "Raccourcis système",
+            "keyboard_hook_desc": "Choisit la destination des raccourcis comme la touche Win. Le changement nécessite une reconnexion.",
+            "keyboard_hook_local": "Local",
+            "keyboard_hook_remote": "Session enfant",
+            "mouse_mode": "Mode souris",
+            "mouse_mode_desc": "Le mode jeu capture le curseur ; maintenez Alt pour le libérer.",
+            "mute": "Muet",
+            "mute_desc": "Coupe le son de la session enfant.",
+            "reconnect_hint": "Modifier les raccourcis système ou le son pendant une connexion nécessite une reconnexion.",
+            "scaling": "Mise à l'échelle",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "Activé : ajustement automatique ; désactivé : 1:1.",
+            "scaling_fit": "Ajuster",
+            "small_window": "Taille de la fenêtre",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "Normal"
+        },
+        "progress": {
+            "cancel_hint": "Vous pouvez annuler cette connexion.",
+            "closing": "Fermeture de la session…",
+            "connecting": "Connexion à la session enfant…",
+            "preparing": "Préparation de l'environnement…",
+            "step_connect": "Connecter le bureau",
+            "step_env": "Préparer l'environnement",
+            "step_session": "Créer la session"
+        },
+        "reconnect": {
+            "later": "Plus tard (annuler)",
+            "message": "Cette option nécessite une reconnexion pour prendre effet. Reconnecter maintenant ?",
+            "now": "Reconnecter maintenant",
+            "reason": {
+                "keyboard_hook": "Modifié : routage des raccourcis système",
+                "mute": "Modifié : son"
+            },
+            "title": "Reconnexion requise"
+        },
+        "section_title": "Clone de bureau",
+        "session_id": "Session {{id}}",
+        "settings": {
+            "close_hint": "Fermer la fenêtre clone et se déconnecter arrête tous les programmes de la session enfant.",
+            "copy_failed": "Échec de la copie : {{message}}",
+            "description": "Exécutez un bureau à distance dans une session enfant séparée pour isoler jeux et applications de votre bureau.",
+            "diagnostics": "Diagnostic",
+            "diagnostics_desc": "Rapport en lecture seule pour diagnostiquer les échecs de démarrage ; il ne contient jamais d'identifiants.",
+            "elevated_option": "Admin",
+            "load_failed": "Échec de la lecture de l'état de Clone de bureau : {{message}}",
+            "open": "Ouvrir Clone de bureau",
+            "open_failed": "Échec de l'ouverture de Clone de bureau : {{message}}",
+            "opened": "La fenêtre Clone de bureau est ouverte.",
+            "options": "Options actuelles",
+            "programs": "Programmes configurés",
+            "programs_count": "{{total}} programmes",
+            "programs_empty": "Aucun programme. Ajoutez-en dans le centre de contrôle de la fenêtre clone.",
+            "reconnect_hint": "Les changements de raccourcis et de son prennent effet après une reconnexion.",
+            "refresh": "Actualiser l'état",
+            "requirements": "Nécessite Windows Pro ou supérieur (Famille non pris en charge), des droits d'administrateur et les contrôles Bureau à distance.",
+            "save_failed": "Échec de l'application des options : {{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "En attente de connexion",
+            "closing": "Fermeture",
+            "connected": "Connecté",
+            "connecting": "Connexion",
+            "disconnected": "Déconnecté",
+            "error": "Erreur",
+            "idle": "Non connecté",
+            "load_failed": "Impossible de lire l'état de l'avatar de bureau.",
+            "preparing": "Préparation",
+            "unsupported": "Non pris en charge"
+        },
+        "title": "Clone de bureau",
+        "unsupported": {
+            "activex": "Les contrôles Bureau à distance requis sont absents (mstscax.dll / atl.dll).",
+            "generic": "Clone de bureau n'est pas pris en charge sur ce système.",
+            "home_edition": "L'édition Famille de Windows ne prend pas en charge les sessions enfants. Utilisez l'édition Pro ou supérieure.",
+            "not_elevated": "Clone de bureau doit être exécuté en tant qu'administrateur.",
+            "unknown_build": "Impossible de déterminer le numéro de build de Windows."
+        }
+    },
     "dev-components": {
         "title": "Composants"
     },

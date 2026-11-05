@@ -44,8 +44,14 @@ pub fn run() {
     {
         app = app
             .plugin(tauri_plugin_autostart::Builder::new().build())
-            .plugin(tauri_plugin_window_state::Builder::default().build());
+            // 克隆窗口的几何由 desktop-clone 自己持久化，避免与插件双写
+            .plugin(
+                tauri_plugin_window_state::Builder::default()
+                    .with_denylist(&["desktop-clone"])
+                    .build(),
+            );
     }
+    app = app.manage(submodules::desktop_clone::CloneManager::new());
     app.setup(|app| {
         // helper 退出后旧 exe 的锁才会释放，启动时顺手清理
         if let Ok(current_exe) = std::env::current_exe() {
@@ -53,6 +59,13 @@ pub fn run() {
         }
 
         let handle = app.handle();
+        submodules::desktop_clone::initialize(handle);
+        // 孤儿清理必须同步完成：会话 ID 会被复用，晚到执行可能误杀新会话
+        submodules::desktop_clone::cleanup_orphan_session(handle);
+        // 上次崩溃遗留的临时投送任务在后台清理（任务名带前缀，不影响用户任务）
+        std::thread::spawn(|| {
+            submodules::desktop_clone::launcher::cleanup_stale_tasks();
+        });
         let window = app.get_webview_window("main").unwrap();
         // window.set_shadow(true).expect("Unsupported platform!");
         // window.open_devtools();
@@ -83,6 +96,8 @@ pub fn run() {
                 .build()?;
             let menu = MenuBuilder::new(app)
                 .items(&[&submenu])
+                .text("desktop-clone", "桌面分身")
+                .separator()
                 .text("exit", "退出 (&Q)")
                 .build()?;
 
@@ -115,8 +130,13 @@ pub fn run() {
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(move |_app, event| match event.id().as_ref() {
+                    "desktop-clone" => {
+                        submodules::desktop_clone::open_from_tray(_app);
+                    }
                     "exit" => {
-                        std::process::exit(0);
+                        // 先尽力结束子会话，再走正常退出流程
+                        submodules::desktop_clone::shutdown(_app);
+                        _app.exit(0);
                     }
                     "None" => {
                         set_mat_check("None");
@@ -290,6 +310,23 @@ pub fn run() {
         commands::cloudgame::navigate_cloudgame_window,
         commands::cloudgame::dispatch_cloudgame_command,
         commands::cloudgame::eval_cloudgame_window,
+        // 桌面分身（Windows 子会话）
+        commands::desktop_clone::desktop_clone_status,
+        commands::desktop_clone::desktop_clone_capability,
+        commands::desktop_clone::desktop_clone_prepare,
+        commands::desktop_clone::desktop_clone_open,
+        commands::desktop_clone::desktop_clone_connect,
+        commands::desktop_clone::desktop_clone_disconnect,
+        commands::desktop_clone::desktop_clone_reconnect,
+        commands::desktop_clone::desktop_clone_close_session,
+        commands::desktop_clone::desktop_clone_hide,
+        commands::desktop_clone::desktop_clone_get_options,
+        commands::desktop_clone::desktop_clone_set_options,
+        commands::desktop_clone::desktop_clone_set_overlay_visible,
+        commands::desktop_clone::desktop_clone_set_chrome_height,
+        commands::desktop_clone::desktop_clone_diagnose,
+        commands::desktop_clone::desktop_clone_send_keys,
+        commands::desktop_clone::desktop_clone_launch_program,
         // 局域网设备发现与一键登录同步
         commands::lan_sync::lan_sync_start,
         commands::lan_sync::lan_sync_stop,

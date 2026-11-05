@@ -5,6 +5,8 @@ pub async fn app_close(app_handle: tauri::AppHandle) {
     // let Some(window) = app_handle.get_webview_window("main") else {
     //     return app_handle.exit(0);
     // };
+    // 桌面分身会创建系统级子会话，退出前必须尽力清理
+    crate::submodules::desktop_clone::shutdown(&app_handle);
     #[cfg(target_os = "windows")]
     {
         use tauri_plugin_window_state::{AppHandleExt, StateFlags};

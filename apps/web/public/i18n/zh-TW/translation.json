@@ -2306,6 +2306,183 @@
     "deep-link": {
         "open_in_app": "在APP中開啟"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "取消",
+            "close": "關閉",
+            "close_and_logoff": "關閉並登出",
+            "control_center": "控制中心",
+            "copied": "已複製",
+            "copy_diagnostic": "複製診斷",
+            "diagnose": "診斷",
+            "hide": "隱藏",
+            "maximize": "最大化",
+            "minimize": "最小化",
+            "mouse_degraded": "此裝置不支援相對滑鼠，已切回一般模式。",
+            "mouse_game": "遊戲",
+            "mouse_game_hint": "遊戲模式會鎖定並隱藏滑鼠指標，按住 Alt 可暫時釋放。",
+            "mouse_mode": "滑鼠模式",
+            "mouse_normal": "一般",
+            "pin": "置頂",
+            "reconnect": "重新連線",
+            "restore": "還原",
+            "retry": "重試",
+            "start": "啟動並連線",
+            "switch_window": "切換視窗",
+            "unpin": "取消置頂",
+            "view_menu": "視窗選項"
+        },
+        "capability": {
+            "activex": "遠端桌面控制項",
+            "child_sessions": "子工作階段支援",
+            "edition": "系統版本",
+            "elevated": "系統管理員權限",
+            "term_service": "遠端桌面服務",
+            "title": "執行環境檢查"
+        },
+        "close": {
+            "message": "關閉並登出會結束子工作階段內的所有程式，且無法復原。選擇「隱藏」可以讓工作階段繼續在背景執行。",
+            "title": "關閉桌面分身？"
+        },
+        "control": {
+            "actions": "快速操作",
+            "add_program": "新增程式",
+            "args": "啟動參數（選填）",
+            "degraded": "控制項通道不可用，已降級為本機鍵盤注入，請將系統熱鍵切換為「子工作階段」。",
+            "done": "已送出",
+            "elevated": "以系統管理員身分啟動",
+            "empty": "尚未設定程式。新增後即可在子工作階段內直接啟動。",
+            "launch": "啟動",
+            "launch_failed": "啟動失敗：{{message}}",
+            "launched": "已投送到子工作階段。",
+            "name": "名稱",
+            "not_connected": "連線後才能啟動程式。",
+            "programs": "程式",
+            "remove": "刪除",
+            "save_failed": "儲存程式清單失敗：{{message}}",
+            "show_desktop": "顯示桌面",
+            "switch_window": "切換視窗",
+            "task_manager": "工作管理員",
+            "title": "控制中心"
+        },
+        "credentials": {
+            "description": "認證只在本次連線的記憶體中使用，不會儲存。",
+            "password": "密碼",
+            "password_hint": "留空表示嘗試自動登入",
+            "required": "子工作階段需要重新登入，請重新輸入帳號密碼。",
+            "submit": "連線",
+            "title": "輸入登入認證",
+            "username": "帳號",
+            "username_hint": "留空則使用目前登入的使用者"
+        },
+        "disconnected": {
+            "description": "可以重新連線到現有子工作階段。",
+            "title": "連線已中斷"
+        },
+        "error": {
+            "account_disabled": "帳戶已被停用。",
+            "account_restricted": "帳戶限制導致無法登入（可能是空白密碼或登入時段限制）。",
+            "bad_credentials": "帳號或密碼錯誤，請重試。",
+            "code": "錯誤碼：{{code}}",
+            "connect_failed": "無法啟動遠端桌面連線。",
+            "credentials_required": "工作階段已中斷，請重新輸入帳號密碼。",
+            "disconnected": "連線意外中斷。",
+            "fatal": "遠端桌面控制項發生嚴重錯誤。",
+            "logon_failed": "登入子工作階段失敗，請檢查帳號密碼後重試。",
+            "no_remote_permission": "帳戶沒有遠端登入權限。",
+            "password_change_required": "首次登入必須先變更密碼。",
+            "password_expired": "密碼已過期，請先在系統中變更密碼。",
+            "prepare_failed": "準備執行環境失敗。",
+            "title": "連線失敗",
+            "window_failed": "建立分身視窗失敗。"
+        },
+        "idle": {
+            "description": "在獨立子工作階段中開啟遠端桌面，執行遊戲或程式而不影響目前桌面。"
+        },
+        "options": {
+            "always_on_top": "視窗置頂",
+            "aspect_lock": "鎖定 16:9 比例",
+            "aspect_lock_desc": "手動調整視窗大小時自動校正高度。",
+            "keyboard_hook": "系統熱鍵",
+            "keyboard_hook_desc": "決定 Win 鍵等系統熱鍵送往哪一端；變更需要重新連線。",
+            "keyboard_hook_local": "本機",
+            "keyboard_hook_remote": "子工作階段",
+            "mouse_mode": "滑鼠模式",
+            "mouse_mode_desc": "遊戲模式會鎖定並隱藏指標，按住 Alt 可暫時釋放。",
+            "mute": "靜音",
+            "mute_desc": "關閉子工作階段的聲音輸出。",
+            "reconnect_hint": "系統熱鍵與靜音在連線中變更後需要重新連線才能生效。",
+            "scaling": "畫面縮放",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "開啟為自動縮放，關閉為 1:1。",
+            "scaling_fit": "自動調整",
+            "small_window": "視窗大小",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "一般"
+        },
+        "progress": {
+            "cancel_hint": "可以取消本次連線。",
+            "closing": "正在結束工作階段…",
+            "connecting": "正在連線子工作階段…",
+            "preparing": "正在準備執行環境…",
+            "step_connect": "連線桌面",
+            "step_env": "準備環境",
+            "step_session": "建立工作階段"
+        },
+        "reconnect": {
+            "later": "稍後（還原設定）",
+            "message": "該選項在連線中變更後需要重新連線才能生效。是否立即重連？",
+            "now": "立即重連",
+            "reason": {
+                "keyboard_hook": "變更項目：系統熱鍵路由",
+                "mute": "變更項目：靜音"
+            },
+            "title": "需要重新連線"
+        },
+        "section_title": "桌面分身",
+        "session_id": "工作階段 {{id}}",
+        "settings": {
+            "close_hint": "關閉分身視窗並登出會結束子工作階段內的所有程式。",
+            "copy_failed": "複製失敗：{{message}}",
+            "description": "在獨立子工作階段中執行遠端桌面，遊戲或程式與目前桌面互不干擾。",
+            "diagnostics": "診斷",
+            "diagnostics_desc": "唯讀報告，用於排查啟動失敗；不包含認證。",
+            "elevated_option": "系統管理員",
+            "load_failed": "讀取桌面分身狀態失敗：{{message}}",
+            "open": "開啟桌面分身",
+            "open_failed": "開啟桌面分身失敗：{{message}}",
+            "opened": "已開啟桌面分身視窗。",
+            "options": "目前選項",
+            "programs": "已設定程式",
+            "programs_count": "{{total}} 個程式",
+            "programs_empty": "尚未設定程式，可在分身視窗的控制中心新增。",
+            "reconnect_hint": "系統熱鍵與靜音的變更需要在已連線時重新連線後生效。",
+            "refresh": "重新整理狀態",
+            "requirements": "需要 Windows 專業版或更高版本（家用版不支援）、系統管理員權限，以及可用的遠端桌面控制項。",
+            "save_failed": "套用選項失敗：{{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "等待登入",
+            "closing": "正在關閉",
+            "connected": "已連線",
+            "connecting": "連線中",
+            "disconnected": "已中斷",
+            "error": "發生錯誤",
+            "idle": "未連線",
+            "load_failed": "無法讀取桌面分身狀態。",
+            "preparing": "準備中",
+            "unsupported": "不支援"
+        },
+        "title": "桌面分身",
+        "unsupported": {
+            "activex": "系統缺少遠端桌面控制項（mstscax.dll / atl.dll）。",
+            "generic": "目前系統不支援桌面分身。",
+            "home_edition": "目前為 Windows 家用版，不支援子工作階段。請使用專業版或更高版本。",
+            "not_elevated": "桌面分身需要以系統管理員身分執行本應用程式。",
+            "unknown_build": "無法辨識 Windows 組建編號。"
+        }
+    },
     "dev-components": {
         "title": "元件除錯"
     },

@@ -73,6 +73,13 @@ export const routes: readonly RouteRecordRaw[] = [
         meta: { requireData: false },
     },
     {
+        // 桌面分身克隆窗口：无边框独立窗口，不套主应用布局，也不走主窗口的最小尺寸约束
+        name: "desktop-clone",
+        path: "/desktop-clone",
+        component: () => import("./views/DesktopCloneView.vue"),
+        meta: { requireData: false },
+    },
+    {
         name: "points-mall",
         path: "/points-mall",
         component: () => import("./views/PointsMall.vue"),

@@ -2307,6 +2307,183 @@
     "deep-link": {
         "open_in_app": "アプリで開く"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "キャンセル",
+            "close": "閉じる",
+            "close_and_logoff": "閉じてサインアウト",
+            "control_center": "コントロールセンター",
+            "copied": "コピーしました",
+            "copy_diagnostic": "診断をコピー",
+            "diagnose": "診断",
+            "hide": "非表示",
+            "maximize": "最大化",
+            "minimize": "最小化",
+            "mouse_degraded": "この環境では相対マウスが使えないため、通常モードに戻しました。",
+            "mouse_game": "ゲーム",
+            "mouse_game_hint": "ゲームモードではカーソルを固定して非表示にします。Alt を押している間は一時的に解放されます。",
+            "mouse_mode": "マウスモード",
+            "mouse_normal": "通常",
+            "pin": "最前面に固定",
+            "reconnect": "再接続",
+            "restore": "元に戻す",
+            "retry": "再試行",
+            "start": "起動して接続",
+            "switch_window": "ウィンドウ切り替え",
+            "unpin": "固定を解除",
+            "view_menu": "ウィンドウオプション"
+        },
+        "capability": {
+            "activex": "リモートデスクトップコントロール",
+            "child_sessions": "子セッション対応",
+            "edition": "システムバージョン",
+            "elevated": "管理者権限",
+            "term_service": "リモートデスクトップサービス",
+            "title": "実行環境チェック"
+        },
+        "close": {
+            "message": "閉じてサインアウトすると子セッション内のすべてのプログラムが終了し、元に戻せません。バックグラウンドで続行するには「非表示」を選んでください。",
+            "title": "デスクトップクローンを閉じますか？"
+        },
+        "control": {
+            "actions": "クイック操作",
+            "add_program": "プログラムを追加",
+            "args": "起動引数（任意）",
+            "degraded": "コントロール経路が使えないため、ローカルにキーを送信しました。システムホットキーを「子セッション」に切り替えてください。",
+            "done": "送信しました",
+            "elevated": "管理者として実行",
+            "empty": "プログラムがまだ登録されていません。追加すると子セッション内で起動できます。",
+            "launch": "起動",
+            "launch_failed": "起動に失敗しました：{{message}}",
+            "launched": "子セッションに送信しました。",
+            "name": "名前",
+            "not_connected": "接続後にプログラムを起動できます。",
+            "programs": "プログラム",
+            "remove": "削除",
+            "save_failed": "プログラム一覧の保存に失敗しました：{{message}}",
+            "show_desktop": "デスクトップを表示",
+            "switch_window": "ウィンドウ切り替え",
+            "task_manager": "タスクマネージャー",
+            "title": "コントロールセンター"
+        },
+        "credentials": {
+            "description": "認証情報はこの接続のメモリ内でのみ使用され、保存されません。",
+            "password": "パスワード",
+            "password_hint": "空欄の場合は自動サインインを試行",
+            "required": "子セッションに再サインインが必要です。",
+            "submit": "接続",
+            "title": "サインイン情報を入力",
+            "username": "アカウント",
+            "username_hint": "空欄の場合は現在のユーザーを使用"
+        },
+        "disconnected": {
+            "description": "既存の子セッションに再接続できます。",
+            "title": "接続が切断されました"
+        },
+        "error": {
+            "account_disabled": "アカウントが無効になっています。",
+            "account_restricted": "アカウントの制限によりサインインできません（パスワード未設定やログオン時間制限など）。",
+            "bad_credentials": "アカウントまたはパスワードが正しくありません。もう一度お試しください。",
+            "code": "エラーコード：{{code}}",
+            "connect_failed": "リモートデスクトップ接続を開始できませんでした。",
+            "credentials_required": "セッションが切断されました。認証情報を再入力してください。",
+            "disconnected": "接続が予期せず切断されました。",
+            "fatal": "リモートデスクトップコントロールで致命的なエラーが発生しました。",
+            "logon_failed": "子セッションへのサインインに失敗しました。資格情報を確認して再試行してください。",
+            "no_remote_permission": "アカウントにリモートサインインの権限がありません。",
+            "password_change_required": "初回サインインの前にパスワードの変更が必要です。",
+            "password_expired": "パスワードの有効期限が切れています。先に Windows で変更してください。",
+            "prepare_failed": "実行環境の準備に失敗しました。",
+            "title": "接続に失敗しました",
+            "window_failed": "クローンウィンドウの作成に失敗しました。"
+        },
+        "idle": {
+            "description": "独立した子セッションでリモートデスクトップを開き、現在のデスクトップに影響を与えずにゲームやアプリを実行します。"
+        },
+        "options": {
+            "always_on_top": "ウィンドウを最前面に",
+            "aspect_lock": "16:9 の比率を固定",
+            "aspect_lock_desc": "ウィンドウを手動で変更すると高さを自動補正します。",
+            "keyboard_hook": "システムホットキー",
+            "keyboard_hook_desc": "Win キーなどのシステムホットキーの送信先を選びます。変更には再接続が必要です。",
+            "keyboard_hook_local": "ローカル",
+            "keyboard_hook_remote": "子セッション",
+            "mouse_mode": "マウスモード",
+            "mouse_mode_desc": "ゲームモードではカーソルを固定します。Alt で一時的に解放できます。",
+            "mute": "ミュート",
+            "mute_desc": "子セッションの音声出力を停止します。",
+            "reconnect_hint": "接続中にシステムホットキーやミュートを変更した場合、再接続が必要です。",
+            "scaling": "画面スケーリング",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "オンで自動スケーリング、オフで 1:1。",
+            "scaling_fit": "自動調整",
+            "small_window": "ウィンドウサイズ",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "通常"
+        },
+        "progress": {
+            "cancel_hint": "この接続はキャンセルできます。",
+            "closing": "セッションを終了しています…",
+            "connecting": "子セッションに接続しています…",
+            "preparing": "実行環境を準備しています…",
+            "step_connect": "デスクトップに接続",
+            "step_env": "環境を準備",
+            "step_session": "セッションを作成"
+        },
+        "reconnect": {
+            "later": "後で（設定を戻す）",
+            "message": "この設定を反映するには再接続が必要です。今すぐ再接続しますか？",
+            "now": "今すぐ再接続",
+            "reason": {
+                "keyboard_hook": "変更項目：システムホットキーの送信先",
+                "mute": "変更項目：ミュート"
+            },
+            "title": "再接続が必要です"
+        },
+        "section_title": "デスクトップクローン",
+        "session_id": "セッション {{id}}",
+        "settings": {
+            "close_hint": "クローンウィンドウを閉じてサインアウトすると、子セッション内のすべてのプログラムが終了します。",
+            "copy_failed": "コピーに失敗しました：{{message}}",
+            "description": "独立した子セッションでリモートデスクトップを実行し、ゲームやアプリを現在のデスクトップと分離します。",
+            "diagnostics": "診断",
+            "diagnostics_desc": "起動失敗の調査用の読み取り専用レポートです。認証情報は含まれません。",
+            "elevated_option": "管理者",
+            "load_failed": "デスクトップクローンの状態を取得できませんでした：{{message}}",
+            "open": "デスクトップクローンを開く",
+            "open_failed": "デスクトップクローンを開けませんでした：{{message}}",
+            "opened": "デスクトップクローンのウィンドウを開きました。",
+            "options": "現在のオプション",
+            "programs": "登録済みプログラム",
+            "programs_count": "{{total}} 個のプログラム",
+            "programs_empty": "プログラムが未登録です。クローンウィンドウのコントロールセンターで追加できます。",
+            "reconnect_hint": "ホットキーとミュートの変更は、接続中に再接続すると反映されます。",
+            "refresh": "状態を更新",
+            "requirements": "Windows Pro 以上（ホームは非対応）、管理者権限、リモートデスクトップコントロールが必要です。",
+            "save_failed": "オプションの適用に失敗しました：{{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "サインイン待ち",
+            "closing": "終了中",
+            "connected": "接続済み",
+            "connecting": "接続中",
+            "disconnected": "切断済み",
+            "error": "エラー",
+            "idle": "未接続",
+            "load_failed": "デスクトップアバターの状態を読み取れません。",
+            "preparing": "準備中",
+            "unsupported": "非対応"
+        },
+        "title": "デスクトップクローン",
+        "unsupported": {
+            "activex": "必要なリモートデスクトップコントロールが見つかりません（mstscax.dll / atl.dll）。",
+            "generic": "このシステムではデスクトップクローンを利用できません。",
+            "home_edition": "Windows ホームエディションは子セッションに対応していません。Pro 以上を使用してください。",
+            "not_elevated": "デスクトップクローンは管理者として実行する必要があります。",
+            "unknown_build": "Windows のビルド番号を特定できません。"
+        }
+    },
     "dev-components": {
         "title": "コンポーネント"
     },

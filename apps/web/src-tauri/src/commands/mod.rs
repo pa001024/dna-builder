@@ -3,6 +3,7 @@
 pub mod afk_support;
 pub mod archive;
 pub mod cloudgame;
+pub mod desktop_clone;
 pub mod diagnostics;
 pub mod download;
 pub mod fs;

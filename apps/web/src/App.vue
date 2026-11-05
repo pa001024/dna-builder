@@ -4,6 +4,7 @@ import { provideClient } from "@urql/vue"
 import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
+import { DESKTOP_CLONE_WINDOW_LABEL } from "./api/desktop-clone"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
 import { useAfkWidget } from "./composables/useAfkWidget"
 import { useForgeIconSync } from "./composables/useForgeIconSync"
@@ -27,8 +28,14 @@ import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
 const ui = useUIStore()
-const mihanNotify = useMihanNotify()
-const forgeAlarm = useForgeAlarm()
+/** 桌面分身克隆窗口：只做外壳与状态界面，远程桌面由原生子窗口绘制。 */
+const isDesktopCloneWindow = env.isApp && getCurrentWindow().label === DESKTOP_CLONE_WINDOW_LABEL
+/**
+ * 密函轮询与铸造提醒只在主窗口/浮窗实例化。
+ * 克隆窗口实例化它们会重复整点轮询、发系统通知，甚至按共享 localStorage 提前清空主窗口的提醒。
+ */
+const mihanNotify = isDesktopCloneWindow ? null : useMihanNotify()
+const forgeAlarm = isDesktopCloneWindow ? null : useForgeAlarm()
 const lanSync = useLanSyncStore()
 const afkSupport = useAfkSupportStore()
 const afkLedger = useAfkLedgerStore()
@@ -54,7 +61,7 @@ const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_W
 const isAfkWidgetWindow = env.isApp && getCurrentWindow().label === "afk-widget"
 
 // 铸造产物图片缓存：浮窗不加载数据包,图片由主窗口解析好写入,供「最近完成」条目出图
-if (!isScreenBarWindow) {
+if (!isScreenBarWindow && !isDesktopCloneWindow) {
     useForgeIconSync()
 }
 
@@ -185,9 +192,9 @@ function stopOnlineExperienceTimer() {
 watch(
     () => setting.theme,
     (next, prev) => {
-        // 信息条浮窗只消费主题,绝不能在这里触发"捕获当前变量":浮窗侧一触发就会用
-        // 浮窗自己的渲染状态覆盖主窗口里正在设计的自定义主题(该数据两窗口共用一份存储)
-        if (isScreenBarWindow) return
+        // 信息条/克隆窗口只消费主题,绝不能在这里触发"捕获当前变量":它们一触发就会用
+        // 自己的渲染状态覆盖主窗口里正在设计的自定义主题(该数据两窗口共用一份存储)
+        if (isScreenBarWindow || isDesktopCloneWindow) return
         if (next === "custom" && prev !== "custom") {
             setting.customTheme = captureCurrentThemeVars(setting.customTheme)
         }
@@ -198,10 +205,12 @@ watchEffect(() => {
     // 自定义主题使用固定的 data-theme id（配套注入的 [data-theme] 样式）
     const themeName = effectiveTheme.value === "custom" ? CUSTOM_THEME_ID : effectiveTheme.value
     document.body.setAttribute("data-theme", themeName)
-    // 信息条窗口是透明浮窗，body 必须保持透明，否则整条会顶着一块实色底板、看不到窗口后面的画面
-    // 两个透明浮窗（信息条 / 狩月动画）的 body 都必须保持透明
+    // 两个透明浮窗（信息条 / 狩月动画）的 body 必须保持透明；克隆窗口是不透明外壳，
+    // 不能跟随主窗口的透明底设置，否则原生 RDP 子窗口周围会露出白底。
     document.body.style.background =
-        isScreenBarWindow || isAfkWidgetWindow || setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
+        isScreenBarWindow || isAfkWidgetWindow || (!isDesktopCloneWindow && setting.windowTrasnparent)
+            ? "transparent"
+            : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
 })
 
@@ -227,8 +236,8 @@ watchEffect(() => {
 watch(
     () => route.path,
     () => {
-        // 信息条窗口不是真实访问来源，不参与访问统计
-        if (isScreenBarWindow) return
+        // 信息条/克隆窗口不是真实访问来源，不参与访问统计
+        if (isScreenBarWindow || isDesktopCloneWindow) return
         reportVisitorCount()
     }
 )
@@ -252,6 +261,7 @@ watch(
             user.clearProfile()
             return
         }
+        if (isDesktopCloneWindow) return
         await user.refreshProfile()
         await claimLaunchExperienceIfNeeded()
     },
@@ -259,7 +269,7 @@ watch(
 )
 
 provideClient(gqClient)
-if (env.isApp && !isScreenBarWindow) {
+if (env.isApp && !isScreenBarWindow && !isDesktopCloneWindow) {
     // 自动签到
     if (setting.autoSign) {
         setting.startAutoSign()
@@ -393,6 +403,11 @@ onMounted(async () => {
     }
     // 狩月动画小窗：只画本地素材，不加载数据包、不拉后台任务
     if (isAfkWidgetWindow) return
+    // 克隆窗口：只保留主题/字体等纯展示初始化，其余主窗口任务一律跳过
+    if (isDesktopCloneWindow) {
+        void setting.initAppFont()
+        return
+    }
     // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
     void setting.initCustomWallpaper()
     void setting.initAppFont()
@@ -414,8 +429,8 @@ onMounted(async () => {
     ui.startTimer()
     reportVisitorCount()
     startOnlineExperienceTimer()
-    forgeAlarm.restore()
-    if (mihanNotify.shouldKeepWatch()) {
+    forgeAlarm?.restore()
+    if (mihanNotify?.shouldKeepWatch()) {
         await mihanNotify.ensureWatch()
     }
     // 深链：主窗口独占监听（浮窗不重复注册），冷启动链接与运行中收到的链接都打开
@@ -439,8 +454,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <!-- 屏幕信息条窗口：只渲染信息条本身，不套主窗口外壳（ResizeableWindow 会给窗口加亚克力材质，透明浮窗用不了） -->
-    <RouterView v-if="isScreenBarWindow || isAfkWidgetWindow" />
+    <!-- 独立浮窗/克隆窗口：只渲染自身路由，不套主窗口外壳（ResizeableWindow 会给窗口加亚克力材质） -->
+    <RouterView v-if="isScreenBarWindow || isAfkWidgetWindow || isDesktopCloneWindow" />
     <template v-else>
         <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
         <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->

@@ -5,6 +5,7 @@ import { aiTestConnection } from "@/api/agent/test-connection"
 import type { FloatWindowConfig } from "@/api/app"
 import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
 import { LAN_SYNC_HTTPS_PORT } from "@/api/lanSync"
+import DesktopCloneSetting from "@/components/desktop-clone/DesktopCloneSetting.vue"
 import type { IconTypes } from "@/components/Icon.vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { closeSafeMode, openSafeMode } from "@/data/versionGate"
@@ -148,6 +149,7 @@ const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }
         { key: "sidebar", title: t("setting.sidebar"), icon: "ri:menu-line" },
         { key: "skill-cd", title: t("skill-cd-overlay.title"), icon: "ri:timer-flash-line" },
         { key: "screen-bar", title: t("screenBar.sectionTitle"), icon: "ri:broadcast-line" },
+        { key: "desktop-clone", title: t("desktop_clone.section_title"), icon: "ri:windows-fill" },
         { key: "afk-support", title: t("afk-support.title"), icon: "ri:gamepad-line" },
         { key: "data-pack", title: t("setting.dataPackManagement"), icon: "ri:database-2-line" },
         { key: "account", title: t("setting.account"), icon: "ri:user-line" },
@@ -155,7 +157,11 @@ const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }
         { key: "ai", title: t("setting.ai"), icon: "ri:robot-2-line" },
         { key: "other", title: t("setting.other"), icon: "ri:settings-4-line" },
     ]
-    return env.isApp ? items : items.filter(item => item.key !== "skill-cd" && item.key !== "screen-bar" && item.key !== "afk-support")
+    return env.isApp
+        ? items
+        : items.filter(
+              item => item.key !== "skill-cd" && item.key !== "screen-bar" && item.key !== "afk-support" && item.key !== "desktop-clone"
+          )
 })
 
 /** 当前环境的 More 入口（含 show 标记，解析时过滤） */
@@ -1316,6 +1322,11 @@ onUnmounted(() => {
             <section v-if="env.isApp" data-scroll-section="screen-bar" class="flex flex-col">
                 <SectionHeader no-animate compact :title="$t('screenBar.sectionTitle')" />
                 <ScreenBarSetting />
+            </section>
+
+            <section v-if="env.isApp" data-scroll-section="desktop-clone" class="flex flex-col">
+                <SectionHeader no-animate compact :title="$t('desktop_clone.section_title')" />
+                <DesktopCloneSetting />
             </section>
 
             <section v-if="env.isApp" data-scroll-section="afk-support" class="flex flex-col">

@@ -4,6 +4,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window"
 import { initRangeProgress } from "dob-ui/runtime/range"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
+import { DESKTOP_CLONE_WINDOW_LABEL } from "@/api/desktop-clone"
 import { getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
 import { dataPackBootstrapLoading, isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
 import packageJson from "../package.json"
@@ -19,6 +20,8 @@ let appRouter: Router | null = null
 
 /** 当前窗口是否为屏幕信息条(顶部通用浮窗)：它不需要数据包与图片缓存。 */
 const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
+/** 当前窗口是否为桌面分身克隆窗口：远程桌面画面由原生子窗口绘制，网页只做外壳。 */
+const isDesktopCloneWindow = env.isApp && getCurrentWindow().label === DESKTOP_CLONE_WINDOW_LABEL
 
 /**
  * 注册 App 端图片服务工作线程（启动时注册，用于 /imgs 缓存）。
@@ -119,7 +122,7 @@ async function bootstrap() {
     const app = createApp(App)
     app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
 
-    if (import.meta.env.PROD) {
+    if (import.meta.env.PROD && !isDesktopCloneWindow) {
         // Sentry 体积较大，放到应用挂载后再加载，不阻塞首屏
         void import("@sentry/vue")
             .then(Sentry => {
@@ -164,14 +167,17 @@ async function bootstrap() {
     initRangeProgress()
 
     // CDN 选源测速：尽早发起并与数据包初始化并行，让后续所有资源请求都走实测更快的一端。
-    // 不 await：测速完成前资源按主源取，避免为了测速把首屏拖住。
-    const cdnProbe = probeCdnSpeed().catch(error => {
-        console.error("CDN 测速失败，按主源使用", error)
-    })
+    // 不 await：测速完成前资源按主源取，避免为了测速把首屏拖住。外壳窗口不发这类后台请求。
+    const cdnProbe =
+        isScreenBarWindow || isDesktopCloneWindow
+            ? Promise.resolve()
+            : probeCdnSpeed().catch(error => {
+                  console.error("CDN 测速失败，按主源使用", error)
+              })
 
-    if (isScreenBarWindow) {
-        // 信息条只读 localStorage 里的配置与密函数据，跳过数据包/图片缓存/外壳预热，
-        // 否则窗口要等最重的那段启动开销才能上屏。
+    if (isScreenBarWindow || isDesktopCloneWindow) {
+        // 信息条只读 localStorage 里的配置与密函数据；克隆窗口的画面由原生子窗口绘制。
+        // 两者都跳过数据包/图片缓存/外壳预热，否则窗口要等最重的那段启动开销才能上屏。
         dataPackBootstrapLoading.value = false
         return
     }

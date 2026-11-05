@@ -2357,6 +2357,183 @@
     "deep-link": {
         "open_in_app": "在APP中打开"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "取消",
+            "close": "关闭",
+            "close_and_logoff": "关闭并注销",
+            "control_center": "控制中心",
+            "copied": "已复制",
+            "copy_diagnostic": "复制诊断",
+            "diagnose": "诊断",
+            "hide": "隐藏",
+            "maximize": "最大化",
+            "minimize": "最小化",
+            "mouse_degraded": "此设备不支持相对鼠标，已切回普通模式。",
+            "mouse_game": "游戏",
+            "mouse_game_hint": "游戏模式会锁定并隐藏鼠标指针，按住 Alt 可临时释放。",
+            "mouse_mode": "鼠标模式",
+            "mouse_normal": "普通",
+            "pin": "置顶",
+            "reconnect": "重新连接",
+            "restore": "还原",
+            "retry": "重试",
+            "start": "启动并连接",
+            "switch_window": "切换窗口",
+            "unpin": "取消置顶",
+            "view_menu": "窗口选项"
+        },
+        "capability": {
+            "activex": "远程桌面控件",
+            "child_sessions": "子会话支持",
+            "edition": "系统版本",
+            "elevated": "管理员权限",
+            "term_service": "远程桌面服务",
+            "title": "运行环境检查"
+        },
+        "close": {
+            "message": "关闭并注销会结束子会话内的所有程序，且无法恢复。选择「隐藏」可以让会话继续在后台运行。",
+            "title": "关闭桌面分身？"
+        },
+        "control": {
+            "actions": "快捷操作",
+            "add_program": "添加程序",
+            "args": "启动参数（可选）",
+            "degraded": "控件通道不可用，已降级为本机键盘注入，请把系统热键切到「子会话」。",
+            "done": "已发送",
+            "elevated": "以管理员身份启动",
+            "empty": "还没有配置程序。添加后可以在子会话内直接启动。",
+            "launch": "启动",
+            "launch_failed": "启动失败：{{message}}",
+            "launched": "已投送到子会话。",
+            "name": "名称",
+            "not_connected": "连接后才能启动程序。",
+            "programs": "程序",
+            "remove": "删除",
+            "save_failed": "保存程序列表失败：{{message}}",
+            "show_desktop": "显示桌面",
+            "switch_window": "切换窗口",
+            "task_manager": "任务管理器",
+            "title": "控制中心"
+        },
+        "credentials": {
+            "description": "凭据只在本次连接的内存中使用，不会保存。",
+            "password": "密码",
+            "password_hint": "留空表示尝试自动登录",
+            "required": "子会话需要重新登录，请重新输入账号密码。",
+            "submit": "连接",
+            "title": "输入登录凭据",
+            "username": "账号",
+            "username_hint": "留空则使用当前登录用户"
+        },
+        "disconnected": {
+            "description": "可以重新连接到现有子会话。",
+            "title": "连接已断开"
+        },
+        "error": {
+            "account_disabled": "账户已被禁用。",
+            "account_restricted": "账户限制导致无法登录（可能是空密码或登录时段限制）。",
+            "bad_credentials": "账号或密码错误，请重试。",
+            "code": "错误码：{{code}}",
+            "connect_failed": "无法启动远程桌面连接。",
+            "credentials_required": "会话已断开，请重新输入账号密码。",
+            "disconnected": "连接意外断开。",
+            "fatal": "远程桌面控件发生致命错误。",
+            "logon_failed": "登录子会话失败，请检查账号密码后重试。",
+            "no_remote_permission": "账户没有远程登录权限。",
+            "password_change_required": "首次登录必须先修改密码。",
+            "password_expired": "密码已过期，请先在系统中修改密码。",
+            "prepare_failed": "准备运行环境失败。",
+            "title": "连接失败",
+            "window_failed": "创建分身窗口失败。"
+        },
+        "idle": {
+            "description": "在独立子会话中打开远程桌面，运行游戏或程序而不影响当前桌面。"
+        },
+        "options": {
+            "always_on_top": "窗口置顶",
+            "aspect_lock": "锁定 16:9 比例",
+            "aspect_lock_desc": "手动调整窗口大小时自动校正高度。",
+            "keyboard_hook": "系统热键",
+            "keyboard_hook_desc": "决定 Win 键等系统热键发往哪一端；变更需重连。",
+            "keyboard_hook_local": "本机",
+            "keyboard_hook_remote": "子会话",
+            "mouse_mode": "鼠标模式",
+            "mouse_mode_desc": "游戏模式会锁定并隐藏指针，按住 Alt 可临时释放。",
+            "mute": "静音",
+            "mute_desc": "关闭子会话的声音输出。",
+            "reconnect_hint": "系统热键与静音在连接中变更后需要重新连接才能生效。",
+            "scaling": "画面缩放",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "开启为自适应缩放，关闭为 1:1。",
+            "scaling_fit": "自适应",
+            "small_window": "窗口大小",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "普通"
+        },
+        "progress": {
+            "cancel_hint": "可以取消本次连接。",
+            "closing": "正在结束会话…",
+            "connecting": "正在连接子会话…",
+            "preparing": "正在准备运行环境…",
+            "step_connect": "连接桌面",
+            "step_env": "准备环境",
+            "step_session": "创建会话"
+        },
+        "reconnect": {
+            "later": "稍后（还原设置）",
+            "message": "该选项在连接中变更后需要重新连接才能生效。是否立即重连？",
+            "now": "立即重连",
+            "reason": {
+                "keyboard_hook": "变更项：系统热键路由",
+                "mute": "变更项：静音"
+            },
+            "title": "需要重新连接"
+        },
+        "section_title": "桌面分身",
+        "session_id": "会话 {{id}}",
+        "settings": {
+            "close_hint": "关闭克隆窗口并注销会结束子会话内的所有程序。",
+            "copy_failed": "复制失败：{{message}}",
+            "description": "在独立子会话中运行远程桌面，游戏或程序与当前桌面互不干扰。",
+            "diagnostics": "诊断",
+            "diagnostics_desc": "只读报告，用于排查启动失败；不包含凭据。",
+            "elevated_option": "管理员",
+            "load_failed": "读取桌面分身状态失败：{{message}}",
+            "open": "打开桌面分身",
+            "open_failed": "打开桌面分身失败：{{message}}",
+            "opened": "已打开桌面分身窗口。",
+            "options": "当前选项",
+            "programs": "已配置程序",
+            "programs_count": "{{total}} 个程序",
+            "programs_empty": "尚未配置程序，可在克隆窗口的控制中心添加。",
+            "reconnect_hint": "系统热键与静音的变更需要在已连接时重新连接后生效。",
+            "refresh": "刷新状态",
+            "requirements": "需要 Windows 专业版或更高版本（家庭版不支持）、管理员权限，以及可用的远程桌面控件。",
+            "save_failed": "应用选项失败：{{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "等待登录",
+            "closing": "正在关闭",
+            "connected": "已连接",
+            "connecting": "连接中",
+            "disconnected": "已断开",
+            "error": "出错",
+            "idle": "未连接",
+            "load_failed": "无法读取桌面分身状态。",
+            "preparing": "准备中",
+            "unsupported": "不支持"
+        },
+        "title": "桌面分身",
+        "unsupported": {
+            "activex": "系统缺少远程桌面控件（mstscax.dll / atl.dll）。",
+            "generic": "当前系统不支持桌面分身。",
+            "home_edition": "当前为 Windows 家庭版，不支持子会话。请使用专业版或更高版本。",
+            "not_elevated": "桌面分身需要以管理员身份运行本应用。",
+            "unknown_build": "无法识别 Windows 构建号。"
+        }
+    },
     "dev-components": {
         "title": "组件调试"
     },

@@ -2331,6 +2331,183 @@
     "deep-link": {
         "open_in_app": "Open in App"
     },
+    "desktop_clone": {
+        "action": {
+            "cancel": "Cancel",
+            "close": "Close",
+            "close_and_logoff": "Close and sign out",
+            "control_center": "Control center",
+            "copied": "Copied",
+            "copy_diagnostic": "Copy diagnostics",
+            "diagnose": "Diagnostics",
+            "hide": "Hide",
+            "maximize": "Maximize",
+            "minimize": "Minimize",
+            "mouse_degraded": "Relative mouse is not supported on this device; switched back to normal mode.",
+            "mouse_game": "Game",
+            "mouse_game_hint": "Game mode captures and hides the cursor. Hold Alt to release it temporarily.",
+            "mouse_mode": "Mouse mode",
+            "mouse_normal": "Normal",
+            "pin": "Keep on top",
+            "reconnect": "Reconnect",
+            "restore": "Restore",
+            "retry": "Retry",
+            "start": "Start and connect",
+            "switch_window": "Switch window",
+            "unpin": "Unpin",
+            "view_menu": "Window options"
+        },
+        "capability": {
+            "activex": "Remote desktop control",
+            "child_sessions": "Child sessions",
+            "edition": "Windows edition",
+            "elevated": "Administrator rights",
+            "term_service": "Remote desktop service",
+            "title": "Environment check"
+        },
+        "close": {
+            "message": "Closing and signing out ends every program in the child session and cannot be undone. Choose \"Hide\" to keep the session running in the background.",
+            "title": "Close Desktop Clone?"
+        },
+        "control": {
+            "actions": "Quick actions",
+            "add_program": "Add program",
+            "args": "Arguments (optional)",
+            "degraded": "The control channel is unavailable; keys were injected locally. Set system hotkeys to \"Child session\".",
+            "done": "Sent",
+            "elevated": "Run as administrator",
+            "empty": "No programs configured yet. Add one to launch it inside the child session.",
+            "launch": "Launch",
+            "launch_failed": "Launch failed: {{message}}",
+            "launched": "Sent to the child session.",
+            "name": "Name",
+            "not_connected": "Connect first to launch programs.",
+            "programs": "Programs",
+            "remove": "Remove",
+            "save_failed": "Failed to save the program list: {{message}}",
+            "show_desktop": "Show desktop",
+            "switch_window": "Switch window",
+            "task_manager": "Task manager",
+            "title": "Control center"
+        },
+        "credentials": {
+            "description": "Credentials stay in memory for this connection only and are never saved.",
+            "password": "Password",
+            "password_hint": "Leave empty to try automatic sign-in",
+            "required": "The child session needs you to sign in again.",
+            "submit": "Connect",
+            "title": "Sign in",
+            "username": "Account",
+            "username_hint": "Leave empty to use the current user"
+        },
+        "disconnected": {
+            "description": "You can reconnect to the existing child session.",
+            "title": "Connection lost"
+        },
+        "error": {
+            "account_disabled": "The account is disabled.",
+            "account_restricted": "The account is restricted from signing in (empty password or logon hours).",
+            "bad_credentials": "Incorrect account or password. Try again.",
+            "code": "Error code: {{code}}",
+            "connect_failed": "Could not start the remote desktop connection.",
+            "credentials_required": "The session was disconnected. Enter your credentials again.",
+            "disconnected": "The connection was lost unexpectedly.",
+            "fatal": "The remote desktop control reported a fatal error.",
+            "logon_failed": "Could not sign in to the child session. Check the credentials and try again.",
+            "no_remote_permission": "The account is not allowed to sign in remotely.",
+            "password_change_required": "The password must be changed before the first sign-in.",
+            "password_expired": "The password has expired. Change it in Windows first.",
+            "prepare_failed": "Failed to prepare the environment.",
+            "title": "Connection failed",
+            "window_failed": "Failed to create the clone window."
+        },
+        "idle": {
+            "description": "Open a remote desktop in a separate child session and run games or apps without disturbing your desktop."
+        },
+        "options": {
+            "always_on_top": "Keep window on top",
+            "aspect_lock": "Lock 16:9 aspect",
+            "aspect_lock_desc": "Adjust the height automatically when the window is resized.",
+            "keyboard_hook": "System hotkeys",
+            "keyboard_hook_desc": "Chooses where Win-key hotkeys go. Changing this requires a reconnect.",
+            "keyboard_hook_local": "This PC",
+            "keyboard_hook_remote": "Child session",
+            "mouse_mode": "Mouse mode",
+            "mouse_mode_desc": "Game mode captures the cursor; hold Alt to release it.",
+            "mute": "Mute",
+            "mute_desc": "Mute audio in the child session.",
+            "reconnect_hint": "Changing system hotkeys or mute while connected requires a reconnect.",
+            "scaling": "Scaling",
+            "scaling_1to1": "1:1",
+            "scaling_desc": "On scales to fit; off uses 1:1.",
+            "scaling_fit": "Fit",
+            "small_window": "Window size",
+            "small_window_1280": "1280×720",
+            "small_window_500": "500×281",
+            "small_window_off": "Normal"
+        },
+        "progress": {
+            "cancel_hint": "You can cancel this connection.",
+            "closing": "Closing the session…",
+            "connecting": "Connecting to the child session…",
+            "preparing": "Preparing the environment…",
+            "step_connect": "Connect desktop",
+            "step_env": "Prepare environment",
+            "step_session": "Create session"
+        },
+        "reconnect": {
+            "later": "Later (revert)",
+            "message": "This option needs a reconnect to take effect. Reconnect now?",
+            "now": "Reconnect now",
+            "reason": {
+                "keyboard_hook": "Changed: system hotkey routing",
+                "mute": "Changed: mute"
+            },
+            "title": "Reconnect required"
+        },
+        "section_title": "Desktop Clone",
+        "session_id": "Session {{id}}",
+        "settings": {
+            "close_hint": "Closing the clone window and signing out ends every program in the child session.",
+            "copy_failed": "Copy failed: {{message}}",
+            "description": "Run a remote desktop in a separate child session so games and apps don't interfere with your desktop.",
+            "diagnostics": "Diagnostics",
+            "diagnostics_desc": "Read-only report for troubleshooting startup failures; it never contains credentials.",
+            "elevated_option": "Admin",
+            "load_failed": "Failed to read Desktop Clone status: {{message}}",
+            "open": "Open Desktop Clone",
+            "open_failed": "Failed to open Desktop Clone: {{message}}",
+            "opened": "The Desktop Clone window is open.",
+            "options": "Current options",
+            "programs": "Configured programs",
+            "programs_count": "{{total}} programs",
+            "programs_empty": "No programs yet. Add them in the clone window's control center.",
+            "reconnect_hint": "Hotkey and mute changes take effect after a reconnect while connected.",
+            "refresh": "Refresh status",
+            "requirements": "Requires Windows Pro or higher (Home is not supported), administrator rights, and the remote desktop controls.",
+            "save_failed": "Failed to apply options: {{message}}"
+        },
+        "status": {
+            "awaiting_credentials": "Waiting for sign-in",
+            "closing": "Closing",
+            "connected": "Connected",
+            "connecting": "Connecting",
+            "disconnected": "Disconnected",
+            "error": "Error",
+            "idle": "Not connected",
+            "load_failed": "Unable to read the desktop avatar status.",
+            "preparing": "Preparing",
+            "unsupported": "Unsupported"
+        },
+        "title": "Desktop Clone",
+        "unsupported": {
+            "activex": "Required remote desktop controls are missing (mstscax.dll / atl.dll).",
+            "generic": "Desktop Clone is not supported on this system.",
+            "home_edition": "Windows Home edition does not support child sessions. Use Pro or a higher edition.",
+            "not_elevated": "Desktop Clone must run as administrator.",
+            "unknown_build": "The Windows build number could not be determined."
+        }
+    },
     "dev-components": {
         "title": "Component Lab"
     },
