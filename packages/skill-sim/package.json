@@ -8,6 +8,7 @@
     "types": "./src/index.ts",
     "exports": {
         ".": "./src/index.ts",
+        "./core": "./src/core/index.ts",
         "./schema": "./src/schema/index.ts",
         "./pipeline": "./src/pipeline/index.ts",
         "./data-index": "./src/pipeline/data-index.ts",
