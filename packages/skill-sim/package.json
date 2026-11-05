@@ -17,8 +17,12 @@
     },
     "scripts": {
         "test": "bun test",
+        "test:parity": "bun test tests/parity",
         "typecheck": "tsc --noEmit",
-        "lint": "tsc --noEmit"
+        "lint": "tsc --noEmit",
+        "generate": "bun scripts/build-generated.ts",
+        "generate:coverage": "bun scripts/coverage-report.ts",
+        "generate:parity": "bun scripts/freeze-parity.ts"
     },
     "dependencies": {
         "dna-builder-data": "file:../../packages/data"

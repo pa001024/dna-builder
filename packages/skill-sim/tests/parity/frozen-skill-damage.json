@@ -1,0 +1,428 @@
+{
+    "schemaVersion": 1,
+    "generatedAt": "2026-11-05",
+    "gameVersion": "v1.7.227.1",
+    "generator": "packages/skill-sim/scripts/freeze-parity.ts",
+    "entries": [
+        {
+            "fixtureId": "lise-fire-4103",
+            "charId": 4103,
+            "skillId": 410301,
+            "skillName": "迸发射击",
+            "slot": "E",
+            "field": "伤害",
+            "tag": "技能,战技,SPliseGun01",
+            "expected": 358721791.4464965
+        },
+        {
+            "fixtureId": "lise-fire-4103",
+            "charId": 4103,
+            "skillId": 410302,
+            "skillName": "涡流狙击",
+            "slot": "Q",
+            "field": "[狙击子弹]伤害",
+            "tag": "技能,终结技,SPliseGun01",
+            "expected": 142949285.31326553
+        },
+        {
+            "fixtureId": "lise-fire-4103",
+            "charId": 4103,
+            "skillId": 410302,
+            "skillName": "涡流狙击",
+            "slot": "Q",
+            "field": "[强化狙击子弹]伤害",
+            "tag": "技能,终结技,SPliseGun01",
+            "expected": 1077064426.4483778
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150101,
+            "skillName": "以坚忍之名",
+            "slot": "E",
+            "field": "伤害",
+            "tag": "技能,战技",
+            "expected": 49448387.68746614
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]一段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 49287492.61493694
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]二段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 57491475.25664902
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]三段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 57618668.78597789
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]四段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 106778967.87158595
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]下落攻击伤害",
+            "tag": "近战,武器,下落攻击",
+            "expected": 1237231.0941338425
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]滑行攻击伤害",
+            "tag": "近战,武器,滑行攻击",
+            "expected": 1795980.6205168678
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]蓄力攻击伤害",
+            "tag": "近战,武器,蓄力攻击,同律",
+            "expected": 963109404.0781999
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "[萨麦尔]S级蓄力攻击伤害",
+            "tag": "近战,武器,蓄力攻击,同律",
+            "expected": 1166110276.8870757
+        },
+        {
+            "fixtureId": "lizbel-shard-1501",
+            "charId": 1501,
+            "skillId": 150102,
+            "skillName": "我不忍啦！",
+            "slot": "Q",
+            "field": "技能释放伤害",
+            "tag": "技能,终结技",
+            "expected": 15978319.505838087
+        },
+        {
+            "fixtureId": "lise-4101-min",
+            "charId": 4101,
+            "skillId": 410101,
+            "skillName": "快速出击",
+            "slot": "E",
+            "field": "伤害",
+            "tag": "技能,战技",
+            "expected": 21681.47718139535
+        },
+        {
+            "fixtureId": "lise-4101-min",
+            "charId": 4101,
+            "skillId": 410101,
+            "skillName": "快速出击",
+            "slot": "E",
+            "field": "消耗[电能]伤害倍率",
+            "tag": "技能,战技",
+            "expected": 32.9004
+        },
+        {
+            "fixtureId": "lise-4101-min",
+            "charId": 4101,
+            "skillId": 410102,
+            "skillName": "涡旋电场",
+            "slot": "Q",
+            "field": "伤害",
+            "tag": "技能,终结技",
+            "expected": 23339.281283720928
+        },
+        {
+            "fixtureId": "lise-4101-min",
+            "charId": 4101,
+            "skillId": 410102,
+            "skillName": "涡旋电场",
+            "slot": "Q",
+            "field": "[电场爆发]选取敌人伤害",
+            "tag": "技能,终结技",
+            "expected": 7232.576720930233
+        },
+        {
+            "fixtureId": "lise-4101-min",
+            "charId": 4101,
+            "skillId": 410102,
+            "skillName": "涡旋电场",
+            "slot": "Q",
+            "field": "[电荷]伤害",
+            "tag": "技能,终结技",
+            "expected": 69367.72459534883
+        },
+        {
+            "fixtureId": "saiqi-5301-min",
+            "charId": 5301,
+            "skillId": 530101,
+            "skillName": "抽茧成梦",
+            "slot": "E",
+            "field": "[幻象]伤害",
+            "tag": "技能,战技",
+            "expected": 5016.811053767441
+        },
+        {
+            "fixtureId": "saiqi-5301-min",
+            "charId": 5301,
+            "skillId": 530101,
+            "skillName": "抽茧成梦",
+            "slot": "E",
+            "field": "[浮光鳞粉]伤害",
+            "tag": "技能,战技,SaiqiSkill01",
+            "expected": 3123.189802046512
+        },
+        {
+            "fixtureId": "saiqi-5301-min",
+            "charId": 5301,
+            "skillId": 530101,
+            "skillName": "抽茧成梦",
+            "slot": "E",
+            "field": "[鳞粉印记]触发伤害",
+            "tag": "技能,战技,SaiqiSkill01",
+            "expected": 908.2527270697674
+        },
+        {
+            "fixtureId": "saiqi-5301-min",
+            "charId": 5301,
+            "skillId": 530102,
+            "skillName": "腐草为萤",
+            "slot": "Q",
+            "field": "射击伤害",
+            "tag": "远程,武器,同律",
+            "expected": 3166.0319118139532
+        },
+        {
+            "fixtureId": "falu-3104-min",
+            "charId": 3104,
+            "skillId": 310401,
+            "skillName": "潜入夜色",
+            "slot": "E",
+            "field": "[暗影一刺]伤害",
+            "tag": "技能,战技",
+            "expected": 21809.33162790698
+        },
+        {
+            "fixtureId": "falu-3104-min",
+            "charId": 3104,
+            "skillId": 310401,
+            "skillName": "潜入夜色",
+            "slot": "E",
+            "field": "[暗影奔袭]伤害",
+            "tag": "技能,战技",
+            "expected": 86304.30697674419
+        },
+        {
+            "fixtureId": "falu-3104-min",
+            "charId": 3104,
+            "skillId": 310402,
+            "skillName": "坠入黑渊",
+            "slot": "Q",
+            "field": "伤害",
+            "tag": "技能,终结技",
+            "expected": 43502.03581395349
+        },
+        {
+            "fixtureId": "falu-3104-min",
+            "charId": 3104,
+            "skillId": 310402,
+            "skillName": "坠入黑渊",
+            "slot": "Q",
+            "field": "充盈伤害",
+            "tag": "技能,终结技,充盈",
+            "expected": 5714.74465116279
+        },
+        {
+            "fixtureId": "falu-3104-min",
+            "charId": 3104,
+            "skillId": 310402,
+            "skillName": "坠入黑渊",
+            "slot": "Q",
+            "field": "附加伤害",
+            "tag": "技能,终结技,充盈",
+            "expected": 1749.411627906977
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110101,
+            "skillName": "残光",
+            "slot": "E",
+            "field": "伤害",
+            "tag": "技能,战技",
+            "expected": 17641.569918139536
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "一段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 605.7825516279071
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "二段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 783.084761860465
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "三段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 871.7358669767443
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "四段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 1167.2395506976745
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "五段伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 1270.6658400000001
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "蓄力攻击伤害",
+            "tag": "近战,武器,蓄力攻击",
+            "expected": 3284.4835116279073
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "滑行攻击伤害",
+            "tag": "近战,武器,滑行攻击",
+            "expected": 1527.434581395349
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "一段剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 6826.135093953489
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "二段剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 8540.056459534884
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "三段剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 9662.970457674419
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "四段剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 13061.262820465117
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "五段剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 14213.727186976743
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "技能开启剑气伤害",
+            "tag": "近战,武器,普攻,同律",
+            "expected": 6826.135093953489
+        },
+        {
+            "fixtureId": "bern-1101-min",
+            "charId": 1101,
+            "skillId": 110102,
+            "skillName": "冥焰",
+            "slot": "Q",
+            "field": "充盈伤害",
+            "tag": "近战,武器,同律,充盈",
+            "expected": 22162.776279069767
+        }
+    ]
+}

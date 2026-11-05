@@ -2,7 +2,8 @@
 
 技能行为数据流水线（U3）：把导出器的 `SkillAssetDoc` 与 `packages/data` 归一成可运行的
 `SkillBehaviorIR`，并生成 manifest + 覆盖率报告；`src/runtime/`（U5）把 IR 解释成 U4 的模拟命令。
-**不含全量数据**（U7）。
+U7 已把真实 U2 产物落成 `generated/`（manifest + 覆盖表 + parity 基线），见
+[`generated/README.md`](./generated/README.md)。
 
 ```text
 SkillAssetDoc (导出器 monage / bytecode / lua 证据)
@@ -116,8 +117,24 @@ runtime.diagnostics()   // 不可执行项清单（同类去重，带 occurrence
 - `provenance.nativeCalls` 中 `known=false` 的项**不可假装执行**；`coverage.nativeCallsUnknown` 是迁移缺口清单。
 - U7 的复杂机制走 `authored`（fixture 里的黎瑟 Q 即示例）；批量 override 可用 `--overrides` 文件：
   `{ "schemaVersion": 1, "skills": { "<skillId>": AuthoredBehavior } }`。
-- U7 parity 基线：`fixtures/parity-smoke.ts` 目前是自比对 smoke（漂移恒 0），冻结基线时把 `expectedDps`
-  换成固定数字，并对 `verifyParity` 传入 `requireCharacter: true`。
+- U7 parity 基线：真实冻结值在 `tests/parity/frozen-baselines.json` / `frozen-skill-damage.json`，
+  由 `scripts/freeze-parity.ts` 生成后提交；测试只重算并比对，不现场生成 expected。
+
+## 全角色生成（U7）
+
+```bash
+# U2 真实产物 → generated/manifest.json + coverage.json + coverage-matrix.json + COVERAGE.md
+bun packages/skill-sim/scripts/build-generated.ts --input <U2>/final/skill-behavior.json
+
+# 重新冻结 parity（仅在数据/公式有意变更后）
+bun packages/skill-sim/scripts/freeze-parity.ts
+bun test packages/skill-sim/tests/parity
+```
+
+- 适配器 `scripts/adapt-u2.ts` 只做形状归一与保守的 `Rate:"#N"` 解析；复杂技能用
+  `fixtures/overrides/lise-saiqi.json`（authored）+ `fixtures/overrides/authored-buffs.json`。
+- 覆盖表：`generated/COVERAGE.md`（人读）/ `generated/coverage-matrix.json`（机器读）。
+- 已知缺口与 U8 集成说明见 `generated/README.md`。
 
 ## 测试
 
@@ -126,4 +143,4 @@ bun test packages/skill-sim
 node node_modules/typescript/bin/tsc -p packages/skill-sim/tsconfig.json --noEmit
 ```
 
-fixtures 为合成样本（`fixtures/skill-asset-sample.json`），真实全量产物不进 git。
+合成的 schema/pipeline 测试样本在 `fixtures/`；真实全量产物在 `generated/`（可重复生成）。

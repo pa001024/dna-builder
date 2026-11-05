@@ -1,0 +1,29 @@
+[
+    {
+        "id": 410122,
+        "name": "负电荷",
+        "props": {
+            "LastTime": 6,
+            "BuffType": [20]
+        },
+        "note": "U2 导出只含正电荷 buff 410121；410122 在 U2 里是 SkillEffect id。U5 黎瑟 Q pilot 用 410122 表示负电荷，本文件显式把它作为 authored buff 注入，manifest 会标注 lua.authored=true。"
+    },
+    {
+        "id": 150324,
+        "name": "未导出增益 150324",
+        "props": {},
+        "note": "技能 150321（莉兹贝尔 Q 子技能）引用，但 U2 buffs 与 packages/data 都没有该 id；占位，不建模数值。"
+    },
+    {
+        "id": 120231,
+        "name": "未导出增益 120231",
+        "props": {},
+        "note": "技能 310403（法露茜被动）引用，但 U2 buffs 与 packages/data 都没有该 id；占位，不建模数值。"
+    },
+    {
+        "id": 120232,
+        "name": "未导出增益 120232",
+        "props": {},
+        "note": "技能 310403（法露茜被动）引用，但 U2 buffs 与 packages/data 都没有该 id；占位，不建模数值。"
+    }
+]

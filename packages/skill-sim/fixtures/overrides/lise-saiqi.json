@@ -1,0 +1,672 @@
+{
+    "schemaVersion": 1,
+    "skills": {
+        "410101": {
+            "note": "authored：U2 montage 有 hit1~hit4，但 SkillEffects.Damage.Rate=\"#1\" 无法在 U2 产物内解析。按旧手写 Lise E（单次冲刺命中）与 montage 首个有效 notify 补一条伤害相位；位移/电能回复/攻速 buff 不建模。",
+            "cast": {
+                "time": 0.11620842,
+                "cooldown": 0,
+                "canMove": false,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 20
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0.11620842,
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "伤害",
+                            "tag": "技能,战技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 3
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:lise-e-dash-hit"
+                }
+            ]
+        },
+        "410102": {
+            "note": "authored：直接复用 U5 黎瑟 Q pilot 的 IR 相位（电场爆发 → 每秒选敌/随机正负电荷 → 3s 电荷反应）。字段/buff 均取自 U2 + packages/data；负电荷 410122 由 authored-buffs.json 注入。",
+            "cast": {
+                "time": 0.45,
+                "cooldown": 2,
+                "canMove": true,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 10
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 20,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 410111,
+                            "target": {
+                                "kind": "self"
+                            }
+                        },
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 410123,
+                            "target": {
+                                "kind": "self"
+                            }
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "伤害",
+                            "tag": "技能,终结技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 10
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:field-open"
+                },
+                {
+                    "at": 1,
+                    "until": 10,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 410111
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -20
+                        },
+                        {
+                            "kind": "select",
+                            "filter": {
+                                "kind": "random",
+                                "count": 1,
+                                "radius": 50
+                            },
+                            "store": "chargeTarget"
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电场爆发]选取敌人伤害",
+                            "tag": "技能,终结技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "stored",
+                                "ref": "chargeTarget"
+                            }
+                        },
+                        {
+                            "kind": "branch",
+                            "on": "random",
+                            "then": [
+                                {
+                                    "kind": "applyBuff",
+                                    "buffId": 410121,
+                                    "duration": 6,
+                                    "target": {
+                                        "kind": "stored",
+                                        "ref": "chargeTarget"
+                                    }
+                                }
+                            ],
+                            "else": [
+                                {
+                                    "kind": "applyBuff",
+                                    "buffId": 410122,
+                                    "duration": 6,
+                                    "target": {
+                                        "kind": "stored",
+                                        "ref": "chargeTarget"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:charge-cycle"
+                },
+                {
+                    "at": 3,
+                    "until": 10,
+                    "tick": {
+                        "interval": 3
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 410111
+                    },
+                    "actions": [
+                        {
+                            "kind": "select",
+                            "filter": {
+                                "kind": "random",
+                                "count": 1,
+                                "radius": 20,
+                                "requiresBuff": 410121
+                            },
+                            "store": "positiveCharge"
+                        },
+                        {
+                            "kind": "select",
+                            "filter": {
+                                "kind": "random",
+                                "count": 1,
+                                "radius": 20,
+                                "requiresBuff": 410122
+                            },
+                            "store": "negativeCharge"
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电荷]伤害",
+                            "tag": "技能,终结技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "stored",
+                                "ref": "positiveCharge"
+                            }
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[电荷]伤害",
+                            "tag": "技能,终结技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "stored",
+                                "ref": "negativeCharge"
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:charge-reaction"
+                }
+            ]
+        },
+        "530101": {
+            "note": "authored：U2 该技能无 montage、Lua 行为为空，只有 SkillEffects（530114/530115/530116）。按效果顺序映射到 [幻象]伤害 / [浮光鳞粉]伤害 / [鳞粉印记]触发伤害，并补 530102 印记 buff。幻象实体/投射物不建模。",
+            "cast": {
+                "time": 0.1,
+                "cooldown": 0.3,
+                "canMove": false,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 30
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0.1,
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "[幻象]伤害",
+                            "tag": "技能,战技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 6
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-e-phantom"
+                },
+                {
+                    "at": 0.3,
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "[浮光鳞粉]伤害",
+                            "tag": "技能,战技,SaiqiSkill01",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 6
+                            }
+                        },
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 530102,
+                            "duration": 10,
+                            "target": {
+                                "kind": "nearest",
+                                "count": 1,
+                                "radius": 6
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-e-pollen"
+                },
+                {
+                    "at": 5,
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "[鳞粉印记]触发伤害",
+                            "tag": "技能,战技,SaiqiSkill01",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 6
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-e-mark-trigger"
+                }
+            ]
+        },
+        "530102": {
+            "note": "authored：U2 Lua 行为给出 530100 持续增益（每秒 30 神智 + 每秒执行效果 530128）与延迟 1.5s 的 530101。效果 530128 的 Damage.Rate=0.05 无法在 U2 产物内解析成字段，按 packages/data 的「射击伤害」字段补每秒射击伤害；生命流失/超限护盾不建模。",
+            "cast": {
+                "time": 0.1,
+                "cooldown": 3.5,
+                "canMove": true,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 10
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 30,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 530100,
+                            "target": {
+                                "kind": "self"
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-q-open"
+                },
+                {
+                    "at": 1,
+                    "until": 10,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 530100
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -30
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "射击伤害",
+                            "tag": "远程,武器,同律",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 1,
+                                "radius": 3
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-q-shoot"
+                },
+                {
+                    "at": 1.5,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 530101,
+                            "target": {
+                                "kind": "self"
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:saiqi-q-delayed-buff"
+                }
+            ]
+        },
+        "540201": {
+            "note": "authored：U3 build 的 deriveBuffTickPhases 用父相位 until 作为 tick 结束，但 buff DotDatas.DotDelay=3 会把 at 推到 3.2 > until，触发 schema.order。此处按同一份证据重写相位（0.2 施加 buff，3.2 起每秒 -10 神智），不改变行为含义；原生调用仍保留在 provenance。",
+            "cast": {
+                "time": 0.2,
+                "cooldown": 1,
+                "canMove": false,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 10
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 10,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0.2,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 540241,
+                            "target": {
+                                "kind": "self"
+                            }
+                        },
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 540201,
+                            "target": {
+                                "kind": "self"
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:montage-buffs"
+                },
+                {
+                    "at": 3.2,
+                    "until": 10.2,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 540201
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -10
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:dot-fix"
+                }
+            ]
+        },
+        "210202": {
+            "note": "authored：U3 的 buff DotDatas tick 相位 until 取自 montage 窗口，DotDelay 会把 at 推到窗口外（schema.order）。同时补 U2 效果 210253 的召唤物伤害（[召唤物·审判]技能伤害，1s tick）；召唤物 AI 不建模。",
+            "cast": {
+                "time": 2.1783094,
+                "cooldown": 0,
+                "canMove": true,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 20
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 30,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 2.1783094,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 210202,
+                            "target": {
+                                "kind": "self"
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:eve-q-open"
+                },
+                {
+                    "at": 2.1783094,
+                    "until": 10,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 210202
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -30
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[召唤物·审判]技能伤害",
+                            "tag": "技能,召唤物",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 15
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:eve-q-summon-tick"
+                }
+            ]
+        },
+        "220102": {
+            "note": "authored：U3 的 buff DotDatas tick 相位 until 越界（schema.order）。按 U2 行为/效果补 3514% 伤害（技能/终结技/WeitaWater）、持续召唤与每秒 12 神智消耗；召唤物 AI 不建模。",
+            "cast": {
+                "time": 1.27,
+                "cooldown": 3,
+                "canMove": true,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 120
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 12,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 1.27,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 220110,
+                            "target": {
+                                "kind": "self"
+                            }
+                        },
+                        {
+                            "kind": "summon",
+                            "creatureId": 220102
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "伤害",
+                            "tag": "技能,终结技,WeitaWater",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 10
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:water-q-open"
+                },
+                {
+                    "at": 3.27,
+                    "until": 10,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 220110
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -12
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:water-q-sustain"
+                }
+            ]
+        },
+        "310401": {
+            "note": "authored：U3 的 buff DotDatas tick 相位 until 越界（schema.order）。按 U2 效果 310419 补 [暗影一刺]伤害 与每秒 10 神智消耗；移动速度/霸体/禁用技能不建模。",
+            "cast": {
+                "time": 0.16666667,
+                "cooldown": 2,
+                "canMove": true,
+                "costs": [
+                    {
+                        "resource": "神智",
+                        "amount": 10
+                    },
+                    {
+                        "resource": "神智",
+                        "amount": 10,
+                        "perSecond": true
+                    }
+                ]
+            },
+            "phases": [
+                {
+                    "at": 0.16666667,
+                    "actions": [
+                        {
+                            "kind": "applyBuff",
+                            "buffId": 310411,
+                            "target": {
+                                "kind": "self"
+                            }
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "[暗影一刺]伤害",
+                            "tag": "技能,战技",
+                            "hits": {
+                                "count": 1,
+                                "interval": 0
+                            },
+                            "target": {
+                                "kind": "nearest",
+                                "count": 3,
+                                "radius": 5
+                            }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:falu-e-open"
+                },
+                {
+                    "at": 1.16666667,
+                    "until": 10,
+                    "tick": {
+                        "interval": 1
+                    },
+                    "condition": {
+                        "kind": "hasBuff",
+                        "buffId": 310411
+                    },
+                    "actions": [
+                        {
+                            "kind": "resource",
+                            "resource": "神智",
+                            "delta": -10
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:falu-e-sustain"
+                }
+            ]
+        }
+    }
+}
