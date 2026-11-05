@@ -1,14 +1,14 @@
 {
     "coverage": {
         "charactersTotal": 34,
-        "skillsTotal": 367,
+        "skillsTotal": 385,
         "skillsWithMontage": 128,
-        "skillsWithBlueprint": 136,
+        "skillsWithBlueprint": 188,
         "skillsWithAnimBP": 209,
-        "skillsWithLua": 352,
+        "skillsWithLua": 370,
         "skillsAuthored": 8,
-        "skillsWithBehavior": 61,
-        "nativeCallsTotal": 1712,
+        "skillsWithBehavior": 60,
+        "nativeCallsTotal": 2355,
         "nativeCallsUnknown": [
             "ALocalDis",
             "ActorToLocationTeleport",
@@ -93,6 +93,7 @@
             "LineTraceSingle",
             "MakeSound",
             "MarkPropertyDirtyFromRepIndex",
+            "NoTarget",
             "Passive1AddSecondSp",
             "Passive2Execute",
             "Passive2Save",
@@ -128,8 +129,10 @@
             "SetVector_ByEffectSource",
             "ShieldFx",
             "Skill02Off",
+            "Skill2Laser",
             "SpawnSystemAttached",
             "StartLoopShoot",
+            "StartSearch",
             "StartTargetCondemn",
             "StopTraceAirDoor",
             "UpdateWeakness",
@@ -248,7 +251,7 @@
     },
     "diagnostics": {
         "errors": 0,
-        "warnings": 1221,
+        "warnings": 1258,
         "items": [
             {
                 "severity": "info",
@@ -343,6 +346,42 @@
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
+                "path": "skills.1010201",
+                "message": "技能 1010201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1010201",
+                "message": "技能 1010201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1010202",
+                "message": "技能 1010202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1010202",
+                "message": "技能 1010202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1010302",
+                "message": "技能 1010302 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1010302",
+                "message": "技能 1010302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
                 "path": "skills.1020101",
                 "message": "技能 1020101 不在 packages/data"
             },
@@ -387,6 +426,54 @@
                 "code": "build.no-actions",
                 "path": "skills.1020104",
                 "message": "技能 1020104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1020201",
+                "message": "技能 1020201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1020201",
+                "message": "技能 1020201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1020202",
+                "message": "技能 1020202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1020202",
+                "message": "技能 1020202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1020203",
+                "message": "技能 1020203 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1020203",
+                "message": "技能 1020203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1020302",
+                "message": "技能 1020302 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1020302",
+                "message": "技能 1020302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -439,6 +526,54 @@
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
+                "path": "skills.1030201",
+                "message": "技能 1030201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1030201",
+                "message": "技能 1030201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1030202",
+                "message": "技能 1030202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1030202",
+                "message": "技能 1030202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1030301",
+                "message": "技能 1030301 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1030301",
+                "message": "技能 1030301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1030302",
+                "message": "技能 1030302 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1030302",
+                "message": "技能 1030302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
                 "path": "skills.1040101",
                 "message": "技能 1040101 不在 packages/data"
             },
@@ -487,6 +622,54 @@
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
+                "path": "skills.1040201",
+                "message": "技能 1040201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1040201",
+                "message": "技能 1040201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1040202",
+                "message": "技能 1040202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1040202",
+                "message": "技能 1040202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1040204",
+                "message": "技能 1040204 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1040204",
+                "message": "技能 1040204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1040302",
+                "message": "技能 1040302 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1040302",
+                "message": "技能 1040302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
                 "path": "skills.1050101",
                 "message": "技能 1050101 不在 packages/data"
             },
@@ -507,6 +690,18 @@
                 "code": "build.no-actions",
                 "path": "skills.1050102",
                 "message": "技能 1050102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1050202",
+                "message": "技能 1050202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1050202",
+                "message": "技能 1050202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -555,6 +750,30 @@
                 "code": "build.no-actions",
                 "path": "skills.1060104",
                 "message": "技能 1060104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1060201",
+                "message": "技能 1060201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1060201",
+                "message": "技能 1060201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "ref.unknown-skill",
+                "path": "skills.1060202",
+                "message": "技能 1060202 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1060202",
+                "message": "技能 1060202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4527,6 +4746,12 @@
                 "code": "ref.unknown-skill",
                 "path": "skills.2050501",
                 "message": "技能 2050501 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2050501",
+                "message": "技能 2050501 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",

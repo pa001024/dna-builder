@@ -15,21 +15,21 @@
             "unsupported": 23
         },
         "skills": {
-            "total": 367,
-            "simulated": 61,
-            "data-only": 127,
-            "unsupported": 179
+            "total": 385,
+            "simulated": 60,
+            "data-only": 131,
+            "unsupported": 194
         },
         "manifestCoverage": {
             "charactersTotal": 34,
-            "skillsTotal": 367,
+            "skillsTotal": 385,
             "skillsWithMontage": 128,
-            "skillsWithBlueprint": 136,
+            "skillsWithBlueprint": 188,
             "skillsWithAnimBP": 209,
-            "skillsWithLua": 352,
+            "skillsWithLua": 370,
             "skillsAuthored": 8,
-            "skillsWithBehavior": 61,
-            "nativeCallsTotal": 1712,
+            "skillsWithBehavior": 60,
+            "nativeCallsTotal": 2355,
             "nativeCallsUnknown": [
                 "ALocalDis",
                 "ActorToLocationTeleport",
@@ -114,6 +114,7 @@
                 "LineTraceSingle",
                 "MakeSound",
                 "MarkPropertyDirtyFromRepIndex",
+                "NoTarget",
                 "Passive1AddSecondSp",
                 "Passive2Execute",
                 "Passive2Save",
@@ -149,8 +150,10 @@
                 "SetVector_ByEffectSource",
                 "ShieldFx",
                 "Skill02Off",
+                "Skill2Laser",
                 "SpawnSystemAttached",
                 "StartLoopShoot",
+                "StartSearch",
                 "StartTargetCondemn",
                 "StopTraceAirDoor",
                 "UpdateWeakness",
@@ -268,12 +271,12 @@
             ]
         },
         "u2Coverage": {
-            "skillsTotal": 367,
+            "skillsTotal": 385,
             "skillsMissing": [],
             "skillsWithMontage": 128,
-            "skillsWithBlueprint": 136,
+            "skillsWithBlueprint": 188,
             "skillsWithAnimBP": 209,
-            "skillsWithLuaOnly": 121,
+            "skillsWithLuaOnly": 127,
             "montagesResolved": 162,
             "montagesMissing": [
                 {
@@ -397,6 +400,54 @@
                     "animName": "Sword_SlideAttack_Montage"
                 },
                 {
+                    "skillId": 1010201,
+                    "nodeId": 1010211,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod01_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1010201,
+                    "nodeId": 1010212,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod01_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1010201,
+                    "nodeId": 1010213,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod01_RunAttack_03_Montage"
+                },
+                {
+                    "skillId": 1010201,
+                    "nodeId": 1010214,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod01_RunAttack_04_Montage"
+                },
+                {
+                    "skillId": 1010202,
+                    "nodeId": 1010221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod01_HeavyAttack_Montage"
+                },
+                {
+                    "skillId": 1010302,
+                    "nodeId": 1010321,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Sword/",
+                    "animResource": null,
+                    "animName": "Sword_Mod02_HeavyAttack_Montage"
+                },
+                {
                     "skillId": 1020101,
                     "nodeId": 1020111,
                     "animPath": null,
@@ -461,6 +512,62 @@
                     "animName": "Polearm_SlideAttack_Montage"
                 },
                 {
+                    "skillId": 1020201,
+                    "nodeId": 1020211,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1020201,
+                    "nodeId": 1020212,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1020201,
+                    "nodeId": 1020213,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_RunAttack_03_Montage"
+                },
+                {
+                    "skillId": 1020201,
+                    "nodeId": 1020214,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_RunAttack_04_Montage"
+                },
+                {
+                    "skillId": 1020202,
+                    "nodeId": 1020221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_HeavyAttack_Montage"
+                },
+                {
+                    "skillId": 1020203,
+                    "nodeId": 1020231,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod01_FallAttack_Montage"
+                },
+                {
+                    "skillId": 1020302,
+                    "nodeId": 1020321,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Polearm/",
+                    "animResource": null,
+                    "animName": "Polearm_Mod02_HeavyAttack_Montage"
+                },
+                {
                     "skillId": 1030101,
                     "nodeId": 1030111,
                     "animPath": null,
@@ -515,6 +622,78 @@
                     "animSubPath": "Combat/Weapon/Claymore/",
                     "animResource": null,
                     "animName": "Claymore_SlideAttack_Montage"
+                },
+                {
+                    "skillId": 1030201,
+                    "nodeId": 1030211,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod01_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1030201,
+                    "nodeId": 1030212,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod01_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1030201,
+                    "nodeId": 1030213,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod01_RunAttack_03_Montage"
+                },
+                {
+                    "skillId": 1030202,
+                    "nodeId": 1030221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod01_HeavyAttack_Montage"
+                },
+                {
+                    "skillId": 1030301,
+                    "nodeId": 1030311,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod02_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1030301,
+                    "nodeId": 1030312,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod02_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1030301,
+                    "nodeId": 1030313,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod02_RunAttack_03_Montage"
+                },
+                {
+                    "skillId": 1030301,
+                    "nodeId": 1030314,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod02_RunAttack_04_Montage"
+                },
+                {
+                    "skillId": 1030302,
+                    "nodeId": 1030321,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Claymore/",
+                    "animResource": null,
+                    "animName": "Claymore_Mod02_HeavyAttack_Montage"
                 },
                 {
                     "skillId": 1040101,
@@ -573,6 +752,62 @@
                     "animName": "Dualblade_SlideAttack_Montage"
                 },
                 {
+                    "skillId": 1040201,
+                    "nodeId": 1040211,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1040201,
+                    "nodeId": 1040212,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1040201,
+                    "nodeId": 1040213,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_RunAttack_03_Montage"
+                },
+                {
+                    "skillId": 1040201,
+                    "nodeId": 1040214,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_RunAttack_04_Montage"
+                },
+                {
+                    "skillId": 1040202,
+                    "nodeId": 1040221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_HeavyAttack_Montage"
+                },
+                {
+                    "skillId": 1040204,
+                    "nodeId": 1040241,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod01_SlideAttack_Montage"
+                },
+                {
+                    "skillId": 1040302,
+                    "nodeId": 1040321,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Dualblade/",
+                    "animResource": null,
+                    "animName": "Dualblade_Mod02_HeavyAttack_Montage"
+                },
+                {
                     "skillId": 1050101,
                     "nodeId": 1050111,
                     "animPath": null,
@@ -611,6 +846,14 @@
                     "animSubPath": "Combat/Weapon/Swordwhip/",
                     "animResource": null,
                     "animName": "Swordwhip_HeavyAttack_Montage"
+                },
+                {
+                    "skillId": 1050202,
+                    "nodeId": 1050221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Swordwhip/",
+                    "animResource": null,
+                    "animName": "Swordwhip_Mod01_HeavyAttack_Montage"
                 },
                 {
                     "skillId": 1060101,
@@ -667,6 +910,46 @@
                     "animSubPath": "Combat/Weapon/Katana/",
                     "animResource": null,
                     "animName": "Katana_SlideAttack_Montage"
+                },
+                {
+                    "skillId": 1060201,
+                    "nodeId": 1060211,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Katana/",
+                    "animResource": null,
+                    "animName": "Katana_Mod01_RunAttack_01_Montage"
+                },
+                {
+                    "skillId": 1060201,
+                    "nodeId": 1060212,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Katana/",
+                    "animResource": null,
+                    "animName": "Katana_Mod01_RunAttack_02_Montage"
+                },
+                {
+                    "skillId": 1060202,
+                    "nodeId": 1060221,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Katana/",
+                    "animResource": null,
+                    "animName": "Katana_Mod01_HeavyAttack_01_Montage"
+                },
+                {
+                    "skillId": 1060202,
+                    "nodeId": 1060222,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Katana/",
+                    "animResource": null,
+                    "animName": "Katana_Mod01_HeavyAttack_02_Montage"
+                },
+                {
+                    "skillId": 1060202,
+                    "nodeId": 1060223,
+                    "animPath": null,
+                    "animSubPath": "Combat/Weapon/Katana/",
+                    "animResource": null,
+                    "animName": "Katana_Mod01_HeavyAttack_03_Montage"
                 },
                 {
                     "skillId": 1503102,
@@ -1301,27 +1584,1173 @@
             "sequencesMissing": [
                 "EM/Content/Asset/Char/Player/Char098_Saiqi01/Animation/Sequence/Combat/Skill/Saiqi_Skill02_Attack01_Loop"
             ],
-            "blueprintsTotal": 332,
-            "blueprintsParsed": 332,
+            "sequencesFailed": [],
+            "blueprintsTotal": 341,
+            "blueprintsParsed": 341,
             "blueprintsFailed": [],
             "blueprintsMissing": [],
             "animBPsTotal": 34,
             "animBPsResolved": 34,
+            "animBPsWithStateMachines": 0,
             "animBPsMissing": [],
-            "passiveEffectsTotal": 115,
+            "passiveEffectsTotal": 119,
             "ownerPassivesTotal": 276,
             "ownerPassivesWithBlueprint": 276,
-            "buffsTotal": 246,
+            "passivesTotal": 393,
+            "passivesWithBlueprint": 390,
+            "passivesMissing": [],
+            "buffsTotal": 247,
             "buffsWithBlueprint": 18,
+            "buffsMissing": [150324],
+            "owners": {
+                "weapon": {
+                    "skills": 129,
+                    "withMontage": 21,
+                    "withBlueprint": 24
+                },
+                "pet": {
+                    "skills": 29,
+                    "withMontage": 0,
+                    "withBlueprint": 11
+                },
+                "char": {
+                    "skills": 209,
+                    "withMontage": 107,
+                    "withBlueprint": 143
+                },
+                "mod": {
+                    "skills": 18,
+                    "withMontage": 0,
+                    "withBlueprint": 10
+                }
+            },
+            "nativeCallsUnknown": [
+                {
+                    "name": "CastToCharacterBase",
+                    "count": 534
+                },
+                {
+                    "name": "AddBuffToTarget",
+                    "count": 313
+                },
+                {
+                    "name": "BooleanAND",
+                    "count": 203
+                },
+                {
+                    "name": "IsValid",
+                    "count": 192
+                },
+                {
+                    "name": "ExecuteSkillEffects",
+                    "count": 184
+                },
+                {
+                    "name": "GetAttr_ByEnum",
+                    "count": 183
+                },
+                {
+                    "name": "EqualEqual_IntInt",
+                    "count": 149
+                },
+                {
+                    "name": "RemoveBuffFromTarget",
+                    "count": 134
+                },
+                {
+                    "name": "FindBuffById",
+                    "count": 123
+                },
+                {
+                    "name": "Add_FloatFloat",
+                    "count": 107
+                },
+                {
+                    "name": "HaveDamageTag",
+                    "count": 102
+                },
+                {
+                    "name": "MakeLiteralName",
+                    "count": 101
+                },
+                {
+                    "name": "GetSkill",
+                    "count": 95
+                },
+                {
+                    "name": "AddGlobalDamageRate",
+                    "count": 88
+                },
+                {
+                    "name": "Array_Get",
+                    "count": 88
+                },
+                {
+                    "name": "Add_IntInt",
+                    "count": 86
+                },
+                {
+                    "name": "Array_Length",
+                    "count": 84
+                },
+                {
+                    "name": "Greater_IntInt",
+                    "count": 81
+                },
+                {
+                    "name": "Not_PreBool",
+                    "count": 81
+                },
+                {
+                    "name": "BooleanOR",
+                    "count": 76
+                },
+                {
+                    "name": "Delay",
+                    "count": 71
+                },
+                {
+                    "name": "Multiply_FloatFloat",
+                    "count": 69
+                },
+                {
+                    "name": "Subtract_IntInt",
+                    "count": 65
+                },
+                {
+                    "name": "GreaterEqual_IntInt",
+                    "count": 63
+                },
+                {
+                    "name": "Less_IntInt",
+                    "count": 57
+                },
+                {
+                    "name": "LessEqual_IntInt",
+                    "count": 56
+                },
+                {
+                    "name": "GetEid",
+                    "count": 55
+                },
+                {
+                    "name": "FTrunc",
+                    "count": 50
+                },
+                {
+                    "name": "GetPassiveEffectById",
+                    "count": 49
+                },
+                {
+                    "name": "NotEqual_IntInt",
+                    "count": 47
+                },
+                {
+                    "name": "GetBuffNumById",
+                    "count": 46
+                },
+                {
+                    "name": "K2_SetTimerDelegate_Combat",
+                    "count": 46
+                },
+                {
+                    "name": "HasSkillTag",
+                    "count": 45
+                },
+                {
+                    "name": "Multiply_IntFloat",
+                    "count": 42
+                },
+                {
+                    "name": "NotEqual_StriStri",
+                    "count": 41
+                },
+                {
+                    "name": "SetInt",
+                    "count": 40
+                },
+                {
+                    "name": "K2_SetTimerDelegate",
+                    "count": 39
+                },
+                {
+                    "name": "GetInt",
+                    "count": 38
+                },
+                {
+                    "name": "EqualEqual_NameName",
+                    "count": 35
+                },
+                {
+                    "name": "SetBool",
+                    "count": 35
+                },
+                {
+                    "name": "Subtract_FloatFloat",
+                    "count": 33
+                },
+                {
+                    "name": "K2_GetActorLocation",
+                    "count": 26
+                },
+                {
+                    "name": "LessEqual_FloatFloat",
+                    "count": 25
+                },
+                {
+                    "name": "GetRougeLikeManager",
+                    "count": 24
+                },
+                {
+                    "name": "DoTargetFilter",
+                    "count": 22
+                },
+                {
+                    "name": "GetCharacter",
+                    "count": 21
+                },
+                {
+                    "name": "Conv_StringToName",
+                    "count": 20
+                },
+                {
+                    "name": "GetEffectSource",
+                    "count": 20
+                },
+                {
+                    "name": "GetExtraEffectDamageTypes",
+                    "count": 20
+                },
+                {
+                    "name": "IsTargetKilled",
+                    "count": 20
+                },
+                {
+                    "name": "IsTreasureExist",
+                    "count": 20
+                },
+                {
+                    "name": "Divide_FloatFloat",
+                    "count": 19
+                },
+                {
+                    "name": "EqualEqual_ByteByte",
+                    "count": 18
+                },
+                {
+                    "name": "ReduceBuffLayerFromTarget",
+                    "count": 18
+                },
+                {
+                    "name": "K2_ClearAndInvalidateTimerHandle_Combat",
+                    "count": 17
+                },
+                {
+                    "name": "EqualEqual_ObjectObject",
+                    "count": 16
+                },
+                {
+                    "name": "Greater_FloatFloat",
+                    "count": 16
+                },
+                {
+                    "name": "GetPassiveEffectClient",
+                    "count": 15
+                },
+                {
+                    "name": "AddSpToTarget",
+                    "count": 14
+                },
+                {
+                    "name": "Array_Contains",
+                    "count": 14
+                },
+                {
+                    "name": "HasMatchingGameplayTag",
+                    "count": 14
+                },
+                {
+                    "name": "Less_FloatFloat",
+                    "count": 14
+                },
+                {
+                    "name": "AddSecondSpToTarget",
+                    "count": 13
+                },
+                {
+                    "name": "Min",
+                    "count": 13
+                },
+                {
+                    "name": "Conv_IntToFloat",
+                    "count": 12
+                },
+                {
+                    "name": "SetInt_ByEffectSource",
+                    "count": 12
+                },
+                {
+                    "name": "Conv_InterfaceToObject",
+                    "count": 11
+                },
+                {
+                    "name": "GetBool",
+                    "count": 11
+                },
+                {
+                    "name": "K2_GetRootComponent",
+                    "count": 11
+                },
+                {
+                    "name": "SetFloat",
+                    "count": 11
+                },
+                {
+                    "name": "CastToActor",
+                    "count": 10
+                },
+                {
+                    "name": "GetSkillLevel",
+                    "count": 10
+                },
+                {
+                    "name": "GreaterEqual_FloatFloat",
+                    "count": 10
+                },
+                {
+                    "name": "Multiply_IntInt",
+                    "count": 10
+                },
+                {
+                    "name": "Add_VectorVector",
+                    "count": 9
+                },
+                {
+                    "name": "Array_Random",
+                    "count": 9
+                },
+                {
+                    "name": "BP_AddComboCount",
+                    "count": 9
+                },
+                {
+                    "name": "FMax",
+                    "count": 9
+                },
+                {
+                    "name": "FMin",
+                    "count": 9
+                },
+                {
+                    "name": "GetGameMode",
+                    "count": 9
+                },
+                {
+                    "name": "ChangeBuffLastTime",
+                    "count": 8
+                },
+                {
+                    "name": "FindBuffsByBuffType",
+                    "count": 8
+                },
+                {
+                    "name": "GenDamageWithType",
+                    "count": 8
+                },
+                {
+                    "name": "GetEntity",
+                    "count": 8
+                },
+                {
+                    "name": "NotEqual_ByteByte",
+                    "count": 8
+                },
+                {
+                    "name": "SetFloat_ByEffectSource",
+                    "count": 8
+                },
+                {
+                    "name": "Vector_Distance",
+                    "count": 8
+                },
+                {
+                    "name": "AddBaseValueRate",
+                    "count": 7
+                },
+                {
+                    "name": "ApplyDamage",
+                    "count": 7
+                },
+                {
+                    "name": "Conv_IntToString",
+                    "count": 7
+                },
+                {
+                    "name": "GetGrabTarget",
+                    "count": 7
+                },
+                {
+                    "name": "GetSkillEffectId",
+                    "count": 7
+                },
+                {
+                    "name": "GetTransform",
+                    "count": 7
+                },
+                {
+                    "name": "IsDamageCrit",
+                    "count": 7
+                },
+                {
+                    "name": "MarkPropertyDirtyFromRepIndex",
+                    "count": 7
+                },
+                {
+                    "name": "NotEqual_NameName",
+                    "count": 7
+                },
+                {
+                    "name": "PlaySeById",
+                    "count": 7
+                },
+                {
+                    "name": "Array_Add",
+                    "count": 6
+                },
+                {
+                    "name": "Array_IsValidIndex",
+                    "count": 6
+                },
+                {
+                    "name": "Conv_Int64ToInt",
+                    "count": 6
+                },
+                {
+                    "name": "ExecuteSkillEffect",
+                    "count": 6
+                },
+                {
+                    "name": "GetAttr_Float",
+                    "count": 6
+                },
+                {
+                    "name": "MakeLiteralString",
+                    "count": 6
+                },
+                {
+                    "name": "Map_Add",
+                    "count": 6
+                },
+                {
+                    "name": "Multiply_VectorFloat",
+                    "count": 6
+                },
+                {
+                    "name": "PlayFMODSound",
+                    "count": 6
+                },
+                {
+                    "name": "SetMaxAcclerationMultiplier",
+                    "count": 6
+                },
+                {
+                    "name": "SetMaxSecondSp",
+                    "count": 6
+                },
+                {
+                    "name": "SetVisibility",
+                    "count": 6
+                },
+                {
+                    "name": "AddWeaponSpToTarget",
+                    "count": 5
+                },
+                {
+                    "name": "BP_BindOnBuffRemoved",
+                    "count": 5
+                },
+                {
+                    "name": "DelayFrames",
+                    "count": 5
+                },
+                {
+                    "name": "Divide_IntInt",
+                    "count": 5
+                },
+                {
+                    "name": "GetBlessingGroupCategory",
+                    "count": 5
+                },
+                {
+                    "name": "GetWeaknessList",
+                    "count": 5
+                },
+                {
+                    "name": "IsEffectSourceValid",
+                    "count": 5
+                },
+                {
+                    "name": "Max",
+                    "count": 5
+                },
+                {
+                    "name": "SetBool_ByEffectSource",
+                    "count": 5
+                },
+                {
+                    "name": "SetDamageDefenseRate",
+                    "count": 5
+                },
+                {
+                    "name": "SetSaveLoc",
+                    "count": 5
+                },
+                {
+                    "name": "VSize",
+                    "count": 5
+                },
+                {
+                    "name": "AddEnergyShield",
+                    "count": 4
+                },
+                {
+                    "name": "Array_Clear",
+                    "count": 4
+                },
+                {
+                    "name": "BP_BindOnBuffAdded",
+                    "count": 4
+                },
+                {
+                    "name": "BlueprintUseSkill",
+                    "count": 4
+                },
+                {
+                    "name": "BreakHitResult",
+                    "count": 4
+                },
+                {
+                    "name": "Conv_IntToInt64",
+                    "count": 4
+                },
+                {
+                    "name": "EqualEqual_FloatFloat",
+                    "count": 4
+                },
+                {
+                    "name": "FlushNetDormancy",
+                    "count": 4
+                },
+                {
+                    "name": "GetAttr_String_ByEnum",
+                    "count": 4
+                },
+                {
+                    "name": "GetCameraComponent",
+                    "count": 4
+                },
+                {
+                    "name": "GetCreator",
+                    "count": 4
+                },
+                {
+                    "name": "GetDotDamage",
+                    "count": 4
+                },
+                {
+                    "name": "GetModAttr_ByEnum",
+                    "count": 4
+                },
+                {
+                    "name": "GetSum_Float",
+                    "count": 4
+                },
+                {
+                    "name": "IsBlessingExist",
+                    "count": 4
+                },
+                {
+                    "name": "IsDead",
+                    "count": 4
+                },
+                {
+                    "name": "PrintString",
+                    "count": 4
+                },
+                {
+                    "name": "RetriggerableDelay",
+                    "count": 4
+                },
+                {
+                    "name": "SetSceneComponentHiddenInGame",
+                    "count": 4
+                },
+                {
+                    "name": "AddDamageCritRate",
+                    "count": 3
+                },
+                {
+                    "name": "AddSecondaryResourceToTarget",
+                    "count": 3
+                },
+                {
+                    "name": "BattleOnDead",
+                    "count": 3
+                },
+                {
+                    "name": "BreakRotator",
+                    "count": 3
+                },
+                {
+                    "name": "CheckConditionNew",
+                    "count": 3
+                },
+                {
+                    "name": "ExecuteSkillEffectsBySkillLevel",
+                    "count": 3
+                },
+                {
+                    "name": "GetActorForwardVector",
+                    "count": 3
+                },
+                {
+                    "name": "GetCurrentSkill",
+                    "count": 3
+                },
+                {
+                    "name": "GetCurrentSkillNodeSpeed",
+                    "count": 3
+                },
+                {
+                    "name": "GetDamageTags",
+                    "count": 3
+                },
+                {
+                    "name": "GetEffectIdTargetEids",
+                    "count": 3
+                },
+                {
+                    "name": "GetRougeToken",
+                    "count": 3
+                },
+                {
+                    "name": "GetSkillType",
+                    "count": 3
+                },
+                {
+                    "name": "GetSocketLocation",
+                    "count": 3
+                },
+                {
+                    "name": "GetVelocity",
+                    "count": 3
+                },
+                {
+                    "name": "HasAnyMatchingGameplayTags",
+                    "count": 3
+                },
+                {
+                    "name": "IsInDungeon",
+                    "count": 3
+                },
+                {
+                    "name": "MakeGameplayTagContainerFromArray",
+                    "count": 3
+                },
+                {
+                    "name": "MakeRotator",
+                    "count": 3
+                },
+                {
+                    "name": "MakeVector",
+                    "count": 3
+                },
+                {
+                    "name": "NotEqual_ObjectObject",
+                    "count": 3
+                },
+                {
+                    "name": "SetJumpCount",
+                    "count": 3
+                },
+                {
+                    "name": "SetNiagaraParameterOnMesh",
+                    "count": 3
+                },
+                {
+                    "name": "SetVector_ByEffectSource",
+                    "count": 3
+                },
+                {
+                    "name": "UpdateSkill01AnimState",
+                    "count": 3
+                },
+                {
+                    "name": "Abs_Int",
+                    "count": 2
+                },
+                {
+                    "name": "BluePrintAddSkillInfo",
+                    "count": 2
+                },
+                {
+                    "name": "BlueprintStopSkill",
+                    "count": 2
+                },
+                {
+                    "name": "BreakVector",
+                    "count": 2
+                },
+                {
+                    "name": "CharLocalDis",
+                    "count": 2
+                },
+                {
+                    "name": "DistanceCheck",
+                    "count": 2
+                },
+                {
+                    "name": "ForceEndJetJump",
+                    "count": 2
+                },
+                {
+                    "name": "GetBool_ByEffectSource",
+                    "count": 2
+                },
+                {
+                    "name": "GetCharacterTag",
+                    "count": 2
+                },
+                {
+                    "name": "GetCurRougeLikeRoomType",
+                    "count": 2
+                },
+                {
+                    "name": "GetFinalValue",
+                    "count": 2
+                },
+                {
+                    "name": "GetFloat",
+                    "count": 2
+                },
+                {
+                    "name": "GetForwardVector",
+                    "count": 2
+                },
+                {
+                    "name": "GetRecoveryCount",
+                    "count": 2
+                },
+                {
+                    "name": "GetRightVector",
+                    "count": 2
+                },
+                {
+                    "name": "GetRootSource",
+                    "count": 2
+                },
+                {
+                    "name": "GetSocketRotation",
+                    "count": 2
+                },
+                {
+                    "name": "GetTrueValue",
+                    "count": 2
+                },
+                {
+                    "name": "HideAllSuitItem",
+                    "count": 2
+                },
+                {
+                    "name": "IsInHardBoss",
+                    "count": 2
+                },
+                {
+                    "name": "IsPhantom",
+                    "count": 2
+                },
+                {
+                    "name": "K2_GetComponentLocation",
+                    "count": 2
+                },
+                {
+                    "name": "K2_SetWorldRotation",
+                    "count": 2
+                },
+                {
+                    "name": "LineTraceSingle",
+                    "count": 2
+                },
+                {
+                    "name": "Map_Find",
+                    "count": 2
+                },
+                {
+                    "name": "Map_Keys",
+                    "count": 2
+                },
+                {
+                    "name": "Multiply_VectorInt",
+                    "count": 2
+                },
+                {
+                    "name": "NotEqual_FloatFloat",
+                    "count": 2
+                },
+                {
+                    "name": "PlayEffectByID",
+                    "count": 2
+                },
+                {
+                    "name": "RandomBool",
+                    "count": 2
+                },
+                {
+                    "name": "ResetSkillCD",
+                    "count": 2
+                },
+                {
+                    "name": "SetJumpVelocityScale",
+                    "count": 2
+                },
+                {
+                    "name": "SetScalarParameterValue",
+                    "count": 2
+                },
+                {
+                    "name": "SetVectorParameterValue",
+                    "count": 2
+                },
+                {
+                    "name": "StopSound",
+                    "count": 2
+                },
+                {
+                    "name": "Subtract_VectorVector",
+                    "count": 2
+                },
+                {
+                    "name": "ZhiliuMarkSetSync",
+                    "count": 2
+                },
+                {
+                    "name": "Abs",
+                    "count": 1
+                },
+                {
+                    "name": "ActorToLocationTeleport",
+                    "count": 1
+                },
+                {
+                    "name": "AddJumpBlock",
+                    "count": 1
+                },
+                {
+                    "name": "AddMoveBlock",
+                    "count": 1
+                },
+                {
+                    "name": "ApplyHeal",
+                    "count": 1
+                },
+                {
+                    "name": "Array_Remove",
+                    "count": 1
+                },
+                {
+                    "name": "Array_Reverse",
+                    "count": 1
+                },
+                {
+                    "name": "Array_Set",
+                    "count": 1
+                },
+                {
+                    "name": "Array_Shuffle",
+                    "count": 1
+                },
+                {
+                    "name": "AsyncCreateEffectCreatureWithCallBack",
+                    "count": 1
+                },
+                {
+                    "name": "BPRequestGameplayTag",
+                    "count": 1
+                },
+                {
+                    "name": "BreakTransform",
+                    "count": 1
+                },
+                {
+                    "name": "CharacterInTag",
+                    "count": 1
+                },
+                {
+                    "name": "Concat_StrStr",
+                    "count": 1
+                },
+                {
+                    "name": "Deactivate",
+                    "count": 1
+                },
+                {
+                    "name": "EqualEqual_Int64Int64",
+                    "count": 1
+                },
+                {
+                    "name": "EqualEqual_StrStr",
+                    "count": 1
+                },
+                {
+                    "name": "FFloor",
+                    "count": 1
+                },
+                {
+                    "name": "Falu_Skill01_Client_Off",
+                    "count": 1
+                },
+                {
+                    "name": "Falu_Skill01_Client_On",
+                    "count": 1
+                },
+                {
+                    "name": "GetActorUpVector",
+                    "count": 1
+                },
+                {
+                    "name": "GetCharacterTag_FName",
+                    "count": 1
+                },
+                {
+                    "name": "GetClientSkillLogicComponent",
+                    "count": 1
+                },
+                {
+                    "name": "GetCurrentWeapon",
+                    "count": 1
+                },
+                {
+                    "name": "GetDirectionUnitVector",
+                    "count": 1
+                },
+                {
+                    "name": "GetEffectAssetByModel",
+                    "count": 1
+                },
+                {
+                    "name": "GetEffectCreatureById",
+                    "count": 1
+                },
+                {
+                    "name": "GetEnumeratorUserFriendlyName",
+                    "count": 1
+                },
+                {
+                    "name": "GetGameInstance",
+                    "count": 1
+                },
+                {
+                    "name": "GetModMultiplier",
+                    "count": 1
+                },
+                {
+                    "name": "GetPhantomTeammates",
+                    "count": 1
+                },
+                {
+                    "name": "GetPhantomWeapon",
+                    "count": 1
+                },
+                {
+                    "name": "GetSummonsList",
+                    "count": 1
+                },
+                {
+                    "name": "GetTags",
+                    "count": 1
+                },
+                {
+                    "name": "GetUltraWeaponId",
+                    "count": 1
+                },
+                {
+                    "name": "GetWeaponTags",
+                    "count": 1
+                },
+                {
+                    "name": "GrabTarget",
+                    "count": 1
+                },
+                {
+                    "name": "GreaterGreater_VectorRotator",
+                    "count": 1
+                },
+                {
+                    "name": "HaveDamageType",
+                    "count": 1
+                },
+                {
+                    "name": "InRange_IntInt",
+                    "count": 1
+                },
+                {
+                    "name": "InitGrabCharacterMaxCount",
+                    "count": 1
+                },
+                {
+                    "name": "InitPassiveFx",
+                    "count": 1
+                },
+                {
+                    "name": "IsMainPlayer",
+                    "count": 1
+                },
+                {
+                    "name": "IsPhoneOrEditorPhone",
+                    "count": 1
+                },
+                {
+                    "name": "IsStandAloneOrAutonomous",
+                    "count": 1
+                },
+                {
+                    "name": "IsStandAloneOrClient",
+                    "count": 1
+                },
+                {
+                    "name": "K2_GetComponentRotation",
+                    "count": 1
+                },
+                {
+                    "name": "Less_Int64Int64",
+                    "count": 1
+                },
+                {
+                    "name": "MakeTransform",
+                    "count": 1
+                },
+                {
+                    "name": "Map_Length",
+                    "count": 1
+                },
+                {
+                    "name": "OnCharacterTagChanged",
+                    "count": 1
+                },
+                {
+                    "name": "OverrideCurrentVelocity",
+                    "count": 1
+                },
+                {
+                    "name": "PauseComboHoldTime",
+                    "count": 1
+                },
+                {
+                    "name": "PlaySkill1Anim",
+                    "count": 1
+                },
+                {
+                    "name": "PlayStunMontage",
+                    "count": 1
+                },
+                {
+                    "name": "PopCameraState",
+                    "count": 1
+                },
+                {
+                    "name": "PushCameraState",
+                    "count": 1
+                },
+                {
+                    "name": "RandomBoolWithWeight",
+                    "count": 1
+                },
+                {
+                    "name": "RandomFloatInRange",
+                    "count": 1
+                },
+                {
+                    "name": "RandomInteger",
+                    "count": 1
+                },
+                {
+                    "name": "RemoveBuffsByBuffType",
+                    "count": 1
+                },
+                {
+                    "name": "RemoveEffectCreatureByTag",
+                    "count": 1
+                },
+                {
+                    "name": "RemoveJumpBlock",
+                    "count": 1
+                },
+                {
+                    "name": "RemoveMoveBlock",
+                    "count": 1
+                },
+                {
+                    "name": "SetActorHideTag",
+                    "count": 1
+                },
+                {
+                    "name": "SetAddAttr",
+                    "count": 1
+                },
+                {
+                    "name": "SetDamageType",
+                    "count": 1
+                },
+                {
+                    "name": "SetForceCrit",
+                    "count": 1
+                },
+                {
+                    "name": "SetSummonLifeTime",
+                    "count": 1
+                },
+                {
+                    "name": "SetSummonTransform",
+                    "count": 1
+                },
+                {
+                    "name": "Skill1_loop",
+                    "count": 1
+                },
+                {
+                    "name": "SpawnSystemAtLocation",
+                    "count": 1
+                },
+                {
+                    "name": "SpawnSystemAttached",
+                    "count": 1
+                },
+                {
+                    "name": "UnPauseComboHoldTime",
+                    "count": 1
+                },
+                {
+                    "name": "VectorToRotator",
+                    "count": 1
+                },
+                {
+                    "name": "ZhiliuMarkAddClient",
+                    "count": 1
+                },
+                {
+                    "name": "ZhiliuMarkRemoveClient",
+                    "count": 1
+                }
+            ],
             "assets": {
-                "fmodelHits": 306,
+                "fmodelHits": 393,
                 "fmodelLoads": 0,
-                "bytecodeHits": 332,
+                "bytecodeHits": 341,
                 "bytecodeLoads": 0
             }
         },
         "u2Exporter": {
-            "gitCommit": "8f613517",
+            "gitCommit": "1ffafad0",
             "parserVersion": 1,
             "gameVersion": "v1.7.227.1"
         }
@@ -1386,20 +2815,20 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 10,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 11,
                     "tickPhases": 1,
                     "actions": {
+                        "native": 35,
                         "applyBuff": 1,
-                        "native": 29,
                         "damage": 2,
                         "summon": 1,
                         "resource": 1
                     },
                     "damageActions": 2,
                     "buffActions": 1,
-                    "nativeActions": 29,
-                    "nativeCallsUnknown": 15,
+                    "nativeActions": 35,
+                    "nativeCallsUnknown": 21,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_CameraControl_C",
@@ -1416,10 +2845,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["12 个 notify 未匹配"]
                 },
                 {
@@ -1669,17 +3098,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 1,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 2,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 4,
+                        "native": 17,
                         "applyBuff": 1
                     },
                     "damageActions": 0,
                     "buffActions": 1,
-                    "nativeActions": 4,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 17,
+                    "nativeCallsUnknown": 15,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "BP_ForceEffect_C",
@@ -1693,10 +3122,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["9 个 notify 未匹配"]
                 },
                 {
@@ -1709,12 +3138,12 @@
                     "phases": 7,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 23
+                        "native": 35
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 23,
-                    "nativeCallsUnknown": 12,
+                    "nativeActions": 35,
+                    "nativeCallsUnknown": 24,
                     "unmatchedNotifies": [
                         "BP_ANS_PostProcess_C",
                         "BP_AnimNotifyStateBase_EffectCreature_C",
@@ -1867,18 +3296,18 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 5,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 6,
                     "tickPhases": 0,
                     "actions": {
                         "applyBuff": 2,
-                        "native": 6,
+                        "native": 15,
                         "summon": 1
                     },
                     "damageActions": 0,
                     "buffActions": 2,
-                    "nativeActions": 6,
-                    "nativeCallsUnknown": 3,
+                    "nativeActions": 15,
+                    "nativeCallsUnknown": 12,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_CameraControl_C",
@@ -1896,10 +3325,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["13 个 notify 未匹配"]
                 },
                 {
@@ -2039,17 +3468,17 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 7,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 8,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 26,
+                        "native": 38,
                         "damage": 2
                     },
                     "damageActions": 2,
                     "buffActions": 0,
-                    "nativeActions": 26,
-                    "nativeCallsUnknown": 13,
+                    "nativeActions": 38,
+                    "nativeCallsUnknown": 25,
                     "unmatchedNotifies": [
                         "BP_CameraControlRotation_C",
                         "BP_CameraControl_C",
@@ -2065,10 +3494,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["11 个 notify 未匹配"]
                 },
                 {
@@ -2200,15 +3629,15 @@
                     "inData": true,
                     "status": "unsupported",
                     "sources": ["montage", "blueprint", "lua", "hybrid"],
-                    "phases": 1,
+                    "phases": 2,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 1
+                        "native": 18
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 1,
-                    "nativeCallsUnknown": 1,
+                    "nativeActions": 18,
+                    "nativeCallsUnknown": 18,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_ForceEffect_C",
@@ -2317,23 +3746,25 @@
                     "name": "少年游",
                     "slot": "E",
                     "inData": true,
-                    "status": "data-only",
-                    "sources": ["lua"],
-                    "phases": 0,
+                    "status": "unsupported",
+                    "sources": ["blueprint", "lua", "hybrid"],
+                    "phases": 1,
                     "tickPhases": 0,
-                    "actions": {},
+                    "actions": {
+                        "native": 26
+                    },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 0,
-                    "nativeCallsUnknown": 0,
+                    "nativeActions": 26,
+                    "nativeCallsUnknown": 26,
                     "unmatchedNotifies": [],
                     "unresolvedDamageRates": [],
                     "hasMontage": false,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["montage", "blueprint"],
-                    "reasons": ["无 montage / SkillEffects / Lua 行为动作"]
+                    "missing": ["montage"],
+                    "reasons": ["只有 native 副作用，未映射为 IR 动作"]
                 },
                 {
                     "id": 150302,
@@ -2341,18 +3772,18 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 10,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 11,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 54,
                         "applyBuff": 3,
-                        "summon": 22,
-                        "native": 23
+                        "summon": 22
                     },
                     "damageActions": 0,
                     "buffActions": 3,
-                    "nativeActions": 23,
-                    "nativeCallsUnknown": 12,
+                    "nativeActions": 54,
+                    "nativeCallsUnknown": 43,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_CameraShake_C",
@@ -2373,10 +3804,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["16 个 notify 未匹配"]
                 },
                 {
@@ -2502,16 +3933,17 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 1,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 2,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 21,
                         "applyBuff": 1
                     },
                     "damageActions": 0,
                     "buffActions": 1,
-                    "nativeActions": 0,
-                    "nativeCallsUnknown": 0,
+                    "nativeActions": 21,
+                    "nativeCallsUnknown": 21,
                     "unmatchedNotifies": [
                         "BP_CameraControl_C",
                         "BP_ForceEffect_C",
@@ -2525,10 +3957,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["9 个 notify 未匹配"]
                 },
                 {
@@ -2777,17 +4209,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 4,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 5,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 8,
+                        "native": 32,
                         "applyBuff": 2
                     },
                     "damageActions": 0,
                     "buffActions": 2,
-                    "nativeActions": 8,
-                    "nativeCallsUnknown": 4,
+                    "nativeActions": 32,
+                    "nativeCallsUnknown": 28,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "AnimnotifyState_ForbidOrient",
@@ -2808,10 +4240,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["16 个 notify 未匹配"]
                 },
                 {
@@ -2967,16 +4399,16 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 9
+                        "native": 16
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 9,
-                    "nativeCallsUnknown": 3,
+                    "nativeActions": 16,
+                    "nativeCallsUnknown": 10,
                     "unmatchedNotifies": [
                         "BP_CameraControl_C",
                         "BP_DetachFX_C",
@@ -2992,10 +4424,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 native 副作用，未映射为 IR 动作", "11 个 notify 未匹配"]
                 },
                 {
@@ -3086,17 +4518,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "summon": 1,
-                        "native": 6
+                        "native": 13,
+                        "summon": 1
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 6,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 13,
+                    "nativeCallsUnknown": 9,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "BP_ForceEffect_C",
@@ -3110,10 +4542,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "9 个 notify 未匹配"]
                 },
                 {
@@ -3122,7 +4554,7 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "manual", "hybrid"],
+                    "sources": ["montage", "blueprint", "lua", "manual", "hybrid"],
                     "phases": 2,
                     "tickPhases": 1,
                     "actions": {
@@ -3133,7 +4565,7 @@
                     "damageActions": 1,
                     "buffActions": 1,
                     "nativeActions": 0,
-                    "nativeCallsUnknown": 2,
+                    "nativeCallsUnknown": 9,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "BP_AnimNotifyStateBase_EffectCreature_C",
@@ -3151,10 +4583,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["13 个 notify 未匹配"]
                 },
                 {
@@ -3245,17 +4677,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 4,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 5,
                     "tickPhases": 0,
                     "actions": {
                         "summon": 2,
-                        "native": 3
+                        "native": 10
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 3,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 10,
+                    "nativeCallsUnknown": 9,
                     "unmatchedNotifies": [
                         "AllowMoveInput",
                         "BP_AnimNotifyStateBase_EffectCreature_C",
@@ -3270,10 +4702,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "10 个 notify 未匹配"]
                 },
                 {
@@ -3402,13 +4834,13 @@
                     "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 2,
+                        "native": 7,
                         "applyBuff": 3
                     },
                     "damageActions": 0,
                     "buffActions": 3,
-                    "nativeActions": 2,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 7,
+                    "nativeCallsUnknown": 7,
                     "unmatchedNotifies": [
                         "BP_ForceEffect_C",
                         "BP_HideChar_C",
@@ -3584,18 +5016,18 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 5,
+                        "native": 9,
                         "applyBuff": 2,
                         "damage": 1
                     },
                     "damageActions": 1,
                     "buffActions": 2,
-                    "nativeActions": 5,
-                    "nativeCallsUnknown": 3,
+                    "nativeActions": 9,
+                    "nativeCallsUnknown": 7,
                     "unmatchedNotifies": [
                         "BP_ANS_PostProcess_C",
                         "BP_AnimNotifyStateBase_EffectCreature_C",
@@ -3612,10 +5044,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["12 个 notify 未匹配"]
                 },
                 {
@@ -3628,12 +5060,12 @@
                     "phases": 1,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 4
+                        "native": 5
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 4,
-                    "nativeCallsUnknown": 4,
+                    "nativeActions": 5,
+                    "nativeCallsUnknown": 5,
                     "unmatchedNotifies": [],
                     "unresolvedDamageRates": [],
                     "hasMontage": false,
@@ -3706,16 +5138,16 @@
                     "slot": "E",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 5,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 6,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 20
+                        "native": 21
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 20,
-                    "nativeCallsUnknown": 10,
+                    "nativeActions": 21,
+                    "nativeCallsUnknown": 11,
                     "unmatchedNotifies": [
                         "AllowMoveInput",
                         "BP_ForceEffect_C",
@@ -3733,10 +5165,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 native 副作用，未映射为 IR 动作", "13 个 notify 未匹配"]
                 },
                 {
@@ -3887,16 +5319,16 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 2,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 3,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 6
+                        "native": 29
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 6,
-                    "nativeCallsUnknown": 4,
+                    "nativeActions": 29,
+                    "nativeCallsUnknown": 27,
                     "unmatchedNotifies": [
                         "BP_ANS_CameraShake_C",
                         "BP_ANS_PostProcess_C",
@@ -3914,10 +5346,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 native 副作用，未映射为 IR 动作", "13 个 notify 未匹配"]
                 },
                 {
@@ -4008,17 +5440,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 1,
+                        "native": 12,
                         "removeBuff": 2
                     },
                     "damageActions": 0,
                     "buffActions": 2,
-                    "nativeActions": 1,
-                    "nativeCallsUnknown": 1,
+                    "nativeActions": 12,
+                    "nativeCallsUnknown": 12,
                     "unmatchedNotifies": [
                         "AllowMoveInput",
                         "BP_AnimNotifyStateBase_EffectCreature_C",
@@ -4035,10 +5467,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["12 个 notify 未匹配"]
                 },
                 {
@@ -4047,17 +5479,18 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 2,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 3,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 11,
                         "applyBuff": 2,
                         "summon": 2
                     },
                     "damageActions": 0,
                     "buffActions": 2,
-                    "nativeActions": 0,
-                    "nativeCallsUnknown": 0,
+                    "nativeActions": 11,
+                    "nativeCallsUnknown": 11,
                     "unmatchedNotifies": [
                         "BP_ANS_CameraShake_C",
                         "BP_ANS_PostProcess_C",
@@ -4075,10 +5508,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["13 个 notify 未匹配"]
                 },
                 {
@@ -4167,7 +5600,7 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "manual", "hybrid"],
+                    "sources": ["montage", "blueprint", "lua", "manual", "hybrid"],
                     "phases": 2,
                     "tickPhases": 1,
                     "actions": {
@@ -4178,14 +5611,14 @@
                     "damageActions": 1,
                     "buffActions": 1,
                     "nativeActions": 0,
-                    "nativeCallsUnknown": 3,
+                    "nativeCallsUnknown": 17,
                     "unmatchedNotifies": ["BP_ForceEffect_C", "BP_QuitSkill_C", "ChangeGravity", "Invincible", "JumpCancel", "WalkCancel"],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["6 个 notify 未匹配"]
                 },
                 {
@@ -4198,12 +5631,12 @@
                     "phases": 3,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 7
+                        "native": 19
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 7,
-                    "nativeCallsUnknown": 5,
+                    "nativeActions": 19,
+                    "nativeCallsUnknown": 17,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_Dis_C",
@@ -4315,17 +5748,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 2,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 3,
                     "tickPhases": 0,
                     "actions": {
-                        "applyBuff": 1,
-                        "native": 4
+                        "native": 7,
+                        "applyBuff": 1
                     },
                     "damageActions": 0,
                     "buffActions": 1,
-                    "nativeActions": 4,
-                    "nativeCallsUnknown": 1,
+                    "nativeActions": 7,
+                    "nativeCallsUnknown": 4,
                     "unmatchedNotifies": [
                         "BP_ForceEffect_C",
                         "BP_QuitSkillInAir_C",
@@ -4337,10 +5770,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["7 个 notify 未匹配"]
                 },
                 {
@@ -4468,18 +5901,18 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 4,
+                        "native": 9,
                         "damage": 1,
                         "removeBuff": 1
                     },
                     "damageActions": 1,
                     "buffActions": 1,
-                    "nativeActions": 4,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 9,
+                    "nativeCallsUnknown": 7,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_ChangeFallingParam_C",
@@ -4494,10 +5927,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["10 个 notify 未匹配"]
                 },
                 {
@@ -4677,24 +6110,24 @@
                     "slot": "P",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 2,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 3,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 1,
+                        "native": 3,
                         "summon": 1
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 1,
-                    "nativeCallsUnknown": 1,
+                    "nativeActions": 3,
+                    "nativeCallsUnknown": 3,
                     "unmatchedNotifies": ["BP_AnimNotifyStateBase_EffectCreature_C", "BP_SkillFeature_C", "JumpCancel", "WalkCancel"],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "4 个 notify 未匹配"]
                 },
                 {
@@ -4737,19 +6170,19 @@
                     "slot": "E",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 2,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 3,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 15,
                         "damage": 2,
                         "applyBuff": 2,
-                        "native": 7,
                         "summon": 1
                     },
                     "damageActions": 2,
                     "buffActions": 2,
-                    "nativeActions": 7,
-                    "nativeCallsUnknown": 3,
+                    "nativeActions": 15,
+                    "nativeCallsUnknown": 11,
                     "unmatchedNotifies": [
                         "AllowMoveInput",
                         "BP_ANS_CameraShake_C",
@@ -4763,10 +6196,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["9 个 notify 未匹配"]
                 },
                 {
@@ -4775,17 +6208,17 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 4,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 5,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 2,
+                        "native": 10,
                         "summon": 6
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 2,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 10,
+                    "nativeCallsUnknown": 10,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "BP_ANS_CameraShake_C",
@@ -4806,10 +6239,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "16 个 notify 未匹配"]
                 },
                 {
@@ -4937,7 +6370,7 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "manual", "hybrid"],
+                    "sources": ["montage", "blueprint", "lua", "manual", "hybrid"],
                     "phases": 3,
                     "tickPhases": 2,
                     "actions": {
@@ -4950,7 +6383,7 @@
                     "damageActions": 4,
                     "buffActions": 4,
                     "nativeActions": 0,
-                    "nativeCallsUnknown": 1,
+                    "nativeCallsUnknown": 11,
                     "unmatchedNotifies": [
                         "BP_ForceEffect_C",
                         "BP_ForceEffect_Loop_C",
@@ -4965,10 +6398,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["10 个 notify 未匹配"]
                 },
                 {
@@ -5698,16 +7131,17 @@
                     "slot": "E",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 1,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 2,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 4,
                         "summon": 1
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 0,
-                    "nativeCallsUnknown": 0,
+                    "nativeActions": 4,
+                    "nativeCallsUnknown": 4,
                     "unmatchedNotifies": [
                         "AllowRotateInput",
                         "BP_ANS_CameraShake_C",
@@ -5721,10 +7155,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "9 个 notify 未匹配"]
                 },
                 {
@@ -5733,16 +7167,17 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 1,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 2,
                     "tickPhases": 0,
                     "actions": {
+                        "native": 4,
                         "summon": 1
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 0,
-                    "nativeCallsUnknown": 0,
+                    "nativeActions": 4,
+                    "nativeCallsUnknown": 4,
                     "unmatchedNotifies": [
                         "BP_ANS_CameraShake_C",
                         "BP_ANS_PostProcess_C",
@@ -5757,10 +7192,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 resource/select/summon 动作，缺伤害/增益语义", "10 个 notify 未匹配"]
                 },
                 {
@@ -6011,13 +7446,13 @@
                     "phases": 3,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 7,
+                        "native": 22,
                         "applyBuff": 1
                     },
                     "damageActions": 0,
                     "buffActions": 1,
-                    "nativeActions": 7,
-                    "nativeCallsUnknown": 5,
+                    "nativeActions": 22,
+                    "nativeCallsUnknown": 20,
                     "unmatchedNotifies": [
                         "BP_ForceEffect_C",
                         "BP_HideChar_C",
@@ -6043,16 +7478,16 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "unsupported",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 3
+                        "native": 20
                     },
                     "damageActions": 0,
                     "buffActions": 0,
-                    "nativeActions": 3,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 20,
+                    "nativeCallsUnknown": 19,
                     "unmatchedNotifies": [
                         "BP_AnimNotifyStateBase_EffectCreature_C",
                         "BP_CameraControl_C",
@@ -6070,10 +7505,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["只有 native 副作用，未映射为 IR 动作", "13 个 notify 未匹配"]
                 },
                 {
@@ -6345,17 +7780,17 @@
                     "slot": "Q",
                     "inData": true,
                     "status": "simulated",
-                    "sources": ["montage", "lua", "hybrid"],
-                    "phases": 3,
+                    "sources": ["montage", "blueprint", "lua", "hybrid"],
+                    "phases": 4,
                     "tickPhases": 0,
                     "actions": {
-                        "native": 2,
+                        "native": 10,
                         "applyBuff": 3
                     },
                     "damageActions": 0,
                     "buffActions": 3,
-                    "nativeActions": 2,
-                    "nativeCallsUnknown": 2,
+                    "nativeActions": 10,
+                    "nativeCallsUnknown": 10,
                     "unmatchedNotifies": [
                         "BP_ForceEffect_C",
                         "BP_ForceEffect_Loop_C",
@@ -6369,10 +7804,10 @@
                     ],
                     "unresolvedDamageRates": [],
                     "hasMontage": true,
-                    "hasBlueprint": false,
+                    "hasBlueprint": true,
                     "hasAnimBP": true,
                     "hasLua": true,
-                    "missing": ["blueprint"],
+                    "missing": [],
                     "reasons": ["9 个 notify 未匹配"]
                 },
                 {

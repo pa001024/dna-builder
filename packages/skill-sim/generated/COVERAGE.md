@@ -2,7 +2,7 @@
 
 - 游戏版本：`v1.7.227.1`
 - 角色：34（simulated 11 / data-only 0 / unsupported 23）
-- 技能：367（simulated 61 / data-only 127 / unsupported 179）
+- 技能：385（simulated 60 / data-only 131 / unsupported 194）
 
 ## 角色
 
@@ -14,7 +14,7 @@
 | 主角-暗 | 1201 | simulated | 120101:simulated<br>120102:simulated<br>120103:unsupported | 5 | 120103 只有 native 副作用，未映射为 IR 动作<br>120104 只有 native 副作用，未映射为 IR 动作<br>100005 无 montage / SkillEffects / Lua 行为动作 |
 | 莉兹贝尔 | 1501 | simulated | 150101:simulated<br>150102:simulated<br>150103:unsupported | 5 | 150103 只有 native 副作用，未映射为 IR 动作<br>150104 只有 native 副作用，未映射为 IR 动作<br>150001 无 montage / SkillEffects / Lua 行为动作 |
 | 妮弗尔夫人 | 1502 | unsupported | 150201:simulated<br>150202:unsupported<br>150203:unsupported | 5 | 150202 只有 native 副作用，未映射为 IR 动作<br>150202 11 个 notify 未匹配<br>150203 只有 native 副作用，未映射为 IR 动作 |
-| 刻舟 | 1503 | unsupported | 150301:data-only<br>150302:simulated<br>150303:unsupported | 5 | 150301 无 montage / SkillEffects / Lua 行为动作<br>150303 只有 native 副作用，未映射为 IR 动作<br>150304 只有 native 副作用，未映射为 IR 动作 |
+| 刻舟 | 1503 | unsupported | 150301:unsupported<br>150302:simulated<br>150303:unsupported | 5 | 150301 只有 native 副作用，未映射为 IR 动作<br>150303 只有 native 副作用，未映射为 IR 动作<br>150304 只有 native 副作用，未映射为 IR 动作 |
 | 苏乙 | 1504 | simulated | 150401:simulated<br>150402:simulated<br>150403:unsupported | 5 | 150403 只有 native 副作用，未映射为 IR 动作<br>150404 只有 native 副作用，未映射为 IR 动作<br>150003 无 montage / SkillEffects / Lua 行为动作 |
 | 主角-光 | 1601 | unsupported | 160101:unsupported<br>160102:simulated<br>160103:unsupported | 5 | 160101 只有 resource/select/summon 动作，缺伤害/增益语义<br>160101 12 个 notify 未匹配<br>160103 只有 native 副作用，未映射为 IR 动作 |
 | 菲娜 | 1801 | unsupported | 180101:simulated<br>180102:data-only<br>180103:unsupported | 5 | 180102 无 montage / SkillEffects / Lua 行为动作<br>180102 7 个 notify 未匹配<br>180103 只有 native 副作用，未映射为 IR 动作 |
@@ -86,7 +86,7 @@
 | 心脏吞噬 | 110001 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 天平裁决 | 110003 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 残光 | 110101 | E | simulated | montage/lua/hybrid | 5 | damage×5 native×15 | 5 | 19 | 19 个 notify 未匹配 |
-| 冥焰 | 110102 | Q | simulated | montage/lua/hybrid | 10 (tick×1) | applyBuff×1 native×29 damage×2 summon×1 resource×1 | 15 | 12 | 12 个 notify 未匹配 |
+| 冥焰 | 110102 | Q | simulated | montage/blueprint/lua/hybrid | 11 (tick×1) | native×35 applyBuff×1 damage×2 summon×1 resource×1 | 21 | 12 | 12 个 notify 未匹配 |
 | 回转 | 110103 | P | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 余火 | 110104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 110111 | 110111 | unknown | unsupported | montage/lua/hybrid | 5 | native×15 | 5 | 19 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
@@ -100,54 +100,54 @@
 | 忘我 | 110204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×1 | 1 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 110211 | 110211 | unknown | unsupported | montage/blueprint/lua/hybrid | 10 | native×17 summon×4 | 7 | 24 | 只有 resource/select/summon 动作，缺伤害/增益语义；24 个 notify 未匹配 |
 | 技能 110221 | 110221 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 宣叙调 | 110301 | E | simulated | montage/lua/hybrid | 1 | native×4 applyBuff×1 | 2 | 9 | 9 个 notify 未匹配 |
-| 幕启 | 110302 | Q | unsupported | montage/blueprint/lua/hybrid | 7 | native×23 | 12 | 16 | 只有 native 副作用，未映射为 IR 动作；16 个 notify 未匹配 |
+| 宣叙调 | 110301 | E | simulated | montage/blueprint/lua/hybrid | 2 | native×17 applyBuff×1 | 15 | 9 | 9 个 notify 未匹配 |
+| 幕启 | 110302 | Q | unsupported | montage/blueprint/lua/hybrid | 7 | native×35 | 24 | 16 | 只有 native 副作用，未映射为 IR 动作；16 个 notify 未匹配 |
 | 舞台演绎 | 110303 | P | unsupported | blueprint/lua/hybrid | 1 | native×13 | 13 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 协奏曲 | 110304 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×1 | 1 | 0 | 只有 native 副作用，未映射为 IR 动作 |
-| 技能 110311 | 110311 | unknown | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 12 | 只有 resource/select/summon 动作，缺伤害/增益语义；12 个 notify 未匹配 |
-| 技能 110321 | 110321 | unknown | unsupported | montage/blueprint/lua/hybrid | 1 | native×1 | 1 | 6 | 只有 native 副作用，未映射为 IR 动作；6 个 notify 未匹配 |
-| 技能 110323 | 110323 | unknown | unsupported | montage/lua/hybrid | 3 | native×13 | 7 | 9 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 110311 | 110311 | unknown | unsupported | montage/blueprint/lua/hybrid | 1 | native×13 | 13 | 12 | 只有 native 副作用，未映射为 IR 动作；12 个 notify 未匹配 |
+| 技能 110321 | 110321 | unknown | unsupported | montage/blueprint/lua/hybrid | 1 | native×13 | 13 | 6 | 只有 native 副作用，未映射为 IR 动作；6 个 notify 未匹配 |
+| 技能 110323 | 110323 | unknown | unsupported | montage/blueprint/lua/hybrid | 4 | native×26 | 20 | 9 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 110324 | 110324 | unknown | unsupported | montage/lua/hybrid | 2 | native×5 | 3 | 18 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 110325 | 110325 | unknown | unsupported | montage/lua/hybrid | 3 | native×5 | 5 | 10 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
-| 技能 110392 | 110392 | unknown | unsupported | montage/lua/hybrid | 3 | native×13 | 7 | 9 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 110392 | 110392 | unknown | unsupported | montage/blueprint/lua/hybrid | 4 | native×26 | 20 | 9 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 110393 | 110393 | unknown | unsupported | montage/lua/hybrid | 2 | native×5 | 3 | 18 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 夜行 | 120101 | E | simulated | montage/lua/hybrid | 4 | native×7 applyBuff×1 | 2 | 11 | 11 个 notify 未匹配 |
-| 雾海祷音 | 120102 | Q | simulated | montage/lua/hybrid | 5 | applyBuff×2 native×6 summon×1 | 3 | 13 | 13 个 notify 未匹配 |
+| 雾海祷音 | 120102 | Q | simulated | montage/blueprint/lua/hybrid | 6 | applyBuff×2 native×15 summon×1 | 12 | 13 | 13 个 notify 未匹配 |
 | 回魂 | 120103 | P | unsupported | blueprint/lua/hybrid | 1 | native×9 | 9 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 挽歌 | 120104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 朱辉散射 | 150001 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 十日流金 | 150003 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 以坚忍之名 | 150101 | E | simulated | montage/lua/hybrid | 4 | damage×4 native×13 | 5 | 22 | 22 个 notify 未匹配 |
-| 我不忍啦！ | 150102 | Q | simulated | montage/lua/hybrid | 7 | native×26 damage×2 | 13 | 11 | 11 个 notify 未匹配 |
+| 我不忍啦！ | 150102 | Q | simulated | montage/blueprint/lua/hybrid | 8 | native×38 damage×2 | 25 | 11 | 11 个 notify 未匹配 |
 | 哼！！ | 150103 | P | unsupported | blueprint/lua/hybrid | 1 | native×14 | 14 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 越想越气！！！ | 150104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 150121 | 150121 | unknown | simulated | montage/lua/hybrid | 1 | removeBuff×2 | 0 | 6 | 6 个 notify 未匹配 |
 | 技能 150123 | 150123 | unknown | unsupported | montage/lua/hybrid | 4 | native×16 | 8 | 11 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
-| 技能 150124 | 150124 | unknown | unsupported | montage/blueprint/lua/hybrid | 9 | native×22 | 13 | 21 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 150124 | 150124 | unknown | unsupported | montage/blueprint/lua/hybrid | 9 | native×32 | 23 | 21 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 150125 | 150125 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 150126 | 150126 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 月猎 | 150201 | E | simulated | montage/lua/hybrid | 2 | summon×2 applyBuff×1 | 0 | 13 | 13 个 notify 未匹配 |
-| 雾海安魂 | 150202 | Q | unsupported | montage/blueprint/lua/hybrid | 1 | native×1 | 1 | 11 | 只有 native 副作用，未映射为 IR 动作；11 个 notify 未匹配 |
+| 雾海安魂 | 150202 | Q | unsupported | montage/blueprint/lua/hybrid | 2 | native×18 | 18 | 11 | 只有 native 副作用，未映射为 IR 动作；11 个 notify 未匹配 |
 | 啼鸣交织 | 150203 | P | unsupported | blueprint/lua/hybrid | 1 | native×17 | 17 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 黄昏 | 150204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×1 | 1 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 150211 | 150211 | unknown | simulated | montage/lua/hybrid | 2 | summon×2 removeBuff×1 | 0 | 13 | 13 个 notify 未匹配 |
 | 技能 150212 | 150212 | unknown | simulated | montage/lua/hybrid | 2 | summon×2 applyBuff×1 | 0 | 13 | 13 个 notify 未匹配 |
 | 技能 150213 | 150213 | unknown | simulated | montage/lua/hybrid | 2 | summon×2 removeBuff×1 | 0 | 13 | 13 个 notify 未匹配 |
-| 少年游 | 150301 | E | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 霜剑拂流星 | 150302 | Q | simulated | montage/lua/hybrid | 10 | applyBuff×3 summon×22 native×23 | 12 | 16 | 16 个 notify 未匹配 |
+| 少年游 | 150301 | E | unsupported | blueprint/lua/hybrid | 1 | native×26 | 26 | 0 | 只有 native 副作用，未映射为 IR 动作 |
+| 霜剑拂流星 | 150302 | Q | simulated | montage/blueprint/lua/hybrid | 11 | native×54 applyBuff×3 summon×22 | 43 | 16 | 16 个 notify 未匹配 |
 | 浮生多变化 | 150303 | P | unsupported | blueprint/lua/hybrid | 1 | native×27 | 27 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 犹记刻舟痕 | 150304 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×3 | 3 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 150311 | 150311 | unknown | data-only | montage | 0 | - | 0 | 7 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
-| 技能 150321 | 150321 | unknown | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 15 | 只有 resource/select/summon 动作，缺伤害/增益语义；15 个 notify 未匹配 |
+| 技能 150321 | 150321 | unknown | unsupported | montage/blueprint/lua/hybrid | 2 | native×26 summon×1 | 26 | 15 | 只有 resource/select/summon 动作，缺伤害/增益语义；15 个 notify 未匹配 |
 | 逐日 | 150401 | E | simulated | montage/lua/hybrid | 2 (tick×1) | summon×1 applyBuff×1 resource×1 | 0 | 7 | 7 个 notify 未匹配 |
-| 歼星模式 | 150402 | Q | simulated | montage/lua/hybrid | 1 | applyBuff×1 | 0 | 9 | 9 个 notify 未匹配 |
+| 歼星模式 | 150402 | Q | simulated | montage/blueprint/lua/hybrid | 2 | native×21 applyBuff×1 | 21 | 9 | 9 个 notify 未匹配 |
 | 蓄势待发 | 150403 | P | unsupported | blueprint/lua/hybrid | 1 | native×21 | 21 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 墨守备攻 | 150404 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×3 | 3 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 150405 | 150405 | unknown | unsupported | montage/lua/hybrid | 4 | native×6 | 3 | 16 | 只有 native 副作用，未映射为 IR 动作；16 个 notify 未匹配 |
 | 技能 150411 | 150411 | unknown | unsupported | montage/lua/hybrid | 2 | native×3 | 1 | 5 | 只有 native 副作用，未映射为 IR 动作；5 个 notify 未匹配 |
 | 技能 150421 | 150421 | unknown | unsupported | montage/lua/hybrid | 1 | native×1 | 1 | 9 | 只有 native 副作用，未映射为 IR 动作；9 个 notify 未匹配 |
 | 技能 150422 | 150422 | unknown | unsupported | montage/lua/hybrid | 1 | native×2 | 1 | 7 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
-| 技能 150441 | 150441 | unknown | unsupported | montage/lua/hybrid | 3 | summon×2 native×1 | 0 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
+| 技能 150441 | 150441 | unknown | unsupported | montage/blueprint/lua/hybrid | 4 | native×22 summon×2 | 21 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
 | 技能 150511 | 150511 | unknown | unsupported | lua | 1 | summon×2 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
 | 技能 150512 | 150512 | unknown | unsupported | lua | 1 | summon×2 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
 | 技能 150514 | 150514 | unknown | unsupported | lua | 1 | summon×2 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
@@ -155,44 +155,44 @@
 | 飞芒 | 160102 | Q | simulated | montage/lua/hybrid | 4 | applyBuff×2 native×5 damage×1 summon×1 | 2 | 11 | 11 个 notify 未匹配 |
 | 散射 | 160103 | P | unsupported | blueprint/lua/hybrid | 1 | native×5 | 5 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 流光 | 160104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| “在一个暖和的午后” | 180101 | E | simulated | montage/lua/hybrid | 4 | native×8 applyBuff×2 | 4 | 16 | 16 个 notify 未匹配 |
+| “在一个暖和的午后” | 180101 | E | simulated | montage/blueprint/lua/hybrid | 5 | native×32 applyBuff×2 | 28 | 16 | 16 个 notify 未匹配 |
 | “下午茶开始了！” | 180102 | Q | data-only | montage/lua/hybrid | 0 | - | 0 | 7 | 无 montage / SkillEffects / Lua 行为动作；7 个 notify 未匹配 |
 | “坏巫师最怕阳光了！” | 180103 | P | unsupported | blueprint/lua/hybrid | 1 | native×24 | 24 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | “故事还没有结束” | 180104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×1 | 1 | 0 | 只有 native 副作用，未映射为 IR 动作 |
-| 技能 180111 | 180111 | unknown | simulated | montage/lua/hybrid | 4 | native×8 applyBuff×2 | 4 | 16 | 16 个 notify 未匹配 |
+| 技能 180111 | 180111 | unknown | simulated | montage/blueprint/lua/hybrid | 5 | native×32 applyBuff×2 | 28 | 16 | 16 个 notify 未匹配 |
 | 技能 180121 | 180121 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | “前进，扑克牌士兵！” | 180191 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 七天泛滥 | 210003 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 缠绵之触 | 210101 | E | unsupported | montage/lua/hybrid | 2 | summon×1 native×3 | 1 | 7 | 只有 resource/select/summon 动作，缺伤害/增益语义；7 个 notify 未匹配 |
-| 爱神蜜露 | 210102 | Q | unsupported | montage/lua/hybrid | 3 | native×9 | 3 | 11 | 只有 native 副作用，未映射为 IR 动作；11 个 notify 未匹配 |
+| 爱神蜜露 | 210102 | Q | unsupported | montage/blueprint/lua/hybrid | 4 | native×16 | 10 | 11 | 只有 native 副作用，未映射为 IR 动作；11 个 notify 未匹配 |
 | 纯爱试炼 | 210103 | P | unsupported | blueprint/lua/hybrid | 1 | native×7 | 7 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 相思成疾 | 210104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 210112 | 210112 | unknown | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 乐园构想 | 210201 | E | unsupported | montage/lua/hybrid | 3 | summon×1 native×6 | 2 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 庆典开始喽 | 210202 | Q | simulated | montage/lua/manual/hybrid | 2 (tick×1) | applyBuff×1 resource×1 damage×1 | 2 | 13 | 13 个 notify 未匹配 |
+| 乐园构想 | 210201 | E | unsupported | montage/blueprint/lua/hybrid | 4 | native×13 summon×1 | 9 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
+| 庆典开始喽 | 210202 | Q | simulated | montage/blueprint/lua/manual/hybrid | 2 (tick×1) | applyBuff×1 resource×1 damage×1 | 9 | 13 | 13 个 notify 未匹配 |
 | 你好，世界 | 210203 | P | unsupported | blueprint/lua/hybrid | 1 | native×7 | 7 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 下次见~ | 210204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 210217 | 210217 | unknown | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 技能 210221 | 210221 | unknown | simulated | montage/lua/hybrid | 1 | removeBuff×1 native×2 | 2 | 7 | 7 个 notify 未匹配 |
+| 技能 210221 | 210221 | unknown | simulated | montage/blueprint/lua/hybrid | 2 | native×9 removeBuff×1 | 9 | 7 | 7 个 notify 未匹配 |
 | 技能 210291 | 210291 | unknown | simulated | montage/lua/hybrid | 1 | applyBuff×1 | 0 | 6 | 6 个 notify 未匹配 |
-| 斩首行动 | 220101 | E | unsupported | montage/lua/hybrid | 4 | summon×2 native×3 | 2 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；10 个 notify 未匹配 |
+| 斩首行动 | 220101 | E | unsupported | montage/blueprint/lua/hybrid | 5 | summon×2 native×10 | 9 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；10 个 notify 未匹配 |
 | 军团战阵 | 220102 | Q | simulated | montage/lua/manual/hybrid | 2 (tick×1) | applyBuff×1 summon×1 damage×1 resource×1 | 1 | 7 | 7 个 notify 未匹配 |
 | 苍白挽歌 | 220103 | P | unsupported | blueprint/lua/hybrid | 1 | native×7 | 7 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 集结号令 | 220104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 220121 | 220121 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 拿手把戏！ | 230101 | E | simulated | montage/blueprint/lua/hybrid | 4 | native×2 applyBuff×3 | 2 | 8 | 8 个 notify 未匹配 |
+| 拿手把戏！ | 230101 | E | simulated | montage/blueprint/lua/hybrid | 4 | native×7 applyBuff×3 | 7 | 8 | 8 个 notify 未匹配 |
 | 正义群殴！ | 230102 | Q | unsupported | montage/lua/hybrid | 5 | summon×4 native×1 | 0 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
 | 闹剧开幕！ | 230103 | P | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 还有高手！ | 230104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 提挈浮沉 | 240101 | E | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 形与神俱 | 240102 | Q | simulated | montage/lua/hybrid | 3 | native×5 applyBuff×2 damage×1 | 3 | 12 | 12 个 notify 未匹配 |
-| 神归心舍 | 240103 | P | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
+| 形与神俱 | 240102 | Q | simulated | montage/blueprint/lua/hybrid | 4 | native×9 applyBuff×2 damage×1 | 7 | 12 | 12 个 notify 未匹配 |
+| 神归心舍 | 240103 | P | unsupported | blueprint/lua/hybrid | 1 | native×5 | 5 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 华英成秀 | 240104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×1 | 1 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 240111 | 240111 | unknown | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 12 | 只有 resource/select/summon 动作，缺伤害/增益语义；12 个 notify 未匹配 |
 | 筋脉和同 | 240191 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 无烟火焰 | 310001 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 火狱制造  | 310003 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 致命绽放 | 310101 | E | unsupported | montage/lua/hybrid | 5 | native×20 | 10 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
+| 致命绽放 | 310101 | E | unsupported | montage/blueprint/lua/hybrid | 6 | native×21 | 11 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
 | 火药酬宾 | 310102 | Q | simulated | montage/blueprint/lua/hybrid | 3 | native×10 applyBuff×1 | 8 | 8 | 8 个 notify 未匹配 |
 | 战术速射 | 310103 | P | unsupported | blueprint/lua/hybrid | 1 | native×15 | 15 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 不可饶恕 | 310104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×3 | 3 | 0 | 只有 native 副作用，未映射为 IR 动作 |
@@ -200,45 +200,45 @@
 | 技能 310121 | 310121 | unknown | unsupported | montage/blueprint/lua/hybrid | 1 | native×5 | 5 | 8 | 只有 native 副作用，未映射为 IR 动作；8 个 notify 未匹配 |
 | 技能 310122 | 310122 | unknown | unsupported | montage/lua/hybrid | 2 | native×10 | 6 | 11 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 高温清扫 | 310201 | E | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作 |
-| 倾情服务 | 310202 | Q | unsupported | montage/lua/hybrid | 2 | native×6 | 4 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
+| 倾情服务 | 310202 | Q | unsupported | montage/blueprint/lua/hybrid | 3 | native×29 | 27 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
 | 自动保洁 | 310203 | P | unsupported | blueprint/lua/hybrid | 1 | native×23 | 23 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 并行奔忙 | 310204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 310211 | 310211 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
-| 小可爱 | 310301 | E | simulated | montage/lua/hybrid | 3 | native×1 removeBuff×2 | 1 | 12 | 12 个 notify 未匹配 |
-| 噩梦回忆 | 310302 | Q | simulated | montage/lua/hybrid | 2 | applyBuff×2 summon×2 | 0 | 13 | 13 个 notify 未匹配 |
+| 小可爱 | 310301 | E | simulated | montage/blueprint/lua/hybrid | 4 | native×12 removeBuff×2 | 12 | 12 | 12 个 notify 未匹配 |
+| 噩梦回忆 | 310302 | Q | simulated | montage/blueprint/lua/hybrid | 3 | native×11 applyBuff×2 summon×2 | 11 | 13 | 13 个 notify 未匹配 |
 | 正确游玩方式 | 310303 | P | unsupported | blueprint/lua/hybrid | 1 | native×11 | 11 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 轰鸣回忆 | 310304 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 技能 310311 | 310311 | unknown | simulated | montage/lua/hybrid | 3 | native×1 removeBuff×2 | 1 | 11 | 11 个 notify 未匹配 |
+| 技能 310311 | 310311 | unknown | simulated | montage/blueprint/lua/hybrid | 4 | native×12 removeBuff×2 | 12 | 11 | 11 个 notify 未匹配 |
 | 技能 310321 | 310321 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 潜入夜色 | 310401 | E | simulated | montage/lua/manual/hybrid | 2 (tick×1) | applyBuff×1 damage×1 resource×1 | 3 | 6 | 6 个 notify 未匹配 |
-| 坠入黑渊 | 310402 | Q | unsupported | montage/blueprint/lua/hybrid | 3 | native×7 | 5 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
+| 潜入夜色 | 310401 | E | simulated | montage/blueprint/lua/manual/hybrid | 2 (tick×1) | applyBuff×1 damage×1 resource×1 | 17 | 6 | 6 个 notify 未匹配 |
+| 坠入黑渊 | 310402 | Q | unsupported | montage/blueprint/lua/hybrid | 3 | native×19 | 17 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
 | 觉醒 | 310403 | P | unsupported | blueprint/lua/hybrid | 1 | native×14 | 14 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 浴血 | 310404 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×7 | 7 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 310411 | 310411 | unknown | unsupported | montage/lua/hybrid | 1 | native×4 | 2 | 10 | 只有 native 副作用，未映射为 IR 动作；10 个 notify 未匹配 |
 | 技能 310412 | 310412 | unknown | unsupported | montage/lua/hybrid | 2 | summon×1 native×1 | 1 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 灼热地狱 | 320101 | E | simulated | montage/lua/hybrid | 2 | applyBuff×1 native×4 | 1 | 7 | 7 个 notify 未匹配 |
+| 灼热地狱 | 320101 | E | simulated | montage/blueprint/lua/hybrid | 3 | native×7 applyBuff×1 | 4 | 7 | 7 个 notify 未匹配 |
 | 绝望牢笼 | 320102 | Q | simulated | montage/lua/hybrid | 1 | native×3 applyBuff×1 | 1 | 10 | 10 个 notify 未匹配 |
 | 惩戒决意 | 320103 | P | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 罪名宣告 | 320104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×3 | 3 | 0 | 只有 native 副作用，未映射为 IR 动作 |
-| 猩红欢宴 | 320201 | E | simulated | montage/lua/hybrid | 3 | native×4 damage×1 removeBuff×1 | 2 | 10 | 10 个 notify 未匹配 |
+| 猩红欢宴 | 320201 | E | simulated | montage/blueprint/lua/hybrid | 4 | native×9 damage×1 removeBuff×1 | 7 | 10 | 10 个 notify 未匹配 |
 | 赤霞珠舞 | 320202 | Q | unsupported | montage/lua/hybrid | 3 | native×2 summon×8 | 0 | 12 | 只有 resource/select/summon 动作，缺伤害/增益语义；12 个 notify 未匹配 |
 | 啜饮毁伤 | 320203 | P | unsupported | blueprint/lua/hybrid | 1 | native×5 | 5 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 迟迟醉醒 | 320204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作 |
-| 技能 320211 | 320211 | unknown | simulated | montage/lua/hybrid | 3 | native×4 removeBuff×1 | 2 | 10 | 10 个 notify 未匹配 |
+| 技能 320211 | 320211 | unknown | simulated | montage/blueprint/lua/hybrid | 4 | native×9 removeBuff×1 | 7 | 10 | 10 个 notify 未匹配 |
 | 瑰色裙裾 | 320291 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 320301 | 320301 | E | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 2 | 只有 resource/select/summon 动作，缺伤害/增益语义；2 个 notify 未匹配 |
-| 技能 320302 | 320302 | P | unsupported | montage/lua/hybrid | 2 | native×1 summon×1 | 1 | 4 | 只有 resource/select/summon 动作，缺伤害/增益语义；4 个 notify 未匹配 |
+| 技能 320302 | 320302 | P | unsupported | montage/blueprint/lua/hybrid | 3 | native×3 summon×1 | 3 | 4 | 只有 resource/select/summon 动作，缺伤害/增益语义；4 个 notify 未匹配 |
 | 技能 320303 | 320303 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 320311 | 320311 | Q | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 2 | 只有 resource/select/summon 动作，缺伤害/增益语义；2 个 notify 未匹配 |
-| 玛尔洁的万能寻宝铲 | 330101 | E | simulated | montage/lua/hybrid | 2 | damage×2 applyBuff×2 native×7 summon×1 | 3 | 9 | 9 个 notify 未匹配 |
-| 玛尔洁的可燃垃圾箱 | 330102 | Q | unsupported | montage/lua/hybrid | 4 | native×2 summon×6 | 2 | 16 | 只有 resource/select/summon 动作，缺伤害/增益语义；16 个 notify 未匹配 |
+| 玛尔洁的万能寻宝铲 | 330101 | E | simulated | montage/blueprint/lua/hybrid | 3 | native×15 damage×2 applyBuff×2 summon×1 | 11 | 9 | 9 个 notify 未匹配 |
+| 玛尔洁的可燃垃圾箱 | 330102 | Q | unsupported | montage/blueprint/lua/hybrid | 5 | native×10 summon×6 | 10 | 16 | 只有 resource/select/summon 动作，缺伤害/增益语义；16 个 notify 未匹配 |
 | 玛尔洁的回收储物袋 | 330103 | P | unsupported | blueprint/lua/hybrid | 1 | native×8 | 8 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 玛尔洁的鼓劲小调儿 | 330104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 技能 330112 | 330112 | unknown | simulated | montage/lua/hybrid | 11 | applyBuff×8 native×31 summon×4 | 12 | 10 | packages/data 无对应技能条目；10 个 notify 未匹配 |
+| 技能 330112 | 330112 | unknown | simulated | montage/blueprint/lua/hybrid | 12 | native×39 applyBuff×8 summon×4 | 20 | 10 | packages/data 无对应技能条目；10 个 notify 未匹配 |
 | 飞雷破夜 | 410001 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 神罚降下 | 410003 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 快速出击 | 410101 | E | simulated | montage/lua/manual/hybrid | 1 | damage×1 | 2 | 13 | 13 个 notify 未匹配 |
-| 涡旋电场 | 410102 | Q | simulated | montage/lua/manual/hybrid | 3 (tick×2) | applyBuff×4 damage×4 resource×1 select×3 branch×1 | 1 | 10 | 10 个 notify 未匹配 |
+| 涡旋电场 | 410102 | Q | simulated | montage/blueprint/lua/manual/hybrid | 3 (tick×2) | applyBuff×4 damage×4 resource×1 select×3 branch×1 | 11 | 10 | 10 个 notify 未匹配 |
 | 战术节能 | 410103 | P | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 电量焦虑 | 410104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 410121 | 410121 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
@@ -247,9 +247,9 @@
 | 双泉并舞 | 410203 | P | unsupported | blueprint/lua/hybrid | 1 | native×7 | 7 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 相生 | 410204 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 410211 | 410211 | unknown | simulated | montage/blueprint/lua/hybrid | 3 | native×4 applyBuff×2 | 3 | 9 | packages/data 无对应技能条目；9 个 notify 未匹配 |
-| 技能 410221 | 410221 | unknown | unsupported | montage/lua/hybrid | 2 | summon×3 native×1 | 1 | 18 | 只有 resource/select/summon 动作，缺伤害/增益语义；18 个 notify 未匹配 |
-| 技能 410222 | 410222 | unknown | unsupported | montage/lua/hybrid | 2 | summon×4 native×1 | 1 | 16 | 只有 resource/select/summon 动作，缺伤害/增益语义；16 个 notify 未匹配 |
-| 技能 410223 | 410223 | unknown | simulated | montage/lua/hybrid | 3 | native×3 applyBuff×1 | 2 | 15 | 15 个 notify 未匹配 |
+| 技能 410221 | 410221 | unknown | unsupported | montage/blueprint/lua/hybrid | 3 | native×8 summon×3 | 8 | 18 | 只有 resource/select/summon 动作，缺伤害/增益语义；18 个 notify 未匹配 |
+| 技能 410222 | 410222 | unknown | unsupported | montage/blueprint/lua/hybrid | 3 | native×8 summon×4 | 8 | 16 | 只有 resource/select/summon 动作，缺伤害/增益语义；16 个 notify 未匹配 |
+| 技能 410223 | 410223 | unknown | simulated | montage/blueprint/lua/hybrid | 4 | native×10 applyBuff×1 | 9 | 15 | 15 个 notify 未匹配 |
 | 迸发射击 | 410301 | E | simulated | montage/lua/hybrid | 3 | applyBuff×1 damage×3 native×7 | 3 | 17 | 17 个 notify 未匹配 |
 | 涡流狙击 | 410302 | Q | simulated | montage/lua/hybrid | 2 | applyBuff×2 | 0 | 13 | 13 个 notify 未匹配 |
 | 电能协同 | 410303 | P | unsupported | blueprint/lua/hybrid | 1 | native×20 | 20 | 0 | 只有 native 副作用，未映射为 IR 动作 |
@@ -271,8 +271,8 @@
 | 有盾同挡 | 420203 | P | unsupported | blueprint/lua/hybrid | 1 | native×10 | 10 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 合理休假 | 420204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 技能 420211 | 420211 | unknown | simulated | montage/lua/hybrid | 1 | native×1 removeBuff×1 | 1 | 6 | 6 个 notify 未匹配 |
-| 夺神权柄 | 430101 | E | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
-| 指尖风暴 | 430102 | Q | unsupported | montage/lua/hybrid | 1 | summon×1 | 0 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；10 个 notify 未匹配 |
+| 夺神权柄 | 430101 | E | unsupported | montage/blueprint/lua/hybrid | 2 | native×4 summon×1 | 4 | 9 | 只有 resource/select/summon 动作，缺伤害/增益语义；9 个 notify 未匹配 |
+| 指尖风暴 | 430102 | Q | unsupported | montage/blueprint/lua/hybrid | 2 | native×4 summon×1 | 4 | 10 | 只有 resource/select/summon 动作，缺伤害/增益语义；10 个 notify 未匹配 |
 | 万钧之势 | 430103 | P | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 黑云执掌 | 430104 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 天空支配 | 510001 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
@@ -287,8 +287,8 @@
 | 技能 510111 | 510111 | unknown | data-only | manual | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
 | 技能 510121 | 510121 | unknown | data-only | montage/lua/hybrid | 0 | - | 0 | 9 | 无 montage / SkillEffects / Lua 行为动作；9 个 notify 未匹配 |
 | 咕咕觅食 | 510191 | unknown | data-only | blueprint/lua/hybrid | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作 |
-| 隐匿 | 510201 | E | simulated | montage/blueprint/lua/hybrid | 3 | native×7 applyBuff×1 | 5 | 9 | 9 个 notify 未匹配 |
-| 猎袭 | 510202 | Q | unsupported | montage/lua/hybrid | 3 | native×3 | 2 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
+| 隐匿 | 510201 | E | simulated | montage/blueprint/lua/hybrid | 3 | native×22 applyBuff×1 | 20 | 9 | 9 个 notify 未匹配 |
+| 猎袭 | 510202 | Q | unsupported | montage/blueprint/lua/hybrid | 4 | native×20 | 19 | 13 | 只有 native 副作用，未映射为 IR 动作；13 个 notify 未匹配 |
 | 以牙还牙 | 510203 | P | unsupported | blueprint/lua/hybrid | 1 | native×17 | 17 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 噬咬 | 510204 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×5 | 5 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 抽茧成梦 | 530101 | E | simulated | lua/manual/hybrid | 3 | damage×3 applyBuff×1 | 0 | 0 | - |
@@ -300,7 +300,7 @@
 | 技能 530121 | 530121 | unknown | unsupported | montage/blueprint/lua/hybrid | 1 | native×4 | 4 | 6 | 只有 native 副作用，未映射为 IR 动作；6 个 notify 未匹配 |
 | 技能 530122 | 530122 | unknown | unsupported | montage/lua/hybrid | 2 | native×3 | 3 | 5 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 翠玉弥散 | 540101 | E | simulated | montage/lua/hybrid | 1 | applyBuff×1 | 0 | 7 | 7 个 notify 未匹配 |
-| 互斥炼成 | 540102 | Q | simulated | montage/lua/hybrid | 3 | native×2 applyBuff×3 | 2 | 9 | 9 个 notify 未匹配 |
+| 互斥炼成 | 540102 | Q | simulated | montage/blueprint/lua/hybrid | 4 | native×10 applyBuff×3 | 10 | 9 | 9 个 notify 未匹配 |
 | 阿佐特弹 | 540103 | P | unsupported | blueprint/lua/hybrid | 1 | native×8 | 8 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 银泪销蚀 | 540104 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×4 | 4 | 0 | 只有 native 副作用，未映射为 IR 动作 |
 | 风起之颂(待包装) | 540201 | E | simulated | montage/blueprint/lua/manual/hybrid | 2 (tick×1) | applyBuff×2 resource×1 | 5 | 3 | 3 个 notify 未匹配 |
@@ -315,24 +315,42 @@
 | 技能 1010102 | 1010102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1010103 | 1010103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1010104 | 1010104 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1010201 | 1010201 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1010202 | 1010202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 1010302 | 1010302 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1020101 | 1020101 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1020102 | 1020102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1020103 | 1020103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1020104 | 1020104 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1020201 | 1020201 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1020202 | 1020202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 1020203 | 1020203 | unknown | unsupported | lua | 1 | summon×1 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
+| 技能 1020302 | 1020302 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1030101 | 1030101 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1030102 | 1030102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1030103 | 1030103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1030104 | 1030104 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1030201 | 1030201 | unknown | unsupported | lua | 1 | summon×2 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
+| 技能 1030202 | 1030202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×15 | 15 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 1030301 | 1030301 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1030302 | 1030302 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1040101 | 1040101 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1040102 | 1040102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1040103 | 1040103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1040104 | 1040104 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1040201 | 1040201 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1040202 | 1040202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 1040204 | 1040204 | unknown | unsupported | lua | 1 | summon×1 | 0 | 0 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
+| 技能 1040302 | 1040302 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1050101 | 1050101 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1050102 | 1050102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
+| 技能 1050202 | 1050202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1060101 | 1060101 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1060102 | 1060102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1060103 | 1060103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 1060104 | 1060104 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1060201 | 1060201 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
+| 技能 1060202 | 1060202 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1503101 | 1503101 | unknown | unsupported | montage/lua/hybrid | 4 | native×12 summon×1 | 6 | 14 | 只有 resource/select/summon 动作，缺伤害/增益语义；packages/data 无对应技能条目 |
 | 技能 1503102 | 1503102 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×6 | 6 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 1503103 | 1503103 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
@@ -395,7 +413,7 @@
 | 技能 2050302 | 2050302 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 2050401 | 2050401 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 2050402 | 2050402 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
-| 技能 2050501 | 2050501 | unknown | simulated | lua | 1 | applyBuff×1 removeBuff×1 summon×1 | 0 | 0 | packages/data 无对应技能条目 |
+| 技能 2050501 | 2050501 | unknown | unsupported | blueprint/lua/hybrid | 1 | native×2 | 2 | 0 | 只有 native 副作用，未映射为 IR 动作；packages/data 无对应技能条目 |
 | 技能 2050502 | 2050502 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 2050601 | 2050601 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
 | 技能 2050602 | 2050602 | unknown | data-only | lua | 0 | - | 0 | 0 | 无 montage / SkillEffects / Lua 行为动作；packages/data 无对应技能条目 |
@@ -417,8 +435,8 @@
 
 ## U2 覆盖率对照
 
-- U2 exporter：`{"gitCommit":"8f613517","parserVersion":1,"gameVersion":"v1.7.227.1"}`
-- U2 coverage（摘要，完整数据见 coverage-matrix.json）：`{"skillsTotal":367,"skillsWithMontage":128,"skillsWithBlueprint":136,"skillsWithAnimBP":209,"skillsWithLuaOnly":121,"montagesResolved":162,"montagesMissing":126,"blueprintsTotal":332,"animBPsTotal":34}`
-- manifest coverage：skills 367 / montage 128 / blueprint 136 / animBP 209 / behavior 61 / native unknown 125
+- U2 exporter：`{"gitCommit":"1ffafad0","parserVersion":1,"gameVersion":"v1.7.227.1"}`
+- U2 coverage（摘要，完整数据见 coverage-matrix.json）：`{"skillsTotal":385,"skillsWithMontage":128,"skillsWithBlueprint":188,"skillsWithAnimBP":209,"skillsWithLuaOnly":127,"montagesResolved":162,"montagesMissing":161,"blueprintsTotal":341,"animBPsTotal":34}`
+- manifest coverage：skills 385 / montage 128 / blueprint 188 / animBP 209 / behavior 60 / native unknown 128
 - U2 产物没有 `nativeCallsUnknown` 字段，未知 native 计数只能以 manifest 为准。
 
