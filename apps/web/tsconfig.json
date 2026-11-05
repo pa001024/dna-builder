@@ -20,7 +20,11 @@
         "paths": {
             "@/*": ["./src/*"],
             "@/data": ["../../packages/data/index.ts"],
-            "@/data/*": ["../../packages/data/*"]
+            "@/data/*": ["../../packages/data/*"],
+            "dna-builder-skill-sim": ["../../packages/skill-sim/src/index.ts"],
+            "dna-builder-skill-sim/core": ["../../packages/skill-sim/src/core/index.ts"],
+            "dna-builder-skill-sim/runtime": ["../../packages/skill-sim/src/runtime/index.ts"],
+            "dna-builder-skill-sim/schema": ["../../packages/skill-sim/src/schema/index.ts"]
         },
         /* Linting */
         "strict": true,

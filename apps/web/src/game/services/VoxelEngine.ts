@@ -1,10 +1,22 @@
+import { createRng, type Rng } from "dna-builder-skill-sim/core"
 import * as THREE from "three"
-import { type CharBuild, type DynamicMonster, LeveledMonsterHelper } from "@/data/index"
+import { type CharBuild, LeveledMonsterHelper } from "@/data/index"
+import { EventView } from "../sim/event-view"
+import { buffName, type CompiledManifest } from "../sim/manifest-loader"
+import { loadSkillManifest } from "../sim/manifest-source"
+import { SimDriver } from "../sim/sim-driver"
 import type { FloatingText, GameSettings, Monster, PlayerStats, VoxelData } from "../types"
 import { Generators } from "../utils/voxelGenerators"
-import type { BaseSkill } from "./BaseSkill"
-import { SkillRegistry } from "./SkillRegistry"
 
+/** 永久增益在 HUD 圆环上的显示时长 */
+const PERMANENT_BUFF_SECONDS = 9999
+
+/**
+ * Three.js 视图层：场景 / 输入 / 相机 / 怪物模型 / 飘字 / HUD 数据。
+ *
+ * 战斗逻辑全部在 `SimDriver`（core `Simulation` + `SkillRuntime`）：本类只把按键与命中判定
+ * 翻译成命令，再把 `SimEvent[]` 与 `FrameSample` 映射成视觉与 HUD 状态。
+ */
 export class VoxelEngine {
     private container: HTMLElement
     private scene: THREE.Scene
@@ -13,21 +25,14 @@ export class VoxelEngine {
     private clock: THREE.Clock
     private animationId: number | null = null
 
-    // -- 公共状态（供技能使用） --
+    // -- 公共状态（供 HUD 使用） --
     public playerStats: PlayerStats
     public monsters: Monster[] = []
-    public activeBuffs: Map<string, number> = new Map()
     public gravityEnabled: boolean = true // Control gravity for flight
-
-    // Weapon State
-    private skillWeaponOverrideMelee: string | null = null
-    private skillWeaponOverrideRanged: string | null = null
 
     // -- 常量 --
     // 1米 = 10引擎单位。
-    // 假设角色约12单位高（约1.2米女孩），所以10单位=1米是合理的比例。
     private readonly METER_SCALE = 10.0
-    // 地图大小
     private readonly MAP_SIZE = 400
     private readonly MAP_HALF_SIZE = 200
 
@@ -35,11 +40,11 @@ export class VoxelEngine {
     private projectiles: any[] = []
     private floatingTexts: FloatingText[] = []
     private playerMesh: THREE.Group
-    private weaponMesh: THREE.Group // 新增：武器模型
+    private weaponMesh: THREE.Group
     private playerVelocity: THREE.Vector3 = new THREE.Vector3()
     private isGrounded = true
     private dashTimer = 0
-    private dirLight: THREE.DirectionalLight // 保存光照引用以跟随玩家
+    private dirLight: THREE.DirectionalLight
 
     // 攻击动画状态
     private isAttacking = false
@@ -50,12 +55,20 @@ export class VoxelEngine {
     private isFiring = false
     private fireTimer = 0
 
-    // 技能
-    private skillE: BaseSkill
-    private skillQ: BaseSkill
-
-    private sanityRegenTimer = 0
+    // 模拟
+    private readonly manifest: CompiledManifest
+    private readonly driver: SimDriver
+    private readonly view: EventView
+    private readonly rng: Rng
+    private readonly monsterById = new Map<string, Monster>()
+    private castPulse = 0
     private chargeAttackTime = 0
+    private castRing: THREE.Mesh
+    private markerMeshes = new Map<string, THREE.Mesh>()
+    private markerGeometry: THREE.RingGeometry
+    private markerMaterial: THREE.MeshBasicMaterial
+    private nextMonsterSeq = 1
+    private nextTextSeq = 1
 
     // 输入
     private keys: Record<string, boolean> = {}
@@ -67,9 +80,6 @@ export class VoxelEngine {
     private onMonstersUpdate: (monsters: Monster[]) => void
     private onTextUpdate: (texts: FloatingText[]) => void
     private onDpsUpdate: (dps: number, total: number) => void
-
-    private totalDamage = 0
-    private startTime = 0
 
     public settings: GameSettings = {
         monsterCount: 5,
@@ -121,7 +131,7 @@ export class VoxelEngine {
 
         const attrs = this.charBuild.attrs
 
-        // 状态
+        // 状态（战斗数值随后由帧采样覆盖）
         this.playerStats = {
             maxHP: attrs.生命,
             currentHP: attrs.生命,
@@ -135,7 +145,20 @@ export class VoxelEngine {
             moveSpeed: 15,
             activeBuffs: [],
         }
-        this.startTime = Date.now()
+
+        this.manifest = loadSkillManifest()
+        this.view = new EventView({
+            buffName: buffId => buffName(this.manifest, buffId),
+            damageColor: () => this.getElementClass(this.charBuild.char.属性),
+        })
+        this.driver = new SimDriver({
+            manifest: this.manifest,
+            characterId: this.charBuild.char.id,
+            charBuild: this.charBuild,
+            seed: 1337,
+            regen: () => ({ amount: this.settings.sanityRegenAmount, interval: this.settings.sanityRegenInterval }),
+        })
+        this.rng = createRng(20261105)
 
         // ThreeJS 设置
         this.scene = new THREE.Scene()
@@ -164,7 +187,7 @@ export class VoxelEngine {
         this.dirLight.shadow.camera.top = 50
         this.dirLight.shadow.camera.bottom = -50
         this.scene.add(this.dirLight)
-        this.scene.add(this.dirLight.target) // 添加target到场景以便移动
+        this.scene.add(this.dirLight.target)
 
         const planeGeo = new THREE.PlaneGeometry(this.MAP_SIZE, this.MAP_SIZE)
         const planeMat = new THREE.MeshStandardMaterial({ color: 0x333344 })
@@ -174,7 +197,7 @@ export class VoxelEngine {
         this.scene.add(ground)
         this.scene.add(new THREE.GridHelper(this.MAP_SIZE, 40, 0x444455, 0x444455))
 
-        // 玩家 (Dynamic Loading)
+        // 玩家
         this.playerMesh = this.createVoxelMesh(this.getCharModel())
         this.playerMesh.position.y = 0
         this.scene.add(this.playerMesh)
@@ -182,17 +205,25 @@ export class VoxelEngine {
         // 武器
         this.weaponMesh = this.createVoxelMesh(this.getWeaponModel())
         this.playerMesh.add(this.weaponMesh)
-        // 初始位置：右手持有，稍微向前倾斜
-        this.weaponMesh.position.set(4, 6, 2) // 右手位置附近
-        this.weaponMesh.rotation.x = Math.PI / 4 // 向前倾斜45度
+        this.weaponMesh.position.set(4, 6, 2)
+        this.weaponMesh.rotation.x = Math.PI / 4
 
-        // 初始化技能
-        const skills = charBuild.char.技能
-        if (skills.length < 2) {
-            throw new Error("角色必须有至少2个技能")
-        }
-        this.skillE = new (SkillRegistry.get(skills[0].id))(this, skills[0].getFieldsWithAttr(attrs))
-        this.skillQ = new (SkillRegistry.get(skills[1].id))(this, skills[1].getFieldsWithAttr(attrs))
+        // 施法 / 选敌通用标记
+        this.castRing = new THREE.Mesh(
+            new THREE.RingGeometry(this.m2u(0.6), this.m2u(1.0), 32),
+            new THREE.MeshBasicMaterial({ color: 0x66ccff, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false })
+        )
+        this.castRing.rotation.x = -Math.PI / 2
+        this.castRing.visible = false
+        this.scene.add(this.castRing)
+        this.markerGeometry = new THREE.RingGeometry(this.m2u(0.7), this.m2u(1.0), 24)
+        this.markerMaterial = new THREE.MeshBasicMaterial({
+            color: 0xfacc15,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+        })
 
         // 事件
         window.addEventListener("keydown", this.onKeyDown)
@@ -212,6 +243,7 @@ export class VoxelEngine {
     public cleanup() {
         if (this.animationId !== null) {
             cancelAnimationFrame(this.animationId)
+            this.animationId = null
         }
         window.removeEventListener("keydown", this.onKeyDown)
         window.removeEventListener("keyup", this.onKeyUp)
@@ -232,25 +264,18 @@ export class VoxelEngine {
         return units / this.METER_SCALE
     }
 
-    // --- 技能接口 ---
+    // --- 位置 / 输入接口 ---
     public getPlayerPosition(): THREE.Vector3 {
         return this.playerMesh.position
     }
 
-    public getPlayerRotation(): number {
-        return this.playerMesh.rotation.y
-    }
-
-    // 获取角色面向（基于鼠标位置）
     public getForwardVector(): THREE.Vector3 {
-        // 直接使用模型的世界方向，因为updatePlayer已经确保了模型朝向正确（消除了视差）
         const dir = new THREE.Vector3()
         this.playerMesh.getWorldDirection(dir)
         dir.y = 0
         if (dir.lengthSq() > 0.001) {
             dir.normalize()
         } else {
-            // 回退逻辑
             dir.set(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.playerMesh.rotation.y)
         }
         return dir
@@ -261,33 +286,10 @@ export class VoxelEngine {
     }
 
     public applyDash(velocity: THREE.Vector3, duration: number) {
-        // 设置水平速度
         this.playerVelocity.x = velocity.x
         this.playerVelocity.z = velocity.z
-        // 暂时重置垂直速度以实现平飞效果（如果是在空中），或者在地面滑行
-        // 不再强制抬高Y轴，防止浮空bug
         this.playerVelocity.y = 0
-
         this.dashTimer = duration
-    }
-
-    public addElectricEnergy(amount: number) {
-        this.playerStats.electricEnergy = Math.min(this.playerStats.electricEnergy + amount, 100)
-    }
-
-    public addBuff(name: string, duration: number) {
-        this.activeBuffs.set(name, duration)
-        // 简单处理：如果是赛琪的破茧状态，设置重力
-        if (name === "破茧") {
-            this.setGravity(false)
-        }
-    }
-
-    public removeBuff(name: string) {
-        this.activeBuffs.delete(name)
-        if (name === "破茧") {
-            this.setGravity(true)
-        }
     }
 
     public setGravity(enabled: boolean) {
@@ -301,31 +303,9 @@ export class VoxelEngine {
         this.weaponMesh.visible = visible
     }
 
-    public setSkillWeaponOverride(slot: "melee" | "ranged", weaponName: string | null) {
-        if (slot === "melee") {
-            this.skillWeaponOverrideMelee = weaponName
-        } else {
-            this.skillWeaponOverrideRanged = weaponName
-        }
-    }
-
-    public getMeleeWeapon() {
-        if (this.skillWeaponOverrideMelee && this.charBuild.skillWeapon?.名称 === this.skillWeaponOverrideMelee) {
-            return this.charBuild.skillWeapon
-        }
-        return this.charBuild.meleeWeapon
-    }
-
-    public getRangedWeapon() {
-        if (this.skillWeaponOverrideRanged && this.charBuild.skillWeapon?.名称 === this.skillWeaponOverrideRanged) {
-            return this.charBuild.skillWeapon
-        }
-        return this.charBuild.rangedWeapon
-    }
-
     public spawnFloatingText(text: string, pos: THREE.Vector3, color: string) {
         this.floatingTexts.push({
-            id: Math.random().toString(),
+            id: `${this.nextTextSeq++}`,
             position: pos,
             text: text,
             color: color,
@@ -354,63 +334,14 @@ export class VoxelEngine {
 
     getElementClass(element: string): string {
         const classMap: Record<string, string> = {
-            光: "#f59e0b", // amber-500
-            暗: "#6b7280", // gray-500
-            水: "#3b82f6", // blue-500
-            火: "#ef4444", // red-500
-            雷: "#8b5cf6", // violet-500
-            风: "#10b981", // emerald-500
+            光: "#f59e0b",
+            暗: "#6b7280",
+            水: "#3b82f6",
+            火: "#ef4444",
+            雷: "#8b5cf6",
+            风: "#10b981",
         }
         return classMap[element] || "#ffffff"
-    }
-
-    public applySkillDamage(target: Monster, skillName: string) {
-        if (target.isDead) return
-
-        // 为CharBuild构建兼容的DynamicMonster对象
-        const adapter = {
-            id: parseInt(target.id, 10) || 130,
-            n: target.name,
-            f: target.faction,
-            atk: target.attack,
-            def: target.defense,
-            hp: target.maxHP,
-            es: target.maxShield,
-            tn: 0,
-            currentHP: target.currentHP,
-            currentShield: target.currentShield,
-            currentTN: 0,
-            等级: target.level,
-        } as DynamicMonster // Cast to unknown first to bypass type check
-
-        // 使用CharBuild计算伤害
-        // 注意：calculateRandomDamage会修改适配器的HP/护盾。
-        this.charBuild.calculateRandomDamage(skillName, adapter)
-
-        // 根据适配器的变化更新真实目标的状态
-        const dealtShieldDmg = target.currentShield - adapter.currentShield
-        const dealtHpDmg = target.currentHP - adapter.currentHP
-
-        target.currentShield = adapter.currentShield
-        target.currentHP = adapter.currentHP
-
-        const totalDmg = dealtShieldDmg + dealtHpDmg
-
-        const color = this.getElementClass(this.charBuild.char.属性)
-        // 显示整数伤害
-        const text = Math.floor(totalDmg).toString()
-        this.spawnFloatingText(text, target.position.clone().add(new THREE.Vector3(0, 3, 0)), color)
-
-        this.totalDamage += totalDmg
-
-        if (target.currentHP <= 0) {
-            target.isDead = true
-            this.scene.remove(target.mesh)
-
-            // Notify skills about death
-            this.skillE.onMonsterDeath(target)
-            this.skillQ.onMonsterDeath(target)
-        }
     }
 
     // --- 内部辅助函数 ---
@@ -442,7 +373,6 @@ export class VoxelEngine {
 
     private isRangedWeapon(weapon: any): boolean {
         if (!weapon) return false
-        // Check for '远程' in type or category, or if it's a SkillWeapon with '远程'
         if (Array.isArray(weapon.类型)) {
             return weapon.类型.includes("远程")
         }
@@ -455,30 +385,23 @@ export class VoxelEngine {
         this.keys[e.code] = true
 
         if (e.code === "Space" && this.isGrounded && this.gravityEnabled) {
-            this.playerVelocity.y = this.m2u(4) // 跳跃逻辑通常是基于冲量的。保持原始值用于跳跃或调整。
+            this.playerVelocity.y = this.m2u(4)
             this.isGrounded = false
         }
-        if (e.code === "KeyE") this.skillE.tryCast()
-        if (e.code === "KeyQ") this.skillQ.tryCast()
+        if (e.code === "KeyE") this.castSlot("E")
+        if (e.code === "KeyQ") this.castSlot("Q")
     }
 
     private onKeyUp = (e: KeyboardEvent) => (this.keys[e.code] = false)
 
     private onMouseDown = (e: MouseEvent) => {
-        // 左键
         if (e.button === 0) {
-            // 检查当前激活的武器是否为远程武器（例如，替代近战武器的同律武器）
-            const activeWeapon = this.getMeleeWeapon()
-
+            const activeWeapon = this.charBuild.meleeWeapon
             if (this.isRangedWeapon(activeWeapon)) {
                 this.isFiring = true
-                // 如果计时器已准备就绪，请立即触发以获得响应感
                 if (this.fireTimer <= 0) {
                     this.performRangedAttack(0)
-                    // 重置计时器。如果武器有攻速属性，使用武器攻速。否则默认0.5秒间隔。
                     const attrs = this.charBuild.calculateWeaponAttributes(activeWeapon)
-                    // 攻速属性是一个乘数（例如，1.2 意味着快 20%）。大多数远程武器的基础速度大约是 2-5 发 / 秒？
-                    // 我们假设基础速度是每秒 2 发（间隔 0.5 秒），再乘以攻击速度。
                     const attackSpeed = Math.max(0.1, attrs.weapon?.攻速 || 1)
                     this.fireTimer = 0.5 / attackSpeed
                 }
@@ -486,7 +409,7 @@ export class VoxelEngine {
                 this.performMeleeAttack()
             }
         } else if (e.button === 2) {
-            this.chargeAttackTime = Date.now()
+            this.chargeAttackTime = this.driver.now
         }
     }
 
@@ -494,8 +417,8 @@ export class VoxelEngine {
         if (e.button === 0) {
             this.isFiring = false
         } else if (e.button === 2) {
-            const charge = Math.min((Date.now() - this.chargeAttackTime) / 1000, 1.5)
-            this.performRangedAttack(charge)
+            const charge = Math.min(this.driver.now - this.chargeAttackTime, 1.5)
+            this.performRangedAttack(Math.max(0, charge))
             this.chargeAttackTime = 0
         }
     }
@@ -511,36 +434,44 @@ export class VoxelEngine {
         if (target) this.mouseWorld.copy(target)
     }
 
+    // --- 技能 ---
+
+    private castSlot(slot: "E" | "Q") {
+        const outcome = this.driver.castSlot(slot)
+        if (!outcome.ok) {
+            this.spawnFloatingText(outcome.message ?? "无法施放", this.playerMesh.position.clone(), "#ff6666")
+            return
+        }
+        this.castPulse = 0.3
+        this.castRing.position.copy(this.playerMesh.position)
+        this.castRing.position.y = 0.1
+        this.castRing.visible = true
+        this.castRing.scale.setScalar(1)
+        ;(this.castRing.material as THREE.MeshBasicMaterial).opacity = 0.8
+    }
+
     // --- ACTIONS ---
 
     private performMeleeAttack() {
-        if (this.isAttacking) return // Prevent spamming while animation plays
+        if (this.isAttacking) return
 
         this.isAttacking = true
         this.attackTimer = 0
 
         const forward = this.getForwardVector()
-        const rangeUnits = this.m2u(2.5) // 2.5米范围
+        const rangeUnits = this.m2u(2.5)
         const hitCenter = this.playerMesh.position.clone().add(forward.multiplyScalar(rangeUnits / 2))
 
-        let skillName = "普通攻击"
-        if (this.skillWeaponOverrideMelee) {
-            skillName = this.skillWeaponOverrideMelee
-        }
-
+        const hitIds: string[] = []
         this.monsters.forEach(m => {
-            if (m.position.distanceTo(hitCenter) < rangeUnits) {
-                this.applySkillDamage(m, skillName)
-                this.addElectricEnergy(2)
-            }
+            if (m.isDead) return
+            if (m.position.distanceTo(hitCenter) < rangeUnits) hitIds.push(m.id)
         })
+        if (hitIds.length > 0) this.driver.dealDamage("普通攻击", hitIds)
     }
 
     private performRangedAttack(chargeTime: number) {
         const startPos = this.playerMesh.position.clone().add(new THREE.Vector3(0, 2, 0))
-
-        // 投射物应该指向鼠标点击的实际世界坐标（地面），而不是跟随角色水平朝向
-        // 这样可以解决飞行时无法打中地面怪物的问题
         const targetDir = this.mouseWorld.clone().sub(startPos).normalize()
 
         const mesh = this.createVoxelMesh(Generators.Projectile())
@@ -550,35 +481,24 @@ export class VoxelEngine {
 
         this.scene.add(mesh)
 
-        let aoeRadius = 0
-        let skillName = "射击"
-
-        if (this.skillWeaponOverrideRanged) {
-            skillName = this.skillWeaponOverrideRanged
-            // Check for Skill Weapon Mode
-            if (skillName === "伊卡洛斯") {
-                const q = this.skillQ as any
-                if (q.shootRadius) {
-                    aoeRadius = q.shootRadius
-                }
-            }
-        }
-
         this.projectiles.push({
             mesh,
-            velocity: targetDir.multiplyScalar(this.m2u(15)), // 速度：15米/秒
+            velocity: targetDir.multiplyScalar(this.m2u(15)),
             life: 2.0,
             charge: chargeTime,
-            aoeRadius: aoeRadius,
-            skillName: skillName, // 将技能名称存储在投射物中
+            skillName: "射击",
         })
     }
 
     // --- 游戏循环 ---
 
+    private nextSimTime(offset = 0): number {
+        return this.driver.now + offset
+    }
+
     private spawnMonster() {
-        const angle = Math.random() * Math.PI * 2
-        const radiusUnits = this.settings.spawnType === "ring" ? this.m2u(10) : this.m2u(5 + Math.random() * 10)
+        const angle = this.rng.next() * Math.PI * 2
+        const radiusUnits = this.settings.spawnType === "ring" ? this.m2u(10) : this.m2u(5 + this.rng.next() * 10)
         const x = Math.sin(angle) * radiusUnits
         const z = Math.cos(angle) * radiusUnits
 
@@ -587,12 +507,11 @@ export class VoxelEngine {
         this.scene.add(monsterMesh)
 
         const level = this.settings.monsterLevel
+        const newMonster = LeveledMonsterHelper.fromId(this.settings.monsterId, level)
+        const id = `m${this.nextMonsterSeq++}`
 
-        // 使用LeveledMonster根据等级计算新怪物的属性
-        const newMonster = LeveledMonsterHelper.fromId(this.settings.monsterId, level) // 130 is "生命木桩" ID, used as base
-
-        this.monsters.push({
-            id: Math.random().toString(),
+        const monster: Monster = {
+            id,
             name: newMonster.n,
             level: level,
             position: monsterMesh.position,
@@ -604,21 +523,41 @@ export class VoxelEngine {
             attack: newMonster.atk,
             defense: newMonster.def,
             faction: newMonster.f,
-            speed: this.m2u(3 + Math.random() * 1), // 单位速度
+            speed: this.m2u(3 + this.rng.next() * 1),
             isDead: false,
-            // AI Init
             aiState: "CHASE",
             aiActionTimer: 0,
-            statusEffects: [], // Initialize statusEffects
+            attackTimer: 0,
+            statusEffects: [],
+        }
+        const accepted = this.driver.spawnEnemy({
+            id,
+            level,
+            hp: newMonster.hp,
+            shield: newMonster.es || 0,
+            def: newMonster.def,
+            position: { x: this.u2m(x), y: this.u2m(z) },
+            meta: { monsterId: this.settings.monsterId, faction: newMonster.f },
         })
+        if (!accepted) {
+            this.scene.remove(monsterMesh)
+            return
+        }
+        this.monsters.push(monster)
+        this.monsterById.set(id, monster)
+    }
+
+    private removeMonster(id: string) {
+        const monster = this.monsterById.get(id)
+        if (!monster) return
+        this.scene.remove(monster.mesh)
+        this.monsterById.delete(id)
+        this.monsters = this.monsters.filter(item => item.id !== id)
     }
 
     private updateMonsters(dt: number) {
-        const now = this.clock.getElapsedTime()
-        if (
-            this.monsters.filter(m => !m.isDead).length < this.settings.monsterCount &&
-            now - this.lastSpawnTime > this.settings.spawnInterval
-        ) {
+        const now = this.nextSimTime()
+        if (this.monsters.length < this.settings.monsterCount && now - this.lastSpawnTime > this.settings.spawnInterval) {
             this.spawnMonster()
             this.lastSpawnTime = now
         }
@@ -629,89 +568,70 @@ export class VoxelEngine {
             this.spawnFloatingText("Monster Level Up!", this.playerMesh.position.clone().add(new THREE.Vector3(0, 5, 0)), "#FF0000")
         }
 
-        const chaseDistanceThreshold = this.m2u(5) // 超过5米强制追逐
-        const stopDistanceThreshold = this.m2u(2.5) // 小于2.5米停止追逐，进入决策状态
+        const chaseDistanceThreshold = this.m2u(5)
+        const stopDistanceThreshold = this.m2u(2.5)
 
         this.monsters.forEach(m => {
             if (m.isDead) return
 
-            // 1. 重力
             if (m.position.y > 0) {
                 m.position.y -= 20 * dt
                 if (m.position.y < 0) m.position.y = 0
             }
 
-            // 2. AI 状态机更新
             m.aiActionTimer = (m.aiActionTimer || 0) - dt
             const dist = m.position.distanceTo(this.playerMesh.position)
 
-            // 状态转换逻辑
             if (dist > chaseDistanceThreshold) {
                 m.aiState = "CHASE"
             } else if (m.aiState === "CHASE" && dist <= stopDistanceThreshold) {
-                // 到达玩家附近，切换到闲置/游荡决策
                 m.aiState = "IDLE"
-                m.aiActionTimer = 0 // 立即进行决策
+                m.aiActionTimer = 0
             }
 
-            // 决策逻辑 (如果在玩家附近且计时器结束)
             if (m.aiState !== "CHASE" && (m.aiActionTimer || 0) <= 0) {
-                const rand = Math.random()
+                const rand = this.rng.next()
                 if (rand < 0.6) {
-                    // 60% 概率发呆
                     m.aiState = "IDLE"
-                    m.aiActionTimer = 1.0 + Math.random() * 2.0 // 持续1-3秒
+                    m.aiActionTimer = 1.0 + this.rng.next() * 2.0
                 } else {
-                    // 40% 概率游荡
                     m.aiState = "WANDER"
-                    m.aiActionTimer = 1.0 + Math.random() * 1.5 // 持续1-2.5秒
-                    // 随机方向
-                    const angle = Math.random() * Math.PI * 2
+                    m.aiActionTimer = 1.0 + this.rng.next() * 1.5
+                    const angle = this.rng.next() * Math.PI * 2
                     m.wanderDirection = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle)).normalize()
                 }
             }
 
-            // 3. 执行行为
             if (m.aiState === "CHASE") {
-                // 追逐玩家
                 const dir = this.playerMesh.position.clone().sub(m.position).normalize()
                 dir.y = 0
                 m.position.add(dir.multiplyScalar(m.speed * dt))
                 m.mesh.lookAt(this.playerMesh.position.x, m.position.y, this.playerMesh.position.z)
             } else if (m.aiState === "WANDER") {
-                // 向随机方向移动
                 if (m.wanderDirection) {
-                    const moveSpeed = m.speed * 0.5 // 游荡速度较慢
+                    const moveSpeed = m.speed * 0.5
                     m.position.add(m.wanderDirection.clone().multiplyScalar(moveSpeed * dt))
-                    // 面向移动方向
                     const lookTarget = m.position.clone().add(m.wanderDirection)
                     m.mesh.lookAt(lookTarget.x, m.position.y, lookTarget.z)
                 }
             } else {
-                // IDLE: 原地不动，盯着玩家
                 m.mesh.lookAt(this.playerMesh.position.x, m.position.y, this.playerMesh.position.z)
             }
 
-            // 限制怪物移动范围
             m.position.x = Math.max(-this.MAP_HALF_SIZE, Math.min(this.MAP_HALF_SIZE, m.position.x))
             m.position.z = Math.max(-this.MAP_HALF_SIZE, Math.min(this.MAP_HALF_SIZE, m.position.z))
 
-            // 4. 碰撞与战斗逻辑 (简单模拟)
-            if (dist < this.m2u(2.5) && m.aiState !== "WANDER") {
-                // 游荡时不攻击
-                // 保持原有的攻击逻辑，但增加一点随机性间隔，避免每帧都在判定
-                if (Math.random() < 0.01) {
-                    const dmg = Math.max(0, m.attack - this.playerStats.defense)
-                    if (this.playerStats.currentShield > 0) {
-                        this.playerStats.currentShield = Math.max(0, this.playerStats.currentShield - dmg)
-                    } else {
-                        this.playerStats.currentHP = Math.max(0, this.playerStats.currentHP - dmg)
-                    }
-                }
+            // 近身攻击：固定 1 秒节奏（旧版是每帧 1% 概率），伤害走模拟
+            m.attackTimer = Math.max(0, (m.attackTimer ?? 0) - dt)
+            if (dist < this.m2u(2.5) && m.aiState !== "WANDER" && (m.attackTimer ?? 0) <= 0) {
+                m.attackTimer = 1
+                this.driver.damagePlayer(Math.max(0, m.attack - this.playerStats.defense))
             }
         })
+    }
 
-        this.monsters = this.monsters.filter(m => !m.isDead)
+    /** 在帧采样 / 事件映射之后推送，保证 HP、护盾与状态效果同帧可见 */
+    private emitMonsters() {
         this.onMonstersUpdate(
             this.monsters.map(m => ({
                 ...m,
@@ -730,6 +650,7 @@ export class VoxelEngine {
             let hitTarget: Monster | null = null
 
             for (const m of this.monsters) {
+                if (m.isDead) continue
                 if (m.position.distanceTo(p.mesh.position) < this.m2u(0.5)) {
                     hit = true
                     hitTarget = m
@@ -738,26 +659,10 @@ export class VoxelEngine {
             }
 
             if (hit && hitTarget) {
-                // 检查是否为AOE技能
-                if (p.aoeRadius > 0) {
-                    // AOE逻辑
-                    const range = this.m2u(p.aoeRadius)
-                    this.monsters.forEach(m => {
-                        if (!m.isDead && m.position.distanceTo(p.mesh.position) <= range) {
-                            // "射击" 触发投射物伤害逻辑
-                            this.applySkillDamage(m, p.skillName)
-                        }
-                    })
-                } else {
-                    // 单体目标逻辑
-                    this.applySkillDamage(hitTarget, p.skillName)
-                }
-
-                // 命中后移除投射物
+                this.driver.dealDamage(p.skillName, [hitTarget.id])
                 this.scene.remove(p.mesh)
                 this.projectiles.splice(i, 1)
             } else if (p.life <= 0) {
-                // 过期投射物移除
                 this.scene.remove(p.mesh)
                 this.projectiles.splice(i, 1)
             }
@@ -765,13 +670,10 @@ export class VoxelEngine {
     }
 
     private updatePlayer(dt: number) {
-        const moveSpeed = this.m2u(5) // 5米/秒
+        const moveSpeed = this.m2u(5)
 
-        // 1. 处理水平移动输入
         if (this.dashTimer > 0) {
             this.dashTimer -= dt
-            // 冲刺期间，X/Z速度由applyDash设定，不接受WASD输入
-            // 但重力仍需在下方应用
         } else {
             const inputVector = new THREE.Vector3(0, 0, 0)
 
@@ -791,14 +693,11 @@ export class VoxelEngine {
             }
         }
 
-        // 2. 面向处理（始终朝向鼠标）
         let lookTarget = new THREE.Vector3(this.mouseWorld.x, this.playerMesh.position.y, this.mouseWorld.z)
 
-        // 飞行修正：使用玩家当前高度的平面进行射线检测，消除高度差带来的视差
         if (!this.gravityEnabled && this.playerMesh.position.y > 1) {
             const raycaster = new THREE.Raycaster()
             raycaster.setFromCamera(this.mouse, this.camera)
-            // 计算平面：法线(0,1,0)，距离原点 -y (平面方程 y = playerY -> y - playerY = 0 -> normal.dot(p) + constant = 0 -> 1*y - playerY = 0)
             const playerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -this.playerMesh.position.y)
             const targetOnLevel = new THREE.Vector3()
 
@@ -809,11 +708,9 @@ export class VoxelEngine {
 
         this.playerMesh.lookAt(lookTarget)
 
-        // 3. 应用重力 (或飞行控制)
         if (this.gravityEnabled) {
             this.playerVelocity.y -= 50 * dt
         } else {
-            // 飞行模式：手动升降，松手悬停
             const flySpeed = this.m2u(20)
             let targetVY = 0
 
@@ -833,13 +730,10 @@ export class VoxelEngine {
             }
         }
 
-        // 4. 更新位置
         this.playerMesh.position.add(this.playerVelocity.clone().multiplyScalar(dt))
 
-        // 5. 地面碰撞检测与修正
         if (this.playerMesh.position.y <= 0) {
             this.playerMesh.position.y = 0
-            // 如果正在下落，重置垂直速度为0
             if (this.playerVelocity.y < 0) {
                 this.playerVelocity.y = 0
             }
@@ -848,107 +742,80 @@ export class VoxelEngine {
             this.isGrounded = false
         }
 
-        // 6. 限制玩家移动范围
         this.playerMesh.position.x = Math.max(-this.MAP_HALF_SIZE, Math.min(this.MAP_HALF_SIZE, this.playerMesh.position.x))
         this.playerMesh.position.z = Math.max(-this.MAP_HALF_SIZE, Math.min(this.MAP_HALF_SIZE, this.playerMesh.position.z))
 
-        // 7. 更新摄像机和光照跟随
         const offset = new THREE.Vector3(30, 30, 30)
         this.camera.position.lerp(this.playerMesh.position.clone().add(offset), 0.1)
 
-        // 光照跟随玩家，确保阴影始终可见
         this.dirLight.position.set(this.playerMesh.position.x + 20, 50, this.playerMesh.position.z + 30)
         this.dirLight.target.position.copy(this.playerMesh.position)
 
-        // 8. 武器动画更新
         if (this.isAttacking) {
             this.attackTimer += dt
             if (this.attackTimer >= this.ATTACK_DURATION) {
                 this.isAttacking = false
                 this.attackTimer = 0
-                // 复位
                 this.weaponMesh.position.set(4, 6, 2)
                 this.weaponMesh.rotation.x = Math.PI / 4
                 this.weaponMesh.rotation.z = 0
             } else {
                 const progress = this.attackTimer / this.ATTACK_DURATION
-                // 简单的刺击动作
-                // 向前移动 (Z轴负方向是模型的前方)
-                const thrustAmt = Math.sin(progress * Math.PI) * 4 // 刺出距离
+                const thrustAmt = Math.sin(progress * Math.PI) * 4
                 this.weaponMesh.position.set(4, 6, 2 - thrustAmt)
-                // 稍微向下旋转模拟刺击角度变化
                 this.weaponMesh.rotation.x = Math.PI / 4 - Math.sin(progress * Math.PI) * 0.5
             }
         } else {
-            // 闲置呼吸动画
             const breathe = Math.sin(this.clock.getElapsedTime() * 2) * 0.1
             this.weaponMesh.position.y = 6 + breathe
         }
 
-        // 自动射击
         if (this.isFiring) {
             this.fireTimer -= dt
             if (this.fireTimer <= 0) {
-                const activeWeapon = this.getMeleeWeapon()
-                // 再检查一下它是否仍然处于范围内（例如状态变化）
+                const activeWeapon = this.charBuild.meleeWeapon
                 if (this.isRangedWeapon(activeWeapon)) {
                     this.performRangedAttack(0)
                     const attrs = this.charBuild.calculateWeaponAttributes(activeWeapon)
-                    // 假设基础攻击率大约是每2秒发射1次（0.5间隔），根据攻速进行修改
                     const attackSpeed = Math.max(0.1, attrs.weapon?.攻速 || 1)
                     this.fireTimer = 0.5 / attackSpeed
                 } else {
-                    this.isFiring = false // 如果武器不知为何切换成了近战武器，请停止射击
+                    this.isFiring = false
                 }
             }
-        } else {
-            // 即使未发射，冷却计时器仍在运行
-            if (this.fireTimer > 0) this.fireTimer -= dt
+        } else if (this.fireTimer > 0) {
+            this.fireTimer -= dt
         }
-
-        // 更新技能
-        this.skillE.update(dt)
-        this.skillQ.update(dt)
-
-        // 更新增益
-        const buffNames: string[] = []
-        for (const [name, time] of this.activeBuffs.entries()) {
-            const newTime = time - dt
-            if (newTime <= 0) {
-                this.removeBuff(name)
-                this.charBuild.removeBuffs([name])
-            } else {
-                this.activeBuffs.set(name, newTime)
-                buffNames.push(name)
-            }
-        }
-        this.playerStats.activeBuffs = buffNames
-
-        // 神智恢复
-        this.sanityRegenTimer += dt
-        if (this.sanityRegenTimer >= this.settings.sanityRegenInterval) {
-            this.sanityRegenTimer = 0
-            if (this.playerStats.currentSanity < this.playerStats.maxSanity) {
-                this.playerStats.currentSanity = Math.min(
-                    this.playerStats.maxSanity,
-                    this.playerStats.currentSanity + this.settings.sanityRegenAmount
-                )
-            }
-        }
-
-        this.onStatsUpdate({ ...this.playerStats })
     }
 
     private animate = () => {
         this.animationId = requestAnimationFrame(this.animate)
 
-        const dt = this.clock.getDelta()
+        const dt = Math.min(this.clock.getDelta(), 0.25)
 
         this.updatePlayer(dt)
+
+        // 会话到点先重建，再处理刷怪 / 走位，避免怪物只存在于视图而没有模拟实体
+        if (this.driver.finished) {
+            this.driver.restart(this.monsters.map(m => this.enemyInitFor(m)))
+            this.view.reset()
+            this.spawnFloatingText("模拟会话已重置", this.playerMesh.position.clone().add(new THREE.Vector3(0, 5, 0)), "#66ccff")
+        }
+
         this.updateMonsters(dt)
         this.updateProjectiles(dt)
 
-        // 更新浮动文本
+        this.driver.syncPositions(
+            { x: this.u2m(this.playerMesh.position.x), y: this.u2m(this.playerMesh.position.z) },
+            this.monsters.map(m => ({ id: m.id, position: { x: this.u2m(m.position.x), y: this.u2m(m.position.z) } }))
+        )
+        this.driver.advance(dt)
+        this.applySimEvents(this.driver.drainEvents())
+        this.applyFrame(this.driver.latestFrame())
+        this.updateMarkers()
+        this.updateCastRing(dt)
+        this.emitMonsters()
+
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const t = this.floatingTexts[i]
             t.life -= dt
@@ -965,13 +832,124 @@ export class VoxelEngine {
             }))
         )
 
-        // DPS
-        const duration = (Date.now() - this.startTime) / 1000
-        const dps = duration > 0 ? this.totalDamage / duration : 0
-        this.onDpsUpdate(Math.floor(dps), Math.floor(this.totalDamage))
+        const total = this.view.state.damageTotal
+        const duration = Math.max(this.driver.now, 1e-6)
+        this.onDpsUpdate(Math.floor(total / duration), Math.floor(total))
+        this.onStatsUpdate({ ...this.playerStats })
 
         this.renderer.render(this.scene, this.camera)
     }
+
+    private enemyInitFor(monster: Monster) {
+        return {
+            id: monster.id,
+            level: monster.level,
+            hp: monster.maxHP,
+            shield: monster.maxShield,
+            def: monster.defense,
+            position: { x: this.u2m(monster.position.x), y: this.u2m(monster.position.z) },
+            meta: { monsterId: this.settings.monsterId, faction: monster.faction },
+        }
+    }
+
+    private applySimEvents(events: ReturnType<SimDriver["drainEvents"]>) {
+        if (events.length === 0) return
+        const floats = this.view.consume(events)
+        for (const spec of floats) {
+            const position =
+                spec.anchor.kind === "actor"
+                    ? this.playerMesh.position.clone().add(new THREE.Vector3(0, 3, 0))
+                    : this.monsterById
+                          .get(spec.anchor.id)
+                          ?.position.clone()
+                          .add(new THREE.Vector3(0, 3, 0))
+            if (!position) continue
+            this.floatingTexts.push({
+                id: `${this.nextTextSeq++}`,
+                position,
+                text: spec.text,
+                color: spec.color,
+                life: 1.0,
+                opacity: 1.0,
+            })
+        }
+        for (const id of this.view.takeDeaths()) this.removeMonster(id)
+    }
+
+    private applyFrame(frame: ReturnType<SimDriver["latestFrame"]>) {
+        if (!frame) return
+
+        const actor = frame.actors.find(sample => sample.actorId === this.driver.actorId)
+        if (actor) {
+            const hp = actor.resources["生命"]
+            const shield = actor.resources["护盾"]
+            const sanity = actor.resources["神智"]
+            const energy = actor.resources["电能量"]
+            this.playerStats.currentHP = hp?.current ?? this.playerStats.currentHP
+            this.playerStats.maxHP = hp?.max ?? this.playerStats.maxHP
+            this.playerStats.currentShield = shield?.current ?? this.playerStats.currentShield
+            this.playerStats.maxShield = shield?.max ?? this.playerStats.maxShield
+            this.playerStats.currentSanity = sanity?.current ?? this.playerStats.currentSanity
+            this.playerStats.maxSanity = sanity?.max ?? this.playerStats.maxSanity
+            this.playerStats.electricEnergy = energy?.current ?? 0
+        }
+
+        for (const sample of frame.targets) {
+            const monster = this.monsterById.get(sample.targetId)
+            if (!monster) continue
+            monster.currentHP = sample.hp
+            monster.maxHP = sample.maxHp
+            monster.currentShield = sample.shield
+            monster.maxShield = Math.max(monster.maxShield, sample.shield)
+            monster.isDead = !sample.alive
+        }
+
+        const now = this.driver.now
+        for (const monster of this.monsters) {
+            monster.statusEffects = this.view.buffsOf(monster.id).map(buff => ({
+                type: buff.buffId,
+                label: buff.label,
+                color: buff.color,
+                duration: Number.isFinite(buff.expiresAt) ? Math.max(0, buff.expiresAt - now) : PERMANENT_BUFF_SECONDS,
+                maxDuration: Number.isFinite(buff.duration) ? buff.duration : PERMANENT_BUFF_SECONDS,
+            }))
+        }
+        this.playerStats.activeBuffs = this.view.state.playerBuffs.map(buff => buff.label)
+    }
+
+    private updateMarkers() {
+        const active = new Set(this.view.activeMarkers(this.driver.now))
+        for (const [id, mesh] of this.markerMeshes) {
+            if (active.has(id) && this.monsterById.has(id)) continue
+            this.scene.remove(mesh)
+            this.markerMeshes.delete(id)
+        }
+        for (const id of active) {
+            const monster = this.monsterById.get(id)
+            if (!monster) continue
+            let mesh = this.markerMeshes.get(id)
+            if (!mesh) {
+                mesh = new THREE.Mesh(this.markerGeometry, this.markerMaterial)
+                mesh.rotation.x = -Math.PI / 2
+                this.scene.add(mesh)
+                this.markerMeshes.set(id, mesh)
+            }
+            mesh.position.set(monster.position.x, 0.15, monster.position.z)
+        }
+    }
+
+    private updateCastRing(dt: number) {
+        if (this.castPulse <= 0) {
+            this.castRing.visible = false
+            return
+        }
+        this.castPulse -= dt
+        const material = this.castRing.material as THREE.MeshBasicMaterial
+        material.opacity = Math.max(0, this.castPulse / 0.3) * 0.8
+        this.castRing.scale.setScalar(1 + (0.3 - this.castPulse) * 3)
+        if (this.castPulse <= 0) this.castRing.visible = false
+    }
+
     public resize() {
         const aspect = this.container.clientWidth / this.container.clientHeight
         const d = 40
