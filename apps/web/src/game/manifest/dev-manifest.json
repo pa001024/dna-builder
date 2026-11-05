@@ -1,0 +1,148 @@
+{
+    "schemaVersion": 1,
+    "gameVersion": "1.7.227.1",
+    "exporter": {
+        "gitCommit": "web-dev-fallback",
+        "parserVersion": 1,
+        "gameVersion": "1.7.227.1"
+    },
+    "characters": [{ "id": 4101, "nameKey": "黎瑟", "skills": [410101] }, { "id": 5301, "nameKey": "赛琪", "skills": [530101, 530102] }],
+    "skills": {
+        "410101": {
+            "id": 410101,
+            "characterId": 4101,
+            "slot": "E",
+            "cast": {
+                "time": 0.2,
+                "cooldown": 1,
+                "canMove": true,
+                "costs": [{ "resource": "神智", "amount": 20 }]
+            },
+            "phases": [
+                {
+                    "at": 0.2,
+                    "actions": [
+                        {
+                            "kind": "branch",
+                            "on": "resourceAtLeast:电能量:30",
+                            "then": [
+                                { "kind": "resource", "resource": "电能量", "delta": -30 },
+                                { "kind": "applyBuff", "buffId": "黎瑟E", "duration": 9, "target": { "kind": "self" } }
+                            ]
+                        },
+                        {
+                            "kind": "damage",
+                            "field": "伤害",
+                            "tag": "技能,战技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "nearest", "count": 3, "radius": 6 }
+                        },
+                        { "kind": "resource", "resource": "电能量", "delta": 5 }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:web-dev-fallback"
+                }
+            ],
+            "sources": ["manual"]
+        },
+        "530101": {
+            "id": 530101,
+            "characterId": 5301,
+            "slot": "E",
+            "cast": {
+                "time": 0.3,
+                "cooldown": 0.3,
+                "canMove": true,
+                "costs": [{ "resource": "神智", "amount": 30 }]
+            },
+            "phases": [
+                {
+                    "at": 0.3,
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "[幻象]伤害",
+                            "tag": "技能,战技",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "nearest", "count": 3, "radius": 6 }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:web-dev-fallback"
+                },
+                {
+                    "at": 0.3,
+                    "condition": { "kind": "hasBuff", "buffId": "破茧" },
+                    "actions": [
+                        {
+                            "kind": "damage",
+                            "field": "[浮光鳞粉]伤害",
+                            "tag": "技能,战技,SaiqiSkill01",
+                            "hits": { "count": 1, "interval": 0 },
+                            "target": { "kind": "nearest", "count": 3, "radius": 10 }
+                        }
+                    ],
+                    "source": "manual",
+                    "origin": "authored:web-dev-fallback-broken-cocoon"
+                }
+            ],
+            "sources": ["manual"]
+        },
+        "530102": {
+            "id": 530102,
+            "characterId": 5301,
+            "slot": "Q",
+            "cast": {
+                "time": 0.3,
+                "cooldown": 3.5,
+                "canMove": true,
+                "costs": [{ "resource": "神智", "amount": 10 }]
+            },
+            "phases": [
+                {
+                    "at": 0,
+                    "actions": [{ "kind": "applyBuff", "buffId": "破茧", "duration": 30, "target": { "kind": "self" } }],
+                    "source": "manual",
+                    "origin": "authored:web-dev-fallback"
+                },
+                {
+                    "at": 1,
+                    "until": 30,
+                    "tick": { "interval": 1 },
+                    "actions": [{ "kind": "resource", "resource": "神智", "delta": -30 }],
+                    "source": "manual",
+                    "origin": "authored:web-dev-fallback-drain"
+                }
+            ],
+            "sources": ["manual"]
+        }
+    },
+    "buffs": {
+        "黎瑟E": {
+            "id": "黎瑟E",
+            "name": "伤害增加",
+            "duration": 9,
+            "sources": ["manual"]
+        },
+        "破茧": {
+            "id": "破茧",
+            "name": "破茧",
+            "duration": 30,
+            "sources": ["manual"]
+        }
+    },
+    "coverage": {
+        "charactersTotal": 2,
+        "skillsTotal": 3,
+        "skillsWithMontage": 0,
+        "skillsWithBlueprint": 0,
+        "skillsWithAnimBP": 0,
+        "skillsWithLua": 0,
+        "skillsAuthored": 3,
+        "skillsWithBehavior": 3,
+        "nativeCallsTotal": 0,
+        "nativeCallsUnknown": [],
+        "unknownTaskFunctions": [],
+        "unmatchedNotifies": []
+    }
+}

@@ -41,6 +41,7 @@ export interface Monster extends BaseEntity {
     aiState?: "CHASE" | "IDLE" | "WANDER"
     aiActionTimer?: number // 倒计时，用于决定何时切换状态
     wanderDirection?: THREE.Vector3 // 游荡时的目标方向
+    attackTimer?: number // 近身攻击间隔（视图态节奏，不参与伤害结算）
 
     statusEffects: StatusEffect[]
 }
