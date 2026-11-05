@@ -7275,6 +7275,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Heitao01",
         rarity: 5,
         charId: 1101,
+        tag: "Beilei01",
         release: "1.6",
     },
     {
@@ -7335,6 +7336,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Baonu01",
         rarity: 5,
         charId: 1501,
+        tag: "Lisbell01",
         release: "1.7",
     },
     {
@@ -7594,6 +7596,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Xier01",
         rarity: 5,
         charId: 3102,
+        tag: "Xierda01",
         release: "1.5",
     },
     {
@@ -7644,6 +7647,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Kami01",
         rarity: 5,
         charId: 3202,
+        tag: "Kamila01",
         release: "1.5",
     },
     {
@@ -7781,6 +7785,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Songlu02",
         rarity: 5,
         charId: 5101,
+        tag: "Songlu02",
         release: "1.7",
     },
     {
@@ -7824,6 +7829,7 @@ export const skinData: SkinItem[] = [
         icon: "T_Head_Saiqi02",
         rarity: 5,
         charId: 5301,
+        tag: "Saiqi02",
         release: "1.6",
     },
     {
