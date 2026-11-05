@@ -8,6 +8,7 @@
 
 import type { CharBuildSettingsInput } from "dna-builder-data/CharBuildHelper"
 import { createCharBuildFromSettings } from "dna-builder-data/CharBuildHelper"
+import { normalizeCharSettings } from "dna-builder-data/charSettings"
 import { charMap } from "dna-builder-data/d"
 import { CharBuildDamageOracle } from "../../src/core/oracle"
 
@@ -65,4 +66,31 @@ export function createParityHarness(charId: number, settings: CharBuildSettingsI
     })
 
     return { build, attrs, oracle, damageFor, resolve }
+}
+
+const DAMAGE_FIELD_EXCLUDE = /半径|范围|提高|降低|减少|加成|比例|转化|持续|次数|数量|概率/
+
+/**
+ * 为任意角色构造最小合法 charSettings：优先用 E/Q 技能里第一个带 tag 的伤害字段，
+ * 没有伤害字段时退回第一个字段（如 5401 只有治疗/增益）。
+ */
+export function minimalParitySettings(charId: number): CharBuildSettingsInput {
+    const skills = ((charMap.get(charId)?.技能 ?? []) as unknown as RawSkill[]).slice(0, 2)
+    for (const skill of skills) {
+        const fields = skill.字段 ?? []
+        const damage = fields.find(
+            field => field.名称.includes("伤害") && !DAMAGE_FIELD_EXCLUDE.test(field.名称) && (field.tag?.length ?? 0) > 0
+        )
+        const field = damage ?? fields[0]
+        if (!field) continue
+        return normalizeCharSettings({
+            charLevel: 80,
+            baseName: skill.名称,
+            targetFunction: `${skill.名称}::${field.名称}`,
+            charSkillLevel: [12, 12, 12],
+            enemyLevel: 80,
+            enemyResistance: 0,
+        })
+    }
+    throw new Error(`角色 ${charId} 没有可用于最小构筑的技能字段`)
 }

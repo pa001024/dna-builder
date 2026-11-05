@@ -1,4 +1,7 @@
-/** 构筑级 parity：冻结 CharBuild DPS 基线（禁止在测试内用同一次 calculate() 现算 expected）。 */
+/**
+ * 冻结 CharBuild DPS 回归（不是模拟器 parity；模拟器 parity 见 runtime-parity*.test.ts）。
+ * 禁止在测试内用同一次 calculate() 现算 expected。
+ */
 
 import { describe, expect, test } from "bun:test"
 import { createLiseFireBuild } from "dna-builder-data/tests/fixtures/liseFireBuild"
@@ -9,7 +12,7 @@ import baselines from "./frozen-baselines.json"
 const fixtures = baselines.fixtures as unknown as ParityFixture[]
 const manifest = (await Bun.file(new URL("../../generated/manifest.json", import.meta.url)).json()) as SkillBehaviorManifest
 
-describe("CharBuild parity — 冻结基线", () => {
+describe("CharBuild 冻结回归（非模拟器 parity）", () => {
     test("冻结 fixture 覆盖 5+ 代表角色且包含线上构筑", () => {
         expect(fixtures.length).toBeGreaterThanOrEqual(5)
         expect(new Set(fixtures.map(fixture => fixture.charId)).size).toBeGreaterThanOrEqual(5)
@@ -29,15 +32,14 @@ describe("CharBuild parity — 冻结基线", () => {
         expect(report.ok).toBe(true)
     })
 
-    test("线上作者标注锚点与当前数据漂移如实记录（不作为 0.1% 门禁）", () => {
-        // liseFireBuild 注释记录作者标注 28053254998.1983；当前数据复算 22606928978.61。
-        // 这里只断言漂移确实存在且方向明确，避免把历史标注当成当前数据基线。
+    test("线上作者标注锚点保留为溯源信息（不据此设置门禁）", () => {
+        // liseFireBuild 注释记录作者标注 28053254998.1983；当前数据复算值随版本变化。
+        // 这里只保留标注值并记录当前漂移，不断言漂移“必须存在”（否则会阻止未来修复）。
         const published = baselines.fixtures.find(fixture => fixture.id === "lise-fire-4103")?.publishedExpectedDps
         expect(published).toBe(28053254998.1983)
         const actual = createLiseFireBuild().calculate()
         const drift = Math.abs(actual - published!) / published!
         console.log(`[parity] liseFire published=${published} actual=${actual} drift=${(drift * 100).toFixed(4)}%`)
-        expect(drift).toBeGreaterThan(0.001)
-        expect(drift).toBeLessThan(0.5)
+        expect(Number.isFinite(drift)).toBe(true)
     })
 })

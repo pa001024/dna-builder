@@ -6,6 +6,7 @@ import { emptyCoverageReport } from "../src/schema/ir"
 export const FIXTURE_FILE = new URL("../fixtures/skill-asset-sample.json", import.meta.url)
 export const FIXTURE_PATH = fileURLToPath(FIXTURE_FILE)
 export const PARITY_FIXTURE_PATH = fileURLToPath(new URL("../fixtures/parity-smoke.ts", import.meta.url))
+export const RAW_U2_FIXTURE_PATH = fileURLToPath(new URL("../fixtures/u2-raw-1101.json", import.meta.url))
 
 export async function loadFixtureDoc(): Promise<SkillAssetDoc> {
     return JSON.parse(await Bun.file(FIXTURE_FILE).text()) as SkillAssetDoc

@@ -20,5 +20,5 @@
             "dna-builder-data/*": ["../data/*"]
         }
     },
-    "include": ["src/**/*.ts", "tests/**/*.ts", "fixtures/**/*.ts"]
+    "include": ["src/**/*.ts", "tests/**/*.ts", "fixtures/**/*.ts", "scripts/**/*.ts"]
 }

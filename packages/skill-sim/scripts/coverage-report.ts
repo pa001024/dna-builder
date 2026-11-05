@@ -13,7 +13,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import process from "node:process"
 import { charMap } from "dna-builder-data/d"
-import type { Action, SkillBehavior, SkillBehaviorManifest } from "../src/schema/ir.ts"
+import type { SkillBehaviorManifest } from "../src/pipeline/types.ts"
+import type { Action, SkillBehavior } from "../src/schema/ir.ts"
 
 interface DiagnosticItem {
     severity: string
@@ -82,6 +83,12 @@ interface SkillReport {
     nativeCallsUnknown: number
     unmatchedNotifies: string[]
     unresolvedDamageRates: string[]
+    hasMontage: boolean
+    hasBlueprint: boolean
+    hasAnimBP: boolean
+    hasLua: boolean
+    /** 缺失的证据来源（montage / blueprint / animBP） */
+    missing: string[]
     reasons: string[]
 }
 
@@ -133,15 +140,24 @@ function classify(skill: SkillBehavior, inData: boolean, diagnostics: Diagnostic
         nativeCallsUnknown: (skill.provenance?.nativeCalls ?? []).filter(call => !call.known).length,
         unmatchedNotifies: skill.provenance?.unmatchedNotify ?? [],
         unresolvedDamageRates,
+        hasMontage: Boolean(skill.provenance?.montageLength ?? skill.sources.includes("montage")),
+        hasBlueprint: skill.sources.includes("blueprint"),
+        hasAnimBP: (skill.provenance?.animBPs?.length ?? 0) > 0,
+        hasLua: skill.sources.includes("lua"),
+        missing: [
+            ...(skill.sources.includes("montage") ? [] : ["montage"]),
+            ...(skill.sources.includes("blueprint") ? [] : ["blueprint"]),
+            ...((skill.provenance?.animBPs?.length ?? 0) > 0 ? [] : ["animBP"]),
+        ],
         reasons,
     }
 }
 
 function characterStatus(skills: SkillReport[]): CharacterStatus {
-    // 只取角色技能表前两项（E/Q）；子技能排在主技能之后，不能参与角色级判定。
-    const main = skills.slice(0, 2)
+    // 只看主 E/Q；子技能（unknown）不参与角色级判定。
+    const main = skills.filter(skill => skill.slot === "E" || skill.slot === "Q")
     if (main.length === 0) return "data-only"
-    if (main.every(skill => skill.status === "simulated")) return "simulated"
+    if (main.length === 2 && main.every(skill => skill.status === "simulated")) return "simulated"
     if (main.some(skill => skill.status !== "data-only")) return "unsupported"
     return "data-only"
 }
@@ -181,7 +197,7 @@ async function main(): Promise<number> {
             id: character.id,
             name: dataCharacter?.名称 ?? String(character.id),
             status: characterStatus(skills),
-            mainSkills: skills.slice(0, 3).map(skill => skill.id),
+            mainSkills: skills.filter(skill => skill.slot === "E" || skill.slot === "Q" || skill.slot === "P").map(skill => skill.id),
             skillCount: skills.length,
             skills,
         }

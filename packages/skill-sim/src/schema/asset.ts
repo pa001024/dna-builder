@@ -167,6 +167,8 @@ export interface SkillAssetBlueprintParam {
 
 export interface SkillAssetBlueprintEvent {
     name: string
+    /** 事件分发目标函数（U2：通常为 `ExecuteUbergraph_X`） */
+    target?: string
     /** ExecuteUbergraph_X(IntConst offset) 的入口偏移 */
     entryOffset?: number
 }

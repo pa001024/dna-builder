@@ -6,12 +6,15 @@
 
 import { describe, expect, test } from "bun:test"
 import type { CastEvent } from "../../src/core/types"
-import { castSkill, characterHarness, loadManifest, mainSlotSkills } from "./helpers"
+import { castSkill, characterHarness, loadManifest, mainSlotSkills, simulatedCharacters } from "./helpers"
 
 const manifest = await loadManifest()
+const simulated = new Set(simulatedCharacters(manifest))
 
 describe("全角色 5s 施放 smoke", () => {
-    test("34 角色 E/Q 全部可施放且无崩溃", () => {
+    test("34 角色 / 169 个主技能：E/Q 全部可施放且无崩溃", () => {
+        expect(manifest.characters).toHaveLength(34)
+        expect(manifest.characters.reduce((sum, character) => sum + character.skills.length, 0)).toBe(169)
         const started = performance.now()
         const failures: string[] = []
         const results: string[] = []
@@ -34,6 +37,10 @@ describe("全角色 5s 施放 smoke", () => {
                 const castIds = new Set(casts.map(event => Number(event.skillId)))
                 const missing = attempted.filter(id => !castIds.has(id))
                 if (missing.length > 0) failures.push(`${character.id}: 缺少 cast 事件 ${missing.join(",")}`)
+                if (simulated.has(character.id)) {
+                    const nonCast = result.events.filter(event => event.kind !== "cast")
+                    if (nonCast.length === 0) failures.push(`${character.id}: simulated 角色没有非 cast 事件`)
+                }
                 for (const skill of skillList) {
                     const entry = manifest.skills[String(skill.id)]
                     if (!entry) failures.push(`${character.id}: manifest 缺少技能 ${skill.id}`)

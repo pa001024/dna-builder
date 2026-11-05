@@ -62,9 +62,10 @@ export function resolveAssetReferences(doc: SkillAssetDoc, index: SkillDataIndex
         const characterId = asset.characterId ?? 0
         const data = index.getSkill(skillId)
         if (!data) {
-            // 武器 / MOD / 魔灵技能没有稳定的技能 id 语义：作为可迁移资产保留，只提示
+            // 主 E/Q/P 缺数据是硬错误；子技能 / 武器 / MOD / 魔灵技能只提示，作为可迁移资产保留。
+            const isMain = asset.slot === "E" || asset.slot === "Q" || asset.slot === "P"
             diagnostics.push(
-                diagnostic(characterId > 0 ? "error" : "warn", "ref.unknown-skill", skillPath, `技能 ${key} 不在 packages/data`)
+                diagnostic(characterId > 0 && isMain ? "error" : "warn", "ref.unknown-skill", skillPath, `技能 ${key} 不在 packages/data`)
             )
         }
         if (characterId > 0) {

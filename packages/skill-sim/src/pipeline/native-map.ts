@@ -145,6 +145,27 @@ export function mapNativeCall(fn: string, args: unknown[], ctx: NativeCallContex
     return { actions: mapped, known: true, mapped: true, canonical: mapping.canonical }
 }
 
+/**
+ * 纯表达式 / 事件分发调用：不是技能行为，不应计入 native 动作或未知调用。
+ * 只过滤明确无行为语义的算子；`GetAttr_ByEnum` / `ExecuteSkillEffects` 等保留。
+ */
+const EXPRESSION_ONLY = [
+    /^(Add|Subtract|Multiply|Divide|Modulo)_/,
+    /^(EqualEqual|NotEqual|Greater|GreaterEqual|Less|LessEqual|InRange)_/,
+    /^(BooleanAND|BooleanOR|Not_PreBool)$/,
+    /^Conv_/,
+    /^(MakeLiteral|MakeVector|MakeRotator|MakeTransform|MakeString|MakeName)/,
+    /^(Break|Abs_|FTrunc|FFloor|FMax|FMin|Max$|Min$|VSize|Vector_)/,
+    /^ExecuteUbergraph_/,
+    /^ReceiveBeginPlay$/,
+    /DelegateSignature$/,
+    /^Relative$/,
+]
+
+export function isExpressionOnlyCall(fn: string): boolean {
+    return EXPRESSION_ONLY.some(pattern => pattern.test(fn))
+}
+
 /** 字节码字面量：`{op:"IntConst", value}` / 裸值 / 目标引用 */
 export function literal(value: unknown): unknown {
     if (value === null || value === undefined) return undefined

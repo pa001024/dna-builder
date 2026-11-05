@@ -11,7 +11,7 @@ import { charMap } from "dna-builder-data/d"
 import buffData from "dna-builder-data/d/buff.data"
 import effectData from "dna-builder-data/d/effect.data"
 import type { Skill } from "dna-builder-data/leveled/LeveledSkill"
-import type { DataBuff, DataCharacter, DataSkill, DataSkillField, SkillDataIndex } from "./types"
+import { type DataBuff, type DataCharacter, type DataSkill, type DataSkillField, KNOWN_SKILL_RESOURCES, type SkillDataIndex } from "./types"
 
 export function createGameDataIndex(): SkillDataIndex {
     const characters = new Map<number, DataCharacter>()
@@ -61,6 +61,9 @@ export function createGameDataIndex(): SkillDataIndex {
         },
         getSkill(id: number) {
             return skills.get(id)
+        },
+        getKnownResources() {
+            return KNOWN_SKILL_RESOURCES
         },
         getBuff(ref: number | string) {
             if (typeof ref === "number") return buffsById.get(ref)

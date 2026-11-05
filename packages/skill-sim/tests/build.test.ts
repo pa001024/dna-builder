@@ -195,3 +195,151 @@ describe("native-map / lua 单元", () => {
         expect(parsed.unparsed).toEqual(["这是一句无法识别的行为"])
     })
 })
+
+describe("共享蓝图归因", () => {
+    test("只取事件入口可达函数，过滤纯表达式调用并去重", () => {
+        const blueprint = {
+            events: [{ name: "ReceiveBeginPlay", target: "ExecuteUbergraph_BP_Shared" }],
+            functions: [
+                {
+                    name: "ExecuteUbergraph_BP_Shared",
+                    body: [
+                        {
+                            op: "Let",
+                            target: "A",
+                            value: {
+                                op: "CallMath",
+                                fn: "AddBuffToTarget",
+                                args: [
+                                    { op: "IntConst", value: 410112 },
+                                    { op: "IntConst", value: 1 },
+                                    { op: "FloatConst", value: 1.1 },
+                                ],
+                            },
+                        },
+                        {
+                            op: "Let",
+                            target: "B",
+                            value: {
+                                op: "CallMath",
+                                fn: "Add_IntInt",
+                                args: [
+                                    { op: "IntConst", value: 1 },
+                                    { op: "IntConst", value: 2 },
+                                ],
+                            },
+                        },
+                        {
+                            op: "Let",
+                            target: "C",
+                            value: { op: "CallMath", fn: "SpawnActor", args: [{ op: "IntConst", value: 99 }] },
+                        },
+                    ],
+                },
+                {
+                    name: "ExecuteUbergraph_BP_Unrelated",
+                    body: [
+                        {
+                            op: "Let",
+                            target: "D",
+                            value: { op: "CallMath", fn: "SpawnActor", args: [{ op: "IntConst", value: 100 }] },
+                        },
+                    ],
+                },
+            ],
+        }
+        const shared = (id: number, slot: "E" | "Q") => ({
+            id,
+            characterId: 4101,
+            slot,
+            lua: { behavior: "", fields: [], effects: [], buffIds: [] },
+            sources: {},
+            blueprint,
+        })
+        const asset = {
+            schemaVersion: 1,
+            gameVersion: "test",
+            characters: [{ id: 4101, nameKey: "黎瑟", skills: [410101, 410102] }],
+            skills: { "410101": shared(410101, "E"), "410102": shared(410102, "Q") },
+            buffs: {},
+        } as SkillAssetDoc
+        const built = buildSkillBehaviorDoc(asset, createGameDataIndex())
+        expect(built.ok).toBe(true)
+        for (const id of [410101, 410102]) {
+            const phases = built.doc.skills[String(id)]!.phases.filter(phase => phase.source === "blueprint")
+            const actions = phases.flatMap(phase => phase.actions)
+            expect(actions.filter(action => action.kind === "applyBuff")).toHaveLength(1)
+            expect(actions.some(action => action.kind === "native" && action.fn === "Add_IntInt")).toBe(false)
+            // 不可达函数里的调用不归因到共享该蓝图的技能。
+            expect(actions.some(action => action.kind === "native" && action.fn === "SpawnActor")).toBe(false)
+        }
+    })
+})
+
+describe("资源消耗解析", () => {
+    test("[X]神智消耗 / 最低神智消耗 / 每秒神智消耗 归一为已知资源", () => {
+        const fields = [
+            { 名称: "[小步]神智消耗", 值: [20, 20] },
+            { 名称: "最低神智消耗", 值: [5, 5] },
+            { 名称: "[蹄蹄大冲撞]每秒神智消耗", 值: [3, 3] },
+            { 名称: "生命消耗", 值: [10, 10] },
+            { 名称: "未知能量消耗", 值: [99, 99] },
+        ]
+        const asset = {
+            schemaVersion: 1,
+            gameVersion: "test",
+            characters: [],
+            skills: {
+                "999901": {
+                    id: 999901,
+                    characterId: 0,
+                    slot: "unknown",
+                    lua: { behavior: "", fields, effects: [], buffIds: [] },
+                    sources: { bpPackages: ["BP_Test"] },
+                },
+            },
+            buffs: {},
+        } as SkillAssetDoc
+        const built = buildSkillBehaviorDoc(asset, createGameDataIndex())
+        expect(built.ok).toBe(true)
+        expect(built.doc.skills["999901"]!.cast.costs).toEqual([
+            { resource: "神智", amount: 20 },
+            { resource: "神智", amount: 5 },
+            { resource: "神智", amount: 3, perSecond: true },
+            { resource: "生命", amount: 10 },
+        ])
+    })
+})
+
+describe("native-only 技能", () => {
+    test("不计入 skillsWithBehavior，并记录 build.no-actions", () => {
+        const asset = {
+            schemaVersion: 1,
+            gameVersion: "test",
+            characters: [],
+            skills: {
+                "999902": {
+                    id: 999902,
+                    characterId: 0,
+                    slot: "unknown",
+                    lua: { behavior: "", fields: [], effects: [], buffIds: [] },
+                    sources: { bpPackages: ["BP_Test"] },
+                    blueprint: {
+                        functions: [
+                            {
+                                name: "ExecuteUbergraph_BP_Test",
+                                body: [{ op: "CallMath", fn: "K2_PlayUnknownEffect", args: [] }],
+                            },
+                        ],
+                    },
+                },
+            },
+            buffs: {},
+        } as SkillAssetDoc
+        const built = buildSkillBehaviorDoc(asset, createGameDataIndex())
+        expect(built.ok).toBe(true)
+        expect(built.doc.skills["999902"]!.phases.flatMap(phase => phase.actions).some(action => action.kind === "native")).toBe(true)
+        expect(built.doc.coverage.skillsWithBehavior).toBe(0)
+        expect(built.diagnostics.some(item => item.code === "build.no-actions" && item.path === "skills.999902")).toBe(true)
+    })
+})

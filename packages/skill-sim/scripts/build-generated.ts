@@ -1,9 +1,8 @@
 #!/usr/bin/env bun
 /**
- * @file 一键生成 `generated/`：U2 产物 → 归一 asset → workflow build → 覆盖表。
+ * @file 一键生成 `generated/`：原始 U2 产物 → workflow build（ingest 内置 U2 归一）→ 覆盖表。
  *
- * 中间 asset 写在 `.tmp/skill-sim-u7/`（不提交）；`generated/` 只保留
- * manifest.json / coverage.json / coverage-matrix.json / COVERAGE.md。
+ * `generated/` 只保留 manifest.json / coverage.json / coverage-matrix.json / COVERAGE.md。
  */
 
 import path from "node:path"
@@ -43,28 +42,19 @@ if (!input) {
     process.exit(2)
 }
 
-const tempDir = path.resolve(".tmp/skill-sim-u7")
-const assetPath = path.join(tempDir, "asset.json")
-run([
-    "bun",
-    "packages/skill-sim/scripts/adapt-u2.ts",
-    "--input",
-    input,
-    "--out",
-    assetPath,
-    "--authored-buffs",
-    "packages/skill-sim/fixtures/overrides/authored-buffs.json",
-])
+// 直接以原始 U2 产物为输入：ingest 内置 U2 归一（不需要先跑 adapt-u2）。
 run([
     "bun",
     "tools/skill-workflow.ts",
     "build",
     "--input",
-    assetPath,
+    input,
     "--out",
     args.outDir,
     "--overrides",
     "packages/skill-sim/fixtures/overrides/lise-saiqi.json",
+    "--authored-buffs",
+    "packages/skill-sim/fixtures/overrides/authored-buffs.json",
 ])
 run(["bun", "packages/skill-sim/scripts/coverage-report.ts", "--out-dir", args.outDir, "--u2-input", input])
 // 生成物统一按仓库 Biome 规则格式化，保证 `biome check packages/skill-sim` 通过且可重复。

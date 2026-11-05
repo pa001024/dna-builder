@@ -39,6 +39,16 @@ export interface SkillDataIndex {
     getSkill(id: number): DataSkill | undefined
     /** 按数字 id 或名称查 buff / effect */
     getBuff(ref: number | string): DataBuff | undefined
+    /** 已知施法资源 token（神智/沉浸度/…）；用于校验 parseCosts 归一结果 */
+    getKnownResources?(): readonly string[]
+}
+
+/** 与 packages/data 字段口径一致的施法资源 token（长词优先匹配） */
+export const KNOWN_SKILL_RESOURCES = ["天工源能", "沉浸度", "觉醒值", "神智", "电能", "生命"] as const
+
+/** 从 `[X]神智消耗` / `最低神智消耗` / `每秒神智消耗` 中提取已知资源 token */
+export function resolveResourceToken(name: string): string | undefined {
+    return KNOWN_SKILL_RESOURCES.find(token => name.includes(token))
 }
 
 export interface DataCharacter {

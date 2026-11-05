@@ -28,6 +28,21 @@ describe("checkManifest", () => {
         expect(result.stats.skillsWithActions).toBe(3)
     })
 
+    test("native-only 技能不算可执行 → gate.missing-behavior", () => {
+        const broken = clone(manifest) as SkillBehaviorManifest
+        broken.skills["410103"]!.phases = [
+            {
+                at: 0,
+                actions: [{ kind: "native", fn: "K2_PlayUnknownEffect", args: [] }],
+                source: "blueprint",
+                origin: "test",
+            },
+        ]
+        const result = checkManifest(broken, { simulated: ["410103"] })
+        expect(result.ok).toBe(false)
+        expect(result.errors.some(item => item.code === "gate.missing-behavior" && item.path === "skills.410103")).toBe(true)
+    })
+
     test("--simulated 技能缺行为 → gate.missing-behavior", () => {
         const broken = clone(manifest) as SkillBehaviorManifest
         broken.skills["410103"]!.phases = []

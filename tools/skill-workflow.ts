@@ -31,8 +31,9 @@ import {
 } from "../packages/skill-sim/src/index.ts"
 import { createGameDataIndex } from "../packages/skill-sim/src/pipeline/data-index.ts"
 import type { Diagnostic } from "../packages/skill-sim/src/pipeline/types.ts"
+import type { U2AuthoredBuff } from "../packages/skill-sim/src/pipeline/u2-adapter.ts"
 
-const VALUE_FLAGS = new Set(["input", "out", "overrides", "simulated", "manifest", "fixtures"])
+const VALUE_FLAGS = new Set(["input", "out", "overrides", "simulated", "manifest", "fixtures", "authored-buffs"])
 const BOOLEAN_FLAGS = new Set(["json", "strict", "allow-drift", "help"])
 const COMMANDS = ["ingest", "build", "check", "verify"] as const
 type Command = (typeof COMMANDS)[number]
@@ -90,8 +91,8 @@ function usage(): string {
         "用法：bun tools/skill-workflow.ts <command> [options]",
         "",
         "命令：",
-        "  ingest --input <file|dir> [--out <file>] [--overrides <file>]",
-        "  build  --input <file|dir> --out <dir> [--overrides <file>] [--strict]",
+        "  ingest --input <file|dir> [--out <file>] [--overrides <file>] [--authored-buffs <file>]",
+        "  build  --input <file|dir> --out <dir> [--overrides <file>] [--authored-buffs <file>] [--strict]",
         "  check  --input <dir|manifest.json> [--simulated <id,...>] [--strict]",
         "  verify --manifest <manifest.json> --fixtures <file> [--allow-drift]",
         "",
@@ -139,12 +140,20 @@ function parseSimulated(value: string | undefined): (number | string)[] {
         .map(item => (/^-?\d+$/.test(item) ? Number(item) : item))
 }
 
+async function readAuthoredBuffs(file: string | undefined): Promise<U2AuthoredBuff[]> {
+    if (!file) return []
+    return (await readJsonFile(file)) as U2AuthoredBuff[]
+}
+
 async function commandIngest(parsed: ParsedArgs): Promise<number> {
     const input = stringFlag(parsed, "input")
     if (!input) return usageError("ingest 需要 --input")
     const out = stringFlag(parsed, "out")
     const overridesFile = stringFlag(parsed, "overrides")
-    const result = await ingestSkillAsset(input)
+    const result = await ingestSkillAsset(input, {
+        index: createGameDataIndex(),
+        authoredBuffs: await readAuthoredBuffs(stringFlag(parsed, "authored-buffs")),
+    })
     const diagnostics = [...result.diagnostics]
     if (overridesFile) {
         const loaded = await loadOverrides(overridesFile)
@@ -182,14 +191,18 @@ async function commandBuild(parsed: ParsedArgs): Promise<number> {
     if (!input) return usageError("build 需要 --input")
     if (!out) return usageError("build 需要 --out <dir>")
     const overridesFile = stringFlag(parsed, "overrides")
-    const ingest = await ingestSkillAsset(input)
+    const index = createGameDataIndex()
+    const ingest = await ingestSkillAsset(input, {
+        index,
+        authoredBuffs: await readAuthoredBuffs(stringFlag(parsed, "authored-buffs")),
+    })
     const diagnostics: Diagnostic[] = [...ingest.diagnostics]
     if (overridesFile) {
         const loaded = await loadOverrides(overridesFile)
         diagnostics.push(...loaded.diagnostics)
         if (Object.keys(loaded.overrides).length > 0) applyOverrides(ingest.doc, loaded.overrides, diagnostics)
     }
-    const built = buildSkillBehaviorDoc(ingest.doc, createGameDataIndex())
+    const built = buildSkillBehaviorDoc(ingest.doc, index)
     diagnostics.push(...built.diagnostics)
     const manifest = createManifest(built.doc, diagnostics)
     const severity = countBySeverity(diagnostics)

@@ -15,11 +15,16 @@ import type {
 } from "../schema/asset"
 import { validateSkillAssetDoc } from "../schema/validate-asset"
 import { checkSchemaVersion } from "../schema/versions"
-import { type Diagnostic, diagnostic, hasErrors } from "./types"
+import { type Diagnostic, diagnostic, hasErrors, type SkillDataIndex } from "./types"
+import { isU2Document, normalizeU2Document, type U2AuthoredBuff } from "./u2-adapter"
 
 export interface IngestOptions {
     /** 外部 authored override：技能 id → 人工语义（`--overrides`） */
     overrides?: Record<string, AuthoredBehavior>
+    /** packages/data 索引；提供后用其口径归一 U2 的归属/槽位/字段 */
+    index?: SkillDataIndex
+    /** 显式 authored buff（U2 缺少数值证据时由调用方注入） */
+    authoredBuffs?: U2AuthoredBuff[]
 }
 
 export interface IngestResult {
@@ -57,12 +62,12 @@ export async function ingestSkillAsset(input: string | SkillAssetDoc, options: I
         for (const name of names) {
             const file = path.join(input, name)
             files.push(file)
-            const shard = await readShard(file, diagnostics)
+            const shard = await readShard(file, diagnostics, options)
             if (shard) shards.push({ doc: shard, source: file })
         }
     } else {
         files.push(input)
-        const shard = await readShard(input, diagnostics)
+        const shard = await readShard(input, diagnostics, options)
         if (shard) shards.push({ doc: shard, source: input })
     }
     return ingestParsed(shards, files, options, diagnostics)
@@ -72,7 +77,7 @@ function emptyDoc(): SkillAssetDoc {
     return { schemaVersion: 1, skills: {}, buffs: {}, characters: [] }
 }
 
-async function readShard(file: string, diagnostics: Diagnostic[]): Promise<SkillAssetDoc | undefined> {
+async function readShard(file: string, diagnostics: Diagnostic[], options: IngestOptions = {}): Promise<SkillAssetDoc | undefined> {
     let text: string
     try {
         text = await readFile(file, "utf8")
@@ -87,14 +92,24 @@ async function readShard(file: string, diagnostics: Diagnostic[]): Promise<Skill
         diagnostics.push(diagnostic("error", "ingest.parse", "", `JSON 解析失败 ${file}: ${String(error)}`))
         return undefined
     }
-    return normalizeShard(raw, file, diagnostics)
+    return normalizeShard(raw, file, diagnostics, options)
 }
 
 /** 别名归一：导出器字段大小写 / 原始 fmodel 结构 → 契约字段。未知字段原样保留。 */
-export function normalizeShard(raw: unknown, source: string, diagnostics: Diagnostic[]): SkillAssetDoc | undefined {
+export function normalizeShard(
+    raw: unknown,
+    source: string,
+    diagnostics: Diagnostic[],
+    options: Pick<IngestOptions, "index" | "authoredBuffs"> = {}
+): SkillAssetDoc | undefined {
     if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
         diagnostics.push(diagnostic("error", "ingest.type", "", `${source} 不是 JSON 对象`))
         return undefined
+    }
+    if (isU2Document(raw)) {
+        const normalized = normalizeU2Document(raw, { index: options.index, authoredBuffs: options.authoredBuffs })
+        diagnostics.push(...normalized.diagnostics)
+        return normalized.doc
     }
     const value = raw as Record<string, unknown>
     const version = checkSchemaVersion(value.schemaVersion, "asset")

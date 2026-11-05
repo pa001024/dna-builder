@@ -5,7 +5,7 @@ import { createSimulation } from "../../src/core/simulation"
 import type { SimConfig, SimResult } from "../../src/core/types"
 import type { SkillBehaviorManifest } from "../../src/pipeline/types"
 import { createSkillRuntime, type SkillRuntime } from "../../src/runtime/index"
-import type { SkillBehavior } from "../../src/schema/ir"
+import { hasExecutableAction, type SkillBehavior } from "../../src/schema/ir"
 
 export const MANIFEST_PATH = new URL("../../generated/manifest.json", import.meta.url)
 
@@ -78,4 +78,18 @@ export function castSkill(runtime: SkillRuntime, skill: SkillBehavior | undefine
 
 export function runTo(runtime: SkillRuntime): SimResult {
     return runtime.run()
+}
+
+/** 生成 manifest 中被判定为 simulated 的角色：主 E/Q 均有可执行动作。 */
+export function simulatedCharacters(manifest: SkillBehaviorManifest): number[] {
+    return manifest.characters
+        .filter(character => {
+            const skills = character.skills
+                .map(skillId => manifest.skills[String(skillId)])
+                .filter((skill): skill is SkillBehavior => !!skill)
+            const e = skills.find(skill => skill.slot === "E")
+            const q = skills.find(skill => skill.slot === "Q")
+            return !!e && !!q && hasExecutableAction(e) && hasExecutableAction(q)
+        })
+        .map(character => character.id)
 }

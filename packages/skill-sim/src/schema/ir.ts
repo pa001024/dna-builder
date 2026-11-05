@@ -73,6 +73,8 @@ export interface SkillBehavior {
 
 export interface BehaviorProvenance {
     bpPackages: string[]
+    /** 技能引用的 AnimBP 资源（U2 sources.animBPs） */
+    animBPs?: string[]
     nativeCalls: NativeCall[]
     unmatchedNotify: string[]
     /** 已识别但无对应 IR 动作的 notify（取消 / 连段窗口等） */
@@ -82,6 +84,8 @@ export interface BehaviorProvenance {
     branchingPoints?: BranchingPoint[]
     /** 无法解析成动作的 Lua 语句原文（不静默丢弃） */
     unparsedLua?: string[]
+    /** authored override 的理由（manual 来源时保留） */
+    authoredNote?: string
 }
 
 export interface BranchingPoint {
@@ -244,6 +248,8 @@ export interface BuffBehavior {
     dots?: BuffDotBehavior[]
     duration?: number
     sources: BehaviorSource[]
+    /** authored 覆盖的理由（仅 manual 来源） */
+    note?: string
 }
 
 export interface BuffDotBehavior {
@@ -270,6 +276,26 @@ export interface CoverageReport {
     unknownTaskFunctions: string[]
     /** 无法映射到任何动作的 notify 名 */
     unmatchedNotifies: string[]
+}
+
+/** 非 native 的可执行动作：damage 需有字段；branch 递归检查 then/else */
+export function isExecutableAction(action: Action): boolean {
+    switch (action.kind) {
+        case "damage":
+            return action.field.length > 0
+        case "applyBuff":
+        case "removeBuff":
+            return true
+        case "branch":
+            return [...action.then, ...(action.else ?? [])].some(isExecutableAction)
+        default:
+            return false
+    }
+}
+
+/** 技能是否至少有一个可执行动作（native / resource / select / summon 不算） */
+export function hasExecutableAction(skill: SkillBehavior): boolean {
+    return skill.phases.some(phase => phase.actions.some(isExecutableAction))
 }
 
 export function emptyCoverageReport(): CoverageReport {

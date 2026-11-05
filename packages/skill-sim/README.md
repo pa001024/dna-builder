@@ -117,8 +117,9 @@ runtime.diagnostics()   // 不可执行项清单（同类去重，带 occurrence
 - `provenance.nativeCalls` 中 `known=false` 的项**不可假装执行**；`coverage.nativeCallsUnknown` 是迁移缺口清单。
 - U7 的复杂机制走 `authored`（fixture 里的黎瑟 Q 即示例）；批量 override 可用 `--overrides` 文件：
   `{ "schemaVersion": 1, "skills": { "<skillId>": AuthoredBehavior } }`。
-- U7 parity 基线：真实冻结值在 `tests/parity/frozen-baselines.json` / `frozen-skill-damage.json`，
-  由 `scripts/freeze-parity.ts` 生成后提交；测试只重算并比对，不现场生成 expected。
+- U7 parity：`tests/parity/runtime-parity*.test.ts` 对 11 个 simulated 角色跑 IR 运行时，
+  逐事件与 CharBuild 现场比对；`frozen-baselines.json` / `frozen-skill-damage.json` 是
+  CharBuild 自身的冻结回归，由 `scripts/freeze-parity.ts` 生成后提交，不现场生成 expected。
 
 ## 全角色生成（U7）
 
@@ -131,8 +132,9 @@ bun packages/skill-sim/scripts/freeze-parity.ts
 bun test packages/skill-sim/tests/parity
 ```
 
-- 适配器 `scripts/adapt-u2.ts` 只做形状归一与保守的 `Rate:"#N"` 解析；复杂技能用
-  `fixtures/overrides/lise-saiqi.json`（authored）+ `fixtures/overrides/authored-buffs.json`。
+- U2 归一在 `src/pipeline/u2-adapter.ts` 内由 ingest 直接调用（顶置蓝图/AnimBP、TaskEffects、负时间等），
+  `scripts/adapt-u2.ts` 仅用于调试落盘；复杂技能用 `fixtures/overrides/lise-saiqi.json`（authored）
+  + `fixtures/overrides/authored-buffs.json`。
 - 覆盖表：`generated/COVERAGE.md`（人读）/ `generated/coverage-matrix.json`（机器读）。
 - 已知缺口与 U8 集成说明见 `generated/README.md`。
 

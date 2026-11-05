@@ -7,51 +7,32 @@
         "skillsWithAnimBP": 209,
         "skillsWithLua": 352,
         "skillsAuthored": 8,
-        "skillsWithBehavior": 272,
-        "nativeCallsTotal": 2872,
+        "skillsWithBehavior": 61,
+        "nativeCallsTotal": 1712,
         "nativeCallsUnknown": [
             "ALocalDis",
-            "Abs_Int",
             "ActorToLocationTeleport",
             "AddCameraSpeed",
             "AddEnergyShield",
             "AddMSP",
             "AddMeleeCounts",
             "AddRangedCounts",
-            "AddSkill02Buff",
             "AddSkill02OffDamageBaseValue",
-            "Add_FloatFloat",
-            "Add_IntInt",
-            "Add_VectorVector",
             "AdditionalHitFX",
             "AimDiffusion",
             "BladeUpdate",
             "BluePrintAddSkillInfo",
             "BombCreate_Grade4",
-            "BooleanAND",
-            "BooleanOR",
-            "BreakHitResult",
-            "BreakRotator",
-            "BreakVector",
             "CalculateSkill02Buff",
             "CalculateSkill02BulletNum",
             "CallBackSkillCreature",
             "CameraUpdate",
             "CastToActor",
             "CastToCharacterBase",
-            "ChangeBuffLayer",
-            "ChangeSkill__DelegateSignature",
             "ChangeWeapon",
             "ChargeBullet",
             "ClearComboCount",
-            "Concat_StrStr",
-            "ConsumeMSP",
             "ControlVisbility",
-            "Conv_Int64ToInt",
-            "Conv_IntToFloat",
-            "Conv_IntToString",
-            "Conv_InterfaceToObject",
-            "Conv_StringToName",
             "CreateCreature",
             "CreateDoubleCreature",
             "CreateSword",
@@ -60,120 +41,16 @@
             "DelayFrames",
             "Disarm",
             "DistanceCheck",
-            "Divide_FloatFloat",
-            "Divide_IntInt",
             "DotCheckout",
             "EndLoopShoot",
             "EndSkill1",
-            "EqualEqual_ByteByte",
-            "EqualEqual_FloatFloat",
-            "EqualEqual_IntInt",
-            "EqualEqual_NameName",
-            "EqualEqual_ObjectObject",
             "EventWysLevelMax",
             "EventWysLevelUp",
             "ExecuteClientSkillLogicFunction",
             "ExecutePassiveFunction",
             "ExecuteSkill2",
-            "ExecuteUbergraph_BP_Aote_Passive",
-            "ExecuteUbergraph_BP_Aote_Passive_Extra",
-            "ExecuteUbergraph_BP_Baiheng_Passive",
-            "ExecuteUbergraph_BP_Baiheng_Passive2",
-            "ExecuteUbergraph_BP_Baonu_Extra",
-            "ExecuteUbergraph_BP_Baonu_HeavyAttack",
-            "ExecuteUbergraph_BP_Baonu_Passive",
-            "ExecuteUbergraph_BP_Buff_110201",
-            "ExecuteUbergraph_BP_Buff_110202",
-            "ExecuteUbergraph_BP_Buff_110203",
-            "ExecuteUbergraph_BP_Buff_110302",
-            "ExecuteUbergraph_BP_Buff_150101",
-            "ExecuteUbergraph_BP_Buff_150221",
-            "ExecuteUbergraph_BP_Buff_150301",
-            "ExecuteUbergraph_BP_Buff_230110",
-            "ExecuteUbergraph_BP_Buff_310120",
-            "ExecuteUbergraph_BP_Buff_410200",
-            "ExecuteUbergraph_BP_Buff_510201",
-            "ExecuteUbergraph_BP_Buff_530101",
-            "ExecuteUbergraph_BP_Buff_540201",
-            "ExecuteUbergraph_BP_Buff_TriggerMarks",
-            "ExecuteUbergraph_BP_Common_HeavyAttack",
-            "ExecuteUbergraph_BP_Common_PhantomPassive",
-            "ExecuteUbergraph_BP_Dafu",
-            "ExecuteUbergraph_BP_Dafu_Extra",
-            "ExecuteUbergraph_BP_Eve_Passive",
-            "ExecuteUbergraph_BP_Eve_Passive2",
-            "ExecuteUbergraph_BP_Falu_Passive",
-            "ExecuteUbergraph_BP_Falu_Passive2",
-            "ExecuteUbergraph_BP_Feina",
-            "ExecuteUbergraph_BP_Feina_Extra",
-            "ExecuteUbergraph_BP_Fuluo",
-            "ExecuteUbergraph_BP_Fuluo_Extra",
-            "ExecuteUbergraph_BP_Haier_Passive",
-            "ExecuteUbergraph_BP_Haier_Passive2",
-            "ExecuteUbergraph_BP_Heitao",
-            "ExecuteUbergraph_BP_Heitao_Passive2",
-            "ExecuteUbergraph_BP_Kajia_Passive",
-            "ExecuteUbergraph_BP_Kami_Passive",
-            "ExecuteUbergraph_BP_Kami_Passive2",
-            "ExecuteUbergraph_BP_Kezhou_Passive",
-            "ExecuteUbergraph_BP_Kezhou_Passive2",
-            "ExecuteUbergraph_BP_Landi",
-            "ExecuteUbergraph_BP_Landi_Extra",
-            "ExecuteUbergraph_BP_Linen",
-            "ExecuteUbergraph_BP_Linen_Extra",
-            "ExecuteUbergraph_BP_Lise_Passive",
-            "ExecuteUbergraph_BP_Lise_Passive2",
-            "ExecuteUbergraph_BP_Maer_Passive",
-            "ExecuteUbergraph_BP_Maer_Passive2",
-            "ExecuteUbergraph_BP_Nifu_Passive",
-            "ExecuteUbergraph_BP_Nifu_Passive_Extra",
-            "ExecuteUbergraph_BP_Nvzhu_Dark_Passive",
-            "ExecuteUbergraph_BP_Nvzhu_Dark_Passive2",
-            "ExecuteUbergraph_BP_Nvzhu_Light_Passive",
-            "ExecuteUbergraph_BP_Nvzhu_Light_Passive2",
-            "ExecuteUbergraph_BP_Pet_421",
-            "ExecuteUbergraph_BP_Pet_601",
-            "ExecuteUbergraph_BP_Pet_602",
-            "ExecuteUbergraph_BP_Pet_603",
-            "ExecuteUbergraph_BP_Pet_604",
-            "ExecuteUbergraph_BP_Pet_901",
-            "ExecuteUbergraph_BP_Ranged_NoMagzine",
-            "ExecuteUbergraph_BP_Ranged_NoMagzine02",
-            "ExecuteUbergraph_BP_SPLise_Passive",
-            "ExecuteUbergraph_BP_SPLise_Passive2",
-            "ExecuteUbergraph_BP_Saiqi",
-            "ExecuteUbergraph_BP_Saiqi_Passive2",
-            "ExecuteUbergraph_BP_Shuimu",
-            "ExecuteUbergraph_BP_Shuimu_Extra",
-            "ExecuteUbergraph_BP_Songlu_Extra",
-            "ExecuteUbergraph_BP_Songlu_Passive",
-            "ExecuteUbergraph_BP_Suyi_Passive",
-            "ExecuteUbergraph_BP_Suyi_Passive2",
-            "ExecuteUbergraph_BP_Swordwhip_HeavyAttack",
-            "ExecuteUbergraph_BP_Tuosi_Extra",
-            "ExecuteUbergraph_BP_Tuosi_Passive",
-            "ExecuteUbergraph_BP_WeitaF_Water_Passive",
-            "ExecuteUbergraph_BP_WeitaF_Water_Passive2",
-            "ExecuteUbergraph_BP_Xibi_Passive",
-            "ExecuteUbergraph_BP_Xibi_Passive2",
-            "ExecuteUbergraph_BP_Xier_Passive",
-            "ExecuteUbergraph_BP_Xier_Passive2",
-            "ExecuteUbergraph_BP_Xier_Skill1",
-            "ExecuteUbergraph_BP_Yeer_Passive",
-            "ExecuteUbergraph_BP_Yeer_Passive2",
-            "ExecuteUbergraph_BP_Yuming",
-            "ExecuteUbergraph_BP_Yuming_Extra",
-            "ExecuteUbergraph_BP_Zhangyu",
-            "ExecuteUbergraph_BP_Zhangyu_Extra",
-            "ExecuteUbergraph_BP_Zhiliu",
-            "ExecuteUbergraph_BP_Zhiliu_Extra",
             "Executeskilleffect",
-            "FFloor",
-            "FMax",
-            "FMin",
-            "FTrunc",
             "Falu_Skill01_Off",
-            "Falu_Skill02_Search",
             "FindBuffById",
             "GetAttr_ByEnum",
             "GetAttr_Float",
@@ -196,17 +73,10 @@
             "Grade1",
             "Grade1Buff",
             "Grade2Shoot",
-            "Grade4CreateBomb",
-            "GreaterEqual_FloatFloat",
-            "GreaterEqual_IntInt",
             "GreaterGreater_VectorRotator",
-            "Greater_FloatFloat",
-            "Greater_IntInt",
             "Heal",
             "HenshinSuperBuff",
             "HitStop",
-            "HyperTriggerRemove__DelegateSignature",
-            "InRange_IntInt",
             "InSummonRange",
             "IsConsume",
             "IsDead",
@@ -220,35 +90,9 @@
             "K2_ClearAndInvalidateTimerHandle_Combat",
             "K2_SetTimerDelegate",
             "K2_SetTimerDelegate_Combat",
-            "LessEqual_FloatFloat",
-            "LessEqual_IntInt",
-            "Less_FloatFloat",
-            "Less_IntInt",
             "LineTraceSingle",
-            "MakeGameplayTagContainerFromArray",
-            "MakeLiteralName",
-            "MakeLiteralString",
-            "MakeRotator",
             "MakeSound",
-            "MakeTransform",
-            "MakeVector",
             "MarkPropertyDirtyFromRepIndex",
-            "Max",
-            "Min",
-            "Multiply_FloatFloat",
-            "Multiply_IntFloat",
-            "Multiply_IntInt",
-            "Multiply_VectorFloat",
-            "Multiply_VectorInt",
-            "NotEqual_ByteByte",
-            "NotEqual_FloatFloat",
-            "NotEqual_IntInt",
-            "NotEqual_NameName",
-            "NotEqual_ObjectObject",
-            "NotEqual_StriStri",
-            "Not_PreBool",
-            "OnSwordwhipSwitch__DelegateSignature",
-            "OnZhiliuMarkChange",
             "Passive1AddSecondSp",
             "Passive2Execute",
             "Passive2Save",
@@ -261,7 +105,6 @@
             "RandomBool",
             "RandomBoolWithWeight",
             "RandomInteger",
-            "ReceiveBeginPlay",
             "RemoveRayCreature",
             "RemoveSkillCreature",
             "RemoveUnit",
@@ -281,7 +124,6 @@
             "SetSaveLoc",
             "SetSceneComponentHiddenInGame",
             "SetSummonLifeTime",
-            "SetSwordCreate",
             "SetToCondemnLoc",
             "SetVector_ByEffectSource",
             "ShieldFx",
@@ -290,18 +132,9 @@
             "StartLoopShoot",
             "StartTargetCondemn",
             "StopTraceAirDoor",
-            "Subtract_FloatFloat",
-            "Subtract_IntInt",
-            "Subtract_VectorVector",
-            "SwitchSummon",
-            "TickAirDoor",
             "UpdateWeakness",
-            "VSize",
             "VectorToRotator",
-            "Vector_Distance",
-            "WeitaWaterSummonSkill02__DelegateSignature",
-            "YeerBombPro",
-            "ZhiliuMarkSync"
+            "YeerBombPro"
         ],
         "unknownTaskFunctions": [
             "AddCameraSpeed",
@@ -415,8 +248,50 @@
     },
     "diagnostics": {
         "errors": 0,
-        "warnings": 1010,
+        "warnings": 1221,
         "items": [
+            {
+                "severity": "info",
+                "code": "u2.rate-resolved",
+                "path": "skills",
+                "message": "按 Lua 行为文本保守解析了 15 个 Rate:\"#N\" 占位"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100001",
+                "message": "技能 100001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100003",
+                "message": "技能 100003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100004",
+                "message": "技能 100004 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100005",
+                "message": "技能 100005 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100007",
+                "message": "技能 100007 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.100009",
+                "message": "技能 100009 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
@@ -427,13 +302,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1010101",
-                "message": "技能 1010101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1010101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1010102",
                 "message": "技能 1010102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1010102",
+                "message": "技能 1010102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -445,7 +326,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1010103",
-                "message": "技能 1010103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1010103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -457,7 +338,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1010104",
-                "message": "技能 1010104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1010104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -469,13 +350,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1020101",
-                "message": "技能 1020101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1020101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1020102",
                 "message": "技能 1020102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1020102",
+                "message": "技能 1020102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -487,7 +374,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1020103",
-                "message": "技能 1020103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1020103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -499,7 +386,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1020104",
-                "message": "技能 1020104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1020104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -511,13 +398,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1030101",
-                "message": "技能 1030101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1030101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1030102",
                 "message": "技能 1030102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1030102",
+                "message": "技能 1030102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -529,7 +422,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1030103",
-                "message": "技能 1030103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1030103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -541,7 +434,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1030104",
-                "message": "技能 1030104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1030104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -553,13 +446,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1040101",
-                "message": "技能 1040101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1040101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1040102",
                 "message": "技能 1040102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1040102",
+                "message": "技能 1040102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -571,7 +470,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1040103",
-                "message": "技能 1040103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1040103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -583,7 +482,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1040104",
-                "message": "技能 1040104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1040104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -595,13 +494,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1050101",
-                "message": "技能 1050101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1050101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1050102",
                 "message": "技能 1050102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1050102",
+                "message": "技能 1050102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -613,13 +518,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1060101",
-                "message": "技能 1060101 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1060101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1060102",
                 "message": "技能 1060102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1060102",
+                "message": "技能 1060102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -631,7 +542,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1060103",
-                "message": "技能 1060103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1060103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -643,7 +554,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1060104",
-                "message": "技能 1060104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1060104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110001",
+                "message": "技能 110001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110003",
+                "message": "技能 110003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -989,6 +912,18 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110103",
+                "message": "技能 110103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110104",
+                "message": "技能 110104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.110111",
                 "message": "技能 110111 不在 packages/data"
@@ -1112,6 +1047,12 @@
                 "code": "build.effect",
                 "path": "skills.110111",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110111",
+                "message": "技能 110111 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1301,9 +1242,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110122",
+                "message": "技能 110122 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.110123",
                 "message": "技能 110123 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110123",
+                "message": "技能 110123 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1315,7 +1268,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.110124",
-                "message": "技能 110124 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 110124 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1370,6 +1323,30 @@
                 "code": "build.effect",
                 "path": "skills.110201",
                 "message": "未识别的 TargetFilter \"Fuluo_Skill01_Long\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110201",
+                "message": "技能 110201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110202",
+                "message": "技能 110202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110203",
+                "message": "技能 110203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110204",
+                "message": "技能 110204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1494,8 +1471,14 @@
             {
                 "severity": "warn",
                 "code": "build.no-actions",
+                "path": "skills.110211",
+                "message": "技能 110211 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
                 "path": "skills.110221",
-                "message": "技能 110221 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 110221 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1694,6 +1677,36 @@
                 "code": "build.effect",
                 "path": "skills.110302",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110302",
+                "message": "技能 110302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110303",
+                "message": "技能 110303 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110304",
+                "message": "技能 110304 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110311",
+                "message": "技能 110311 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110321",
+                "message": "技能 110321 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1799,6 +1812,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110323",
+                "message": "技能 110323 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.110324",
                 "message": "技能 110324 不在 packages/data"
@@ -1835,9 +1854,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110324",
+                "message": "技能 110324 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.110325",
                 "message": "技能 110325 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110325",
+                "message": "技能 110325 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -1943,6 +1974,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110392",
+                "message": "技能 110392 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.110393",
                 "message": "技能 110393 不在 packages/data"
@@ -1979,6 +2016,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.110393",
+                "message": "技能 110393 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.120101",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
@@ -2069,6 +2112,30 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.120103",
+                "message": "技能 120103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.120104",
+                "message": "技能 120104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150001",
+                "message": "技能 150001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150003",
+                "message": "技能 150003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.150101",
                 "message": "未识别的 TargetFilter \"Char_Sphere_Middle\"，按 primary 处理"
@@ -2366,6 +2433,18 @@
                 "code": "build.effect",
                 "path": "skills.150102",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150103",
+                "message": "技能 150103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150104",
+                "message": "技能 150104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2495,6 +2574,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150123",
+                "message": "技能 150123 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.150124",
                 "message": "技能 150124 不在 packages/data"
@@ -2603,6 +2688,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150124",
+                "message": "技能 150124 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.150125",
                 "message": "技能 150125 不在 packages/data"
@@ -2611,7 +2702,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.150125",
-                "message": "技能 150125 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 150125 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2623,7 +2714,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.150126",
-                "message": "技能 150126 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 150126 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2636,6 +2727,24 @@
                 "code": "build.effect",
                 "path": "skills.150201",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150202",
+                "message": "技能 150202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150203",
+                "message": "技能 150203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150204",
+                "message": "技能 150204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2677,7 +2786,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.150301",
-                "message": "技能 150301 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 150301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2852,6 +2961,18 @@
                 "code": "build.effect",
                 "path": "skills.150302",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150303",
+                "message": "技能 150303 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150304",
+                "message": "技能 150304 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2951,9 +3072,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503101",
+                "message": "技能 1503101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1503102",
                 "message": "技能 1503102 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503102",
+                "message": "技能 1503102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2965,7 +3098,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503103",
-                "message": "技能 1503103 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2977,7 +3110,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503104",
-                "message": "技能 1503104 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -2989,7 +3122,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.150311",
-                "message": "技能 150311 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 150311 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3107,15 +3240,33 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503121",
+                "message": "技能 1503121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1503122",
                 "message": "技能 1503122 不在 packages/data"
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503122",
+                "message": "技能 1503122 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1503123",
                 "message": "技能 1503123 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503123",
+                "message": "技能 1503123 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3127,7 +3278,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503124",
-                "message": "技能 1503124 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503124 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3257,9 +3408,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503141",
+                "message": "技能 1503141 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1503142",
                 "message": "技能 1503142 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503142",
+                "message": "技能 1503142 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3271,7 +3434,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503143",
-                "message": "技能 1503143 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503143 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3283,7 +3446,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503144",
-                "message": "技能 1503144 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503144 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3395,9 +3558,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503161",
+                "message": "技能 1503161 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.1503162",
                 "message": "技能 1503162 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.1503162",
+                "message": "技能 1503162 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3409,7 +3584,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503163",
-                "message": "技能 1503163 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503163 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3421,7 +3596,25 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.1503164",
-                "message": "技能 1503164 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 1503164 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150321",
+                "message": "技能 150321 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150403",
+                "message": "技能 150403 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150404",
+                "message": "技能 150404 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3482,6 +3675,12 @@
                 "code": "build.effect",
                 "path": "skills.150405",
                 "message": "未识别的 TargetFilter \"CondemnTarget\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150405",
+                "message": "技能 150405 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3491,9 +3690,27 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150411",
+                "message": "技能 150411 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150421",
+                "message": "技能 150421 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.150422",
                 "message": "技能 150422 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150422",
+                "message": "技能 150422 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3503,9 +3720,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150441",
+                "message": "技能 150441 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.150511",
                 "message": "技能 150511 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150511",
+                "message": "技能 150511 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3515,15 +3744,27 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.150512",
+                "message": "技能 150512 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.150514",
                 "message": "技能 150514 不在 packages/data"
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.160102",
-                "message": "未识别的 TargetFilter \"AlmostAllFrd\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.150514",
+                "message": "技能 150514 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.160101",
+                "message": "技能 160101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3541,7 +3782,7 @@
                 "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.160102",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+                "message": "未识别的 TargetFilter \"AlmostAllFrd\"，按 primary 处理"
             },
             {
                 "severity": "warn",
@@ -3560,6 +3801,24 @@
                 "code": "build.effect",
                 "path": "skills.160102",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.160102",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.160103",
+                "message": "技能 160103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.160104",
+                "message": "技能 160104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3625,7 +3884,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.180102",
-                "message": "技能 180102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 180102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.180103",
+                "message": "技能 180103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.180104",
+                "message": "技能 180104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3691,13 +3962,25 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.180121",
-                "message": "技能 180121 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 180121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.180191",
+                "message": "技能 180191 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2010101",
                 "message": "技能 2010101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2010101",
+                "message": "技能 2010101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3709,13 +3992,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2010102",
-                "message": "技能 2010102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2010102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2010401",
                 "message": "技能 2010401 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2010401",
+                "message": "技能 2010401 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3727,13 +4016,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2010402",
-                "message": "技能 2010402 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2010402 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2019901",
                 "message": "技能 2019901 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2019901",
+                "message": "技能 2019901 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3745,13 +4040,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2019902",
-                "message": "技能 2019902 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2019902 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2020101",
                 "message": "技能 2020101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2020101",
+                "message": "技能 2020101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3763,13 +4064,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2020102",
-                "message": "技能 2020102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2020102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2020301",
                 "message": "技能 2020301 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2020301",
+                "message": "技能 2020301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3781,13 +4088,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2020302",
-                "message": "技能 2020302 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2020302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2020701",
                 "message": "技能 2020701 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2020701",
+                "message": "技能 2020701 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3799,7 +4112,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2020702",
-                "message": "技能 2020702 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2020702 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3809,9 +4122,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2029901",
+                "message": "技能 2029901 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030101",
                 "message": "技能 2030101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030101",
+                "message": "技能 2030101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3823,13 +4148,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030102",
-                "message": "技能 2030102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030201",
                 "message": "技能 2030201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030201",
+                "message": "技能 2030201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3841,13 +4172,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030202",
-                "message": "技能 2030202 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030301",
                 "message": "技能 2030301 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030301",
+                "message": "技能 2030301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3859,13 +4196,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030302",
-                "message": "技能 2030302 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030401",
                 "message": "技能 2030401 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030401",
+                "message": "技能 2030401 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3877,13 +4220,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030402",
-                "message": "技能 2030402 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030402 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030501",
                 "message": "技能 2030501 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030501",
+                "message": "技能 2030501 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3895,13 +4244,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030502",
-                "message": "技能 2030502 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030502 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2030601",
                 "message": "技能 2030601 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2030601",
+                "message": "技能 2030601 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3913,13 +4268,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2030602",
-                "message": "技能 2030602 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2030602 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040101",
                 "message": "技能 2040101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040101",
+                "message": "技能 2040101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3931,13 +4292,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040102",
-                "message": "技能 2040102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040201",
                 "message": "技能 2040201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040201",
+                "message": "技能 2040201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3949,13 +4316,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040202",
-                "message": "技能 2040202 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040301",
                 "message": "技能 2040301 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040301",
+                "message": "技能 2040301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3967,7 +4340,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040302",
-                "message": "技能 2040302 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3977,9 +4350,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040501",
+                "message": "技能 2040501 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040502",
                 "message": "技能 2040502 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040502",
+                "message": "技能 2040502 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -3991,13 +4376,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040503",
-                "message": "技能 2040503 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040503 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040601",
                 "message": "技能 2040601 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040601",
+                "message": "技能 2040601 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4009,13 +4400,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040602",
-                "message": "技能 2040602 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040602 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2040701",
                 "message": "技能 2040701 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2040701",
+                "message": "技能 2040701 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4027,13 +4424,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2040702",
-                "message": "技能 2040702 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2040702 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2050101",
                 "message": "技能 2050101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2050101",
+                "message": "技能 2050101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4045,7 +4448,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050102",
-                "message": "技能 2050102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4057,7 +4460,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050201",
-                "message": "技能 2050201 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4069,7 +4472,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050202",
-                "message": "技能 2050202 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4081,7 +4484,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050301",
-                "message": "技能 2050301 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4093,7 +4496,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050302",
-                "message": "技能 2050302 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4105,7 +4508,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050401",
-                "message": "技能 2050401 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050401 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4117,7 +4520,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050402",
-                "message": "技能 2050402 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050402 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4135,7 +4538,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050502",
-                "message": "技能 2050502 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050502 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4147,7 +4550,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050601",
-                "message": "技能 2050601 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050601 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4159,13 +4562,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050602",
-                "message": "技能 2050602 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050602 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2050701",
                 "message": "技能 2050701 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2050701",
+                "message": "技能 2050701 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4177,7 +4586,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2050902",
-                "message": "技能 2050902 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2050902 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4187,9 +4596,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2051001",
+                "message": "技能 2051001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2051101",
                 "message": "技能 2051101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2051101",
+                "message": "技能 2051101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4201,7 +4622,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2051102",
-                "message": "技能 2051102 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2051102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4213,7 +4634,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2051201",
-                "message": "技能 2051201 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2051201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4225,7 +4646,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.2051202",
-                "message": "技能 2051202 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 2051202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4235,9 +4656,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2059901",
+                "message": "技能 2059901 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2060101",
                 "message": "技能 2060101 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060101",
+                "message": "技能 2060101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4247,9 +4680,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060102",
+                "message": "技能 2060102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2060201",
                 "message": "技能 2060201 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060201",
+                "message": "技能 2060201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4259,9 +4704,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060301",
+                "message": "技能 2060301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2060302",
                 "message": "技能 2060302 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060302",
+                "message": "技能 2060302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4271,15 +4728,27 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.2060501",
+                "message": "技能 2060501 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.2060502",
                 "message": "技能 2060502 不在 packages/data"
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.210101",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.2060502",
+                "message": "技能 2060502 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210003",
+                "message": "技能 210003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4298,6 +4767,18 @@
                 "code": "build.effect",
                 "path": "skills.210101",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.210101",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210101",
+                "message": "技能 210101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4373,9 +4854,27 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.210201",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.210102",
+                "message": "技能 210102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210103",
+                "message": "技能 210103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210104",
+                "message": "技能 210104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210112",
+                "message": "技能 210112 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4418,6 +4917,18 @@
                 "code": "build.effect",
                 "path": "skills.210201",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.210201",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210201",
+                "message": "技能 210201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4442,6 +4953,24 @@
                 "code": "build.effect",
                 "path": "skills.210202",
                 "message": "未识别的 TargetFilter \"Eve_Sum03\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210203",
+                "message": "技能 210203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210204",
+                "message": "技能 210204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.210217",
+                "message": "技能 210217 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4460,6 +4989,12 @@
                 "code": "build.effect",
                 "path": "skills.220101",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.220101",
+                "message": "技能 220101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4482,8 +5017,20 @@
             {
                 "severity": "warn",
                 "code": "build.no-actions",
+                "path": "skills.220103",
+                "message": "技能 220103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.220104",
+                "message": "技能 220104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
                 "path": "skills.220121",
-                "message": "技能 220121 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 220121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4511,9 +5058,27 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.240102",
-                "message": "未识别的 TargetFilter \"AlmostAllOtFr\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.230102",
+                "message": "技能 230102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.230103",
+                "message": "技能 230103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.230104",
+                "message": "技能 230104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.240101",
+                "message": "技能 240101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4525,7 +5090,7 @@
                 "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.240102",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+                "message": "未识别的 TargetFilter \"AlmostAllOtFr\"，按 primary 处理"
             },
             {
                 "severity": "warn",
@@ -4542,8 +5107,44 @@
             {
                 "severity": "warn",
                 "code": "build.effect",
-                "path": "skills.310101",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+                "path": "skills.240102",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.240103",
+                "message": "技能 240103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.240104",
+                "message": "技能 240104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.240111",
+                "message": "技能 240111 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.240191",
+                "message": "技能 240191 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310001",
+                "message": "技能 310001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310003",
+                "message": "技能 310003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4718,6 +5319,18 @@
                 "code": "build.effect",
                 "path": "skills.310101",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.310101",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310101",
+                "message": "技能 310101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4757,9 +5370,15 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.310111",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.310103",
+                "message": "技能 310103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310104",
+                "message": "技能 310104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4790,6 +5409,24 @@
                 "code": "build.effect",
                 "path": "skills.310111",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.310111",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge120\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310111",
+                "message": "技能 310111 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310121",
+                "message": "技能 310121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4871,9 +5508,15 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.310202",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.310122",
+                "message": "技能 310122 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310201",
+                "message": "技能 310201 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4904,6 +5547,30 @@
                 "code": "build.effect",
                 "path": "skills.310202",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.310202",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310202",
+                "message": "技能 310202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310203",
+                "message": "技能 310203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310204",
+                "message": "技能 310204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4915,13 +5582,25 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.310211",
-                "message": "技能 310211 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 310211 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310303",
+                "message": "技能 310303 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310304",
+                "message": "技能 310304 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.310321",
-                "message": "技能 310321 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 310321 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -4985,9 +5664,21 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.310411",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.310402",
+                "message": "技能 310402 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310403",
+                "message": "技能 310403 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310404",
+                "message": "技能 310404 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5012,6 +5703,24 @@
                 "code": "build.effect",
                 "path": "skills.310411",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.310411",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310411",
+                "message": "技能 310411 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.310412",
+                "message": "技能 310412 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5072,6 +5781,18 @@
                 "code": "build.effect",
                 "path": "skills.320102",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_XLarge\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320103",
+                "message": "技能 320103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320104",
+                "message": "技能 320104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5099,9 +5820,21 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.320211",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.320202",
+                "message": "技能 320202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320203",
+                "message": "技能 320203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320204",
+                "message": "技能 320204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5124,8 +5857,38 @@
             {
                 "severity": "warn",
                 "code": "build.effect",
-                "path": "skills.330101",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+                "path": "skills.320211",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Small\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320291",
+                "message": "技能 320291 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320301",
+                "message": "技能 320301 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320302",
+                "message": "技能 320302 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320303",
+                "message": "技能 320303 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.320311",
+                "message": "技能 320311 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5192,6 +5955,30 @@
                 "code": "build.effect",
                 "path": "skills.330101",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.330101",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.330102",
+                "message": "技能 330102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.330103",
+                "message": "技能 330103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.330104",
+                "message": "技能 330104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5497,7 +6284,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.401",
-                "message": "技能 401 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 401 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5509,7 +6296,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.402",
-                "message": "技能 402 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 402 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5521,7 +6308,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.403",
-                "message": "技能 403 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 403 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5533,7 +6320,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.404",
-                "message": "技能 404 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 404 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5545,7 +6332,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.405",
-                "message": "技能 405 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 405 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5557,7 +6344,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.406",
-                "message": "技能 406 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 406 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5569,7 +6356,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.407",
-                "message": "技能 407 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 407 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5581,7 +6368,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.408",
-                "message": "技能 408 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 408 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5593,13 +6380,31 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.409",
-                "message": "技能 409 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 409 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.41",
                 "message": "技能 41 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.41",
+                "message": "技能 41 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410001",
+                "message": "技能 410001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410003",
+                "message": "技能 410003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5634,8 +6439,20 @@
             {
                 "severity": "warn",
                 "code": "build.no-actions",
+                "path": "skills.410103",
+                "message": "技能 410103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410104",
+                "message": "技能 410104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
                 "path": "skills.410121",
-                "message": "技能 410121 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 410121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5690,6 +6507,18 @@
                 "code": "build.effect",
                 "path": "skills.410202",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410203",
+                "message": "技能 410203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410204",
+                "message": "技能 410204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5717,9 +6546,15 @@
             },
             {
                 "severity": "warn",
-                "code": "build.effect",
-                "path": "skills.410223",
-                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+                "code": "build.no-actions",
+                "path": "skills.410221",
+                "message": "技能 410221 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410222",
+                "message": "技能 410222 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5736,8 +6571,8 @@
             {
                 "severity": "warn",
                 "code": "build.effect",
-                "path": "skills.410301",
-                "message": "未识别的 TargetFilter \"SpLise_Skill01_01\"，按 primary 处理"
+                "path": "skills.410223",
+                "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
             },
             {
                 "severity": "warn",
@@ -5786,6 +6621,24 @@
                 "code": "build.effect",
                 "path": "skills.410301",
                 "message": "未识别的 TargetFilter \"SpLise_Skill01_01\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.effect",
+                "path": "skills.410301",
+                "message": "未识别的 TargetFilter \"SpLise_Skill01_01\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410303",
+                "message": "技能 410303 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.410304",
+                "message": "技能 410304 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5923,7 +6776,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.410327",
-                "message": "技能 410327 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 410327 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5935,7 +6788,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.411",
-                "message": "技能 411 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 411 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5947,7 +6800,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.412",
-                "message": "技能 412 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 412 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5959,7 +6812,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.413",
-                "message": "技能 413 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 413 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5971,7 +6824,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.414",
-                "message": "技能 414 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 414 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5983,7 +6836,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.415",
-                "message": "技能 415 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 415 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -5995,7 +6848,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.416",
-                "message": "技能 416 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 416 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6007,7 +6860,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.417",
-                "message": "技能 417 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 417 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6032,6 +6885,30 @@
                 "code": "build.effect",
                 "path": "skills.420102",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large_Front\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420102",
+                "message": "技能 420102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420103",
+                "message": "技能 420103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420104",
+                "message": "技能 420104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420191",
+                "message": "技能 420191 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6050,6 +6927,24 @@
                 "code": "build.effect",
                 "path": "skills.420201",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420202",
+                "message": "技能 420202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420203",
+                "message": "技能 420203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.420204",
+                "message": "技能 420204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6059,9 +6954,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.421",
+                "message": "技能 421 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.422",
                 "message": "技能 422 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.422",
+                "message": "技能 422 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6071,9 +6978,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.423",
+                "message": "技能 423 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.424",
                 "message": "技能 424 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.424",
+                "message": "技能 424 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6083,12 +7002,60 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.425",
+                "message": "技能 425 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.426",
                 "message": "技能 426 不在 packages/data"
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.426",
+                "message": "技能 426 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.430101",
+                "message": "技能 430101 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.430102",
+                "message": "技能 430102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.430103",
+                "message": "技能 430103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.430104",
+                "message": "技能 430104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510001",
+                "message": "技能 510001 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510003",
+                "message": "技能 510003 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.510101",
                 "message": "未识别的 TargetFilter \"AlmostAllFrd\"，按 primary 处理"
@@ -6098,6 +7065,18 @@
                 "code": "build.effect",
                 "path": "skills.510101",
                 "message": "未识别的 TargetFilter \"AlmostAllFrd\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510102",
+                "message": "技能 510102 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510103",
+                "message": "技能 510103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6167,6 +7146,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510104",
+                "message": "技能 510104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.510105",
                 "message": "技能 510105 不在 packages/data"
@@ -6200,6 +7185,18 @@
                 "code": "build.effect",
                 "path": "skills.510105",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Middle\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510105",
+                "message": "技能 510105 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510106",
+                "message": "技能 510106 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6270,14 +7267,56 @@
             {
                 "severity": "warn",
                 "code": "build.no-actions",
+                "path": "skills.510107",
+                "message": "技能 510107 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
                 "path": "skills.510111",
-                "message": "技能 510111 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 510111 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.510121",
-                "message": "技能 510121 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 510121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510191",
+                "message": "技能 510191 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510202",
+                "message": "技能 510202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510203",
+                "message": "技能 510203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.510204",
+                "message": "技能 510204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.530103",
+                "message": "技能 530103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.530104",
+                "message": "技能 530104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6348,8 +7387,20 @@
             {
                 "severity": "warn",
                 "code": "build.no-actions",
+                "path": "skills.530105",
+                "message": "技能 530105 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
                 "path": "skills.530111",
-                "message": "技能 530111 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 530111 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.530121",
+                "message": "技能 530121 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6359,6 +7410,12 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.530122",
+                "message": "技能 530122 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "build.effect",
                 "path": "skills.540102",
                 "message": "未识别的 TargetFilter \"AlmostAllFrd\"，按 primary 处理"
@@ -6380,24 +7437,42 @@
                 "code": "build.effect",
                 "path": "skills.540102",
                 "message": "未识别的 TargetFilter \"Char_Cylinder_Large\"，按 primary 处理"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.540103",
+                "message": "技能 540103 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.540104",
+                "message": "技能 540104 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.540202",
+                "message": "技能 540202 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540203",
-                "message": "技能 540203 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540203 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540204",
-                "message": "技能 540204 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540204 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540211",
-                "message": "技能 540211 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540211 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6409,19 +7484,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540212",
-                "message": "技能 540212 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540212 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540221",
-                "message": "技能 540221 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540221 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.540222",
-                "message": "技能 540222 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 540222 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6431,9 +7506,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.601",
+                "message": "技能 601 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.602",
                 "message": "技能 602 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.602",
+                "message": "技能 602 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6443,9 +7530,21 @@
             },
             {
                 "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.603",
+                "message": "技能 603 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
+            },
+            {
+                "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.604",
                 "message": "技能 604 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.604",
+                "message": "技能 604 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6457,7 +7556,7 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.605",
-                "message": "技能 605 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 605 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
@@ -6469,13 +7568,19 @@
                 "severity": "warn",
                 "code": "build.no-actions",
                 "path": "skills.606",
-                "message": "技能 606 没有可执行动作（仅数值字段或未识别 notify）"
+                "message": "技能 606 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             },
             {
                 "severity": "warn",
                 "code": "ref.unknown-skill",
                 "path": "skills.901",
                 "message": "技能 901 不在 packages/data"
+            },
+            {
+                "severity": "warn",
+                "code": "build.no-actions",
+                "path": "skills.901",
+                "message": "技能 901 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）"
             }
         ]
     }

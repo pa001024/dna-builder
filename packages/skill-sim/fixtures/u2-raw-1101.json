@@ -1,0 +1,3126 @@
+{
+    "schemaVersion": 1,
+    "exporter": {
+        "gitCommit": "8f613517",
+        "parserVersion": 1,
+        "gameVersion": "v1.7.227.1",
+        "note": "U2 raw subset (character 1101 E/Q + assist 110001) extracted from final/skill-behavior.json for ingest/build regression"
+    },
+    "characters": [
+        {
+            "id": 1101,
+            "nameKey": "UI_CHAR_NAME_1101",
+            "modelId": 1101,
+            "skills": [110101, 110102],
+            "subSkills": [],
+            "animBP": "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao"
+        }
+    ],
+    "skills": {
+        "110001": {
+            "id": 110001,
+            "characterId": 1101,
+            "parentSkillId": null,
+            "owner": {
+                "kind": "char",
+                "id": 1101
+            },
+            "slot": "T",
+            "lua": {
+                "skillType": "PhantomPassive",
+                "nameKey": "SKILL_110001_NAME",
+                "beginNodeId": null,
+                "behavior": "被动效果(110001)(BP_Common_PhantomPassive)",
+                "fields": [
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "Skill_DESC_AtkUp"
+                        },
+                        "值": 0.4
+                    }
+                ],
+                "nodes": [],
+                "effects": [],
+                "buffIds": [110002],
+                "passiveEffectIds": [110001],
+                "passiveEffectBPs": [
+                    {
+                        "id": 110001,
+                        "path": "/Game/BluePrints/Combat/PassiveEffect/DesignerBP/Player/BP_Common_PhantomPassive.BP_Common_PhantomPassive"
+                    }
+                ]
+            },
+            "sources": {
+                "montage": null,
+                "montages": [],
+                "bpPackages": ["EM/Content/BluePrints/Combat/PassiveEffect/DesignerBP/Player/BP_Common_PhantomPassive"],
+                "animBPs": ["EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao"]
+            },
+            "montage": null,
+            "additionalMontages": [],
+            "sequences": [],
+            "animationRefs": [],
+            "animBP": "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao",
+            "blueprintErrors": []
+        },
+        "110101": {
+            "id": 110101,
+            "characterId": 1101,
+            "parentSkillId": null,
+            "owner": {
+                "kind": "char",
+                "id": 1101
+            },
+            "slot": "E",
+            "lua": {
+                "skillType": "Skill1",
+                "nameKey": "SKILL_110101_NAME",
+                "beginNodeId": 110111,
+                "behavior": "造成角色攻击347.0%的伤害(技能/战技);削减战姿25;Boss削韧29",
+                "fields": [
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_SpCost"
+                        },
+                        "值": 20,
+                        "格式": "{}"
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_Damage"
+                        },
+                        "值": 3.47,
+                        "削韧": 25,
+                        "Boss削韧": 29,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_DamageRadius"
+                        },
+                        "值": 3,
+                        "格式": "{}\u0001GT{SKILL_DESC_Meter}\u0001"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 110111,
+                        "animPath": "/Game/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/",
+                        "animResource": "Heitao_Skill01_Montage",
+                        "animName": null,
+                        "animSubPath": null,
+                        "playRate": 1,
+                        "effects": [110111, 110112, 110113, 110114],
+                        "nextNodeId": null,
+                        "branchNodeIds": []
+                    }
+                ],
+                "effects": [
+                    {
+                        "id": 110111,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Char",
+                                    "DamageTag": ["Skill", "Skill1"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 29,
+                                    "CauseHit": "HitFly_XY800Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 25
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110111
+                        }
+                    },
+                    {
+                        "id": 110112,
+                        "notifyNames": ["hit2"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit2"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Char",
+                                    "DamageTag": ["Skill", "Skill1"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 29,
+                                    "CauseHit": "HitFly_XY800Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 25
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110112
+                        }
+                    },
+                    {
+                        "id": 110113,
+                        "notifyNames": ["hit3"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit3"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Char",
+                                    "DamageTag": ["Skill", "Skill1"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 29,
+                                    "CauseHit": "HitFly_XY800Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 25
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110113
+                        }
+                    },
+                    {
+                        "id": 110114,
+                        "notifyNames": ["hit4"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit4"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Char",
+                                    "DamageTag": ["Skill", "Skill1"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 29,
+                                    "CauseHit": "HitFly_XY600Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 25
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110114
+                        }
+                    }
+                ],
+                "buffIds": [],
+                "passiveEffectIds": [],
+                "passiveEffectBPs": []
+            },
+            "sources": {
+                "montage": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill01_Montage",
+                "montages": ["EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill01_Montage"],
+                "bpPackages": [],
+                "animBPs": ["EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao"]
+            },
+            "montage": {
+                "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill01_Montage",
+                "length": 4.766667,
+                "sections": [
+                    {
+                        "name": "Default",
+                        "begin": 0,
+                        "length": 3.9,
+                        "next": "None",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01"
+                    },
+                    {
+                        "name": "SkillInAir",
+                        "begin": 3.9,
+                        "length": 0.8666667,
+                        "next": "None",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01_01"
+                    }
+                ],
+                "segments": [
+                    {
+                        "slot": "DefaultSlot",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01",
+                        "start": 0,
+                        "end": 3.9,
+                        "rate": 1,
+                        "startPos": 0,
+                        "loopingCount": 1
+                    },
+                    {
+                        "slot": "DefaultSlot",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01_01",
+                        "start": 0,
+                        "end": 0.8666667,
+                        "rate": 1,
+                        "startPos": 3.9,
+                        "loopingCount": 1
+                    }
+                ],
+                "notifies": [
+                    {
+                        "name": "Invincible",
+                        "time": 0,
+                        "duration": 0.23996595,
+                        "endTime": 0.23996595,
+                        "trackIndex": 3,
+                        "state": true,
+                        "payload": {
+                            "index": 4,
+                            "class": "AnimNotifyState_Invincible",
+                            "export": "AnimNotifyState_Invincible_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [4],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "AllowMoveInput",
+                        "time": 0,
+                        "duration": 0.15,
+                        "endTime": 0.15,
+                        "trackIndex": 5,
+                        "state": true,
+                        "payload": {
+                            "index": 1,
+                            "class": "AnimNotifyState_AllowMoveInput",
+                            "export": "AnimNotifyState_AllowMoveInput_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [1],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "ChangeGravity",
+                        "time": 0,
+                        "duration": 0.59999996,
+                        "endTime": 0.59999996,
+                        "trackIndex": 10,
+                        "state": true,
+                        "payload": {
+                            "index": 2,
+                            "class": "AnimNotifyState_ChangeGravity",
+                            "export": "AnimNotifyState_ChangeGravity_0",
+                            "properties": {
+                                "DesignedGravity": 0.1
+                            }
+                        },
+                        "payloadMatches": [2],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraControl_C",
+                        "time": 0,
+                        "duration": 4.766667,
+                        "endTime": 4.766667,
+                        "trackIndex": 13,
+                        "state": true,
+                        "payload": {
+                            "index": 34,
+                            "class": "BP_AnimNotifyState_CameraControl_C",
+                            "export": "BP_AnimNotifyState_CameraControl_C_0",
+                            "properties": {
+                                "CameraNotifyStateInfos": [
+                                    {
+                                        "TriggerTime": 0.01,
+                                        "TransitionTime": 0.034,
+                                        "bUsingPresetData": true,
+                                        "PresetCameraName": "SpringArm200",
+                                        "CameraName": "None",
+                                        "CameraControlInfo": {
+                                            "TimelineFloatCurve": {
+                                                "ObjectName": "CurveFloat'CameraCurve'",
+                                                "ObjectPath": "EM/Content/AssetDesign/Camera/CameraCurves/CameraCurve.0"
+                                            },
+                                            "SocketOffset": {
+                                                "X": 0,
+                                                "Y": 35,
+                                                "Z": 25
+                                            },
+                                            "ArmLength": 230,
+                                            "ProbeSize": 12,
+                                            "ArmPos": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 25
+                                            },
+                                            "CameraLagMaxDistance": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "CameraLagSpeed": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "bIncrementArmLength": false,
+                                            "bIncrementSocketOffset": false,
+                                            "bIncrementArmPos": false
+                                        },
+                                        "Priority": 100
+                                    },
+                                    {
+                                        "TriggerTime": 0.1,
+                                        "TransitionTime": 1,
+                                        "bUsingPresetData": true,
+                                        "PresetCameraName": "IncrementDefault",
+                                        "CameraName": "None",
+                                        "CameraControlInfo": {
+                                            "TimelineFloatCurve": {
+                                                "ObjectName": "CurveFloat'CameraCurve'",
+                                                "ObjectPath": "EM/Content/AssetDesign/Camera/CameraCurves/CameraCurve.0"
+                                            },
+                                            "SocketOffset": {
+                                                "X": 0,
+                                                "Y": 35,
+                                                "Z": 25
+                                            },
+                                            "ArmLength": 230,
+                                            "ProbeSize": 12,
+                                            "ArmPos": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 25
+                                            },
+                                            "CameraLagMaxDistance": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "CameraLagSpeed": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "bIncrementArmLength": false,
+                                            "bIncrementSocketOffset": false,
+                                            "bIncrementArmPos": false
+                                        },
+                                        "Priority": 100
+                                    }
+                                ]
+                            }
+                        },
+                        "payloadMatches": [34],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "Invincible",
+                        "time": 0,
+                        "duration": 4.766667,
+                        "endTime": 4.766667,
+                        "trackIndex": 17,
+                        "state": true,
+                        "payload": {
+                            "index": 5,
+                            "class": "AnimNotifyState_Invincible",
+                            "export": "AnimNotifyState_Invincible_1",
+                            "properties": {
+                                "bCannotBeHarmed": false
+                            }
+                        },
+                        "payloadMatches": [5],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ChangePlayerCollision_C",
+                        "time": 0.033333335,
+                        "duration": 0.30000004,
+                        "endTime": 0.33333337,
+                        "trackIndex": 8,
+                        "state": true,
+                        "payload": {
+                            "index": 35,
+                            "class": "BP_AnimNotifyState_ChangePlayerCollision_C",
+                            "export": "BP_AnimNotifyState_ChangePlayerCollision_C_0",
+                            "properties": {
+                                "DesireResponse": "ECR_Ignore"
+                            }
+                        },
+                        "payloadMatches": [35],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillMove_C",
+                        "time": 0.033333335,
+                        "duration": 0.5333333,
+                        "endTime": 0.56666666,
+                        "trackIndex": 9,
+                        "state": true,
+                        "payload": {
+                            "index": 39,
+                            "class": "BP_AnimNotifyState_SkillMove_C",
+                            "export": "BP_AnimNotifyState_SkillMove_C_0",
+                            "properties": {
+                                "位移X": 600,
+                                "位移禁用根运动": true
+                            }
+                        },
+                        "payloadMatches": [39],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_HideChar_C",
+                        "time": 0.0544495,
+                        "duration": 0.53333336,
+                        "endTime": 0.58778286,
+                        "trackIndex": 11,
+                        "state": true,
+                        "payload": {
+                            "index": 36,
+                            "class": "BP_AnimNotifyState_HideChar_C",
+                            "export": "BP_AnimNotifyState_HideChar_C_0",
+                            "properties": {
+                                "隐藏角色": true,
+                                "隐藏武器": true
+                            }
+                        },
+                        "payloadMatches": [36],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 0.06666666,
+                        "duration": 0,
+                        "endTime": 0.06666666,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 28,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_3",
+                            "properties": {
+                                "通知名称": "hit1"
+                            }
+                        },
+                        "payloadMatches": [28],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.06666666,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 7,
+                        "state": false,
+                        "payload": {
+                            "index": 22,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_5",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Slash'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Slash.0"
+                                }
+                            }
+                        },
+                        "payloadMatches": [22],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.07663743,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 6,
+                        "state": false,
+                        "payload": {
+                            "index": 17,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_0",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_Loop_Light'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_Loop_Light.0"
+                                },
+                                "Tag": "hit1",
+                                "EffectId": 110111,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [17],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraShake_C",
+                        "time": 0.10000001,
+                        "duration": 0,
+                        "endTime": 0.10000001,
+                        "trackIndex": 2,
+                        "state": false,
+                        "payload": {
+                            "index": 13,
+                            "class": "BP_AnimNotify_CameraShake_C",
+                            "export": "BP_AnimNotify_CameraShake_C_0",
+                            "properties": {
+                                "ShakeBP": {
+                                    "ObjectName": "BlueprintGeneratedClass'BP_CS_HeitaoE_Hit_C'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Blueprint/CameraShake/BP_CS_HeitaoE_Hit.0"
+                                },
+                                "EffectId": 110111,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [13],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ANS_CameraShake_C",
+                        "time": 0.1283499,
+                        "duration": 1.1260107,
+                        "endTime": 1.2543606,
+                        "trackIndex": 4,
+                        "state": true,
+                        "payload": {
+                            "index": 40,
+                            "class": "BP_ANS_CameraShake_C",
+                            "export": "BP_ANS_CameraShake_C_0",
+                            "properties": {
+                                "OscillationDuration": 0.5,
+                                "FOVOscillation": {
+                                    "Amplitude": 0.7,
+                                    "Frequency": 50
+                                }
+                            }
+                        },
+                        "payloadMatches": [40],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 0.26666668,
+                        "duration": 0,
+                        "endTime": 0.19999999,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 29,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_4",
+                            "properties": {
+                                "通知名称": "hit2"
+                            }
+                        },
+                        "payloadMatches": [29],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.27703866,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 6,
+                        "state": false,
+                        "payload": {
+                            "index": 18,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_1",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_Loop_Light'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_Loop_Light.0"
+                                },
+                                "Tag": "hit2",
+                                "EffectId": 110112,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [18],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraShake_C",
+                        "time": 0.3,
+                        "duration": 0,
+                        "endTime": 0.3,
+                        "trackIndex": 2,
+                        "state": false,
+                        "payload": {
+                            "index": 14,
+                            "class": "BP_AnimNotify_CameraShake_C",
+                            "export": "BP_AnimNotify_CameraShake_C_1",
+                            "properties": {
+                                "ShakeBP": {
+                                    "ObjectName": "BlueprintGeneratedClass'BP_CS_HeitaoE_Hit_C'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Blueprint/CameraShake/BP_CS_HeitaoE_Hit.0"
+                                },
+                                "EffectId": 110112,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [14],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.33333337,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 7,
+                        "state": false,
+                        "payload": {
+                            "index": 23,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_6",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Range'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Range.0"
+                                }
+                            }
+                        },
+                        "payloadMatches": [23],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 0.43333334,
+                        "duration": 0,
+                        "endTime": 0.29999998,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 30,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_5",
+                            "properties": {
+                                "通知名称": "hit3"
+                            }
+                        },
+                        "payloadMatches": [30],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.46666667,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 6,
+                        "state": false,
+                        "payload": {
+                            "index": 19,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_2",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_Loop_Light'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_Loop_Light.0"
+                                },
+                                "Tag": "hit3",
+                                "EffectId": 110113,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [19],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraShake_C",
+                        "time": 0.4666667,
+                        "duration": 0,
+                        "endTime": 0.4666667,
+                        "trackIndex": 2,
+                        "state": false,
+                        "payload": {
+                            "index": 15,
+                            "class": "BP_AnimNotify_CameraShake_C",
+                            "export": "BP_AnimNotify_CameraShake_C_2",
+                            "properties": {
+                                "ShakeBP": {
+                                    "ObjectName": "BlueprintGeneratedClass'BP_CS_HeitaoE_Hit_C'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Blueprint/CameraShake/BP_CS_HeitaoE_Hit.0"
+                                },
+                                "EffectId": 110113,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [15],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "WindMotor",
+                        "time": 0.5,
+                        "duration": 0.23333335,
+                        "endTime": 0.73333335,
+                        "trackIndex": 12,
+                        "state": true,
+                        "payload": {
+                            "index": 12,
+                            "class": "AnimNotifyState_WindMotor",
+                            "export": "AnimNotifyState_WindMotor_0",
+                            "properties": {
+                                "WindMotorType": "EWindFieldSourceType::Omni",
+                                "Offset": {
+                                    "X": 2.5,
+                                    "Y": 0,
+                                    "Z": 0
+                                },
+                                "Strength": 35,
+                                "Radius": 2.5
+                            }
+                        },
+                        "payloadMatches": [12],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SwitchMontageSection_C",
+                        "time": 0.53333336,
+                        "duration": 0,
+                        "endTime": 0.53333336,
+                        "trackIndex": 3,
+                        "state": false,
+                        "payload": {
+                            "index": 33,
+                            "class": "BP_AnimNotify_SwitchMontageSection_C",
+                            "export": "BP_AnimNotify_SwitchMontageSection_C_0",
+                            "properties": {
+                                "Section Name": "SkillInAir",
+                                "条件编号": 20,
+                                "是否为技能": true
+                            }
+                        },
+                        "payloadMatches": [33],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ANS_CameraShake_C",
+                        "time": 0.66271675,
+                        "duration": 0.59105945,
+                        "endTime": 1.2537762,
+                        "trackIndex": 18,
+                        "state": true,
+                        "payload": {
+                            "index": 41,
+                            "class": "BP_ANS_CameraShake_C",
+                            "export": "BP_ANS_CameraShake_C_1",
+                            "properties": {
+                                "OscillationDuration": 0.2,
+                                "OscillationBlendOutTime": 0.3,
+                                "LocOscillation": {
+                                    "X": {
+                                        "Amplitude": 3,
+                                        "Frequency": 35
+                                    },
+                                    "Y": {
+                                        "Amplitude": 3,
+                                        "Frequency": 37
+                                    },
+                                    "Z": {
+                                        "Amplitude": 5,
+                                        "Frequency": 42
+                                    }
+                                },
+                                "FOVOscillation": {
+                                    "Amplitude": 5,
+                                    "Frequency": 45
+                                }
+                            }
+                        },
+                        "payloadMatches": [41],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 0.6666667,
+                        "duration": 0,
+                        "endTime": 0.4333333,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 31,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_6",
+                            "properties": {
+                                "通知名称": "hit4"
+                            }
+                        },
+                        "payloadMatches": [31],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 0.6666667,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 6,
+                        "state": false,
+                        "payload": {
+                            "index": 20,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_3",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Slash'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Slash.0"
+                                }
+                            }
+                        },
+                        "payloadMatches": [20],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "JumpCancel",
+                        "time": 0.6999999,
+                        "duration": 3.2000003,
+                        "endTime": 3.9,
+                        "trackIndex": 5,
+                        "state": true,
+                        "payload": {
+                            "index": 6,
+                            "class": "AnimNotifyState_JumpCancel",
+                            "export": "AnimNotifyState_JumpCancel_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [6],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillCancel_C",
+                        "time": 0.6999999,
+                        "duration": 3.2000003,
+                        "endTime": 3.9,
+                        "trackIndex": 7,
+                        "state": true,
+                        "payload": {
+                            "index": 37,
+                            "class": "BP_AnimNotifyState_SkillCancel_C",
+                            "export": "BP_AnimNotifyState_SkillCancel_C_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [37],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraShake_C",
+                        "time": 0.70000005,
+                        "duration": 0,
+                        "endTime": 0.70000005,
+                        "trackIndex": 2,
+                        "state": false,
+                        "payload": {
+                            "index": 16,
+                            "class": "BP_AnimNotify_CameraShake_C",
+                            "export": "BP_AnimNotify_CameraShake_C_3",
+                            "properties": {
+                                "ShakeBP": {
+                                    "ObjectName": "BlueprintGeneratedClass'BP_CS_HeitaoE_Hit_C'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Blueprint/CameraShake/BP_CS_HeitaoE_Hit.0"
+                                },
+                                "EffectId": 110114,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [16],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "WalkCancel",
+                        "time": 0.8666666,
+                        "duration": 3.0333335,
+                        "endTime": 3.9,
+                        "trackIndex": 6,
+                        "state": true,
+                        "payload": {
+                            "index": 10,
+                            "class": "AnimNotifyState_WalkCancel",
+                            "export": "AnimNotifyState_WalkCancel_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [10],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 1.3,
+                        "duration": 0,
+                        "endTime": 1.3,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 25,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_0",
+                            "properties": {
+                                "通知名称": "hit5"
+                            }
+                        },
+                        "payloadMatches": [25],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_Sound",
+                        "time": 1.4033966,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 19,
+                        "state": false,
+                        "payload": {
+                            "index": 32,
+                            "class": "BP_AnimNotify_Sound_C",
+                            "export": "BP_AnimNotify_Sound_C_0",
+                            "properties": {
+                                "bEndStopByTag": true,
+                                "bEndStopByMontage": true,
+                                "FMODEvent": {
+                                    "ObjectName": "FMODEvent'skill01_end'",
+                                    "ObjectPath": "EM/Content/Asset/Audio/FMOD/Events/sfx/player/Heitao/skill01_end.0"
+                                },
+                                "bFollowSocket": true
+                            }
+                        },
+                        "payloadMatches": [32],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "UnbindWeapon",
+                        "time": 2.266667,
+                        "duration": 1.6363759,
+                        "endTime": 3.9030428,
+                        "trackIndex": 8,
+                        "state": true,
+                        "payload": {
+                            "index": 8,
+                            "class": "AnimNotifyState_UnbindWeapon",
+                            "export": "AnimNotifyState_UnbindWeapon_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [8],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "ChangeGravity",
+                        "time": 3.9,
+                        "duration": 0.4876585,
+                        "endTime": 4.3876586,
+                        "trackIndex": 10,
+                        "state": true,
+                        "payload": {
+                            "index": 3,
+                            "class": "AnimNotifyState_ChangeGravity",
+                            "export": "AnimNotifyState_ChangeGravity_2",
+                            "properties": {
+                                "DesignedGravity": 0.1,
+                                "bResetXYVelocity": true
+                            }
+                        },
+                        "payloadMatches": [3],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ANS_PostProcess_C",
+                        "time": 3.9,
+                        "duration": 0.297956,
+                        "endTime": 4.197956,
+                        "trackIndex": 11,
+                        "state": true,
+                        "payload": {
+                            "index": 42,
+                            "class": "BP_ANS_PostProcess_C",
+                            "export": "BP_ANS_PostProcess_C_1",
+                            "properties": {
+                                "仅对自己生效": true,
+                                "PostMat": {
+                                    "ObjectName": "MaterialInstanceConstant'm_post_cha_yb_001'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Material/Post/m_post_cha_yb_001.0"
+                                },
+                                "CurrentTime": 1.0000026,
+                                "PostProcessType": "EPPType::PostCha",
+                                "PostCurveData": {
+                                    "ObjectName": "CurveLinearColor'FX_PostCurve_10'",
+                                    "ObjectPath": "EM/Content/Asset/Effect/Curve/PostCurve/FX_PostCurve_10.0"
+                                },
+                                "TimeDilation": 0.3,
+                                "RealTimeDilation": 0.3,
+                                "BlurRadius": 1.5,
+                                "BlurIntensity": 1.2,
+                                "BlurPosition": {
+                                    "X": 0,
+                                    "Y": 105,
+                                    "Z": 105
+                                }
+                            }
+                        },
+                        "payloadMatches": [42],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 3.9333334,
+                        "duration": 0,
+                        "endTime": 0.433333,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 27,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_2",
+                            "properties": {
+                                "通知名称": "hit4"
+                            }
+                        },
+                        "payloadMatches": [27],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 3.947412,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 5,
+                        "state": false,
+                        "payload": {
+                            "index": 21,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_4",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Range'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Range.0"
+                                },
+                                "EffectId": 110114,
+                                "ConditionId": 101
+                            }
+                        },
+                        "payloadMatches": [21],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 4.1333337,
+                        "duration": 0,
+                        "endTime": 4.1333337,
+                        "trackIndex": 1,
+                        "state": false,
+                        "payload": {
+                            "index": 26,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_1",
+                            "properties": {
+                                "通知名称": "hit5"
+                            }
+                        },
+                        "payloadMatches": [26],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "JumpCancel",
+                        "time": 4.4,
+                        "duration": 0.3666668,
+                        "endTime": 4.766667,
+                        "trackIndex": 5,
+                        "state": true,
+                        "payload": {
+                            "index": 7,
+                            "class": "AnimNotifyState_JumpCancel",
+                            "export": "AnimNotifyState_JumpCancel_3",
+                            "properties": {}
+                        },
+                        "payloadMatches": [7],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "WalkCancel",
+                        "time": 4.4,
+                        "duration": 0.3666668,
+                        "endTime": 4.766667,
+                        "trackIndex": 6,
+                        "state": true,
+                        "payload": {
+                            "index": 11,
+                            "class": "AnimNotifyState_WalkCancel",
+                            "export": "AnimNotifyState_WalkCancel_2",
+                            "properties": {}
+                        },
+                        "payloadMatches": [11],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillCancel_C",
+                        "time": 4.4,
+                        "duration": 0.3666668,
+                        "endTime": 4.766667,
+                        "trackIndex": 7,
+                        "state": true,
+                        "payload": {
+                            "index": 38,
+                            "class": "BP_AnimNotifyState_SkillCancel_C",
+                            "export": "BP_AnimNotifyState_SkillCancel_C_2",
+                            "properties": {}
+                        },
+                        "payloadMatches": [38],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "UnbindWeapon",
+                        "time": 4.4,
+                        "duration": 0.3666668,
+                        "endTime": 4.766667,
+                        "trackIndex": 8,
+                        "state": true,
+                        "payload": {
+                            "index": 9,
+                            "class": "AnimNotifyState_UnbindWeapon",
+                            "export": "AnimNotifyState_UnbindWeapon_1",
+                            "properties": {}
+                        },
+                        "payloadMatches": [9],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_QuitSkill_C",
+                        "time": 4.7333336,
+                        "duration": 0,
+                        "endTime": 4.7333336,
+                        "trackIndex": 0,
+                        "state": false,
+                        "payload": {
+                            "index": 24,
+                            "class": "BP_AnimNotify_QuitSkill_C",
+                            "export": "BP_AnimNotify_QuitSkill_C_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [24],
+                        "payloadSource": "objectPath"
+                    }
+                ],
+                "branchingPoints": [
+                    {
+                        "notifyIndex": 0,
+                        "time": 0.0001,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 4,
+                        "time": 0.0001,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 8,
+                        "time": 0.06666666,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 0,
+                        "time": 0.24006595,
+                        "type": "EAnimNotifyEventType::End"
+                    },
+                    {
+                        "notifyIndex": 13,
+                        "time": 0.26666668,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 17,
+                        "time": 0.43333334,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 23,
+                        "time": 0.6666667,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 29,
+                        "time": 1.3,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 34,
+                        "time": 3.9333334,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 36,
+                        "time": 4.1333337,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 4,
+                        "time": 4.766667,
+                        "type": "EAnimNotifyEventType::End"
+                    }
+                ]
+            },
+            "additionalMontages": [],
+            "sequences": [
+                {
+                    "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01",
+                    "length": 3.9,
+                    "frames": 118,
+                    "fps": 30.256410256410255,
+                    "rootMotion": true,
+                    "skeleton": "EM/Content/Asset/Char/Player/Skeleton/Biped_Skeleton",
+                    "notifies": [
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 0.9014805
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 0.9880873
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 0.42674702
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 0.38504747
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 0.981672
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 0.01,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0.027023,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.06666667,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.1,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0.10040784,
+                            "duration": 0.7369392
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.16666667,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0.18308155,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.185264,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.23333335,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.300829,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.36666667,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.418464,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0.47466528,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.49378657,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0.62727445,
+                            "duration": 0.4617291
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.63147885,
+                            "duration": 0
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 0.64166015,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0.79294336,
+                            "duration": 0
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 2.146415,
+                            "duration": 0
+                        }
+                    ]
+                },
+                {
+                    "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill01_01",
+                    "length": 0.8666667,
+                    "frames": 27,
+                    "fps": 31.15384495562135,
+                    "rootMotion": true,
+                    "skeleton": "EM/Content/Asset/Char/Player/Skeleton/Biped_Skeleton",
+                    "notifies": []
+                }
+            ],
+            "animationRefs": [
+                {
+                    "nodeId": 110111,
+                    "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill01_Montage",
+                    "animPath": "/Game/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/",
+                    "animResource": "Heitao_Skill01_Montage",
+                    "animName": null,
+                    "animSubPath": null,
+                    "playRate": 1
+                }
+            ],
+            "animBP": "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao",
+            "blueprintErrors": []
+        },
+        "110102": {
+            "id": 110102,
+            "characterId": 1101,
+            "parentSkillId": null,
+            "owner": {
+                "kind": "char",
+                "id": 1101
+            },
+            "slot": "Q",
+            "lua": {
+                "skillType": "Skill2",
+                "nameKey": "SKILL_110102_NAME",
+                "beginNodeId": 110121,
+                "behavior": "附加增益(110101)[每1秒消耗30神智, 激活技能, 召唤武器, 禁用[下落攻击], 霸体];召唤实体(110141)",
+                "fields": [
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_SpCost"
+                        },
+                        "值": 10,
+                        "格式": "{}"
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_SpChangeScd"
+                        },
+                        "值": 30,
+                        "格式": "{}"
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamage1"
+                        },
+                        "值": 0.19,
+                        "削韧": 15,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamage2"
+                        },
+                        "值": 0.2,
+                        "削韧": 15,
+                        "Boss削韧": 20,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamage3"
+                        },
+                        "值": 0.26,
+                        "削韧": 25,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamage4"
+                        },
+                        "值": 0.35,
+                        "削韧": 30,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamage5"
+                        },
+                        "值": 0.42,
+                        "削韧": 40,
+                        "Boss削韧": 35,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_ComboDamageRadius"
+                        },
+                        "值": 3,
+                        "格式": "{}\u0001GT{SKILL_DESC_Meter}\u0001"
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_HeavyAttackDemage"
+                        },
+                        "值": 3.29,
+                        "削韧": 73,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_SlideAttackDemage"
+                        },
+                        "值": 1.53,
+                        "削韧": 33,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamage1"
+                        },
+                        "值": 2.09,
+                        "削韧": 15,
+                        "Boss削韧": 27,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamage2"
+                        },
+                        "值": 2.59,
+                        "削韧": 15,
+                        "Boss削韧": 32,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamage3"
+                        },
+                        "值": 2.91,
+                        "削韧": 15,
+                        "Boss削韧": 37,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamage4"
+                        },
+                        "值": 4,
+                        "削韧": 15,
+                        "Boss削韧": 42,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamage5"
+                        },
+                        "值": 4.34,
+                        "削韧": 15,
+                        "Boss削韧": 47,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveDamageOn"
+                        },
+                        "值": 2.09,
+                        "削韧": 15,
+                        "Boss削韧": 27,
+                        "is_damage": true
+                    },
+                    {
+                        "名称": {
+                            "__t": "t",
+                            "key": "SKILL_DESC_1101WaveWidth"
+                        },
+                        "值": 12,
+                        "格式": "{}\u0001GT{SKILL_DESC_Meter}\u0001"
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": 110121,
+                        "animPath": "/Game/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/",
+                        "animResource": "Heitao_Skill02_On_Montage",
+                        "animName": null,
+                        "animSubPath": null,
+                        "playRate": 1,
+                        "effects": [110121, 110122],
+                        "nextNodeId": null,
+                        "branchNodeIds": []
+                    }
+                ],
+                "effects": [
+                    {
+                        "id": 110121,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Self",
+                            "TaskEffects": [
+                                {
+                                    "BuffId": 110101,
+                                    "Function": "AddBuff",
+                                    "LastTime": -1
+                                }
+                            ],
+                            "TaskId": 110121
+                        }
+                    },
+                    {
+                        "id": 110122,
+                        "notifyNames": ["hit2"],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit2"],
+                            "TargetFilter": "Heitao_Skill02_Search",
+                            "TaskEffects": [
+                                {
+                                    "ATKBase": "ATK_Ultra",
+                                    "CreatureId": 110141,
+                                    "Function": "CreateSkillCreature",
+                                    "Location": [0, 0, 30],
+                                    "Rotation": [0, 0, 30]
+                                }
+                            ],
+                            "TaskId": 110122
+                        }
+                    },
+                    {
+                        "id": 110141,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small180",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 15,
+                                    "CauseHit": "HitFly_XY400Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110141
+                        }
+                    },
+                    {
+                        "id": 110142,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small180",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 20,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110142
+                        }
+                    },
+                    {
+                        "id": 110143,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 25,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 25
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110143
+                        }
+                    },
+                    {
+                        "id": 110144,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small180",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 30,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 30
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110144
+                        }
+                    },
+                    {
+                        "id": 110145,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AllowSkillRangeModify": true,
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small180",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110151,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 35,
+                                    "CauseHit": "HitFly_XY400Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 40
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 110101
+                                }
+                            ],
+                            "TaskId": 110145
+                        }
+                    },
+                    {
+                        "id": 1010121,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Middle180",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK",
+                                    "DamageTag": ["Melee", "Weapon", "HeavyAttack"],
+                                    "Function": "Damage",
+                                    "Rate": 3.29
+                                },
+                                {
+                                    "Function": "ExecutePassiveFunction",
+                                    "FunctionName": "ClearComboCount",
+                                    "PassiveEffectId": 102
+                                },
+                                {
+                                    "Function": "PlayFX",
+                                    "MaxHitFXNum": 5,
+                                    "WeaponFXGroupName": "Hit1"
+                                },
+                                {
+                                    "CauseHit": "HitFly_XY800Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 73
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.03,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "MeleeHitLevel": "Heavy",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 1010121
+                        }
+                    },
+                    {
+                        "id": 1010141,
+                        "notifyNames": ["hit1"],
+                        "raw": {
+                            "AttackRangeType": "Normal",
+                            "HatredIncrement": 40,
+                            "NotifyName": ["hit1"],
+                            "TargetFilter": "Char_Cylinder_Small",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK",
+                                    "DamageTag": ["Melee", "Weapon", "SlideAttack"],
+                                    "Function": "Damage",
+                                    "Rate": 1.53
+                                },
+                                {
+                                    "Function": "PlayFX",
+                                    "FxRotator": [0, 90, 0],
+                                    "IsFaceToChar": true,
+                                    "MaxHitFXNum": 3,
+                                    "WeaponFXGroupName": "Hit"
+                                },
+                                {
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 33
+                                },
+                                {
+                                    "Condition": 100,
+                                    "Dilation": 0,
+                                    "Duration": 0.1,
+                                    "Function": "HitStop"
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "MeleeHitLevel": "Normal",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 1010141
+                        }
+                    },
+                    {
+                        "id": 110151,
+                        "notifyNames": [],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "TargetFilter": "Target",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110152,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 27,
+                                    "CauseHit": "HitFly_XY400Z400_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 110151
+                        }
+                    },
+                    {
+                        "id": 110152,
+                        "notifyNames": [],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "TargetFilter": "Target",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110152,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 32,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 110152
+                        }
+                    },
+                    {
+                        "id": 110153,
+                        "notifyNames": [],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "TargetFilter": "Target",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110152,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 37,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 110153
+                        }
+                    },
+                    {
+                        "id": 110154,
+                        "notifyNames": [],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "TargetFilter": "Target",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110152,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 42,
+                                    "CauseHit": "HitFly_XY200Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 110154
+                        }
+                    },
+                    {
+                        "id": 110155,
+                        "notifyNames": [],
+                        "raw": {
+                            "HatredIncrement": 40,
+                            "TargetFilter": "Target",
+                            "TaskEffects": [
+                                {
+                                    "BaseAttr": "ATK_Ultra",
+                                    "DamageTag": ["Melee", "Weapon", "Attack", "Ultra"],
+                                    "Function": "Damage",
+                                    "Rate": "#1"
+                                },
+                                {
+                                    "FXId": 110152,
+                                    "Function": "PlayFX"
+                                },
+                                {
+                                    "BossValue": 47,
+                                    "CauseHit": "HitFly_XY400Z300_F",
+                                    "Function": "CutToughness",
+                                    "Value": 15
+                                },
+                                {
+                                    "Function": "PlaySE",
+                                    "SEId": 104
+                                }
+                            ],
+                            "TaskId": 110155
+                        }
+                    }
+                ],
+                "buffIds": [110101],
+                "passiveEffectIds": [102],
+                "passiveEffectBPs": []
+            },
+            "sources": {
+                "montage": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill02_On_Montage",
+                "montages": ["EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill02_On_Montage"],
+                "bpPackages": [],
+                "animBPs": ["EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao"]
+            },
+            "montage": {
+                "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill02_On_Montage",
+                "length": 2.3333333,
+                "sections": [
+                    {
+                        "name": "Default",
+                        "begin": 0,
+                        "length": 2.3333333,
+                        "next": "None",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill02_On"
+                    }
+                ],
+                "segments": [
+                    {
+                        "slot": "DefaultSlot",
+                        "sequence": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill02_On",
+                        "start": 0,
+                        "end": 2.3333333,
+                        "rate": 1,
+                        "startPos": 0,
+                        "loopingCount": 1
+                    }
+                ],
+                "notifies": [
+                    {
+                        "name": "Invincible",
+                        "time": 0,
+                        "duration": 1.709549,
+                        "endTime": 1.709549,
+                        "trackIndex": 1,
+                        "state": true,
+                        "payload": {
+                            "index": 1,
+                            "class": "AnimNotifyState_Invincible",
+                            "export": "AnimNotifyState_Invincible_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [1],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_CameraControl_C",
+                        "time": 0,
+                        "duration": 1.1859645,
+                        "endTime": 1.1859645,
+                        "trackIndex": 2,
+                        "state": true,
+                        "payload": {
+                            "index": 10,
+                            "class": "BP_AnimNotifyState_CameraControl_C",
+                            "export": "BP_AnimNotifyState_CameraControl_C_0",
+                            "properties": {
+                                "CameraNotifyStateInfos": [
+                                    {
+                                        "TriggerTime": 0,
+                                        "TransitionTime": 0.5,
+                                        "bUsingPresetData": false,
+                                        "PresetCameraName": "Arm150OffsetZ40",
+                                        "CameraName": "000",
+                                        "CameraControlInfo": {
+                                            "TimelineFloatCurve": {
+                                                "ObjectName": "CurveFloat'CameraCurve'",
+                                                "ObjectPath": "EM/Content/AssetDesign/Camera/CameraCurves/CameraCurve.0"
+                                            },
+                                            "SocketOffset": {
+                                                "X": 0,
+                                                "Y": -20,
+                                                "Z": -40
+                                            },
+                                            "ArmLength": -150,
+                                            "ProbeSize": 12,
+                                            "ArmPos": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "CameraLagMaxDistance": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "CameraLagSpeed": {
+                                                "X": 0,
+                                                "Y": 0,
+                                                "Z": 0
+                                            },
+                                            "bIncrementArmLength": true,
+                                            "bIncrementSocketOffset": true,
+                                            "bIncrementArmPos": false
+                                        },
+                                        "Priority": 100000
+                                    }
+                                ]
+                            }
+                        },
+                        "payloadMatches": [10],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_GlobalTimeDilation_C",
+                        "time": 0,
+                        "duration": 1.2996315,
+                        "endTime": 1.2996315,
+                        "trackIndex": 4,
+                        "state": true,
+                        "payload": {
+                            "index": 12,
+                            "class": "BP_AnimNotifyState_GlobalTimeDilation_C",
+                            "export": "BP_AnimNotifyState_GlobalTimeDilation_C_0",
+                            "properties": {
+                                "Time Dilation": 0.03,
+                                "功能开关": false
+                            }
+                        },
+                        "payloadMatches": [12],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_AnimNotifyStateBase_EffectCreature_C",
+                        "time": 0,
+                        "duration": 0.6666666,
+                        "endTime": 0.6666666,
+                        "trackIndex": 7,
+                        "state": true,
+                        "payload": {
+                            "index": 15,
+                            "class": "BP_AnimNotifyStateBase_EffectCreature_C",
+                            "export": "BP_AnimNotifyStateBase_EffectCreature_C_0",
+                            "properties": {
+                                "EffectCreatureId": 110111,
+                                "Attach to Char": true,
+                                "Socket Name": "hook_upperarm_l"
+                            }
+                        },
+                        "payloadMatches": [15],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_AnimNotifyStateBase_EffectCreature_C",
+                        "time": 0,
+                        "duration": 0.6666666,
+                        "endTime": 0.6666666,
+                        "trackIndex": 8,
+                        "state": true,
+                        "payload": {
+                            "index": 16,
+                            "class": "BP_AnimNotifyStateBase_EffectCreature_C",
+                            "export": "BP_AnimNotifyStateBase_EffectCreature_C_1",
+                            "properties": {
+                                "EffectCreatureId": 110112,
+                                "Attach to Char": true,
+                                "Socket Name": "hook_arm_r"
+                            }
+                        },
+                        "payloadMatches": [16],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_HideChar_C",
+                        "time": 0,
+                        "duration": 0.6666666,
+                        "endTime": 0.6666666,
+                        "trackIndex": 9,
+                        "state": true,
+                        "payload": {
+                            "index": 13,
+                            "class": "BP_AnimNotifyState_HideChar_C",
+                            "export": "BP_AnimNotifyState_HideChar_C_0",
+                            "properties": {
+                                "隐藏武器": true
+                            }
+                        },
+                        "payloadMatches": [13],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillFeature_C",
+                        "time": 0,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 0,
+                        "state": false,
+                        "payload": {
+                            "index": 8,
+                            "class": "BP_AnimNotify_SkillFeature_C",
+                            "export": "BP_AnimNotify_SkillFeature_C_0",
+                            "properties": {
+                                "CapsuleTraceDis": 150,
+                                "AttachBoneName": "camera_point",
+                                "bUseNewSkillFeature": true,
+                                "FeatureSequence": "(, /Game/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill02_Cam.Heitao_Skill02_Cam, )",
+                                "BindingTag": "Skill2"
+                            }
+                        },
+                        "payloadMatches": [8],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_Sound_C",
+                        "time": 0.01392287,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 7,
+                        "state": false,
+                        "payload": {
+                            "index": 9,
+                            "class": "BP_AnimNotify_Sound_C",
+                            "export": "BP_AnimNotify_Sound_C_0",
+                            "properties": {
+                                "FMODEvent": {
+                                    "ObjectName": "FMODEvent'skill02_attack'",
+                                    "ObjectPath": "EM/Content/Asset/Audio/FMOD/Events/sfx/player/Heitao/skill02_attack.0"
+                                },
+                                "bFollowSocket": true
+                            }
+                        },
+                        "payloadMatches": [9],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_Loop_C",
+                        "time": 0.5,
+                        "duration": 0.8333334,
+                        "endTime": 1.3333334,
+                        "trackIndex": 3,
+                        "state": true,
+                        "payload": {
+                            "index": 11,
+                            "class": "BP_AnimNotifyState_ForceEffect_Loop_C",
+                            "export": "BP_AnimNotifyState_ForceEffect_Loop_C_0",
+                            "properties": {
+                                "Force Feedback Effect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Range'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Range.0"
+                                }
+                            }
+                        },
+                        "payloadMatches": [11],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 0.5264798,
+                        "duration": 0,
+                        "endTime": 1.6,
+                        "trackIndex": 0,
+                        "state": false,
+                        "payload": {
+                            "index": 7,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_2",
+                            "properties": {
+                                "通知名称": "hit1"
+                            }
+                        },
+                        "payloadMatches": [7],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_ForceEffect_C",
+                        "time": 1.3333334,
+                        "duration": 0,
+                        "endTime": 0,
+                        "trackIndex": 4,
+                        "state": false,
+                        "payload": {
+                            "index": 4,
+                            "class": "BP_AnimNotify_ForceEffect_C",
+                            "export": "BP_AnimNotify_ForceEffect_C_0",
+                            "properties": {
+                                "ForceEffect": {
+                                    "ObjectName": "ForceFeedbackEffect'FE_ExtraLight_Slash'",
+                                    "ObjectPath": "EM/Content/AssetDesign/Controller/FE_ExtraLight_Slash.0"
+                                }
+                            }
+                        },
+                        "payloadMatches": [4],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillEffect_C",
+                        "time": 1.3999999,
+                        "duration": 0,
+                        "endTime": 1.3999999,
+                        "trackIndex": 0,
+                        "state": false,
+                        "payload": {
+                            "index": 6,
+                            "class": "BP_AnimNotify_SkillEffect_C",
+                            "export": "BP_AnimNotify_SkillEffect_C_0",
+                            "properties": {
+                                "通知名称": "hit2"
+                            }
+                        },
+                        "payloadMatches": [6],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "JumpCancel",
+                        "time": 1.65,
+                        "duration": 0.6833333,
+                        "endTime": 2.3333333,
+                        "trackIndex": 3,
+                        "state": true,
+                        "payload": {
+                            "index": 2,
+                            "class": "AnimNotifyState_JumpCancel",
+                            "export": "AnimNotifyState_JumpCancel_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [2],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_SkillCancel_C",
+                        "time": 1.65,
+                        "duration": 0.6833333,
+                        "endTime": 2.3333333,
+                        "trackIndex": 5,
+                        "state": true,
+                        "payload": {
+                            "index": 14,
+                            "class": "BP_AnimNotifyState_SkillCancel_C",
+                            "export": "BP_AnimNotifyState_SkillCancel_C_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [14],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "WalkCancel",
+                        "time": 2.16,
+                        "duration": 0.17333317,
+                        "endTime": 2.3333333,
+                        "trackIndex": 4,
+                        "state": true,
+                        "payload": {
+                            "index": 3,
+                            "class": "AnimNotifyState_WalkCancel",
+                            "export": "AnimNotifyState_WalkCancel_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [3],
+                        "payloadSource": "objectPath"
+                    },
+                    {
+                        "name": "BP_QuitSkill_C",
+                        "time": 2.3,
+                        "duration": 0,
+                        "endTime": 2.3,
+                        "trackIndex": 0,
+                        "state": false,
+                        "payload": {
+                            "index": 5,
+                            "class": "BP_AnimNotify_QuitSkill_C",
+                            "export": "BP_AnimNotify_QuitSkill_C_0",
+                            "properties": {}
+                        },
+                        "payloadMatches": [5],
+                        "payloadSource": "objectPath"
+                    }
+                ],
+                "branchingPoints": [
+                    {
+                        "notifyIndex": 0,
+                        "time": -0.0001,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 6,
+                        "time": 0.0001,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 9,
+                        "time": 0.5264798,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 11,
+                        "time": 1.3999999,
+                        "type": "EAnimNotifyEventType::Begin"
+                    },
+                    {
+                        "notifyIndex": 0,
+                        "time": 1.7094489,
+                        "type": "EAnimNotifyEventType::End"
+                    }
+                ]
+            },
+            "additionalMontages": [],
+            "sequences": [
+                {
+                    "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Skill/Heitao_Skill02_On",
+                    "length": 2.3333333,
+                    "frames": 71,
+                    "fps": 30.42857186326531,
+                    "rootMotion": true,
+                    "skeleton": "EM/Content/Asset/Char/Player/Skeleton/Biped_Skeleton",
+                    "notifies": [
+                        {
+                            "name": "BP_ANS_FresnelColor_C",
+                            "time": 0,
+                            "duration": 2.3333333
+                        },
+                        {
+                            "name": "BP_ANS_FresnelColor_C",
+                            "time": 0,
+                            "duration": 2.333333
+                        },
+                        {
+                            "name": "BP_WeaponDissolve_C",
+                            "time": 0,
+                            "duration": 0.9185668
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 2.0189826
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0,
+                            "duration": 2.0151443
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.181341,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.266667,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.266667,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_Sound_C",
+                            "time": 0.482269,
+                            "duration": 0
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 0.8339875,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.8666666,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_SkillFX_C",
+                            "time": 0.8666666,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_ANS_CameraShake_C",
+                            "time": 0.9288502,
+                            "duration": 0.30513883
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0.9308461,
+                            "duration": 0.43755755
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 0.9404417,
+                            "duration": 0.4433148
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 1.2662016,
+                            "duration": 0
+                        },
+                        {
+                            "name": "PlayNiagaraEffect",
+                            "time": 1.3,
+                            "duration": 0
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 1.3,
+                            "duration": 0.9436556
+                        },
+                        {
+                            "name": "BP_ANS_PostProcess_C",
+                            "time": 1.3292375,
+                            "duration": 0.9755285
+                        }
+                    ]
+                }
+            ],
+            "animationRefs": [
+                {
+                    "nodeId": 110121,
+                    "asset": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/Heitao_Skill02_On_Montage",
+                    "animPath": "/Game/Asset/Char/Player/Char001_Heitao_J/Animation/Montage/Combat/Skill/",
+                    "animResource": "Heitao_Skill02_On_Montage",
+                    "animName": null,
+                    "animSubPath": null,
+                    "playRate": 1
+                }
+            ],
+            "animBP": "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao",
+            "blueprintErrors": []
+        }
+    },
+    "blueprints": {
+        "EM/Content/BluePrints/Combat/PassiveEffect/DesignerBP/Player/BP_Common_PhantomPassive": {
+            "schemaVersion": 1,
+            "asset": "BP_Common_PhantomPassive",
+            "class": {
+                "name": "BP_Common_PhantomPassive_C",
+                "super": "BP_PassiveEffectBase_C",
+                "interfaces": []
+            },
+            "events": [
+                {
+                    "name": "ReceiveBeginPlay",
+                    "target": "ExecuteUbergraph_BP_Common_PhantomPassive",
+                    "entryOffset": 10,
+                    "flags": ["FUNC_Event", "FUNC_Public", "FUNC_BlueprintEvent"]
+                }
+            ],
+            "variables": [
+                {
+                    "name": "UberGraphFrame",
+                    "type": "StructProperty",
+                    "struct": "PointerToUberGraphFrame",
+                    "default": {}
+                },
+                {
+                    "name": "BattleEvent",
+                    "type": "ObjectProperty",
+                    "default": {
+                        "kind": "export",
+                        "name": "BP_BattleEventComponent"
+                    }
+                }
+            ],
+            "components": [],
+            "functions": [
+                {
+                    "name": "ExecuteUbergraph_BP_Common_PhantomPassive",
+                    "flags": ["FUNC_Final", "FUNC_UbergraphFunction", "FUNC_HasDefaults"],
+                    "params": [
+                        {
+                            "name": "EntryPoint",
+                            "type": "IntProperty",
+                            "out": false
+                        }
+                    ],
+                    "locals": [
+                        {
+                            "name": "CallFunc_AddBuffToTarget_SkillLevelSource_CastInput",
+                            "type": "InterfaceProperty",
+                            "out": false
+                        },
+                        {
+                            "name": "CallFunc_AddBuffToTarget_ReturnValue",
+                            "type": "ArrayProperty",
+                            "out": false,
+                            "innerType": "ObjectProperty",
+                            "objectClass": "Buff"
+                        }
+                    ],
+                    "codeSize": 151,
+                    "body": [
+                        {
+                            "op": "EX_ComputedJump",
+                            "offset": 0,
+                            "target": {
+                                "op": "EX_LocalVariable",
+                                "offset": 1,
+                                "property": {
+                                    "path": ["EntryPoint"],
+                                    "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                                }
+                            }
+                        },
+                        {
+                            "op": "EX_Let",
+                            "offset": 10,
+                            "property": null,
+                            "variable": {
+                                "op": "EX_LocalVariable",
+                                "offset": 19,
+                                "property": {
+                                    "path": ["CallFunc_AddBuffToTarget_SkillLevelSource_CastInput"],
+                                    "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                                }
+                            },
+                            "value": {
+                                "op": "EX_ObjToInterfaceCast",
+                                "offset": 28,
+                                "class": "SkillLevelInterface",
+                                "target": {
+                                    "op": "EX_InstanceVariable",
+                                    "offset": 37,
+                                    "property": {
+                                        "path": ["OwnerSkill"],
+                                        "owner": "PassiveEffectObject"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "op": "EX_Let",
+                            "offset": 46,
+                            "property": {
+                                "path": ["CallFunc_AddBuffToTarget_ReturnValue"],
+                                "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                            },
+                            "variable": {
+                                "op": "EX_LocalVariable",
+                                "offset": 55,
+                                "property": {
+                                    "path": ["CallFunc_AddBuffToTarget_ReturnValue"],
+                                    "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                                }
+                            },
+                            "value": {
+                                "op": "EX_Context",
+                                "offset": 64,
+                                "object": {
+                                    "op": "EX_ObjectConst",
+                                    "offset": 65,
+                                    "object": {
+                                        "kind": "import",
+                                        "name": "Default__BattleFunctionLibrary",
+                                        "class": "BattleFunctionLibrary"
+                                    }
+                                },
+                                "context": {
+                                    "op": "EX_FinalFunction",
+                                    "offset": 86,
+                                    "function": "AddBuffToTarget",
+                                    "args": [
+                                        {
+                                            "op": "EX_InstanceVariable",
+                                            "offset": 95,
+                                            "property": {
+                                                "path": ["PassiveOwner"],
+                                                "owner": "PassiveEffectObject"
+                                            }
+                                        },
+                                        {
+                                            "op": "EX_InstanceVariable",
+                                            "offset": 104,
+                                            "property": {
+                                                "path": ["PassiveOwner"],
+                                                "owner": "PassiveEffectObject"
+                                            }
+                                        },
+                                        {
+                                            "op": "EX_InstanceVariable",
+                                            "offset": 113,
+                                            "property": {
+                                                "path": ["BuffId"],
+                                                "owner": "BP_Common_PhantomPassive_C"
+                                            }
+                                        },
+                                        {
+                                            "op": "EX_FloatConst",
+                                            "offset": 122,
+                                            "value": -1
+                                        },
+                                        {
+                                            "op": "EX_FloatConst",
+                                            "offset": 127,
+                                            "value": 0
+                                        },
+                                        {
+                                            "op": "EX_LocalVariable",
+                                            "offset": 132,
+                                            "property": {
+                                                "path": ["CallFunc_AddBuffToTarget_SkillLevelSource_CastInput"],
+                                                "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                                            }
+                                        },
+                                        {
+                                            "op": "EX_IntConst",
+                                            "offset": 141,
+                                            "value": 1
+                                        },
+                                        {
+                                            "op": "EX_NoObject",
+                                            "offset": 146
+                                        }
+                                    ]
+                                },
+                                "property": {
+                                    "path": ["CallFunc_AddBuffToTarget_ReturnValue"],
+                                    "owner": "ExecuteUbergraph_BP_Common_PhantomPassive"
+                                }
+                            }
+                        },
+                        {
+                            "op": "EX_Return",
+                            "offset": 148,
+                            "value": {
+                                "op": "EX_Nothing",
+                                "offset": 149
+                            }
+                        },
+                        {
+                            "op": "EX_EndOfScript",
+                            "offset": 150
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "index": 0,
+                            "startOffset": 0,
+                            "endOffset": 10,
+                            "statements": [0],
+                            "successors": [
+                                {
+                                    "kind": "computedJump",
+                                    "from": 0,
+                                    "block": null
+                                }
+                            ]
+                        },
+                        {
+                            "index": 1,
+                            "startOffset": 10,
+                            "endOffset": 150,
+                            "statements": [1, 2, 3],
+                            "successors": []
+                        },
+                        {
+                            "index": 2,
+                            "startOffset": 150,
+                            "endOffset": 151,
+                            "statements": [4],
+                            "successors": []
+                        }
+                    ]
+                },
+                {
+                    "name": "ReceiveBeginPlay",
+                    "flags": ["FUNC_Event", "FUNC_Public", "FUNC_BlueprintEvent"],
+                    "params": [],
+                    "locals": [],
+                    "codeSize": 18,
+                    "body": [
+                        {
+                            "op": "EX_LocalFinalFunction",
+                            "offset": 0,
+                            "function": "ExecuteUbergraph_BP_Common_PhantomPassive",
+                            "args": [
+                                {
+                                    "op": "EX_IntConst",
+                                    "offset": 9,
+                                    "value": 10
+                                }
+                            ]
+                        },
+                        {
+                            "op": "EX_Return",
+                            "offset": 15,
+                            "value": {
+                                "op": "EX_Nothing",
+                                "offset": 16
+                            }
+                        },
+                        {
+                            "op": "EX_EndOfScript",
+                            "offset": 17
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "index": 0,
+                            "startOffset": 0,
+                            "endOffset": 17,
+                            "statements": [0, 1],
+                            "successors": []
+                        },
+                        {
+                            "index": 1,
+                            "startOffset": 17,
+                            "endOffset": 18,
+                            "statements": [2],
+                            "successors": []
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "animBPs": {
+        "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao": {
+            "asset": "EM/Content/AssetDesign/Char/Player/Heitao/ABP_Heitao",
+            "className": "ABP_Heitao_C",
+            "targetSkeleton": "EM/Content/Asset/Char/Player/Skeleton/Biped_Skeleton",
+            "syncGroupNames": [
+                "moving",
+                "RunStart",
+                "Pivot",
+                "Pivot2",
+                "crouching",
+                "Slide_Start",
+                "Slide_Loop",
+                "WallJump",
+                "FirstJump",
+                "ShootHold",
+                "WalkStop",
+                "WalkSyn",
+                "WalkSync"
+            ],
+            "linkedLayerClass": null,
+            "stateMachines": [],
+            "graph": [
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_192",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Idle'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Idle.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_112",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Crossbow01_Shooting_Loop'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Combat/Weapon/Crossbow/Heitao_Crossbow01_Shooting_Loop.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_69",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Linen_Skill02_Idle'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char011_Linen/Animation/Sequence/Combat/Skill/Linen_Skill02_Idle.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_BlendSpacePlayer",
+                    "name": "AnimGraphNode_BlendSpacePlayer_6",
+                    "properties": {
+                        "BlendSpace": {
+                            "ObjectName": "BlendSpace'BS_FlyingEnd_XY'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char010_Saiqi/Animation/Sequence/Combat/Skill/BS_FlyingEnd_XY.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_BlendSpacePlayer",
+                    "name": "AnimGraphNode_BlendSpacePlayer_5",
+                    "properties": {
+                        "BlendSpace": {
+                            "ObjectName": "BlendSpace'Saiqi_FlyingACC_Start'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char010_Saiqi/Animation/Sequence/Combat/Skill/Saiqi_FlyingACC_Start.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_17",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Walk_Stop_LF'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Walk_Stop_LF.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_16",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Walk_Stop_RF'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Walk_Stop_RF.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_15",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Walk_Stop_LU'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Walk_Stop_LU.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_14",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Walk_Stop_RU'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Walk_Stop_RU.0"
+                        }
+                    }
+                },
+                {
+                    "node": "AnimGraphNode_SequencePlayer",
+                    "name": "AnimGraphNode_SequencePlayer_12",
+                    "properties": {
+                        "Sequence": {
+                            "ObjectName": "AnimSequence'Heitao_Run_Loop'",
+                            "ObjectPath": "EM/Content/Asset/Char/Player/Char001_Heitao_J/Animation/Sequence/Locomotion/Heitao_Run_Loop.0"
+                        }
+                    }
+                }
+            ],
+            "stateMachinesUnavailable": "BakedStateMachines is not serialized by UAssetAPI for cooked AnimBlueprintGeneratedClass"
+        }
+    },
+    "buffs": {
+        "110002": {
+            "id": 110002,
+            "lua": {
+                "AddAttrs": [
+                    {
+                        "AttrName": "ATK",
+                        "Rate": 0.4
+                    }
+                ],
+                "BuffId": 110002,
+                "CombatConditionId": 1001,
+                "MaxLayer": 2,
+                "MergeRule1": "Global",
+                "MergeRule2": "NewFree"
+            },
+            "bpPackages": [],
+            "bpNames": []
+        },
+        "110101": {
+            "id": 110101,
+            "lua": {
+                "ActivateSkills": {
+                    "110102": 110121
+                },
+                "AllowSkillSustainModify": true,
+                "BuffId": 110101,
+                "BuffType": [70],
+                "DisableSkills": ["FallAttack"],
+                "DotDatas": [
+                    {
+                        "DotDelay": 1,
+                        "Interval": 1,
+                        "Type": "SpChange",
+                        "Value": -30
+                    }
+                ],
+                "EmissiveIntensity": {
+                    "Hair": 150
+                },
+                "EyeStrength": 1500,
+                "FresnelParams": {
+                    "FresnelColor": [1, 0, 0, 0],
+                    "FresnelColorRange": {
+                        "Default": 0.5
+                    },
+                    "FresnelColorStrength": {
+                        "Default": 10,
+                        "FresnelColor": 10
+                    }
+                },
+                "MergeRule1": "Personal",
+                "MergeRule2": "Merge",
+                "NotEnterCharacterTagType": ["Hit"],
+                "RemoveWhenSpZero": true,
+                "UseSummonWeapon": 1,
+                "VisualEffects": [110129]
+            },
+            "bpPackages": [],
+            "bpNames": []
+        },
+        "110102": {
+            "id": 110102,
+            "lua": {
+                "ActivateSkills": {
+                    "110101": 110111
+                },
+                "BuffId": 110102,
+                "MergeRule1": "Personal",
+                "MergeRule2": "Merge"
+            },
+            "bpPackages": [],
+            "bpNames": ["BP_Heitao_Passive2"]
+        }
+    }
+}

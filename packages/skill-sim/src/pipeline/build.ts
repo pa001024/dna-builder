@@ -18,6 +18,8 @@ import {
     type BuffBehavior,
     type CoverageReport,
     emptyCoverageReport,
+    hasExecutableAction,
+    isExecutableAction,
     type NativeCall,
     type Phase,
     type ResourceCost,
@@ -25,9 +27,9 @@ import {
 } from "../schema/ir"
 import { validateSkillBehaviorDoc } from "../schema/validation"
 import { deriveBuffDots, type LuaContext, mapEffectList, parseLuaBehavior } from "./lua"
-import { levelTenValue, mapNativeCall } from "./native-map"
+import { isExpressionOnlyCall, levelTenValue, mapNativeCall } from "./native-map"
 import { normalizeEffects, type ResolvedSkill, resolveAssetReferences } from "./resolve"
-import { type Diagnostic, diagnostic, hasErrors, type SkillDataIndex } from "./types"
+import { type Diagnostic, diagnostic, hasErrors, KNOWN_SKILL_RESOURCES, resolveResourceToken, type SkillDataIndex } from "./types"
 
 export interface BuildOptions {
     /** 覆盖导出器记录的 gameVersion */
@@ -46,6 +48,7 @@ export function buildSkillBehaviorDoc(asset: SkillAssetDoc, index: SkillDataInde
     const diagnostics: Diagnostic[] = []
     const resolved = resolveAssetReferences(asset, index)
     diagnostics.push(...resolved.diagnostics)
+    const knownResources = new Set(index.getKnownResources?.() ?? KNOWN_SKILL_RESOURCES)
 
     const buffs = buildBuffs(asset)
     const skills: SkillBehaviorDoc["skills"] = {}
@@ -53,7 +56,7 @@ export function buildSkillBehaviorDoc(asset: SkillAssetDoc, index: SkillDataInde
 
     const unknownTaskFunctions: string[] = []
     for (const item of resolved.skills) {
-        const built = buildSkill(item, buffs, diagnostics)
+        const built = buildSkill(item, buffs, knownResources, diagnostics)
         skills[String(item.skillId)] = built.behavior
         unknownTaskFunctions.push(...built.unknownTaskFunctions)
         accumulateCoverage(coverage, item.asset, built.behavior, Boolean(item.asset.authored?.phases))
@@ -61,7 +64,7 @@ export function buildSkillBehaviorDoc(asset: SkillAssetDoc, index: SkillDataInde
 
     coverage.charactersTotal = asset.characters?.length ?? 0
     coverage.skillsTotal = resolved.skills.length
-    coverage.skillsWithBehavior = Object.values(skills).filter(skill => skill.phases.some(phase => phase.actions.length > 0)).length
+    coverage.skillsWithBehavior = Object.values(skills).filter(hasExecutableAction).length
     coverage.nativeCallsUnknown = uniqueSorted(coverage.nativeCallsUnknown)
     coverage.unmatchedNotifies = uniqueSorted(coverage.unmatchedNotifies)
     coverage.unknownTaskFunctions = uniqueSorted(unknownTaskFunctions)
@@ -95,7 +98,12 @@ interface SkillBuildOutput {
     unknownTaskFunctions: string[]
 }
 
-function buildSkill(resolved: ResolvedSkill, buffs: Record<string, BuffBehavior>, diagnostics: Diagnostic[]): SkillBuildOutput {
+function buildSkill(
+    resolved: ResolvedSkill,
+    buffs: Record<string, BuffBehavior>,
+    knownResources: ReadonlySet<string>,
+    diagnostics: Diagnostic[]
+): SkillBuildOutput {
     const { asset: skill, data, skillId, characterId, slot } = resolved
     const skillPath = `skills.${skillId}`
     const fields = toDataFields(skill.lua?.fields, data?.fields)
@@ -142,23 +150,32 @@ function buildSkill(resolved: ResolvedSkill, buffs: Record<string, BuffBehavior>
     const cast = {
         time: authoredCast?.time ?? montageActionTime ?? firstActionTime(phases),
         cooldown: authoredCast?.cooldown ?? data?.cd ?? 0,
-        costs: authoredCast?.costs ?? parseCosts(fields),
+        costs: authoredCast?.costs ?? parseCosts(fields, knownResources),
         canMove: authoredCast?.canMove ?? montage.canMove,
     }
 
     const sources = collectSources(skill, authored !== undefined)
     const provenance = {
         bpPackages: skill.sources?.bpPackages ?? [],
+        animBPs: skill.sources?.animBPs ?? [],
         nativeCalls,
         unmatchedNotify: uniqueSorted(unmatchedNotify),
         inertNotifies: uniqueSorted(inertNotifies),
         montageLength: skill.montage?.length,
         branchingPoints: toBranchingPoints(skill),
         unparsedLua: unparsedLua.length > 0 ? uniqueSorted(unparsedLua) : undefined,
+        authoredNote: authored?.note,
     }
 
-    if (!phases.some(phase => phase.actions.length > 0)) {
-        diagnostics.push(diagnostic("warn", "build.no-actions", skillPath, `技能 ${skillId} 没有可执行动作（仅数值字段或未识别 notify）`))
+    if (!phases.some(phase => phase.actions.some(isExecutableAction))) {
+        diagnostics.push(
+            diagnostic(
+                "warn",
+                "build.no-actions",
+                skillPath,
+                `技能 ${skillId} 没有可执行动作（需 damage/applyBuff/removeBuff；native-only / 仅数值字段不算）`
+            )
+        )
     }
 
     return { behavior: { id: skillId, characterId, slot, cast, phases, sources, provenance }, unknownTaskFunctions }
@@ -309,14 +326,24 @@ function deriveFromBlueprint(
     fields: { name: string; values: number | number[]; tag?: string[] }[]
 ): DerivedBlueprint {
     const result: DerivedBlueprint = { phases: [], calls: [] }
-    const functions = skill.blueprint?.functions
-    if (!Array.isArray(functions)) return result
+    const blueprint = skill.blueprint
+    const functions = blueprint?.functions
+    if (!blueprint || !Array.isArray(functions)) return result
+    const byName = new Map<string, Record<string, unknown>>()
+    for (const fn of functions) {
+        if (typeof fn === "object" && fn !== null && typeof (fn as Record<string, unknown>).name === "string") {
+            byName.set((fn as Record<string, unknown>).name as string, fn as Record<string, unknown>)
+        }
+    }
+    const reachable = reachableFunctions(blueprint, byName)
     const seen = new Set<string>()
     const actions: Action[] = []
-    for (const fn of functions) {
+    for (const fn of reachable) {
         const calls: { fn: string; args: unknown[] }[] = []
         collectCalls(fn.body, calls)
         for (const call of calls) {
+            // 纯数学/事件分发调用不是技能行为，不计入 native 调用/未知清单。
+            if (isExpressionOnlyCall(call.fn)) continue
             const signature = `${call.fn}|${JSON.stringify(call.args)}`
             if (seen.has(signature)) continue
             seen.add(signature)
@@ -332,6 +359,42 @@ function deriveFromBlueprint(
         result.phases.push({ at: 0, actions, source: "blueprint", origin: "blueprint:bytecode" })
     }
     return result
+}
+
+/**
+ * 从蓝图事件入口沿调用图取出可达函数；无事件入口时退回全部函数（仍过滤纯表达式调用）。
+ * 共享 bpPackage 的技能会得到同一事件图，但不会再挂上与事件无关的函数。
+ */
+function reachableFunctions(
+    blueprint: NonNullable<SkillAssetSkill["blueprint"]>,
+    byName: Map<string, Record<string, unknown>>
+): Record<string, unknown>[] {
+    const seeds = new Set<string>()
+    for (const event of blueprint.events ?? []) {
+        const target = typeof event.target === "string" ? event.target : undefined
+        if (target && byName.has(target)) seeds.add(target)
+        const name = typeof event.name === "string" ? event.name : undefined
+        if (name && byName.has(name)) seeds.add(name)
+    }
+    if (seeds.size === 0) {
+        for (const name of byName.keys()) if (name.startsWith("ExecuteUbergraph_")) seeds.add(name)
+    }
+    if (seeds.size === 0) return [...byName.values()]
+    const reachable: Record<string, unknown>[] = []
+    const visited = new Set<string>()
+    const queue = [...seeds]
+    while (queue.length > 0) {
+        const name = queue.shift()!
+        if (visited.has(name)) continue
+        visited.add(name)
+        const fn = byName.get(name)
+        if (!fn) continue
+        reachable.push(fn)
+        const calls: { fn: string; args: unknown[] }[] = []
+        collectCalls(fn.body, calls)
+        for (const call of calls) if (byName.has(call.fn) && !visited.has(call.fn)) queue.push(call.fn)
+    }
+    return reachable
 }
 
 function collectCalls(value: unknown, out: { fn: string; args: unknown[] }[]): void {
@@ -419,14 +482,17 @@ function firstActionTime(phases: Phase[]): number {
     return 0
 }
 
-function parseCosts(fields: { name: string; values: number | number[]; impact?: string }[]): ResourceCost[] {
+function parseCosts(
+    fields: { name: string; values: number | number[]; impact?: string }[],
+    knownResources: ReadonlySet<string>
+): ResourceCost[] {
     const costs: ResourceCost[] = []
     for (const field of fields) {
+        if (!/消耗$/.test(field.name)) continue
         const perSecond = field.name.includes("每秒")
-        const baseName = field.name.replace("每秒", "")
-        const match = baseName.match(/^(.+?)消耗$/)
-        if (!match) continue
-        const resource = match[1]!.replace(/[[\]]/g, "")
+        // 资源名从完整字段名中提取已知 token，避免 "[小步]神智消耗" → "小步神智" 这类伪资源。
+        const resource = resolveResourceToken(field.name)
+        if (!resource || !knownResources.has(resource)) continue
         const amount = levelTenValue(field.values)
         if (amount === undefined || amount <= 0) continue
         costs.push(perSecond ? { resource, amount, perSecond: true } : { resource, amount })
@@ -438,6 +504,8 @@ function buildBuffs(asset: SkillAssetDoc): Record<string, BuffBehavior> {
     const result: Record<string, BuffBehavior> = {}
     for (const [key, buff] of Object.entries(asset.buffs ?? {})) {
         const id = buff.id ?? (/^\d+$/.test(key) ? Number(key) : key)
+        const lua = buff.lua as Record<string, unknown> | undefined
+        const manual = lua?.authored === true
         const hasEvidence = Boolean(buff.lua || buff.props || (buff.bpPackages?.length ?? 0) > 0)
         const duration = typeof buff.props?.LastTime === "number" && buff.props.LastTime > 0 ? buff.props.LastTime : undefined
         result[key] = {
@@ -448,7 +516,8 @@ function buildBuffs(asset: SkillAssetDoc): Record<string, BuffBehavior> {
             bpPackages: buff.bpPackages,
             dots: deriveBuffDots(buff.props),
             duration,
-            sources: hasEvidence ? ["lua"] : [],
+            sources: manual ? ["manual"] : hasEvidence ? ["lua"] : [],
+            note: manual && typeof lua?.note === "string" ? lua.note : undefined,
         }
     }
     return result

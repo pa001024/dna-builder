@@ -6,7 +6,7 @@
  * `--strict` 额外把 warn 升级为失败（用于 CI / U8 集成）。
  */
 
-import { type Action, type CoverageReport, emptyCoverageReport, type SkillBehaviorDoc } from "../schema/ir"
+import { type Action, type CoverageReport, emptyCoverageReport, hasExecutableAction, type SkillBehaviorDoc } from "../schema/ir"
 import { validateSkillBehaviorDoc } from "../schema/validation"
 import { type Diagnostic, diagnostic, type SkillBehaviorManifest, type SkillDataIndex } from "./types"
 
@@ -59,7 +59,7 @@ export function checkManifest(manifest: SkillBehaviorManifest | SkillBehaviorDoc
     if (options.index) checkReferences(manifest, options.index, errors, warnings)
 
     const skillEntries = Object.entries(manifest.skills)
-    const withActions = skillEntries.filter(([, skill]) => skill.phases.some(phase => phase.actions.length > 0))
+    const withActions = skillEntries.filter(([, skill]) => hasExecutableAction(skill))
     const simulated = expandSimulated(manifest, options.simulated ?? [], errors)
     let satisfied = 0
     for (const id of simulated) {
@@ -68,9 +68,15 @@ export function checkManifest(manifest: SkillBehaviorManifest | SkillBehaviorDoc
             errors.push(diagnostic("error", "gate.missing-behavior", `skills.${id}`, `--simulated 技能 ${id} 不在 manifest 中`))
             continue
         }
-        const hasAction = skill.phases.some(phase => phase.actions.length > 0)
-        if (!hasAction) {
-            errors.push(diagnostic("error", "gate.missing-behavior", `skills.${id}`, `--simulated 技能 ${id} 没有任何可执行动作`))
+        if (!hasExecutableAction(skill)) {
+            errors.push(
+                diagnostic(
+                    "error",
+                    "gate.missing-behavior",
+                    `skills.${id}`,
+                    `--simulated 技能 ${id} 没有可执行动作（需 damage/applyBuff/removeBuff，native-only 不算）`
+                )
+            )
             continue
         }
         satisfied++
@@ -115,7 +121,11 @@ function expandSimulated(manifest: SkillBehaviorDoc, values: (number | string)[]
             errors.push(diagnostic("error", "gate.missing-behavior", `skills.${id}`, `--simulated 引用的 ${id} 既不是技能也不是角色`))
             continue
         }
-        const owned = character.skills.map(String).filter(skillId => manifest.skills[skillId])
+        // 角色 id 只展开主 E/Q/P；子技能（slot unknown）不参与 simulated 门禁。
+        const owned = character.skills.map(String).filter(skillId => {
+            const slot = manifest.skills[skillId]?.slot
+            return slot === "E" || slot === "Q" || slot === "P"
+        })
         if (owned.length === 0) {
             errors.push(
                 diagnostic("error", "gate.missing-behavior", `characters.${id}`, `--simulated 角色 ${id} 在 manifest 中没有任何技能`)
@@ -187,13 +197,15 @@ function checkReferences(manifest: SkillBehaviorDoc, index: SkillDataIndex, erro
     for (const [key, skill] of Object.entries(manifest.skills)) {
         const data = index.getSkill(skill.id)
         if (!data) {
-            const target = skill.characterId > 0 ? errors : warnings
+            const isMain = skill.slot === "E" || skill.slot === "Q" || skill.slot === "P"
+            const fatal = skill.characterId > 0 && isMain
+            const target = fatal ? errors : warnings
             target.push(
                 diagnostic(
-                    skill.characterId > 0 ? "error" : "warn",
+                    fatal ? "error" : "warn",
                     "gate.unknown-skill",
                     `skills.${key}`,
-                    `技能 ${key} 不在 packages/data（${skill.characterId > 0 ? "角色技能" : "非角色技能"}）`
+                    `技能 ${key} 不在 packages/data（${isMain ? "主技能" : "子技能/非角色资产"}）`
                 )
             )
             continue
