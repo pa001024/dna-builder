@@ -265,6 +265,9 @@ async function loadConfigs() {
             const height = Number(iniFile[section]["ResolutionSizeY"] || 900)
             currentResolution.value = { width, height }
         }
+
+        // 用真实配置内容算哈希，一次性匹配当前生效的预设
+        detectActivePreset()
     } catch (error) {
         console.error("加载配置文件失败:", error)
     } finally {
@@ -340,6 +343,9 @@ function toggleOptionEnabled(option: ConfigOption) {
     } else {
         iniFile[option.section][option.key] = option.defaultValue
     }
+    if ((PRESET_SECTIONS as readonly string[]).includes(option.section)) {
+        activePreset.value = null
+    }
     debouncedSave()
 }
 
@@ -370,6 +376,9 @@ function setOptionValue(option: ConfigOption, value: any) {
         iniFile[option.section] = {}
     }
     iniFile[option.section][option.key] = value
+    if ((PRESET_SECTIONS as readonly string[]).includes(option.section)) {
+        activePreset.value = null
+    }
     debouncedSave()
 }
 
@@ -399,15 +408,87 @@ function resetConfig() {
  */
 function resetToDefault() {
     resetConfig()
+    activePreset.value = "none"
     saveConfigs()
 }
 
+// 当前生效的性能预设，null 表示与所有预设都不匹配（比如被手动改过），不存本地储存
+type PerformancePresetKey = "none" | "low" | "medium" | "high" | "ultra"
+const activePreset = ref<PerformancePresetKey | null>(null)
+
+// 预设实际写入的段：哈希对比只看这些段的真实内容
+const PRESET_SECTIONS = ["SystemSettings", "/Script/Engine.RendererSettings"] as const
+
 /**
- * 应用预设配置
- * @param preset 预设名称
+ * cyrb53 字符串哈希，用于计算配置指纹
  */
-async function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
-    const commonOptions = `AudioThread.UseBackgroundThreadPool=1
+function hashString(input: string): string {
+    let h1 = 0xdeadbeef
+    let h2 = 0x41c6ce57
+    for (let i = 0; i < input.length; i++) {
+        const ch = input.charCodeAt(i)
+        h1 = Math.imul(h1 ^ ch, 2654435761)
+        h2 = Math.imul(h2 ^ ch, 1597334677)
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+    return (h2 >>> 0).toString(16).padStart(8, "0") + (h1 >>> 0).toString(16).padStart(8, "0")
+}
+
+/**
+ * 预设扁平表转规范字符串：按 key 排序后拼接消除键序影响，值统一转字符串消除数字/字符串类型差异
+ */
+function canonicalPresetString(values: Record<string, any>): string {
+    return Object.keys(values)
+        .sort()
+        .map((key) => `${key}=${String(values[key])}`)
+        .join("\n")
+}
+
+const presetHashCache = new Map<string, string>()
+
+/**
+ * 取某档预设的指纹（懒加载缓存）
+ */
+function getPresetHash(preset: "low" | "medium" | "high" | "ultra"): string {
+    const cached = presetHashCache.get(preset)
+    if (cached) return cached
+    const hash = hashString(canonicalPresetString(getPresetValues(preset)))
+    presetHashCache.set(preset, hash)
+    return hash
+}
+
+/**
+ * 用真实配置文件内容算哈希，对比各预设指纹，匹配当前生效项；全不匹配则不选中
+ */
+function detectActivePreset() {
+    const current: Record<string, string> = {}
+    for (const section of PRESET_SECTIONS) {
+        const data = engineIni.value[section]
+        if (data && typeof data === "object") {
+            for (const [key, value] of Object.entries(data)) {
+                const v = Array.isArray(value) ? value[value.length - 1] : value
+                current[`${section}|${key}`] = String(v)
+            }
+        }
+    }
+    if (Object.keys(current).length === 0) {
+        activePreset.value = "none"
+        return
+    }
+    const currentHash = hashString(canonicalPresetString(current))
+    const keys: Array<"low" | "medium" | "high" | "ultra"> = ["low", "medium", "high", "ultra"]
+    for (const key of keys) {
+        if (currentHash === getPresetHash(key)) {
+            activePreset.value = key
+            return
+        }
+    }
+    activePreset.value = null
+}
+
+function getCommonOptions(): Record<string, string> {
+    return `AudioThread.UseBackgroundThreadPool=1
 MaterialBaking.RenderDocCapture=1
 r.Streaming.PoolSize=0
 r.Streaming.LimitPoolSizeToVRAM=1
@@ -592,6 +673,10 @@ r.ShaderCodeLibrary.SeparateLoadingCache=1`
             },
             {} as Record<string, string>
         )
+}
+
+function getPresetValues(preset: "low" | "medium" | "high" | "ultra"): Record<string, any> {
+    const commonOptions = getCommonOptions()
 
     const presets: Record<string, Record<string, any>> = {
         low: {
@@ -892,7 +977,15 @@ r.ShaderCodeLibrary.SeparateLoadingCache=1`
         },
     }
 
-    const presetValues = presets[preset]
+    return presets[preset]
+}
+
+/**
+ * 应用预设配置
+ * @param preset 预设名称
+ */
+async function applyPreset(preset: "low" | "medium" | "high" | "ultra") {
+    const presetValues = getPresetValues(preset)
     if (!presetValues) return
     resetConfig()
     for (const [sectionKey, value] of Object.entries(presetValues)) {
@@ -905,6 +998,7 @@ r.ShaderCodeLibrary.SeparateLoadingCache=1`
         }
         iniFile[section][key] = value
     }
+    activePreset.value = preset
     await saveConfigs()
 }
 
@@ -946,6 +1040,7 @@ function openConfigDir() {
                 <button
                     type="button"
                     class="btn btn-xs whitespace-nowrap px-2.5"
+                    :class="activePreset === 'none' ? 'btn-primary' : ''"
                     @click="resetToDefault"
                 >
                     {{ $t('game-setting.preset_none') }}
@@ -953,6 +1048,7 @@ function openConfigDir() {
                 <button
                     type="button"
                     class="btn btn-xs whitespace-nowrap px-2.5"
+                    :class="activePreset === 'low' ? 'btn-primary' : ''"
                     @click="applyPreset('low')"
                 >
                     {{ $t('game-setting.preset_very_low') }}
@@ -960,6 +1056,7 @@ function openConfigDir() {
                 <button
                     type="button"
                     class="btn btn-xs whitespace-nowrap px-2.5"
+                    :class="activePreset === 'medium' ? 'btn-primary' : ''"
                     @click="applyPreset('medium')"
                 >
                     {{ $t('game-setting.preset_low') }}
@@ -967,6 +1064,7 @@ function openConfigDir() {
                 <button
                     type="button"
                     class="btn btn-xs whitespace-nowrap px-2.5"
+                    :class="activePreset === 'high' ? 'btn-primary' : ''"
                     @click="applyPreset('high')"
                 >
                     {{ $t('game-setting.preset_medium') }}
@@ -974,6 +1072,7 @@ function openConfigDir() {
                 <button
                     type="button"
                     class="btn btn-xs whitespace-nowrap px-2.5"
+                    :class="activePreset === 'ultra' ? 'btn-primary' : ''"
                     @click="applyPreset('ultra')"
                 >
                     {{ $t('game-setting.preset_high') }}
