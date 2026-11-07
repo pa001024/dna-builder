@@ -60,11 +60,32 @@ agent 成功时开头是它写的 markdown（`##` 分组、列表、加粗），
 | `BILI_JCT` | Secret | 二选一 | Cookie 中的 `bili_jct`（32 位十六进制） |
 | `BILI_BUVID3` | Secret | 否 | 缺失时脚本会调 `finger/spi` 自动获取 |
 | `BILI_DEDEUSERID` | Secret | 否 | Cookie 中的 `DedeUserID` |
+| `BILI_REFRESH_TOKEN` | Secret | 续期需要 | localStorage 的 `ac_time_value`（见下节「Cookie 续期」） |
+| `BILI_SECRETS_PAT` | Secret | 续期需要 | 可写 Actions secrets 的 PAT；`GITHUB_TOKEN` 没有该权限 |
 | `DEEPSEEK_MODEL` | Variable | 否 | 默认 `deepseek-flash` |
 | `DEEPSEEK_BASE_URL` | Variable | 否 | 默认 `https://api.deepseek.com` |
 | `CHROME_PATH` | Variable | 否 | 仅在自托管 runner 且浏览器不在默认路径时需要；托管 runner 由 `Resolve Chrome` 步骤自动写入 |
 
 `BILI_COOKIE` 的取法：浏览器登录 `bilibili.com` → DevTools → Network → 任意 `api.bilibili.com` 请求 → 复制请求头里的 `Cookie`。`SESSDATA` 会过期，失效后日志会报 `code=-101`，重新获取即可。
+
+## Cookie 续期
+
+B 站 web cookie 不主动续期的话约 3 天就被判失效。官方续期链：`cookie/info`（检查+取服务端时间戳）→ `/correspond/1/{path}`（RSA-OAEP 加密 `refresh_{timestamp}` 得 correspondPath，返回 HTML 里取 `refresh_csrf`）→ `cookie/refresh`（轮换 SESSDATA/bili_jct，返回新 `refresh_token`）→ `confirm/refresh`（旧凭据作废）。`tools/bili-dynamic/refresh.ts` 实现了整条链：
+
+```bash
+node tools/bili-dynamic/refresh.ts --check          # 只查服务端刷新标志
+node tools/bili-dynamic/refresh.ts --force          # 强制续期并打印新凭据
+node tools/bili-dynamic/refresh.ts --write-secrets  # 续期后经 gh 把新凭据写回仓库 Secrets
+```
+
+`.github/workflows/bili-cookie-refresh.yml` 每天跑 `--write-secrets`，把新的 `BILI_COOKIE` 与 `BILI_REFRESH_TOKEN` 自动回写，登录态就能一直活着；续期失败（token 链断了）workflow 会变红，此时按下方方法重新获取。
+
+`BILI_REFRESH_TOKEN` 的取法：浏览器登录 `www.bilibili.com` → F12 控制台执行 `localStorage.ac_time_value`（32 位十六进制）。该值只在登录时写入，查不到就在 `www.bilibili.com` 上退出重登一次。
+
+注意两点：
+
+- **续期会让同一对凭据的其他副本作废**：CI 第一次续期后，浏览器里那份登录态会失效；想同时保有浏览器登录，给 CI 用一个小号。
+- `BILI_SECRETS_PAT` 用 fine-grained PAT 即可，只需对目标仓库开 **Secrets: Read and write** 权限。缺了这个 secret 时续期仍会执行，只是凭据回写失败。
 
 ## 本地运行
 

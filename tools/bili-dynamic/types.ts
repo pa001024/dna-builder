@@ -55,6 +55,8 @@ export interface BiliCredentials {
     csrf: string
     buvid3: string
     dedeUserId: string
+    /** localStorage 的 ac_time_value；续期（refresh.ts）用，发布不需要 */
+    refreshToken?: string
 }
 
 export type CredentialState =
