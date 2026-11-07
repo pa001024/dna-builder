@@ -1,0 +1,68 @@
+[package]
+name = "cloudgame-client"
+version = "0.1.0"
+description = "Native cloud gaming client for cloud.DNA (WeLink WL_RTC/WebTransport path, embedded wgc wasm engine). Standalone exe."
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "multipart",
+    "rustls-tls",
+    "system-proxy",
+] }
+md5 = "0.8"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
+aes = "0.8"
+cbc = { version = "0.1", features = ["alloc", "block-padding"] }
+prost = "0.13"
+wasmtime = "37"
+wtransport = { version = "0.7", features = ["dangerous-configuration", "quinn"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+winit = "0.30"
+softbuffer = "0.4"
+wry = "0.53"
+tao = "0.34"
+tracing = { version = "0.1", features = ["release_max_level_off"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dirs = "6"
+rand = "0.8"
+cpal = "0.15"
+windows = { version = "0.61", features = [
+    "Win32_Media_MediaFoundation",
+    "Win32_System_Com",
+    "Win32_System_Threading",
+    "Win32_System_LibraryLoader",
+    "Win32_Foundation",
+    "Win32_System_Variant",
+    "Win32_System_Ole",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D10",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Imaging",
+    "Win32_UI_Shell",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[build-dependencies]
+embed-resource = "3"
+
+[profile.release]
+opt-level = "z"     # 优化体积（比 "s" 更激进）
+lto = true          # 启用链接时优化
+codegen-units = 1   # 单代码生成单元提升优化空间
+panic = "abort"     # 移除 panic 展开代码
+strip = true        # 自动剥离符号表

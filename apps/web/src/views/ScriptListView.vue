@@ -234,7 +234,79 @@ const sidePanelTab = computed({
         scriptRuntime.sidePanelTab = value
     },
 })
-const consoleLogs = computed(() => scriptRuntime.consoleLogs.filter(log => shouldAcceptScopedScriptEvent(log.scope)))
+/** 控制台级别过滤候选（Chrome 同款：每项独立开关，默认全开，仅内存态不持久化）。 */
+const CONSOLE_LOG_LEVELS = ["error", "warn", "info", "debug"] as const
+type ConsoleLogLevel = (typeof CONSOLE_LOG_LEVELS)[number]
+const CONSOLE_LEVEL_LABELS: Record<ConsoleLogLevel, string> = {
+    error: "错误",
+    warn: "警告",
+    info: "信息",
+    debug: "调试",
+}
+/** 被隐藏的日志级别，空对象即默认全开。 */
+const hiddenConsoleLevels = ref<Record<string, boolean>>({})
+
+/**
+ * 将任意 level 文案归一到四个过滤档位，保证每条日志恰好属于一个开关。
+ */
+function normalizeConsoleLevelKey(level: unknown): ConsoleLogLevel {
+    const text = String(level ?? "info").trim().toLowerCase()
+    if (text === "error" || text === "err" || text === "fatal") return "error"
+    if (text === "warn" || text === "warning") return "warn"
+    if (text === "debug" || text === "verbose" || text === "trace") return "debug"
+    return "info"
+}
+
+/**
+ * 判断指定级别是否被过滤隐藏。
+ */
+function isConsoleLevelHidden(level: string): boolean {
+    return !!hiddenConsoleLevels.value[normalizeConsoleLevelKey(level)]
+}
+
+/**
+ * 独立开关某级别的显隐。
+ */
+function toggleConsoleLevel(level: string) {
+    const key = normalizeConsoleLevelKey(level)
+    hiddenConsoleLevels.value = { ...hiddenConsoleLevels.value, [key]: !hiddenConsoleLevels.value[key] }
+}
+
+/** 级别下拉触发按钮文案（Chrome 同款：All levels / 某级 only / Custom levels）。 */
+const consoleLevelTriggerLabel = computed(() => {
+    const visible = CONSOLE_LOG_LEVELS.filter(level => !isConsoleLevelHidden(level))
+    if (visible.length === CONSOLE_LOG_LEVELS.length) return "全部级别"
+    const only = visible.length === 1 ? visible[0] : undefined
+    if (only) return `仅${CONSOLE_LEVEL_LABELS[only]}`
+    return "自定义级别"
+})
+
+/** 各级别在当前作用域下的条数（供过滤按钮展示）。 */
+const consoleLevelCounts = computed(() => {
+    const counts: Record<ConsoleLogLevel, number> = { error: 0, warn: 0, info: 0, debug: 0 }
+    for (const log of scriptRuntime.consoleLogs) {
+        if (!shouldAcceptScopedScriptEvent(log.scope)) continue
+        counts[normalizeConsoleLevelKey(log.level)]++
+    }
+    return counts
+})
+
+/** 级别小圆点颜色。 */
+function getConsoleLevelDotClass(level: string): string {
+    switch (normalizeConsoleLevelKey(level)) {
+        case "error":
+            return "bg-error"
+        case "warn":
+            return "bg-warning"
+        case "info":
+            return "bg-info"
+        case "debug":
+            return "bg-base-content/60"
+    }
+}
+const consoleLogs = computed(() =>
+    scriptRuntime.consoleLogs.filter(log => shouldAcceptScopedScriptEvent(log.scope) && !isConsoleLevelHidden(log.level))
+)
 const scriptStatuses = computed(() => scriptRuntime.scriptStatuses.filter(status => shouldAcceptScopedScriptEvent(status.scope)))
 const isRunning = computed({
     get: () => scriptRuntime.isRunning,
@@ -270,10 +342,20 @@ const consoleOutputRef = ref<HTMLDivElement | null>(null)
 const isConsolePinnedToBottom = ref(true)
 const isCloudGameEntryActive = computed(() => cloudgame.isWindowOpen || cloudgame.opening)
 const cloudGameEntryTitle = computed(() => {
-    if (cloudgame.opening) return "正在打开云游戏窗口"
-    if (cloudgame.isBridgeConnected) return "聚焦云游戏窗口（已连通）"
-    if (cloudgame.isWindowOpen) return "聚焦云游戏窗口"
-    return "打开云游戏窗口"
+    const native = cloudgame.implementation === "native"
+    if (cloudgame.opening) {
+        if (!native) return t("game-launcher.cloudGameOpening")
+        if (cloudgame.nativePhase === "downloading") {
+            return t("game-launcher.cloudGameNativeDownloading", { progress: cloudgame.nativeProgress })
+        }
+        if (cloudgame.nativePhase === "deploying") return t("game-launcher.cloudGameNativeExtracting")
+        if (cloudgame.nativePhase === "launching") return t("game-launcher.cloudGameNativeLaunching")
+        return t("game-launcher.cloudGameNativePreparing")
+    }
+    if (native) return t("game-launcher.cloudGameNativeOpen")
+    if (cloudgame.isBridgeConnected) return t("game-launcher.cloudGameFocusedConnected")
+    if (cloudgame.isWindowOpen) return t("game-launcher.cloudGameFocused")
+    return t("game-launcher.cloudGameOpen")
 })
 let unlistenFileChangedFn: UnlistenFn | null = null
 const watchedFiles = ref<Set<string>>(new Set())
@@ -3369,13 +3451,16 @@ watch(showConsole, async visible => {
     if (!visible) {
         return
     }
+    // 打开时把环形缓冲的最新快照一次性刷出来，避免节流期间看到旧画面。
+    scriptRuntime.flushConsoleLogs()
     isConsolePinnedToBottom.value = true
     await nextTick()
     scrollConsoleToBottom()
 })
 
+// 监听末条 seq 而非长度：环形缓冲写满后长度恒定，只有 seq 一直单调递增。
 watch(
-    () => consoleLogs.value.length,
+    () => scriptRuntime.consoleLogs.at(-1)?.seq ?? 0,
     async () => {
         if (!showConsole.value || !isConsolePinnedToBottom.value) {
             return
@@ -3802,7 +3887,19 @@ onUnmounted(async () => {
                                 @click="openCloudGameFromScript"
                                 :title="cloudGameEntryTitle"
                             >
-                                <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-4 h-4" />
+                                <Icon
+                                    :icon="
+                                        cloudgame.isNativeBusy
+                                            ? 'ri:refresh-line'
+                                            : cloudgame.implementation === 'native'
+                                              ? 'ri:cpu-line'
+                                              : cloudgame.isBridgeConnected
+                                                ? 'ri:cloud-fill'
+                                                : 'ri:cloud-line'
+                                    "
+                                    class="w-4 h-4"
+                                    :class="{ 'animate-spin': cloudgame.isNativeBusy }"
+                                />
                             </button>
                             <button
                                 class="btn btn-sm btn-ghost btn-square"
@@ -3918,6 +4015,32 @@ onUnmounted(async () => {
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
+                                <div class="dropdown dropdown-end">
+                                    <div
+                                        tabindex="0"
+                                        role="button"
+                                        class="input input-bordered input-xs flex items-center gap-1 cursor-pointer whitespace-nowrap font-normal"
+                                        :title="consoleLevelTriggerLabel"
+                                    >
+                                        <span>{{ consoleLevelTriggerLabel }}</span>
+                                        <Icon icon="ri:arrow-down-s-line" class="w-3.5 h-3.5 text-base-content/50" />
+                                    </div>
+                                    <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-20 w-56 p-2 shadow-sm">
+                                        <li v-for="level in CONSOLE_LOG_LEVELS" :key="level">
+                                            <a @click="toggleConsoleLevel(level)">
+                                                <span class="w-4 flex justify-center shrink-0">
+                                                    <Icon v-if="!isConsoleLevelHidden(level)" icon="ri:check-line" class="w-3.5 h-3.5" />
+                                                </span>
+                                                <span
+                                                    class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                    :class="getConsoleLevelDotClass(level)"
+                                                ></span>
+                                                <span>{{ CONSOLE_LEVEL_LABELS[level] }}</span>
+                                                <span class="ml-auto text-base-content/50">{{ consoleLevelCounts[level] }}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                                 <button class="btn btn-xs btn-ghost" @click="clearConsole" :title="$t('script-list.clear')">
                                     <Icon icon="ri:delete-bin-line" class="w-3 h-3" />
                                 </button>

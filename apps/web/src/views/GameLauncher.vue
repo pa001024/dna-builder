@@ -3,7 +3,7 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
 import { createDesktopShortcut as createShortcut, deleteFile, openExplorer, pathExists, removeDirAll, renameFile } from "@/api/app"
-import { useCloudGameStore } from "@/store/cloudgame"
+import { type CloudGameImplementation, useCloudGameStore } from "@/store/cloudgame"
 import { useGameStore } from "@/store/game"
 import { useUIStore } from "@/store/ui"
 
@@ -147,11 +147,37 @@ const createDesktopShortcut = async () => {
 }
 
 const cloudGameEntryTitle = computed(() => {
-    if (cloudgame.opening) return "正在打开云游戏窗口"
-    if (cloudgame.isBridgeConnected) return "聚焦云游戏窗口（已连通）"
-    if (cloudgame.isWindowOpen) return "聚焦云游戏窗口"
-    return "打开云游戏窗口"
+    const native = cloudgame.implementation === "native"
+    if (cloudgame.opening) {
+        if (!native) return t("game-launcher.cloudGameOpening")
+        if (cloudgame.nativePhase === "downloading") {
+            return t("game-launcher.cloudGameNativeDownloading", { progress: cloudgame.nativeProgress })
+        }
+        if (cloudgame.nativePhase === "deploying") return t("game-launcher.cloudGameNativeExtracting")
+        if (cloudgame.nativePhase === "launching") return t("game-launcher.cloudGameNativeLaunching")
+        return t("game-launcher.cloudGameNativePreparing")
+    }
+    if (native) return t("game-launcher.cloudGameNativeOpen")
+    if (cloudgame.isBridgeConnected) return t("game-launcher.cloudGameFocusedConnected")
+    if (cloudgame.isWindowOpen) return t("game-launcher.cloudGameFocused")
+    return t("game-launcher.cloudGameOpen")
 })
+
+const cloudGameEntryIcon = computed(() => {
+    if (cloudgame.isNativeBusy) return "ri:refresh-line"
+    if (cloudgame.implementation === "native") return "ri:cpu-line"
+    return cloudgame.isBridgeConnected ? "ri:cloud-fill" : "ri:cloud-line"
+})
+
+/**
+ * 切换云游戏实现方式并从启动页直接启动，避免只改配置没有可见反馈。
+ * @param implementation 目标实现方式
+ */
+async function selectCloudGameImplementation(implementation: CloudGameImplementation) {
+    cloudgame.setImplementation(implementation)
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    await openCloudGameFromLauncher()
+}
 
 /**
  * 从游戏启动页打开或聚焦云游戏窗口。
@@ -243,19 +269,69 @@ onMounted(async () => {
                     >
                         <Icon icon="ri:folder-line" class="size-4" />
                     </button>
-                    <button
-                        type="button"
-                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border transition-colors duration-150"
-                        :class="
-                            cloudgame.isWindowOpen || cloudgame.opening
-                                ? 'border-primary/70 bg-primary/10 text-primary'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                        "
-                        :data-tip="cloudGameEntryTitle"
-                        @click="openCloudGameFromLauncher()"
-                    >
-                        <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="size-4" />
-                    </button>
+                    <div class="flex items-center">
+                        <button
+                            type="button"
+                            class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-l-xs border transition-colors duration-150"
+                            :class="
+                                cloudgame.implementation === 'native' || cloudgame.isWindowOpen || cloudgame.opening
+                                    ? 'border-primary/70 bg-primary/10 text-primary'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            :data-tip="cloudGameEntryTitle"
+                            @click="openCloudGameFromLauncher()"
+                        >
+                            <Icon :icon="cloudGameEntryIcon" class="size-4" :class="{ 'animate-spin': cloudgame.isNativeBusy }" />
+                        </button>
+                        <div class="dropdown dropdown-end">
+                            <div
+                                tabindex="0"
+                                role="button"
+                                class="tooltip tooltip-bottom inline-flex h-7 w-5 cursor-pointer items-center justify-center rounded-r-xs border border-l-0 transition-colors duration-150"
+                                :class="
+                                    cloudgame.implementation === 'native' || cloudgame.isWindowOpen || cloudgame.opening
+                                        ? 'border-primary/70 bg-primary/10 text-primary'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                :data-tip="$t('game-launcher.cloudGameMode')"
+                            >
+                                <Icon icon="ri:arrow-down-s-line" class="size-3.5" />
+                            </div>
+                            <ul
+                                tabindex="-1"
+                                class="dropdown-content menu z-30 mt-1 w-48 rounded-xs border border-base-content/15 bg-base-100/95 p-1 text-xs shadow-lg backdrop-blur-md"
+                            >
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="flex items-center gap-2"
+                                        :class="{ 'text-primary': cloudgame.implementation === 'web' }"
+                                        @click="selectCloudGameImplementation('web')"
+                                    >
+                                        <Icon
+                                            :icon="cloudgame.implementation === 'web' ? 'ri:check-line' : 'ri:cloud-line'"
+                                            class="size-4"
+                                        />
+                                        <span>{{ $t("game-launcher.cloudGameWeb") }}</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="flex items-center gap-2"
+                                        :class="{ 'text-primary': cloudgame.implementation === 'native' }"
+                                        @click="selectCloudGameImplementation('native')"
+                                    >
+                                        <Icon
+                                            :icon="cloudgame.implementation === 'native' ? 'ri:check-line' : 'ri:cpu-line'"
+                                            class="size-4"
+                                        />
+                                        <span>{{ $t("game-launcher.cloudGameNative") }}</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                     <button
                         type="button"
                         class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error"

@@ -1,6 +1,8 @@
 import type { UnlistenFn } from "@tauri-apps/api/event"
 import { getCurrentWindow } from "@tauri-apps/api/window"
+import { t } from "i18next"
 import { defineStore } from "pinia"
+import { launchNormal } from "@/api/app"
 import {
     type CloudGameBridgePayload,
     type CloudGameBridgeStatus,
@@ -18,6 +20,21 @@ import {
 } from "@/api/cloudgame"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
+import {
+    downloadCloudgameNative,
+    installCloudgameNative,
+    isCloudgameNativeInstalled,
+    resolveCloudgameNativePaths,
+} from "@/utils/cloudgame-native"
+
+/** 云游戏实现方式：原版 WebView 网页端 / 原生客户端。 */
+export type CloudGameImplementation = "web" | "native"
+
+/** 原生客户端部署阶段，用于界面展示进度文案。 */
+export type CloudGameNativePhase = "idle" | "checking" | "downloading" | "deploying" | "launching"
+
+/** 云游戏实现方式在 localStorage 中的键名。 */
+const CLOUDGAME_IMPLEMENTATION_KEY = "cloudgame.implementation"
 
 let bridgeUnlistenFn: UnlistenFn | null = null
 let pageLoadUnlistenFn: UnlistenFn | null = null
@@ -93,6 +110,9 @@ export const useCloudGameStore = defineStore("cloudgame", {
     state: () => ({
         initialized: false,
         opening: false,
+        implementation: "web" as CloudGameImplementation,
+        nativePhase: "idle" as CloudGameNativePhase,
+        nativeProgress: 0,
         windowState: null as CloudGameWindowState | null,
         bridgeStatus: null as CloudGameBridgeStatus | null,
         lastBridgeEventType: "",
@@ -102,6 +122,7 @@ export const useCloudGameStore = defineStore("cloudgame", {
     getters: {
         isWindowOpen: state => Boolean(state.windowState),
         isBridgeConnected: state => Boolean(state.bridgeStatus?.connected),
+        isNativeBusy: state => state.opening && state.implementation === "native",
         bridgeEventSummary: state => {
             if (!state.lastBridgeEventType) return ""
             if (state.bridgeStatus?.connected) {
@@ -111,6 +132,28 @@ export const useCloudGameStore = defineStore("cloudgame", {
         },
     },
     actions: {
+        /**
+         * 切换云游戏实现方式并持久化，供启动器下拉选择与脚本页按钮共用。
+         * @param implementation 目标实现方式
+         */
+        setImplementation(implementation: CloudGameImplementation) {
+            this.implementation = implementation
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem(CLOUDGAME_IMPLEMENTATION_KEY, implementation)
+            }
+        },
+
+        /**
+         * 从 localStorage 恢复上次选择的云游戏实现方式。
+         */
+        restoreImplementation() {
+            if (typeof localStorage === "undefined") return
+            const stored = localStorage.getItem(CLOUDGAME_IMPLEMENTATION_KEY)
+            if (stored === "web" || stored === "native") {
+                this.implementation = stored
+            }
+        },
+
         /**
          * 应用云游戏窗口状态。
          * @param windowState 最新窗口状态
@@ -152,6 +195,8 @@ export const useCloudGameStore = defineStore("cloudgame", {
          */
         async initCloudGameTracking() {
             if (!canInitCloudGameTracking()) return
+
+            this.restoreImplementation()
 
             if (cloudGameListenerReady) {
                 this.initialized = true
@@ -208,9 +253,51 @@ export const useCloudGameStore = defineStore("cloudgame", {
         },
 
         /**
+         * 启动原生云游戏客户端；本地未部署当前版本时先下载并解压。
+         */
+        async launchNativeCloudGame() {
+            const ui = useUIStore()
+            if (this.opening) return
+            this.opening = true
+            this.nativePhase = "checking"
+            this.nativeProgress = 0
+            try {
+                const paths = await resolveCloudgameNativePaths()
+                if (!(await isCloudgameNativeInstalled(paths))) {
+                    this.nativePhase = "downloading"
+                    await downloadCloudgameNative(paths, event => {
+                        this.nativeProgress = event.progress
+                    })
+                    this.nativePhase = "deploying"
+                    await installCloudgameNative(paths)
+                }
+                this.nativePhase = "launching"
+                const launched = (await launchNormal(paths.exePath, "")) as unknown as boolean
+                if (launched === false) {
+                    throw new Error("ShellExecute failed")
+                }
+            } catch (error) {
+                console.error("启动原生云游戏客户端失败", error)
+                ui.showErrorMessage(
+                    t("game-launcher.cloudGameNativeFailed", {
+                        error: error instanceof Error ? error.message : String(error),
+                    })
+                )
+            } finally {
+                this.opening = false
+                this.nativePhase = "idle"
+                this.nativeProgress = 0
+            }
+        },
+
+        /**
          * 聚焦已存在的云游戏窗口；不存在时退化为直接打开。
          */
         async openOrFocusCloudGame() {
+            if (this.implementation === "native" && env.isApp) {
+                await this.launchNativeCloudGame()
+                return
+            }
             await this.syncWindowStateFromBackend()
             if (this.windowState) {
                 const nextState = await focusCloudGameWindow()

@@ -1738,7 +1738,7 @@ async function confirmShare() {
 
         if (result) {
             activeRemoteId.value = result.id
-            await copyText(`${env.endpoint}/graph/${result.id}`)
+            await copyText(`${env.endpoint}/flow/${result.id}`)
             ui.showSuccessMessage("节点图分享链接已复制")
             share_model_show.value = false
             graphShow.value?.fetchGraphs()

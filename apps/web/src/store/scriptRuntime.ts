@@ -10,6 +10,13 @@ import {
     stopScriptByPath,
 } from "@/api/app"
 import { env } from "@/env"
+import {
+    ConsoleLogRingBuffer,
+    SCRIPT_CONSOLE_FLUSH_INTERVAL_MS,
+    SCRIPT_CONSOLE_RING_CAPACITY,
+    SCRIPT_CONSOLE_TOUCH_THROTTLE_MS,
+    truncateConsoleMessage,
+} from "./scriptConsoleRing"
 
 type ScriptRunningMode = "single" | "scheduler" | null
 type ScriptConfigKind = "number" | "string" | "select" | "multi-select" | "boolean"
@@ -68,10 +75,20 @@ export interface ScriptConsoleLog {
     timestamp: number
 }
 
-/** 控制台日志保留上限：防止长会话无界增长拖慢渲染。 */
-const MAX_CONSOLE_LOGS = 1000
+/** 控制台日志保留上限：环形缓冲容量，防止长会话无界增长拖慢渲染。 */
+export const MAX_CONSOLE_LOGS = SCRIPT_CONSOLE_RING_CAPACITY
 
 let consoleLogSeq = 0
+
+/**
+ * 控制台日志环形缓冲（非响应式）：事件回调内只做 O(1) 入环，
+ * 响应式快照经节流后批量刷新，避免洪水日志饿死主线程导致点不了停止。
+ */
+const consoleLogRing = new ConsoleLogRingBuffer<ScriptConsoleLog>(MAX_CONSOLE_LOGS)
+let consoleFlushTimer: ReturnType<typeof setTimeout> | null = null
+let lastConsoleFlushAt = 0
+let lastScriptEventAtRaw = 0
+let lastTouchReactiveAt = 0
 
 /**
  * 脚本状态项（文本/图片）。
@@ -333,6 +350,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         showStatusPanel: false,
         sidePanelTab: "status" as ScriptRuntimeSidePanelTab,
         consoleLogs: [] as ScriptConsoleLog[],
+        consoleLogDroppedCount: 0,
         scriptStatuses: [] as ScriptStatusItem[],
         lastEventAt: 0,
         activeConfigScope: "",
@@ -341,10 +359,22 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
     }),
     actions: {
         /**
-         * 更新最近一次脚本事件时间戳。
+         * 更新最近一次脚本事件时间戳（响应式同步按秒节流，看门狗读原始值）。
          */
         touchScriptEvent() {
-            this.lastEventAt = Date.now()
+            const now = Date.now()
+            lastScriptEventAtRaw = now
+            if (!this.lastEventAt || now - lastTouchReactiveAt >= SCRIPT_CONSOLE_TOUCH_THROTTLE_MS) {
+                lastTouchReactiveAt = now
+                this.lastEventAt = now
+            }
+        },
+
+        /**
+         * 读取最近一次脚本事件时间戳（含尚未同步到响应式的原始值）。
+         */
+        getLastScriptEventAt() {
+            return Math.max(this.lastEventAt, lastScriptEventAtRaw)
         },
 
         /**
@@ -636,11 +666,12 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             }
             if (scriptRuntimeRestartingByTimeout) return
             if (!this.resolveRuntimeWatchdogScriptName()) return
-            if (!this.lastEventAt) {
+            const lastEventAt = this.getLastScriptEventAt()
+            if (!lastEventAt) {
                 this.touchScriptEvent()
                 return
             }
-            if (Date.now() - this.lastEventAt < timeoutSeconds * 1000) return
+            if (Date.now() - lastEventAt < timeoutSeconds * 1000) return
             await this.restartRunningScriptByTimeout(timeoutSeconds)
         },
 
@@ -754,54 +785,98 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
-         * 追加一条控制台日志。
+         * 追加一条控制台日志：写入环形缓冲后节流刷新快照。
          * @param level 日志级别
          * @param message 日志内容
          */
         appendConsoleLog(level: string, message: string) {
-            this.consoleLogs.push({
+            const text = String(message ?? "")
+            if (!text) return
+            this.touchScriptEvent()
+            consoleLogRing.push({
                 seq: ++consoleLogSeq,
                 scope: undefined,
                 level,
-                message,
+                message: truncateConsoleMessage(text),
                 timestamp: Date.now(),
             })
-            this.trimConsoleLogs()
+            this.queueConsoleFlush()
         },
 
         /**
-         * 按上限裁剪控制台日志（保留最新）。
+         * 按上限裁剪控制台日志（兼容旧调用：环形缓冲已在写入时限流，此处仅刷新快照）。
          */
         trimConsoleLogs() {
-            const overflow = this.consoleLogs.length - MAX_CONSOLE_LOGS
-            if (overflow > 0) {
-                this.consoleLogs.splice(0, overflow)
-            }
+            this.flushConsoleLogs()
         },
 
         /**
-         * 追加一条来自后端事件的控制台日志。
+         * 追加一条来自后端事件的控制台日志：回调内只做 O(1) 入环，不直接改响应式状态。
          * @param payload 控制台事件负载
          */
         appendConsoleEvent(payload: { scope?: string; level?: string; message?: string }) {
             const message = String(payload.message ?? "")
             if (!message) return
             this.touchScriptEvent()
-            this.consoleLogs.push({
+            consoleLogRing.push({
                 seq: ++consoleLogSeq,
                 scope: normalizeScriptEventScope(payload.scope),
                 level: String(payload.level ?? "info"),
-                message,
+                message: truncateConsoleMessage(message),
                 timestamp: Date.now(),
             })
-            this.trimConsoleLogs()
+            this.queueConsoleFlush()
         },
 
         /**
-         * 清空控制台日志。
+         * 请求刷新控制台快照：低频时同步刷新保证即时可见，高频时节流批量刷新。
+         */
+        queueConsoleFlush() {
+            const now = Date.now()
+            if (now - lastConsoleFlushAt >= SCRIPT_CONSOLE_FLUSH_INTERVAL_MS) {
+                this.flushConsoleLogs()
+                return
+            }
+            if (consoleFlushTimer) return
+            const delay = SCRIPT_CONSOLE_FLUSH_INTERVAL_MS - (now - lastConsoleFlushAt)
+            consoleFlushTimer = setTimeout(() => {
+                consoleFlushTimer = null
+                this.flushConsoleLogs()
+            }, delay)
+        },
+
+        /**
+         * 将环形缓冲一次性同步为响应式快照（单次赋值，只触发一次渲染）。
+         */
+        flushConsoleLogs() {
+            lastConsoleFlushAt = Date.now()
+            if (consoleFlushTimer) {
+                clearTimeout(consoleFlushTimer)
+                consoleFlushTimer = null
+            }
+            this.consoleLogs = consoleLogRing.toArray()
+            this.consoleLogDroppedCount = consoleLogRing.droppedCount
+        },
+
+        /**
+         * 取消待处理的控制台快照刷新（仅测试/热重载场景使用）。
+         */
+        cancelConsoleFlush() {
+            if (consoleFlushTimer) {
+                clearTimeout(consoleFlushTimer)
+                consoleFlushTimer = null
+            }
+        },
+
+        /**
+         * 清空控制台日志（同步清空缓冲与快照，拥堵时点清空立刻生效）。
          */
         clearConsoleLogs() {
+            this.cancelConsoleFlush()
+            consoleLogRing.clear()
+            lastConsoleFlushAt = Date.now()
             this.consoleLogs = []
+            this.consoleLogDroppedCount = 0
         },
 
         /**
@@ -813,7 +888,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (!normalizedScope) {
                 return
             }
-            this.consoleLogs = this.consoleLogs.filter(item => normalizeScriptEventScope(item.scope) !== normalizedScope)
+            consoleLogRing.removeIf(item => normalizeScriptEventScope(item.scope) === normalizedScope)
+            this.flushConsoleLogs()
         },
 
         /**
@@ -823,16 +899,17 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         clearConsoleLogsForScope(scope?: string, includeGlobal = true) {
             const normalizedScope = normalizeScriptEventScope(scope)
-            this.consoleLogs = this.consoleLogs.filter(item => {
+            consoleLogRing.removeIf(item => {
                 const itemScope = normalizeScriptEventScope(item.scope)
                 if (normalizedScope && itemScope === normalizedScope) {
-                    return false
+                    return true
                 }
                 if (includeGlobal && !itemScope) {
-                    return false
+                    return true
                 }
-                return true
+                return false
             })
+            this.flushConsoleLogs()
         },
 
         /**
@@ -1116,6 +1193,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             this.runningStartedAt = 0
             // 运行结束后重置看门狗事件基准与重启中标记，并禁用看门狗。
             this.lastEventAt = 0
+            lastScriptEventAtRaw = 0
+            lastTouchReactiveAt = 0
             scriptRuntimeRestartingByTimeout = false
             this.syncScriptRuntimeWatchdog()
         },
@@ -1269,6 +1348,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         disposeRuntimeTracking() {
             // 看门狗随运行时跟踪一并停止，重置重启中标记。
             this.stopScriptRuntimeWatchdog()
+            this.cancelConsoleFlush()
             scriptRuntimeRestartingByTimeout = false
             if (runtimeUnlistenFn) {
                 runtimeUnlistenFn()

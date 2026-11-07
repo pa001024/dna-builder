@@ -443,10 +443,10 @@ defineExpose({
                     <div class="flex flex-1 flex-col p-4">
                         <div class="mb-2 flex items-start justify-between">
                             <a
-                                :href="`${env.endpoint}/graph/${graph.id}`"
+                                :href="`${env.endpoint}/flow/${graph.id}`"
                                 :title="t('dob-build-show.click_copy_link')"
                                 class="line-clamp-2 flex-1 text-base font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
-                                @click.prevent="copyLink(`${env.endpoint}/graph/${graph.id}`)"
+                                @click.prevent="copyLink(`${env.endpoint}/flow/${graph.id}`)"
                             >
                                 {{ graph.title }}
                             </a>

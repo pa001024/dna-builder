@@ -641,12 +641,30 @@ function isBoundNodeTarget(target: HTMLElement | null): boolean {
     return Boolean(host?.dataset.id && host.dataset.id !== props.id)
 }
 
-/** 画布空白处按下：开始框选 */
+/** 画布空白处按下：与外层保持一致，拖动平移画布，按住 Shift 拖动才框选 */
 function handleCanvasPointerDown(event: PointerEvent) {
     if (event.button !== 0 || editingId.value) return
     // 点在主题上时由主题自己接管；点在绑定主题的真实节点上时交给节点本身
     if ((event.target as HTMLElement).closest(".mind-node")) return
     if (isBoundNodeTarget(event.target as HTMLElement | null)) return
+    // 非 Shift：不拦截，放行给外层 Vue Flow 平移画布；仅在未拖动（点击）时清空选择
+    if (!event.shiftKey) {
+        const startX = event.clientX
+        const startY = event.clientY
+        let moved = false
+        const onMove = (moveEvent: PointerEvent) => {
+            if (!moved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 4) return
+            moved = true
+        }
+        const onUp = () => {
+            window.removeEventListener("pointermove", onMove)
+            window.removeEventListener("pointerup", onUp)
+            if (!moved) selectedIds.value = new Set()
+        }
+        window.addEventListener("pointermove", onMove)
+        window.addEventListener("pointerup", onUp)
+        return
+    }
     event.preventDefault()
     const start = canvasPoint(event)
     let moved = false

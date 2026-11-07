@@ -1,12 +1,11 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, nextTick, onBeforeUnmount, ref } from "vue"
 import { aiQuotaQuery } from "@/api/graphql"
 import { useGraphChat } from "@/composables/useGraphChat"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
 import { formatCost } from "@/utils/ai-log-format"
 import type { ChatSubmitPayload } from "@/utils/chat-image"
 import { warmupBuildSandbox } from "@/utils/code-sandbox"
@@ -87,11 +86,6 @@ const isOpen = ref(false)
 const inputText = ref("")
 /** 输入框实例（打开窗口时自动聚焦） */
 const askBoxRef = ref<{ focus: () => void } | null>(null)
-
-/**
- * 是否已具备可用的上游配置：没有密钥又未登录时给出可操作提示，不打无谓的请求。
- */
-const hasUpstream = computed(() => Boolean(resolveSharedAgentUpstream()))
 
 /**
  * 输入框占位文案：等待作答 > 已有对话 > 全新对话。
@@ -182,13 +176,6 @@ async function handleCompactContext() {
 
     ui.showErrorMessage(t("dbAgent.ui.contextUsage.compactFailed"))
 }
-
-onMounted(() => {
-    // 未配置上游时直接展开窗口，把「请先登录 / 填密钥」的提示摆到用户面前
-    if (!hasUpstream.value) {
-        void open()
-    }
-})
 
 onBeforeUnmount(() => {
     setGraphApi(null)
