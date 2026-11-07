@@ -23,3 +23,5 @@ mr-boxington = "latest"
 #   1) 上面加一行 rust = { version = "stable", mr_boxington = true } (要 mise 2026.9.2+,
 #      会在 ~/.local/share/mise 下另装一套 Rust, 只在 mise shell 内生效)
 #   2) 跑一次 mbx setup (给当前 rustup 的 cargo 加 shim, 全局生效, 见 https://mr-boxington.jdx.dev/setup)
+# 某 Cargo workspace 的 C/C++ 经 mbx 编译失败时, 在该 workspace 根放 .mbx.toml 写 cc = false
+# (只关 C/C++ 缓存, Rust 照走; 例见 apps/web/src-tauri/.mbx.toml)。
