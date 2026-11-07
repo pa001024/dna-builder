@@ -158,7 +158,6 @@ const cloudGameEntryTitle = computed(() => {
         return t("game-launcher.cloudGameNativePreparing")
     }
     if (native) return t("game-launcher.cloudGameNativeOpen")
-    if (cloudgame.isBridgeConnected) return t("game-launcher.cloudGameFocusedConnected")
     if (cloudgame.isWindowOpen) return t("game-launcher.cloudGameFocused")
     return t("game-launcher.cloudGameOpen")
 })
@@ -166,7 +165,7 @@ const cloudGameEntryTitle = computed(() => {
 const cloudGameEntryIcon = computed(() => {
     if (cloudgame.isNativeBusy) return "ri:refresh-line"
     if (cloudgame.implementation === "native") return "ri:cpu-line"
-    return cloudgame.isBridgeConnected ? "ri:cloud-fill" : "ri:cloud-line"
+    return "ri:cloud-line"
 })
 
 /**

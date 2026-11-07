@@ -1,4 +1,4 @@
-//! 云游戏受控窗口：独立 WebView 窗口的创建、状态广播、桥接事件与导航控制。
+//! 云游戏受控窗口：独立 WebView 窗口的创建、状态广播与导航控制。
 
 use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
@@ -6,7 +6,6 @@ use url::Url;
 
 const CLOUDGAME_WINDOW_LABEL: &str = "cloudgame";
 const CLOUDGAME_DEFAULT_URL: &str = "https://dna.yingxiong.com/cloudgame/";
-const CLOUDGAME_BRIDGE_EVENT: &str = "cloudgame://bridge";
 const CLOUDGAME_PAGE_LOAD_EVENT: &str = "cloudgame://page-load";
 const CLOUDGAME_WINDOW_EVENT: &str = "cloudgame://window-state";
 
@@ -53,19 +52,6 @@ struct CloudGamePageLoadPayload {
     label: String,
     url: String,
     event: String,
-}
-
-/// 云游戏桥接事件负载。
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CloudGameBridgeEventPayload {
-    event_type: String,
-    payload: Option<serde_json::Value>,
-}
-
-/// 构建注入到云游戏页面中的后台控制桥。
-fn build_cloudgame_init_script() -> String {
-    include_str!("../cloudgame_init.js").to_string()
 }
 
 /// 将页面加载事件转换成稳定的字符串值。
@@ -126,23 +112,6 @@ fn emit_cloudgame_page_load(
     app_handle
         .emit(CLOUDGAME_PAGE_LOAD_EVENT, &payload)
         .map_err(|error| format!("发送云游戏页面加载事件失败: {error}"))
-}
-
-/// 接收远程云游戏页桥接事件并转发到主窗口。
-#[tauri::command]
-pub fn dispatch_cloudgame_bridge_event(
-    app_handle: tauri::AppHandle,
-    payload: CloudGameBridgeEventPayload,
-) -> Result<(), String> {
-    app_handle
-        .emit(
-            CLOUDGAME_BRIDGE_EVENT,
-            &serde_json::json!({
-                "type": payload.event_type,
-                "payload": payload.payload,
-            }),
-        )
-        .map_err(|error| format!("转发云游戏桥接事件失败: {error}"))
 }
 
 /// 统一获取云游戏窗口句柄，避免各命令重复判空。
@@ -229,22 +198,11 @@ pub async fn open_cloudgame_window(
     .always_on_top(options.always_on_top.unwrap_or(false))
     .skip_taskbar(options.skip_taskbar.unwrap_or(false))
     .incognito(options.incognito.unwrap_or(false))
-    .initialization_script(build_cloudgame_init_script())
     .on_page_load(move |window, payload| {
         let _ = emit_cloudgame_page_load(&page_load_handle, payload.url(), payload.event());
         let _ = emit_cloudgame_window_state(&page_load_handle, &window);
     })
-    .on_document_title_changed(move |window, title| {
-        let _ = title_event_handle.emit(
-            CLOUDGAME_BRIDGE_EVENT,
-            serde_json::json!({
-                "type": "title-change",
-                "payload": {
-                    "title": title,
-                    "href": window.url().map(|value| value.to_string()).unwrap_or_default(),
-                }
-            }),
-        );
+    .on_document_title_changed(move |window, _title| {
         let _ = emit_cloudgame_window_state(&title_event_handle, &window);
     });
 
@@ -369,42 +327,4 @@ pub fn navigate_cloudgame_window(
             .map_err(|error| format!("导航云游戏窗口失败: {error}"))?;
         emit_cloudgame_window_state(&app_handle, &window)
     })
-}
-
-/// 向云游戏页面派发桥接命令。
-#[tauri::command]
-pub fn dispatch_cloudgame_command(
-    app_handle: tauri::AppHandle,
-    action: String,
-    payload: Option<serde_json::Value>,
-) -> Result<(), String> {
-    let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) else {
-        return Err("云游戏窗口未打开".to_string());
-    };
-
-    let detail = serde_json::json!({
-        "action": action,
-        "payload": payload.unwrap_or(serde_json::Value::Null),
-    });
-    let detail_json =
-        serde_json::to_string(&detail).map_err(|error| format!("序列化云游戏命令失败: {error}"))?;
-    let script = format!(
-        "window.dispatchEvent(new CustomEvent('__dna_cloudgame_control__', {{ detail: {detail_json} }}));",
-    );
-
-    window
-        .eval(script)
-        .map_err(|error| format!("派发云游戏命令失败: {error}"))
-}
-
-/// 直接在云游戏页面执行任意脚本，作为高阶兜底入口。
-#[tauri::command]
-pub fn eval_cloudgame_window(app_handle: tauri::AppHandle, script: String) -> Result<(), String> {
-    let Some(window) = app_handle.get_webview_window(CLOUDGAME_WINDOW_LABEL) else {
-        return Err("云游戏窗口未打开".to_string());
-    };
-
-    window
-        .eval(script)
-        .map_err(|error| format!("执行云游戏脚本失败: {error}"))
 }

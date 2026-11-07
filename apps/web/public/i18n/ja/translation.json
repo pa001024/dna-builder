@@ -3022,7 +3022,6 @@
         "changelog": "更新内容",
         "char": "キャラクター",
         "cloudGameFocused": "クラウドゲームウィンドウをフォーカス",
-        "cloudGameFocusedConnected": "クラウドゲームウィンドウをフォーカス（接続済み）",
         "cloudGameMode": "クラウドゲームの実装方式",
         "cloudGameNative": "ネイティブクライアント（新版）",
         "cloudGameNativeDownloading": "ネイティブクライアントをダウンロード中 {{ progress }}%",

@@ -299,7 +299,6 @@ pub fn run() {
         commands::script_cmds::get_script_input_recorder_snapshot,
         commands::script_cmds::clear_script_input_recorder_actions,
         // 云游戏窗口
-        commands::cloudgame::dispatch_cloudgame_bridge_event,
         commands::cloudgame::open_cloudgame_window,
         commands::cloudgame::get_cloudgame_window_state,
         commands::cloudgame::close_cloudgame_window,
@@ -308,8 +307,6 @@ pub fn run() {
         commands::cloudgame::focus_cloudgame_window,
         commands::cloudgame::reload_cloudgame_window,
         commands::cloudgame::navigate_cloudgame_window,
-        commands::cloudgame::dispatch_cloudgame_command,
-        commands::cloudgame::eval_cloudgame_window,
         // 桌面分身（Windows 子会话）
         commands::desktop_clone::desktop_clone_status,
         commands::desktop_clone::desktop_clone_capability,

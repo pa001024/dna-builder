@@ -1,7 +1,7 @@
 # 云·二重螺旋 — 云游戏协议逆向与 Native 客户端
 
 目标：用 Rust 独立 exe（`crates/cloudgame-client`）替代 `apps/web` 里基于 WebView 的云游戏窗口
-（`src-tauri/src/commands/cloudgame.rs` + `cloudgame_init.js` 注入桥）。
+（`src-tauri/src/commands/cloudgame.rs`）。WebView 端只保留窗口打开/聚焦，页面注入桥（含 `cg*` 脚本 API）已移除。
 
 逆向来源：`https://dna.yingxiong.com/cloudgame/`（index-B98g2EJD.js + WelinkCloudGame.5.11.4 + WeLinkQueue.1.0.4，
 均已 pretty-print 存于 `.tmp/cloudgame-re/`）。
@@ -532,5 +532,6 @@ base64url → 嵌套 SimpleCmd 的 arg/arg1/arg2/data。data channel 的非 99 k
   `%APPDATA%/dna-builder/bin/cloudgame-client.exe`（无解压步骤），再写
   `cloudgame-client.version`，最后 `launch_normal` 启动 exe；
   选择保存在 localStorage `cloudgame.implementation`，默认为原 WEB 端。
-- WEB 端（原版）仍走 `open_cloudgame_window` 的 WebView 注入桥，行为不变。
+- WEB 端（原版）仍走 `open_cloudgame_window` 打开官方页面，但不再注入任何脚本；
+  脚本侧 `cgMove/cgClick/cgKey...` 等依赖注入桥的 API 已一并移除。
 

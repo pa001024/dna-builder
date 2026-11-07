@@ -4,19 +4,15 @@ import { t } from "i18next"
 import { defineStore } from "pinia"
 import { launchNormal } from "@/api/app"
 import {
-    type CloudGameBridgePayload,
-    type CloudGameBridgeStatus,
     type CloudGamePageLoadPayload,
     type CloudGameWindowOptions,
     type CloudGameWindowState,
     closeCloudGameWindow,
     focusCloudGameWindow,
     getCloudGameWindowState,
-    listenCloudGameBridge,
     listenCloudGamePageLoad,
     listenCloudGameWindowState,
     openCloudGameWindow,
-    requestCloudGameBridgeStatus,
 } from "@/api/cloudgame"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
@@ -36,17 +32,9 @@ export type CloudGameNativePhase = "idle" | "checking" | "downloading" | "deploy
 /** 云游戏实现方式在 localStorage 中的键名。 */
 const CLOUDGAME_IMPLEMENTATION_KEY = "cloudgame.implementation"
 
-let bridgeUnlistenFn: UnlistenFn | null = null
 let pageLoadUnlistenFn: UnlistenFn | null = null
 let windowStateUnlistenFn: UnlistenFn | null = null
 let cloudGameListenerReady = false
-
-interface CloudGameCommandResultPayload {
-    action: string | null
-    ok: boolean
-    result?: unknown
-    error?: string
-}
 
 /**
  * 判断当前是否在桌面端主窗口中运行，避免在子窗口重复初始化全局监听。
@@ -54,56 +42,6 @@ interface CloudGameCommandResultPayload {
  */
 function canInitCloudGameTracking() {
     return env.isApp && getCurrentWindow().label === "main"
-}
-
-/**
- * 判断输入值是否像云游戏桥状态对象。
- * @param payload 待判断负载
- * @returns 是否为桥状态
- */
-function isCloudGameBridgeStatus(payload: unknown): payload is CloudGameBridgeStatus {
-    if (!payload || typeof payload !== "object") return false
-    const candidate = payload as Record<string, unknown>
-    return (
-        typeof candidate.hookedAt === "number" &&
-        typeof candidate.transportReady === "boolean" &&
-        typeof candidate.transportAttached === "boolean" &&
-        Array.isArray(candidate.seenActionNames)
-    )
-}
-
-/**
- * 判断输入值是否像 command-result 负载。
- * @param payload 待判断负载
- * @returns 是否为命令结果负载
- */
-function isCloudGameCommandResultPayload(payload: unknown): payload is CloudGameCommandResultPayload {
-    if (!payload || typeof payload !== "object") return false
-    const candidate = payload as Record<string, unknown>
-    return typeof candidate.ok === "boolean" && ("action" in candidate || "result" in candidate || "error" in candidate)
-}
-
-/**
- * 从桥接事件负载中提取桥状态，兼容多种事件结构。
- * @param payload 桥接事件负载
- * @returns 桥状态，不存在时返回 null
- */
-function extractBridgeStatus(payload: unknown): CloudGameBridgeStatus | null {
-    if (isCloudGameBridgeStatus(payload)) {
-        return payload
-    }
-    if (!payload || typeof payload !== "object") {
-        return null
-    }
-
-    const candidate = payload as Record<string, unknown>
-    if (isCloudGameBridgeStatus(candidate.state)) {
-        return candidate.state
-    }
-    if (isCloudGameCommandResultPayload(payload) && isCloudGameBridgeStatus(candidate.result)) {
-        return candidate.result
-    }
-    return null
 }
 
 export const useCloudGameStore = defineStore("cloudgame", {
@@ -114,22 +52,11 @@ export const useCloudGameStore = defineStore("cloudgame", {
         nativePhase: "idle" as CloudGameNativePhase,
         nativeProgress: 0,
         windowState: null as CloudGameWindowState | null,
-        bridgeStatus: null as CloudGameBridgeStatus | null,
-        lastBridgeEventType: "",
-        lastBridgePayload: null as unknown,
         lastPageLoadPayload: null as CloudGamePageLoadPayload | null,
     }),
     getters: {
         isWindowOpen: state => Boolean(state.windowState),
-        isBridgeConnected: state => Boolean(state.bridgeStatus?.connected),
         isNativeBusy: state => state.opening && state.implementation === "native",
-        bridgeEventSummary: state => {
-            if (!state.lastBridgeEventType) return ""
-            if (state.bridgeStatus?.connected) {
-                return `${state.lastBridgeEventType} · 已连通`
-            }
-            return state.lastBridgeEventType
-        },
     },
     actions: {
         /**
@@ -163,19 +90,6 @@ export const useCloudGameStore = defineStore("cloudgame", {
         },
 
         /**
-         * 处理桥接事件并同步状态快照。
-         * @param eventPayload 桥接事件负载
-         */
-        applyBridgeEvent(eventPayload: CloudGameBridgePayload) {
-            this.lastBridgeEventType = String(eventPayload?.type ?? "")
-            this.lastBridgePayload = eventPayload?.payload ?? null
-            const bridgeStatus = extractBridgeStatus(eventPayload?.payload)
-            if (bridgeStatus) {
-                this.bridgeStatus = bridgeStatus
-            }
-        },
-
-        /**
          * 处理页面加载事件。
          * @param payload 页面加载事件负载
          */
@@ -201,16 +115,9 @@ export const useCloudGameStore = defineStore("cloudgame", {
             if (cloudGameListenerReady) {
                 this.initialized = true
                 await this.syncWindowStateFromBackend()
-                if (this.windowState) {
-                    await requestCloudGameBridgeStatus()
-                }
                 return
             }
 
-            bridgeUnlistenFn = await listenCloudGameBridge(event => {
-                if (!event?.payload) return
-                this.applyBridgeEvent(event.payload)
-            })
             pageLoadUnlistenFn = await listenCloudGamePageLoad(event => {
                 if (!event?.payload) return
                 this.applyPageLoadPayload(event.payload)
@@ -222,13 +129,10 @@ export const useCloudGameStore = defineStore("cloudgame", {
             cloudGameListenerReady = true
             this.initialized = true
             await this.syncWindowStateFromBackend()
-            if (this.windowState) {
-                await requestCloudGameBridgeStatus()
-            }
         },
 
         /**
-         * 打开或复用云游戏窗口，并刷新最新桥状态。
+         * 打开或复用云游戏窗口。
          * @param options 云游戏窗口配置
          */
         async openCloudGame(options: CloudGameWindowOptions = {}) {
@@ -242,7 +146,6 @@ export const useCloudGameStore = defineStore("cloudgame", {
                         ...options,
                     })
                 )
-                await requestCloudGameBridgeStatus()
             } catch (error) {
                 console.error("打开云游戏窗口失败", error)
                 ui.showErrorMessage(`打开云游戏窗口失败: ${error instanceof Error ? error.message : String(error)}`)
@@ -304,9 +207,7 @@ export const useCloudGameStore = defineStore("cloudgame", {
                 this.applyWindowState(nextState ?? null)
                 if (!nextState) {
                     await this.openCloudGame()
-                    return
                 }
-                await requestCloudGameBridgeStatus()
                 return
             }
             await this.openCloudGame()
@@ -331,10 +232,8 @@ export const useCloudGameStore = defineStore("cloudgame", {
          * 释放监听，仅用于热重载或测试场景。
          */
         disposeCloudGameTracking() {
-            bridgeUnlistenFn?.()
             pageLoadUnlistenFn?.()
             windowStateUnlistenFn?.()
-            bridgeUnlistenFn = null
             pageLoadUnlistenFn = null
             windowStateUnlistenFn = null
             cloudGameListenerReady = false

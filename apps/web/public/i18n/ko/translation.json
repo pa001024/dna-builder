@@ -3023,7 +3023,6 @@
         "changelog": "변경 사항",
         "char": "캐릭터",
         "cloudGameFocused": "클라우드 게임 창 포커스",
-        "cloudGameFocusedConnected": "클라우드 게임 창 포커스(연결됨)",
         "cloudGameMode": "클라우드 게임 구현 방식",
         "cloudGameNative": "네이티브 클라이언트(신버전)",
         "cloudGameNativeDownloading": "네이티브 클라이언트 다운로드 중 {{ progress }}%",

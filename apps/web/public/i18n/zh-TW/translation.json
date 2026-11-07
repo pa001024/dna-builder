@@ -3020,7 +3020,6 @@
         "changelog": "更新說明",
         "char": "角色",
         "cloudGameFocused": "聚焦雲遊戲視窗",
-        "cloudGameFocusedConnected": "聚焦雲遊戲視窗（已連通）",
         "cloudGameMode": "雲遊戲實作方式",
         "cloudGameNative": "原生客戶端（新版）",
         "cloudGameNativeDownloading": "正在下載原生客戶端 {{ progress }}%",

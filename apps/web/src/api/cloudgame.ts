@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
 import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event"
 
-export const CLOUDGAME_BRIDGE_EVENT = "cloudgame://bridge"
 export const CLOUDGAME_PAGE_LOAD_EVENT = "cloudgame://page-load"
 export const CLOUDGAME_WINDOW_EVENT = "cloudgame://window-state"
 
@@ -38,67 +37,6 @@ export interface CloudGameWindowState {
     title: string
     visible: boolean
     focused: boolean
-}
-
-/**
- * 云游戏桥接事件负载。
- */
-export interface CloudGameBridgePayload {
-    type: string
-    payload: unknown
-}
-
-/**
- * 云游戏 SDK 桥接状态。
- */
-export interface CloudGameBridgeStatus {
-    hookedAt: number
-    transportReady: boolean
-    transportKind: string | null
-    transportAttached: boolean
-    sid: number | null
-    connected: boolean
-    inputMode: string | null
-    lastAction: string | null
-    lastPacket: unknown
-    connectArg: unknown
-    seenActionNames: string[]
-    seenPackets: number
-}
-
-/**
- * 云游戏原生鼠标指令参数。
- */
-export interface CloudGameMouseCommand {
-    mouseX: number
-    mouseY: number
-    cursorX: number
-    cursorY: number
-    action: number
-    code: number
-    value?: number
-    extra?: number
-}
-
-/**
- * 云游戏原生键盘指令参数。
- */
-export interface CloudGameKeyEventCommand {
-    action: number
-    state: number
-}
-
-/**
- * 云游戏原生触摸指令参数。
- */
-export interface CloudGameTouchCommand {
-    action: number
-    state: number
-    index?: number
-    x: number
-    y: number
-    extra1?: number
-    extra2?: number
 }
 
 /**
@@ -174,98 +112,6 @@ export async function reloadCloudGameWindow() {
  */
 export async function navigateCloudGameWindow(url: string) {
     return await invoke<CloudGameWindowState | null>("navigate_cloudgame_window", { url })
-}
-
-/**
- * 通过注入桥向页面派发高阶控制命令。
- * @param action 控制动作名称
- * @param payload 控制动作负载
- */
-export async function dispatchCloudGameCommand(action: string, payload?: unknown) {
-    await invoke("dispatch_cloudgame_command", { action, payload })
-}
-
-/**
- * 请求当前桥接到的 SDK 输入通道状态。
- * 实际结果会通过 bridge 事件异步回流。
- */
-export async function requestCloudGameBridgeStatus() {
-    await dispatchCloudGameCommand("status")
-}
-
-/**
- * 直接发送原始 transport 数据包。
- * @param packet 目标 worker/port 协议包
- */
-export async function sendCloudGameRawPacket(packet: Record<string, unknown>) {
-    await dispatchCloudGameCommand("sendRaw", packet)
-}
-
-/**
- * 发送 x_fn_exec 原生指令。
- * @param actionName SDK 原生动作名
- * @param args 动作参数（不含 sid）
- */
-export async function sendCloudGameXFnExec(actionName: string, args: unknown[] = []) {
-    await dispatchCloudGameCommand("xFnExec", { actionName, args })
-}
-
-/**
- * 发送 fn_exec 原生指令。
- * @param actionName SDK 原生动作名
- * @param args 动作参数
- * @param prependSid 是否自动补 sid
- */
-export async function sendCloudGameFnExec(actionName: string, args: unknown[] = [], prependSid = true) {
-    await dispatchCloudGameCommand("fnExec", { actionName, args, prependSid })
-}
-
-/**
- * 发送云游戏原生鼠标指令。
- * @param command 鼠标动作参数
- */
-export async function sendCloudGameMouse(command: CloudGameMouseCommand) {
-    await dispatchCloudGameCommand("mouse", command)
-}
-
-/**
- * 发送云游戏原生键盘指令。
- * @param command 键盘动作参数
- */
-export async function sendCloudGameKeyEvent(command: CloudGameKeyEventCommand) {
-    await dispatchCloudGameCommand("keyEvent", command)
-}
-
-/**
- * 发送云游戏原生触摸指令。
- * @param command 触摸动作参数
- */
-export async function sendCloudGameTouch(command: CloudGameTouchCommand) {
-    await dispatchCloudGameCommand("touch", command)
-}
-
-/**
- * 主动发送 keep-alive 指令，验证 transport 是否存活。
- */
-export async function sendCloudGameKeepAlive() {
-    await dispatchCloudGameCommand("keepAlive")
-}
-
-/**
- * 直接在云游戏页面执行脚本。
- * @param script 要执行的脚本
- */
-export async function evalCloudGameWindow(script: string) {
-    return await invoke("eval_cloudgame_window", { script })
-}
-
-/**
- * 监听云游戏桥接事件。
- * @param handler 事件处理函数
- * @returns 取消监听函数
- */
-export async function listenCloudGameBridge(handler: (event: Event<CloudGameBridgePayload>) => void): Promise<UnlistenFn> {
-    return await listen<CloudGameBridgePayload>(CLOUDGAME_BRIDGE_EVENT, handler)
 }
 
 /**

@@ -3061,7 +3061,6 @@
         "changelog": "Journal des modifications",
         "char": "Personnage",
         "cloudGameFocused": "Focaliser la fenêtre de cloud gaming",
-        "cloudGameFocusedConnected": "Focaliser la fenêtre de cloud gaming (connectée)",
         "cloudGameMode": "Implémentation du cloud gaming",
         "cloudGameNative": "Client natif (nouveau)",
         "cloudGameNativeDownloading": "Téléchargement du client natif {{ progress }} %",

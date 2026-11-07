@@ -3071,7 +3071,6 @@
         "changelog": "更新说明",
         "char": "角色",
         "cloudGameFocused": "聚焦云游戏窗口",
-        "cloudGameFocusedConnected": "聚焦云游戏窗口（已连通）",
         "cloudGameMode": "云游戏实现方式",
         "cloudGameNative": "原生客户端（新版）",
         "cloudGameNativeDownloading": "正在下载原生客户端 {{ progress }}%",

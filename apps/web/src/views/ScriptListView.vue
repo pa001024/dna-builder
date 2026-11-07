@@ -353,7 +353,6 @@ const cloudGameEntryTitle = computed(() => {
         return t("game-launcher.cloudGameNativePreparing")
     }
     if (native) return t("game-launcher.cloudGameNativeOpen")
-    if (cloudgame.isBridgeConnected) return t("game-launcher.cloudGameFocusedConnected")
     if (cloudgame.isWindowOpen) return t("game-launcher.cloudGameFocused")
     return t("game-launcher.cloudGameOpen")
 })
@@ -3893,9 +3892,7 @@ onUnmounted(async () => {
                                             ? 'ri:refresh-line'
                                             : cloudgame.implementation === 'native'
                                               ? 'ri:cpu-line'
-                                              : cloudgame.isBridgeConnected
-                                                ? 'ri:cloud-fill'
-                                                : 'ri:cloud-line'
+                                              : 'ri:cloud-line'
                                     "
                                     class="w-4 h-4"
                                     :class="{ 'animate-spin': cloudgame.isNativeBusy }"

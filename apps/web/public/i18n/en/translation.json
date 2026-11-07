@@ -3045,7 +3045,6 @@
         "changelog": "Changelog",
         "char": "Character",
         "cloudGameFocused": "Focus cloud game window",
-        "cloudGameFocusedConnected": "Focus cloud game window (connected)",
         "cloudGameMode": "Cloud game implementation",
         "cloudGameNative": "Native client (new)",
         "cloudGameNativeDownloading": "Downloading native client {{ progress }}%",
