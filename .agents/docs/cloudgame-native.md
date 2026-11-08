@@ -109,10 +109,21 @@ WLCGV2 命名空间另有 `ClientFirstOnline`（DIRECT 模式首包）与 `Video
 
 ### 排队（WeLinkQueue 1.0.4，挂 SDK IspUrl = gateWayUrl）
 
-play.lg 的 sdkMsg `identiType=="queuing"`、`seatNo/queuingSize != -1`、`token` 非空且非 `"{}"` 时进入排队。
+**play.lg 只调用一次**（官方 `checkQueue`），响应先看 `codes` / `weilinSdkStatus`，不能靠“有没有 sdkMsg”判断：
+
+| 响应 | 官方处理 |
+|---|---|
+| `codes !== 0` | 30002=登录失效（登出重登）、30003=服务器维护（`dialogTips`）、其他=提示 `error_description` |
+| `weilinSdkStatus === 1` | 云游戏时长与畅玩卡已耗尽，去商店 |
+| `weilinSdkStatus === 2` | 游戏启动失败，请重试（不自动重试） |
+| `sdkMsg.includes("queuing")` | 进入排队（`checkDispatchInfo`） |
+| 其他 sdkMsg | 直接 `startGame(sdkMsg)` |
+
+进入排队的合法性：`identiType=="queuing"`、`seatNo/queuingSize != -1`、`token` 非空且非 `"{}"`、IspUrl 已配置；
+不满足 → 排队信息获取失败（游戏启动失败），不要继续轮询。
 官方：先用 play sdkMsg 内嵌数值上屏，**立即** `POST {gateWayUrl}/sdk_api/web/queue/search_queue_info`
-（FormData：`token/requestId/requestTime=Date.now()`，单次请求 2s 超时），之后每 10s 一次；
-`code:200|4000` → `data.sdkMsg` 出现即真 session，否则 `data.{seatNo,queuingSize}`；
+（FormData：`token/requestId/requestTime=Date.now()`，单次请求 2s 超时），之后每 **10s 固定间隔**一次；
+`code:200|4000` → `data.sdkMsg` **非空**即真 session（空串/null 不算），否则 `data.{seatNo,queuingSize}`；
 `seatNo` 单调不增（`min(旧,新)`，下限 0），`queuingSize<=0` 归 0；`500` 继续轮询，其他 code 取消并报错；
 30s 无成功响应 → `POST /sdk_api/web/queue/cancel` 并失败。
 
@@ -130,8 +141,11 @@ ping 后返回 `nodeResult.nodeId` 填 play.lg 的 `node`。v1 可直接取首�
 
 `{userId:cUid, node:nodeId, resolution:"WxH", bitRate, fps:60, codecType, version:"v1.0", cmdLine:"",
 env:0, bizData:<bizData JSON>, access_token:cToken, queueType:1|2}`；
+queueType 官方按用户信息选：`playCardEnable` → 2（畅玩卡通道），否则 1（免费时长；`paidTimeTipsDialogSwitch` 默认 false）。
+native 在启动时先拉 `user/info.lg`（同 cToken），`codes==30002` 视为登录失效并重登。
 bizData=`{btype:"",os:"WINDOWS",osVer:"",clientVer:"5.11.4.260113143905-wlweb-release",osCategory:"H5",isOneLine:1,extSDK:"{...}",ping:[...]}`。
 sdkMsg 非 queuing 时 = `{auth,verify,packedData,assignResultParam,gsIp,gsPort|webRtcPort,gsmToken,userId,codecType,schemeType,gsVer,...}`。
+返回顶层字段：`{codes,weilinSdkStatus,error_description,dialogTips,sdkMsg}`（注意是 `codes`，queue API 的 `code` 是另一套）。
 
 ### 游戏内登录（进房后）
 
@@ -143,8 +157,14 @@ datachannel 上 `SendDataToGame` 两条：
 ## 登录/持久化设计（native）
 
 - 首登：wry(WebView2）小窗嵌官方登录页完成 253 验证码+短信 → 抓 `phoneToken`/`access_token` → 落盘
-  `%APPDATA%/dna-builder/cloudgame-session.json`（phoneToken + deviceNum + checklgn 结果）。
-- 之后：`autoLogin.lg`（phoneToken）→ getToken → checklgn 全静默；30002 = 失效重登。
+  `%APPDATA%/dna-builder/cloudgame-sessions.json`（phoneToken + deviceNum + checklgn 结果）。
+- 续期（官方 `csdkLogin` 每次加载都会走）：`autoLogin.lg{token:phoneToken,phone,client_id:appKey}`
+  → `getToken.lg{code,client_id,client_secret}` → `access_token`，**这个 access_token 就是云游戏 API 的 cToken**
+  （实测直接用于 `user/info.lg`/`play.lg`；不需要再调 usdk checklgn）。
+  `getToken` 返回 `expires_in:172800`（cToken 48h），phoneToken 存活更久，所以每次启动静默续期即可。
+- 续期失败 / 续期后仍 30002 → 清空 token 并重开该账号的登录窗（同 webview profile）。
+- usdk `checklgn` 只用于拿 USDK 自己的 accessToken（游戏内 login/支付）；它的响应是
+  `swap(base64(base64(AES-256-CBC)))` 双层编码，native 端未使用该接口。
 
 ## Native 客户端结构
 
@@ -281,6 +301,10 @@ protoVersion 后官方实际发送序(DISPATCH 分支,startType=DISPATCH,mIsStar
 - `ID3D11VideoDevice/Context` + `D3D11_VIDEO_PROCESSOR_CONTENT_DESC`：NV12 纹理直接
   `VideoProcessorBlt` 到交换链(驱动内完成 YUV→RGB + 缩放)，`VideoProcessorSetStreamSourceRect`
   裁掉宏块补齐行(1600x912→1600x900)；`Present(0)`。窗口尺寸变化 → `ResizeBuffers` + 重建处理器。
+  **`ResizeBuffers` 必须原样传创建时的标志**（`DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT`）：
+  DXGI 不允许增删该标志，传 0 会固定返回 `DXGI_ERROR_INVALID_CALL`，表现为缩放时整窗被 DWM 拉伸变糊、
+  标题栏条带露黑、且每次尺寸事件都重建交换链（很卡）。
+  （DirectComposition 分层窗口方案实测不可用：视频层不显示、界面卡顿，不要再改回去。）
 - 输入尺寸变化(实测服务端会从 1600x900 切到 1920x1080)由 STREAM_CHANGE 重协商驱动，
   VideoProcessor 按新尺寸重建。
 - 回退链:硬解初始化失败 → 软解;GPU 呈现连续失败 → 软解 NV12 → `present_nv12` 上传纹理
@@ -520,14 +544,19 @@ base64url → 嵌套 SimpleCmd 的 arg/arg1/arg2/data。data channel 的非 99 k
 ## 发布与前端部署（2026-11-07）
 
 - 打包上传：`bun tools/cloudgame-upload.ts build upload`（或 `pnpm cloudgame`）完整链路：
-  `cargo build --release` → `upx --best --lzma` 就地压缩 → 直传单文件 exe 到
-  `cloudgame/cloudgame-client-v<版本>.exe`（`application/vnd.microsoft.portable-executable`），
-  OSS 与 R2 双写并各自探测一次可访问性。可用 `--exe <path>` 指定别的构建产物，
-  `--skip-upx` 跳过压缩。
-- 版本号在前端 `apps/web/src/utils/cloudgame-native.ts` 的 `CLOUDGAME_NATIVE_VERSION`；
-  对象名带版本，发新客户端时**必须同时换版本号**：CDN 边缘按路径缓存（OSS 侧 TTL 30 天），
-  覆盖同名对象不会立即生效。旧安装因版本标记不匹配会自动重新下载。
-- 前端部署：启动器云游戏按钮右侧下拉选「原生客户端（新版）」，选择后立即
+  `cargo build --release` → `upx --best --lzma` 就地压缩 → 直传单文件 exe，OSS 与 R2 双写并各自探测一次可访问性。
+  可用 `--exe <path>` 指定别的构建产物，`--skip-upx` 跳过压缩。
+- 产物两件套：
+  1. `cloudgame/cloudgame-client-v<版本>.exe` —— UPX 压缩后的单文件（同名覆盖）。
+  2. `cloudgame/latest.json` —— 发布清单，字段与 `apk/latest.json` 同构
+     `{version, fileName, url, size, sha256, builtAt, notes?}`，每次上传覆盖写（先传 exe 再传清单）。
+- 前端部署（`apps/web/src/utils/cloudgame-native.ts`）：启动原生客户端时先拉清单
+  （`fetchWithCdnFallback`，4s 超时；失败时退回 `CLOUDGAME_NATIVE_VERSION` 常量，不阻塞启动），
+  与 `%APPDATA%/dna-builder/bin/cloudgame-client.version` 里的本地标记比对；
+  版本不一致 → 下载清单 `fileName` 对应对象直写 `cloudgame-client.exe`（按清单 `size`/`sha256` 校验，
+  不一致则删文件换源重试），通过后写新标记。
+  因此发版只需上传清单里的新版本号，无需改前端常量。
+- 前端部署 UI：启动器云游戏按钮右侧下拉选「原生客户端（新版）」，选择后立即
   `downloadFile`（优先测速选中的 CDN，失败回退另一端）直写
   `%APPDATA%/dna-builder/bin/cloudgame-client.exe`（无解压步骤），再写
   `cloudgame-client.version`，最后 `launch_normal` 启动 exe；

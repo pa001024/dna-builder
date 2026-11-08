@@ -209,8 +209,46 @@ async fn main() -> Result<()> {
         return Ok(());
     }
 
+    // 官方页面每次加载都会用 LOGIN_CACHE_INTERNAL.phoneToken 静默续期：
+    // autoLogin.lg → getToken.lg，其 access_token 就是云游戏 API 的 cToken（play/user 直接可用）。
+    // cToken 有效期 48h（getToken.expires_in=172800），不续期会在启动时 30002。
+    if current_id.is_some() && !session.phone.is_empty() && !session.phone_token.is_empty() {
+        match api.auto_login(&session.phone, &session.phone_token).await {
+            Ok(a) => {
+                tracing::info!("登录态续期成功");
+                session.ctoken = a.access_token.clone();
+                session.access_token = a.access_token;
+            }
+            Err(e) => tracing::warn!("登录态续期失败，沿用现有 cToken: {e:#}"),
+        }
+    }
+
+    // 官方登录后立即拉 user/info：ctoken 失效(30002)时清空登录态走重登，
+    // 同时用 playCardEnable 决定 play.lg 的 queueType（2=畅玩卡，1=免费时长）。
+    let mut user_info: Option<Value> = None;
+    if current_id.is_some() && !session.ctoken.is_empty() {
+        match api.user_info(&session.ctoken).await {
+            Ok(v) => match as_i64(v.get("codes")) {
+                Some(0) => user_info = Some(v),
+                Some(30002) => {
+                    tracing::warn!("登录状态已失效，需要重新登录");
+                    session.access_token.clear();
+                    session.ctoken.clear();
+                }
+                _ => tracing::warn!("user/info: {}", truncate_json(&v, 300)),
+            },
+            Err(e) => tracing::warn!("user/info 请求失败: {e:#}"),
+        }
+    }
+    // 官方 startGame：playCardEnable → queueType=畅玩卡通道，否则免费时长通道
+    let queue_type = if user_info.as_ref().is_some_and(|v| truthy(v.get("playCardEnable"))) {
+        QUEUE_TYPE_CARD
+    } else {
+        QUEUE_TYPE_FREE
+    };
+
     let mut relogin = false;
-    if current_id.is_none() || session.cuid.is_empty() || session.access_token.is_empty() {
+    if current_id.is_none() || session.cuid.is_empty() || session.access_token.is_empty() || session.ctoken.is_empty() {
         tracing::info!("无有效登录态，打开登录窗口");
         // 已有账号 → 用它自己的 webview profile 重登；新会话 → 先分配 id 再登录
         let login_id = current_id.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
@@ -324,7 +362,7 @@ async fn main() -> Result<()> {
         };
         tracing::info!("node: {node}");
         let mut node_now = node;
-        let mut play = allocate(&api, &session, &gateway, &node_now, ping.clone(), w, h).await?;
+        let mut play = allocate(&api, &session, &gateway, &node_now, ping.clone(), w, h, queue_type).await?;
         // 路由线程与本进程的连接循环共享：连接代际 + 本代握手上下文（重连/换线要换）
         let conn_gen = Arc::new(std::sync::atomic::AtomicU64::new(0));
         // 实例是否真正启动过（收到首帧）：官方 mIsStart，决定重连用 auth 还是仍是首次握手
@@ -446,11 +484,8 @@ async fn main() -> Result<()> {
                                     // 整体重建一次（最大化/全屏时偶发 DXGI_ERROR_INVALID_CALL）
                                     if failed {
                                         if let (Some(g), Some((hwnd, _, _, _))) = (&gpu, attach) {
-                                            match render::GpuSink::new(g, hwnd, w, h, top) {
-                                                Ok(s) => {
-                                                    tracing::info!("交换链重建 {w}x{h} top={top}");
-                                                    sink = Some(s);
-                                                }
+                                            match rebuild_swapchain(&mut sink, g, hwnd, w, h, top) {
+                                                Ok(()) => tracing::info!("交换链重建 {w}x{h} top={top}"),
                                                 Err(e) => tracing::warn!("交换链重建失败: {e:#}"),
                                             }
                                         }
@@ -577,9 +612,8 @@ async fn main() -> Result<()> {
                                                 if sink.is_some() && last_present.elapsed() >= std::time::Duration::from_secs(5) {
                                                     if let (Some(g), Some((hwnd, w, h, top))) = (&gpu, attach) {
                                                         tracing::warn!("画面 {:?} 未呈现，重建交换链", last_present.elapsed());
-                                                        match render::GpuSink::new(g, hwnd, w, h, top) {
-                                                            Ok(s) => sink = Some(s),
-                                                            Err(e) => tracing::warn!("看门狗重建交换链失败: {e:#}"),
+                                                        if let Err(e) = rebuild_swapchain(&mut sink, g, hwnd, w, h, top) {
+                                                            tracing::warn!("看门狗重建交换链失败: {e:#}");
                                                         }
                                                     }
                                                     last_present = std::time::Instant::now();
@@ -967,7 +1001,7 @@ async fn main() -> Result<()> {
                     node_now = n.clone();
                     ui::set_restart_loading(true);
                     ui::set_conn(ui::Conn::Connecting, "");
-                    match allocate(&api, &session, &gateway, &node_now, ping.clone(), w, h).await {
+                    match allocate(&api, &session, &gateway, &node_now, ping.clone(), w, h, queue_type).await {
                         Ok(p) => {
                             play = p;
                             gen += 1;
@@ -1222,22 +1256,30 @@ async fn cancel_queue(http: &reqwest::Client, url: &str, token: &str) {
     }
 }
 
-/// 官方 WeLinkQueue 1.0.4：play.lg 内嵌的数值先上屏，立即查询一次后每 10s 轮询；
-/// 名次取 queuingSize，seatNo 只用于推算等待分钟（单调不增）。30s 无成功响应则取消排队。
+/// 官方 WeLinkQueue 1.0.4 checkDispatchInfo：sdkMsg 含 "queuing" 才进排队，
+/// 先校验 seatNo/queuingSize/token，内嵌数值立即上屏；随后立即查一次、每 10s 轮询，
+/// data.sdkMsg 非空才算排到；任一 200/4000 刷新 30s 超时，其他 code 取消并失败。
 async fn wait_queue(gateway: &str, sdk_msg: Value) -> Result<Value> {
-    let s = match &sdk_msg {
-        Value::String(s) => s.clone(),
-        v => return Ok(v.clone()),
+    let parsed = match &sdk_msg {
+        Value::String(s) => {
+            if !s.contains("queuing") {
+                return Ok(sdk_msg);
+            }
+            serde_json::from_str::<Value>(s).context("排队信息无效")?
+        }
+        // 非字符串只有对象形态带 identiType；其余原样交给 startGame
+        v if v.is_object() => (*v).clone(),
+        _ => return Ok(sdk_msg),
     };
-    let parsed: Value = serde_json::from_str(&s).unwrap_or(Value::Null);
     if parsed.get("identiType").and_then(Value::as_str) != Some("queuing") {
         return Ok(sdk_msg);
     }
-    let seat0 = parsed.get("seatNo").and_then(Value::as_i64).unwrap_or(-1);
-    let size0 = parsed.get("queuingSize").and_then(Value::as_i64).unwrap_or(-1);
+    // 官方 valid：seatNo/queuingSize != -1、token 非空非 "{}"、已配置 IspUrl
+    let seat0 = as_i64(parsed.get("seatNo")).unwrap_or(-1);
+    let size0 = as_i64(parsed.get("queuingSize")).unwrap_or(-1);
     let token = parsed.get("token").and_then(Value::as_str).unwrap_or("").to_string();
-    if seat0 == -1 || size0 == -1 || token.is_empty() || token == "{}" {
-        anyhow::bail!("排队信息无效");
+    if seat0 == -1 || size0 == -1 || token.is_empty() || token == "{}" || gateway.is_empty() {
+        anyhow::bail!("排队信息获取失败");
     }
     loading::set_queue(seat0, size0);
 
@@ -1249,6 +1291,7 @@ async fn wait_queue(gateway: &str, sdk_msg: Value) -> Result<Value> {
     let mut prev: Option<Value> = None;
     let mut last_ok = std::time::Instant::now();
     loop {
+        let started = std::time::Instant::now();
         let r = match http.post(&search).multipart(queue_form(&token)).send().await {
             Ok(resp) => resp.json::<Value>().await.ok(),
             Err(e) => {
@@ -1257,18 +1300,19 @@ async fn wait_queue(gateway: &str, sdk_msg: Value) -> Result<Value> {
             }
         };
         if let Some(r) = r {
-            let code = r.get("code").and_then(Value::as_i64).unwrap_or(0);
+            let code = as_i64(r.get("code")).unwrap_or(0);
             if code == 200 || code == 4000 {
                 last_ok = std::time::Instant::now();
                 let data = r.get("data").cloned().unwrap_or(Value::Null);
-                if let Some(m) = data.get("sdkMsg") {
+                // 官方 `l && l.sdkMsg`：空串 / null 不算排到
+                if let Some(m) = data.get("sdkMsg").filter(|v| has_sdk_msg(v)) {
                     tracing::info!("queue done");
                     return Ok(m.clone());
                 }
-                let cur = data.get("seatNo").and_then(Value::as_i64).unwrap_or(0);
-                let prev_seat = prev.as_ref().and_then(|p| p.get("seatNo")).and_then(Value::as_i64).unwrap_or(0);
+                let cur = as_i64(data.get("seatNo")).unwrap_or(0);
+                let prev_seat = as_i64(prev.as_ref().and_then(|p| p.get("seatNo"))).unwrap_or(0);
                 let seat = if prev.is_some() { cur.min(prev_seat) } else { cur }.max(0);
-                let size = data.get("queuingSize").and_then(Value::as_i64).filter(|v| *v > 0).unwrap_or(0);
+                let size = as_i64(data.get("queuingSize")).filter(|v| *v > 0).unwrap_or(0);
                 tracing::info!("queuing seat={seat} size={size}");
                 loading::set_queue(seat, size);
                 prev = Some(data);
@@ -1279,9 +1323,11 @@ async fn wait_queue(gateway: &str, sdk_msg: Value) -> Result<Value> {
         }
         if last_ok.elapsed() >= std::time::Duration::from_secs(30) {
             cancel_queue(&http, &cancel, &token).await;
-            anyhow::bail!("排队信息获取超时");
+            anyhow::bail!("排队失败，请重试");
         }
-        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+        // 官方 10s 固定间隔（首轮立即），轮询本身耗时不计入间隔
+        let wait = std::time::Duration::from_secs(10).saturating_sub(started.elapsed());
+        tokio::time::sleep(wait).await;
     }
 }
 
@@ -1392,6 +1438,52 @@ struct ConnInfo {
     sdk: Value,
 }
 
+/// 数值字段兼容 number / 数字字符串（sdk-api 两种形态都出现过）。
+fn as_i64(v: Option<&Value>) -> Option<i64> {
+    v.and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+}
+
+/// 官方 JS 的真值判断（playCardEnable 可能是 bool / 0|1 / 字符串）。
+fn truthy(v: Option<&Value>) -> bool {
+    match v {
+        Some(Value::Bool(b)) => *b,
+        Some(Value::Number(n)) => n.as_i64().unwrap_or(0) != 0,
+        Some(Value::String(s)) => !s.is_empty() && s != "0" && s != "false",
+        _ => false,
+    }
+}
+
+fn truncate_json(v: &Value, n: usize) -> String {
+    let s = v.to_string();
+    s.chars().take(n).collect()
+}
+
+/// play.lg queueType：免费时长通道 / 畅玩卡通道（官方按 playCardEnable 选择）。
+const QUEUE_TYPE_FREE: i64 = 1;
+const QUEUE_TYPE_CARD: i64 = 2;
+
+/// sdkMsg 有实质内容：null / 空串不算排到（官方 `l && l.sdkMsg`）。
+fn has_sdk_msg(v: &Value) -> bool {
+    match v {
+        Value::Null => false,
+        Value::String(s) => !s.is_empty(),
+        _ => true,
+    }
+}
+
+/// 同一 HWND 上不能并存两条 flip 链：先释放旧交换链再重建。
+fn rebuild_swapchain(sink: &mut Option<render::GpuSink>, ctx: &render::GpuContext, hwnd: isize, w: u32, h: u32, top: u32) -> Result<()> {
+    *sink = None;
+    *sink = Some(render::GpuSink::new(ctx, hwnd, w, h, top)?);
+    Ok(())
+}
+
+/// 缩放/DPI 变化后赶在下一帧前按新宽度重画标题栏并上传，保证第一帧即对齐窗口。
+fn repaint_bar_now(render_tx: &std::sync::mpsc::Sender<RenderCmd>, bar_pixels: &mut Vec<u8>, w: u32, title_h: u32, scale: f32) {
+    *bar_pixels = ui::render_bar(w, scale);
+    let _ = render_tx.send(RenderCmd::Overlay { slot: 0, x: 0, y: 0, w, h: title_h, pixels: bar_pixels.clone() });
+}
+
 /// play.lg + 排队 + 解析 sdkMsg + 证书哈希；首次启动和换线路共用。
 async fn allocate(
     api: &api::SdkApi,
@@ -1401,25 +1493,38 @@ async fn allocate(
     ping: Vec<Value>,
     w: i64,
     h: i64,
+    queue_type: i64,
 ) -> Result<PlayCtx> {
     let req = api::PlayRequest {
         user_id: session.cuid.clone(),
         node: node.to_string(),
         resolution: format!("{w}x{h}"),
         ctoken: session.ctoken.clone(),
-        queue_type: 1,
+        queue_type,
         ping,
     };
-    // weilinSdkStatus=2 → 分配失败重试
-    let mut play_resp = None;
-    for attempt in 0..6 {
-        let r = api.play(&req).await.context("play.lg")?;
-        if r.get("sdkMsg").is_some() { play_resp = Some(r); break; }
-        tracing::warn!("play.lg attempt {attempt}: {}", &r.to_string()[..r.to_string().len().min(300)]);
-        tokio::time::sleep(std::time::Duration::from_secs(4)).await;
+    // 官方 checkQueue：play.lg 只调一次，失败按 codes / weilinSdkStatus 分支，不自动重试
+    let play_resp = api.play(&req).await.context("play.lg")?;
+    tracing::info!("play.lg: {}", truncate_json(&play_resp, 600));
+    let codes = as_i64(play_resp.get("codes")).unwrap_or(0);
+    if codes != 0 {
+        match codes {
+            30002 => anyhow::bail!("登录状态已失效，请重新登录"),
+            30003 => {
+                let tips = play_resp.get("dialogTips").and_then(Value::as_str).unwrap_or("");
+                anyhow::bail!("服务器维护中{}", if tips.is_empty() { String::new() } else { format!("：{tips}") });
+            }
+            _ => anyhow::bail!(
+                "{}",
+                play_resp.get("error_description").and_then(Value::as_str).unwrap_or("游戏启动失败")
+            ),
+        }
     }
-    let play_resp = play_resp.context("play.lg: server 未分配实例")?;
-    tracing::info!("play.lg: {}", &play_resp.to_string()[..play_resp.to_string().len().min(600)]);
+    match as_i64(play_resp.get("weilinSdkStatus")).unwrap_or(0) {
+        1 => anyhow::bail!("您的云游戏时长与畅玩卡已耗尽，前往商店购买后可继续游戏"),
+        2 => anyhow::bail!("游戏启动失败，请重试"),
+        _ => {}
+    }
     if let Some(s) = play_resp.get("sdkMsg").and_then(Value::as_str) {
         if let Ok(sdk) = serde_json::from_str::<Value>(s) {
             let keys: Vec<String> = sdk.as_object().map(|o| o.keys().cloned().collect()).unwrap_or_default();
@@ -1429,11 +1534,12 @@ async fn allocate(
             }
         }
     }
-    let mut sdk_msg = play_resp
+    let sdk_msg = play_resp
         .get("sdkMsg").cloned()
         .or_else(|| play_resp.pointer("/data/sdkMsg").cloned())
-        .context("play.lg: no sdkMsg")?;
-    sdk_msg = wait_queue(gateway, sdk_msg).await?;
+        .filter(|v| has_sdk_msg(v))
+        .context("play.lg: 未返回 sdkMsg")?;
+    let sdk_msg = wait_queue(gateway, sdk_msg).await?;
 
     loading::set_notice("游戏启动中，请耐心等待～");
     let sdk: Value = match &sdk_msg {
@@ -2239,6 +2345,8 @@ fn run_window(
                         bar_sig = None;
                         if title_h == 0 {
                             let _ = render_tx.send(RenderCmd::ClearOverlay { slot: 0 });
+                        } else {
+                            repaint_bar_now(&render_tx, &mut bar_pixels, sz.width, title_h, window.scale_factor() as f32);
                         }
                         // 窗口尺寸变化 → 200ms 防抖后作为出流分辨率下发给服务端
                         // （不发会导致服务端仍按旧分辨率出流，客户端缩放后画面显示异常）
@@ -2255,6 +2363,9 @@ fn run_window(
                     *video_area.lock().unwrap() = (sz.width, sz.height.saturating_sub(title_h));
                     let _ = render_tx.send(RenderCmd::Resize { w: sz.width, h: sz.height, top: title_h });
                     bar_sig = None;
+                    if title_h > 0 && sz.width > 0 {
+                        repaint_bar_now(&render_tx, &mut bar_pixels, sz.width, title_h, window.scale_factor() as f32);
+                    }
                 }
                 WindowEvent::MouseInput { state, button, .. } => {
                     if button == winit::event::MouseButton::Left {

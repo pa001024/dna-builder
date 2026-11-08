@@ -29,6 +29,10 @@ const LEVELS: [D3D_FEATURE_LEVEL; 4] = [
     D3D_FEATURE_LEVEL_10_0,
 ];
 
+/// 交换链创建标志。ResizeBuffers 必须原样带上它（DXGI 不允许增删该标志，
+/// 传 0 会固定返回 DXGI_ERROR_INVALID_CALL，缩放永远失败）。
+const SWAP_FLAGS: u32 = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT.0 as u32;
+
 pub struct GpuContext {
     pub device: ID3D11Device,
     pub manager: IMFDXGIDeviceManager,
@@ -132,7 +136,7 @@ impl GpuSink {
                 AlphaMode: DXGI_ALPHA_MODE_IGNORE,
                 // 可等待帧延迟对象：Present 前先等 DWM 释放一帧（带超时），
                 // 避免最大化↔全屏切换时 Present 永久阻塞解码线程（画面冻结、声音继续）
-                Flags: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT.0 as u32,
+                Flags: SWAP_FLAGS,
             };
             let hwnd = HWND(hwnd as *mut _);
             let swapchain = factory
@@ -236,7 +240,7 @@ impl GpuSink {
         if size_changed {
             unsafe {
                 self.swapchain
-                    .ResizeBuffers(0, w, h, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG(0))
+                    .ResizeBuffers(0, w, h, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG(SWAP_FLAGS as i32))
                     .context("ResizeBuffers")?;
             }
             self.out_w = w;
@@ -355,28 +359,47 @@ impl GpuSink {
         unsafe { self.blit_present(&copy, 0, cw, ch, dw, dh).map(|_| ()) }
     }
 
-    /// 后备缓冲清为纯黑（loading 页背景）。
-    fn clear_bb(&mut self, bb: &ID3D11Texture2D) -> Result<()> {
+    /// 取后备缓冲的 RTV（缓存：flip 链两张缓冲轮换）。
+    fn rtv_for(&mut self, bb: &ID3D11Texture2D) -> Option<ID3D11RenderTargetView> {
         let key = bb.as_raw() as usize;
         if !self.rtvs.iter().any(|(k, _)| *k == key) {
-            unsafe {
-                let mut v: Option<ID3D11RenderTargetView> = None;
-                self.device.CreateRenderTargetView(bb, None, Some(&mut v))?;
-                let v = v.context("rtv")?;
-                if self.rtvs.len() >= 4 {
-                    self.rtvs.clear();
-                }
-                self.rtvs.push((key, v));
+            let mut v: Option<ID3D11RenderTargetView> = None;
+            unsafe { self.device.CreateRenderTargetView(bb, None, Some(&mut v)).ok()? };
+            let v = v?;
+            if self.rtvs.len() >= 4 {
+                self.rtvs.clear();
             }
+            self.rtvs.push((key, v));
         }
-        let rtv = self.rtvs.iter().find(|(k, _)| *k == key).map(|(_, v)| v.clone());
-        let ctx: ID3D11DeviceContext = unsafe { self.device.GetImmediateContext()? };
-        unsafe {
-            if let Some(rtv) = rtv {
-                ctx.ClearRenderTargetView(&rtv, &[0.0, 0.0, 0.0, 1.0]);
-            }
-        }
+        self.rtvs.iter().find(|(k, _)| *k == key).map(|(_, v)| v.clone())
+    }
+
+    /// 后备缓冲清为纯黑（loading 页背景）。
+    fn clear_bb(&mut self, bb: &ID3D11Texture2D) -> Result<()> {
+        let rtv = self.rtv_for(bb).context("rtv")?;
+        let ctx: ID3D11DeviceContext = unsafe { self.device.GetImmediateContext() }?;
+        unsafe { ctx.ClearRenderTargetView(&rtv, &[0.0, 0.0, 0.0, 1.0]) };
         Ok(())
+    }
+
+    /// 只清标题栏条带：窗口刚缩放、新宽度的标题栏位图还没生成的那一帧，
+    /// 条带不会被视频 Blt 覆盖，不清会露出黑条/垃圾。
+    fn clear_strip(&mut self, bb: &ID3D11Texture2D) {
+        if self.top == 0 || self.out_w == 0 {
+            return;
+        }
+        let Some(rtv) = self.rtv_for(bb) else { return };
+        let Ok(ctx) = (unsafe { self.device.GetImmediateContext() }) else { return };
+        let Ok(ctx1) = ctx.cast::<ID3D11DeviceContext1>() else { return };
+        let (r, g, b) = crate::ui::BAR_RGB;
+        let color = [
+            r as f32 / 255.0,
+            g as f32 / 255.0,
+            b as f32 / 255.0,
+            1.0,
+        ];
+        let rect = [RECT { left: 0, top: 0, right: self.out_w as i32, bottom: self.top as i32 }];
+        unsafe { ctx1.ClearView(&rtv, &color, Some(&rect)) };
     }
 
     fn blit_present(&mut self, tex: &ID3D11Texture2D, sub: u32, coded_w: u32, coded_h: u32, disp_w: u32, disp_h: u32) -> Result<bool> {
@@ -455,8 +478,15 @@ impl GpuSink {
             if let Some((x, y, tex)) = loading {
                 self.clear_bb(&bb)?;
                 ctx.CopySubresourceRegion(&bb, 0, x, y, 0, &tex, 0, None);
+            } else {
+                self.clear_strip(&bb);
             }
-            for ov in self.overlays[..3].iter().flatten() {
+            for (i, ov) in self.overlays[..3].iter().enumerate().filter_map(|(i, o)| o.as_ref().map(|o| (i, o))) {
+                // 窗口刚缩放、标题栏覆盖层还是旧宽度时不上屏：否则交换链已经是新尺寸，
+                // 旧标题栏只盖住左边一段，右侧留黑（缩放的瞬间非常明显）。
+                if i == 0 && self.top > 0 && (ov.w != self.out_w || ov.h != self.top) {
+                    continue;
+                }
                 ctx.CopySubresourceRegion(&bb, 0, ov.x, ov.y, 0, &ov.tex, 0, None);
             }
             // 同步到垂直空白（官方 JS 走 rAF）。DO_NOT_WAIT：DWM 长时间不释放后备缓冲时

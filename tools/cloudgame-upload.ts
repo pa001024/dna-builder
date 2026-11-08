@@ -6,18 +6,20 @@
  *   bun tools/cloudgame-upload.ts build upload   # 完整链路：编译 → upx → 上传
  *   bun tools/cloudgame-upload.ts build          # 只编译 + UPX，不上传
  *   bun tools/cloudgame-upload.ts upload         # 只 UPX + 上传现有产物（不编译）
- *   bun tools/cloudgame-upload.ts -v 1.0.3       # 指定对象版本号（默认 1.0.2）
+ *   bun tools/cloudgame-upload.ts -v 1.1.0       # 指定对象版本号（默认 1.0.3）
+ *   bun tools/cloudgame-upload.ts -m 描述        # 附加更新说明（写进清单的 notes）
  *   bun tools/cloudgame-upload.ts --exe <path>   # 指定要压缩上传的 exe（默认 release 产物）
  *   bun tools/cloudgame-upload.ts --skip-upx     # 跳过 UPX，直接上传现有 exe
  *
- * 产物：`cloudgame/cloudgame-client-v<版本>.exe`（UPX 压缩后的单文件，前端下载后直接启动）。
+ * 产物：`cloudgame/cloudgame-client-v<版本>.exe`（UPX 压缩后的单文件，前端下载后直接启动）
+ * 与 `cloudgame/latest.json`（发布清单，字段与 `apk/latest.json` 同构，前端据此判断是否需要更新）。
  */
 
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { $ } from "bun"
-import { getActiveBackends, getPublicUrlOn, putFile } from "./object-storage"
+import { getActiveBackends, getPublicUrl, getPublicUrlOn, putFile, putGenerated } from "./object-storage"
 
 /** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -31,6 +33,8 @@ const args = process.argv.slice(2)
 const shouldBuild = args.includes("build")
 const shouldUpload = args.includes("upload")
 const skipUpx = args.includes("--skip-upx")
+const notesIndex = args.findIndex(arg => arg === "-m" || arg === "--msg")
+const notes = notesIndex >= 0 ? args[notesIndex + 1] : undefined
 /** 已知的 vcvars64.bat 位置（按需自适应初始化 MSVC 编译环境） */
 const VCVARS_CANDIDATES = [
     process.env.VCVARS64_BAT ?? "",
@@ -90,6 +94,26 @@ if (!/^\d+\.\d+\.\d+$/.test(version)) {
 
 /** 带版本号的 exe 对象 key */
 const objectKey = `${OBJECT_PREFIX}/cloudgame-client-v${version}.exe`
+/** 发布清单（固定路径，覆盖写）：前端本地部署版本与清单版本不一致时更新 */
+const latestKey = `${OBJECT_PREFIX}/latest.json`
+
+/** cloudgame/latest.json 的内容：只描述最新一版客户端（与 apk/latest.json 同构） */
+export type CloudgameLatest = {
+    /** 版本号 */
+    version: string
+    /** 对象存储上的文件名 */
+    fileName: string
+    /** 下载地址 */
+    url: string
+    /** exe 字节数 */
+    size: number
+    /** exe sha256，供客户端下载后校验 */
+    sha256: string
+    /** 发布时刻（ISO 8601） */
+    builtAt: string
+    /** 更新说明 */
+    notes?: string
+}
 
 /**
  * 计算文件 SHA-256（流式，避免整文件读入内存）。
@@ -189,6 +213,18 @@ async function main(): Promise<void> {
     console.log(`📦 上传 ${path.relative(REPO_ROOT, exePath)} (${(exeSize / 1024 / 1024).toFixed(1)} MB, sha256 ${sha256})`)
     console.log(`📤 上传对象存储: ${objectKey}`)
     await putFile(objectKey, exePath, EXE_CONTENT_TYPE)
+    // 先传 exe 再传清单：清单出现时对象一定已经可下载
+    const latest: CloudgameLatest = {
+        version,
+        fileName: path.basename(objectKey),
+        url: getPublicUrl(objectKey),
+        size: exeSize,
+        sha256,
+        builtAt: new Date().toISOString(),
+        notes,
+    }
+    await putGenerated(latestKey, () => JSON.stringify(latest, null, 2), "application/json")
+    console.log(`🧾 发布清单: ${latestKey} (v${version})`)
     console.log("✅ 上传完成")
 
     await verifyPublicUrls(objectKey, sha256)
