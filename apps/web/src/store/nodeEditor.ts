@@ -217,6 +217,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         "cardModId",
         "cardWidth",
         "focusMode",
+        "activeModTab",
     ])
 
     /**

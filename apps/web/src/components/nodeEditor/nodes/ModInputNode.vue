@@ -50,7 +50,24 @@ function cloneModSettings(settings?: NodeModSettings): NodeModSettings | undefin
 }
 
 const modSettings = ref<NodeModSettings>(readModSettings())
-const activeTab = ref<ModSlotType>("角色")
+
+/**
+ * 读取持久化的激活页签，非法取值回退为角色槽。
+ * @returns 初始页签
+ */
+function readActiveTab(): ModSlotType {
+    const raw = props.data.activeModTab
+    return (MOD_TABS as string[]).includes(raw) ? (raw as ModSlotType) : "角色"
+}
+
+const activeTab = ref<ModSlotType>(readActiveTab())
+
+watch(
+    () => props.data.activeModTab,
+    next => {
+        if ((MOD_TABS as string[]).includes(next) && next !== activeTab.value) activeTab.value = next as ModSlotType
+    }
+)
 
 watch(
     () => props.data.modSettings,
@@ -89,19 +106,24 @@ const activeAuraMod = computed(() => {
 const tabs = computed(() =>
     MOD_TABS.map(name => ({
         name,
-        // 未接入构筑时没有角色 / 武器信息，只有角色槽可编辑，且不按属性过滤候选
-        disabled:
-            name !== "角色" &&
-            (!charBuild.value ||
-                (name === "近战" && charBuild.value.meleeWeapon.isEmpty) ||
-                (name === "远程" && charBuild.value.rangedWeapon.isEmpty) ||
-                (name === "同律" && (!charBuild.value.skillWeapon || Boolean(charBuild.value.skillWeapon.inherit))))
+        // 未接入构筑时没有角色 / 武器信息，全部槽位可切换，且不按属性过滤候选
+        disabled: charBuild.value
+            ? name !== "角色" &&
+              ((name === "近战" && charBuild.value.meleeWeapon.isEmpty) ||
+                  (name === "远程" && charBuild.value.rangedWeapon.isEmpty) ||
+                  (name === "同律" && (!charBuild.value.skillWeapon || Boolean(charBuild.value.skillWeapon.inherit))))
+            : false
     }))
 )
 
+function selectTab(name: ModSlotType) {
+    activeTab.value = name
+    if (props.data.activeModTab !== name) store.updateNodeData(props.id, { activeModTab: name })
+}
+
 watch(tabs, items => {
     const current = items.find(item => item.name === activeTab.value)
-    if (current?.disabled) activeTab.value = "角色"
+    if (current?.disabled) selectTab("角色")
 })
 
 const mods = computed<(LeveledMod | null)[]>(() =>
@@ -237,7 +259,7 @@ const modCost = computed(() => {
                             : 'border-base-content/10 bg-base-100 text-base-content/60 hover:border-primary/30 hover:text-primary'
                     "
                     :disabled="item.disabled"
-                    @click="activeTab = item.name"
+                    @click="selectTab(item.name)"
                 >
                     {{ $t(item.name) }}
                 </button>
