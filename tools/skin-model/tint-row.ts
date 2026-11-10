@@ -17,12 +17,7 @@ function bodyType(name: string): string {
     return name.split("_")[0]
 }
 
-/**
- * @description 在染色表里按材质名找默认行。
- * @param table 染色表（行名 → 参数）
- * @param materialName 材质名或去前缀后的网格名
- * @returns 匹配到的行；无法唯一确定时 undefined（调用方应保留材质自带默认值）
- */
+/** 在染色表里按材质名找默认行；无法唯一确定时返回 undefined（调用方保留材质自带默认值）。 */
 export function pickTintRow<T>(table: Record<string, T>, materialName: string): T | undefined {
     if (table[materialName]) return table[materialName]
     const code = suitCode(materialName)

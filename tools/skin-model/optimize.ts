@@ -1,6 +1,14 @@
 import { inflateSync } from "node:zlib"
 import { MeshoptSimplifier } from "meshoptimizer"
-import { appendAccessors, appendBufferView, type GlbDocument, readAccessorBytes } from "../../apps/web/src/utils/skin-model-glb"
+import {
+    appendAccessors,
+    appendBufferView,
+    COMPONENT_SIZE,
+    type GlbDocument,
+    type GltfMeshPrimitive,
+    readAccessorBytes,
+    TYPE_COMPONENTS,
+} from "../../apps/web/src/utils/skin-model-glb"
 
 export interface OptimizeOptions {
     textureQuality?: number
@@ -27,8 +35,6 @@ export interface OptimizeReport {
 const TRIANGLES = 34962
 const INDICES = 34963
 const MASK = "COLOR_0"
-const COMPONENT_SIZE: Record<number, number> = { 5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4 }
-const TYPE_COMPONENTS: Record<string, number> = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT2: 4, MAT3: 9, MAT4: 16 }
 
 function floats(document: GlbDocument, index: number): Float32Array {
     const bytes = readAccessorBytes(document, index)
@@ -96,7 +102,7 @@ interface Simplification {
 /** 用位置、法线、UV0、顶点遮罩联合误差简化单个 primitive，并压实成独立顶点流。 */
 async function simplify(
     document: GlbDocument,
-    primitive: Record<string, any>,
+    primitive: GltfMeshPrimitive,
     ratio: number,
     error: number
 ): Promise<Simplification | undefined> {
@@ -144,7 +150,7 @@ async function simplify(
         if (target !== 0xffffffff && target < unique) sourceOf[target] = vertex
     }
     const compacted: Simplification["attributes"] = {}
-    for (const [name, accessor] of Object.entries(primitive.attributes as Record<string, number>)) {
+    for (const [name, accessor] of Object.entries(primitive.attributes)) {
         const meta = document.json.accessors[accessor]
         const size = TYPE_COMPONENTS[meta.type]
         if (meta.componentType === 5126) {
@@ -222,9 +228,9 @@ export function cutoutBaseNames(document: GlbDocument): Set<string> {
     for (const material of document.json.materials ?? []) {
         const data = material.extras?.dnaColorize
         if (!data || data.kind === "shadow") continue
-        const silk = data.textures?.["丝绸混合贴图"] !== undefined
+        const silk = data.textures?.丝绸混合贴图 !== undefined
         if (!silk && !(data.parent ?? "").includes("M_Player_Wing_ShopSkin")) continue
-        const texture = data.textures?.["时装BaseClor"] ?? data.textures?.["颜色贴图"]
+        const texture = data.textures?.时装BaseClor ?? data.textures?.颜色贴图
         if (texture === undefined) continue
         const image = document.json.images?.[document.json.textures?.[texture]?.source]
         if (image?.name) names.add(image.name)
@@ -268,8 +274,8 @@ export async function optimizeGlb(document: GlbDocument, options: OptimizeOption
     const quality = options.textureQuality ?? 95
     const ratio = options.simplifyRatio ?? 1
     const before = document.binary.length + new TextEncoder().encode(JSON.stringify(document.json)).length
-    const views = document.json.bufferViews as Record<string, any>[]
-    const accessors = document.json.accessors as Record<string, any>[]
+    const views = document.json.bufferViews
+    const accessors = document.json.accessors
     const binary = document.binary
     const source: GlbDocument = { json: { ...document.json, bufferViews: views, accessors }, binary }
     const report: OptimizeReport = { textures: [], geometry: [], bytes: { before, after: 0 } }
@@ -278,7 +284,8 @@ export async function optimizeGlb(document: GlbDocument, options: OptimizeOption
     document.binary = new Uint8Array(0)
 
     for (const [index, image] of (document.json.images ?? []).entries()) {
-        const sourceView = views[image.bufferView]
+        // 导出器产出的贴图必带 bufferView；外来文档缺视图时与之前一致直接抛错。
+        const sourceView = views[image.bufferView!]
         const start = sourceView.byteOffset ?? 0
         const original = binary.subarray(start, start + sourceView.byteLength)
         let encoded = original
@@ -302,7 +309,7 @@ export async function optimizeGlb(document: GlbDocument, options: OptimizeOption
 
     for (const mesh of document.json.meshes ?? []) {
         for (const primitive of mesh.primitives) {
-            const attributeIndices = { ...(primitive.attributes as Record<string, number>) }
+            const attributeIndices = { ...primitive.attributes }
             const triangles = primitive.indices === undefined ? 0 : indices(source, primitive.indices).length / 3
             let result: Simplification | undefined
             const meshRatio = options.simplifyRatios?.[mesh.name ?? ""] ?? ratio
@@ -346,7 +353,8 @@ export async function optimizeGlb(document: GlbDocument, options: OptimizeOption
                 attributes[name] = index
             }
             primitive.attributes = attributes
-            const geometry = result?.indices ?? indices(source, primitive.indices)
+            // 简化没跑（ratio>=1 或被跳过）时直接复用原索引；几何 primitive 必带 indices，与之前一致。
+            const geometry = result?.indices ?? indices(source, primitive.indices!)
             const narrowed = narrow(geometry)
             const [index] = appendAccessors(document, [
                 { data: narrowed.data, type: "SCALAR", componentType: narrowed.componentType, count: geometry.length, target: INDICES },

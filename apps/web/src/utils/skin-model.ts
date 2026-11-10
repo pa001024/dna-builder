@@ -85,12 +85,7 @@ function toLinear(value: number): number {
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
 }
 
-/**
- * @description 把数据包色板表转成渲染器用的索引表。
- * 旧版数据包没有 `linear` 字段，按 sRGB 换算；直接把 0–255 的 rgb 当线性值会整片发白。
- * @param swatches 数据包里的色板行
- * @returns 色板 id → 线性 RGB 与菲涅尔
- */
+/** 数据包色板表转渲染器索引表：旧版数据包没有 `linear`，直接把 0–255 当线性值会整片发白。 */
 export function swatchTable(swatches: SwatchSource[]): Record<string, { linear: LinearRgb; fresnel?: number }> {
     const result: Record<string, { linear: LinearRgb; fresnel?: number }> = {}
     for (const swatch of swatches) {

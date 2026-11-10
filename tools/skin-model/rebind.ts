@@ -1,4 +1,5 @@
-import { appendAccessors, type GlbDocument, readAccessorBytes } from "../../apps/web/src/utils/skin-model-glb"
+import type { GltfAnimationSampler } from "../../apps/web/src/utils/skin-model-glb"
+import { appendAccessors, type GlbDocument, type GltfNode, readAccessorBytes } from "../../apps/web/src/utils/skin-model-glb"
 import type { UeModelBone } from "./uemodel"
 
 /**
@@ -95,7 +96,7 @@ function invert(matrix: Mat4): Mat4 {
 }
 
 /** 骨骼世界矩阵 = 父级世界矩阵 · 本地 TRS；节点顺序在 glTF 里保证父级在前。 */
-function worldMatrices(nodes: Record<string, any>[]): Mat4[] {
+function worldMatrices(nodes: GltfNode[]): Mat4[] {
     const parents = new Int32Array(nodes.length).fill(-1)
     for (const [index, node] of nodes.entries()) for (const child of node.children ?? []) parents[child] = index
     const output: Mat4[] = new Array(nodes.length)
@@ -141,19 +142,11 @@ function decomposeRotation(matrix: Mat4): { rotation: number[]; scale: number[] 
 }
 
 /**
- * @description 把独立骨架的根节点挂到角色骨骼上（皮肤品阶效果网格：翅膀等）。
- *
- * 效果网格的绑定姿态绕自身原点书写，直接并进文档会落在角色脚下；这里把根节点
- * 改挂到目标骨骼，并用骨骼世界旋转的逆抵消朝向，网格本体保持原来的世界朝向只换位置。
- * 必须在 `bindToSkeleton` 之后调用：逆绑定矩阵已按原世界坐标生成，
- * 之后改父子关系才会把顶点一起带走（先改的话绑定矩阵会把位移抵消掉）。
- * @param document 已绑定的模型
- * @param roots 根节点名列表
- * @param bone 目标骨骼名
- * @returns 成功挂接的数量
+ * 把独立骨架的根节点挂到角色骨骼上：效果网格的绑定姿态绕自身原点书写，直接合并会落在脚下；
+ * 必须在 `bindToSkeleton` 之后调用，否则绑定矩阵会把位移抵消掉。
  */
 export function attachEffectRoots(document: GlbDocument, roots: string[], bone: string): number {
-    const nodes = document.json.nodes as Record<string, any>[]
+    const nodes = document.json.nodes
     const indexOf = new Map<string, number>()
     for (const [index, node] of nodes.entries()) if (typeof node.name === "string") indexOf.set(node.name, index)
     const boneIndex = indexOf.get(bone)
@@ -180,7 +173,7 @@ export function attachEffectRoots(document: GlbDocument, roots: string[], bone: 
     return attached
 }
 
-function sampleKeys(document: GlbDocument, sampler: Record<string, any>, time: number, components: number): number[] {
+function sampleKeys(document: GlbDocument, sampler: GltfAnimationSampler, time: number, components: number): number[] {
     const times = new Float32Array(readAccessorBytes(document, sampler.input).buffer.slice(0))
     const values = new Float32Array(readAccessorBytes(document, sampler.output).buffer.slice(0))
     let low = 0
@@ -208,12 +201,12 @@ export interface RebindResult {
  * 之后任意动画帧都按 UE 的公式 `M(帧) · M(绑定)^-1` 计算，与游戏逐帧一致。
  */
 export function bindToSkeleton(document: GlbDocument, bones: UeModelBone[]): RebindResult {
-    const nodes = document.json.nodes as Record<string, any>[]
+    const nodes = document.json.nodes
     const bind = new Map<string, UeModelBone>()
     for (const bone of bones) if (!bind.has(bone.name)) bind.set(bone.name, bone)
     const missing = new Set<string>()
     for (const skin of document.json.skins ?? [])
-        for (const joint of skin.joints as number[]) {
+        for (const joint of skin.joints) {
             const name = nodes[joint]?.name
             if (typeof name !== "string" || !bind.has(name)) missing.add(name ?? `#${joint}`)
         }
@@ -258,7 +251,7 @@ export function bindToSkeleton(document: GlbDocument, bones: UeModelBone[]): Reb
 export function rebindToAnimation(document: GlbDocument, animationIndex = 0, time = 0): RebindResult {
     const animation = document.json.animations?.[animationIndex]
     if (!animation) return { skins: 0, joints: 0, nodes: 0 }
-    const nodes = document.json.nodes as Record<string, any>[]
+    const nodes = document.json.nodes
     const animated = new Map<number, Record<string, number[]>>()
     for (const channel of animation.channels) {
         const sampler = animation.samplers[channel.sampler]
@@ -266,9 +259,10 @@ export function rebindToAnimation(document: GlbDocument, animationIndex = 0, tim
         const components = path === "rotation" ? 4 : 3
         if (path !== "translation" && path !== "rotation" && path !== "scale") continue
         const value = sampleKeys(document, sampler, time, components)
-        const entry = animated.get(channel.target.node) ?? {}
+        // 通道必带节点（解析器产出的合法动画）；缺失时与之前一致沿用 undefined 键分组。
+        const entry = animated.get(channel.target.node!) ?? {}
         entry[path] = value
-        animated.set(channel.target.node, entry)
+        animated.set(channel.target.node!, entry)
     }
     const poseNodes = nodes.map((node, index) => {
         const entry = animated.get(index)
@@ -290,7 +284,7 @@ export function rebindToAnimation(document: GlbDocument, animationIndex = 0, tim
     let joints = 0
     for (const skin of document.json.skins ?? []) {
         if (skin.inverseBindMatrices === undefined) continue
-        const indices: number[] = skin.joints
+        const indices = skin.joints
         const matrices = new Float32Array(indices.length * 16)
         let offset = 0
         for (const joint of indices) {

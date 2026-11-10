@@ -27,11 +27,6 @@ const percent = computed(() => {
     return Math.min(100, Math.round((loaded / total) * 100))
 })
 
-/**
- * @description 把字节数格式化成人类可读的大小。
- * @param bytes 字节数
- * @returns 例如 "3.4 MB"
- */
 function formatBytes(bytes: number): string {
     if (!bytes) return "0 B"
     if (bytes < 1024) return `${bytes} B`
@@ -39,12 +34,6 @@ function formatBytes(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-/**
- * @description 加载并挂载渲染器。模型由 `skin-model-runtime` 按 id 精确下载，
- * 已缓存时不会产生网络请求，进度条随即消失。
- * @param skinId 皮肤 id；为 0 时表示打开本地文件
- * @param url 直接指定的模型地址（打开本地 GLB 时用）
- */
 async function load(skinId: number, url?: string) {
     const current = ++generation
     controller?.abort()

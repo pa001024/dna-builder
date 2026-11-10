@@ -114,10 +114,7 @@ function resetDraft(preset?: AutomationRulePreset) {
     draftConfig.value = { ...readPluginGlobalConfig(pluginOf(draftActionId.value)), ...(preset?.actionConfig ?? {}) }
 }
 
-/**
- * 从预设开一个新规则（父组件快捷按钮调用，编辑器内场景下拉框继续选场景）。
- * @param preset kind + when（+ 可选 name / actionConfig）预设
- */
+/** 从预设开一个新规则：只填 kind + when，动作用编辑器默认动作。 */
 async function startNewRule(preset?: AutomationRulePreset) {
     resetDraft(preset)
     await ensurePluginsLoaded()
@@ -148,7 +145,7 @@ function ruleSummary(rule: AutomationRule) {
         .map(item => `${item.field} ${t(`automation.op_${item.op}`)} ${String(item.value)}`)
         .join("；")
     const targetName = String(rule.actionConfig.sceneName ?? rule.actionConfig.scene_id ?? "")
-    return [kinds, conditions, targetName ? `→ ${targetName}` : ""].filter(Boolean).join(" ")
+    return [kinds, conditions, targetName ? `→ ${targetName}` : `→ ${ruleActionTitle(rule.actionId)}`].filter(Boolean).join(" ")
 }
 
 function configString(key: string) {

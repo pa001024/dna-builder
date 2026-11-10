@@ -330,10 +330,6 @@ function clearPreviewImage() {
     uploadedImageUrl.value = ""
 }
 
-/**
- * @description 将本地预览图上传到服务器，返回可分享的图片 URL。
- * @returns 图片 URL，上传失败时返回空字符串。
- */
 async function uploadPreviewImage(): Promise<string> {
     if (uploadedImageUrl.value) return uploadedImageUrl.value
     if (!previewFile.value) return ""

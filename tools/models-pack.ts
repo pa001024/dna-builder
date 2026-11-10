@@ -53,7 +53,7 @@ export type SkinManifestEntry = {
      * 每个部件都带着同一份，若留在部件里会被重复打包 N 次，这里提到清单只存一份。
      * 色板表不在这里：它来自数据包（`skin-colorize.data.ts`），各皮肤完全一致。
      */
-    meta?: Record<string, any>
+    meta?: Record<string, unknown>
     /** 展示待机动画文件名；动画绑定骨骼名，合并完成后再绑回节点 */
     animation?: string
     /** 动画文件字节数 */
@@ -68,11 +68,7 @@ export type ModelManifest = {
     skins: SkinManifestEntry[]
 }
 
-/**
- * @description 递归收集源目录下的 GLB。
- * @param dir 源目录
- * @returns 绝对路径与相对路径列表
- */
+/** 递归收集源目录下的 GLB。 */
 function collectModels(dir = sourceModelsDir): { absPath: string; relPath: string }[] {
     const files: { absPath: string; relPath: string }[] = []
     if (!fs.existsSync(dir)) return files
@@ -88,11 +84,7 @@ function collectModels(dir = sourceModelsDir): { absPath: string; relPath: strin
     return files.sort((a, b) => a.relPath.localeCompare(b.relPath))
 }
 
-/**
- * @description 找出源目录里重复的模型 id。清单以 id 为键，重复会导致条目互相覆盖。
- * @param models 收集到的源文件
- * @returns 第一个重复的 id 及其所有相对路径；没有重复时 undefined
- */
+/** 找出源目录里重复的模型 id：清单以 id 为键，重复会导致条目互相覆盖。 */
 export function findDuplicateId(models: { relPath: string }[]): { id: string; paths: string[] } | undefined {
     const groups = new Map<string, string[]>()
     for (const model of models) {
@@ -107,11 +99,7 @@ export function findDuplicateId(models: { relPath: string }[]): { id: string; pa
     return undefined
 }
 
-/**
- * @description 计算内容哈希（FNV-1a），用来判断模型是否变化。
- * @param bytes 内容
- * @returns 8 位十六进制哈希
- */
+/** 计算内容哈希（FNV-1a），用来判断模型是否变化。 */
 export function hashBytes(bytes: Uint8Array): string {
     let hash = 2166136261
     for (const byte of bytes) {
@@ -121,10 +109,7 @@ export function hashBytes(bytes: Uint8Array): string {
     return (hash >>> 0).toString(16).padStart(8, "0")
 }
 
-/**
- * @description 读取已有清单。
- * @returns 清单；不存在或是旧版单文件清单时返回空清单
- */
+/** 读取已有清单；不存在或是旧版单文件清单时返回空清单。 */
 export function readManifest(): ModelManifest {
     const empty: ModelManifest = { builtAt: new Date(0).toISOString(), parts: [], skins: [] }
     if (!fs.existsSync(manifestPath)) return empty
@@ -137,12 +122,7 @@ export function readManifest(): ModelManifest {
     }
 }
 
-/**
- * @description 判断部件是否需要重新发布。
- * @param entry 新条目
- * @param existing 已有条目
- * @returns 是否需要发布
- */
+/** 判断部件是否需要重新发布。 */
 export function needsPublish(entry: Pick<PartManifestEntry, "hash" | "bytes">, existing?: PartManifestEntry): boolean {
     return !existing || existing.hash !== entry.hash || existing.bytes !== entry.bytes
 }
@@ -163,11 +143,7 @@ function parseArgs(argv: string[]) {
     return { options, flags }
 }
 
-/**
- * @description 解析贴图预算覆盖参数（`--texture cutout=0.75:lossless,mask=0.5:lossless`）。
- * @param value 参数值
- * @returns 覆盖后的预算
- */
+/** 解析贴图预算覆盖参数（`--texture cutout=0.75:lossless,mask=0.5:lossless`）。 */
 export function parseTextureBudget(value: string | undefined): TextureBudget {
     const budget: TextureBudget = { ...DEFAULT_TEXTURE_BUDGET }
     if (!value) return budget
@@ -188,25 +164,18 @@ export function parseTextureBudget(value: string | undefined): TextureBudget {
 /** 默认目标体积上限：5 MiB。皮肤之间贴图张数差别大，靠固定档位压不进这个范围。 */
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024
 
-/**
- * @description 解析体积上限参数（MiB）。
- * @param value 参数值；缺省或非法时用默认值
- * @returns 字节数
- */
+/** 解析体积上限参数（MiB）；缺省或非法时用默认值。 */
 export function parseMaxBytes(value: string | undefined): number {
     const mib = Number(value ?? 0)
     return Number.isFinite(mib) && mib > 0 ? mib * 1024 * 1024 : DEFAULT_MAX_BYTES
 }
 
 /** 一次拆分的产物：某个皮肤由哪些部件组成。 */
-type SkinParts = { id: string; parts: string[]; glbs: Map<string, Uint8Array>; meta?: Record<string, any>; animation?: Uint8Array }
+type SkinParts = { id: string; parts: string[]; glbs: Map<string, Uint8Array>; meta?: Record<string, unknown>; animation?: Uint8Array }
 
 /**
- * @description 把全部源模型拆成「皮肤 → 部件」并收集唯一的部件二进制。
- * 同一部件（同一网格）在多个皮肤里只保留一份，这就是去重的来源。
- * 皮肤级染色元数据（色板表等）从部件里摘出来，随皮肤清单存一份；展示动画单独抽成文件。
- * @param models 源文件列表
- * @returns 每个皮肤的部件清单与元数据，以及部件名 → 原始 GLB
+ * 把全部源模型拆成「皮肤 → 部件」并收集唯一的部件二进制。
+ * 皮肤级染色元数据从部件里摘出来随皮肤清单存一份；展示动画单独抽成文件。
  */
 function collectParts(models: { absPath: string; relPath: string }[]): {
     skins: SkinParts[]

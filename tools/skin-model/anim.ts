@@ -1,4 +1,4 @@
-import { appendAccessors, type GlbDocument } from "../../apps/web/src/utils/skin-model-glb"
+import { appendAccessors, type GlbDocument, type GltfAnimationSampler, type GltfChannel } from "../../apps/web/src/utils/skin-model-glb"
 
 export interface AnimationKey {
     frame: number
@@ -165,7 +165,7 @@ export interface AnimationResult {
 
 /** 把 UE 动画转成 glTF channel；骨骼按名称匹配，静止且与绑定姿态一致的通道省略。 */
 export function appendUeAnimation(document: GlbDocument, animation: UeAnimation): AnimationResult {
-    const nodes = document.json.nodes as Record<string, any>[]
+    const nodes = document.json.nodes
     const byName = new Map<string, number[]>()
     for (const [index, node] of nodes.entries()) {
         if (!node.name) continue
@@ -183,8 +183,8 @@ export function appendUeAnimation(document: GlbDocument, animation: UeAnimation)
         inputs.set(signature, accessor)
         return accessor
     }
-    const samplers: Record<string, any>[] = []
-    const channels: Record<string, any>[] = []
+    const samplers: GltfAnimationSampler[] = []
+    const channels: GltfChannel[] = []
     let keyCount = 0
     let skipped = 0
     const push = (node: number, path: string, sampler: number) => {

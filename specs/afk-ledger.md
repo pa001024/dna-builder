@@ -184,7 +184,7 @@
 
 ## 10. 仅一次 fireOnce（单规则）
 
-- 默认开：新建规则 `fireOnce` 初值 `true`，开关在每条规则行与编辑器内（badge `automation.only_once`）。
+- 默认关：新建规则 `fireOnce` 初值 `false`，开关在每条规则行与编辑器内（badge `automation.only_once`）。
 - 语义：`dispatch` 整批命中规则执行完后统一把其中 `fireOnce` 的规则置 `enabled=false`（同一批次全部执行，不丢触发；对齐密函 `mihanNotifyOnce` 先关后通的口径）。
 - 只影响自动触发：手动「立即执行」（`fireRuleNow`）无视规则的 `enabled/fireOnce` 且永不翻转开关，但仍受插件总开关约束（插件关闭时返回 `plugin disabled`）；回放事件（`replayed`）不进 `dispatch`（与通知口径一致）；关闭 `fireOnce` 的规则每次命中都执行。
 - 触发记录在 `automation` store：`lastFiredAt[ruleId]` 展示上次执行时刻，`fireError[ruleId]` 展示最近一次错误（成功即清空），行内错误不弹整页提示。

@@ -871,11 +871,7 @@ function trimLimitedPrizePools(pools: unknown): Record<string, TrimmedLimitedPri
     return trimmed
 }
 
-/**
- * @description sRGB（0–255）转线性 RGB，供缺 Actual 字段的色板兜底。
- * @param rgb sRGB 分量
- * @returns 线性分量，保留 4 位小数
- */
+/** sRGB（0–255）转线性 RGB，供缺 Actual 字段的色板兜底（保留 4 位小数）。 */
 function srgbToLinear(rgb: number[]): [number, number, number] {
     const convert = (value: number) => {
         const channel = value / 255

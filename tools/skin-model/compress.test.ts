@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { readGlb } from "../../apps/web/src/utils/skin-model-glb"
+import { type GlbDocument, type GltfMaterial, readGlb } from "../../apps/web/src/utils/skin-model-glb"
 import { classifyTextures, compressGlb, DEFAULT_TEXTURE_BUDGET } from "./compress"
 
 /** 造一个带蒙皮、逆绑定矩阵与动画的最小 GLB，用来回归「压缩不能丢 skin 数据」。 */
@@ -85,7 +85,7 @@ function skinnedGlb(jointCount = 2): Uint8Array {
  * @param images 贴图名列表
  * @returns GLB 文档
  */
-function fixture(materials: Record<string, any>[], images: string[]) {
+function fixture(materials: GltfMaterial[], images: string[]): GlbDocument {
     return {
         json: {
             asset: { version: "2.0" },
@@ -97,6 +97,9 @@ function fixture(materials: Record<string, any>[], images: string[]) {
             scenes: [{ nodes: [] }],
             bufferViews: [],
             accessors: [],
+            skins: [],
+            animations: [],
+            samplers: [],
             buffers: [{ byteLength: 0 }],
         },
         binary: new Uint8Array(),
@@ -121,7 +124,7 @@ describe("texture budget classification", () => {
             ],
             ["T_Silk_D", "T_Silk_A", "T_Wing_D", "T_Skin_D"]
         )
-        const kinds = classifyTextures(document as any)
+        const kinds = classifyTextures(document)
         expect(kinds.get("T_Silk_D")).toBe("cutout")
         expect(kinds.get("T_Wing_D")).toBe("cutout")
         expect(kinds.get("T_Silk_A")).toBe("mask")
@@ -145,7 +148,7 @@ describe("texture budget classification", () => {
             ],
             ["T_Shared", "T_Silk_A"]
         )
-        expect(classifyTextures(document as any).get("T_Shared")).toBe("cutout")
+        expect(classifyTextures(document).get("T_Shared")).toBe("cutout")
     })
 
     it("classifies normals and untouched images", () => {
@@ -153,7 +156,7 @@ describe("texture budget classification", () => {
             [{ name: "MI_Face", extras: { dnaColorize: { kind: "base", textures: { 颜色贴图: 0, 法线贴图: 1 } } } }],
             ["T_Face_D", "T_Face_N"]
         )
-        const kinds = classifyTextures(document as any)
+        const kinds = classifyTextures(document)
         expect(kinds.get("T_Face_D")).toBe("color")
         expect(kinds.get("T_Face_N")).toBe("normal")
     })
@@ -170,9 +173,9 @@ describe("compression keeps skin data", () => {
         // 压缩会清空 accessors 再重建；逆绑定矩阵若没重新登记，会指向无关的几何 accessor，
         // 骨骼矩阵解出 NaN，模型在 three 里整只不显示。
         const { glb } = await compressGlb(skinnedGlb(2))
-        const json = readGlb(glb).json as Record<string, any>
+        const json = readGlb(glb).json
         expect(json.skins).toHaveLength(1)
-        const accessor = json.accessors[json.skins[0].inverseBindMatrices]
+        const accessor = json.accessors[json.skins[0].inverseBindMatrices!]
         expect(accessor.type).toBe("MAT4")
         expect(accessor.componentType).toBe(5126)
         expect(accessor.count).toBe(json.skins[0].joints.length)
@@ -180,13 +183,13 @@ describe("compression keeps skin data", () => {
 
     it("keeps the animation and its time accessor usable", async () => {
         const { glb } = await compressGlb(skinnedGlb(2))
-        const json = readGlb(glb).json as Record<string, any>
+        const json = readGlb(glb).json
         expect(json.animations).toHaveLength(1)
         for (const sampler of json.animations[0].samplers) {
             const input = json.accessors[sampler.input]
             expect(input.componentType).toBe(5126)
             expect(input.count).toBe(2)
-            expect(json.bufferViews[input.bufferView]).toBeDefined()
+            expect(json.bufferViews[input.bufferView!]).toBeDefined()
         }
     })
 })

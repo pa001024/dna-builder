@@ -71,11 +71,6 @@ const ENGINE_COLORS: Record<string, [number, number, number, number]> = {
     DefaultWhiteGrid: [255, 255, 255, 255],
 }
 
-/**
- * @description 编码一张 2x2 纯色 PNG，用于替代引擎内置贴图。
- * @param rgba 颜色
- * @returns PNG 字节
- */
 function encodeSolidPng([r, g, b, a]: [number, number, number, number]): Uint8Array {
     const raw = new Uint8Array(2 * (2 * 4 + 1))
     for (let y = 0; y < 2; y++) {
@@ -197,11 +192,7 @@ class CliSession {
         return child
     }
 
-    /**
-     * @description 在常驻会话里跑一条命令。
-     * @param args 子命令与参数
-     * @returns CLI 输出的那一行 JSON
-     */
+    /** 在常驻会话里跑一条命令，返回 CLI 输出的那一行 JSON。 */
     async run(args: string[]): Promise<{ stdout: Uint8Array; stderr: string; code: number }> {
         const child = await this.ensure()
         const line = args.join(" ")
@@ -296,13 +287,7 @@ const CACHED_EXTENSIONS: Record<string, string> = {
     "export-anim": ".ueanim",
 }
 
-/**
- * @description 查导出缓存。CLI 以 OutputDir 为根会再拼一层完整包路径，
- * 磁盘上平铺与嵌套两种形态都可能出现，都要认。
- * @param command 导出子命令
- * @param path 包路径
- * @returns 缓存文件绝对路径；没有时 undefined
- */
+/** 查导出缓存：磁盘上平铺与嵌套两种形态都可能出现，都要认。 */
 function cachedExport(command: string, path: string): string | undefined {
     const extension = CACHED_EXTENSIONS[command]
     if (!extension) return undefined
@@ -352,12 +337,7 @@ async function readTable(path: string): Promise<Record<string, any>> {
 }
 
 /** 用 glob 搜索资产，返回第一个匹配的 `/Game/...` 包路径。 */
-/**
- * @description 按 glob 搜资产，返回第一个 .uasset 的 /Game/ 路径。
- * @param pattern 包路径 glob
- * @param preferDir 优先匹配包含该目录名的结果，避免同名材质撞到别的角色
- * @returns 资产路径；没搜到时 undefined
- */
+/** 按 glob 搜资产：优先匹配角色目录的结果，避免同名材质撞到别的角色。 */
 async function searchAsset(pattern: string, preferDir?: string): Promise<string | undefined> {
     const { stdout, code } = await runCli(["search", pattern, "50"])
     if (code) return undefined
@@ -369,11 +349,8 @@ async function searchAsset(pattern: string, preferDir?: string): Promise<string 
 }
 
 /**
- * @description 在角色目录下找展示待机动画，按优先级返回**全部**候选。
- * 命名不统一（Fuluo01→Fuluo、Baiheng01→Baiheng01），少数角色只有转向版（Nifu 只有 Turn90/Turn180），
- * 而且个别动画的压缩格式 CLI 解不了（Songlu 的 Armory_Idle），必须逐个试导出而不是只取第一个搜到的。
- * @param entry 皮肤条目
- * @returns 动画资产路径候选，按优先级排列
+ * 在角色目录下找展示待机动画：命名不统一、个别压缩格式 CLI 解不了，
+ * 必须按优先级返回全部候选逐个试导出，而不是只取第一个搜到的。
  */
 async function findArmoryIdle(entry: SkinCatalogEntry): Promise<string[]> {
     const dir = characterDirectory(entry)
@@ -395,12 +372,8 @@ interface SkinExportInput {
 }
 
 /**
- * @description 数据表里的部件路径不一定存在于当前游戏版本。
- * 个别体型（SP17 / Lilikou）的公共路径没有打包，身体被拆成同前缀的多个 Part 网格放在角色目录下，
- * 按网格名前缀在角色目录里搜出全部同类部件。
- * @param path 数据表里的原始路径
- * @param entry 皮肤条目（用来挑角色目录下的同名网格）
- * @returns 实际可导出的路径，可能多于一个；找不到替代时原样返回
+ * 数据表里的部件路径不一定存在于当前游戏版本：个别体型的公共路径没有打包，
+ * 按网格名前缀在角色目录里搜出全部同类部件；找不到替代时原样返回。
  */
 async function resolveMeshPaths(path: string, entry: SkinCatalogEntry): Promise<string[]> {
     const name = path.split("/").at(-1) ?? ""
@@ -706,8 +679,9 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
     for (const mesh of model.json.meshes ?? []) {
         if (!effectMeshNames.has(mesh.name)) continue
         const kept = mesh.primitives.filter(primitive => {
-            const data = model.json.materials[primitive.material]?.extras?.dnaColorize
-            return data?.textures?.["时装BaseClor"] !== undefined || data?.textures?.["颜色贴图"] !== undefined
+            const material = primitive.material === undefined ? undefined : model.json.materials[primitive.material]
+            const data = material?.extras?.dnaColorize
+            return data?.textures?.时装BaseClor !== undefined || data?.textures?.颜色贴图 !== undefined
         })
         if (kept.length !== mesh.primitives.length)
             console.log(`  effect mesh ${mesh.name}: dropped ${mesh.primitives.length - kept.length} untextured primitive(s)`)

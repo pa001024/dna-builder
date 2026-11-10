@@ -34,7 +34,7 @@ export type ModelPartEntry = {
 export type SkinEntry = {
     id: string
     parts: string[]
-    meta?: Record<string, any>
+    meta?: Record<string, unknown>
     /** 展示动画文件名（绑定骨骼名，合并后再绑回节点） */
     animation?: string
     animationBytes?: number
@@ -80,18 +80,10 @@ const partCache = new Map<string, Uint8Array>()
 /** 已拼好的完整模型对象 URL，避免重复解析 */
 const modelCache = new Map<string, string>()
 
-/**
- * @description 判断是否走本地 mock（开发服务器）。
- * @returns 是否使用开发基址
- */
 function isDev(): boolean {
     return Boolean(import.meta.env.DEV)
 }
 
-/**
- * @description 取兜底基址：开发环境走 vite 的 mock 中间件，线上是主 CDN 加另一侧 CDN。
- * @returns 基址列表（无尾斜杠）
- */
 function fallbackBases(): string[] {
     if (isDev()) return [DEV_BASE_URL]
     const primary = buildCdnUrl(REMOTE_PREFIX).replace(/\/$/, "")
@@ -99,34 +91,19 @@ function fallbackBases(): string[] {
     return alternate === primary ? [primary] : [primary, alternate]
 }
 
-/**
- * @description 更新下载状态。
- * @param patch 增量
- */
 function patch(patch: Partial<ModelDownloadState>): void {
     modelDownloadState.value = { ...modelDownloadState.value, ...patch }
 }
 
-/**
- * @description 重置下载状态。
- */
 export function resetModelDownloadState(): void {
     modelDownloadState.value = { active: false, stage: "manifest", id: "", loaded: 0, total: 0, speedBps: 0, error: "" }
 }
 
-/**
- * @description 标记为「正在解析」：打开本地 GLB 时没有下载阶段，
- * 进度条应直接显示解析态而不是停在「正在下载」。
- */
 export function markModelParsing(): void {
     patch({ active: true, stage: "ready", loaded: 0, total: 0, speedBps: 0, error: "" })
 }
 
-/**
- * @description 拉取模型清单；开发与线上都先读清单才知道该下哪个文件、多大。
- * @returns 清单
- * @throws 所有源都失败时抛错
- */
+/** 拉取模型清单：先读清单才知道该下哪个文件、多大；所有源都失败时抛错。 */
 export async function fetchModelManifest(): Promise<ModelManifest> {
     const bases = fallbackBases()
     for (const base of bases) {
@@ -139,39 +116,21 @@ export async function fetchModelManifest(): Promise<ModelManifest> {
             if (!Array.isArray(manifest?.parts) || !Array.isArray(manifest?.skins)) continue
             manifestCache.set(base, manifest)
             return manifest
-        } catch {
-            // 换下一个源
+        } catch (error) {
+            console.warn(`模型清单源失败，换下一个源: ${base}`, error)
         }
     }
     throw new Error("无法获取模型清单")
 }
 
-/**
- * @description 在清单里按皮肤 id 找部件组合。
- * @param manifest 清单
- * @param id 皮肤 id
- * @returns 皮肤条目；不存在时 undefined
- */
 export function findSkin(manifest: ModelManifest, id: number | string): SkinEntry | undefined {
     return manifest.skins.find(entry => entry.id === String(id))
 }
 
-/**
- * @description 在清单里按名字找部件。
- * @param manifest 清单
- * @param name 部件名
- * @returns 部件条目；不存在时 undefined
- */
 export function findPart(manifest: ModelManifest, name: string): ModelPartEntry | undefined {
     return manifest.parts.find(entry => entry.name === name)
 }
 
-/**
- * @description 读取带进度的响应体。
- * @param response 响应
- * @param onProgress 进度回调
- * @returns 完整字节
- */
 async function readWithProgress(
     response: Response,
     onProgress: (loaded: number, total: number, speedBps: number) => void
@@ -204,11 +163,6 @@ async function readWithProgress(
     return bytes
 }
 
-/**
- * @description 从 Cache Storage 取已缓存部件。
- * @param key 缓存键（部件名@哈希）
- * @returns 缓存命中时的字节
- */
 async function readCache(key: string): Promise<Uint8Array | undefined> {
     if (typeof caches === "undefined") return undefined
     try {
@@ -216,23 +170,19 @@ async function readCache(key: string): Promise<Uint8Array | undefined> {
         const hit = await cache.match(key)
         if (!hit) return undefined
         return new Uint8Array(await hit.arrayBuffer())
-    } catch {
+    } catch (error) {
+        console.warn(`模型部件缓存读取失败: ${key}`, error)
         return undefined
     }
 }
 
-/**
- * @description 写入 Cache Storage。
- * @param key 缓存键（部件名@哈希）
- * @param bytes 内容
- */
 async function writeCache(key: string, bytes: Uint8Array): Promise<void> {
     if (typeof caches === "undefined") return
     try {
         const cache = await caches.open(CACHE_NAME)
         await cache.put(key, new Response(bytes.slice(), { headers: { "content-type": "model/gltf-binary" } }))
-    } catch {
-        // 配额不足等失败不影响本次使用
+    } catch (error) {
+        console.warn(`模型部件缓存写入失败（不影响本次使用）: ${key}`, error)
     }
 }
 
@@ -250,16 +200,6 @@ export function isGlb(response: Response, bytes: Uint8Array): boolean {
     return bytes[0] === 0x67 && bytes[1] === 0x6c && bytes[2] === 0x54 && bytes[3] === 0x46
 }
 
-/**
- * @description 下载一个文件（部件或动画），带缓存与进度。
- * @param file 文件名
- * @param cacheKey 缓存键
- * @param bytesHint 清单里的字节数
- * @param base 资源基址
- * @param onProgress 进度回调
- * @param signal 中止信号
- * @returns 文件字节
- */
 async function downloadFile(
     file: string,
     cacheKey: string,
@@ -288,15 +228,6 @@ async function downloadFile(
     return bytes
 }
 
-/**
- * @description 下载单个部件：先查内存、再查 Cache Storage，最后才走网络。
- * @param manifest 清单
- * @param name 部件名
- * @param base 资源基址
- * @param onProgress 进度回调
- * @param signal 中止信号
- * @returns 部件字节
- */
 async function downloadPart(
     manifest: ModelManifest,
     name: string,
@@ -311,9 +242,8 @@ async function downloadPart(
 }
 
 /**
- * @description 进度泵：把真实字节数按「最短展示时长」的缓动曲线摊开。
- * 本地 mock 与缓存命中时数据瞬间到齐，没有它进度条会一闪而过（甚至来不及渲染），
- * 所以即使下载已经完成，也让进度条按固定节奏走完一遍。
+ * 进度泵：本地 mock 与缓存命中时数据瞬间到齐，没有它进度条会一闪而过；
+ * 按「最短展示时长」的缓动曲线把真实字节数摊开展示。
  */
 function createProgressPump(total: number): { report: (loaded: number) => void; finish: () => Promise<void>; stop: () => void } {
     const startedAt = performance.now()
@@ -347,13 +277,7 @@ function createProgressPump(total: number): { report: (loaded: number) => void; 
     }
 }
 
-/**
- * @description 下载指定皮肤的部件并拼成完整模型，返回可直接交给 GLTFLoader 的 URL。
- * 命中内存或 Cache Storage 的部件不会产生网络请求；多个皮肤共用的体型只会下一次。
- * @param id 皮肤 id
- * @param signal 中止信号
- * @returns 模型 URL（blob:）
- */
+/** 下载指定皮肤的部件并拼成完整模型，返回可直接交给 GLTFLoader 的 URL（blob:）。 */
 export async function downloadModel(id: number | string, signal?: AbortSignal): Promise<string> {
     const key = String(id)
     const manifest = await fetchModelManifest()
@@ -437,9 +361,6 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
     }
 }
 
-/**
- * @description 清空模型缓存（内存与 Cache Storage）。
- */
 export async function clearModelCache(): Promise<void> {
     for (const url of modelCache.values()) URL.revokeObjectURL(url)
     modelCache.clear()
@@ -447,6 +368,8 @@ export async function clearModelCache(): Promise<void> {
     if (typeof caches !== "undefined") {
         try {
             await caches.delete(CACHE_NAME)
-        } catch {}
+        } catch (error) {
+            console.warn("模型缓存清理失败", error)
+        }
     }
 }

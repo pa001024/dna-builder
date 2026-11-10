@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { mergeGlbs, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
+import { type GlbDocument, mergeGlbs, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
 
-function fixture() {
+function fixture(): GlbDocument {
     return {
         json: {
             asset: { version: "2.0" },
@@ -12,6 +12,10 @@ function fixture() {
             meshes: [{ primitives: [{ attributes: { POSITION: 0 }, indices: 0, material: 0 }] }],
             nodes: [{ mesh: 0, skin: 0, children: [1] }, { name: "root" }],
             skins: [{ joints: [1], skeleton: 1, inverseBindMatrices: 0 }],
+            images: [],
+            textures: [],
+            samplers: [],
+            animations: [],
             scene: 0,
             scenes: [{ nodes: [0] }],
         },
@@ -49,8 +53,8 @@ describe("skin GLB packaging", () => {
             extensionsRequired: ["EXT_meshopt_compression"],
         })
         const result = mergeGlbs([compressed, compressed])
-        expect(result.json.bufferViews[0].extensions.EXT_meshopt_compression.byteOffset).toBe(0)
-        expect(result.json.bufferViews[1].extensions.EXT_meshopt_compression.byteOffset).toBe(4)
+        expect(result.json.bufferViews[0].extensions?.EXT_meshopt_compression?.byteOffset).toBe(0)
+        expect(result.json.bufferViews[1].extensions?.EXT_meshopt_compression?.byteOffset).toBe(4)
         expect(result.json.extensionsRequired).toEqual(["EXT_meshopt_compression"])
     })
     it("remaps animation accessors and target nodes of independent assets", () => {

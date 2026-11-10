@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import type { GlbDocument } from "../../apps/web/src/utils/skin-model-glb"
 import { averageAlpha, cutoutBaseNames, optimizeGlb } from "./optimize"
 
 function triangleDocument() {
@@ -150,6 +151,11 @@ describe("skin GLB optimization", () => {
                 nodes: [],
                 scenes: [{ nodes: [] }],
                 scene: 0,
+                skins: [],
+                animations: [],
+                samplers: [],
+                images: [],
+                textures: [],
             },
             binary,
         }
@@ -165,13 +171,13 @@ describe("skin GLB optimization", () => {
         expect(meta.componentType).toBe(5121)
         expect(meta.normalized).toBe(true)
         const view = document.json.bufferViews[meta.bufferView]
-        const bytes = document.binary.subarray(view.byteOffset, view.byteOffset + view.byteLength)
+        const bytes = document.binary.subarray(view.byteOffset ?? 0, (view.byteOffset ?? 0) + view.byteLength)
         expect(bytes[0]).toBe(255)
         expect(bytes[1]).toBe(128)
         expect(bytes[2]).toBe(64)
         const positionAccessor = document.json.accessors[primitive.attributes.POSITION]
         expect(positionAccessor.count).toBe(meta.count)
-        const indexMeta = document.json.accessors[primitive.indices]
+        const indexMeta = document.json.accessors[primitive.indices!]
         expect(indexMeta.count % 3).toBe(0)
     })
 })
@@ -186,7 +192,7 @@ const OPAQUE_PNG = Buffer.from(
     "base64"
 )
 
-function imageDocument(name: string, png: Buffer) {
+function imageDocument(name: string, png: Buffer): GlbDocument {
     return {
         json: {
             asset: { version: "2.0" },
@@ -200,6 +206,9 @@ function imageDocument(name: string, png: Buffer) {
             nodes: [],
             scenes: [{ nodes: [] }],
             scene: 0,
+            skins: [],
+            animations: [],
+            samplers: [],
         },
         binary: new Uint8Array(png),
     }
@@ -207,9 +216,10 @@ function imageDocument(name: string, png: Buffer) {
 
 const encodeTexture = async () => Uint8Array.of(0x52, 0x49, 0x46, 0x46)
 
-function imageBytes(document: ReturnType<typeof imageDocument>): Uint8Array {
-    const view = document.json.bufferViews[document.json.images[0].bufferView]
-    return document.binary.subarray(view.byteOffset, view.byteOffset + view.byteLength)
+function imageBytes(document: GlbDocument): Uint8Array {
+    // 夹具必带 bufferView；外来文档缺视图时与之前一致直接抛错。
+    const view = document.json.bufferViews[document.json.images[0].bufferView!]
+    return document.binary.subarray(view.byteOffset ?? 0, (view.byteOffset ?? 0) + view.byteLength)
 }
 
 describe("cutout base detection", () => {
@@ -239,10 +249,18 @@ describe("cutout base detection", () => {
                     },
                     { name: "MI_Shadow", extras: { dnaColorize: { kind: "shadow", textures: {} } } },
                 ],
+                bufferViews: [],
+                accessors: [],
+                meshes: [],
+                nodes: [],
+                scenes: [{ nodes: [] }],
+                skins: [],
+                animations: [],
+                samplers: [],
             },
             binary: new Uint8Array(),
         }
-        expect([...cutoutBaseNames(document as any)].sort()).toEqual(["T_Silk_D", "T_Wing_D"])
+        expect([...cutoutBaseNames(document)].sort()).toEqual(["T_Silk_D", "T_Wing_D"])
     })
 })
 

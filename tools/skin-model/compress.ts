@@ -1,5 +1,20 @@
 import { MeshoptEncoder } from "meshoptimizer"
-import { type GlbDocument, readAccessorBytes, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
+import {
+    COMPONENT_SIZE,
+    type GlbDocument,
+    type GltfAccessor,
+    type GltfBufferView,
+    type GltfImage,
+    type GltfMaterial,
+    type GltfMesh,
+    type GltfMeshPrimitive,
+    type GltfSkin,
+    type GltfTexture,
+    readAccessorBytes,
+    readGlb,
+    TYPE_COMPONENTS,
+    writeGlb,
+} from "../../apps/web/src/utils/skin-model-glb"
 
 /**
  * 把导出好的 GLB 压成发布体积：剔除武器、贴图按语义分档重编码、顶点属性收窄 + meshopt 压缩。
@@ -54,20 +69,17 @@ export type CompressReport = {
     removed: { materials: string[]; nodes: string[]; images: string[] }
 }
 
-const TYPE_COMPONENTS: Record<string, number> = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 }
-const COMPONENT_SIZE: Record<number, number> = { 5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4 }
-
 const CLASS_RANK: Record<keyof TextureBudget, number> = { cutout: 0, mask: 1, normal: 2, color: 3 }
 
 /** 按材质槽语义给每张贴图归类，优先级：剪影 > 遮罩 > 法线 > 颜色。 */
 export function classifyTextures(document: GlbDocument): Map<string, keyof TextureBudget> {
-    const json = document.json as Record<string, any>
+    const json = document.json
     const result = new Map<string, keyof TextureBudget>()
     const imageName = (slot: number | undefined) => {
         if (slot === undefined) return undefined
-        const texture = json.textures?.[slot]
-        if (!texture) return undefined
-        return json.images?.[texture.source]?.name as string | undefined
+        const source = json.textures?.[slot]?.source
+        if (source === undefined) return undefined
+        return json.images?.[source]?.name
     }
     const assign = (name: string | undefined, kind: keyof TextureBudget) => {
         if (!name) return
@@ -78,21 +90,21 @@ export function classifyTextures(document: GlbDocument): Map<string, keyof Textu
     for (const material of json.materials ?? []) {
         const data = material.extras?.dnaColorize
         if (!data || data.kind === "shadow") continue
-        const textures = (data.textures ?? {}) as Record<string, number>
-        const silk = textures["丝绸混合贴图"] !== undefined
+        const textures = data.textures ?? {}
+        const silk = textures.丝绸混合贴图 !== undefined
         const wing = String(data.parent ?? "").includes("M_Player_Wing_ShopSkin")
-        assign(imageName(textures["时装BaseClor"] ?? textures["颜色贴图"]), silk || wing ? "cutout" : "color")
-        assign(imageName(textures["混合贴图"]), "mask")
-        assign(imageName(textures["丝绸混合贴图"]), "mask")
-        assign(imageName(textures["法线贴图"]), "normal")
-        assign(imageName(textures["自发光贴图"]), "color")
+        assign(imageName(textures.时装BaseClor ?? textures.颜色贴图), silk || wing ? "cutout" : "color")
+        assign(imageName(textures.混合贴图), "mask")
+        assign(imageName(textures.丝绸混合贴图), "mask")
+        assign(imageName(textures.法线贴图), "normal")
+        assign(imageName(textures.自发光贴图), "color")
     }
     for (const image of json.images ?? []) assign(image.name, "color")
     return result
 }
 
 /** 追加裸 bufferView 到二进制尾部，返回视图索引。 */
-function pushView(document: GlbDocument, bytes: Uint8Array, extra: Record<string, any> = {}): number {
+function pushView(document: GlbDocument, bytes: Uint8Array, extra: Record<string, unknown> = {}): number {
     const offset = Math.ceil(document.binary.length / 4) * 4
     const next = new Uint8Array(offset + bytes.length)
     next.set(document.binary)
@@ -117,7 +129,7 @@ function pushCompressedView(
     // 规范要求 bufferView 的 byteLength 是解压后的字节数，数据本身走 extension 的 byteOffset。
     // 顶层的 byteStride 不能省：加载器按它决定要不要走交错缓冲，只写进 extension 的话
     // 量化成 byte 的法线会被当成 3 字节步长读，整片法线错位。
-    const view: Record<string, any> = {
+    const view: GltfBufferView = {
         buffer: 0,
         byteOffset: 0,
         byteLength: spec.count * spec.byteStride,
@@ -138,13 +150,13 @@ function pushCompressedView(
 
 /** 剔除指定材质，连带删掉变空的网格、节点与贴图。 */
 function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
-    const json = document.json as Record<string, any>
+    const json = document.json
     const removedMaterials: string[] = []
     const removedNodes: string[] = []
     const removedImages: string[] = []
 
     const materialRemap = new Map<number, number>()
-    const keptMaterials: Record<string, any>[] = []
+    const keptMaterials: GltfMaterial[] = []
     for (const [index, material] of (json.materials ?? []).entries()) {
         if (dropMaterials.has(material.name)) {
             removedMaterials.push(material.name)
@@ -167,13 +179,13 @@ function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
     const weaponMeshNames = new Set<string>()
     for (const index of weaponMeshes) weaponMeshNames.add(json.meshes[index]?.name ?? "")
 
-    const keptMeshes: Record<string, any>[] = []
+    const keptMeshes: GltfMesh[] = []
     const meshRemap = new Map<number, number>()
     for (const [index, mesh] of (json.meshes ?? []).entries()) {
         // 同名的多个 primitive 集合属于同一份网格资产（导出器按材质拆成 mesh_N），
         // 武器网格与角色网格同名不同实例，这里按「网格名 + 是否为武器」区分
         if (weaponMeshes.has(index)) continue
-        mesh.primitives = mesh.primitives.filter((primitive: any) => {
+        mesh.primitives = mesh.primitives.filter(primitive => {
             if (primitive.material === undefined) return true
             if (!materialRemap.has(primitive.material)) return false
             primitive.material = materialRemap.get(primitive.material)
@@ -197,7 +209,7 @@ function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
     // 被删掉网格的那套蒙皮（武器自带 6 关节）已经没人引用，留着白占逆绑定矩阵
     const usedSkins = new Set<number>()
     for (const node of json.nodes ?? []) if (node.skin !== undefined) usedSkins.add(node.skin)
-    const keptSkins: Record<string, any>[] = []
+    const keptSkins: GltfSkin[] = []
     const skinRemap = new Map<number, number>()
     for (const [index, skin] of (json.skins ?? []).entries()) {
         if (!usedSkins.has(index)) continue
@@ -208,7 +220,7 @@ function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
     for (const node of json.nodes ?? []) if (node.skin !== undefined) node.skin = skinRemap.get(node.skin)
 
     const droppedSources = new Set<number>()
-    const keptImages: Record<string, any>[] = []
+    const keptImages: GltfImage[] = []
     for (const [index, image] of (json.images ?? []).entries()) {
         if (/Sword_Shezui/.test(image.name ?? "")) {
             removedImages.push(image.name)
@@ -223,7 +235,7 @@ function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
     for (let index = 0; index < json.images.length + droppedSources.size; index++)
         if (!droppedSources.has(index)) imageRemap.set(index, cursor++)
 
-    const keptTextures: Record<string, any>[] = []
+    const keptTextures: GltfTexture[] = []
     for (const texture of json.textures ?? []) {
         if (texture.source !== undefined && droppedSources.has(texture.source)) continue
         if (texture.source !== undefined) texture.source = imageRemap.get(texture.source)!
@@ -237,7 +249,7 @@ function dropWeapon(document: GlbDocument, dropMaterials: Set<string>) {
     for (const material of json.materials) {
         const data = material.extras?.dnaColorize
         if (!data?.textures) continue
-        for (const [slot, value] of Object.entries(data.textures as Record<string, number>)) {
+        for (const [slot, value] of Object.entries(data.textures)) {
             if (!liveTextures.has(value)) delete data.textures[slot]
         }
     }
@@ -249,13 +261,14 @@ async function reencodeTextures(
     document: GlbDocument,
     budget: TextureBudget
 ): Promise<{ name: string; kind: string; before: number; after: number }[]> {
-    const json = document.json as Record<string, any>
+    const json = document.json
     const kinds = classifyTextures(document)
     const binary = document.binary
     const report: { name: string; kind: string; before: number; after: number }[] = []
     const encoded: Uint8Array[] = []
     for (const image of json.images ?? []) {
-        const view = json.bufferViews[image.bufferView]
+        // 导出器产出的贴图必带 bufferView；外来文档缺视图时与之前一致直接抛错。
+        const view = json.bufferViews[image.bufferView!]
         const start = view.byteOffset ?? 0
         const source = binary.subarray(start, start + view.byteLength)
         const kind = kinds.get(image.name) ?? "color"
@@ -299,11 +312,11 @@ const NARROWED: Record<string, { componentType: number; stride: number }> = {
 /** 把单个 primitive 重排 + 收窄 + meshopt 压缩，返回压缩前后的字节数。 */
 async function compressPrimitive(
     document: GlbDocument,
-    primitive: Record<string, any>,
+    primitive: GltfMeshPrimitive,
     source: GlbDocument
 ): Promise<{ before: number; after: number } | undefined> {
-    const json = document.json as Record<string, any>
-    const sourceJson = source.json as Record<string, any>
+    const json = document.json
+    const sourceJson = source.json
     if (primitive.indices === undefined || primitive.attributes?.POSITION === undefined) return undefined
     const indexAccessor = sourceJson.accessors[primitive.indices]
     const rawIndex = readAccessorBytes(source, primitive.indices)
@@ -328,7 +341,7 @@ async function compressPrimitive(
     after += encodedIndex.byteLength
     const indexView = pushCompressedView(document, encodedIndex, { count: index.length, byteStride: 4, mode: "TRIANGLES" })
     const attributes: Record<string, number> = {}
-    for (const [name, accessorIndex] of Object.entries(primitive.attributes as Record<string, number>)) {
+    for (const [name, accessorIndex] of Object.entries(primitive.attributes)) {
         const accessor = sourceJson.accessors[accessorIndex]
         const components = TYPE_COMPONENTS[accessor.type] ?? 1
         const size = COMPONENT_SIZE[accessor.componentType] ?? 4
@@ -369,13 +382,13 @@ async function compressPrimitive(
         const encoded = await MeshoptEncoder.encodeGltfBuffer(reordered, vertexCount, stride, "ATTRIBUTES")
         after += encoded.byteLength
         const view = pushCompressedView(document, encoded, { count: vertexCount, byteStride: stride, mode: "ATTRIBUTES" })
-        const entry: Record<string, any> = { bufferView: view, componentType, count: vertexCount, type }
+        const entry: GltfAccessor = { bufferView: view, componentType, count: vertexCount, type }
         if (normalized) entry.normalized = true
         if (accessor.min) entry.min = accessor.min
         if (accessor.max) entry.max = accessor.max
         attributes[name] = json.accessors.push(entry) - 1
     }
-    const indexEntry: Record<string, any> = { bufferView: indexView, componentType: 5125, count: index.length, type: "SCALAR" }
+    const indexEntry: GltfAccessor = { bufferView: indexView, componentType: 5125, count: index.length, type: "SCALAR" }
     primitive.indices = json.accessors.push(indexEntry) - 1
     primitive.attributes = attributes
     return { before, after }
@@ -383,8 +396,8 @@ async function compressPrimitive(
 
 /** 动画关键帧量化：旋转四元数 → int16，位移/缩放 → int16，时间保持 float。 */
 async function compressAnimation(document: GlbDocument, source: GlbDocument): Promise<{ before: number; after: number }> {
-    const json = document.json as Record<string, any>
-    const sourceJson = source.json as Record<string, any>
+    const json = document.json
+    const sourceJson = source.json
     let before = 0
     let after = 0
     for (const animation of json.animations ?? []) {
@@ -394,7 +407,7 @@ async function compressAnimation(document: GlbDocument, source: GlbDocument): Pr
             // 时间轴保持 float（播放器直接按秒采样），但必须重新挂到新的 accessor 列表
             const timeBytes = readAccessorBytes(source, sampler.input)
             const timeView = pushView(document, timeBytes, { target: 34962 })
-            const timeEntry: Record<string, any> = {
+            const timeEntry: GltfAccessor = {
                 bufferView: timeView,
                 componentType: 5126,
                 count: inputAccessor.count,
@@ -428,7 +441,7 @@ async function compressAnimation(document: GlbDocument, source: GlbDocument): Pr
                 byteStride: stride,
                 mode: "ATTRIBUTES",
             })
-            const entry: Record<string, any> = {
+            const entry: GltfAccessor = {
                 bufferView,
                 componentType: 5122,
                 count: outputAccessor.count,
@@ -441,12 +454,7 @@ async function compressAnimation(document: GlbDocument, source: GlbDocument): Pr
     return { before, after }
 }
 
-/**
- * @description 按比例缩放整套贴图预算，档位低于 1 时只会更小。
- * @param budget 原预算
- * @param factor 缩放系数
- * @returns 缩放后的预算
- */
+/** 按比例缩放整套贴图预算。 */
 function scaleBudget(budget: TextureBudget, factor: number): TextureBudget {
     const scale = (spec: TextureSpec): TextureSpec =>
         "lossless" in spec ? { scale: spec.scale * factor, lossless: true } : { scale: spec.scale * factor, quality: spec.quality }
@@ -470,7 +478,7 @@ export async function compressGlb(bytes: Uint8Array, options: CompressOptions = 
 /** 用一套固定预算压一次。 */
 async function compressOnce(bytes: Uint8Array, options: CompressOptions = {}): Promise<{ glb: Uint8Array; report: CompressReport }> {
     const document = readGlb(bytes)
-    const json = document.json as Record<string, any>
+    const json = document.json
     const before = bytes.length
     // 压缩阶段要读原始几何，而贴图重编码会重建 bufferViews，先留一份源快照
     const source: GlbDocument = { json: structuredClone(json), binary: document.binary }

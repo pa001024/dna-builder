@@ -70,12 +70,7 @@ function meshPath(value: string | undefined): string | undefined {
     return packagePath.startsWith("/Game/") ? packagePath : `/Game/${packagePath.replace(/^\/+/, "")}`
 }
 
-/**
- * 解析数据表顶部 `local T = {}` 里的复用常量（`T.RT_86 = { 110291, 110292 }`）。
- * 有些皮肤的 `PartModelsId` 写成常量引用而不是字面量数组。
- * @param source 数据表源码
- * @returns 常量名到表体文本
- */
+/** 解析数据表顶部 `local T = {}` 里的复用常量：有些皮肤的 `PartModelsId` 写成常量引用而不是字面量数组。 */
 function constantTables(source: string): Map<string, string> {
     const result = new Map<string, string>()
     for (const match of source.matchAll(/^T\.(RT_\d+) = \{/gm)) {
@@ -94,12 +89,7 @@ function partModelIds(block: string, constants: Map<string, string>): number[] {
 }
 
 /**
- * @description 解析皮肤品阶效果生物的网格：`Skin2LevelUpEffectCreature` → `EffectCreature`
- * （`MeshResourceId`）→ `Model.lua` 的 `SkeletonMeshPath`。
- *
- * 这类网格是独立骨架（只有翅膀骨骼），不在 `PartModelsId` 里，却是展示界面上最主要的外观元素。
- * @param luaDir 游戏 Script 目录
- * @returns 皮肤 id → 效果网格包路径（同皮肤内去重）
+ * 解析皮肤品阶效果生物的网格：这类网格是独立骨架，不在 `PartModelsId` 里，却是展示界面上最主要的外观元素。
  */
 function readEffectMeshes(luaDir: string): Map<number, string[]> {
     const result = new Map<number, string[]>()
@@ -135,14 +125,8 @@ function readEffectMeshes(luaDir: string): Map<number, string[]> {
 }
 
 /**
- * @description 解析全部皮肤目录。只收「有独立模型的皮肤」（skinId !== charId），
- * 默认外观不算皮肤。
- *
- * 两类皮肤都收：
- * - 角色专属皮肤：`SkinTag` 非空，部件是自己的身体 + 头发；
- * - 系列皮肤：没有 `SkinTag`，部件是**公共体型** + 角色头发，和游戏里一样靠模型表拼出来。
- * @param luaDir 游戏 Script 目录（含 `Datas/Skin.lua`）
- * @returns 按皮肤 id 升序的目录
+ * 解析全部皮肤目录，只收「有独立模型的皮肤」（默认外观不算）。
+ * 两类都收：角色专属（`SkinTag` 非空）与系列皮肤（公共体型 + 角色头发）。
  */
 export function readSkinCatalog(luaDir: string): SkinCatalogEntry[] {
     const skinSource = readLua(join(luaDir, "Datas/Skin.lua"))
@@ -197,11 +181,8 @@ export function readSkinCatalog(luaDir: string): SkinCatalogEntry[] {
 }
 
 /**
- * @description 由皮肤条目推出角色资产目录（`EM/Content/Asset/Char/...`），
- * 用于搜索该角色的展示动画与材质。
- * 优先用模型表的 `MontageFolder`：系列皮肤的脸网格来自公共体型目录，靠脸网格推不出角色。
- * @param entry 皮肤目录条目
- * @returns 角色目录的包路径前缀
+ * 由皮肤条目推出角色资产目录：优先用模型表的 `MontageFolder`，
+ * 系列皮肤的脸网格来自公共体型目录，靠脸网格推不出角色。
  */
 export function characterDirectory(entry: SkinCatalogEntry): string | undefined {
     if (entry.characterDir) return entry.characterDir
