@@ -14,8 +14,6 @@ import { i18nHmrPlugin } from "./src/i18n-hmr-plugin"
 import { dataPackRewritePlugin } from "./src/utils/data-pack/data-pack-rewrite-plugin"
 
 const host = process.env.TAURI_DEV_HOST
-const mockDataPackDir = resolve(__dirname, "mock/data-pack")
-const mockPluginsDir = resolve(__dirname, "mock/plugins")
 const isAppBuild = process.env.DNA_BUILDER_APP_BUILD === "1"
 const isDisableRewrite = process.env.DISABLE_REWRITE === "1"
 /** 每次构建唯一：注册 sw.js 时带在 URL 上，绕过 CDN 对 SW 脚本的缓存 */
@@ -271,53 +269,63 @@ export default defineConfig(async () => ({
                 use: (arg0: string, arg1: { (req: any, res: any, next: any): void; (req: any, res: any, next: any): void }) => void
             }
         }) {
-            server.middlewares.use("/mock/plugins", (req, res, next) => {
-                const url = req.url || "/"
-                const filePath = url === "/" ? "plugins.json" : url.replace(/^\//, "")
-                const absPath = resolve(mockPluginsDir, filePath)
-                if (!absPath.startsWith(mockPluginsDir)) {
+            /**
+             * 统一的 mock 静态资源服务：`/mock/<子目录>/<文件>` 映射到 `apps/web/mock/<子目录>/<文件>`。
+             *
+             * 数据包、插件、3D 模型都走这一条，新增 mock 目录不必再写一遍中间件。
+             * 访问目录时按各子目录的默认入口文件返回（`/` → 该目录的索引）。
+             */
+            const MOCK_DEFAULT_FILES: Record<string, string> = {
+                plugins: "plugins.json",
+                "data-pack": "versions.json",
+                models: "manifest.json",
+                "imgs-pack": "versions.json",
+            }
+            const MOCK_CONTENT_TYPES: Record<string, string> = {
+                ".json": "application/json; charset=utf-8",
+                ".zip": "application/zip",
+                ".glb": "model/gltf-binary",
+                ".webp": "image/webp",
+                ".png": "image/png",
+            }
+            server.middlewares.use((req, res, next) => {
+                const url = decodeURIComponent((req.url || "/").split("?")[0])
+                // 只接管 /mock/<白名单子目录>/...；其余请求原样放行
+                if (!url.startsWith("/mock/")) {
+                    next()
+                    return
+                }
+                const [group, ...rest] = url.slice("/mock/".length).split("/")
+                if (!group || !Object.hasOwn(MOCK_DEFAULT_FILES, group)) {
+                    next()
+                    return
+                }
+                const rootDir = resolve(__dirname, "mock", group)
+                const segments = rest.filter(Boolean)
+                // 目录请求（无文件名）落到该子目录的入口文件，避免被 SPA fallback 抢走
+                if (!segments.length) {
+                    const entry = MOCK_DEFAULT_FILES[group]
+                    res.statusCode = 302
+                    res.setHeader("Location", `/mock/${group}/${entry}`)
+                    res.end()
+                    return
+                }
+                const relative = segments.join("/")
+                const absPath = resolve(rootDir, relative)
+                if (!absPath.startsWith(rootDir)) {
                     res.statusCode = 403
                     res.end("Forbidden")
                     return
                 }
-
                 fs.readFile(absPath, (error, buffer) => {
                     if (error) {
                         next()
                         return
                     }
-
+                    const extension = absPath.slice(absPath.lastIndexOf("."))
                     res.statusCode = 200
-                    if (absPath.endsWith(".json")) {
-                        res.setHeader("Content-Type", "application/json; charset=utf-8")
-                    } else if (absPath.endsWith(".zip")) {
-                        res.setHeader("Content-Type", "application/zip")
-                    }
-                    res.end(buffer)
-                })
-            })
-            server.middlewares.use("/mock/data-pack", (req, res, next) => {
-                const url = req.url || "/"
-                const filePath = url === "/" ? "latest.json" : url.replace(/^\//, "")
-                const absPath = resolve(mockDataPackDir, filePath)
-                if (!absPath.startsWith(mockDataPackDir)) {
-                    res.statusCode = 403
-                    res.end("Forbidden")
-                    return
-                }
-
-                fs.readFile(absPath, (error, buffer) => {
-                    if (error) {
-                        next()
-                        return
-                    }
-
-                    res.statusCode = 200
-                    if (absPath.endsWith(".json")) {
-                        res.setHeader("Content-Type", "application/json; charset=utf-8")
-                    } else if (absPath.endsWith(".zip")) {
-                        res.setHeader("Content-Type", "application/zip")
-                    }
+                    const contentType = MOCK_CONTENT_TYPES[extension]
+                    if (contentType) res.setHeader("Content-Type", contentType)
                     res.end(buffer)
                 })
             })

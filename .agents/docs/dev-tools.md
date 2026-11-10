@@ -131,4 +131,75 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
   `bun tools/data-pack.ts backfill` 给本地版本列表回填缺失的 major；缺 major 的老条目按
   `1.6.208.7` 分割线推断（之前为 1，自 MOD 数值挪进 `加成` 起为 2）；
 - `pnpm ip`（`bun tools/imgs-pack.ts build`）— 图片包；
-- dev 环境数据包基址是 `/mock/data-pack`（本地仓库目录），无需联网即可安装。
+- `pnpm mp`（`bun tools/models-pack.ts`）— 3D 皮肤模型，参数 `[--force] [--only <id>] [--src <dir>] [--max-size <MiB>] [--texture cutout=0.45:lossless,…] [upload]`。
+  源 GLB 放在 `models-src/`（git 忽略，`tools/skin-model/export-flora.ts` 的默认输出目录），
+  压缩后写 `apps/web/mock/models/`，并按 `models/` 前缀上传对象存储。
+  **按部件发布，不是按皮肤**：202 个可染色皮肤一共引用 669 个网格，去重后只有 177 个不同网格
+  （另有 3 个皮肤各带效果生物网格，见下），逐皮肤各存一份会重复打包 492 次（实测 175.6 MiB → 2426.8 MiB）。
+  工具把每个皮肤拆成部件（`apps/web/src/utils/skin-model-parts.ts`），同名的只存一份，
+  清单 `manifest.json` 只记录「皮肤 → 部件名顺序」；运行期再按顺序合并回去。
+  皮肤级染色元数据（部件名、丝袜白名单）从部件里摘出，只存在清单里；
+  **色板表不进模型也不进清单**：它是全局数据，已随数据包下发（`packages/data/d/skin-colorize.data.ts`
+  的 `linear` / `fresnel` 字段），渲染器加载时从数据包补。202 个皮肤各存一份色表会凭空多出半兆。
+  展示动画单独成 `<id>.anim.glb`，通道按骨骼名记录，合并完成后再绑回节点索引。
+  实测 6 个皮肤：逐皮肤 55.1 MiB → 部件化 12.9 MiB（单皮肤 3.2–6.0 MiB）。
+  模型不进 `public/`、不随前端打包：前端打开染色页时才按皮肤清单下载缺的部件。
+  下载进度由 `skin-model-runtime.ts` 的进度泵驱动：显示值取「真实字节」与「缓动曲线」的较小值，
+  并保证至少展示 900ms（`MIN_PROGRESS_MS`）——本地 mock 与 Cache Storage 命中时数据瞬间到齐，
+  不铺节奏的话进度条会在同一帧从 0 跳到 100%，用户只能看到画面突然出现。
+  浮层必须锚在画布容器（`.relative` 只包画布）上，包含说明文字的外层不能当定位父级，
+  否则 `bottom-0` 会盖住下方的提示文案。
+  增量口径是部件内容哈希，没变的部件不会重压重传。`models-src` 只允许平铺的 `<id>.glb`，
+  同一 id 出现在两个路径会直接报错。
+  压缩由 `tools/skin-model/compress.ts` 完成：剔除武器、贴图按材质槽语义分四档
+  （剪影/遮罩无损、法线/颜色有损降采样）、顶点属性收窄 + `EXT_meshopt_compression`。
+  默认按 `--max-size 5`（MiB）做体积上限：不同皮肤贴图张数差别大，固定档位压出来会飘，
+  超限时按 `BUDGET_LADDER` 逐档等比缩小贴图预算，取第一个达标的。
+  注意：染色着色器用的贴图（混合/丝绸混合/法线/自发光）**只登记在 `dnaColorize.textures` 里**，
+  glTF 材质字段只引用底图；拆分与压缩都必须按元数据把这些贴图一起带上，否则丝袜会缺遮罩贴图。
+  染色色号与亮度取贴图的**原始字节**（游戏按 sRGB 采样后又用 `1.055*c^(1/2.4)-0.055` 编码回去，
+  两者相消），色带 `x = G * (5 + 量化)`，`染色1..6` 依次按 `clamp(x-0..4)` 混合。
+  两类着色器取色号的位置不同：
+  - `M_Player_Silk_ShopSkin`（BodyUP 贴身衣）走 `dnaPacked`：底图 UV0 的 G 是色号、R 是亮度，
+    法线贴图 B 是染色覆盖权重；`丝绸混合贴图` 只参与高光，底图 B 才是丝绸层剪影（进 alphaTest）。
+  - `M_Player_Wing_ShopSkin`（BodyDN、羽翼/垂饰）走 `dnaWing`：色号在 `时装BaseClor_2U` 遮罩的 G、
+    覆盖权重在同贴图 R，按 **UV1** 采样，底图只提供亮度（R）和剪影（B）。底图 G 在这里恒为 0，
+    拿它当色号会把整片羽毛压成 1 号色。材质没覆盖 2U 槽时游戏用父材质默认白图
+    （R=1 全覆盖、G=1 → 6 号色），渲染器同样退回白图。
+  导出必须保留 UV1（`optimizeGlb` 的 `dropExtraUvs: false`）：丢掉 UV1 就等于丢掉 Wing 的分区；
+  旧缓存模型没有 UV1 时渲染器退回底图算法，避免整片压成 1 号色。
+- `bun tools/skin-model/export-flora.ts` — 从游戏资产导出皮肤 GLB。默认导出**全部可染色皮肤**
+  （含系列皮肤：没有 `SkinTag`，靠模型表拼「公共体型 + 角色头发」）；`--skin <id>` 只导一个，
+  `--skip-existing` 做增量。
+  皮肤 → 网格 → 材质的映射全部来自游戏数据表（`tools/skin-model/catalog.ts` 解析
+  `Skin.lua` → `Model.lua` → `CharPartModel.lua`，含 `T.RT_N` 复用常量），不硬编码角色。
+  材质按名字逐个候选路径试（角色目录、**每个部件网格**的 Materials 目录、公共 Body/Face 目录），
+  都失败再全局搜并优先落在角色目录的结果——身体材质躺在身体网格旁，不在头发网格旁。
+  展示动画按角色目录实搜 `<Tag>_Armory_Idle`，搜到后**逐个候选试导出**：搜得到不代表解得了
+  （Songlu / Zhangyu 等 17 个角色的动画是 ACL 压缩，CUE4Parse 报 `Unsupported compressed data type`），
+  一个失败就换 `_Turn90_Idle` / `_Turn180_Idle` / `_Turn90_Start`，全失败才留空动画。
+  角色目录优先取模型表的 `MontageFolder`：系列皮肤的脸来自公共体型目录，靠脸网格推不出角色。
+  默认染色值以**材质实例自身的参数**为准（那就是游戏里的默认外观），
+  `DT_ShopskinTint` / `DT_HairTint` 只补材质没写的槽（`暗部颜色`、部分 `自发光颜色`）。
+  表里的行名是网格名（`QNF_SP14_Body_SM`），材质名是另一套写法（`MI_QNF01_SP14_BodyUP`），
+  匹配按「套装码 `SP14`/`TP03` + 体型前缀」对齐（`tools/skin-model/tint-row.ts`）——
+  只比首段会让所有同体型套装共用 SP01 那一行，整只皮肤套用别人的蓝衣红羽配色。
+  数据表里的部件路径也可能在当版本缺失（SP17 / Lilikou 的公共体型没打包，身体被拆成
+  `QNF_SP17_Part01/02_SM` 放在角色目录下），按名字搜不到时退到同前缀的 `*Part*_SM` 全部导出。
+  材质名与资产名的 `MI_` 前缀也可能对不上（网格写 `Lilikou_SP01_Hair`、资产是 `MI_Lilikou_SP01_Hair`），
+  两种写法都要试。特效/水面类材质没有染色底图，退化成扁平色并保留元数据——
+  **任何材质都不能缺 `dnaColorize`**，渲染器逐材质重建，缺一个整只模型不渲染。
+  皮肤品阶效果生物（`Skin2LevelUpEffectCreature` → `EffectCreature.MeshResourceId` →
+  `Model.SkeletonMeshPath`）是**独立骨架**的附加网格（芙洛拉「赦罪者」的翅膀等），不在 `PartModelsId` 里，
+  却是展示界面上最显眼的部分。导出时把它的骨架根改名为 `<网格>_Root`（否则合并去重时会被当成角色
+  `Root` 并到脚下），绑定后再整体挂到 `spine_03` 并抵消骨骼世界旋转；用角色共享 `Biped` 骨架的效果网格
+  不挂接，按普通部件合并。效果网格里没有染色底图的贴片（水面/能量类，如 `m_wave_dh_058`）在预览里只会
+  退化成不透明白色整片盖住翅膀，导出时直接剔除；贴片全被剔除的网格不发布（`meshNames` 跳过空网格）。
+  `fmodel-cli` 输出是 UTF-8，必须按严格 UTF-8 解码、失败才回退 GBK；早先无条件按 GBK 解，
+  中文槽名（`时装BaseClor`、`染色1`…）全变乱码，材质取不到底图、染色拿到错误默认色。
+  **走常驻 `batch` 子命令**（`fmodel-cli batch`，一次建 pak 索引、stdin 逐行收命令）：
+  单次启动要 ~13 秒重建 60 万文件索引，一个皮肤 30+ 次调用就会多花 7 分钟；
+  批处理后一个皮肤从 7 分钟降到 1 分钟出头。`--no-batch` 可退回逐次调用排查问题。
+  `/Engine/EngineResources/*` 是引擎内置纯色贴图，不在内容 pak 里，脚本按名字合成 2×2 PNG 顶替。
+- dev 环境数据包基址是 `/mock/data-pack`，模型基址是 `/mock/models`，无需联网即可安装；
+  vite 用一条通用中间件服务整个 `mock/<子目录>/`（白名单见 `MOCK_DEFAULT_FILES`）。
