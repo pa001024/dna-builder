@@ -114,6 +114,29 @@ let readConfigListenerReady = false
 let setConfigListenerReady = false
 let runtimeTrackingInitPromise: Promise<void> | null = null
 
+/** 脚本状态刷新节流间隔（毫秒）：与控制台共用节奏，高频 setStatus 下每秒最多渲染约 4 次。 */
+const SCRIPT_STATUS_FLUSH_INTERVAL_MS = 250
+/** 挂起状态条目的 Map 键：`scope + NUL + title`，同键高频更新天然合并。 */
+const SCRIPT_STATUS_KEY_SEPARATOR = "\u0000"
+
+interface PendingScriptStatusEntry {
+    remove: boolean
+    item: ScriptStatusItem
+}
+
+/**
+ * 脚本状态挂起缓冲（非响应式）：Tauri 事件回调内只做 Map 写入，
+ * 响应式数组经节流后批量合并，避免高频 setStatus 事件饿死主线程导致点不了停止。
+ */
+const pendingScriptStatusMap = new Map<string, PendingScriptStatusEntry>()
+let statusFlushTimer: ReturnType<typeof setTimeout> | null = null
+let lastStatusFlushAt = 0
+
+/** 构建挂起状态缓冲的 Map 键。 */
+function buildScriptStatusKey(scope: string | undefined, title: string): string {
+    return `${scope ?? ""}${SCRIPT_STATUS_KEY_SEPARATOR}${title}`
+}
+
 /** 脚本运行超时默认阈值（秒），0 表示默认禁用看门狗（需手动配置 >0 才启用）。 */
 export const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 0
 /** 脚本“运行超时”配置项名称（复用既有脚本配置 UI）。 */
@@ -165,6 +188,19 @@ function normalizeScriptEventScope(scope?: string | null): string | undefined {
         .replace(/\//g, "\\")
         .toLowerCase()
     return normalized || undefined
+}
+
+/**
+ * 判断后端运行条目是否为“真实脚本文件”。
+ * exec_script 的作用域是任意字符串（`__exec_script__`、`__race_lottery_ocr__` 等，无路径分隔符），
+ * 文件脚本注册的是规范化绝对路径；内部 exec 残留不应显示为运行中的脚本。
+ * @param path 后端上报的运行条目
+ * @returns true 表示按脚本文件展示
+ */
+function isScriptFileRunEntry(path: string): boolean {
+    const normalized = String(path ?? "").trim()
+    if (!normalized) return false
+    return normalized.includes("\\") || normalized.includes("/")
 }
 
 /**
@@ -913,13 +949,14 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
-         * 按标题移除指定脚本状态。
+         * 按标题移除指定脚本状态（同步生效，同时清除可能挂在缓冲里的同键更新）。
          * @param title 状态标题
          */
         removeScriptStatus(title: string, scope?: string) {
             const normalizedTitle = String(title ?? "").trim()
             if (!normalizedTitle) return
             const normalizedScope = normalizeScriptEventScope(scope) ?? ""
+            pendingScriptStatusMap.delete(buildScriptStatusKey(normalizedScope, normalizedTitle))
             const index = this.scriptStatuses.findIndex(item => (item.scope ?? "") === normalizedScope && item.title === normalizedTitle)
             if (index >= 0) {
                 this.scriptStatuses.splice(index, 1)
@@ -927,7 +964,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
-         * 新增或更新脚本状态。
+         * 新增或更新脚本状态（同步生效，同时覆盖缓冲里的同键待合并项）。
          * @param status 脚本状态
          */
         upsertScriptStatus(status: ScriptStatusItem) {
@@ -939,6 +976,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 title: normalizedTitle,
             }
             const normalizedScope = nextStatus.scope ?? ""
+            pendingScriptStatusMap.delete(buildScriptStatusKey(normalizedScope, normalizedTitle))
             const index = this.scriptStatuses.findIndex(item => (item.scope ?? "") === normalizedScope && item.title === normalizedTitle)
             if (index >= 0) {
                 this.scriptStatuses[index] = nextStatus
@@ -948,7 +986,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
-         * 处理来自后端的脚本状态事件。
+         * 处理来自后端的脚本状态事件：回调内只写入非响应式缓冲并节流合并，
+         * 同一 (scope, title) 的高频更新天然只保留最新值。
          * @param payload 状态事件负载
          */
         applyScriptStatusEvent(payload: {
@@ -964,8 +1003,19 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (!normalizedTitle) return
             this.touchScriptEvent()
             const normalizedScope = normalizeScriptEventScope(payload.scope)
+            const scopeKey = normalizedScope ?? ""
+            const bufferKey = buildScriptStatusKey(scopeKey, normalizedTitle)
+
             if (payload.action === "remove") {
-                this.removeScriptStatus(normalizedTitle, normalizedScope)
+                pendingScriptStatusMap.set(bufferKey, {
+                    remove: true,
+                    item: {
+                        scope: normalizedScope,
+                        title: normalizedTitle,
+                        timestamp: payload.timestamp ?? Date.now(),
+                    },
+                })
+                this.queueStatusFlush()
                 return
             }
 
@@ -978,18 +1028,92 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             }
 
             if (!payload.text && normalizedImages.length === 0) {
-                this.removeScriptStatus(normalizedTitle, normalizedScope)
+                pendingScriptStatusMap.set(bufferKey, {
+                    remove: true,
+                    item: {
+                        scope: normalizedScope,
+                        title: normalizedTitle,
+                        timestamp: payload.timestamp ?? Date.now(),
+                    },
+                })
+                this.queueStatusFlush()
                 return
             }
 
-            this.upsertScriptStatus({
-                scope: normalizedScope,
-                title: normalizedTitle,
-                text: payload.text,
-                image: normalizedImages[0],
-                images: normalizedImages,
-                timestamp: payload.timestamp ?? Date.now(),
+            pendingScriptStatusMap.set(bufferKey, {
+                remove: false,
+                item: {
+                    scope: normalizedScope,
+                    title: normalizedTitle,
+                    text: payload.text,
+                    image: normalizedImages[0],
+                    images: normalizedImages,
+                    timestamp: payload.timestamp ?? Date.now(),
+                },
             })
+            this.queueStatusFlush()
+        },
+
+        /**
+         * 请求刷新脚本状态快照：低频时同步刷新保证即时可见，高频时节流批量合并。
+         */
+        queueStatusFlush() {
+            const now = Date.now()
+            if (now - lastStatusFlushAt >= SCRIPT_STATUS_FLUSH_INTERVAL_MS) {
+                this.flushScriptStatuses()
+                return
+            }
+            if (statusFlushTimer) return
+            const delay = SCRIPT_STATUS_FLUSH_INTERVAL_MS - (now - lastStatusFlushAt)
+            statusFlushTimer = setTimeout(() => {
+                statusFlushTimer = null
+                this.flushScriptStatuses()
+            }, delay)
+        },
+
+        /**
+         * 将挂起缓冲一次性合并进响应式数组（单次赋值，只触发一次渲染）。
+         */
+        flushScriptStatuses() {
+            lastStatusFlushAt = Date.now()
+            if (statusFlushTimer) {
+                clearTimeout(statusFlushTimer)
+                statusFlushTimer = null
+            }
+            if (pendingScriptStatusMap.size === 0) {
+                return
+            }
+            const pending = new Map(pendingScriptStatusMap)
+            pendingScriptStatusMap.clear()
+            const next: ScriptStatusItem[] = []
+            for (const item of this.scriptStatuses) {
+                const key = buildScriptStatusKey(item.scope, item.title)
+                const entry = pending.get(key)
+                if (entry === undefined) {
+                    next.push(item)
+                    continue
+                }
+                pending.delete(key)
+                if (!entry.remove) {
+                    next.push(entry.item)
+                }
+            }
+            for (const entry of pending.values()) {
+                if (!entry.remove) {
+                    next.push(entry.item)
+                }
+            }
+            this.scriptStatuses = next
+        },
+
+        /**
+         * 取消待处理的状态快照刷新（仅测试/热重载场景使用）。
+         */
+        cancelStatusFlush() {
+            if (statusFlushTimer) {
+                clearTimeout(statusFlushTimer)
+                statusFlushTimer = null
+            }
         },
 
         /**
@@ -1156,20 +1280,28 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
-         * 清空全部脚本状态。
+         * 清空全部脚本状态（同步清空缓冲与快照，拥堵时点清空立刻生效）。
          */
         clearScriptStatuses() {
+            this.cancelStatusFlush()
+            pendingScriptStatusMap.clear()
+            lastStatusFlushAt = Date.now()
             this.scriptStatuses = []
         },
 
         /**
-         * 按作用域清空脚本状态。
+         * 按作用域清空脚本状态（同步清除缓冲与快照中匹配项）。
          * @param scope 作用域
          */
         clearScriptStatusesByScope(scope?: string) {
             const normalizedScope = normalizeScriptEventScope(scope)
             if (!normalizedScope) {
                 return
+            }
+            for (const [key, entry] of pendingScriptStatusMap) {
+                if (normalizeScriptEventScope(entry.item.scope) === normalizedScope) {
+                    pendingScriptStatusMap.delete(key)
+                }
             }
             this.scriptStatuses = this.scriptStatuses.filter(item => normalizeScriptEventScope(item.scope) !== normalizedScope)
         },
@@ -1201,15 +1333,22 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
 
         /**
          * 用后端运行信息刷新前端状态。
+         * 只把“真实脚本文件路径”计入运行列表：内部 exec_script 作用域（无路径分隔符的任意字符串）
+         * 不是用户脚本，残留实例不应显示为运行中的脚本。
          * @param runtimeInfo 后端运行信息
          */
         applyBackendRuntimeInfo(runtimeInfo: ScriptRuntimeInfo) {
             const normalizedPaths = Array.isArray(runtimeInfo.scriptPaths)
-                ? runtimeInfo.scriptPaths.map(path => String(path ?? "").trim()).filter(path => path.length > 0)
+                ? runtimeInfo.scriptPaths
+                      .map(path => String(path ?? "").trim())
+                      .filter(path => path.length > 0)
+                      .filter(isScriptFileRunEntry)
                 : []
             this.runningScriptPaths = normalizedPaths
 
-            const normalizedCount = Number(runtimeInfo.runningCount ?? 0)
+            // 后端已拒绝同路径并行实例，可见脚本数 = 文件路径数；
+            // 不采用后端 runningCount（含内部 exec 条目）。
+            const normalizedCount = normalizedPaths.length
             const hasRunningScripts = Boolean(runtimeInfo.running) && normalizedPaths.length > 0 && normalizedCount > 0
             if (hasRunningScripts) {
                 if (!this.isRunning) {
@@ -1349,6 +1488,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             // 看门狗随运行时跟踪一并停止，重置重启中标记。
             this.stopScriptRuntimeWatchdog()
             this.cancelConsoleFlush()
+            this.cancelStatusFlush()
+            pendingScriptStatusMap.clear()
             scriptRuntimeRestartingByTimeout = false
             if (runtimeUnlistenFn) {
                 runtimeUnlistenFn()
