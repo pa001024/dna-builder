@@ -34,6 +34,14 @@ export interface AutomationRule {
     actionConfig: Record<string, unknown>
 }
 
+/** 新规则预设：快捷按钮填充 kind + when，编辑器接管后落库。 */
+export interface AutomationRulePreset {
+    name?: string
+    kind?: string
+    when?: MatchCond[]
+    actionConfig?: Record<string, unknown>
+}
+
 export interface ActionContext {
     event: AutomationEvent
     signal: AbortSignal

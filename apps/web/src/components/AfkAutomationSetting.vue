@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * 账本页尾的通用自动化区域：插件管理 + 快捷新建 + 规则面板。
+ *
+ * 动作侧配置（登录、场景选择等）由各插件自带界面提供，core 只做事件组装与规则存取。
+ */
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import {
@@ -11,13 +16,9 @@ import {
     uninstallPlugin,
 } from "@/automation/loader"
 import { useAutomationStore } from "@/automation/store"
+import type { AutomationRulePreset, MatchCond } from "@/automation/types"
 import AutomationPanel from "@/components/AutomationPanel.vue"
 import { useAfkLedgerStore } from "@/store/afkLedger"
-import {
-    type AutomationCondition,
-    type AutomationRulePreset,
-    migrateLegacyAutomation,
-} from "@/store/automation-migrate"
 import { MIHAN_TYPES } from "@/store/mihan"
 import { useUIStore } from "@/store/ui"
 import { afkDungeonName } from "@/utils/afk-ledger"
@@ -92,22 +93,22 @@ const dungeonOptions = computed(() => {
     const entries = Object.entries(ledger.snapshot.dungeons)
         .map(([id, entry]) => ({ value: id, label: dungeonDisplayName(id, afkDungeonName(id, entry.name)) }))
         .sort((a, b) => a.label.localeCompare(b.label))
-    return [{ value: "-", label: t("afk-mihome.dungeon_any") }, ...entries]
+    return [{ value: "-", label: t("automation.any") }, ...entries]
 })
 
 const rarityOptions = computed(() => [
-    { value: 1, label: t("afk-mihome.rarity_any") },
+    { value: 1, label: t("automation.rarity_any") },
     ...[5, 4, 3, 2].map(n => ({ value: n, label: t(`afk-ledger.rarity_${n}`) })),
 ])
 
 function dungeonLabel(id: string) {
-    if (!id) return t("afk-mihome.dungeon_any")
+    if (!id) return t("automation.any")
     const entry = ledger.snapshot.dungeons[id]
     return dungeonDisplayName(id, afkDungeonName(id, entry?.name ?? id))
 }
 
 function applyPreset() {
-    const when: AutomationCondition[] = []
+    const when: MatchCond[] = []
     let kind: string
     let name: string
     if (presetShape.value === "dungeon_complete") {
@@ -117,7 +118,7 @@ function applyPreset() {
             when.push({ field: "id", op: "eq", value: presetDungeon.value })
             name = dungeonLabel(presetDungeon.value)
         } else {
-            name = t("afk-mihome.kind_dungeon_complete")
+            name = t("automation.preset_dungeon_complete")
         }
     } else if (presetShape.value === "item_drop") {
         kind = "reward"
@@ -126,7 +127,7 @@ function applyPreset() {
             when.push({ field: "name", op: "contains", value: item })
             name = item
         } else {
-            name = t("afk-mihome.kind_item_drop")
+            name = t("automation.preset_item_drop")
         }
         if (presetRarity.value > 1) when.push({ field: "rarity", op: "gte", value: presetRarity.value })
     } else if (presetShape.value === "commission_refresh") {
@@ -137,7 +138,7 @@ function applyPreset() {
             when.push({ field: "mission", op: "contains", value: mission })
             name = mission
         } else {
-            name = t("afk-mihome.kind_commission_refresh")
+            name = t("automation.preset_commission_refresh")
         }
     } else {
         kind = "craft"
@@ -146,7 +147,7 @@ function applyPreset() {
             when.push({ field: "name", op: "contains", value: item })
             name = item
         } else {
-            name = t("afk-mihome.kind_craft_complete")
+            name = t("automation.preset_craft_complete")
         }
     }
     const preset: AutomationRulePreset = { name: name!, kind, when }
@@ -159,7 +160,6 @@ function openManager() {
 }
 
 onMounted(() => {
-    migrateLegacyAutomation()
     void ledger.init()
     void ensurePluginsLoaded().then(() => {
         if (!selectedPlugin.value) selectedPlugin.value = installedIds.value[0] ?? ""
@@ -282,7 +282,7 @@ onMounted(() => {
                 <template #actions>
                     <div class="flex justify-end gap-1.5">
                         <button type="button" class="btn btn-xs" @click="managerOpen = false">
-                            {{ $t("afk-mihome.close") }}
+                            {{ $t("automation.close") }}
                         </button>
                     </div>
                 </template>
@@ -290,18 +290,18 @@ onMounted(() => {
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                 <div class="mb-1.5 flex flex-wrap items-end gap-2">
                     <label class="flex min-w-32 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_kind") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.kind") }}</span>
                         <Select
                             v-model="presetShape"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         >
                             <SelectItem v-for="shape in SHAPES" :key="shape" :value="shape">
-                                {{ $t(`afk-mihome.kind_${shape}`) }}
+                                {{ $t(`automation.preset_${shape}`) }}
                             </SelectItem>
                         </Select>
                     </label>
                     <label v-if="presetShape === 'dungeon_complete'" class="flex min-w-32 flex-1 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_dungeon") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.preset_dungeon") }}</span>
                         <Select
                             v-model="presetDungeon"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -312,39 +312,39 @@ onMounted(() => {
                         </Select>
                     </label>
                     <label v-else-if="presetShape === 'commission_refresh'" class="flex min-w-32 flex-1 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_mission") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.preset_mission") }}</span>
                         <input
                             v-model="presetItem"
                             type="text"
                             class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            :placeholder="$t('afk-mihome.field_mission_placeholder')"
+                            :placeholder="$t('automation.preset_mission_placeholder')"
                             autocomplete="off"
                         />
                     </label>
                     <label v-else class="flex min-w-32 flex-1 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_item") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.preset_item") }}</span>
                         <input
                             v-model="presetItem"
                             type="text"
                             class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            :placeholder="$t('afk-mihome.field_item_placeholder')"
+                            :placeholder="$t('automation.preset_item_placeholder')"
                             autocomplete="off"
                         />
                     </label>
                     <label v-if="presetShape === 'commission_refresh'" class="flex min-w-28 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_mihan_type") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.preset_mihan_type") }}</span>
                         <Select
                             v-model="presetMihanType"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         >
-                            <SelectItem value="-">{{ $t("afk-mihome.mihan_type_any") }}</SelectItem>
+                            <SelectItem value="-">{{ $t("automation.mihan_type_any") }}</SelectItem>
                             <SelectItem v-for="type in MIHAN_TYPES" :key="type" :value="type">
                                 {{ type }}
                             </SelectItem>
                         </Select>
                     </label>
                     <label v-if="presetShape === 'item_drop'" class="flex min-w-28 flex-col gap-1">
-                        <span class="text-[11px] text-base-content/55">{{ $t("afk-mihome.field_rarity") }}</span>
+                        <span class="text-[11px] text-base-content/55">{{ $t("automation.preset_rarity") }}</span>
                         <Select
                             v-model="presetRarity"
                             class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"

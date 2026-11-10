@@ -1531,9 +1531,9 @@ function clearAll() {
             </div>
         </template>
 
-        <!-- 自动化：插件勾选与事件规则，空账本时也要能配置 -->
+        <!-- 自动化：插件管理与事件规则（通用，动作配置由各插件自带界面提供），空账本时也要能配置 -->
         <section :data-scroll-title="$t('automation.title')">
-            <AfkMiHomeSetting />
+            <AfkAutomationSetting />
         </section>
 
         <p class="text-[11px] leading-relaxed text-base-content/35">{{ $t("afk-ledger.note") }}</p>

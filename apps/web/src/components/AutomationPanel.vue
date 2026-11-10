@@ -2,13 +2,12 @@
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
 import { actionVersion, fireRuleNow, listActions, pluginOf } from "@/automation/bus"
-import { type CondValueOption, resolveValueOptions, schemaFieldsFor } from "@/automation/eventSchema"
+import { AFK_KINDS, type CondValueOption, resolveValueOptions, schemaFieldsFor } from "@/automation/eventSchema"
 import { ensurePluginsLoaded, pluginSettings } from "@/automation/loader"
 import { readPluginGlobalConfig } from "@/automation/pluginConfig"
 import { useAutomationStore } from "@/automation/store"
-import type { ActionDef, AutomationRule, MatchOp } from "@/automation/types"
+import type { ActionDef, AutomationRule, AutomationRulePreset, MatchCond, MatchOp } from "@/automation/types"
 import { useAfkLedgerStore } from "@/store/afkLedger"
-import { AFK_KINDS, type AutomationCondition, type AutomationRulePreset } from "@/store/automation-migrate"
 import { useUIStore } from "@/store/ui"
 import { afkDungeonName } from "@/utils/afk-ledger"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
@@ -55,7 +54,7 @@ const draftName = ref("")
 const draftEnabled = ref(true)
 const draftFireOnce = ref(false)
 const draftKind = ref("")
-const draftWhen = ref<AutomationCondition[]>([])
+const draftWhen = ref<MatchCond[]>([])
 
 /** 当前 kind 下可选字段（字段列只允许下拉选择）。 */
 const schemaFields = computed(() => schemaFieldsFor(draftKind.value || undefined))
@@ -68,7 +67,7 @@ const dungeonOptions = computed(() =>
 )
 
 /** 某行值的取值方式：副本下拉 / 枚举下拉 / 自由文本。 */
-function valueOptionsOf(cond: AutomationCondition): CondValueOption[] | "dungeons" | null {
+function valueOptionsOf(cond: MatchCond): CondValueOption[] | "dungeons" | null {
     if (!cond.field) return null
     return resolveValueOptions(draftKind.value || undefined, cond.field)
 }
@@ -131,7 +130,7 @@ async function openEdit(rule: AutomationRule) {
     draftName.value = rule.name
     draftEnabled.value = rule.enabled
     draftFireOnce.value = rule.fireOnce
-    draftKind.value = rule.match.kind ?? (rule.match as { kinds?: string[] }).kinds?.[0] ?? ""
+    draftKind.value = rule.match.kind ?? ""
     draftWhen.value = (rule.match.when ?? []).map(item => ({ ...item }))
     draftActionId.value = props.actionFilter || rule.actionId
     draftConfig.value = { ...readPluginGlobalConfig(pluginOf(draftActionId.value)), ...rule.actionConfig }
@@ -144,12 +143,12 @@ function kindLabel(kind?: string) {
 }
 
 function ruleSummary(rule: AutomationRule) {
-    const kinds = kindLabel(rule.match.kind ?? (rule.match as { kinds?: string[] }).kinds?.[0])
+    const kinds = kindLabel(rule.match.kind)
     const conditions = (rule.match.when ?? [])
         .map(item => `${item.field} ${t(`automation.op_${item.op}`)} ${String(item.value)}`)
         .join("；")
-    const sceneName = String(rule.actionConfig.sceneName ?? rule.actionConfig.scene_id ?? "")
-    return [kinds, conditions, sceneName ? `→ ${sceneName}` : ""].filter(Boolean).join(" ")
+    const targetName = String(rule.actionConfig.sceneName ?? rule.actionConfig.scene_id ?? "")
+    return [kinds, conditions, targetName ? `→ ${targetName}` : ""].filter(Boolean).join(" ")
 }
 
 function configString(key: string) {
@@ -208,7 +207,7 @@ function saveForm() {
     editingId.value = null
 }
 
-function sceneLabelOf(rule: AutomationRule) {
+function resultLabelOf(rule: AutomationRule) {
     return String(rule.actionConfig.sceneName ?? rule.actionConfig.scene_id ?? rule.name)
 }
 
@@ -218,10 +217,10 @@ async function fireNow(id: string) {
     firingId.value = id
     try {
         const result = await fireRuleNow(rule)
-        if (result.ok) ui.showSuccessMessage(t("afk-mihome.fire_ok", { scene: sceneLabelOf(rule) }))
-        else ui.showErrorMessage(t("afk-mihome.fire_fail", { error: result.message ?? id }))
+        if (result.ok) ui.showSuccessMessage(t("automation.fire_ok", { name: resultLabelOf(rule) }))
+        else ui.showErrorMessage(t("automation.fire_fail", { error: result.message ?? id }))
     } catch (error) {
-        ui.showErrorMessage(t("afk-mihome.fire_fail", { error: error instanceof Error ? error.message : String(error) }))
+        ui.showErrorMessage(t("automation.fire_fail", { error: error instanceof Error ? error.message : String(error) }))
     } finally {
         if (firingId.value === id) firingId.value = ""
     }
@@ -277,31 +276,31 @@ defineExpose({ startNewRule })
                     type="button"
                     class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px]"
                     :disabled="firingId === rule.id"
-                    :title="$t('afk-mihome.fire_now')"
+                    :title="$t('automation.fire_now')"
                     @click="fireNow(rule.id)"
                 >
-                    {{ $t("afk-mihome.fire_now") }}
+                    {{ $t("automation.fire_now") }}
                 </button>
                 <button
                     type="button"
                     class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px]"
-                    :title="$t('afk-mihome.edit_rule')"
+                    :title="$t('automation.edit_rule')"
                     @click="openEdit(rule)"
                 >
-                    {{ $t("afk-mihome.edit_rule") }}
+                    {{ $t("automation.edit_rule") }}
                 </button>
                 <button
                     type="button"
                     class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] text-error/80 hover:text-error"
-                    :title="$t('afk-mihome.delete')"
+                    :title="$t('automation.delete')"
                     @click="store.removeRule(rule.id)"
                 >
-                    {{ $t("afk-mihome.delete") }}
+                    {{ $t("automation.delete") }}
                 </button>
             </div>
         </div>
 
-        <Dialog v-model="showForm" wide :title="editingId ? $t('afk-mihome.edit_rule') : $t('automation.add_rule')">
+        <Dialog v-model="showForm" wide :title="editingId ? $t('automation.edit_rule') : $t('automation.add_rule')">
             <template #content>
                 <div class="flex flex-col gap-2">
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -330,7 +329,7 @@ defineExpose({ startNewRule })
                 <div class="flex items-center gap-4">
                     <label class="flex items-center gap-1.5 text-[11px] text-base-content/55">
                         <input v-model="draftEnabled" type="checkbox" class="toggle toggle-xs toggle-secondary" />
-                        {{ $t("afk-mihome.enable") }}
+                        {{ $t("automation.enable") }}
                     </label>
                     <label class="flex items-center gap-1.5 text-[11px] text-base-content/55">
                         <input v-model="draftFireOnce" type="checkbox" class="toggle toggle-xs toggle-secondary" />
@@ -434,10 +433,10 @@ defineExpose({ startNewRule })
                     <button
                         type="button"
                         class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] text-error/80 hover:text-error"
-                        :title="$t('afk-mihome.delete')"
+                        :title="$t('automation.delete')"
                         @click="removeCondition(index)"
                     >
-                        {{ $t("afk-mihome.delete") }}
+                        {{ $t("automation.delete") }}
                     </button>
                 </div>
             </div>
@@ -481,10 +480,10 @@ defineExpose({ startNewRule })
             <template #actions>
                 <div class="flex justify-end gap-1.5">
                     <button type="button" class="btn btn-xs" @click="showForm = false; editingId = null">
-                        {{ $t("afk-mihome.cancel") }}
+                        {{ $t("automation.cancel") }}
                     </button>
                     <button type="button" class="btn btn-xs btn-primary" @click="saveForm">
-                        {{ $t("afk-mihome.save") }}
+                        {{ $t("automation.save") }}
                     </button>
                 </div>
             </template>

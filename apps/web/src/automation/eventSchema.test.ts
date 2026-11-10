@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { AFK_KINDS } from "@/store/automation-migrate"
-import { EVENT_SCHEMA, resolveValueOptions, schemaFieldsFor } from "./eventSchema"
+import { AFK_KINDS, EVENT_SCHEMA, resolveValueOptions, schemaFieldsFor } from "./eventSchema"
 
 describe("eventSchema", () => {
     it("覆盖全部 kind 且字段非空", () => {
