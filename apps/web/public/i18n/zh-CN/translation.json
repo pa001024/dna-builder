@@ -4845,6 +4845,18 @@
     "skin-colorize": {
         "desc": "预览和分享角色皮肤染色",
         "desc_placeholder": "补充描述（可选）",
+        "model_character": "角色预览",
+        "model_downloading": "正在下载模型",
+        "model_error": "模型加载失败。请运行模型导出工具，或打开工具导出的 GLB。",
+        "model_notice": "拖动旋转，滚轮缩放。1–6：服装；7：自发光；8：丝袜。灯光与特效尚未通过游戏截帧标定，此预览不代表像素级一致。",
+        "model_open": "打开 GLB",
+        "model_parsing": "正在解析模型",
+        "model_reset": "重置视角",
+        "model_size": "模型大小",
+        "model_title": "模型染色预览",
+        "model_unsupported": "该皮肤暂无可用的 3D 模型，可打开本地 GLB 预览。",
+        "model_weapon": "武器预览",
+        "model_weapon_removed": "3D 预览不含武器",
         "no_data": "暂无角色染色数据",
         "title": "染色方案"
     },

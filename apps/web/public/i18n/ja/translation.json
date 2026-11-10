@@ -4797,6 +4797,18 @@
     "skin-colorize": {
         "desc": "キャラクタースキンの染色をプレビューして共有",
         "desc_placeholder": "補足説明（任意）",
+        "model_character": "キャラクターを表示",
+        "model_downloading": "モデルをダウンロード中",
+        "model_error": "モデルを読み込めません。エクスポートツールを実行するか、出力されたGLBを開いてください。",
+        "model_notice": "ドラッグで回転、ホイールでズーム。1–6：衣装、7：発光、8：ストッキング。ゲームのキャプチャによる照明・エフェクトの校正は未完了です。ピクセル単位の一致は保証しません。",
+        "model_open": "GLBを開く",
+        "model_parsing": "モデルを解析中",
+        "model_reset": "視点をリセット",
+        "model_size": "モデルサイズ",
+        "model_title": "3D染色プレビュー",
+        "model_unsupported": "このスキンには利用可能な 3D モデルがまだありません。ローカルの GLB を開いてプレビューできます。",
+        "model_weapon": "武器を表示",
+        "model_weapon_removed": "3Dプレビューに武器は含まれません",
         "no_data": "キャラのカラーリングデータがありません",
         "title": "染色プラン"
     },

@@ -4819,6 +4819,18 @@
     "skin-colorize": {
         "desc": "Preview and share character skin dyes",
         "desc_placeholder": "Additional description (optional)",
+        "model_character": "Show Character",
+        "model_downloading": "Downloading model",
+        "model_error": "Could not load the model. Run the exporter or open its exported GLB.",
+        "model_notice": "Drag to orbit, scroll to zoom. 1–6: clothing; 7: emission; 8: stockings. Lighting and effects have not been calibrated against a game capture; this is not a pixel-exact preview.",
+        "model_open": "Open GLB",
+        "model_parsing": "Parsing model",
+        "model_reset": "Reset View",
+        "model_size": "Model size",
+        "model_title": "3D Dye Preview",
+        "model_unsupported": "No 3D model is available for this skin yet. You can open a local GLB to preview.",
+        "model_weapon": "Show Weapon",
+        "model_weapon_removed": "3D preview excludes the weapon",
         "no_data": "No character color data",
         "title": "Dye Plans"
     },

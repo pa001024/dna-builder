@@ -4836,6 +4836,18 @@
     "skin-colorize": {
         "desc": "Previsualiser et partager les teintures de skin",
         "desc_placeholder": "Description complémentaire (facultatif)",
+        "model_character": "Afficher personnage",
+        "model_downloading": "Téléchargement du modèle",
+        "model_error": "Impossible de charger le modèle. Lancez le programme pour exporter le modèle ou ouvrez le GLB obtenu.",
+        "model_notice": "Glissez pour tourner, défilez pour zoomer. 1–6 : tenue ; 7 : émission ; 8 : bas. Éclairage et effets non calibrés sur une capture du jeu : cet aperçu ne garantit pas une correspondance exacte.",
+        "model_open": "Ouvrir un GLB",
+        "model_parsing": "Analyse du modèle",
+        "model_reset": "Réinitialiser la vue",
+        "model_size": "Taille du modèle",
+        "model_title": "Aperçu 3D de la teinture",
+        "model_unsupported": "Aucun modèle 3D n'est encore disponible pour cette tenue. Vous pouvez ouvrir un GLB local pour l'aperçu.",
+        "model_weapon": "Afficher arme",
+        "model_weapon_removed": "L'aperçu 3D n'inclut pas l'arme",
         "no_data": "Aucune donnée de coloration de personnage",
         "title": "Plans de teinture"
     },

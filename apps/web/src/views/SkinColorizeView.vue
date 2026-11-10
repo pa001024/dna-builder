@@ -707,13 +707,18 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="flex h-full min-h-0 w-full flex-col">
-        <div class="min-h-0 flex-1 overflow-auto p-4">
+        <div class="min-h-0 flex-1 overflow-y-auto p-4 lg:overflow-hidden">
             <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm text-base-content/50">
                 {{ $t("skin-colorize.no_data") }}
             </div>
-            <div v-else class="mx-auto grid max-w-7xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
-                <!-- 左列：方案信息 / 预览图 / 染色码 / 颜色预览 / 消耗 / 评论 -->
-                <div class="stagger-rise min-w-0 space-y-4">
+            <div v-else class="mx-auto grid max-w-7xl gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_400px]">
+                <!-- 左列：方案信息 / 预览图 / 染色码 / 颜色预览 / 消耗 / 评论（独立滚动，对照右侧调色） -->
+                <div class="min-w-0 space-y-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
+                    <SkinColorizeModelPreview
+                        :skin-id="selectedSkinId"
+                        :color-ids="selectedColorIds"
+                        :hair-color-ids="includeHair ? hairColorIds : undefined"
+                    />
                     <!-- 方案信息：标题 / 描述 / 作者与统计 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PLAN" title="方案信息">
@@ -1030,8 +1035,8 @@ onBeforeUnmount(() => {
                     </section>
                 </div>
 
-                <!-- 右列：颜色选择器 / 发型染色 / 保存 -->
-                <aside class="stagger-rise min-w-0 space-y-4 lg:sticky lg:top-4">
+                <!-- 右列：颜色选择器 / 发型染色 / 保存（独立滚动） -->
+                <aside class="min-w-0 space-y-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
                     <!-- 颜色选择器 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PALETTE" title="颜色选择器">
@@ -1042,31 +1047,24 @@ onBeforeUnmount(() => {
 
                         <!-- 角色 / 皮肤选择（新建或可编辑时展示） -->
                         <template v-if="canEdit">
-                            <div
-                                class="mb-2 flex max-h-40 flex-wrap gap-1 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2"
-                            >
-                                <button
-                                    v-for="character in characters"
-                                    :key="character.id"
-                                    class="btn btn-xs whitespace-nowrap"
-                                    :class="
-                                        character.id === selectedCharacterId
-                                            ? 'btn-primary'
-                                            : ''
-                                    "
-                                    type="button"
-                                    @click="selectCharacter(character.id)"
+                            <div class="mb-3 grid grid-cols-2 gap-2">
+                                <Select
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    :model-value="selectedCharacterId"
+                                    @update:model-value="selectCharacter"
                                 >
-                                    {{ character.名称 }}
-                                </button>
+                                    <SelectItem v-for="character in characters" :key="character.id" :value="character.id">{{
+                                        character.名称
+                                    }}</SelectItem>
+                                </Select>
+                                <Select
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    :model-value="selectedSkinId"
+                                    @update:model-value="selectSkin"
+                                >
+                                    <SelectItem v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</SelectItem>
+                                </Select>
                             </div>
-                            <Select
-                                class="mb-3 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                :model-value="selectedSkinId"
-                                @update:model-value="selectSkin"
-                            >
-                                <SelectItem v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</SelectItem>
-                            </Select>
                         </template>
 
                         <!-- 部位选择 -->

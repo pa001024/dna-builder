@@ -4795,6 +4795,18 @@
     "skin-colorize": {
         "desc": "預覽及分享角色皮膚染色",
         "desc_placeholder": "補充描述（選填）",
+        "model_character": "角色預覽",
+        "model_downloading": "正在下載模型",
+        "model_error": "模型載入失敗。請執行模型匯出工具，或開啟工具匯出的 GLB。",
+        "model_notice": "拖曳旋轉，滾輪縮放。1–6：服裝；7：自發光；8：絲襪。燈光與特效尚未透過遊戲截幀校準，此預覽不代表像素級一致。",
+        "model_open": "開啟 GLB",
+        "model_parsing": "正在解析模型",
+        "model_reset": "重設視角",
+        "model_size": "模型大小",
+        "model_title": "模型染色預覽",
+        "model_unsupported": "此皮膚暫無可用的 3D 模型，可開啟本機 GLB 預覽。",
+        "model_weapon": "武器預覽",
+        "model_weapon_removed": "3D 預覽不含武器",
         "no_data": "暫無角色染色資料",
         "title": "染色方案"
     },

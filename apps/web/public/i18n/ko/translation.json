@@ -4798,6 +4798,18 @@
     "skin-colorize": {
         "desc": "캐릭터 스킨 염색 미리보기 및 공유",
         "desc_placeholder": "추가 설명(선택)",
+        "model_character": "캐릭터 보기",
+        "model_downloading": "모델 다운로드 중",
+        "model_error": "모델을 불러올 수 없습니다. 내보내기 도구를 실행하거나 출력된 GLB를 여세요.",
+        "model_notice": "드래그로 회전, 휠로 확대합니다. 1–6: 의상, 7: 발광, 8: 스타킹. 게임 캡처로 조명과 효과를 보정하지 않았으며 픽셀 단위로 일치하지 않습니다.",
+        "model_open": "GLB 열기",
+        "model_parsing": "모델 분석 중",
+        "model_reset": "시점 초기화",
+        "model_size": "모델 크기",
+        "model_title": "3D 염색 미리보기",
+        "model_unsupported": "이 스킨에는 아직 사용 가능한 3D 모델이 없습니다. 로컬 GLB를 열어 미리 볼 수 있습니다.",
+        "model_weapon": "무기 보기",
+        "model_weapon_removed": "3D 미리보기에 무기는 포함되지 않습니다",
         "no_data": "캐릭터 염색 데이터가 없습니다",
         "title": "염색 플랜"
     },

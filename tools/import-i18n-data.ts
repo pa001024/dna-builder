@@ -871,6 +871,20 @@ function trimLimitedPrizePools(pools: unknown): Record<string, TrimmedLimitedPri
     return trimmed
 }
 
+/**
+ * @description sRGB（0–255）转线性 RGB，供缺 Actual 字段的色板兜底。
+ * @param rgb sRGB 分量
+ * @returns 线性分量，保留 4 位小数
+ */
+function srgbToLinear(rgb: number[]): [number, number, number] {
+    const convert = (value: number) => {
+        const channel = value / 255
+        const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+        return Math.round(linear * 10000) / 10000
+    }
+    return [convert(rgb[0]), convert(rgb[1]), convert(rgb[2])]
+}
+
 const MAPPINGS: Mapping[] = [
     { source: "Archive", targetStem: "archive", targetVar: "archiveData", locales: ["cn"] },
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
@@ -1524,10 +1538,18 @@ const MAPPINGS: Mapping[] = [
                     // NaN 落进 .data.ts 会写成标识符字面量，工具自身无法回读。统一按 0（无发色染剂）处理。
                     const resourceId = Number(swatch.ResourceID) || 0
                     const hairResourceId = Number(swatch.HairResourceID) || 0
+                    // 着色器要的是线性值 ActualRGB，不是 ColorNumber 的 sRGB；
+                    // 两者不是简单换算关系（部分色板 Actual 与 sRGB 明显不同），必须原样带上。
+                    // 个别色板（1022 纯白）没有 Actual 字段，按 sRGB 换算兜底。
+                    const actual = [Number(swatch.ActualR), Number(swatch.ActualG), Number(swatch.ActualB)]
+                    const linear = actual.every(Number.isFinite) ? actual : srgbToLinear(swatch.ColorNumber as number[])
+                    const fresnel = Number(swatch.Fresnel)
                     return {
                         id: Number(swatch.ColorID),
                         name: translateTextMap(textMap, resourceNames.get(String(resourceId)) || ""),
                         rgb: swatch.ColorNumber,
+                        linear,
+                        ...(Number.isFinite(fresnel) ? { fresnel } : {}),
                         resourceId,
                         hairResourceId,
                         hairResourceName: translateTextMap(textMap, resourceNames.get(String(hairResourceId)) || ""),
