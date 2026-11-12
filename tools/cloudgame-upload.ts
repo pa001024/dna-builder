@@ -19,7 +19,9 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { $ } from "bun"
-import { getActiveBackends, getPublicUrl, getPublicUrlOn, putFile, putGenerated } from "./object-storage"
+import type { ReleaseInfo } from "../apps/web/src/utils/app-download"
+import { getActiveBackends, getPublicUrlOn, putFile, putGenerated } from "./object-storage"
+import { sha256File } from "./update-pack"
 
 /** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -97,36 +99,8 @@ const objectKey = `${OBJECT_PREFIX}/cloudgame-client-v${version}.exe`
 /** 发布清单（固定路径，覆盖写）：前端本地部署版本与清单版本不一致时更新 */
 const latestKey = `${OBJECT_PREFIX}/latest.json`
 
-/** cloudgame/latest.json 的内容：只描述最新一版客户端（与 apk/latest.json 同构） */
-export type CloudgameLatest = {
-    /** 版本号 */
-    version: string
-    /** 对象存储上的文件名 */
-    fileName: string
-    /** 下载地址 */
-    url: string
-    /** exe 字节数 */
-    size: number
-    /** exe sha256，供客户端下载后校验 */
-    sha256: string
-    /** 发布时刻（ISO 8601） */
-    builtAt: string
-    /** 更新说明 */
-    notes?: string
-}
-
-/**
- * 计算文件 SHA-256（流式，避免整文件读入内存）。
- * @param filePath 文件路径
- * @returns 小写十六进制摘要
- */
-async function sha256File(filePath: string): Promise<string> {
-    const hasher = new Bun.CryptoHasher("sha256")
-    for await (const chunk of Bun.file(filePath).stream()) {
-        hasher.update(chunk)
-    }
-    return hasher.digest("hex")
-}
+/** cloudgame/latest.json 的内容：与 apk/latest.json 同构 */
+export type CloudgameLatest = ReleaseInfo
 
 /**
  * 判断 exe 是否已是 UPX 压缩产物（UPX 存根含 `UPX!` 魔数），已压缩则跳过重复压缩。
@@ -213,17 +187,26 @@ async function main(): Promise<void> {
     console.log(`📦 上传 ${path.relative(REPO_ROOT, exePath)} (${(exeSize / 1024 / 1024).toFixed(1)} MB, sha256 ${sha256})`)
     console.log(`📤 上传对象存储: ${objectKey}`)
     await putFile(objectKey, exePath, EXE_CONTENT_TYPE)
-    // 先传 exe 再传清单：清单出现时对象一定已经可下载
-    const latest: CloudgameLatest = {
-        version,
-        fileName: path.basename(objectKey),
-        url: getPublicUrl(objectKey),
-        size: exeSize,
-        sha256,
-        builtAt: new Date().toISOString(),
-        notes,
-    }
-    await putGenerated(latestKey, () => JSON.stringify(latest, null, 2), "application/json")
+    // 先传 exe 再传清单：清单出现时对象一定已经可下载。
+    // 清单按后端各自生成：url 必须指向该后端自己的域名，否则兜底源拿到的是主源地址。
+    await putGenerated(
+        latestKey,
+        backend =>
+            JSON.stringify(
+                {
+                    version,
+                    fileName: path.basename(objectKey),
+                    url: getPublicUrlOn(backend, objectKey),
+                    size: exeSize,
+                    sha256,
+                    builtAt: new Date().toISOString(),
+                    notes,
+                } satisfies CloudgameLatest,
+                null,
+                2
+            ),
+        "application/json"
+    )
     console.log(`🧾 发布清单: ${latestKey} (v${version})`)
     console.log("✅ 上传完成")
 

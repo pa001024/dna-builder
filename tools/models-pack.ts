@@ -18,6 +18,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { readGlb, writeGlb } from "../apps/web/src/utils/skin-model-glb"
 import { extractAnimation, meshNames, splitMesh } from "../apps/web/src/utils/skin-model-parts"
+import type { ModelManifest, ModelPartEntry, SkinEntry } from "../apps/web/src/utils/skin-model-runtime"
 import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 import { compressGlb, DEFAULT_TEXTURE_BUDGET, type TextureBudget } from "./skin-model/compress"
 
@@ -31,42 +32,9 @@ const manifestPath = path.resolve(mockModelsDir, "manifest.json")
 /** 远端前缀：与前端 `buildCdnUrl("models/...")` 对应 */
 const REMOTE_PREFIX = "models"
 
-export type PartManifestEntry = {
-    /** 部件名（网格名，例如 `QNF00_TP01_SM`），也是文件名 */
-    name: string
-    /** 远端对象 key，相对 `models/` 前缀 */
-    file: string
-    /** 压缩后字节数 */
-    bytes: number
-    /** 压缩后内容哈希：变了才需要重新下载 */
-    hash: string
-    builtAt: string
-}
-
-export type SkinManifestEntry = {
-    /** 皮肤 id */
-    id: string
-    /** 组成该皮肤的部件名，顺序与游戏里的 `PartModelsId` 一致（体型在前、脸在后） */
-    parts: string[]
-    /**
-     * 皮肤级染色元数据（部件名、丝袜白名单…）。
-     * 每个部件都带着同一份，若留在部件里会被重复打包 N 次，这里提到清单只存一份。
-     * 色板表不在这里：它来自数据包（`skin-colorize.data.ts`），各皮肤完全一致。
-     */
-    meta?: Record<string, unknown>
-    /** 展示待机动画文件名；动画绑定骨骼名，合并完成后再绑回节点 */
-    animation?: string
-    /** 动画文件字节数 */
-    animationBytes?: number
-}
-
-export type ModelManifest = {
-    builtAt: string
-    /** 部件表：按名字索引，多个皮肤共用 */
-    parts: PartManifestEntry[]
-    /** 皮肤 → 部件组合 */
-    skins: SkinManifestEntry[]
-}
+export type PartManifestEntry = ModelPartEntry
+export type SkinManifestEntry = SkinEntry
+export type { ModelManifest }
 
 /** 递归收集源目录下的 GLB。 */
 function collectModels(dir = sourceModelsDir): { absPath: string; relPath: string }[] {
@@ -127,8 +95,8 @@ export function needsPublish(entry: Pick<PartManifestEntry, "hash" | "bytes">, e
     return !existing || existing.hash !== entry.hash || existing.bytes !== entry.bytes
 }
 
-/** 命令行参数 */
-function parseArgs(argv: string[]) {
+/** 命令行参数：`--key value` 收进 options，裸 `--flag` 收进 flags。 */
+export function parseArgs(argv: string[]) {
     const options = new Map<string, string>()
     const flags = new Set<string>()
     for (let index = 0; index < argv.length; index++) {
@@ -153,10 +121,8 @@ export function parseTextureBudget(value: string | undefined): TextureBudget {
         const [scale, quality] = spec.split(":")
         const parsed = Number(scale)
         if (!Number.isFinite(parsed)) continue
-        const target = budget[slot as keyof TextureBudget]
         budget[slot as keyof TextureBudget] =
             quality === "lossless" ? { scale: parsed, lossless: true } : { scale: parsed, quality: Number(quality ?? 90) }
-        void target
     }
     return budget
 }
@@ -171,7 +137,7 @@ export function parseMaxBytes(value: string | undefined): number {
 }
 
 /** 一次拆分的产物：某个皮肤由哪些部件组成。 */
-type SkinParts = { id: string; parts: string[]; glbs: Map<string, Uint8Array>; meta?: Record<string, unknown>; animation?: Uint8Array }
+type SkinParts = { id: string; parts: string[]; meta?: Record<string, unknown>; animation?: Uint8Array }
 
 /**
  * 把全部源模型拆成「皮肤 → 部件」并收集唯一的部件二进制。
@@ -196,18 +162,23 @@ function collectParts(models: { absPath: string; relPath: string }[]): {
         delete document.json.extras
         // 动画绑定的是骨骼节点，拆分后每个部件只剩自己那套索引，必须单独抽出来
         const animation = extractAnimation(document)
-        const glbs = new Map<string, Uint8Array>()
+        const produced = new Set<string>()
         for (const name of names) {
+            // 部件已拆过（公共体型被几十个皮肤共用）就跳过——拆分要整文档克隆再重打包，
+            // 结果又会被丢弃，是这个循环里最贵的一步
+            if (parts.has(name)) {
+                produced.add(name)
+                continue
+            }
             const part = splitMesh(document, name)
             if (!part) continue
             delete part.json.extras
-            glbs.set(name, writeGlb(part))
-            if (!parts.has(name)) parts.set(name, glbs.get(name)!)
+            parts.set(name, writeGlb(part))
+            produced.add(name)
         }
         skins.push({
             id,
-            parts: names.filter(name => glbs.has(name)),
-            glbs,
+            parts: names.filter(name => produced.has(name)),
             meta,
             animation: animation ? writeGlb(animation) : undefined,
         })
@@ -245,6 +216,7 @@ async function main(): Promise<void> {
     console.log(`拆出 ${skins.length} 个皮肤 / ${parts.size} 个唯一部件`)
 
     const entries: PartManifestEntry[] = []
+    const uploads: Promise<void>[] = []
     let published = 0
     let savedBytes = 0
     for (const [name, source] of parts) {
@@ -270,8 +242,7 @@ async function main(): Promise<void> {
             fs.writeFileSync(localPath, glb)
             if (upload) {
                 const key = `${REMOTE_PREFIX}/${entry.file}`
-                await putFile(key, localPath)
-                console.log(`  已上传 ${key} -> ${getPublicUrl(key)}`)
+                uploads.push(putFile(key, localPath).then(() => console.log(`  已上传 ${key} -> ${getPublicUrl(key)}`)))
             }
             published++
             console.log(
@@ -298,14 +269,14 @@ async function main(): Promise<void> {
             fs.writeFileSync(path.join(mockModelsDir, file), skin.animation)
             if (upload) {
                 const key = `${REMOTE_PREFIX}/${file}`
-                await putFile(key, path.join(mockModelsDir, file))
+                uploads.push(putFile(key, path.join(mockModelsDir, file)))
             }
-            skinEntries.push({ ...entry, animation: file, animationBytes: skin.animation.length })
+            skinEntries.push({ ...entry, animation: file, animationBytes: skin.animation.length, animationHash: hashBytes(skin.animation) })
         } else skinEntries.push(entry)
     }
     const next: ModelManifest = { builtAt: new Date().toISOString(), parts: entries, skins: skinEntries }
     fs.writeFileSync(manifestPath, `${JSON.stringify(next, null, 2)}\n`)
-    const naive = skins.reduce((sum, skin) => sum + skin.parts.reduce((inner, name) => inner + (skin.glbs.get(name)?.length ?? 0), 0), 0)
+    const naive = skins.reduce((sum, skin) => sum + skin.parts.reduce((inner, name) => inner + (parts.get(name)?.length ?? 0), 0), 0)
     console.log(
         `清单已写入 ${path.relative(rootDir, manifestPath)}（${entries.length} 个部件 / ${skinEntries.length} 个皮肤，` +
             `本次发布 ${published} 个部件；部件化后 ${(savedBytes / 1048576).toFixed(1)} MiB，` +
@@ -313,6 +284,8 @@ async function main(): Promise<void> {
     )
 
     if (upload) {
+        // 部件/动画上传攒成一批并发跑，最后再传清单
+        await Promise.all(uploads)
         const key = `${REMOTE_PREFIX}/manifest.json`
         await putFile(key, manifestPath)
         console.log(`已上传 ${key} -> ${getPublicUrl(key)}`)

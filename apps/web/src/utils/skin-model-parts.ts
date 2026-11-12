@@ -3,7 +3,6 @@ import {
     type GlbDocument,
     type GltfChannel,
     type GltfJson,
-    type GltfNode,
     type GltfTexture,
     repackBinary,
     walkTextureRefs,
@@ -14,13 +13,6 @@ import {
  * 若每个皮肤各存一份完整模型，公共体型的几何与贴图会被重复打包几十次。
  * 这里按网格名切出独立 GLB，运行期再用 `mergeGlbs` 按 `PartModelsId` 拼回去。
  */
-
-export interface PartSplit {
-    /** 部件名（网格节点名，例如 `QNF00_TP01_SM`） */
-    name: string
-    /** 独立 GLB */
-    glb: GlbDocument
-}
 
 /**
  * 列出网格名：导出器的名字放在 `meshes[i].name` 上；贴片全被剔除的空网格跳过，否则会发布空部件。
@@ -35,7 +27,7 @@ export function meshNames(document: GlbDocument): string[] {
         .filter((name): name is string => typeof name === "string")
 }
 
-/** 取网格节点对应的网格名：优先节点名，其次网格名。 */
+/** 取网格节点对应的网格名（导出器的名字写在 `meshes[i].name` 上）。 */
 function meshName(json: GltfJson, meshIndex: number): string | undefined {
     return json.meshes?.[meshIndex]?.name
 }
@@ -56,6 +48,9 @@ export function splitMesh(document: GlbDocument, name: string): GlbDocument | un
         keep.add(index)
         for (const child of nodes[index].children ?? []) queue.push(child)
     }
+    // 一次性建父级表，下面每条父链查找都是 O(1)，不用逐节点扫 children。
+    const parents = new Int32Array(nodes.length).fill(-1)
+    for (const [parent, node] of nodes.entries()) for (const child of node.children ?? []) parents[child] = parent
     // 蒙皮关节及其父链。父链必须一路保留到根：骨骼树要挂在场景根下，
     // 否则节点存在但不在场景里，动画按名字找不到骨骼、蒙皮也不会更新。
     const skin = target.skin !== undefined ? json.skins[target.skin] : undefined
@@ -65,19 +60,15 @@ export function splitMesh(document: GlbDocument, name: string): GlbDocument | un
             let cursor: number | undefined = joint
             while (cursor !== undefined) {
                 keep.add(cursor)
-                const parent = parentOf(nodes, cursor)
-                if (parent === undefined) roots.add(cursor)
-                cursor = parent
+                const p: number = parents[cursor]
+                if (p < 0) roots.add(cursor)
+                cursor = p >= 0 ? p : undefined
             }
         }
     }
     // 场景根：网格节点所在的最顶层祖先
     let top: number | undefined = nodes.indexOf(target)
-    while (true) {
-        const parent = parentOf(nodes, top)
-        if (parent === undefined) break
-        top = parent
-    }
+    while (top !== undefined && parents[top] >= 0) top = parents[top]
     if (top !== undefined) {
         keep.add(top)
         roots.add(top)
@@ -86,7 +77,7 @@ export function splitMesh(document: GlbDocument, name: string): GlbDocument | un
 }
 
 /** 保留指定节点集合并重建索引表，用于部件拆分与运行期合并前的裁剪。 */
-export function extractNodes(document: GlbDocument, keep: Set<number>, roots: Set<number>): GlbDocument {
+function extractNodes(document: GlbDocument, keep: Set<number>, roots: Set<number>): GlbDocument {
     const source = structuredClone(document.json)
     const nodes = source.nodes ?? []
     const order = [...keep].sort((a, b) => a - b)
@@ -227,14 +218,6 @@ export function extractNodes(document: GlbDocument, keep: Set<number>, roots: Se
     return { json: out, binary }
 }
 
-/** 节点索引 → 父节点索引 */
-function parentOf(nodes: GltfNode[], index: number): number | undefined {
-    for (let parent = 0; parent < nodes.length; parent++) {
-        if ((nodes[parent].children ?? []).includes(index)) return parent
-    }
-    return undefined
-}
-
 /** 把集合重排成 0..n-1 的映射 */
 function remap(indices: Set<number>): Map<number, number> {
     const result = new Map<number, number>()
@@ -243,7 +226,7 @@ function remap(indices: Set<number>): Map<number, number> {
 }
 
 /** 重写 `dnaColorize.textures` 里的贴图索引（槽名 → 数字索引）。 */
-export function remapDyeTextureSlots(slots: Record<string, number> | undefined, map: (index: number) => number | undefined): void {
+function remapDyeTextureSlots(slots: Record<string, number> | undefined, map: (index: number) => number | undefined): void {
     if (!slots) return
     for (const [name, index] of Object.entries(slots)) {
         const next = map(index)

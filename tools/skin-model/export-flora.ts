@@ -3,7 +3,8 @@ import { mkdir, stat } from "node:fs/promises"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { deflateSync } from "node:zlib"
-import { appendAccessors, appendBinary, mergeGlbs, readAccessorBytes, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
+import { appendAccessors, appendBufferView, mergeGlbs, readAccessorBytes, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
+import { parseArgs } from "../models-pack"
 import { appendUeAnimation, readUeAnim } from "./anim"
 import { characterDirectory, readSkinCatalog, type SkinCatalogEntry } from "./catalog"
 import { cutoutBaseNames, isMaskTexture, optimizeGlb } from "./optimize"
@@ -24,17 +25,7 @@ import { mapVertexColors, readUeModelSkeleton, readUeModelVertexColors, type UeM
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 /** 效果生物网格（翅膀）挂接的骨骼：上背，翅膀根通常就在这里。 */
 const EFFECT_ATTACH_BONE = "spine_03"
-const options = new Map<string, string>()
-const flags = new Set<string>()
-for (let index = 2; index < process.argv.length; index++) {
-    const value = process.argv[index]
-    if (!value.startsWith("--")) continue
-    const next = process.argv[index + 1]
-    if (next && !next.startsWith("--")) {
-        options.set(value.slice(2), next)
-        index++
-    } else flags.add(value.slice(2))
-}
+const { options, flags } = parseArgs(process.argv.slice(2))
 if (flags.has("help")) {
     console.log(`用法: bun tools/skin-model/export-flora.ts [选项]
 
@@ -520,8 +511,7 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
             console.warn(`  texture unavailable: ${normalized} (${(error as Error).message})`)
             return undefined
         }
-        const byteOffset = appendBinary(model, bytes)
-        const bufferView = model.json.bufferViews.push({ buffer: 0, byteOffset, byteLength: bytes.length }) - 1
+        const bufferView = appendBufferView(model, bytes)
         const image = model.json.images.push({ bufferView, mimeType: "image/png", name: normalized.split("/").at(-1) }) - 1
         const texture = model.json.textures.push({ source: image }) - 1
         embedded.set(normalized, texture)
@@ -537,8 +527,7 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
             const cached = embedded.get(path)
             if (cached !== undefined) return cached
             const png = encodeSolidPng(rgba)
-            const byteOffset = appendBinary(model, png)
-            const bufferView = model.json.bufferViews.push({ buffer: 0, byteOffset, byteLength: png.length }) - 1
+            const bufferView = appendBufferView(model, png)
             const image = model.json.images.push({ bufferView, mimeType: "image/png", name: name ?? "builtin" }) - 1
             const texture = model.json.textures.push({ source: image }) - 1
             embedded.set(path, texture)

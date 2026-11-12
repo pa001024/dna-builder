@@ -12,6 +12,7 @@ import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import * as ts from "typescript"
+import { srgbChannelToLinear } from "../apps/web/src/utils/color"
 
 /** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -873,11 +874,7 @@ function trimLimitedPrizePools(pools: unknown): Record<string, TrimmedLimitedPri
 
 /** sRGB（0–255）转线性 RGB，供缺 Actual 字段的色板兜底（保留 4 位小数）。 */
 function srgbToLinear(rgb: number[]): [number, number, number] {
-    const convert = (value: number) => {
-        const channel = value / 255
-        const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
-        return Math.round(linear * 10000) / 10000
-    }
+    const convert = (value: number) => Math.round(srgbChannelToLinear(value) * 10000) / 10000
     return [convert(rgb[0]), convert(rgb[1]), convert(rgb[2])]
 }
 

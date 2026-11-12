@@ -442,9 +442,8 @@ export function mergeGlbs(documents: GlbDocument[]): GlbDocument {
  * 每个网格导出的骨架都是同一副骨骼的完整副本（pelvis/spine_01… 重名 2-3 份）。
  * 运行时动画按名字绑定只会命中第一套，其余骨架静止、共享骨名的蒙皮顶点被错绑变形。
  * 同名关节一律归并到最先出现的那一份，其它引用（children/joints/skeleton/动画通道/场景根）全部重定向。
- * @returns 被归并掉的节点数。
  */
-export function dedupeSkeletons(document: GlbDocument): number {
+function dedupeSkeletons(document: GlbDocument): void {
     const json = document.json
     const nodes = json.nodes
     const jointNames = new Set<string>()
@@ -457,7 +456,7 @@ export function dedupeSkeletons(document: GlbDocument): number {
         if (canonical.has(name)) alias.set(index, canonical.get(name)!)
         else canonical.set(name, index)
     }
-    if (!alias.size) return 0
+    if (!alias.size) return
     const parentOf = new Map<number, number>()
     nodes.forEach((node, index) => {
         for (const child of node.children ?? []) if (!parentOf.has(child)) parentOf.set(child, index)
@@ -496,5 +495,4 @@ export function dedupeSkeletons(document: GlbDocument): number {
     }
     for (const animation of json.animations ?? [])
         for (const channel of animation.channels ?? []) channel.target.node = remap(channel.target.node)
-    return alias.size
 }

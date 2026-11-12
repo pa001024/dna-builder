@@ -1,4 +1,5 @@
 import { appendAccessors, type GlbDocument, type GltfAnimationSampler, type GltfChannel } from "../../apps/web/src/utils/skin-model-glb"
+import { toRotation, toTranslation, ueCursorOf, ueF32, ueI32, ueText, ueU8 } from "./uemodel"
 
 export interface AnimationKey {
     frame: number
@@ -19,115 +20,54 @@ export interface UeAnimation {
     tracks: AnimationTrack[]
 }
 
-/** 复用同一 DataView 读取 fstring，避免每个字段重建解码器。 */
-function stringReader(bytes: Uint8Array, view: DataView) {
-    let offset = 0
-    const need = (size: number) => {
-        if (offset + size > bytes.length) throw new Error("Truncated UE animation")
-    }
-    return {
-        i32: () => {
-            need(4)
-            const value = view.getInt32(offset, true)
-            offset += 4
-            return value
-        },
-        f32: () => {
-            need(4)
-            const value = view.getFloat32(offset, true)
-            offset += 4
-            return value
-        },
-        u8: () => {
-            need(1)
-            return bytes[offset++]
-        },
-        text: () => {
-            const length = view.getInt32(offset, true)
-            offset += 4
-            if (length < 0) throw new Error("Invalid UE string length")
-            need(length)
-            const value = new TextDecoder().decode(bytes.subarray(offset, offset + length)).replace(/\0.*$/, "")
-            offset += length
-            return value
-        },
-        tell: () => offset,
-        seek: (value: number) => {
-            offset = value
-        },
-        get length() {
-            return bytes.length
-        },
-    }
-}
-
 /** 解析 fmodel-cli 导出的 .ueanim（UEFormat v9，未压缩）。 */
 export function readUeAnim(bytes: Uint8Array): UeAnimation {
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
     if (bytes.length < 16 || new TextDecoder().decode(bytes.subarray(0, 8)) !== "UEFORMAT") throw new Error("Expected a UEFormat animation")
-    const cursor = stringReader(bytes, view)
-    cursor.seek(8)
-    if (cursor.text() !== "UEANIM") throw new Error("Expected a UEANIM asset")
-    const version = cursor.u8()
+    const cursor = ueCursorOf(bytes)
+    cursor.offset = 8
+    if (ueText(cursor) !== "UEANIM") throw new Error("Expected a UEANIM asset")
+    const version = ueU8(cursor)
     if (version !== 9) throw new Error(`Unsupported UEANIM version ${version}`)
-    const name = cursor.text()
-    if (cursor.u8() !== 0) throw new Error("Compressed UE animations are not supported")
+    const name = ueText(cursor)
+    if (ueU8(cursor) !== 0) throw new Error("Compressed UE animations are not supported")
     let frames = 0
     let fps = 30
     let tracks: AnimationTrack[] = []
-    while (cursor.tell() < cursor.length) {
-        const section = cursor.text()
-        const count = cursor.i32()
-        const size = cursor.i32()
-        const start = cursor.tell()
-        if (start + size > cursor.length) throw new Error(`Truncated ${section} section`)
+    while (cursor.offset < bytes.length) {
+        const section = ueText(cursor)
+        const count = ueI32(cursor)
+        const size = ueI32(cursor)
+        const start = cursor.offset
+        if (start + size > bytes.length) throw new Error(`Truncated ${section} section`)
         if (section === "METADATA") {
-            frames = cursor.i32()
-            fps = cursor.f32()
-            cursor.text()
-            cursor.u8()
-            cursor.u8()
-            cursor.i32()
+            frames = ueI32(cursor)
+            fps = ueF32(cursor)
+            ueText(cursor)
+            ueU8(cursor)
+            ueU8(cursor)
+            ueI32(cursor)
         } else if (section === "TRACKS") {
             tracks = Array.from({ length: count }, () => {
-                const bone = cursor.text()
-                const positions = Array.from({ length: cursor.i32() }, () => ({
-                    frame: cursor.i32(),
-                    value: [cursor.f32(), cursor.f32(), cursor.f32()],
+                const bone = ueText(cursor)
+                const positions = Array.from({ length: ueI32(cursor) }, () => ({
+                    frame: ueI32(cursor),
+                    value: [ueF32(cursor), ueF32(cursor), ueF32(cursor)],
                 }))
-                const rotations = Array.from({ length: cursor.i32() }, () => ({
-                    frame: cursor.i32(),
-                    value: [cursor.f32(), cursor.f32(), cursor.f32(), cursor.f32()],
+                const rotations = Array.from({ length: ueI32(cursor) }, () => ({
+                    frame: ueI32(cursor),
+                    value: [ueF32(cursor), ueF32(cursor), ueF32(cursor), ueF32(cursor)],
                 }))
-                const scales = Array.from({ length: cursor.i32() }, () => ({
-                    frame: cursor.i32(),
-                    value: [cursor.f32(), cursor.f32(), cursor.f32()],
+                const scales = Array.from({ length: ueI32(cursor) }, () => ({
+                    frame: ueI32(cursor),
+                    value: [ueF32(cursor), ueF32(cursor), ueF32(cursor)],
                 }))
                 return { name: bone, positions, rotations, scales }
             })
         }
-        cursor.seek(start + size)
+        cursor.offset = start + size
     }
     if (!frames || !tracks.length) throw new Error("UE animation has no frames or tracks")
     return { name, frames, fps, tracks }
-}
-
-const SCALE = 0.01
-
-export function toTranslation(value: number[]): [number, number, number] {
-    return [value[0] * SCALE, value[2] * SCALE, value[1] * SCALE]
-}
-
-/**
- * UE 四元数 (x,y,z,w) 转到 glTF 的 Y-up 空间。
- *
- * 只交换 y/z 会得到镜像旋转：手部骨骼会被转到相反方向，手指/裙摆绑定的顶点被拉成长刺。
- * 引擎侧该变换是左手到右手的反射，反射作用在旋转上表现为共轭，因此 x/y/z 三个分量都要取反，
- * w 保持符号。用「骨骼世界坐标 vs 网格顶点重心」实测，共轭把平均误差从 0.41 降到 0.12。
- */
-export function toRotation(value: number[]): [number, number, number, number] {
-    const length = Math.hypot(value[0], value[1], value[2], value[3]) || 1
-    return [-value[0] / length, -value[2] / length, -value[1] / length, value[3] / length]
 }
 
 function same(a: number[] | undefined, b: number[] | undefined, epsilon: number) {

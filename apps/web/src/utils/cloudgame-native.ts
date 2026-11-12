@@ -1,7 +1,9 @@
 import { dataDir, join } from "@tauri-apps/api/path"
+import { sha256Hex } from "@/api/agent/skills/zip"
 import type { DownloadProgressEvent } from "@/api/app"
 import { deleteFile, downloadFile, pathExists, readBinaryFile, readTextFile, writeTextFile } from "@/api/app"
-import { buildCdnUrl, fetchWithCdnFallback, getOtherCdnBase } from "@/utils/cdn"
+import { fetchReleaseManifest, type ReleaseInfo } from "@/utils/app-download"
+import { buildCdnUrl, getOtherCdnBase } from "@/utils/cdn"
 
 /** 原生云游戏客户端版本：与对象存储的 cloudgame/cloudgame-client-v<版本>.exe 一一对应，清单拿不到时兜底 */
 export const CLOUDGAME_NATIVE_VERSION = "1.1.0"
@@ -15,23 +17,8 @@ const CLOUDGAME_NATIVE_VERSION_FILE = "cloudgame-client.version"
 /** 清单请求超时：失败时退回常量版本，不阻塞启动 */
 const LATEST_TIMEOUT_MS = 4000
 
-/** 发布清单 `cloudgame/latest.json` 的内容。 */
-export interface CloudgameNativeRelease {
-    /** 版本号；本地标记与之不一致时更新 */
-    version: string
-    /** 对象存储上的文件名 */
-    fileName: string
-    /** 下载地址 */
-    url: string
-    /** exe 字节数 */
-    size: number
-    /** exe sha256 */
-    sha256: string
-    /** 发布时刻（ISO 8601） */
-    builtAt: string
-    /** 更新说明 */
-    notes?: string
-}
+/** 发布清单 `cloudgame/latest.json` 的内容（与 apk/latest.json 同构）。 */
+export type CloudgameNativeRelease = ReleaseInfo
 
 /** 原生客户端的本地部署路径。 */
 export interface CloudgameNativePaths {
@@ -61,30 +48,13 @@ export async function resolveCloudgameNativePaths(): Promise<CloudgameNativePath
  * @returns 清单；网络失败或内容非法时返回 null（调用方退回常量版本）
  */
 export async function fetchCloudgameNativeRelease(): Promise<CloudgameNativeRelease | null> {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), LATEST_TIMEOUT_MS)
     try {
-        const response = await fetchWithCdnFallback(CLOUDGAME_NATIVE_LATEST_PATH, {
-            cache: "no-cache",
-            signal: controller.signal,
+        return await fetchReleaseManifest(CLOUDGAME_NATIVE_LATEST_PATH, {
+            timeoutMs: LATEST_TIMEOUT_MS,
+            fallbackFileName: version => `cloudgame-client-v${version}.exe`,
         })
-        const data = (await response.json()) as Record<string, unknown>
-        const version = typeof data.version === "string" ? data.version : ""
-        const url = typeof data.url === "string" ? data.url : ""
-        if (!version || !url) return null
-        return {
-            version,
-            url,
-            fileName: typeof data.fileName === "string" ? data.fileName : `cloudgame-client-v${version}.exe`,
-            size: typeof data.size === "number" ? data.size : 0,
-            sha256: typeof data.sha256 === "string" ? data.sha256 : "",
-            builtAt: typeof data.builtAt === "string" ? data.builtAt : "",
-            notes: typeof data.notes === "string" ? data.notes : undefined,
-        }
     } catch {
         return null
-    } finally {
-        clearTimeout(timer)
     }
 }
 
@@ -146,8 +116,7 @@ async function verifyCloudgameNativeDownload(exePath: string, release: Cloudgame
         throw new Error(`cloudgame native size mismatch: got ${data.byteLength}, want ${release.size}`)
     }
     if (release.sha256) {
-        const digest = await crypto.subtle.digest("SHA-256", data)
-        const actual = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("")
+        const actual = await sha256Hex(new Uint8Array(data))
         if (actual !== release.sha256.toLowerCase()) throw new Error("cloudgame native sha256 mismatch")
     }
 }

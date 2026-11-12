@@ -1,5 +1,7 @@
 import { MeshoptEncoder } from "meshoptimizer"
 import {
+    appendBinary,
+    appendBufferView,
     COMPONENT_SIZE,
     type GlbDocument,
     type GltfAccessor,
@@ -103,29 +105,13 @@ export function classifyTextures(document: GlbDocument): Map<string, keyof Textu
     return result
 }
 
-/** 追加裸 bufferView 到二进制尾部，返回视图索引。 */
-function pushView(document: GlbDocument, bytes: Uint8Array, extra: Record<string, unknown> = {}): number {
-    const offset = Math.ceil(document.binary.length / 4) * 4
-    const next = new Uint8Array(offset + bytes.length)
-    next.set(document.binary)
-    next.set(bytes, offset)
-    document.binary = next
-    document.json.buffers = [{ byteLength: next.length }]
-    return document.json.bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: bytes.length, ...extra }) - 1
-}
-
 /** 追加带 EXT_meshopt_compression 的 bufferView，返回视图索引。 */
 function pushCompressedView(
     document: GlbDocument,
     bytes: Uint8Array,
     spec: { count: number; byteStride: number; mode: "ATTRIBUTES" | "TRIANGLES" }
 ): number {
-    const offset = Math.ceil(document.binary.length / 4) * 4
-    const next = new Uint8Array(offset + bytes.length)
-    next.set(document.binary)
-    next.set(bytes, offset)
-    document.binary = next
-    document.json.buffers = [{ byteLength: next.length }]
+    const offset = appendBinary(document, bytes)
     // 规范要求 bufferView 的 byteLength 是解压后的字节数，数据本身走 extension 的 byteOffset。
     // 顶层的 byteStride 不能省：加载器按它决定要不要走交错缓冲，只写进 extension 的话
     // 量化成 byte 的法线会被当成 3 字节步长读，整片法线错位。
@@ -298,7 +284,7 @@ async function reencodeTextures(
     json.bufferViews = []
     document.binary = new Uint8Array(0)
     for (const [index, bytes] of encoded.entries()) {
-        json.images[index].bufferView = pushView(document, bytes)
+        json.images[index].bufferView = appendBufferView(document, bytes)
     }
     return report
 }
@@ -406,7 +392,8 @@ async function compressAnimation(document: GlbDocument, source: GlbDocument): Pr
             before += inputAccessor.count * 4
             // 时间轴保持 float（播放器直接按秒采样），但必须重新挂到新的 accessor 列表
             const timeBytes = readAccessorBytes(source, sampler.input)
-            const timeView = pushView(document, timeBytes, { target: 34962 })
+            const timeView = appendBufferView(document, timeBytes)
+            json.bufferViews[timeView].target = 34962
             const timeEntry: GltfAccessor = {
                 bufferView: timeView,
                 componentType: 5126,
@@ -493,7 +480,7 @@ async function compressOnce(bytes: Uint8Array, options: CompressOptions = {}): P
         const oldIndex = skin.inverseBindMatrices
         const bytes = oldIndex === undefined ? undefined : readAccessorBytes(source, oldIndex)
         if (!bytes) continue
-        const view = pushView(document, bytes)
+        const view = appendBufferView(document, bytes)
         skin.inverseBindMatrices =
             json.accessors.push({
                 bufferView: view,

@@ -61,23 +61,14 @@ export const EVENT_SCHEMA: Record<string, CondFieldDef[]> = {
     ],
 }
 
-/** 规则编辑器 kind 单选的固定选项（与 EVENT_SCHEMA 的键保持一致）。 */
-export const AFK_KINDS = [
-    "dungeon",
-    "reward",
-    "craft",
-    "character",
-    "monster",
-    "chat",
-    "language",
-    "control",
-    "commission_refresh",
-] as const
+/** 规则编辑器 kind 单选的固定选项（即 EVENT_SCHEMA 的键）。 */
+export const AFK_KINDS = Object.keys(EVENT_SCHEMA)
 
 /**
  * 给定事件 kind 取字段；kind 为空表示不限种类，返回全量。
  * @param kind 已选 kind
- */ export function schemaFieldsFor(kind?: string): CondFieldDef[] {
+ */
+export function schemaFieldsFor(kind?: string): CondFieldDef[] {
     const out: CondFieldDef[] = []
     const seen = new Set<string>()
     const pool = kind ? [kind] : Object.keys(EVENT_SCHEMA)

@@ -1,5 +1,5 @@
 import { ref } from "vue"
-import { buildCdnUrl, getOtherCdnBase } from "./cdn"
+import { buildCdnUrl, getOtherCdnBase, readResponseBytesWithProgress } from "./cdn"
 
 /**
  * 3D 皮肤模型运行时：按皮肤清单下载**部件**，在浏览器里拼成完整模型。
@@ -23,62 +23,88 @@ const MIN_PROGRESS_MS = 900
 
 /** 部件条目：一个网格一份文件，多个皮肤共用 */
 export type ModelPartEntry = {
+    /** 部件名（网格名，例如 `QNF00_TP01_SM`），也是文件名 */
     name: string
+    /** 远端对象 key，相对 `models/` 前缀 */
     file: string
+    /** 压缩后字节数 */
     bytes: number
+    /** 压缩后内容哈希：变了才需要重新下载 */
     hash: string
     builtAt: string
 }
 
 /** 皮肤条目：按顺序引用部件名，并携带皮肤级染色元数据与展示动画 */
 export type SkinEntry = {
+    /** 皮肤 id */
     id: string
+    /** 组成该皮肤的部件名，顺序与游戏里的 `PartModelsId` 一致（体型在前、脸在后） */
     parts: string[]
+    /**
+     * 皮肤级染色元数据（部件名、丝袜白名单…）。
+     * 每个部件都带着同一份，若留在部件里会被重复打包 N 次，这里提到清单只存一份。
+     * 色板表不在这里：它来自数据包（`skin-colorize.data.ts`），各皮肤完全一致。
+     */
     meta?: Record<string, unknown>
-    /** 展示动画文件名（绑定骨骼名，合并后再绑回节点） */
+    /** 展示待机动画文件名；动画绑定骨骼名，合并完成后再绑回节点 */
     animation?: string
+    /** 动画文件字节数 */
     animationBytes?: number
+    /** 动画内容哈希：与部件同口径，变了才需要重新下载 */
+    animationHash?: string
 }
 
 export type ModelManifest = {
     builtAt: string
+    /** 部件表：按名字索引，多个皮肤共用 */
     parts: ModelPartEntry[]
+    /** 皮肤 → 部件组合 */
     skins: SkinEntry[]
 }
 
 /** 下载阶段：查清单 / 下部件 / 合并 / 完成 */
 export type ModelDownloadStage = "manifest" | "model" | "ready" | "error"
 export type ModelDownloadState = {
-    active: boolean
     stage: ModelDownloadStage
-    /** 当前皮肤 id */
-    id: string
     /** 已下载字节 */
     loaded: number
     /** 总字节；清单还没拿到时为 0 */
     total: number
     /** 实时速度（字节/秒） */
     speedBps: number
-    /** 失败原因 */
-    error: string
 }
 
 export const modelDownloadState = ref<ModelDownloadState>({
-    active: false,
     stage: "manifest",
-    id: "",
     loaded: 0,
     total: 0,
     speedBps: 0,
-    error: "",
 })
 
 /** 已解析的清单缓存（按基址） */
 const manifestCache = new Map<string, ModelManifest>()
 /** 已下载部件的字节，按 `<部件名>@<哈希>` 索引；多个皮肤共用同一体型时只下一次 */
 const partCache = new Map<string, Uint8Array>()
-/** 已拼好的完整模型对象 URL，避免重复解析 */
+/** 已拼好的完整模型对象 URL，避免重复解析；LRU 上限防止逐皮肤累积 Blob */
+const MODEL_CACHE_LIMIT = 8
 const modelCache = new Map<string, string>()
+
+function modelCacheSet(key: string, url: string): void {
+    if (modelCache.has(key)) modelCache.delete(key)
+    modelCache.set(key, url)
+    while (modelCache.size > MODEL_CACHE_LIMIT) {
+        const oldest = modelCache.keys().next().value!
+        URL.revokeObjectURL(modelCache.get(oldest)!)
+        modelCache.delete(oldest)
+    }
+}
+
+/** 命中即提升到最新位，让淘汰落在真正的最久未用项上（get 不会改顺序的话只是 FIFO）。 */
+function modelCacheGet(key: string): string | undefined {
+    const url = modelCache.get(key)
+    if (url !== undefined) modelCacheSet(key, url)
+    return url
+}
 
 function isDev(): boolean {
     return Boolean(import.meta.env.DEV)
@@ -96,15 +122,15 @@ function patch(patch: Partial<ModelDownloadState>): void {
 }
 
 export function resetModelDownloadState(): void {
-    modelDownloadState.value = { active: false, stage: "manifest", id: "", loaded: 0, total: 0, speedBps: 0, error: "" }
+    modelDownloadState.value = { stage: "manifest", loaded: 0, total: 0, speedBps: 0 }
 }
 
 export function markModelParsing(): void {
-    patch({ active: true, stage: "ready", loaded: 0, total: 0, speedBps: 0, error: "" })
+    patch({ stage: "ready", loaded: 0, total: 0, speedBps: 0 })
 }
 
 /** 拉取模型清单：先读清单才知道该下哪个文件、多大；所有源都失败时抛错。 */
-export async function fetchModelManifest(): Promise<ModelManifest> {
+async function fetchModelManifest(): Promise<ModelManifest> {
     const bases = fallbackBases()
     for (const base of bases) {
         const cached = manifestCache.get(base)
@@ -123,44 +149,12 @@ export async function fetchModelManifest(): Promise<ModelManifest> {
     throw new Error("无法获取模型清单")
 }
 
-export function findSkin(manifest: ModelManifest, id: number | string): SkinEntry | undefined {
+function findSkin(manifest: ModelManifest, id: number | string): SkinEntry | undefined {
     return manifest.skins.find(entry => entry.id === String(id))
 }
 
-export function findPart(manifest: ModelManifest, name: string): ModelPartEntry | undefined {
+function findPart(manifest: ModelManifest, name: string): ModelPartEntry | undefined {
     return manifest.parts.find(entry => entry.name === name)
-}
-
-async function readWithProgress(
-    response: Response,
-    onProgress: (loaded: number, total: number, speedBps: number) => void
-): Promise<Uint8Array> {
-    const total = Number(response.headers.get("content-length") || 0)
-    const startedAt = performance.now()
-    if (!response.body?.getReader) {
-        const bytes = new Uint8Array(await response.arrayBuffer())
-        onProgress(bytes.byteLength, total || bytes.byteLength, 0)
-        return bytes
-    }
-    const reader = response.body.getReader()
-    const chunks: Uint8Array[] = []
-    let loaded = 0
-    for (;;) {
-        const { done, value } = await reader.read()
-        if (done) break
-        if (!value) continue
-        chunks.push(value)
-        loaded += value.byteLength
-        const elapsed = (performance.now() - startedAt) / 1000
-        onProgress(loaded, total, elapsed > 0 ? loaded / elapsed : 0)
-    }
-    const bytes = new Uint8Array(loaded)
-    let offset = 0
-    for (const chunk of chunks) {
-        bytes.set(chunk, offset)
-        offset += chunk.byteLength
-    }
-    return bytes
 }
 
 async function readCache(key: string): Promise<Uint8Array | undefined> {
@@ -221,9 +215,9 @@ async function downloadFile(
     }
     const response = await fetch(`${base}/${file}`, { signal })
     if (!response.ok) throw new Error(`${file} 下载失败（${response.status}）`)
-    const bytes = await readWithProgress(response, loaded => onProgress(loaded))
+    const bytes = await readResponseBytesWithProgress(response, ({ bytesDownloaded }) => onProgress(bytesDownloaded))
     if (!isGlb(response, bytes)) throw new Error(`${file} 不是 GLB`)
-    await writeCache(cacheKey, bytes)
+    void writeCache(cacheKey, bytes)
     partCache.set(cacheKey, bytes)
     return bytes
 }
@@ -288,9 +282,9 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
     const total = entries.reduce((sum, entry) => sum + entry.bytes, 0) + (skin.animationBytes ?? 0)
     // 合并结果按「皮肤 id + 全部部件哈希」缓存：任一部件变了都要重新合并
     const cacheKey = `${key}@${entries.map(entry => entry.hash).join(".")}`
-    const cached = modelCache.get(cacheKey)
+    const cached = modelCacheGet(cacheKey)
 
-    patch({ active: true, stage: "model", id: key, loaded: 0, total, speedBps: 0, error: "" })
+    patch({ stage: "model", loaded: 0, total, speedBps: 0 })
     const pump = createProgressPump(total)
     if (cached) {
         // 已合并过也要走一遍下载进度：命中缓存时切到解析态，用户看到的是「正在解析」而不是画面突然出现
@@ -314,20 +308,22 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
         let lastError: unknown
         for (const base of bases) {
             try {
-                const downloaded = await Promise.all(
-                    skin.parts.map(name => downloadPart(manifest, name, base, value => report(name, value), signal))
-                )
-                // 动画单独一个文件：绑定的是骨骼名，合并完成后再绑回节点
-                if (skin.animation)
-                    animationBytes = await downloadFile(
-                        skin.animation,
-                        // 动画文件名固定为 `<id>.anim.glb`，缓存键必须带上字节数，否则更新后仍命中旧缓存
-                        `anim:${skin.animation}@${skin.animationBytes ?? 0}`,
-                        skin.animationBytes ?? 0,
-                        base,
-                        value => report("animation", value),
-                        signal
-                    )
+                // 动画与部件同批下载：单独一个文件，绑定的是骨骼名，合并完成后再绑回节点。
+                // 缓存键必须带上字节数，否则更新后仍命中旧缓存。
+                const [downloaded, animation] = await Promise.all([
+                    Promise.all(skin.parts.map(name => downloadPart(manifest, name, base, value => report(name, value), signal))),
+                    skin.animation
+                        ? downloadFile(
+                              skin.animation,
+                              `anim:${skin.animation}@${skin.animationHash ?? skin.animationBytes ?? 0}`,
+                              skin.animationBytes ?? 0,
+                              base,
+                              value => report("animation", value),
+                              signal
+                          )
+                        : Promise.resolve(undefined),
+                ])
+                animationBytes = animation
                 parts = downloaded
                 break
             } catch (error) {
@@ -352,24 +348,11 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
         }
         const bytes = writeGlb(merged)
         const blobUrl = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "model/gltf-binary" }))
-        modelCache.set(cacheKey, blobUrl)
+        modelCacheSet(cacheKey, blobUrl)
         return blobUrl
     } catch (error) {
         pump.stop()
-        patch({ stage: "error", error: error instanceof Error ? error.message : String(error) })
+        patch({ stage: "error" })
         throw error
-    }
-}
-
-export async function clearModelCache(): Promise<void> {
-    for (const url of modelCache.values()) URL.revokeObjectURL(url)
-    modelCache.clear()
-    partCache.clear()
-    if (typeof caches !== "undefined") {
-        try {
-            await caches.delete(CACHE_NAME)
-        } catch (error) {
-            console.warn("模型缓存清理失败", error)
-        }
     }
 }

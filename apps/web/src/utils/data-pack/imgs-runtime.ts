@@ -2,7 +2,7 @@ import { unzipSync } from "fflate"
 import { ref } from "vue"
 import { tauriFetch } from "@/api/app"
 import { env } from "@/env"
-import { buildCdnUrl, getOtherCdnBase } from "../cdn"
+import { buildCdnUrl, getOtherCdnBase, readResponseBytesWithProgress } from "../cdn"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
 
@@ -330,72 +330,6 @@ async function loadImgsPack(versionInfo: ImgsPackVersionInfo, baseUrl: string): 
         })
     })
     return unzipSync(bytes)
-}
-
-/**
- * 从响应流中读取全部字节并汇报进度。
- * @param response 响应对象
- * @param onProgress 进度回调
- * @returns 读取结果
- */
-async function readResponseBytesWithProgress(
-    response: Response,
-    onProgress?: (progress: { bytesDownloaded: number; bytesTotal: number; speedBps: number }) => void
-): Promise<Uint8Array> {
-    const total = Number(response.headers.get("content-length") || 0)
-    const startedAt = performance.now()
-    let bytesDownloaded = 0
-
-    if (!response.body?.getReader) {
-        const bytes = new Uint8Array(await response.arrayBuffer())
-        onProgress?.({
-            bytesDownloaded: bytes.byteLength,
-            bytesTotal: total || bytes.byteLength,
-            speedBps: bytes.byteLength > 0 ? (bytes.byteLength * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
-        })
-        return bytes
-    }
-
-    const reader = response.body.getReader()
-    const chunks: Uint8Array[] = []
-
-    for (;;) {
-        const { done, value } = await reader.read()
-        if (done) {
-            break
-        }
-        if (value) {
-            chunks.push(value)
-            bytesDownloaded += value.byteLength
-            onProgress?.({
-                bytesDownloaded,
-                bytesTotal: total,
-                speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
-            })
-        }
-    }
-
-    if (chunks.length === 1) {
-        onProgress?.({
-            bytesDownloaded,
-            bytesTotal: total || bytesDownloaded,
-            speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
-        })
-        return chunks[0]
-    }
-
-    const bytes = new Uint8Array(bytesDownloaded)
-    let offset = 0
-    for (const chunk of chunks) {
-        bytes.set(chunk, offset)
-        offset += chunk.byteLength
-    }
-    onProgress?.({
-        bytesDownloaded,
-        bytesTotal: total || bytesDownloaded,
-        speedBps: bytesDownloaded > 0 ? (bytesDownloaded * 1000) / Math.max(performance.now() - startedAt, 1) : 0,
-    })
-    return bytes
 }
 
 /**

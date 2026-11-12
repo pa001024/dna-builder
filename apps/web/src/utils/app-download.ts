@@ -4,6 +4,9 @@ import { buildCdnUrl, fetchWithCdnFallback } from "@/utils/cdn"
 /** Android 安装包发布清单（由 tools/app-upload.ts 上传到 CDN，主源失败时读兜底源） */
 export const APK_MANIFEST_URL = buildCdnUrl("apk/latest.json")
 
+/** 发布清单路径（apk/latest.json、cloudgame/latest.json 同构） */
+export type ReleaseManifestPath = "apk/latest.json" | "cloudgame/latest.json"
+
 /** 桌面端（Windows）安装包下载入口：服务端 302 到最新的 MSI */
 export const DESKTOP_DOWNLOAD_URL = `${env.endpoint}/api/download`
 
@@ -16,8 +19,8 @@ export const AUTO_DOWNLOAD_SECONDS = 3
 /** 访问端类型 */
 export type ClientPlatform = "desktop" | "android" | "ios" | "mobile"
 
-/** APK 发布信息 */
-export interface ApkReleaseInfo {
+/** 安装包发布信息（apk 与云游戏 native 同构） */
+export interface ReleaseInfo {
     /** 版本号 */
     version: string
     /** 文件名 */
@@ -112,29 +115,57 @@ export function formatReleaseDate(iso: string): string {
 /**
  * 校验并归一化发布清单内容。
  * @param payload 清单原始内容
+ * @param fallbackFileName 清单缺 fileName 时按版本号拼兜底文件名；不传则 fileName 为空
  * @returns 发布信息
  * @throws 字段缺失时抛错
  */
-function normalizeRelease(payload: unknown): ApkReleaseInfo {
+export function normalizeRelease(payload: unknown, fallbackFileName?: (version: string) => string): ReleaseInfo {
     if (typeof payload !== "object" || payload === null) {
-        throw new Error("安装包清单格式不正确")
+        throw new Error("发布清单格式不正确")
     }
 
     const record = payload as Record<string, unknown>
     const version = typeof record.version === "string" ? record.version : ""
     const url = typeof record.url === "string" ? record.url : ""
     if (!version || !url) {
-        throw new Error("安装包清单缺少版本号或下载地址")
+        throw new Error("发布清单缺少版本号或下载地址")
     }
 
     return {
         version,
         url,
-        fileName: typeof record.fileName === "string" ? record.fileName : `v${version}.apk`,
+        fileName: typeof record.fileName === "string" ? record.fileName : (fallbackFileName?.(version) ?? ""),
         size: typeof record.size === "number" ? record.size : 0,
         sha256: typeof record.sha256 === "string" ? record.sha256 : "",
         builtAt: typeof record.builtAt === "string" ? record.builtAt : "",
         notes: typeof record.notes === "string" ? record.notes : undefined,
+    }
+}
+
+/**
+ * 拉取发布清单（apk / cloudgame 同构，两端 CDN 依次尝试）。
+ * @param path 清单对象路径
+ * @param options.timeoutMs 超时时间（毫秒）
+ * @param options.fallbackFileName 清单缺 fileName 时按版本号拼的兜底文件名
+ * @returns 发布信息
+ * @throws 网络异常、超时或清单非法时抛错
+ */
+export async function fetchReleaseManifest(
+    path: ReleaseManifestPath,
+    options: { timeoutMs?: number; fallbackFileName?: (version: string) => string } = {}
+): Promise<ReleaseInfo> {
+    const timeoutMs = options.timeoutMs ?? 10000
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+        // 主源失败（网络异常或非 2xx）时自动读兜底源
+        const response = await fetchWithCdnFallback(path, { signal: controller.signal, cache: "no-cache" })
+        if (!response.ok) {
+            throw new Error(`发布清单请求失败：HTTP ${response.status}`)
+        }
+        return normalizeRelease(await response.json(), options.fallbackFileName)
+    } finally {
+        clearTimeout(timer)
     }
 }
 
@@ -144,20 +175,9 @@ function normalizeRelease(payload: unknown): ApkReleaseInfo {
  * @returns 发布信息
  * @throws 网络异常、超时或清单非法时抛错
  */
-export async function fetchApkRelease(options: { timeoutMs?: number } = {}): Promise<ApkReleaseInfo> {
-    const timeoutMs = options.timeoutMs ?? 10000
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeoutMs)
-    try {
-        // 主源失败（网络异常或非 2xx）时自动读兜底源
-        const response = await fetchWithCdnFallback("apk/latest.json", { signal: controller.signal, cache: "no-cache" })
-        if (!response.ok) {
-            throw new Error(`安装包清单请求失败：HTTP ${response.status}`)
-        }
-        return normalizeRelease(await response.json())
-    } finally {
-        clearTimeout(timer)
-    }
+export async function fetchApkRelease(options: { timeoutMs?: number } = {}): Promise<ReleaseInfo> {
+    // 清单缺 fileName 时按 APK 发布约定拼 `v<版本>.apk`
+    return fetchReleaseManifest("apk/latest.json", { ...options, fallbackFileName: version => `v${version}.apk` })
 }
 
 /**

@@ -30,7 +30,7 @@ const BASE_HEADERS: Record<string, string> = {
     "accept-language": "zh-CN,zh;q=0.9",
 }
 
-interface BiliResponse<T> {
+export interface BiliResponse<T> {
     code: number
     message?: string
     msg?: string
@@ -99,7 +99,7 @@ export function readCredentials(env: Record<string, string | undefined> = proces
     return { status: "ok", missing: [], credentials: { sessdata, csrf, buvid3, dedeUserId, refreshToken } }
 }
 
-async function requestJson<T>(
+export async function requestJson<T>(
     url: string,
     init: RequestInit,
     label: string,

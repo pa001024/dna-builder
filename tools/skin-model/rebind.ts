@@ -1,11 +1,9 @@
-import type { GltfAnimationSampler } from "../../apps/web/src/utils/skin-model-glb"
-import { appendAccessors, type GlbDocument, type GltfNode, readAccessorBytes } from "../../apps/web/src/utils/skin-model-glb"
+import { appendAccessors, type GlbDocument, type GltfNode } from "../../apps/web/src/utils/skin-model-glb"
 import type { UeModelBone } from "./uemodel"
 
 /**
  * 导出器给的骨骼静止姿态是共享骨架的 T-pose，网格顶点却是 A-pose 建模，两者对不上。
- * `bindToSkeleton` 用 `.uemodel` 里的网格绑定姿态重绑（游戏用的正是这套）；
- * `rebindToAnimation` 是拿不到网格骨架时的退路，把绑定姿态近似成某段动画的首帧。
+ * `bindToSkeleton` 用 `.uemodel` 里的网格绑定姿态重绑（游戏用的正是这套）。
  */
 
 type Mat4 = Float32Array
@@ -173,23 +171,6 @@ export function attachEffectRoots(document: GlbDocument, roots: string[], bone: 
     return attached
 }
 
-function sampleKeys(document: GlbDocument, sampler: GltfAnimationSampler, time: number, components: number): number[] {
-    const times = new Float32Array(readAccessorBytes(document, sampler.input).buffer.slice(0))
-    const values = new Float32Array(readAccessorBytes(document, sampler.output).buffer.slice(0))
-    let low = 0
-    while (low + 1 < times.length && times[low + 1] <= time) low++
-    const high = Math.min(low + 1, times.length - 1)
-    const span = times[high] - times[low]
-    const weight = span <= 0 ? 0 : Math.max(0, Math.min(1, (time - times[low]) / span))
-    const output: number[] = []
-    for (let channel = 0; channel < components; channel++) {
-        const a = values[low * components + channel]
-        const b = values[high * components + channel]
-        output.push(a + (b - a) * weight)
-    }
-    return output
-}
-
 export interface RebindResult {
     skins: number
     joints: number
@@ -241,60 +222,4 @@ export function bindToSkeleton(document: GlbDocument, bones: UeModelBone[]): Reb
         skin.inverseBindMatrices = accessor
     }
     return { skins: document.json.skins?.length ?? 0, joints, nodes: matched }
-}
-
-/**
- * 把每个 skin 的 inverseBindMatrices 重绑到 `animation` 的 `time` 帧姿态。
- * 同时把节点 TRS 写成该帧姿态，否则「不播放动画」时会按旧绑定把网格拉回 T-pose。
- * 同一 skin 的多条通道若存在冲突，后写入者覆盖前值（glTF 规定同节点同路径只应有一条）。
- */
-export function rebindToAnimation(document: GlbDocument, animationIndex = 0, time = 0): RebindResult {
-    const animation = document.json.animations?.[animationIndex]
-    if (!animation) return { skins: 0, joints: 0, nodes: 0 }
-    const nodes = document.json.nodes
-    const animated = new Map<number, Record<string, number[]>>()
-    for (const channel of animation.channels) {
-        const sampler = animation.samplers[channel.sampler]
-        const path = channel.target.path as string
-        const components = path === "rotation" ? 4 : 3
-        if (path !== "translation" && path !== "rotation" && path !== "scale") continue
-        const value = sampleKeys(document, sampler, time, components)
-        // 通道必带节点（解析器产出的合法动画）；缺失时与之前一致沿用 undefined 键分组。
-        const entry = animated.get(channel.target.node!) ?? {}
-        entry[path] = value
-        animated.set(channel.target.node!, entry)
-    }
-    const poseNodes = nodes.map((node, index) => {
-        const entry = animated.get(index)
-        if (!entry) return node
-        return {
-            ...node,
-            translation: entry.translation ?? node.translation,
-            rotation: entry.rotation ?? node.rotation,
-            scale: entry.scale ?? node.scale,
-        }
-    })
-    const worlds = worldMatrices(poseNodes)
-    for (const [index, entry] of animated) {
-        const node = nodes[index]
-        if (entry.translation) node.translation = entry.translation
-        if (entry.rotation) node.rotation = entry.rotation
-        if (entry.scale) node.scale = entry.scale
-    }
-    let joints = 0
-    for (const skin of document.json.skins ?? []) {
-        if (skin.inverseBindMatrices === undefined) continue
-        const indices = skin.joints
-        const matrices = new Float32Array(indices.length * 16)
-        let offset = 0
-        for (const joint of indices) {
-            // 绑定矩阵是首帧骨骼世界矩阵的逆；静止姿态因此正好落在首帧动画上。
-            matrices.set(invert(worlds[joint] ?? IDENTITY), offset)
-            offset += 16
-            joints++
-        }
-        const [accessor] = appendAccessors(document, [{ data: matrices, type: "MAT4", componentType: 5126, count: indices.length }])
-        skin.inverseBindMatrices = accessor
-    }
-    return { skins: document.json.skins?.length ?? 0, joints, nodes: animated.size }
 }

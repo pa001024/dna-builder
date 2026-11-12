@@ -60,19 +60,21 @@ function attributeFloats(document: GlbDocument, index: number): Float32Array {
                   ? 1 / 32767
                   : 1
     const raw = bytes
-    for (let index = 0; index < count; index++) {
-        const offset = index * COMPONENT_SIZE[accessor.componentType]
+    const int8 = accessor.componentType === 5120 ? new Int8Array(buffer) : undefined
+    const int16 = accessor.componentType === 5122 ? new Int16Array(buffer) : undefined
+    for (let i = 0; i < count; i++) {
+        const offset = i * COMPONENT_SIZE[accessor.componentType]
         const value =
             accessor.componentType === 5121
                 ? raw[offset]
                 : accessor.componentType === 5123
                   ? raw[offset] | (raw[offset + 1] << 8)
-                  : accessor.componentType === 5120
-                    ? new Int8Array(buffer)[offset]
-                    : accessor.componentType === 5122
-                      ? new Int16Array(buffer)[index]
+                  : int8 !== undefined
+                    ? int8[offset]
+                    : int16 !== undefined
+                      ? int16[i]
                       : raw[offset]
-        output[index] = accessor.normalized ? value * scale : value
+        output[i] = accessor.normalized ? value * scale : value
     }
     return output
 }

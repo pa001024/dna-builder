@@ -12,6 +12,7 @@ import {
 import { env } from "@/env"
 import {
     ConsoleLogRingBuffer,
+    createThrottledFlush,
     SCRIPT_CONSOLE_FLUSH_INTERVAL_MS,
     SCRIPT_CONSOLE_RING_CAPACITY,
     SCRIPT_CONSOLE_TOUCH_THROTTLE_MS,
@@ -85,8 +86,6 @@ let consoleLogSeq = 0
  * 响应式快照经节流后批量刷新，避免洪水日志饿死主线程导致点不了停止。
  */
 const consoleLogRing = new ConsoleLogRingBuffer<ScriptConsoleLog>(MAX_CONSOLE_LOGS)
-let consoleFlushTimer: ReturnType<typeof setTimeout> | null = null
-let lastConsoleFlushAt = 0
 let lastScriptEventAtRaw = 0
 let lastTouchReactiveAt = 0
 
@@ -114,23 +113,19 @@ let readConfigListenerReady = false
 let setConfigListenerReady = false
 let runtimeTrackingInitPromise: Promise<void> | null = null
 
-/** 脚本状态刷新节流间隔（毫秒）：与控制台共用节奏，高频 setStatus 下每秒最多渲染约 4 次。 */
-const SCRIPT_STATUS_FLUSH_INTERVAL_MS = 250
 /** 挂起状态条目的 Map 键：`scope + NUL + title`，同键高频更新天然合并。 */
 const SCRIPT_STATUS_KEY_SEPARATOR = "\u0000"
-
-interface PendingScriptStatusEntry {
-    remove: boolean
-    item: ScriptStatusItem
-}
 
 /**
  * 脚本状态挂起缓冲（非响应式）：Tauri 事件回调内只做 Map 写入，
  * 响应式数组经节流后批量合并，避免高频 setStatus 事件饿死主线程导致点不了停止。
+ * 值为 null 表示移除该键（remove 只需键，不再塞一份完整对象）。
  */
-const pendingScriptStatusMap = new Map<string, PendingScriptStatusEntry>()
-let statusFlushTimer: ReturnType<typeof setTimeout> | null = null
-let lastStatusFlushAt = 0
+const pendingScriptStatusMap = new Map<string, ScriptStatusItem | null>()
+
+type ThrottledFlush = ReturnType<typeof createThrottledFlush>
+let consoleFlusher: ThrottledFlush | undefined
+let statusFlusher: ThrottledFlush | undefined
 
 /** 构建挂起状态缓冲的 Map 键。 */
 function buildScriptStatusKey(scope: string | undefined, title: string): string {
@@ -198,9 +193,7 @@ function normalizeScriptEventScope(scope?: string | null): string | undefined {
  * @returns true 表示按脚本文件展示
  */
 function isScriptFileRunEntry(path: string): boolean {
-    const normalized = String(path ?? "").trim()
-    if (!normalized) return false
-    return normalized.includes("\\") || normalized.includes("/")
+    return /[\\/]/.test(path.trim())
 }
 
 /**
@@ -868,28 +861,14 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 请求刷新控制台快照：低频时同步刷新保证即时可见，高频时节流批量刷新。
          */
         queueConsoleFlush() {
-            const now = Date.now()
-            if (now - lastConsoleFlushAt >= SCRIPT_CONSOLE_FLUSH_INTERVAL_MS) {
-                this.flushConsoleLogs()
-                return
-            }
-            if (consoleFlushTimer) return
-            const delay = SCRIPT_CONSOLE_FLUSH_INTERVAL_MS - (now - lastConsoleFlushAt)
-            consoleFlushTimer = setTimeout(() => {
-                consoleFlushTimer = null
-                this.flushConsoleLogs()
-            }, delay)
+            ;(consoleFlusher ??= createThrottledFlush(SCRIPT_CONSOLE_FLUSH_INTERVAL_MS, () => this.flushConsoleLogs())).queue()
         },
 
         /**
          * 将环形缓冲一次性同步为响应式快照（单次赋值，只触发一次渲染）。
          */
         flushConsoleLogs() {
-            lastConsoleFlushAt = Date.now()
-            if (consoleFlushTimer) {
-                clearTimeout(consoleFlushTimer)
-                consoleFlushTimer = null
-            }
+            consoleFlusher?.beginFlush()
             this.consoleLogs = consoleLogRing.toArray()
             this.consoleLogDroppedCount = consoleLogRing.droppedCount
         },
@@ -898,10 +877,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 取消待处理的控制台快照刷新（仅测试/热重载场景使用）。
          */
         cancelConsoleFlush() {
-            if (consoleFlushTimer) {
-                clearTimeout(consoleFlushTimer)
-                consoleFlushTimer = null
-            }
+            consoleFlusher?.cancel()
         },
 
         /**
@@ -910,7 +886,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         clearConsoleLogs() {
             this.cancelConsoleFlush()
             consoleLogRing.clear()
-            lastConsoleFlushAt = Date.now()
+            consoleFlusher?.touch()
             this.consoleLogs = []
             this.consoleLogDroppedCount = 0
         },
@@ -1003,18 +979,10 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (!normalizedTitle) return
             this.touchScriptEvent()
             const normalizedScope = normalizeScriptEventScope(payload.scope)
-            const scopeKey = normalizedScope ?? ""
-            const bufferKey = buildScriptStatusKey(scopeKey, normalizedTitle)
+            const bufferKey = buildScriptStatusKey(normalizedScope, normalizedTitle)
 
             if (payload.action === "remove") {
-                pendingScriptStatusMap.set(bufferKey, {
-                    remove: true,
-                    item: {
-                        scope: normalizedScope,
-                        title: normalizedTitle,
-                        timestamp: payload.timestamp ?? Date.now(),
-                    },
-                })
+                pendingScriptStatusMap.set(bufferKey, null)
                 this.queueStatusFlush()
                 return
             }
@@ -1028,28 +996,18 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             }
 
             if (!payload.text && normalizedImages.length === 0) {
-                pendingScriptStatusMap.set(bufferKey, {
-                    remove: true,
-                    item: {
-                        scope: normalizedScope,
-                        title: normalizedTitle,
-                        timestamp: payload.timestamp ?? Date.now(),
-                    },
-                })
+                pendingScriptStatusMap.set(bufferKey, null)
                 this.queueStatusFlush()
                 return
             }
 
             pendingScriptStatusMap.set(bufferKey, {
-                remove: false,
-                item: {
-                    scope: normalizedScope,
-                    title: normalizedTitle,
-                    text: payload.text,
-                    image: normalizedImages[0],
-                    images: normalizedImages,
-                    timestamp: payload.timestamp ?? Date.now(),
-                },
+                scope: normalizedScope,
+                title: normalizedTitle,
+                text: payload.text,
+                image: normalizedImages[0],
+                images: normalizedImages,
+                timestamp: payload.timestamp ?? Date.now(),
             })
             this.queueStatusFlush()
         },
@@ -1058,28 +1016,14 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 请求刷新脚本状态快照：低频时同步刷新保证即时可见，高频时节流批量合并。
          */
         queueStatusFlush() {
-            const now = Date.now()
-            if (now - lastStatusFlushAt >= SCRIPT_STATUS_FLUSH_INTERVAL_MS) {
-                this.flushScriptStatuses()
-                return
-            }
-            if (statusFlushTimer) return
-            const delay = SCRIPT_STATUS_FLUSH_INTERVAL_MS - (now - lastStatusFlushAt)
-            statusFlushTimer = setTimeout(() => {
-                statusFlushTimer = null
-                this.flushScriptStatuses()
-            }, delay)
+            ;(statusFlusher ??= createThrottledFlush(SCRIPT_CONSOLE_FLUSH_INTERVAL_MS, () => this.flushScriptStatuses())).queue()
         },
 
         /**
          * 将挂起缓冲一次性合并进响应式数组（单次赋值，只触发一次渲染）。
          */
         flushScriptStatuses() {
-            lastStatusFlushAt = Date.now()
-            if (statusFlushTimer) {
-                clearTimeout(statusFlushTimer)
-                statusFlushTimer = null
-            }
+            statusFlusher?.beginFlush()
             if (pendingScriptStatusMap.size === 0) {
                 return
             }
@@ -1094,13 +1038,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                     continue
                 }
                 pending.delete(key)
-                if (!entry.remove) {
-                    next.push(entry.item)
+                if (entry) {
+                    next.push(entry)
                 }
             }
             for (const entry of pending.values()) {
-                if (!entry.remove) {
-                    next.push(entry.item)
+                if (entry) {
+                    next.push(entry)
                 }
             }
             this.scriptStatuses = next
@@ -1110,10 +1054,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 取消待处理的状态快照刷新（仅测试/热重载场景使用）。
          */
         cancelStatusFlush() {
-            if (statusFlushTimer) {
-                clearTimeout(statusFlushTimer)
-                statusFlushTimer = null
-            }
+            statusFlusher?.cancel()
         },
 
         /**
@@ -1285,7 +1226,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         clearScriptStatuses() {
             this.cancelStatusFlush()
             pendingScriptStatusMap.clear()
-            lastStatusFlushAt = Date.now()
+            statusFlusher?.touch()
             this.scriptStatuses = []
         },
 
@@ -1298,8 +1239,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (!normalizedScope) {
                 return
             }
-            for (const [key, entry] of pendingScriptStatusMap) {
-                if (normalizeScriptEventScope(entry.item.scope) === normalizedScope) {
+            for (const key of pendingScriptStatusMap.keys()) {
+                if (key.split(SCRIPT_STATUS_KEY_SEPARATOR)[0] === normalizedScope) {
                     pendingScriptStatusMap.delete(key)
                 }
             }
@@ -1339,10 +1280,7 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         applyBackendRuntimeInfo(runtimeInfo: ScriptRuntimeInfo) {
             const normalizedPaths = Array.isArray(runtimeInfo.scriptPaths)
-                ? runtimeInfo.scriptPaths
-                      .map(path => String(path ?? "").trim())
-                      .filter(path => path.length > 0)
-                      .filter(isScriptFileRunEntry)
+                ? runtimeInfo.scriptPaths.map(path => String(path ?? "").trim()).filter(isScriptFileRunEntry)
                 : []
             this.runningScriptPaths = normalizedPaths
 

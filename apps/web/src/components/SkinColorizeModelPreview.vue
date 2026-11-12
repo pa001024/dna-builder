@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { formatFileSize } from "@/utils/app-download"
 import type { SkinModelRenderer } from "@/utils/skin-model-renderer"
 import { downloadModel, markModelParsing, modelDownloadState, resetModelDownloadState } from "@/utils/skin-model-runtime"
 
@@ -18,6 +19,7 @@ let objectUrl = ""
 let generation = 0
 let mounted = false
 let controller: AbortController | undefined
+let visibilityObserver: IntersectionObserver | undefined
 
 /** 已下载 / 总大小，用于进度条 */
 const download = modelDownloadState
@@ -27,12 +29,7 @@ const percent = computed(() => {
     return Math.min(100, Math.round((loaded / total) * 100))
 })
 
-function formatBytes(bytes: number): string {
-    if (!bytes) return "0 B"
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
+const formatBytes = (bytes: number): string => (bytes > 0 ? formatFileSize(bytes) : "0 B")
 
 async function load(skinId: number, url?: string) {
     const current = ++generation
@@ -98,12 +95,18 @@ watch(
 )
 onMounted(() => {
     mounted = true
+    // 预览列独立滚动，滚出视野后暂停渲染循环（动画 rAF 每帧都跑 renderer.render）
+    visibilityObserver = new IntersectionObserver(entries => {
+        for (const entry of entries) viewer?.setVisible(entry.isIntersecting)
+    })
+    if (host.value) visibilityObserver.observe(host.value)
     if (props.skinId) void load(props.skinId)
 })
 onBeforeUnmount(() => {
     mounted = false
     generation++
     controller?.abort()
+    visibilityObserver?.disconnect()
     viewer?.dispose()
     if (objectUrl) URL.revokeObjectURL(objectUrl)
 })
@@ -131,17 +134,13 @@ onBeforeUnmount(() => {
             <div class="relative">
                 <div
                     ref="host"
-                    class="h-[440px] w-full overflow-hidden rounded-xs bg-[radial-gradient(ellipse_at_50%_35%,var(--color-base-200),var(--color-base-300))] sm:h-[560px]"
+                    class="h-110 w-full overflow-hidden rounded-xs bg-[radial-gradient(ellipse_at_50%_35%,var(--color-base-200),var(--color-base-300))] sm:h-140"
                     :aria-label="$t('skin-colorize.model_title')"
                     :aria-busy="loading"
-                    data-skin-model
-                    :data-ready="ready"
                 />
                 <div
                     v-if="loading && !error"
-                    class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-base-100/90 to-transparent p-4 text-xs text-base-content/70"
-                    data-model-progress
-                    :data-stage="download.stage"
+                    class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-linear-to-t from-base-100/90 to-transparent p-4 text-xs text-base-content/70"
                 >
                     <div class="flex items-baseline justify-between gap-3">
                         <span class="font-medium">
@@ -157,9 +156,6 @@ onBeforeUnmount(() => {
                         class="progress progress-primary h-1 w-full"
                         :value="download.total ? percent : undefined"
                         max="100"
-                        :data-percent="percent"
-                        :data-loaded="download.loaded"
-                        :data-total="download.total"
                     />
                     <div class="flex items-baseline justify-between gap-3 text-[11px] text-base-content/50">
                         <span>{{ $t("skin-colorize.model_size") }}：{{ formatBytes(download.total) }}</span>

@@ -7,7 +7,7 @@
 
 import { execFileSync } from "node:child_process"
 import { constants, createPublicKey, publicEncrypt } from "node:crypto"
-import { cookieHeader, readCredentials } from "./bilibili.ts"
+import { cookieHeader, readCredentials, requestJson } from "./bilibili.ts"
 import { ConfigError } from "./errors.ts"
 import type { BiliCredentials } from "./types.ts"
 
@@ -41,26 +41,13 @@ function parseSetCookie(headers: Headers): Map<string, string> {
     return values
 }
 
-async function requestJson<T>(
-    url: string,
-    init: RequestInit,
-    label: string
-): Promise<{ response: Response; json: { code: number; message?: string; data?: T } }> {
-    const response = await fetch(url, { ...init, signal: AbortSignal.timeout(30_000) })
-    const text = await response.text()
-    try {
-        return { response, json: JSON.parse(text) }
-    } catch {
-        throw new Error(`${label}失败：HTTP ${response.status}，返回非 JSON：${text.slice(0, 160)}`)
-    }
-}
-
 /** 查询服务端是否要求刷新，同时拿到服务端毫秒时间戳（correspondPath 的有效期很短） */
 async function refreshInfo(cookie: string, csrf: string): Promise<{ refresh: boolean; timestamp: number }> {
     const { json } = await requestJson<{ refresh: boolean; timestamp: number }>(
         `${INFO_URL}?csrf=${encodeURIComponent(csrf)}`,
         { headers: { ...BASE_HEADERS, cookie } },
-        "检查刷新状态"
+        "检查刷新状态",
+        30_000
     )
     if (json.code === -101) throw new ConfigError("B 站登录态已失效（code=-101），需要重新登录并更新 BILI_COOKIE 与 BILI_REFRESH_TOKEN")
     if (json.code !== 0 || !json.data) throw new Error(`检查刷新状态失败（code=${json.code} ${json.message ?? ""}）`)
@@ -105,7 +92,8 @@ async function postRefresh(
             headers: { ...BASE_HEADERS, "content-type": "application/x-www-form-urlencoded", cookie },
             body,
         },
-        "刷新 Cookie"
+        "刷新 Cookie",
+        30_000
     )
     if (json.code !== 0 || !json.data?.refresh_token) {
         const hint =
@@ -129,7 +117,8 @@ async function confirmRefresh(cookie: string, csrf: string, oldRefreshToken: str
             headers: { ...BASE_HEADERS, "content-type": "application/x-www-form-urlencoded", cookie },
             body,
         },
-        "确认刷新"
+        "确认刷新",
+        30_000
     )
     if (json.code !== 0) console.warn(`  ! 确认刷新返回 code=${json.code} ${json.message ?? ""}（新凭据已生效，忽略）`)
 }

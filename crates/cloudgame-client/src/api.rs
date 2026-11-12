@@ -25,6 +25,11 @@ fn value_to_field(v: &Value) -> Option<String> {
     }
 }
 
+/// 数值字段兼容 number / 数字字符串（sdk-api 两种形态都出现过）。
+pub(crate) fn as_i64(v: Option<&Value>) -> Option<i64> {
+    v.and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+}
+
 /// 对应 hN：body = data ∪ channelParams + deviceNum + sign（sign 计算剔除 market 与空值）。
 fn signed_body(mut data: Map<String, Value>, device_num: &str) -> Map<String, Value> {
     if let Value::Object(cfg) = config::channel_params() {
@@ -126,7 +131,7 @@ impl SdkApi {
         m.insert("phone".into(), phone.into());
         m.insert("client_id".into(), config::APP_KEY.into());
         let r = self.post("/sdkcom/c1/auth/phone/autoLogin.lg", m).await?;
-        if r.get("codes").and_then(Value::as_i64) != Some(0) {
+        if as_i64(r.get("codes")) != Some(0) {
             bail!("autoLogin failed: {r}");
         }
         let code = r
@@ -143,7 +148,7 @@ impl SdkApi {
         m.insert("client_id".into(), config::APP_KEY.into());
         m.insert("client_secret".into(), config::APP_SECRET.into());
         let r = self.post("/sdkcom/auth/getToken.lg", m).await?;
-        if r.get("codes").and_then(Value::as_i64) != Some(0) {
+        if as_i64(r.get("codes")) != Some(0) {
             bail!("getToken failed: {r}");
         }
         let access_token = r

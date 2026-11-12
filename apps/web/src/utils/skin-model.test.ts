@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import {
-    decodePackedSkinColor,
     type LinearRgb,
     resolveHairModelDye,
     resolveSkinModelColor,
@@ -79,22 +78,6 @@ describe("game skin dye semantics", () => {
             [0.5, 0.6, 0.7],
         ])
         expect(result.hairPartEmission).toEqual([0.6, 0.7, 0.8])
-    })
-    it("decodes all six green bands and red luminance with normal-blue coverage", () => {
-        const colors: LinearRgb[] = [
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-            [1, 1, 0],
-            [1, 0, 1],
-            [0, 1, 1],
-        ]
-        for (let i = 0; i < 6; i++) {
-            const decoded = decodePackedSkinColor([0.5, i / 5, 0.8], 1, colors)
-            decoded.forEach((value, channel) => expect(value).toBeCloseTo(colors[i][channel] * 0.5))
-        }
-        expect(decodePackedSkinColor([0.5, 0.2, 0.8], 0, colors)[0]).toBeCloseTo(0.21404114)
-        expect(decodePackedSkinColor([0.5, 0.2, 0.8], 0.5, colors)[1]).toBeCloseTo((0.03310477 + 0.5) / 2)
     })
     it("rejects unrelated GLBs and invalid color payloads", () => {
         expect(validateSkinModelMetadata(metadata)).toBe(metadata)

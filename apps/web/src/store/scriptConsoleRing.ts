@@ -79,6 +79,48 @@ export class ConsoleLogRingBuffer<T> {
 }
 
 /**
+ * 高频事件源的节流调度器：低频时同步 flush 保证即时可见，高频时合并到 interval 一次 flush。
+ * 控制台日志与脚本状态共用一套，避免每加一个事件源就复制一份 timer/lastAt 簿记。
+ * @param intervalMs 节流间隔
+ * @param flush 真正写响应式状态的函数
+ * @returns queue（请求一次刷新）、beginFlush（在 flush 体内记账并取消待处理刷新）、cancel、touch
+ */
+export function createThrottledFlush(intervalMs: number, flush: () => void) {
+    let timer: ReturnType<typeof setTimeout> | null = null
+    let lastAt = 0
+    const cancel = () => {
+        if (timer) {
+            clearTimeout(timer)
+            timer = null
+        }
+    }
+    return {
+        queue() {
+            const now = Date.now()
+            if (now - lastAt >= intervalMs) {
+                flush()
+                return
+            }
+            if (timer) return
+            const delay = intervalMs - (now - lastAt)
+            timer = setTimeout(() => {
+                timer = null
+                flush()
+            }, delay)
+        },
+        /** 在 flush 函数体开头调用：记录刷新时刻并取消待处理的定时刷新。 */
+        beginFlush() {
+            lastAt = Date.now()
+            cancel()
+        },
+        cancel,
+        touch() {
+            lastAt = Date.now()
+        },
+    }
+}
+
+/**
  * 截断超长控制台消息，保留首尾便于定位。
  */
 export function truncateConsoleMessage(message: string, maxLength: number = SCRIPT_CONSOLE_MAX_MESSAGE_LENGTH): string {

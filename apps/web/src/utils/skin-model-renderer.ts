@@ -6,7 +6,6 @@ import {
     DoubleSide,
     EquirectangularReflectionMapping,
     HemisphereLight,
-    LoopOnce,
     LoopRepeat,
     Mesh,
     MeshPhysicalMaterial,
@@ -104,7 +103,6 @@ vec3 dnaWeapon(vec3 base, vec3 mask) {
 `
 
 interface DyeMaterial {
-    material: MeshStandardMaterial
     metadata: SkinMaterialMetadata
     uniforms: Record<string, { value: any }>
 }
@@ -120,12 +118,13 @@ export class SkinModelRenderer {
     private metadata?: SkinModelMetadata
     private dyeMaterials: DyeMaterial[] = []
     private textures = new Set<Texture>()
+    /** 染色贴图按 GLB 索引克隆一份缓存：多张材质引同一张图时只上传一份到 GPU */
+    private textureClones = new Map<number, Promise<Texture>>()
     private request = 0
     private disposed = false
     private visible = true
     private center = new Vector3()
     private distance = 1
-    private cameraDirection = new Vector3()
     private visibility = () => {
         if (this.playing) this.startLoop()
         else this.invalidate()
@@ -252,13 +251,16 @@ export class SkinModelRenderer {
         })
         for (const mesh of meshes) {
             const original = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-            const converted = []
+            const hasUv1 = mesh.geometry.getAttribute("uv1") !== undefined
+            // 贴图依赖已被 parser 缓存成 Promise，并行只省掉串行 await 的时间
+            const converted = await Promise.all(
+                original.map(material => {
+                    const data = material.userData.dnaColorize as SkinMaterialMetadata | undefined
+                    if (data?.version !== 1) throw new Error(`Missing dye material metadata: ${material.name}`)
+                    return this.createMaterial(data, material as MeshStandardMaterial, hasUv1)
+                })
+            )
             for (const material of original) {
-                const data = material.userData.dnaColorize as SkinMaterialMetadata | undefined
-                if (data?.version !== 1) throw new Error(`Missing dye material metadata: ${material.name}`)
-                converted.push(
-                    await this.createMaterial(data, material as MeshStandardMaterial, mesh.geometry.getAttribute("uv1") !== undefined)
-                )
                 for (const value of Object.values(material)) if (value instanceof Texture) this.textures.add(value)
                 material.dispose()
             }
@@ -309,16 +311,23 @@ export class SkinModelRenderer {
         this.resetCamera()
     }
 
-    private async dataTexture(index: number | undefined): Promise<Texture> {
+    private dataTexture(index: number | undefined): Promise<Texture> {
         if (index === undefined) throw new Error("Required game texture is missing")
-        const original: Texture = await this.gltf!.parser.getDependency("texture", index)
-        this.textures.add(original)
-        const texture = original.clone()
-        texture.colorSpace = NoColorSpace
-        texture.flipY = false
-        texture.needsUpdate = true
-        this.textures.add(texture)
-        return texture
+        // clone 按索引缓存：公共贴图（引擎内置图、共享法线/混合图）被多个材质引用时只克隆、上传一份
+        let cached = this.textureClones.get(index)
+        if (!cached) {
+            cached = this.gltf!.parser.getDependency("texture", index).then((original: Texture) => {
+                this.textures.add(original)
+                const texture = original.clone()
+                texture.colorSpace = NoColorSpace
+                texture.flipY = false
+                texture.needsUpdate = true
+                this.textures.add(texture)
+                return texture
+            })
+            this.textureClones.set(index, cached)
+        }
+        return cached
     }
 
     /** 保留游戏编码贴图，用 Shader chunk 替换基础色和 BC7 法线；灯光仍是 Three 的近似预览。 */
@@ -346,10 +355,11 @@ export class SkinModelRenderer {
         mask.needsUpdate = true
         this.textures.add(mask)
         const vector = (name: string, fallback: LinearRgb = [1, 1, 1]) => new Vector3(...(data.vectors[name] ?? fallback))
+        // 羽片（wing）按父材质名判定，翼片遮罩与 2U 染色分区两处都用它。
+        const wingShader = (data.parent ?? "").includes("M_Player_Wing_ShopSkin")
         // Wing 着色器的染色分区存在 2U 槽的遮罩里（不是底图）：G=色号、R=权重，按 UV1 采样。
         // 材质没覆盖 2U 时用父材质的默认白图（G=1 → 6 号色、R=1 → 全覆盖），不能退回底图算法。
         // 模型没带 UV1（旧缓存）时退回底图 UV0 的近似算法，避免整片被压成 1 号色。
-        const wingShader = (data.parent ?? "").includes("M_Player_Wing_ShopSkin")
         const dyeIndex = data.textures["时装BaseClor_2U"]
         const wingDye = wingShader && hasUv1
         const dyeMap =
@@ -390,7 +400,7 @@ export class SkinModelRenderer {
         const silk = data.kind === "packed" && data.textures["丝绸混合贴图"] !== undefined
         // 羽片是卡片网格，真实剪影只写在底图 B 通道（alpha 恒为 1）；游戏 Wing 着色器用它做不透明遮罩，
         // 直接采样 alpha 会把整张卡片渲染成硬边矩形。
-        const wingMask = !silk && (data.parent ?? "").includes("M_Player_Wing_ShopSkin")
+        const wingMask = !silk && wingShader
         const common = {
             name: source.name,
             map: base,
@@ -499,7 +509,7 @@ export class SkinModelRenderer {
             )
         }
         material.customProgramCacheKey = () => `dna-${JSON.stringify(data)}`
-        this.dyeMaterials.push({ material, metadata: data, uniforms })
+        this.dyeMaterials.push({ metadata: data, uniforms })
         return material
     }
 
@@ -539,17 +549,10 @@ export class SkinModelRenderer {
     resetCamera() {
         this.controls.target.copy(this.center)
         const aspect = Math.min(1, this.camera.aspect)
-        this.cameraDirection.set(0, 0, 1)
-        this.camera.position.copy(this.center).add(this.cameraDirection.multiplyScalar(this.distance / aspect))
+        this.camera.position.copy(this.center)
+        this.camera.position.z += this.distance / aspect
         this.controls.update()
         this.invalidate()
-    }
-
-    showWeapon(weapon: boolean) {
-        this.model?.traverse(object => {
-            if (object instanceof Mesh) object.visible = (object.userData.dnaRole === "weapon") === weapon
-        })
-        this.frameModel()
     }
 
     setVisible(visible: boolean) {
@@ -564,36 +567,17 @@ export class SkinModelRenderer {
         }
     }
 
-    get animationNames(): string[] {
-        return this.actions.map(entry => entry.name)
-    }
-
-    /** 播放指定片段；未指定时优先 Armory 展示待机，动作幅度比战斗待机大得多。 */
-    play(name?: string, loop = true) {
-        if (!this.mixer || !this.actions.length) return false
-        const entry = name
-            ? this.actions.find(item => item.name === name)
-            : (this.actions.find(item => item.name.endsWith("_Armory_Idle")) ?? this.actions[0])
-        if (!entry) return false
+    /** 播放 Armory 展示待机（动作幅度比战斗待机大得多），循环播放。 */
+    private play() {
+        if (!this.mixer || !this.actions.length) return
+        const entry = this.actions.find(item => item.name.endsWith("_Armory_Idle")) ?? this.actions[0]
         this.mixer.stopAllAction()
         entry.action.reset()
-        entry.action.setLoop(loop ? LoopRepeat : LoopOnce, loop ? Infinity : 1)
-        entry.action.clampWhenFinished = !loop
+        entry.action.setLoop(LoopRepeat, Infinity)
+        entry.action.clampWhenFinished = false
         entry.action.play()
         this.playing = true
         this.startLoop()
-        return true
-    }
-
-    stop() {
-        this.playing = false
-        this.mixer?.stopAllAction()
-        if (this.request) {
-            cancelAnimationFrame(this.request)
-            this.request = 0
-            this.lastFrame = 0
-        }
-        this.invalidate()
     }
 
     private disposeModel(model: Object3D) {
@@ -607,6 +591,7 @@ export class SkinModelRenderer {
         })
         for (const texture of this.textures) texture.dispose()
         this.textures.clear()
+        this.textureClones.clear()
     }
 
     dispose() {

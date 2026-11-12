@@ -1,3 +1,5 @@
+import { srgbChannelToLinear } from "./color"
+
 export type LinearRgb = [number, number, number]
 
 export interface SkinModelMetadata {
@@ -23,12 +25,6 @@ export interface SkinMaterialMetadata {
     vectors: Record<string, LinearRgb>
     scalars: Record<string, number>
     textures: Record<string, number>
-}
-
-export interface SkinHairDyeFallbacks {
-    hair: [LinearRgb, LinearRgb, LinearRgb]
-    hairPart: [LinearRgb, LinearRgb, LinearRgb]
-    hairPartEmission: LinearRgb
 }
 
 export interface SkinHairDye {
@@ -79,24 +75,18 @@ export interface SwatchSource {
     fresnel?: number
 }
 
-/** sRGB（0–255）转线性。 */
-function toLinear(value: number): number {
-    const channel = value / 255
-    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
-}
-
 /** 数据包色板表转渲染器索引表：旧版数据包没有 `linear`，直接把 0–255 当线性值会整片发白。 */
 export function swatchTable(swatches: SwatchSource[]): Record<string, { linear: LinearRgb; fresnel?: number }> {
     const result: Record<string, { linear: LinearRgb; fresnel?: number }> = {}
     for (const swatch of swatches) {
-        const linear: LinearRgb = swatch.linear ?? ([...swatch.rgb.map(toLinear)] as LinearRgb)
+        const linear: LinearRgb = swatch.linear ?? ([...swatch.rgb.map(srgbChannelToLinear)] as LinearRgb)
         result[String(swatch.id)] = swatch.fresnel === undefined ? { linear } : { linear, fresnel: swatch.fresnel }
     }
     return result
 }
 
 /** 发型码 1–6 依次映射到头发 1–2、头饰 3–5 与头饰自发光 6。 */
-export function resolveHairModelDye(metadata: SkinModelMetadata, ids: number[], fallbacks: SkinHairDyeFallbacks): SkinHairDye {
+export function resolveHairModelDye(metadata: SkinModelMetadata, ids: number[], fallbacks: SkinHairDye): SkinHairDye {
     return {
         hair: [
             resolveSkinModelColor(metadata, ids, 1, fallbacks.hair[0]),
@@ -110,20 +100,4 @@ export function resolveHairModelDye(metadata: SkinModelMetadata, ids: number[], 
         ],
         hairPartEmission: resolveSkinModelColor(metadata, ids, 6, fallbacks.hairPartEmission),
     }
-}
-
-/** MF_BIA6Tint_Color 的 CPU 对照：G 为色区编码，R 为明度，法线 B 为染色权重。 */
-export function decodePackedSkinColor(encoded: LinearRgb, weight: number, colors: LinearRgb[], quantize = 0): LinearRgb {
-    if (colors.length !== 6) throw new Error("Packed skin requires six colors")
-    const srgbToLinear = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
-    const g = encoded[1] + quantize * (Math.floor(encoded[1] * 6) / 6 - encoded[1])
-    let tint: LinearRgb = [...colors[0]]
-    for (let i = 1; i < 6; i++) {
-        const blend = Math.min(1, Math.max(0, g * (5 + quantize) - (i - 1)))
-        tint = tint.map((v, c) => v + blend * (colors[i][c] - v)) as LinearRgb
-    }
-    return encoded.map((v, c) => {
-        const base = srgbToLinear(v)
-        return base + weight * (encoded[0] * tint[c] - base)
-    }) as LinearRgb
 }

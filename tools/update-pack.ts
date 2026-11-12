@@ -40,7 +40,7 @@ export interface ExeAssetInfo {
  * @param filePath 文件路径
  * @returns 小写十六进制摘要
  */
-async function sha256File(filePath: string): Promise<string> {
+export async function sha256File(filePath: string): Promise<string> {
     const hasher = new Bun.CryptoHasher("sha256")
     const stream = Bun.file(filePath).stream()
     for await (const chunk of stream) {

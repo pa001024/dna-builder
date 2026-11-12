@@ -38,6 +38,7 @@ use winit::event::{ElementState, Event, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{CursorGrabMode, Window};
 
+use crate::api::as_i64;
 use crate::wgc::{WgcCmd, WgcEngine, WgcEvent};
 
 struct Frame {
@@ -1436,11 +1437,6 @@ struct ConnInfo {
     uid: String,
     packed: String,
     sdk: Value,
-}
-
-/// 数值字段兼容 number / 数字字符串（sdk-api 两种形态都出现过）。
-fn as_i64(v: Option<&Value>) -> Option<i64> {
-    v.and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
 }
 
 /// 官方 JS 的真值判断（playCardEnable 可能是 bool / 0|1 / 字符串）。
