@@ -19,6 +19,8 @@ const props = defineProps<{
 const emit = defineEmits<{
     /** 点击某一格数据（柱子/折线上的点），参数为类目下标 */
     select: [index: number]
+    /** 点击图元（饼图扇区等没有类目轴的图），参数为数据下标 */
+    itemClick: [index: number]
 }>()
 
 const element = ref<HTMLDivElement | null>(null)
@@ -76,6 +78,11 @@ onMounted(() => {
         const index = Math.round(local[0])
         if (index < 0 || index >= categoryCount(props.option)) return
         emit("select", index)
+    })
+    // 没有类目轴的图（饼图等）：convertFromPixel 拿不到类目，直接用 series 点击的 dataIndex
+    chart.on("click", params => {
+        const index = (params as { dataIndex?: number }).dataIndex
+        if (typeof index === "number" && index >= 0) emit("itemClick", index)
     })
 
     observer = new ResizeObserver(entries => {

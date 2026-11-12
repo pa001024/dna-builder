@@ -24,10 +24,13 @@ import { useUIStore } from "@/store/ui"
 import { patchAfkAnimState, useAfkAnimState } from "@/utils/afk-anim-state"
 import {
     AFK_DUNGEON_ALIASES,
+    AFK_HEATMAP_DAYS,
+    type AfkDay,
     type AfkDrop,
     type AfkItemRow,
     type AfkRun,
-    afkDungeonName,
+    afkDungeonLabel,
+    dayIdOf,
     groupDropsByItem,
     groupStatsByDungeon,
     isDungeonDrop,
@@ -37,7 +40,6 @@ import {
     trendBuckets,
 } from "@/utils/afk-ledger"
 import { readAfkWidgetClickThrough, writeAfkWidgetClickThrough } from "@/utils/afk-widget"
-import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRarityColor, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 type RangeKey = "today" | "7d" | "30d" | "all" | "custom"
@@ -85,6 +87,15 @@ const RANGE_OPTIONS: { key: RangeKey; labelKey: string }[] = [
     { key: "all", labelKey: "afk-ledger.range_all" },
 ]
 
+/** 事件驱动的刷新间隔：范围越大重读的数据越多，「全部」挂机时不必几百毫秒刷一次。 */
+function reloadDelay() {
+    const span = rangeTo() - rangeFrom(range.value)
+    if (span > 90 * 86400000) return 5000
+    if (span > 7 * 86400000) return 2000
+    if (span > 86400000) return 800
+    return 300
+}
+
 /** 接收端状态文案：未启用 / 等待游戏连接 / 已连接。 */
 const supportStatusKey = computed(() => {
     if (!afkSupport.running) return "afk-support.status_stopped"
@@ -106,6 +117,14 @@ const itemKey = ref("")
 const period = ref<Period | null>(null)
 const runs = ref<AfkRun[]>([])
 const drops = ref<AfkDrop[]>([])
+/** 热力图的日聚合格（最近 53 周，来自场次收尾时维护的聚合表）。 */
+const dayCells = ref<AfkDay[]>([])
+/** 热力图选中的日子零点：自定义区间恰好为一天时即视为选中。 */
+const heatSelected = computed(() => {
+    const current = customRange.value
+    if (range.value !== "custom" || !current) return null
+    return current.to - current.from === 86400000 ? current.from : null
+})
 const loading = ref(false)
 const loaded = ref(false)
 const loadError = ref("")
@@ -141,6 +160,20 @@ function rangeTo() {
  */
 function onCustomSelect(value: DateRangeValue) {
     customRange.value = value
+    range.value = "custom"
+}
+
+/**
+ * 点击热力图的一天：把时间范围收成当天（custom 单日），再点同一天取消。
+ * @param dayStart 该日零点时间戳
+ */
+function onHeatSelect(dayStart: number) {
+    if (heatSelected.value === dayStart) {
+        customRange.value = null
+        range.value = "all"
+        return
+    }
+    customRange.value = { from: dayStart, to: dayStart + 86400000 }
     range.value = "custom"
 }
 
@@ -201,6 +234,23 @@ async function reload() {
     }
 }
 
+/**
+ * 重新取热力图数据：固定覆盖最近 53 周，与当前时间范围/副本筛选无关（副本在组件内过滤）。
+ */
+async function reloadHeat() {
+    try {
+        const toDay = dayIdOf(Date.now())
+        dayCells.value = await ledger.loadDayCells(toDay - AFK_HEATMAP_DAYS + 1, toDay)
+    } catch (error) {
+        loadError.value = String(error)
+    }
+}
+
+/** 重新拉取页面全部数据：场次/掉落与热力图。 */
+async function reloadAll() {
+    await Promise.all([reload(), reloadHeat()])
+}
+
 watch([range, dungeon, customRange], () => {
     period.value = null
     void reload()
@@ -212,13 +262,18 @@ watch(
         reloadTimer = window.setTimeout(() => {
             reloadTimer = null
             void reload()
-        }, 300)
+        }, reloadDelay())
     }
+)
+// 热力图只随场次变化刷新：掉落事件不影响每日时长，不必重读场次表
+watch(
+    () => ledger.runsVersion,
+    () => void reloadHeat()
 )
 
 onMounted(async () => {
     await ledger.init()
-    await reload()
+    await reloadAll()
     // 窗口不可持久化：把实际窗口拉回与开关一致（上一版程序可能留下孤儿窗口）
     void syncAfkWidgetWindow()
 })
@@ -289,7 +344,6 @@ function dropKey(drop: AfkDrop) {
 const completedRuns = computed(() => visibleRuns.value.filter(run => run.status === "done"))
 const totalRuns = computed(() => completedRuns.value.length)
 const totalDrops = computed(() => lootDrops.value.reduce((sum, drop) => sum + drop.count, 0))
-const goldDrops = computed(() => lootDrops.value.reduce((sum, drop) => sum + (drop.rarity >= 5 ? drop.count : 0), 0))
 const totalDuration = computed(() => completedRuns.value.reduce((sum, run) => sum + runDuration(run), 0))
 
 /** 已收尾场次里的掉落：场均只按这些算，进行中的场次不参与。 */
@@ -301,6 +355,14 @@ const avgDrops = computed(() =>
     totalRuns.value > 0 ? settledDrops.value.reduce((sum, drop) => sum + drop.count, 0) / totalRuns.value : 0
 )
 
+/** 概览 KPI 卡片：场次 / 掉落 / 场均 / 时长。 */
+const kpis = computed(() => [
+    { key: "runs", labelKey: "afk-ledger.kpi_runs", value: formatNumber(totalRuns.value) },
+    { key: "drops", labelKey: "afk-ledger.kpi_drops", value: formatNumber(totalDrops.value) },
+    { key: "avg", labelKey: "afk-ledger.kpi_avg", value: formatDecimal(avgDrops.value) },
+    { key: "time", labelKey: "afk-ledger.kpi_time", value: formatDuration(totalDuration.value) },
+])
+
 const hasFilters = computed(() => Boolean(dungeon.value) || rarity.value !== null || Boolean(itemKey.value) || period.value !== null)
 const isFilteredEmpty = computed(() => hasFilters.value && visibleRuns.value.length === 0 && visibleDrops.value.length === 0)
 const isEmpty = computed(
@@ -309,6 +371,17 @@ const isEmpty = computed(
 
 const itemRows = computed(() => groupDropsByItem(lootDrops.value).slice(0, 10))
 const dungeonRows = computed(() => groupStatsByDungeon(visibleRuns.value, visibleDrops.value).filter(row => row.runs > 0 || row.drops > 0))
+
+/** 副本统计饼图的度量：时长 / 场次。 */
+type PieMetric = "duration" | "runs"
+
+const PIE_METRICS: { key: PieMetric; labelKey: string }[] = [
+    { key: "duration", labelKey: "afk-ledger.pie_metric_duration" },
+    { key: "runs", labelKey: "afk-ledger.pie_metric_runs" },
+]
+
+/** 当前饼图度量。 */
+const pieMetric = ref<PieMetric>("duration")
 
 /** 每个场次掉了哪些物品（最近场次里按 inline 图标 + 数量展示；不受品质/物品筛选影响，保留上下文）。 */
 const runItems = computed(() => {
@@ -392,16 +465,6 @@ const dungeonOptions = computed(() =>
         .map(([id, entry]) => ({ value: id, label: afkDungeonLabel(id, entry.name) }))
         .sort((a, b) => a.label.localeCompare(b.label))
 )
-
-/**
- * 副本的展示名：与 /db/dungeon 列表同一套规则（带括号后缀）。
- * @param id 副本 ID
- * @param fallback 数据包里查不到时的名字
- * @returns 展示名
- */
-function afkDungeonLabel(id: string, fallback: string) {
-    return dungeonDisplayName(id, afkDungeonName(id, fallback))
-}
 
 /**
  * 副本详情页链接：数据包里有这个副本才给链接。
@@ -732,6 +795,94 @@ const trendOption = computed<EChartsOption>(() => {
 /** 当前维度的总件数（堆叠条与占比共用）。 */
 const mixTotal = computed(() => mixRows.value.reduce((sum, row) => sum + row.count, 0))
 
+/** 饼图只单列前 3 个副本，其余合进「其他」，图例才不拥挤。 */
+const PIE_TOP = 3
+
+/** 饼图数据：当前范围内的副本按度量取 Top 3 + 其他；「其他」没有 id，不可点。 */
+const pieRows = computed(() => {
+    void i18next.language
+    const metric = pieMetric.value
+    const rows = dungeonRows.value
+        .map(row => ({ id: row.id, name: afkDungeonLabel(row.id, row.name), value: metric === "duration" ? row.durationMs : row.runs }))
+        .filter(row => row.value > 0)
+        .sort((a, b) => b.value - a.value)
+    const head = rows.slice(0, PIE_TOP)
+    const restValue = rows.slice(PIE_TOP).reduce((sum, row) => sum + row.value, 0)
+    const total = head.reduce((sum, row) => sum + row.value, 0) + restValue
+    const percentOf = (value: number) => (total > 0 ? Math.round((value / total) * 100) : 0)
+    const data = head.map((row, index) => ({
+        ...row,
+        percent: percentOf(row.value),
+        itemStyle: { color: mixPalette[index % mixPalette.length] },
+    }))
+    if (restValue > 0) {
+        data.push({
+            id: "",
+            name: t("afk-ledger.pie_other"),
+            value: restValue,
+            percent: percentOf(restValue),
+            itemStyle: { color: mixPalette[mixPalette.length - 1] },
+        })
+    }
+    return data
+})
+
+/**
+ * 副本统计饼图：把当前范围内的副本按时长或场次聚成 Top 3 + 其他，点击扇区按副本筛选。
+ */
+const dungeonPieOption = computed<EChartsOption>(() => {
+    void i18next.language
+    const metric = pieMetric.value
+    const data = pieRows.value
+    return {
+        tooltip: {
+            trigger: "item",
+            // 挂到 body：tooltip 不会被卡片/容器裁掉
+            appendTo: "body",
+            confine: false,
+            formatter: params => {
+                const p = params as { name?: string; value?: number; percent?: number }
+                const value = metric === "duration" ? formatDuration(Number(p.value)) : `${Number(p.value)}${t("afk-ledger.pie_runs_unit")}`
+                return `${p.name ?? ""} · ${value} · ${p.percent ?? 0}%`
+            },
+        },
+        legend: {
+            bottom: 0,
+            left: "center",
+            icon: "roundRect",
+            itemWidth: 10,
+            itemHeight: 10,
+            itemGap: 12,
+            textStyle: { color: chartColors.value.muted, fontSize: 11 },
+            formatter: (name: string) => {
+                const row = data.find(item => item.name === name)
+                if (!row) return name
+                // 名字过长截断，留出比例
+                const short = name.length > 10 ? `${name.slice(0, 10)}…` : name
+                return `${short} ${row.percent}%`
+            },
+        },
+        series: [
+            {
+                type: "pie",
+                radius: ["42%", "68%"],
+                center: ["50%", "42%"],
+                label: { show: false },
+                itemStyle: { borderWidth: 1, borderRadius: 2 },
+                emphasis: { scale: true, scaleSize: 4 },
+                data,
+            },
+        ],
+    }
+})
+
+/** 饼图扇区点击：按副本筛选；「其他」没有 id，不可点。 */
+function onPieSelect(index: number) {
+    const id = pieRows.value[index]?.id
+    if (!id) return
+    dungeon.value = dungeon.value === id ? "" : id
+}
+
 /**
  * 毫秒格式化为 `mm:ss` / `h:mm:ss`。
  * @param ms 时长
@@ -975,7 +1126,7 @@ function clearAll() {
 
 <template>
     <ScrollSpyLayout auto nav-kicker="AFK LEDGER" class="h-full">
-        <div class="flex flex-col gap-3 p-4">
+        <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 p-4">
         <AfkLedgerHero
             kicker="AFK LEDGER"
             :title="$t('afk-ledger.title')"
@@ -1181,7 +1332,7 @@ function clearAll() {
                 {{ $t("afk-ledger.db_error") }}
             </div>
             <p class="font-mono text-[10px] break-all text-base-content/45">{{ ledger.error || loadError }}</p>
-            <button type="button" class="btn btn-xs w-fit border-primary bg-primary/10 text-primary" @click="reload()">
+            <button type="button" class="btn btn-xs w-fit border-primary bg-primary/10 text-primary" @click="reloadAll()">
                 {{ $t("common.retry") }}
             </button>
         </div>
@@ -1243,110 +1394,128 @@ function clearAll() {
 
         <template v-else>
             <div class="flex flex-col gap-3 transition-opacity duration-150" :class="loading ? 'opacity-60' : ''">
-            <!-- 概览 -->
+            <!-- 概览：热力图（左）+ KPI 2×2（右），两列等高 -->
             <section :data-scroll-title="$t('afk-ledger.nav_overview')">
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
-                <div class="rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2">
-                    <div class="text-[11px] text-base-content/45">{{ $t("afk-ledger.kpi_runs") }}</div>
-                    <div class="font-mono text-lg font-semibold tabular-nums">{{ formatNumber(totalRuns) }}</div>
+            <div class="grid grid-cols-1 items-stretch gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
+            <div class="min-w-0 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                <div class="mb-1 flex flex-wrap items-baseline gap-x-2">
+                    <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.chart_heatmap") }}</span>
+                    <span class="text-[10px] text-base-content/35">{{ $t("afk-ledger.hint_click_heat") }}</span>
                 </div>
-                <div class="rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2">
-                    <div class="text-[11px] text-base-content/45">{{ $t("afk-ledger.kpi_drops") }}</div>
-                    <div class="font-mono text-lg font-semibold tabular-nums">{{ formatNumber(totalDrops) }}</div>
+                <AfkHeatmap
+                    :cells="dayCells"
+                    :dungeon-id="dungeon || undefined"
+                    :selected="heatSelected"
+                    @select="onHeatSelect"
+                />
+            </div>
+            <div class="grid grid-cols-2 content-stretch gap-3 self-stretch">
+                <div
+                    v-for="kpi in kpis"
+                    :key="kpi.key"
+                    class="flex flex-col justify-center rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2"
+                >
+                    <div class="text-[11px] text-base-content/45">{{ $t(kpi.labelKey) }}</div>
+                    <div class="font-mono text-lg font-semibold tabular-nums">{{ kpi.value }}</div>
                 </div>
-                <div class="rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2">
-                    <div class="text-[11px] text-base-content/45">{{ $t("afk-ledger.kpi_gold") }}</div>
-                    <div class="font-mono text-lg font-semibold tabular-nums" :style="{ color: getRarityColor(5) }">
-                        {{ formatNumber(goldDrops) }}
-                    </div>
-                </div>
-                <div class="rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2">
-                    <div class="text-[11px] text-base-content/45">{{ $t("afk-ledger.kpi_avg") }}</div>
-                    <div class="font-mono text-lg font-semibold tabular-nums">{{ formatDecimal(avgDrops) }}</div>
-                </div>
-                <div class="rounded-xs border border-base-content/10 bg-base-100/60 px-3 py-2">
-                    <div class="text-[11px] text-base-content/45">{{ $t("afk-ledger.kpi_time") }}</div>
-                    <div class="font-mono text-lg font-semibold tabular-nums">{{ formatDuration(totalDuration) }}</div>
-                </div>
+            </div>
             </div>
             </section>
 
-            <!-- 图表 -->
+            <!-- 图表：副本占比（饼图）+ 掉落趋势 + 分布 -->
             <section :data-scroll-title="$t('afk-ledger.nav_charts')">
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <div class="min-w-0 rounded-xs border border-base-content/10 bg-base-100/60 p-3 lg:col-span-2">
+            <!-- 主图表：副本占比（饼图）+ 掉落趋势 -->
+            <div class="grid grid-cols-1 gap-3 xl:grid-cols-3">
+                <div class="flex min-w-0 flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                    <div class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.chart_dungeon_pie") }}</span>
+                        <div class="flex flex-wrap items-center gap-1">
+                            <button
+                                v-for="option in PIE_METRICS"
+                                :key="option.key"
+                                type="button"
+                                class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] font-normal"
+                                :class="pieMetric === option.key ? 'border-primary bg-primary/10 font-semibold text-primary' : 'border-transparent'"
+                                :aria-pressed="pieMetric === option.key"
+                                @click="pieMetric = option.key"
+                            >
+                                {{ $t(option.labelKey) }}
+                            </button>
+                        </div>
+                    </div>
+                    <AfkLedgerChart :option="dungeonPieOption" height="240px" @item-click="onPieSelect" />
+                    <div class="mt-1 text-[10px] text-base-content/35">{{ $t("afk-ledger.hint_click_pie") }}</div>
+                </div>
+                <div class="min-w-0 rounded-xs border border-base-content/10 bg-base-100/60 p-3 xl:col-span-2">
                     <div class="mb-1 flex flex-wrap items-baseline gap-x-2">
                         <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.chart_trend") }}</span>
                         <span class="text-[10px] text-base-content/35">{{ $t("afk-ledger.hint_click_bar") }}</span>
                     </div>
                     <AfkLedgerChart :option="trendOption" height="240px" @select="onBarClick" />
                 </div>
-                <div class="flex min-w-0 flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-                    <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.chart_breakdown") }}</span>
-                        <!-- 维度切换：品质 / 副本 / 物品 / 铸造 -->
-                        <div class="flex flex-wrap items-center gap-1">
-                            <button
-                                v-for="option in MIX_DIMENSIONS"
-                                :key="option.key"
-                                type="button"
-                                class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] font-normal"
-                                :class="
-                                    mixDimension === option.key
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-transparent'
-                                "
-                                :aria-pressed="mixDimension === option.key"
-                                @click="mixDimension = option.key"
-                            >
-                                {{ $t(option.labelKey) }}
-                            </button>
-                        </div>
-                    </div>
-                    <!-- 只用颜色区分分组：色块可点击筛选，再次点击取消 -->
-                    <div class="flex h-3 w-full gap-px overflow-hidden rounded-xs bg-base-content/5">
+            </div>
+            <!-- 分布：品质 / 副本 / 物品 / 铸造 -->
+            <div class="mt-3 flex min-w-0 flex-col rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <span class="text-xs font-medium text-base-content/60">{{ $t("afk-ledger.chart_breakdown") }}</span>
+                    <!-- 维度切换：品质 / 副本 / 物品 / 铸造 -->
+                    <div class="flex flex-wrap items-center gap-1">
                         <button
-                            v-for="row in mixRows"
-                            :key="row.key"
+                            v-for="option in MIX_DIMENSIONS"
+                            :key="option.key"
                             type="button"
-                            class="h-full cursor-pointer transition-opacity hover:opacity-80"
-                            :style="{
-                                width: `${(row.count / Math.max(1, mixTotal)) * 100}%`,
-                                background: row.color,
-                            }"
-                            :title="`${row.label} · ${shareOf(row.count)}`"
-                            :aria-label="`${row.label} · ${shareOf(row.count)}`"
-                            @click="pickMixRow(row)"
-                        />
-                    </div>
-                    <div class="mt-3 flex flex-col gap-1.5">
-                        <component
-                            :is="mixRowClickable(row) ? 'button' : 'div'"
-                            v-for="row in mixRows"
-                            :key="row.key"
-                            :type="mixRowClickable(row) ? 'button' : undefined"
-                            class="flex w-full items-center gap-2 rounded-xs px-1 py-0.5 text-left text-[11px]"
-                            :class="[
-                                mixRowClickable(row) ? 'cursor-pointer transition-colors hover:bg-base-content/5' : '',
-                                rowSelected(row) ? 'bg-primary/10 font-semibold text-primary' : '',
-                            ]"
-                            @click="mixRowClickable(row) ? pickMixRow(row) : undefined"
+                            class="btn btn-xs h-5 min-h-0 px-1.5 text-[10px] font-normal"
+                            :class="
+                                mixDimension === option.key
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-transparent'
+                            "
+                            :aria-pressed="mixDimension === option.key"
+                            @click="mixDimension = option.key"
                         >
-                            <!-- 品质维度用统一的品质色块，其余维度用调色板小方块（与堆叠条同色） -->
-                            <span v-if="mixDimension === 'rarity'" :class="getRaritySwatchClass(row.rarity ?? 1)" />
-                            <span
-                                v-else
-                                class="inline-block size-2.5 shrink-0 rounded-xs"
-                                :style="{ background: row.color }"
-                            />
-                            <!-- 标签吃掉剩余宽度（有空间就铺满，不再固定 128px 截断），数值不参与收缩 -->
-                            <span class="min-w-0 flex-1 truncate text-base-content/55">{{ row.label }}</span>
-                            <span class="shrink-0 font-mono tabular-nums text-base-content/40">{{ shareOf(row.count) }}</span>
-                        </component>
+                            {{ $t(option.labelKey) }}
+                        </button>
                     </div>
-                    <div v-if="mixRows.length === 0" class="py-4 text-center text-xs text-base-content/40">
-                        {{ $t("afk-ledger.no_drops") }}
-                    </div>
+                </div>
+                <!-- 只用颜色区分分组：色块可点击筛选，再次点击取消 -->
+                <div class="flex h-3 w-full gap-px overflow-hidden rounded-xs bg-base-content/5">
+                    <button
+                        v-for="row in mixRows"
+                        :key="row.key"
+                        type="button"
+                        class="h-full cursor-pointer transition-opacity hover:opacity-80"
+                        :style="{
+                            width: `${(row.count / Math.max(1, mixTotal)) * 100}%`,
+                            background: row.color,
+                        }"
+                        :title="`${row.label} · ${shareOf(row.count)}`"
+                        :aria-label="`${row.label} · ${shareOf(row.count)}`"
+                        @click="pickMixRow(row)"
+                    />
+                </div>
+                <div class="mt-3 flex flex-col gap-1.5">
+                    <component
+                        :is="mixRowClickable(row) ? 'button' : 'div'"
+                        v-for="row in mixRows"
+                        :key="row.key"
+                        :type="mixRowClickable(row) ? 'button' : undefined"
+                        class="flex w-full items-center gap-2 rounded-xs px-1 py-0.5 text-left text-[11px]"
+                        :class="[
+                            mixRowClickable(row) ? 'cursor-pointer transition-colors hover:bg-base-content/5' : '',
+                            rowSelected(row) ? 'bg-primary/10 font-semibold text-primary' : '',
+                        ]"
+                        @click="mixRowClickable(row) ? pickMixRow(row) : undefined"
+                    >
+                        <!-- 品质维度用统一的品质色块，其余维度用调色板小方块（与堆叠条同色） -->
+                        <span v-if="mixDimension === 'rarity'" :class="getRaritySwatchClass(row.rarity ?? 1)" />
+                        <span v-else class="inline-block size-2.5 shrink-0 rounded-xs" :style="{ background: row.color }" />
+                        <!-- 标签吃掉剩余宽度（有空间就铺满，不再固定 128px 截断），数值不参与收缩 -->
+                        <span class="min-w-0 flex-1 truncate text-base-content/55">{{ row.label }}</span>
+                        <span class="shrink-0 font-mono tabular-nums text-base-content/40">{{ shareOf(row.count) }}</span>
+                    </component>
+                </div>
+                <div v-if="mixRows.length === 0" class="py-4 text-center text-xs text-base-content/40">
+                    {{ $t("afk-ledger.no_drops") }}
                 </div>
             </div>
             </section>
