@@ -497,7 +497,7 @@ pub fn skill_fields_for(
                 value: field.value,
                 value2: field.value2,
                 format: field.base.format.clone(),
-                base: field.base.attr_base.clone(),
+                base: field.base.attr_prop.clone(),
                 tags: field.base.tags.clone(),
                 damage_type: field.base.damage_type.clone(),
             })

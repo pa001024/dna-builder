@@ -42,9 +42,9 @@ fn effect_removal_income_matches_ts() {
     let request = fixture_request();
     let base = build_value(&tables, request.char_id, &request.settings, None);
     let cases = [
-        ("m", 51942, 0.2868465132242164, "不动万钧"),
-        ("w", 10199, 0.6618042558812907, "无解谜题"),
-        ("w", 20306, 0.23453310726267107, "活着的重量"),
+        ("m", 51942, 0.2866230033406101, "不动万钧"),
+        ("w", 10199, 0.5540305666584648, "无解谜题"),
+        ("w", 20306, 0.23435778338690794, "活着的重量"),
     ];
     for (prefix, id, expected, name) in cases {
         let income = calc_effect_income(
@@ -74,7 +74,7 @@ fn effect_add_income_respects_level() {
         .effect_config
         .push(("m:51942".to_string(), 0.0));
     let base = build_value(&tables, request.char_id, &request.settings, None);
-    // 附加到 5 级 → 19528709804.334003 / 17079160924.360023 - 1
+    // 附加到 5 级 → 5607721739.337771 / 4904806547.599011 - 1
     let income = calc_effect_income(
         &tables,
         request.char_id,
@@ -85,7 +85,7 @@ fn effect_add_income_respects_level() {
         None,
         Some(base),
     );
-    assert_close(income, 0.1434232566121082, "不动万钧@5");
+    assert_close(income, 0.14331150167030526, "不动万钧@5");
     // 附加到满级即还原当前构筑：与移除口径同值（比值只差分子分母互换）
     let income_max = calc_effect_income(
         &tables,
@@ -97,5 +97,5 @@ fn effect_add_income_respects_level() {
         None,
         Some(base),
     );
-    assert_close(income_max, 0.2868465132242164, "不动万钧@max");
+    assert_close(income_max, 0.2866230033406101, "不动万钧@max");
 }

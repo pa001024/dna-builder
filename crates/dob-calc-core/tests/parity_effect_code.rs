@@ -89,10 +89,10 @@ fn bare_identifier_falls_back_to_base_name_weapon_panel() {
     let results = evaluate_expressions(&tables, &request, &expressions.map(String::from));
     let value = |index: usize| results[index].value.unwrap_or(f64::NAN);
 
-    // `攻速` / `暴击` 来自 baseName（求索）对应的武器面板
+    // `攻速` / `暴击` 来自 baseName（求索）对应的武器面板；`伤害` 为按角色面板结算的求索伤害
     assert_close(value(0), 1.44, "攻速");
     assert_close(value(1), 1.65, "暴击");
-    // `伤害` 含该面板的武器攻击；`DPS` 宏取 `or(攻速,技能速度)` → 攻速
-    assert_close(value(2), 12162175876.008177, "伤害");
-    assert_close(value(3), 17513533261.451775, "DPS");
+    // `伤害` 为角色链路的求索伤害（不含近战武器攻击/双爆）；`DPS` 宏取 `or(攻速,技能速度)` → 攻速
+    assert_close(value(2), 340529683.93213063, "伤害");
+    assert_close(value(3), 490362744.8622681, "DPS");
 }

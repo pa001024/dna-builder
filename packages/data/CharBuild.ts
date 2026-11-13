@@ -2598,10 +2598,10 @@ export class CharBuild {
         }
 
         // 分量（tag）：武器池 + 有面板走武器攻分量（角色攻击/武器攻击占比）；其余（技能池、无面板回退）走纯元素基座；
-        // 灾厄转化（原武器路径口径，武器归属时生效）：转为纯物理分量，不吃抗性，按物理类型触发规则结算；
-        // inherit + atk=all 的同律武器保持纯元素结算；无武器归属（角色技能）沿用原技能路径的纯元素结算。
+        // 灾厄转化：直接灾厄伤害一律转为纯物理分量，不吃抗性（不吃属性克制），按物理类型触发规则结算；
+        // inherit + atk=all 的同律武器保持纯元素结算。
         const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
-        const calamityPhysical = hasWeapon && damageType === "灾厄" && !inheritAllSkillWeapon
+        const calamityPhysical = damageType === "灾厄" && !inheritAllSkillWeapon
         type DamagePart = { ratio: number; resistanceFactor: number; triggerAdd: number; settlesElement: boolean }
         const parts: DamagePart[] = []
         const useWeaponSplit = !isSkillPool && hasWeapon
@@ -3492,6 +3492,17 @@ export class CharBuild {
             )?.find(v => v.safeName.includes(fieldName))
         type TemporaryAttributes = Record<string, number>
         /**
+         * 字段攻击来源覆写（对应上游 BaseAttr：ATK_Char/ATK_Melee…）。
+         * @param fieldName AST字段名
+         * @param base 字段命名空间
+         * @returns "角色"/"近战"/"远程"；未显式指定时返回 undefined（按当前归属行为）
+         */
+        const getFieldAttackBase = (fieldName?: string, base?: string, skillContext?: LeveledSkill) => {
+            if (!fieldName) return undefined
+            const attackBase = getSkillAttr(fieldName, base, skillContext)?.基础
+            return attackBase === "角色" || attackBase === "近战" || attackBase === "远程" ? attackBase : undefined
+        }
+        /**
          * 获取武器伤害关键词对应的装备类型。
          * @param fieldName AST字段名
          * @returns 对应装备类型；普通字段返回 undefined
@@ -3507,6 +3518,10 @@ export class CharBuild {
         const getWeaponDamageBase = (base?: string, fieldName?: string, skillContext?: LeveledSkill) => {
             const keywordBase = getWeaponFieldBase(fieldName)
             if (keywordBase) return keywordBase
+            // 基础覆写："角色" 不用武器面板；"近战"/"远程" 强制用对应槽位面板
+            const attackBase = getFieldAttackBase(fieldName, base, skillContext)
+            if (attackBase === "角色") return undefined
+            if (attackBase === "近战" || attackBase === "远程") return attackBase
             const key = base || this.baseName
             if (!weaponsMap.has(key) || !fieldName) return undefined
             if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return key
@@ -3659,16 +3674,23 @@ export class CharBuild {
             const key = weaponFieldBase || base || this.baseName
             const cacheKey = fieldName ? `${key}::${fieldName}` : key
             if (!temporaryAttributes && damageCache.has(cacheKey)) return damageCache.get(cacheKey)!
-            const weapon = weaponsMap.get(key)
-            const weaponAttr = getTemporaryWeaponAttr(key, fieldName, temporaryAttributes, skillContext)
-            const skillAttrsContext = getSummonAttrs(key, temporaryAttributes, fieldName, skillContext)
             const field = fieldName ? getSkillAttr(fieldName, base, skillContext) : undefined
+            // 基础覆写："角色" 按角色面板（无武器归属的技能链路）结算；"近战"/"远程" 强制用对应槽位面板
+            const attackBaseOverride = field?.基础 === "角色" || field?.基础 === "近战" || field?.基础 === "远程" ? field.基础 : undefined
+            const effectiveKey = attackBaseOverride === "角色" ? undefined : (attackBaseOverride ?? key)
+            const weapon = effectiveKey ? weaponsMap.get(effectiveKey) : undefined
+            const weaponAttr =
+                attackBaseOverride === "角色"
+                    ? undefined
+                    : getTemporaryWeaponAttr(attackBaseOverride ?? key, fieldName, temporaryAttributes, skillContext)
+            const skillAttrsContext = getSummonAttrs(key, temporaryAttributes, fieldName, skillContext)
             const fieldDamageType = field?.伤害类型
             const fieldTag = field?.tag
             // 乘区与分量按字段 tag 结算：tag 含「技能」走技能池（技能伤害 + 技能追伤 + 纯元素分量），
             // 含「武器」走武器池；无 tag 按归属回退（有武器面板→武器池，否则→技能池）。
             // 双爆（暴击/触发）按归属结算，见 calculateDamage。
-            const isSkillPool = fieldTag ? fieldTag.includes("技能") : !weapon
+            // 基础覆写为"角色"时强制走技能池（无武器归属的技能链路），否则按 tag/归属判定
+            const isSkillPool = attackBaseOverride === "角色" ? true : fieldTag ? fieldTag.includes("技能") : !weapon
             // 箭雨的独立降伤只作用于武器自身攻击：100% 灾厄伤害字段豁免，且只剔除箭雨自身词条
             const arrowRainPenalty =
                 weapon && fieldDamageType === "灾厄" && weapon.类型 === "远程" && this.rangedMods.some(v => v?.id === 43604) ? -0.6 : 0
@@ -3718,8 +3740,9 @@ export class CharBuild {
         const defCache = new Map<boolean, number>()
         const getDef = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes, skillContext?: LeveledSkill) => {
             const key = base || this.baseName
-            // 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御
-            const isSkillField = fieldName ? (getSkillAttr(fieldName, base, skillContext)?.tag?.includes("技能") ?? false) : false
+            // 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御；基础覆写为"角色"同样走技能口径
+            const fieldForDef = fieldName ? getSkillAttr(fieldName, base, skillContext) : undefined
+            const isSkillField = (fieldForDef?.tag?.includes("技能") ?? false) || fieldForDef?.基础 === "角色"
             const isWeapon = !isSkillField && !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
             if (!temporaryAttributes && defCache.has(isWeapon)) return defCache.get(isWeapon)!
             const def = this.calculateDefenseMultiplier(
@@ -3925,15 +3948,20 @@ export class CharBuild {
                 const value1 = field.值
                 const value2 = field.值2 || 0
 
-                // 计算基础属性值
+                // 计算基础属性值（含上游 BaseAttr 语义：基础覆写强制指定攻击来源面板）
                 let baseValue = 0
-                if (!field.基础) {
+                if (field.基础 === "角色") {
+                    baseValue = currentAttrs.攻击
+                } else if (field.基础 === "近战" || field.基础 === "远程") {
+                    const patk = getTemporaryWeaponAttr(field.基础, fieldName, temporaryAttributes, skillContext)?.攻击 || 0
+                    baseValue = currentAttrs.攻击 + patk
+                } else if (field.属性 === "生命") {
+                    baseValue = currentAttrs.生命
+                } else if (field.属性 === "防御") {
+                    baseValue = currentAttrs.防御
+                } else {
                     const patk = getTemporaryWeaponAttr(ns, fieldName, temporaryAttributes, skillContext)?.攻击 || 0
                     baseValue = currentAttrs.攻击 + patk
-                } else if (field.基础 === "生命") {
-                    baseValue = currentAttrs.生命
-                } else if (field.基础 === "防御") {
-                    baseValue = currentAttrs.防御
                 }
 
                 // 解析并计算表达式

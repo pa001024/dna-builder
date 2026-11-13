@@ -10,7 +10,7 @@ import { charData } from "../../index"
  * 供 autoBuild 性能基准（tools/benchmark-autobuild.ts）与真实构筑回归测试共用，避免两处副本漂移。
  * 该构筑特征：综合DPS 目标函数 + 25 个自定义变量 + 22 条 BUFF（含 6 溯 / 灾厄 5 熔 / 双队友助战），
  * 是 autoBuild 全量候选搜索（角色 343 + 近战 92 + 远程 75 + 同律 88）下 calculate() 热路径的真实压力样本。
- * 本地复算 target 与作者标注一致：28053254998.1983（约 280.53 亿）。
+ * 本地复算 target：6674376021.747875（约 66.74 亿；求索改角色链路且灾厄不吃抗性后较作者标注回落）。
  */
 export const liseFireBuild = {
     charLevel: 80,

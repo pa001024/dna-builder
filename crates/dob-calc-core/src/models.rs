@@ -369,8 +369,10 @@ pub struct SkillFieldBase {
     /// 受哪些角色属性影响（`技能威力,技能效益` 这类逗号分隔串）。
     pub influence: String,
     pub format: Option<String>,
-    /// `基础`：格式串里含「生命 / 防御」时解析出的基数来源。
-    pub attr_base: Option<String>,
+    /// `基础`：显式指定的攻击来源面板（角色/近战/远程，对应上游 BaseAttr）。
+    pub attack_base: Option<String>,
+    /// `属性`：格式串里含「生命 / 防御」时派生出的属性基数来源。
+    pub attr_prop: Option<String>,
     /// 伤害类型标签（如 `["充盈"]` / `["召唤物"]`）。
     pub tags: Vec<String>,
     /// 字段自带的伤害类型（`伤害类型` 字段，如「灾厄」）；未标注为 `None`。
@@ -814,8 +816,15 @@ impl LeveledSkill {
                     let text = field.text("格式");
                     if text.is_empty() { None } else { Some(text) }
                 };
-                // 格式串里出现「生命」「防御」时，该字段以对应角色属性为基数
-                let base = format.as_ref().and_then(|text| {
+                // `基础` 与 `属性` 分管不同情况，不混用：前者是上游 BaseAttr 指定的攻击来源面板
+                // （角色/近战/远程），后者是格式串里含「生命」「防御」时派生的属性基数来源
+                let explicit = field.text("基础");
+                let attack_base = if explicit == "角色" || explicit == "近战" || explicit == "远程" {
+                    Some(explicit)
+                } else {
+                    None
+                };
+                let attr_prop = format.as_ref().and_then(|text| {
                     if text.contains("生命") {
                         Some("生命".to_string())
                     } else if text.contains("防御") {
@@ -830,7 +839,8 @@ impl LeveledSkill {
                         name,
                         influence: field.text("影响"),
                         format,
-                        attr_base: base,
+                        attack_base,
+                        attr_prop,
                         tags: field.texts("tag"),
                         damage_type: {
                             let text = field.text("伤害类型");
@@ -1001,7 +1011,8 @@ impl LeveledSkill {
                     safe_name: name.replace('/', "_"),
                     influence: String::new(),
                     format,
-                    attr_base: None,
+                    attack_base: None,
+                    attr_prop: None,
                     tags: Vec::new(),
                     damage_type: None,
                     index: 10_000 + index,

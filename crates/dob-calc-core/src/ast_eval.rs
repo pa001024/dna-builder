@@ -457,7 +457,7 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             let current = self.summon_attrs(base, temporary, Some(name), namespace, None);
             let attack = current.get("攻击").copied().unwrap_or(0.0)
                 + self.weapon_field_value("攻击", Some(base), temporary);
-            return Ok(attack * self.defense_for(Some(base), None));
+            return Ok(attack * self.defense_for(Some(base), None, None));
         }
 
         match name {
@@ -466,20 +466,20 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 let attack = current.get("攻击").copied().unwrap_or(0.0)
                     + self.weapon_field_value("攻击", namespace, temporary);
-                return Ok(attack * self.defense_for(namespace, None));
+                return Ok(attack * self.defense_for(namespace, None, None));
             }
             "[防御]" => {
                 let field_base = namespace.unwrap_or("");
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 return Ok(
-                    current.get("防御").copied().unwrap_or(0.0) * self.defense_for(namespace, None)
+                    current.get("防御").copied().unwrap_or(0.0) * self.defense_for(namespace, None, None)
                 );
             }
             "[生命]" => {
                 let field_base = namespace.unwrap_or("");
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 return Ok(
-                    current.get("生命").copied().unwrap_or(0.0) * self.defense_for(namespace, None)
+                    current.get("生命").copied().unwrap_or(0.0) * self.defense_for(namespace, None, None)
                 );
             }
             _ => {}
@@ -494,16 +494,27 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         // 与 `field_of` 同 key（`skill_keys[ns] or base_name`），复用免二次扫描。
         let current =
             self.summon_attrs(field_base, temporary, Some(name), namespace, Some(field_ref.clone()));
-        // 伤害 / 治疗字段：按格式串求值
+        // 伤害 / 治疗字段：按格式串求值（含上游 BaseAttr 语义：基础覆写强制指定攻击来源面板）
         if field.name.ends_with("伤害") || field.name.ends_with("治疗") {
             let value1 = field.value;
             let value2 = field.value2;
-            let base_value = if field.attr_base.is_none() {
+            let base_value = if field.attack_base.as_deref() == Some("角色") {
+                current.get("攻击").copied().unwrap_or(0.0)
+            } else if field.attack_base.as_deref() == Some("近战")
+                || field.attack_base.as_deref() == Some("远程")
+            {
+                current.get("攻击").copied().unwrap_or(0.0)
+                    + self.weapon_field_value(
+                        "攻击",
+                        Some(field.attack_base.as_deref().unwrap_or("近战")),
+                        temporary,
+                    )
+            } else if field.attr_prop.is_none() {
                 current.get("攻击").copied().unwrap_or(0.0)
                     + self.weapon_field_value("攻击", namespace, temporary)
-            } else if field.attr_base.as_deref() == Some("生命") {
+            } else if field.attr_prop.as_deref() == Some("生命") {
                 current.get("生命").copied().unwrap_or(0.0)
-            } else if field.attr_base.as_deref() == Some("防御") {
+            } else if field.attr_prop.as_deref() == Some("防御") {
                 current.get("防御").copied().unwrap_or(0.0)
             } else {
                 0.0
@@ -516,7 +527,10 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                 // 治疗不吃防御
                 return Ok(base_damage);
             }
-            return Ok(base_damage * self.defense_for(namespace, Some(&field.tags)));
+            return Ok(
+                base_damage
+                    * self.defense_for(namespace, Some(&field.tags), field.attack_base.as_deref()),
+            );
         }
         Ok(field.value)
     }
@@ -720,12 +734,19 @@ impl<'a, 'b> Evaluator<'a, 'b> {
 
     /// 防御乘区（按是否技能区分）；对应上游 `getDef`。
     ///
-    /// 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御。
-    fn defense_for(&mut self, namespace: Option<&str>, field_tag: Option<&[String]>) -> f64 {
+    /// 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御；
+    /// `基础` 覆写为「角色」同样走技能口径。
+    fn defense_for(
+        &mut self,
+        namespace: Option<&str>,
+        field_tag: Option<&[String]>,
+        attack_base: Option<&str>,
+    ) -> f64 {
         crate::prof!("ast_eval::defense_for");
         let is_skill_field = field_tag
             .map(|tags| tags.iter().any(|tag| tag == "技能"))
-            .unwrap_or(false);
+            .unwrap_or(false)
+            || attack_base == Some("角色");
         let base_name;
         let key = match namespace {
             Some(value) => value,
@@ -844,10 +865,30 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         // 细分乘区（普攻 / 蓄力 / 下落 / 滑行）
         let (attack_type_bonus, attack_type_independent) =
             self.attack_type_bonuses(&key, field_name);
-        let weapon_opt = self.context.weapons_by_base().get(&key).copied();
-        let is_skill_pool = match &field_tag {
-            Some(tags) => tags.iter().any(|tag| tag == "技能"),
-            None => weapon_opt.is_none(),
+        // 上游 BaseAttr 口径：`基础` 显式指定攻击来源面板（角色/近战/远程）时强制按该面板结算；
+        // 「角色」按角色面板（无武器归属的技能链路），「近战」/「远程」强制用对应槽位面板
+        let attack_override: Option<&str> = match field.as_ref() {
+            Some(item) => match item.get().attack_base.as_deref() {
+                Some("角色") | Some("近战") | Some("远程") => item.get().attack_base.as_deref(),
+                _ => None,
+            },
+            None => None,
+        };
+        let effective_key: Option<String> = match attack_override {
+            Some("角色") => None,
+            Some(slot) => Some(slot.to_string()),
+            None => Some(key.clone()),
+        };
+        let weapon_opt = effective_key
+            .as_deref()
+            .and_then(|name| self.context.weapons_by_base().get(name).copied());
+        // 基础覆写为「角色」时强制走技能池（无武器归属的技能链路），否则按 tag/归属判定
+        let is_skill_pool = match attack_override {
+            Some("角色") => true,
+            _ => match &field_tag {
+                Some(tags) => tags.iter().any(|tag| tag == "技能"),
+                None => weapon_opt.is_none(),
+            },
         };
         // 箭雨的独立降伤只作用于武器自身攻击：灾厄伤害字段豁免，且只剔除箭雨自身词条
         let arrow_rain_penalty = if weapon_opt == Some(WeaponRef::Ranged)
@@ -864,9 +905,11 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         // 导致计算错误；现全部改为显式参数传入。
         let panel_trigger = weapon_opt
             .and_then(|_| {
-                self.weapon_panels
-                    .get(&key)
-                    .and_then(|panel| panel.get("触发").copied())
+                effective_key.as_deref().and_then(|name| {
+                    self.weapon_panels
+                        .get(name)
+                        .and_then(|panel| panel.get("触发").copied())
+                })
             })
             .unwrap_or(0.0);
         let skill_trigger_coverage = if is_skill_pool && weapon_opt.is_some() {
@@ -874,7 +917,11 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         } else {
             1.0
         };
-        let panel = weapon_opt.and_then(|_| self.weapon_panels.get(&key).cloned());
+        let panel = weapon_opt.and_then(|_| {
+            effective_key
+                .as_deref()
+                .and_then(|name| self.weapon_panels.get(name).cloned())
+        });
         let wrapped = WeaponAttributes {
             char: context_attrs.clone(),
             panel: None,
