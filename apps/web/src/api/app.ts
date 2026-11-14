@@ -167,6 +167,29 @@ export async function setLaunchAtStartupEnabled(enabled: boolean) {
     return await invoke<boolean>("set_launch_at_startup_enabled", { enabled })
 }
 
+/** 单个目标进程的工作集修剪结果。 */
+export interface TrimItem {
+    pid: number
+    name: string
+    ok: boolean
+    error?: string
+}
+
+/** 一次工作集修剪的整体结果。 */
+export interface TrimReport {
+    status: "ok" | "not_running" | "unsupported"
+    targets: TrimItem[]
+}
+
+/**
+ * 修剪目标进程的工作集（仅 Windows 桌面端）。
+ * @param processNames 目标进程名列表；缺省为游戏进程白名单，空数组表示不含游戏进程
+ * @param includeSelf 是否同时修剪当前应用自身
+ */
+export async function trimGameWorkingSet(processNames?: string[], includeSelf = false) {
+    return await invoke<TrimReport>("trim_game_working_set", { processNames, includeSelf })
+}
+
 /**
  * 导出二进制文件到指定路径
  * @param filePath 文件路径
