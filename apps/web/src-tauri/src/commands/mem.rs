@@ -58,19 +58,25 @@ impl TrimReport {
 ///
 /// `process_names` 缺省时使用游戏进程白名单；传入空数组则只处理 `include_self` 指定的自身进程。
 /// `include_self` 为 true 时同时修剪当前应用自身。
+/// 单个目标的失败记在 `targets` 里；进程枚举本身失败时返回 `Err`，避免误报 `not_running`。
 #[tauri::command]
-pub fn trim_game_working_set(
+pub async fn trim_game_working_set(
     process_names: Option<Vec<String>>,
     include_self: Option<bool>,
-) -> TrimReport {
+) -> Result<TrimReport, String> {
     #[cfg(target_os = "windows")]
     {
-        win_impl::trim(process_names, include_self.unwrap_or(false))
+        // 枚举与逐进程修剪都是阻塞调用，整体移到阻塞线程池，避免卡住主线程事件循环。
+        tokio::task::spawn_blocking(move || {
+            win_impl::trim(process_names, include_self.unwrap_or(false))
+        })
+        .await
+        .map_err(|error| format!("内存清理任务执行失败: {error}"))?
     }
     #[cfg(not(target_os = "windows"))]
     {
         let _ = (process_names, include_self);
-        TrimReport::unsupported()
+        Ok(TrimReport::unsupported())
     }
 }
 
@@ -94,7 +100,10 @@ mod win_impl {
     }
 
     /// 按名单收集全部同名进程（分身/多开副本会同时命中），再按需追加自身进程。
-    pub fn trim(process_names: Option<Vec<String>>, include_self: bool) -> TrimReport {
+    pub fn trim(
+        process_names: Option<Vec<String>>,
+        include_self: bool,
+    ) -> Result<TrimReport, String> {
         let names: Vec<String> = match process_names {
             Some(list) => list
                 .into_iter()
@@ -107,7 +116,7 @@ mod win_impl {
                 .collect(),
         };
 
-        let mut targets = collect_targets(&names);
+        let mut targets = collect_targets(&names)?;
         if include_self {
             let pid = std::process::id();
             if !targets.iter().any(|target| target.pid == pid) {
@@ -119,58 +128,86 @@ mod win_impl {
         }
 
         if targets.is_empty() {
-            return TrimReport {
+            return Ok(TrimReport {
                 status: TrimStatus::NotRunning,
                 targets: Vec::new(),
-            };
+            });
         }
 
         let items = targets
             .into_iter()
             .map(|target| trim_one(target.pid, &target.name))
             .collect();
-        TrimReport {
+        Ok(TrimReport {
             status: TrimStatus::Ok,
             targets: items,
-        }
+        })
     }
 
     /// 枚举快照中与名单同名（不区分大小写）的所有进程。
-    fn collect_targets(names: &[String]) -> Vec<Target> {
+    ///
+    /// 快照创建与遍历失败都返回 `Err`；`Process32FirstW` 失败表示快照为空，按成功空结果处理；
+    /// `Process32NextW` 失败仅在 `ERROR_NO_MORE_FILES` 时视为正常结束，其余错误上报。
+    fn collect_targets(names: &[String]) -> Result<Vec<Target>, String> {
         let mut targets = Vec::new();
         if names.is_empty() {
-            return targets;
+            return Ok(targets);
         }
 
-        unsafe {
-            let Ok(snapshot) = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) else {
-                return targets;
-            };
+        let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }
+            .map_err(|error| format!("枚举进程失败: {}", describe(&error)))?;
+
+        let result = (|| -> Result<(), String> {
             let mut entry = PROCESSENTRY32W::default();
             entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
-            if Process32FirstW(snapshot, &mut entry).is_ok() {
-                loop {
-                    let name = String::from_utf16_lossy(&entry.szExeFile);
-                    let name = name.trim_matches('\0');
-                    if !name.is_empty()
-                        && names
-                            .iter()
-                            .any(|candidate| name.eq_ignore_ascii_case(candidate))
-                    {
-                        targets.push(Target {
-                            pid: entry.th32ProcessID,
-                            name: name.to_string(),
-                        });
-                    }
-                    if Process32NextW(snapshot, &mut entry).is_err() {
-                        break;
-                    }
+            if unsafe { Process32FirstW(snapshot, &mut entry) }.is_err() {
+                return Ok(());
+            }
+            loop {
+                // szExeFile 是定长数组，只解码首个 NUL 之前的部分，避免残留字节污染进程名。
+                let len = entry
+                    .szExeFile
+                    .iter()
+                    .position(|&unit| unit == 0)
+                    .unwrap_or(entry.szExeFile.len());
+                let name = String::from_utf16_lossy(&entry.szExeFile[..len]);
+                if !name.is_empty()
+                    && names
+                        .iter()
+                        .any(|candidate| name.eq_ignore_ascii_case(candidate))
+                {
+                    targets.push(Target {
+                        pid: entry.th32ProcessID,
+                        name,
+                    });
+                }
+                match unsafe { Process32NextW(snapshot, &mut entry) } {
+                    Ok(()) => {}
+                    Err(error) if is_enumeration_end(&error) => break,
+                    Err(error) => return Err(format!("枚举进程失败: {}", describe(&error))),
                 }
             }
-            // 快照是内核句柄，必须显式关闭。
-            let _ = CloseHandle(snapshot);
+            Ok(())
+        })();
+
+        // 快照是内核句柄，成功与失败路径都必须显式关闭。
+        let _ = unsafe { CloseHandle(snapshot) };
+        result.map(|()| targets)
+    }
+
+    /// 遍历结束的判定：Tool Help 以 `ERROR_NO_MORE_FILES` 表示已无更多进程。
+    fn is_enumeration_end(error: &windows::core::Error) -> bool {
+        error.code() == windows::Win32::Foundation::ERROR_NO_MORE_FILES.to_hresult()
+    }
+
+    /// 取用户可读的 Win32 错误描述（缺失时回退到带错误码的 Display）。
+    fn describe(error: &windows::core::Error) -> String {
+        let message = error.message();
+        if message.is_empty() {
+            format!("{error}")
+        } else {
+            message
         }
-        targets
     }
 
     /// 取当前可执行文件名（自身进程条目展示用）。
@@ -207,19 +244,12 @@ mod win_impl {
                 ok: true,
                 error: None,
             },
-            Err(error) => {
-                let message = error.message();
-                TrimItem {
-                    pid,
-                    name: name.to_string(),
-                    ok: false,
-                    error: Some(if message.is_empty() {
-                        format!("{error}")
-                    } else {
-                        message
-                    }),
-                }
-            }
+            Err(error) => TrimItem {
+                pid,
+                name: name.to_string(),
+                ok: false,
+                error: Some(describe(&error)),
+            },
         }
     }
 }
