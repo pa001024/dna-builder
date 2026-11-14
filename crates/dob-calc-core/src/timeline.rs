@@ -328,7 +328,8 @@ impl<'a> BuildContext<'a> {
                         .push((buff.name.clone(), buff.level, Some(buff.coverage)));
                 }
             }
-            let Some(mut owned) = BuildContext::new(self.tables, self.char.id, &owned_settings)
+            let Some(mut owned) =
+                BuildContext::new_excluding(self.tables, self.char.id, &owned_settings, &self.excluded_buffs)
             else {
                 continue;
             };
@@ -406,9 +407,30 @@ pub fn calculate_with_settings(
     settings: &super::config::CharSettings,
     timeline: Option<&RawTimelineData>,
 ) -> f64 {
-    let Some(mut context) = BuildContext::new(tables, char_id, settings) else {
+    let Some(context) = BuildContext::new(tables, char_id, settings) else {
         return 0.0;
     };
+    finish_calculate(context, timeline)
+}
+
+/// 带 BUFF 排除集的顶层求值：收益计算的移除口径用（对应上游 clone 后按名过滤）。
+///
+/// 时间轴内逐事件重建同样携带排除集（见 `calculate_with_timeline`）。
+pub fn calculate_with_settings_excluding(
+    tables: &BuildTables,
+    char_id: i64,
+    settings: &super::config::CharSettings,
+    excluded: &[String],
+    timeline: Option<&RawTimelineData>,
+) -> f64 {
+    let Some(context) = BuildContext::new_excluding(tables, char_id, settings, excluded) else {
+        return 0.0;
+    };
+    finish_calculate(context, timeline)
+}
+
+/// 装配后求值收尾（单次目标函数 / 时间轴分发）。
+fn finish_calculate(mut context: BuildContext, timeline: Option<&RawTimelineData>) -> f64 {
     match timeline {
         Some(timeline) => context.calculate_with_timeline(timeline),
         None => {
