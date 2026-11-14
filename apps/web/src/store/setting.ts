@@ -8,7 +8,9 @@ import {
     setLaunchAtStartupEnabled,
     startHeartbeat,
     stopHeartbeat,
+    type TrimReport,
     tauriFetch,
+    trimGameWorkingSet,
 } from "@/api/app"
 import { executeSignFlow } from "@/api/dna-sign"
 import { isSafeModeClosed } from "@/data/versionGate"
@@ -50,6 +52,34 @@ let apiInitKey = ""
 let apiGeneration = 0
 /** 最近一次心跳完整握手的 promise：快速路径超时后，后续请求失败时等它 resolve 再重试。 */
 let heartbeatReadyPromise: Promise<boolean> | null = null
+
+/** 自动内存清理范围：仅游戏进程 / 仅本应用 / 两者。 */
+export type MemCleanScope = "game" | "app" | "all"
+
+/** 自动清理间隔下限（分钟）：过于频繁会让前台游戏反复缺页而卡顿。 */
+export const MEM_CLEAN_MIN_INTERVAL_MIN = 5
+/** 自动清理间隔上限（分钟）。 */
+export const MEM_CLEAN_MAX_INTERVAL_MIN = 240
+
+/** 自动清理轮询句柄（模块级：切换页面不中断，停用后清空）。 */
+let memCleanTimer: number | null = null
+/** 当前定时器使用的间隔（毫秒）：间隔未变化时不重置倒计时。 */
+let memCleanTimerIntervalMs: number | null = null
+
+/** 内存清理依赖 Windows 进程 API：Web 端与非 Windows 桌面端都不支持。 */
+export function isMemCleanSupported(): boolean {
+    return env.isApp && /Windows/i.test(navigator.userAgent)
+}
+
+/**
+ * 把清理范围翻译成后端参数：game 走缺省白名单，app/all 追加自身进程。
+ * @param scope 清理范围
+ */
+function resolveMemCleanTargets(scope: MemCleanScope): { processNames?: string[]; includeSelf: boolean } {
+    if (scope === "app") return { processNames: [], includeSelf: true }
+    if (scope === "all") return { processNames: undefined, includeSelf: true }
+    return { processNames: undefined, includeSelf: false }
+}
 
 // 迁移必须在建立 store 之前完成：useLocalStorage 会先把存储里的旧默认值读进 state
 migrateLegacyAiMaxTokens()
@@ -129,6 +159,15 @@ export const useSettingStore = defineStore("setting", {
             afkWidgetEnabled: useLocalStorage("setting_afk_widget", false),
             // 主窗口关闭按钮行为：ask 每次弹窗询问，minimize 最小化到托盘，exit 直接退出
             closeAction: useLocalStorage<"ask" | "minimize" | "exit">("setting_close_action", "ask"),
+            // ===== 内存清理（桌面端工作集修剪）：默认关闭、默认仅游戏、默认 30 分钟 =====
+            memCleanEnabled: useLocalStorage("setting_mem_clean_enabled", false),
+            memCleanIntervalMin: useLocalStorage("setting_mem_clean_interval_min", 30),
+            memCleanScope: useLocalStorage<MemCleanScope>("setting_mem_clean_scope", "game"),
+            // 上次清理结果与进行中的调用（会话内瞬态，不持久化）
+            memCleanLastReport: null as TrimReport | null,
+            memCleanLastRunAt: 0,
+            memCleanLastError: "",
+            memCleanBusy: false,
         }
     },
     getters: {},
@@ -761,6 +800,94 @@ export const useSettingStore = defineStore("setting", {
             tomorrow.setDate(tomorrow.getDate() + 1)
             tomorrow.setHours(1, 0, 0, 0)
             this.nextSignCheckTime = tomorrow.getTime()
+        },
+
+        /**
+         * 归一化自动清理间隔（分钟），钳制在保守区间内。
+         */
+        normalizedMemCleanInterval(): number {
+            return this.normalizeMemCleanIntervalValue(this.memCleanIntervalMin)
+        },
+
+        /**
+         * 设置自动清理开关，并立即启停轮询。
+         * @param enabled 是否启用自动清理
+         */
+        setMemCleanEnabled(enabled: boolean) {
+            this.memCleanEnabled = enabled
+            this.syncMemCleanPolling()
+        },
+
+        /**
+         * 设置自动清理间隔（分钟），启用状态下按新间隔重启轮询。
+         * @param minutes 间隔分钟数
+         */
+        setMemCleanInterval(minutes: number) {
+            this.memCleanIntervalMin = this.normalizeMemCleanIntervalValue(minutes)
+            if (this.memCleanEnabled) this.syncMemCleanPolling()
+        },
+
+        /**
+         * 归一化任意候选间隔值（供输入控件回写用）。
+         * @param minutes 候选分钟数
+         */
+        normalizeMemCleanIntervalValue(minutes: number): number {
+            const rounded = Math.round(Number(minutes))
+            if (!Number.isFinite(rounded)) return 30
+            return Math.min(MEM_CLEAN_MAX_INTERVAL_MIN, Math.max(MEM_CLEAN_MIN_INTERVAL_MIN, rounded))
+        },
+
+        /**
+         * 按当前开关、间隔与范围恢复自动清理轮询；非 Windows 桌面端或未启用时只清理定时器。
+         * 间隔未变化时保留现有定时器，避免仅失焦提交就重置倒计时。
+         */
+        syncMemCleanPolling() {
+            if (!this.memCleanEnabled || !isMemCleanSupported()) {
+                this.stopMemCleanPolling()
+                return
+            }
+            const intervalMs = this.normalizedMemCleanInterval() * 60 * 1000
+            if (memCleanTimer !== null && memCleanTimerIntervalMs === intervalMs) return
+            this.stopMemCleanPolling()
+            memCleanTimerIntervalMs = intervalMs
+            memCleanTimer = window.setInterval(() => {
+                void this.trimMemoryNow()
+            }, intervalMs)
+        },
+
+        /**
+         * 停止自动清理轮询。
+         */
+        stopMemCleanPolling() {
+            if (memCleanTimer !== null) {
+                window.clearInterval(memCleanTimer)
+                memCleanTimer = null
+            }
+            memCleanTimerIntervalMs = null
+        },
+
+        /**
+         * 立即执行一次工作集清理并记录结果（手动按钮与自动轮询共用）。
+         * @returns 本次清理结果；非 Windows 桌面端或已有调用在途时返回 null
+         */
+        async trimMemoryNow(): Promise<TrimReport | null> {
+            if (!isMemCleanSupported() || this.memCleanBusy) return null
+            this.memCleanBusy = true
+            this.memCleanLastError = ""
+            try {
+                const { processNames, includeSelf } = resolveMemCleanTargets(this.memCleanScope)
+                const report = await trimGameWorkingSet(processNames, includeSelf)
+                this.memCleanLastReport = report
+                this.memCleanLastRunAt = Date.now()
+                return report
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error)
+                this.memCleanLastError = message
+                console.error("内存清理失败:", error)
+                return null
+            } finally {
+                this.memCleanBusy = false
+            }
         },
     },
 })

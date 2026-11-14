@@ -14,7 +14,7 @@ import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
 import { useLanSyncStore } from "@/store/lanSync"
-import { useSettingStore } from "@/store/setting"
+import { isMemCleanSupported, MEM_CLEAN_MAX_INTERVAL_MIN, MEM_CLEAN_MIN_INTERVAL_MIN, useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import {
@@ -136,12 +136,16 @@ async function focusDeepLinkTarget() {
 
 /** 滚动布局引用：目录高亮与点击跳转由 ScrollSpyLayout 内部接管 */
 const scrollLayoutRef = ref<{ contentEl: HTMLElement | null; scrollToKey: (key: string) => void } | null>(null)
+/** 内存清理依赖 Windows 进程 API：Web 端与非 Windows 桌面端都不展示入口 */
+const supportsMemClean = computed(() => isMemCleanSupported())
+/** 桌面端专属区块（Web 端目录需一并隐藏） */
+const APP_ONLY_SECTION_KEYS = new Set(["skill-cd", "screen-bar", "desktop-clone", "afk-support", "mem-clean"])
 /**
  * 设置页目录。
  *
  * key 必须与内容区各区块的 data-scroll-section 一一对应，顺序也要一致 ——
  * 滚动高亮按 DOM 顺序判定，目录顺序错位会让高亮指到隔壁区块。
- * 技能 CD 指示器是桌面端专属区块，Web 端不渲染，目录里也要一并去掉。
+ * 技能 CD 指示器、内存清理是桌面端专属区块，Web 端不渲染，目录里也要一并去掉。
  */
 const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }[]>(() => {
     const items: { key: string; title: string; icon: IconTypes }[] = [
@@ -151,17 +155,16 @@ const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }
         { key: "screen-bar", title: t("screenBar.sectionTitle"), icon: "ri:broadcast-line" },
         { key: "desktop-clone", title: t("desktop_clone.section_title"), icon: "ri:windows-fill" },
         { key: "afk-support", title: t("afk-support.title"), icon: "ri:gamepad-line" },
+        { key: "mem-clean", title: t("setting.memCleanTitle"), icon: "ri:delete-bin-line" },
         { key: "data-pack", title: t("setting.dataPackManagement"), icon: "ri:database-2-line" },
         { key: "account", title: t("setting.account"), icon: "ri:user-line" },
         { key: "story", title: t("setting.storyText"), icon: "ri:book-open-line" },
         { key: "ai", title: t("setting.ai"), icon: "ri:robot-2-line" },
         { key: "other", title: t("setting.other"), icon: "ri:settings-4-line" },
     ]
-    return env.isApp
-        ? items
-        : items.filter(
-              item => item.key !== "skill-cd" && item.key !== "screen-bar" && item.key !== "afk-support" && item.key !== "desktop-clone"
-          )
+    if (!env.isApp) return items.filter(item => !APP_ONLY_SECTION_KEYS.has(item.key))
+    if (!supportsMemClean.value) return items.filter(item => item.key !== "mem-clean")
+    return items
 })
 
 /** 当前环境的 More 入口（含 show 标记，解析时过滤） */
@@ -229,6 +232,33 @@ const imgsDownloadProgressValue = computed(() => {
 
     return Math.round((state.completed / state.total) * 100)
 })
+
+/** 上次内存清理结果的可读摘要（失败时逐进程列出原因）。 */
+const memCleanSummary = computed(() => {
+    if (setting.memCleanLastError) {
+        return `${t("setting.memCleanError")}: ${setting.memCleanLastError}`
+    }
+    const report = setting.memCleanLastReport
+    if (!report) return t("setting.memCleanLastNever")
+    if (report.status === "unsupported") return t("setting.memCleanUnsupported")
+    const time = setting.memCleanLastRunAt ? new Date(setting.memCleanLastRunAt).toLocaleTimeString() : ""
+    if (report.status === "not_running") return `${time} · ${t("setting.memCleanNotRunning")}`
+    const total = report.targets.length
+    const ok = report.targets.filter(item => item.ok).length
+    const head = t("setting.memCleanResult", { ok, total })
+    const failed = report.targets.filter(item => !item.ok)
+    if (failed.length === 0) return `${time} · ${head}`
+    const detail = failed.map(item => `${item.name} (${item.pid}) ${item.error ?? ""}`.trim()).join("; ")
+    return `${time} · ${head} · ${detail}`
+})
+
+/**
+ * 自动清理开关：交由 store 同步启停轮询。
+ * @param event checkbox change 事件
+ */
+function onMemCleanToggle(event: Event) {
+    setting.setMemCleanEnabled((event.target as HTMLInputElement).checked)
+}
 
 const dataPackVersions = computed(() => {
     const versions = dataPack.status?.versions || []
@@ -1429,6 +1459,92 @@ onUnmounted(() => {
                                 </p>
                             </div>
                         </template>
+                    </div>
+                </div>
+            </section>
+
+            <section v-if="supportsMemClean" data-scroll-section="mem-clean" class="flex flex-col">
+                <SectionHeader no-animate compact :title="$t('setting.memCleanTitle')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.03s' }"
+                >
+                    <div class="flex flex-col gap-2">
+                        <!-- 自动清理总开关 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanAuto") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanDesc") }}</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
+                                <input
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
+                                    :checked="setting.memCleanEnabled"
+                                    @change="onMemCleanToggle"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- 清理间隔 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanInterval") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanIntervalDesc") }}</div>
+                            </span>
+                            <DragNumberInput
+                                v-model="setting.memCleanIntervalMin"
+                                :min="MEM_CLEAN_MIN_INTERVAL_MIN"
+                                :max="MEM_CLEAN_MAX_INTERVAL_MIN"
+                                :step="1"
+                                :precision="0"
+                                suffix="min"
+                                :aria-label="$t('setting.memCleanInterval')"
+                                @change="setting.setMemCleanInterval"
+                            />
+                        </div>
+
+                        <!-- 清理范围 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanScope") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanScopeDesc") }}</div>
+                            </span>
+                            <Select
+                                v-model="setting.memCleanScope"
+                                class="w-36 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
+                            >
+                                <SelectItem value="game">{{ $t("setting.memCleanScopeGame") }}</SelectItem>
+                                <SelectItem value="app">{{ $t("setting.memCleanScopeApp") }}</SelectItem>
+                                <SelectItem value="all">{{ $t("setting.memCleanScopeAll") }}</SelectItem>
+                            </Select>
+                        </div>
+
+                        <!-- 立即清理与上次结果 -->
+                        <div
+                            class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text min-w-0">
+                                {{ $t("setting.memCleanLastResult") }}
+                                <div class="break-words text-xs text-base-content/50">{{ memCleanSummary }}</div>
+                            </span>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline shrink-0"
+                                :disabled="setting.memCleanBusy"
+                                @click="setting.trimMemoryNow()"
+                            >
+                                <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
+                                {{ $t("setting.memCleanRunNow") }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -274,6 +274,10 @@ if (env.isApp && !isScreenBarWindow && !isDesktopCloneWindow) {
     if (setting.autoSign) {
         setting.startAutoSign()
     }
+    // 自动内存清理：仅主窗口持有轮询定时器（浮窗/分身窗口同样挂载 App，不能重复计时）
+    if (isMainWindow) {
+        setting.syncMemCleanPolling()
+    }
     void setting.syncLaunchAtStartup().catch(error => {
         console.error("同步开机启动状态失败:", error)
     })
