@@ -224,6 +224,8 @@ export function isMaskTexture(name: string): boolean {
 /**
  * 底图 B 通道被当作剪影遮罩的材质：Wing 系列（裙摆/披风）和丝绸层（丝袜藤蔓、手套、鞋）。
  * 这些贴图的 RGB 参与裁切，有损压缩会让阈值附近的纹素翻转，多裁或少裁，必须无损。
+ * 眼球底图也一并无损：虹膜花纹、瞳孔边缘、高光斑都只有几个像素宽，
+ * 有损压缩的块效应会在放大的眼睛上直接看出来。
  */
 export function cutoutBaseNames(document: GlbDocument): Set<string> {
     const names = new Set<string>()
@@ -231,7 +233,8 @@ export function cutoutBaseNames(document: GlbDocument): Set<string> {
         const data = material.extras?.dnaColorize
         if (!data || data.kind === "shadow") continue
         const silk = data.textures?.丝绸混合贴图 !== undefined
-        if (!silk && !(data.parent ?? "").includes("M_Player_Wing_ShopSkin")) continue
+        const eye = data.kind === "eye"
+        if (!silk && !eye && !(data.parent ?? "").includes("M_Player_Wing_ShopSkin")) continue
         const texture = data.textures?.时装BaseClor ?? data.textures?.颜色贴图
         if (texture === undefined) continue
         const image = document.json.images?.[document.json.textures?.[texture]?.source]

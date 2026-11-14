@@ -3,14 +3,18 @@ import { DNAAPI } from "dna-api"
 import { computed, onMounted, ref, watch } from "vue"
 import { tauriFetch } from "@/api/app"
 
-const errorMessage = ref("")
-const successMessage = ref("")
-// 提示条可见性与文本分离：退场动画期间文本必须保留，否则元素先塌成只剩图标再播动画
-const errorMessageVisible = ref(false)
-const successMessageVisible = ref(false)
-// 提示自动隐藏定时器句柄，重复提示时需清掉旧定时器
-let errorMessageHideTimer: ReturnType<typeof setTimeout> | undefined
-let successMessageHideTimer: ReturnType<typeof setTimeout> | undefined
+interface LoginToast {
+    id: number
+    kind: "error" | "success"
+    message: string
+    /** 为 true 时不自动消失，需手动关闭 */
+    sticky: boolean
+}
+
+// 右下角提示队列：多条共存，各自独立计时；TransitionGroup 接管退场动画
+const toasts = ref<LoginToast[]>([])
+let toastSeq = 0
+const toastHideTimers = new Map<number, ReturnType<typeof setTimeout>>()
 
 const email = ref("")
 const phone = ref("")
@@ -30,36 +34,30 @@ const api = new DNAAPI({
     mode: "android",
 })
 
-/**
- * 收起成功提示：只切可见性，保留文本供退场动画渲染。
- * @param delay 延时毫秒；不传则立即收起
- */
-function dismissSuccessMessage(delay = 0) {
-    clearTimeout(successMessageHideTimer)
-    successMessageHideTimer = setTimeout(() => {
-        successMessageVisible.value = false
-    }, delay)
-}
-/**
- * 收起错误提示：只切可见性，保留文本供退场动画渲染。
- * @param delay 延时毫秒；不传则立即收起
- */
-function dismissErrorMessage(delay = 0) {
-    clearTimeout(errorMessageHideTimer)
-    errorMessageHideTimer = setTimeout(() => {
-        errorMessageVisible.value = false
-    }, delay)
+/** 关闭指定提示，顺带清理其自动隐藏定时器 */
+function dismissToast(id: number) {
+    const timer = toastHideTimers.get(id)
+    if (timer !== undefined) {
+        clearTimeout(timer)
+        toastHideTimers.delete(id)
+    }
+    const index = toasts.value.findIndex(toast => toast.id === id)
+    if (index >= 0) toasts.value.splice(index, 1)
 }
 
-function showSuccessMessage(message: string) {
-    successMessage.value = message
-    successMessageVisible.value = true
-    dismissSuccessMessage(3e3)
+function pushToast(kind: LoginToast["kind"], message: string, sticky: boolean) {
+    const id = ++toastSeq
+    toasts.value.push({ id, kind, message, sticky })
+    if (!sticky) {
+        toastHideTimers.set(id, setTimeout(() => dismissToast(id), 3e3))
+    }
 }
-function showErrorMessage(message: string) {
-    errorMessage.value = message
-    errorMessageVisible.value = true
-    dismissErrorMessage(3e3)
+
+function showSuccessMessage(message: string, sticky = false) {
+    pushToast("success", message, sticky)
+}
+function showErrorMessage(message: string, sticky = false) {
+    pushToast("error", message, sticky)
 }
 
 async function getEmailCode() {
@@ -380,33 +378,34 @@ interface Captcha4Instance {
             </div>
         </div>
 
-        <!-- 消息提示 -->
-        <div class="pointer-events-none fixed bottom-6 right-6 z-50 space-y-4">
-            <!-- 错误消息 -->
-            <transition name="toast-slide">
+        <!-- 消息提示队列：多条共存，各自独立计时 -->
+        <div class="pointer-events-none fixed right-6 bottom-6 z-50 flex flex-col items-end gap-2">
+            <TransitionGroup name="toast-slide">
                 <div
-                    v-if="errorMessageVisible"
+                    v-for="toast in toasts"
+                    :key="toast.id"
                     role="alert"
-                    class="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xs border border-error/40 bg-base-100/85 px-3 py-2 shadow-lg backdrop-blur-md"
-                    @click="dismissErrorMessage()"
+                    title="点击关闭"
+                    class="pointer-events-auto flex max-w-md cursor-pointer items-start gap-2 rounded-xs border bg-base-100/85 px-4 py-2.5 shadow-lg backdrop-blur-md"
+                    :class="toast.kind === 'error' ? 'border-error/40 hover:border-error/70' : 'border-success/40 hover:border-success/70'"
+                    @click="dismissToast(toast.id)"
                 >
-                    <Icon icon="ri:error-warning-line" class="size-4 shrink-0 text-error" />
-                    <span class="text-xs text-base-content/85">{{ errorMessage }}</span>
+                    <Icon
+                        :icon="toast.kind === 'error' ? 'ri:error-warning-line' : 'ri:checkbox-circle-line'"
+                        class="mt-0.5 size-5 shrink-0"
+                        :class="toast.kind === 'error' ? 'text-error' : 'text-success'"
+                    />
+                    <span class="text-sm text-base-content/85">{{ toast.message }}</span>
+                    <button
+                        v-if="toast.sticky"
+                        class="ml-1 shrink-0 cursor-pointer rounded-xs p-0.5 text-base-content/50 transition-colors hover:bg-base-content/10 hover:text-base-content"
+                        aria-label="关闭提示"
+                        @click.stop="dismissToast(toast.id)"
+                    >
+                        <Icon icon="ri:close-line" class="block size-4" />
+                    </button>
                 </div>
-            </transition>
-
-            <!-- 成功消息 -->
-            <transition name="toast-slide">
-                <div
-                    v-if="successMessageVisible"
-                    role="alert"
-                    class="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xs border border-success/40 bg-base-100/85 px-3 py-2 shadow-lg backdrop-blur-md"
-                    @click="dismissSuccessMessage()"
-                >
-                    <Icon icon="ri:checkbox-circle-line" class="size-4 shrink-0 text-success" />
-                    <span class="text-xs text-base-content/85">{{ successMessage }}</span>
-                </div>
-            </transition>
+            </TransitionGroup>
         </div>
     </div>
 </template>
@@ -414,7 +413,11 @@ interface Captcha4Instance {
 /*
  * 提示条专用转场：只过渡 opacity 与 transform，不用 all。
  * 若用 all，长文本换成短文本时宽高会参与过渡，堆叠布局会被拉着慢慢变形。
+ * 队列增删时剩余提示用 move 过渡平滑归位；退场动画由 TransitionGroup 保留节点完成。
  */
+.toast-slide-move {
+    transition: transform 0.25s ease;
+}
 .toast-slide-enter-active {
     transition:
         opacity 0.24s ease-out,

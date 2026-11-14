@@ -55,11 +55,17 @@ export interface GltfTexture {
 /** 采样器本站只做透传（合并时整体搬运），不读字段。 */
 export type GltfSampler = Record<string, unknown>
 
-/** 染色元数据：只有这三个字段会被管线读写，其余透传。 */
+/** 染色元数据：导出器写入完整形态（与 `SkinMaterialMetadata` 一致），管线合并时只重映射 `textures` 里的索引，其余透传。 */
 export interface DnaColorizeMeta {
+    version?: 1
     kind?: string
+    role?: string
     parent?: string
+    vectors?: Record<string, [number, number, number]>
+    scalars?: Record<string, number>
     textures?: Record<string, number>
+    eyeAtlas?: { center: [number, number]; radius: number; channel: 0 | 1; pupil?: { center: [number, number]; radius: number } }
+    [key: string]: unknown
 }
 
 export interface GltfMaterial {
@@ -345,7 +351,7 @@ export function mergeGlbs(documents: GlbDocument[]): GlbDocument {
     ] as const
     const result: GlbDocument = {
         json: {
-            asset: { version: "2.0", generator: "dna-builder flora exporter" },
+            asset: { version: "2.0", generator: "dna-builder skin exporter" },
             scene: 0,
             scenes: [{ nodes: [] }],
             bufferViews: [],

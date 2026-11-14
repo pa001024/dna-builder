@@ -17,14 +17,35 @@ export interface SkinModelMetadata {
     captureVerified: boolean
 }
 
+/** 虹膜在图集每格内的位置：圆心与角膜缘外缘半径，都是 0~1 的 UV。导出时从贴图量得。 */
+export interface EyeAtlas {
+    center: [number, number]
+    radius: number
+    /** 虹膜图集画在哪套 UV 上：V10/V11 材质在 UV0，V14 在 UV1。导出时按网格实测。 */
+    channel: 0 | 1
+    /** 瞳孔中心与等效半径。着色器不读：瞳孔形态按「相对暗度 × 半径」从贴图直接取。 */
+    pupil?: { center: [number, number]; radius: number }
+}
+
+/**
+ * 虹膜图集画在哪套 UV 上的兜底规则：实测 202 个皮肤，`M_Player_Eye_V10`/`V11` 全部画在
+ * UV0（187 个），`V14` 分画在 UV1 的 0~1 / 1~2 两格（15 个）。旧导出包既没有 `eyeAtlas`
+ * 又丢了 UV1 时只能按这个判。
+ */
+export function eyeUvChannelFromParent(parent: string | undefined): 0 | 1 {
+    return /M_Player_Eye_V14/.test(parent ?? "") ? 1 : 0
+}
+
 export interface SkinMaterialMetadata {
     version: 1
-    kind: "packed" | "stocking" | "hair" | "hairPart" | "weapon" | "base" | "shadow"
+    kind: "packed" | "stocking" | "hair" | "hairPart" | "weapon" | "base" | "shadow" | "eye"
     role: "character" | "weapon"
     parent: string
     vectors: Record<string, LinearRgb>
     scalars: Record<string, number>
     textures: Record<string, number>
+    /** 仅 kind === "eye"：虹膜图集参数，缺失时渲染器退回内置默认值。 */
+    eyeAtlas?: EyeAtlas
 }
 
 export interface SkinHairDye {
@@ -45,7 +66,7 @@ export function validateSkinModelMetadata(value: unknown): SkinModelMetadata {
         !data.swatches ||
         typeof data.swatches !== "object"
     )
-        throw new Error("This GLB does not contain the skin dye metadata. Use tools/skin-model/export-flora.ts.")
+        throw new Error("This GLB does not contain the skin dye metadata. Use tools/skin-model/export-skin.ts.")
     for (const swatch of Object.values(data.swatches)) {
         if (!Array.isArray(swatch.linear) || swatch.linear.length !== 3 || swatch.linear.some(v => !Number.isFinite(v) || v < 0)) {
             throw new Error("Invalid linear dye color in GLB")

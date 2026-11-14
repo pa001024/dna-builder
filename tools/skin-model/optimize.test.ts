@@ -226,8 +226,8 @@ describe("cutout base detection", () => {
     it("marks Wing-shopskin and silk bases, where the B channel is the opacity mask", () => {
         const document = {
             json: {
-                images: [{ name: "T_Wing_D" }, { name: "T_Skin_D" }, { name: "T_Silk_D" }, { name: "T_Weapon_D" }],
-                textures: [{ source: 0 }, { source: 1 }, { source: 2 }, { source: 3 }],
+                images: [{ name: "T_Wing_D" }, { name: "T_Skin_D" }, { name: "T_Silk_D" }, { name: "T_Weapon_D" }, { name: "T_Eye_D" }],
+                textures: [{ source: 0 }, { source: 1 }, { source: 2 }, { source: 3 }, { source: 4 }],
                 materials: [
                     {
                         name: "MI_Wing",
@@ -248,6 +248,7 @@ describe("cutout base detection", () => {
                         },
                     },
                     { name: "MI_Shadow", extras: { dnaColorize: { kind: "shadow", textures: {} } } },
+                    { name: "MI_Eye", extras: { dnaColorize: { kind: "eye", parent: "M_Player_Eye_V14.0", textures: { 颜色贴图: 4 } } } },
                 ],
                 bufferViews: [],
                 accessors: [],
@@ -260,7 +261,7 @@ describe("cutout base detection", () => {
             },
             binary: new Uint8Array(),
         }
-        expect([...cutoutBaseNames(document)].sort()).toEqual(["T_Silk_D", "T_Wing_D"])
+        expect([...cutoutBaseNames(document)].sort()).toEqual(["T_Eye_D", "T_Silk_D", "T_Wing_D"])
     })
 })
 

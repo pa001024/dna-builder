@@ -284,7 +284,7 @@ export function extractAnimation(document: GlbDocument): GlbDocument | undefined
     }))
     return {
         json: {
-            asset: { version: "2.0", generator: "dna-builder flora exporter" },
+            asset: { version: "2.0", generator: "dna-builder skin exporter" },
             scenes: [{ nodes: [] }],
             scene: 0,
             nodes: [],

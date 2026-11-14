@@ -30,7 +30,11 @@ export type TextureSpec = { scale: number; lossless: true } | { scale: number; q
 
 /** 按材质语义分的四档贴图预算 */
 export type TextureBudget = {
-    /** 剪影写在底图通道里（丝绸层与羽片的 B 通道），有损会翻掉阈值附近的纹素 */
+    /**
+     * 剪影写在底图通道里（丝绸层与羽片的 B 通道）：分辨率不能降。
+     * 降采样会把腿上的荆棘/蛛网细线糊成粗块，alphaTest 一裁就是断线和锯齿，
+     * 所以这一档固定全分辨率、高质量有损（无损 WebP 每张要 2~4 MiB，全量发布放不下）。
+     */
     cutout: TextureSpec
     /** 混合贴图、丝绸混合贴图、SDF 等遮罩 */
     mask: TextureSpec
@@ -41,14 +45,16 @@ export type TextureBudget = {
 }
 
 export const DEFAULT_TEXTURE_BUDGET: TextureBudget = {
-    cutout: { scale: 0.45, lossless: true },
+    cutout: { scale: 1, quality: 95 },
     mask: { scale: 0.3, lossless: true },
     normal: { scale: 0.4, quality: 90 },
     color: { scale: 0.5, quality: 88 },
 }
 
-/** 体积上限重试：整套预算等比缩一档，直到压进上限或到底。 */
-const BUDGET_LADDER = [1, 0.85, 0.7, 0.6, 0.5]
+/** 体积上限重试：只缩遮罩/法线/颜色，剪影分辨率保持不动（见 cutout 档说明）。 */
+const BUDGET_LADDER = [1, 0.7, 0.5]
+/** 连剪影一起缩的兜底档：非剪影档缩到 0.5 仍超限才用。 */
+const CUTOUT_LADDER = [0.6, 0.4]
 
 export type CompressOptions = {
     /** 要剔除的材质名，默认武器 */
@@ -95,7 +101,10 @@ export function classifyTextures(document: GlbDocument): Map<string, keyof Textu
         const textures = data.textures ?? {}
         const silk = textures.丝绸混合贴图 !== undefined
         const wing = String(data.parent ?? "").includes("M_Player_Wing_ShopSkin")
-        assign(imageName(textures.时装BaseClor ?? textures.颜色贴图), silk || wing ? "cutout" : "color")
+        // 眼球底图是全模型唯一按像素级细节看的贴图（虹膜花纹、瞳孔边缘、高光斑），
+        // 缩到 0.5 会把瞳孔糊成一团，和剪影同档保分辨率。
+        const eye = data.kind === "eye"
+        assign(imageName(textures.时装BaseClor ?? textures.颜色贴图), silk || wing || eye ? "cutout" : "color")
         assign(imageName(textures.混合贴图), "mask")
         assign(imageName(textures.丝绸混合贴图), "mask")
         assign(imageName(textures.法线贴图), "normal")
@@ -295,6 +304,31 @@ const NARROWED: Record<string, { componentType: number; stride: number }> = {
     NORMAL: { componentType: 5120, stride: 4 },
 }
 
+/**
+ * 蒙皮权重收窄成 u8：逐分量四舍五入后，把和校准回 255（权重 1）。
+ * 着色器的蒙皮矩阵不做归一化，权重和偏离 1 等于把顶点整体缩放；误差几毫米在面部这种近距离网格上
+ * 会变成肉眼可见的多边形块状伪影（眼睛/嘴周边尤其明显）。
+ */
+export function quantizeWeights(source: Float32Array, vertexCount: number): Uint8Array {
+    const data = new Uint8Array(vertexCount * 4)
+    for (let vertex = 0; vertex < vertexCount; vertex++) {
+        const base = vertex * 4
+        let sourceSum = 0
+        for (let channel = 0; channel < 4; channel++) {
+            const value = Math.min(1, Math.max(0, source[base + channel]))
+            sourceSum += value
+            data[base + channel] = Math.round(value * 255)
+        }
+        const sum = data[base] + data[base + 1] + data[base + 2] + data[base + 3]
+        // 源权重本身不归一（损坏资产）时保持原样，不替它编造权重。
+        if (!sum || Math.abs(sourceSum - 1) > 1e-3) continue
+        let largest = 0
+        for (let channel = 1; channel < 4; channel++) if (data[base + channel] > data[base + largest]) largest = channel
+        data[base + largest] = Math.min(255, Math.max(0, data[base + largest] + 255 - sum))
+    }
+    return data
+}
+
 /** 把单个 primitive 重排 + 收窄 + meshopt 压缩，返回压缩前后的字节数。 */
 async function compressPrimitive(
     document: GlbDocument,
@@ -344,11 +378,10 @@ async function compressPrimitive(
             stride = narrow.stride
             componentType = narrow.componentType
             normalized = true
-            data = new Uint8Array(vertexCount * stride)
             if (name === "WEIGHTS_0") {
-                for (let v = 0; v < vertexCount; v++)
-                    for (let c = 0; c < 4; c++) data[v * stride + c] = Math.round(Math.min(1, Math.max(0, source[v * 4 + c])) * 255)
+                data = quantizeWeights(source, vertexCount)
             } else {
+                data = new Uint8Array(vertexCount * stride)
                 for (let v = 0; v < vertexCount; v++)
                     for (let c = 0; c < 3; c++)
                         data[v * stride + c] = Math.max(-127, Math.min(127, Math.round(source[v * 3 + c] * 127))) & 0xff
@@ -442,10 +475,15 @@ async function compressAnimation(document: GlbDocument, source: GlbDocument): Pr
 }
 
 /** 按比例缩放整套贴图预算。 */
-function scaleBudget(budget: TextureBudget, factor: number): TextureBudget {
-    const scale = (spec: TextureSpec): TextureSpec =>
-        "lossless" in spec ? { scale: spec.scale * factor, lossless: true } : { scale: spec.scale * factor, quality: spec.quality }
-    return { cutout: scale(budget.cutout), mask: scale(budget.mask), normal: scale(budget.normal), color: scale(budget.color) }
+function scaleBudget(budget: TextureBudget, factor: number, cutoutFactor = 1): TextureBudget {
+    const scale = (spec: TextureSpec, f: number): TextureSpec =>
+        "lossless" in spec ? { scale: spec.scale * f, lossless: true } : { scale: spec.scale * f, quality: spec.quality }
+    return {
+        cutout: scale(budget.cutout, cutoutFactor),
+        mask: scale(budget.mask, factor),
+        normal: scale(budget.normal, factor),
+        color: scale(budget.color, factor),
+    }
 }
 
 /** 压成发布体积。 */
@@ -453,11 +491,18 @@ export async function compressGlb(bytes: Uint8Array, options: CompressOptions = 
     const base = options.texture ?? DEFAULT_TEXTURE_BUDGET
     if (!options.maxBytes) return compressOnce(bytes, { ...options, texture: base })
     // 不同皮肤的贴图张数与分辨率差别很大，固定档位压出来的体积会飘。
-    // 逐档缩到上限内，取第一个达标的；都不达标就用最小那档。
+    // 先只缩遮罩/法线/颜色保住剪影分辨率，仍超限才连剪影一起缩；取第一个达标的。
     let result = await compressOnce(bytes, { ...options, texture: base })
     for (const factor of BUDGET_LADDER.slice(1)) {
         if (result.glb.length <= options.maxBytes) break
         result = await compressOnce(bytes, { ...options, texture: scaleBudget(base, factor) })
+    }
+    for (const cutoutFactor of CUTOUT_LADDER) {
+        if (result.glb.length <= options.maxBytes) break
+        result = await compressOnce(bytes, {
+            ...options,
+            texture: scaleBudget(base, BUDGET_LADDER.at(-1)!, cutoutFactor),
+        })
     }
     return result
 }

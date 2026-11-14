@@ -7,9 +7,21 @@ import { SIDEBAR_DOCKED_PATHS, SIDEBAR_LOCKED_PATHS } from "@/utils/entry-util"
 /** 全局提示自动隐藏延时（毫秒） */
 const MESSAGE_HIDE_DELAY = 3000
 
-// 自动隐藏定时器句柄放在模块级：定时器对象不可序列化，进入 Pinia state 会被响应式包装且污染 devtools
-let errorMessageHideTimer: ReturnType<typeof setTimeout> | undefined
-let successMessageHideTimer: ReturnType<typeof setTimeout> | undefined
+/** 右下角同时堆叠的提示上限，超出时优先挤掉最早的非手动关闭提示 */
+const MAX_TOAST_COUNT = 5
+
+/** 全局提示项：右下角堆叠，多条共存，各自独立计时 */
+export interface ToastItem {
+    id: number
+    kind: "error" | "success"
+    message: string
+    /** 为 true 时不自动消失，需手动关闭 */
+    sticky: boolean
+}
+
+// 提示自增 id 与自动隐藏定时器放在模块级：定时器对象不可序列化，进入 Pinia state 会被响应式包装且污染 devtools
+let toastSeq = 0
+const toastHideTimers = new Map<number, ReturnType<typeof setTimeout>>()
 
 export interface ITab {
     name?: string
@@ -88,11 +100,8 @@ export const useUIStore = defineStore("ui", {
             sidebarExpand: false,
             loading: false,
             title: "",
-            errorMessage: "",
-            successMessage: "",
-            // 提示条可见性：与文本分离，退场动画期间文本必须保留，否则元素会先塌成只剩图标再播动画
-            errorMessageVisible: false,
-            successMessageVisible: false,
+            // 右下角提示队列：多条共存，各自独立计时；TransitionGroup 接管退场动画，无需可见性/文本分离
+            toasts: [] as ToastItem[],
             dialogVisible: false,
             dialogTitle: "",
             dialogContent: "",
@@ -204,34 +213,52 @@ export const useUIStore = defineStore("ui", {
             this.sidebarLayout = defaultSidebarLayout(this.tabs)
         },
         /**
-         * 收起错误提示：只切可见性，保留文本供退场动画渲染。
-         * @param delay 延时毫秒；不传则立即收起
+         * 推入一条提示：自动消失与手动关闭共用队列，超出上限时优先挤掉最早的非手动关闭提示。
+         * @param kind 提示类型
+         * @param message 提示文本
+         * @param sticky 是否需手动关闭
+         * @returns 提示 id，可用于 dismissToast 主动关闭
          */
-        dismissErrorMessage(delay = 0) {
-            clearTimeout(errorMessageHideTimer)
-            errorMessageHideTimer = setTimeout(() => {
-                this.errorMessageVisible = false
-            }, delay)
+        pushToast(kind: ToastItem["kind"], message: string, sticky: boolean) {
+            const id = ++toastSeq
+            this.toasts.push({ id, kind, message, sticky })
+            while (this.toasts.length > MAX_TOAST_COUNT) {
+                // 新推入的不参与被挤候选：优先挤最早的非手动关闭，兜底挤最早的一条，保证新消息总能显示
+                const victim = this.toasts.find(toast => toast.id !== id && !toast.sticky) ?? this.toasts.find(toast => toast.id !== id)
+                if (!victim) break
+                this.dismissToast(victim.id)
+            }
+            if (!sticky) {
+                toastHideTimers.set(
+                    id,
+                    setTimeout(() => this.dismissToast(id), MESSAGE_HIDE_DELAY)
+                )
+            }
+            return id
         },
-        /**
-         * 收起成功提示：只切可见性，保留文本供退场动画渲染。
-         * @param delay 延时毫秒；不传则立即收起
-         */
-        dismissSuccessMessage(delay = 0) {
-            clearTimeout(successMessageHideTimer)
-            successMessageHideTimer = setTimeout(() => {
-                this.successMessageVisible = false
-            }, delay)
+        /** 关闭指定提示，顺带清理其自动隐藏定时器 */
+        dismissToast(id: number) {
+            const timer = toastHideTimers.get(id)
+            if (timer !== undefined) {
+                clearTimeout(timer)
+                toastHideTimers.delete(id)
+            }
+            const index = this.toasts.findIndex(toast => toast.id === id)
+            if (index >= 0) this.toasts.splice(index, 1)
         },
         showErrorMessage(...messages: any[]) {
-            this.errorMessage = messages.join(" ")
-            this.errorMessageVisible = true
-            this.dismissErrorMessage(MESSAGE_HIDE_DELAY)
+            return this.pushToast("error", messages.join(" "), false)
         },
         showSuccessMessage(...messages: any[]) {
-            this.successMessage = messages.join(" ")
-            this.successMessageVisible = true
-            this.dismissSuccessMessage(MESSAGE_HIDE_DELAY)
+            return this.pushToast("success", messages.join(" "), false)
+        },
+        /** 手动关闭变体：不自动消失，右下角带关闭按钮，点击整条或按钮均可关闭 */
+        showStickyErrorMessage(...messages: any[]) {
+            return this.pushToast("error", messages.join(" "), true)
+        },
+        /** 手动关闭变体：不自动消失，右下角带关闭按钮，点击整条或按钮均可关闭 */
+        showStickySuccessMessage(...messages: any[]) {
+            return this.pushToast("success", messages.join(" "), true)
         },
         timeDistancePassed(time: number) {
             const now = this.timeNow

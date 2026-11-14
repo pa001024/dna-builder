@@ -1,6 +1,8 @@
 import {
     AnimationMixer,
     Box3,
+    BufferAttribute,
+    type BufferGeometry,
     DataTexture,
     DirectionalLight,
     DoubleSide,
@@ -15,15 +17,18 @@ import {
     PerspectiveCamera,
     PMREMGenerator,
     Scene,
+    SkinnedMesh,
     Sphere,
     SRGBColorSpace,
     Texture,
     Vector3,
+    Vector4,
     WebGLRenderer,
 } from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 import { type GLTF, GLTFLoader } from "three/addons/loaders/GLTFLoader.js"
 import {
+    eyeUvChannelFromParent,
     type LinearRgb,
     resolveHairModelDye,
     resolveSkinModelColor,
@@ -56,8 +61,10 @@ uniform sampler2D dnaNormal;
 uniform sampler2D dnaEmitMap;
 uniform sampler2D dnaMaskMap;
 uniform sampler2D dnaDyeMap;
+uniform vec4 dnaEyeAtlas;
 varying vec2 vDnaUv;
 varying vec2 vDnaUv1;
+varying vec2 vDnaEyeUv;
 varying float vDnaStocking;
 vec3 dnaLinear(vec3 c) {
     return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
@@ -107,6 +114,21 @@ interface DyeMaterial {
     uniforms: Record<string, { value: any }>
 }
 
+/** 单只眼的归一化框：UV0 模式是巩膜小方块的包围盒，位置模式是均值与最大半径。 */
+interface EyeFrame {
+    centerX: number
+    centerY: number
+    sizeX: number
+    sizeY: number
+}
+
+/** 公告板卡片：展开到世界空间的相对尺寸（乘顶点色 R 得半边长，单位米）。 */
+interface BillboardCard {
+    size: number
+    /** 展开后卡片可能超出折叠状态包围球的最大距离，用于放宽视锥剔除。 */
+    extent: number
+}
+
 export class SkinModelRenderer {
     private renderer: WebGLRenderer
     private scene = new Scene()
@@ -123,6 +145,8 @@ export class SkinModelRenderer {
     private request = 0
     private disposed = false
     private visible = true
+    /** 画布是否拿到 MSAA：alpha-to-coverage 只在多重采样缓冲上有效。 */
+    private msaa = false
     private center = new Vector3()
     private distance = 1
     private visibility = () => {
@@ -137,6 +161,7 @@ export class SkinModelRenderer {
 
     constructor(host: HTMLElement) {
         this.renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" })
+        this.msaa = this.renderer.getContext().getContextAttributes()?.antialias === true
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         this.renderer.outputColorSpace = SRGBColorSpace
         this.renderer.setClearColor(0x000000, 0)
@@ -257,21 +282,40 @@ export class SkinModelRenderer {
                 original.map(material => {
                     const data = material.userData.dnaColorize as SkinMaterialMetadata | undefined
                     if (data?.version !== 1) throw new Error(`Missing dye material metadata: ${material.name}`)
-                    return this.createMaterial(data, material as MeshStandardMaterial, hasUv1)
+                    return this.createMaterial(data, material as MeshStandardMaterial, hasUv1, mesh.name)
                 })
             )
             for (const material of original) {
-                for (const value of Object.values(material)) if (value instanceof Texture) this.textures.add(value)
+                for (const value of Object.values(material)) {
+                    if (!(value instanceof Texture)) continue
+                    // 直接复用原材质的贴图（无染色底图的 billboard/装饰件）也要开各向异性，避免远景闪烁。
+                    value.anisotropy = this.renderer.capabilities.getMaxAnisotropy()
+                    this.textures.add(value)
+                }
                 material.dispose()
             }
             const color = mesh.geometry.getAttribute("color")
             if (color) mesh.geometry.setAttribute("dnaMask", color)
             else {
                 // 没有顶点遮罩的部件不走丝袜分支。
-                const { BufferAttribute } = await import("three")
                 const mask = new Float32Array(mesh.geometry.getAttribute("position").count * 4).fill(1)
                 mesh.geometry.setAttribute("dnaMask", new BufferAttribute(mask, 4))
             }
+            // 眼球虹膜画在 UV0 还是 UV1 上逐角色不同（V10/V11 → UV0，V14 → UV1），
+            // 由导出器实测后写进材质元数据；取错那套只能看到一圈巩膜。
+            // 旧导出包没有这个字段（或整包丢了 UV1）时按材质版本号兜底。
+            const eyeMaterial = original.find(
+                material => (material.userData.dnaColorize as SkinMaterialMetadata | undefined)?.kind === "eye"
+            )
+            if (eyeMaterial) {
+                const data = eyeMaterial.userData.dnaColorize as SkinMaterialMetadata
+                const channel = data.eyeAtlas?.channel ?? eyeUvChannelFromParent(data.parent)
+                mesh.geometry.setAttribute("dnaEyeUv", this.eyeUv(mesh.geometry, channel))
+            }
+            // 公告板（珍珠链、帽子上的花）是 UV 图集里的一块小卡片：四角顶点位置完全相同，
+            // 只有 UV 不同，游戏在顶点着色器里按 UV 把卡片展开。不展开就是四个重合点，链子整条消失。
+            const card = this.billboardCard(mesh)
+            if (card) for (const material of Array.isArray(converted) ? converted : [converted]) this.expandBillboard(material, card, mesh)
             mesh.material = Array.isArray(mesh.material) ? converted : converted[0]
             let parent: Object3D | null = mesh
             while (parent && !parent.userData.dnaRole) parent = parent.parent
@@ -283,6 +327,28 @@ export class SkinModelRenderer {
             return undefined
         }
         this.scene.add(gltf.scene)
+        // 帽子和身体在游戏里是两个独立组件：帽子只跟随头部骨，角色动画里针对默认头饰的
+        // headparts 轨道（与帽子自己的绑定姿态不一致）不能作用到它，否则帽檐会被甩到头顶上。
+        const hatBones = new Set<string>()
+        for (const mesh of meshes) {
+            if (!(mesh instanceof SkinnedMesh) || !/hat/i.test(mesh.name)) continue
+            const weights = mesh.geometry.getAttribute("skinWeight")
+            const indices = mesh.geometry.getAttribute("skinIndex")
+            if (!weights || !indices) continue
+            for (let vertex = 0; vertex < weights.count; vertex++)
+                for (let channel = 0; channel < 4; channel++) {
+                    if (!weights.getComponent(vertex, channel)) continue
+                    const bone = mesh.skeleton.bones[indices.getComponent(vertex, channel)]
+                    if (bone) hatBones.add(bone.name)
+                }
+        }
+        if (hatBones.size)
+            for (const clip of gltf.animations) {
+                clip.tracks = clip.tracks.filter(track => {
+                    const separator = track.name.lastIndexOf(".")
+                    return separator < 0 || !hatBones.has(track.name.slice(0, separator))
+                })
+            }
         if (gltf.animations.length) {
             this.mixer = new AnimationMixer(gltf.scene)
             this.actions = gltf.animations.map(clip => ({ name: clip.name, action: this.mixer!.clipAction(clip) }))
@@ -311,6 +377,204 @@ export class SkinModelRenderer {
         this.resetCamera()
     }
 
+    /**
+     * 眼球虹膜 UV：游戏把虹膜图集画在哪套 UV 上逐角色不同——V10/V11 材质直接画在 UV0 上
+     * （左右眼共用同一块），V14 则分画在 UV1 的 0~1 / 1~2 两格（UV0 只剩巩膜纯色区）。
+     * 通道由导出器实测写进 `eyeAtlas.channel`；该通道的 UV 缺失（旧导出包）时按仿射补一份，
+     * 实测在 512px 贴图上残差约 7px，与真 UV1 在视觉上无法区分。**不要**按法线做球面投影：
+     * 眼球是一层扁壳加一圈外翻背壳（深度/直径只有 0.24），球面投影会把朝后的背壳也投进虹膜，
+     * 整只眼变成银色金属球。
+     */
+    private eyeUv(geometry: BufferGeometry, channel: 0 | 1): BufferAttribute {
+        const source = geometry.getAttribute(channel === 1 ? "uv1" : "uv0") as BufferAttribute | undefined
+        if (source) return source
+        const position = geometry.getAttribute("position") as BufferAttribute
+        const uv0 = geometry.getAttribute("uv0") as BufferAttribute | undefined
+        const uv = new Float32Array(position.count * 2)
+        // 每只眼单独求归一化框：UV0 落在巩膜小方块里，位置框则是眼球自身的包围盒。
+        const frame = this.eyeFrames(position, uv0)
+        for (let vertex = 0; vertex < position.count; vertex++) {
+            const side = position.getX(vertex) >= 0 ? 1 : -1
+            const box = frame[side > 0 ? 1 : 0]
+            let u: number
+            let v: number
+            if (uv0) {
+                const x = (side * (uv0.getX(vertex) - box.centerX)) / box.sizeX
+                const y = (uv0.getY(vertex) - box.centerY) / box.sizeY
+                u = 0.5 + 0.845817 * x + 0.063637 * y + 0.00741
+                v = 0.5 - 0.019985 * x + 0.878396 * y - 0.005785
+            } else {
+                const x = (side * (position.getX(vertex) - box.centerX)) / box.sizeX
+                const y = (position.getY(vertex) - box.centerY) / box.sizeY
+                u = 0.5 + 0.513083 * x - 0.057407 * y + 0.014071
+                v = 0.5 - 0.025682 * x - 0.486675 * y + 0.030063
+            }
+            // 右眼进 tile 1：显式加 1，换成 ClampToEdge 采样器也不会采错格。
+            uv[vertex * 2] = side > 0 ? u + 1 : u
+            uv[vertex * 2 + 1] = v
+        }
+        return new BufferAttribute(uv, 2)
+    }
+
+    /**
+     * @description 按 x 的符号把眼球顶点分成左右两组，各求一个归一化框。
+     * UV0 模式取 UV0 的包围盒（巩膜小方块），位置模式取顶点的均值与最大半径。
+     */
+    private eyeFrames(position: BufferAttribute, uv0: BufferAttribute | undefined): EyeFrame[] {
+        return [-1, 1].map(side => {
+            const frame: EyeFrame = { centerX: 0, centerY: 0, sizeX: 1, sizeY: 1 }
+            let minX = Number.POSITIVE_INFINITY
+            let maxX = Number.NEGATIVE_INFINITY
+            let minY = Number.POSITIVE_INFINITY
+            let maxY = Number.NEGATIVE_INFINITY
+            let sumX = 0
+            let sumY = 0
+            let count = 0
+            for (let vertex = 0; vertex < position.count; vertex++) {
+                if ((position.getX(vertex) >= 0 ? 1 : -1) !== side) continue
+                const x = uv0 ? uv0.getX(vertex) : position.getX(vertex)
+                const y = uv0 ? uv0.getY(vertex) : position.getY(vertex)
+                minX = Math.min(minX, x)
+                maxX = Math.max(maxX, x)
+                minY = Math.min(minY, y)
+                maxY = Math.max(maxY, y)
+                sumX += x
+                sumY += y
+                count++
+            }
+            if (!count) return frame
+            if (uv0) {
+                frame.centerX = (minX + maxX) / 2
+                frame.centerY = (minY + maxY) / 2
+                frame.sizeX = maxX - minX
+                frame.sizeY = maxY - minY
+                return frame
+            }
+            frame.centerX = sumX / count
+            frame.centerY = sumY / count
+            // 位置模式的半径取到该眼最远顶点，归一化后正好落在 [-1, 1]。
+            let radius = 0
+            for (let vertex = 0; vertex < position.count; vertex++) {
+                if ((position.getX(vertex) >= 0 ? 1 : -1) !== side) continue
+                radius = Math.max(radius, Math.hypot(position.getX(vertex) - frame.centerX, position.getY(vertex) - frame.centerY))
+            }
+            frame.sizeX = radius
+            frame.sizeY = radius
+            return frame
+        })
+    }
+
+    /**
+     * @description 公告板卡片网格：四角顶点位置几乎重合、只有 UV 落在图集里的一小块上，
+     * 游戏在顶点着色器里按 UV 把卡片展开成朝向相机的四边形。这里把每张卡的角点符号
+     * 预先写进 `dnaCardCorner` 顶点属性（-1~1），并按卡片间距反推展开尺寸。
+     * 不是卡片网格返回 undefined。
+     */
+    private billboardCard(mesh: Mesh): BillboardCard | undefined {
+        const material = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material
+        const data = material.userData.dnaColorize as SkinMaterialMetadata | undefined
+        if (!(data?.parent ?? "").includes("M_Player_Billboard")) return undefined
+        const uv = mesh.geometry.getAttribute("uv")
+        const color = mesh.geometry.getAttribute("color")
+        const position = mesh.geometry.getAttribute("position")
+        if (!uv || !color || !position || position.count < 8) return undefined
+        // 同一张卡的四角位置重合（误差远小于卡片间距），按位置聚类成卡片；UV 落在图集里的一小块上，
+        // 角点符号就是 UV 相对这块矩形中心的偏移。不能按索引两两配对：不同皮肤的三角剖分
+        // 顺序不一致（SP07/SP14 的四边形并不共享对角线），会切出错位的卡片。
+        const bounds = new Box3().setFromBufferAttribute(position as BufferAttribute)
+        const epsilon = Math.max(1e-5, bounds.getSize(new Vector3()).length() * 1e-4)
+        const corners = new Float32Array(position.count * 2)
+        const cards: number[][] = []
+        for (let vertex = 0; vertex < position.count; vertex++) {
+            const card = cards.find(candidate => {
+                const anchor = candidate[0]
+                return (
+                    Math.abs(position.getX(vertex) - position.getX(anchor)) <= epsilon &&
+                    Math.abs(position.getY(vertex) - position.getY(anchor)) <= epsilon &&
+                    Math.abs(position.getZ(vertex) - position.getZ(anchor)) <= epsilon
+                )
+            })
+            if (card) card.push(vertex)
+            else cards.push([vertex])
+        }
+        for (const card of cards) {
+            if (card.length < 3) return undefined
+            let minU = Number.POSITIVE_INFINITY
+            let maxU = Number.NEGATIVE_INFINITY
+            let minV = Number.POSITIVE_INFINITY
+            let maxV = Number.NEGATIVE_INFINITY
+            for (const vertex of card) {
+                minU = Math.min(minU, uv.getX(vertex))
+                maxU = Math.max(maxU, uv.getX(vertex))
+                minV = Math.min(minV, uv.getY(vertex))
+                maxV = Math.max(maxV, uv.getY(vertex))
+            }
+            const halfU = (maxU - minU) / 2
+            const halfV = (maxV - minV) / 2
+            // 退化卡片（UV 全相同）在游戏里也是不可见的，保持原样即可。
+            if (halfU <= 0 || halfV <= 0) continue
+            for (const vertex of card) {
+                corners[vertex * 2] = (uv.getX(vertex) - (minU + maxU) / 2) / halfU
+                corners[vertex * 2 + 1] = (uv.getY(vertex) - (minV + maxV) / 2) / halfV
+            }
+        }
+        // 卡片间距与自身尺寸成正比（顶点色 R 是每张卡的半径），按最近邻间距的中位数反推展开尺寸：
+        // 卡片边长取间距的 0.36 倍时相邻珠子之间才留出游戏里那种细缝，取满间距会连成一串糖葫芦。
+        const centers = cards.map(card => [position.getX(card[0]), position.getY(card[0]), position.getZ(card[0])])
+        const ratios: number[] = []
+        for (let a = 0; a < centers.length; a++) {
+            const radius = Math.max(...cards[a].map(vertex => color.getX(vertex)))
+            if (radius <= 0) return undefined
+            let nearest = Number.POSITIVE_INFINITY
+            for (let b = 0; b < centers.length; b++) {
+                if (a === b) continue
+                nearest = Math.min(
+                    nearest,
+                    Math.hypot(centers[a][0] - centers[b][0], centers[a][1] - centers[b][1], centers[a][2] - centers[b][2])
+                )
+            }
+            if (Number.isFinite(nearest)) ratios.push(nearest / radius)
+        }
+        if (!ratios.length) return undefined
+        ratios.sort((a, b) => a - b)
+        const size = 0.18 * ratios[Math.floor(ratios.length / 2)]
+        let extent = 0
+        for (const card of cards) extent = Math.max(extent, Math.max(...card.map(vertex => color.getX(vertex))) * size)
+        mesh.geometry.setAttribute("dnaCardCorner", new BufferAttribute(corners, 2))
+        return { size, extent }
+    }
+
+    /** @description 卡片网格的顶点着色器改成「按预存的角点朝相机方向展开」，并让法线直接面向相机。 */
+    private expandBillboard(material: MeshStandardMaterial, card: BillboardCard, mesh: Mesh) {
+        const original = material.onBeforeCompile
+        const baseKey = material.customProgramCacheKey()
+        material.onBeforeCompile = (shader, renderer) => {
+            original.call(material, shader, renderer)
+            shader.uniforms.dnaCardSize = { value: card.size }
+            shader.vertexShader = `uniform float dnaCardSize;\n${shader.vertexShader}`.replace(
+                "#include <project_vertex>",
+                // 视图空间展开：四角顶点位置相同，按每张卡的角点符号推出方向，
+                // 半边长 = 顶点色 R（每张卡的半径）× dnaCardSize。
+                `vec4 mvPosition = modelViewMatrix * vec4(transformed, 1.0);
+                mvPosition.xy += dnaCardCorner * (dnaMask.r * dnaCardSize);
+                gl_Position = projectionMatrix * mvPosition;`
+            )
+            // 卡片面向相机，切线空间就是视图空间：法线贴图的 XY 直接当视图空间方向，Z 朝相机。
+            shader.fragmentShader = shader.fragmentShader.replace(
+                "#include <normal_fragment_maps>",
+                `vec4 dnaCardNormal = texture2D(dnaNormal, vDnaUv);
+                vec2 dnaCardXY = (dnaCardNormal.rg * 2.0 - 1.0) * dnaNormalStrength;
+                normal = normalize(vec3(dnaCardXY, sqrt(max(0.0, 1.0 - dot(dnaCardXY, dnaCardXY)))));`
+            )
+        }
+        material.customProgramCacheKey = () => `${baseKey}-billboard`
+        material.side = DoubleSide
+        // 折叠状态下卡片是几个重合点，包围球远小于展开后的真实范围，不放大就会被视锥剔除。
+        mesh.geometry.computeBoundingSphere()
+        const sphere = mesh.geometry.boundingSphere
+        if (sphere) sphere.radius += card.extent
+    }
+
     private dataTexture(index: number | undefined): Promise<Texture> {
         if (index === undefined) throw new Error("Required game texture is missing")
         // clone 按索引缓存：公共贴图（引擎内置图、共享法线/混合图）被多个材质引用时只克隆、上传一份
@@ -321,6 +585,8 @@ export class SkinModelRenderer {
                 const texture = original.clone()
                 texture.colorSpace = NoColorSpace
                 texture.flipY = false
+                // 各向异性过滤：远景/斜视角下花纹（纹身、蕾丝）才不会因 mip 采样闪成噪点。
+                texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy()
                 texture.needsUpdate = true
                 this.textures.add(texture)
                 return texture
@@ -331,7 +597,12 @@ export class SkinModelRenderer {
     }
 
     /** 保留游戏编码贴图，用 Shader chunk 替换基础色和 BC7 法线；灯光仍是 Three 的近似预览。 */
-    private async createMaterial(data: SkinMaterialMetadata, source: MeshStandardMaterial, hasUv1: boolean): Promise<MeshStandardMaterial> {
+    private async createMaterial(
+        data: SkinMaterialMetadata,
+        source: MeshStandardMaterial,
+        hasUv1: boolean,
+        meshName: string
+    ): Promise<MeshStandardMaterial> {
         if (data.kind === "shadow") {
             const shadow = source.clone()
             shadow.depthWrite = false
@@ -377,7 +648,7 @@ export class SkinModelRenderer {
                 : data.kind === "hair"
                   ? ["头发染色1", "头发染色2", "头发染色3", "头发染色1", "头发染色2", "头发染色3"]
                   : Array.from({ length: 6 }, (_, i) => `染色${i + 1}`)
-        const uniforms = {
+        const uniforms: Record<string, { value: any }> = {
             dnaBase: { value: base },
             dnaNormal: { value: normal },
             dnaEmitMap: { value: emit },
@@ -397,10 +668,35 @@ export class SkinModelRenderer {
             dnaDyeMap: { value: dyeMap },
             dnaWingDye: { value: wingDye ? 1 : 0 },
         }
-        const silk = data.kind === "packed" && data.textures["丝绸混合贴图"] !== undefined
+        // 眼睛材质：虹膜底图画在哪套 UV 上逐角色不同（V10/V11 在 UV0，V14 在 UV1），
+        // 由导出器实测后写进元数据。取错那套只能看到一圈巩膜。
+        const eye = data.kind === "eye"
+        // 虹膜在图集每格内的位置由导出器从贴图量得（圆心 xy、外缘半径 z、瞳孔半径 w）。
+        // 每个角色的瞳孔形状都不同（圆形/竖缝/星芒），所以不能写死某一张贴图的数值。
+        const atlas = data.eyeAtlas
+        uniforms.dnaEyeAtlas = {
+            value: new Vector4(atlas?.center[0] ?? 0.5, atlas?.center[1] ?? 0.5, atlas?.radius ?? 0.4785, atlas?.pupil?.radius ?? 0),
+        }
+        const silkIndex = data.textures["丝绸混合贴图"]
+        const silk = data.kind === "packed" && silkIndex !== undefined
+        // 游戏丝绸的 `_Aniso_M` 与 three 的 anisotropyMap 同口径：RG 是切空间方向、B 是强度。
+        const silkMap = silkIndex === undefined ? undefined : await this.dataTexture(silkIndex)
+        // 丝绸剪影只存在于需要透出皮肤层的身体网格：帽子的底图 B 是各向异性遮罩，
+        // 按剪影裁 alpha 会在帽檐上挖出大片空洞。
+        const silkCutout = !/hat/i.test(meshName)
+        // 能量层（贴身能量衣/纹身纹路）同样用底图 B 作剪影：B 为 0 处游戏里透空，露出皮肤。
+        // 混合贴图 R 是灰度覆盖图，墨迹浓淡与半透明感都来自它，不能二值化。
+        const energyCutout = silkCutout && data.kind === "packed" && (data.parent ?? "").includes("M_Player_Energy_ShopSkin")
+        // 半透明丝绸（SilkTran：贴身薄纱、纱裙）和皮肤只差 0.2~0.6mm，游戏里是透明度混合的薄纱。
+        // 按剪影硬裁会让整片纱压住皮肤和白色衬衣（染色后远看只剩一片色块），掠射角还会和皮肤
+        // 互相遮挡闪成噪点；这里改走 alpha 混合，不透明度取底图 B 的布料覆盖率并整体压低。
+        const silkTran = silkCutout && data.kind === "packed" && (data.parent ?? "").includes("M_Player_SilkTran_ShopSkin")
         // 羽片是卡片网格，真实剪影只写在底图 B 通道（alpha 恒为 1）；游戏 Wing 着色器用它做不透明遮罩，
         // 直接采样 alpha 会把整张卡片渲染成硬边矩形。
         const wingMask = !silk && wingShader
+        // 公告板卡片同理：packed 版把珠子/花瓣的剪影写在底图 B（alpha 恒为 1），
+        // 只有 base 版（SP15）用 alpha 通道。取错通道就是整块不透明方片，或整条链子消失。
+        const billboardMask = data.kind === "packed" && (data.parent ?? "").includes("M_Player_Billboard")
         const common = {
             name: source.name,
             map: base,
@@ -408,52 +704,90 @@ export class SkinModelRenderer {
             // 顶点色在游戏里是遮罩（丝袜/自发光分区），不参与 albedo 相乘。
             vertexColors: false,
             metalness: data.scalars["金属度"] ?? 0,
-            alphaTest: source.alphaTest,
+            // 能量层/薄纱走灰度 alpha 混合：保留 alphaTest 会把墨迹、纱网硬切成洞。
+            alphaTest: energyCutout || silkTran ? 0 : source.alphaTest,
             // 皮肤网格的躯干/上臂三角形绕序与腿部相反，单面剔除会把胸口、上臂整片裁掉。
             side: data.kind === "stocking" ? DoubleSide : source.side,
-            transparent: source.transparent,
+            transparent: source.transparent || energyCutout || silkTran,
+            depthWrite: !energyCutout && !silkTran,
+            // 能量层/薄纱整体只比皮肤高零点几毫米，远景深度精度不足时会和皮肤互相遮挡闪成噪点；
+            // 用多边形偏移把整层朝相机提一点，稳定压住皮肤。
+            polygonOffset: energyCutout || silkTran,
+            polygonOffsetFactor: -1,
+            polygonOffsetUnits: -2,
         }
-        // 丝绸是布料，用物理材质的 sheen 补上游戏里靠各向异性高光给出的布面光泽。
+        // 眼睛是贴在脸上的薄壳：底图 alpha 全为 1，但游戏里它必须压过脸部皮肤，否则眼白会被
+        // 脸部网格的深度遮住。eye 走不透明渲染并给一点负向偏移，保证在脸前面。
+        if (eye) {
+            common.transparent = false
+            common.alphaTest = 0
+            common.depthWrite = true
+            common.polygonOffset = true
+            common.polygonOffsetFactor = -1
+            common.polygonOffsetUnits = -1
+        }
+        // 丝绸是布料：游戏靠各向异性高光给布面光泽，直接上白色 sheen 会在帽檐这种大平面上
+        // 变成一整片银白反射。改用游戏自己的 Aniso 贴图做各向异性，sheen 只留一点布面柔光。
         const material: MeshStandardMaterial = silk
             ? new MeshPhysicalMaterial({
                   ...common,
-                  roughness: 0.42,
-                  sheen: 1,
-                  sheenRoughness: 0.3,
+                  roughness: 0.5,
+                  sheen: 0.2,
+                  sheenRoughness: 0.5,
                   sheenColor: 0xf4f7ff,
-                  specularIntensity: 0.9,
+                  specularIntensity: data.scalars["AnisotropySpecularScale"] ?? 0.5,
+                  anisotropy: data.scalars["Anisotropy"] ?? 0,
+                  ...(silkMap ? { anisotropyMap: silkMap } : {}),
               })
             : new MeshStandardMaterial({
                   ...common,
                   roughness: data.kind === "stocking" ? 0.55 : 0.8,
               })
         material.userData.dnaColorize = data
+        // 远景下 alphaTest 的硬边缘会随相机移动闪成噪点：交给 MSAA 做覆盖率平滑（alpha-to-coverage），
+        // 只对不透明材质启用；半透明/能量层的 alphaTest 已关掉。
+        material.alphaToCoverage = this.msaa && material.alphaTest > 0 && !material.transparent
         material.onBeforeCompile = shader => {
             Object.assign(shader.uniforms, uniforms)
-            shader.vertexShader =
-                `attribute vec4 dnaMask; attribute vec2 uv1; varying vec2 vDnaUv; varying vec2 vDnaUv1; varying float vDnaStocking;\n${shader.vertexShader}`.replace(
-                    "#include <uv_vertex>",
-                    // 顶点色是游戏里的分区遮罩（G=丝袜覆盖），不是 albedo 相乘项；用平滑过渡避免 UV 岛边界硬边。
-                    "#include <uv_vertex>\nvDnaUv = uv; vDnaUv1 = uv1; vDnaStocking = smoothstep(0.15, 0.85, dnaMask.g);"
-                )
+            shader.vertexShader = `attribute vec4 dnaMask; attribute vec2 uv1; attribute vec2 dnaEyeUv; attribute vec2 dnaCardCorner;
+varying vec2 vDnaUv; varying vec2 vDnaUv1; varying vec2 vDnaEyeUv; varying float vDnaStocking;
+${shader.vertexShader}`.replace(
+                "#include <uv_vertex>",
+                // 顶点色是游戏里的分区遮罩（G=丝袜覆盖），不是 albedo 相乘项；用平滑过渡避免 UV 岛边界硬边。
+                `#include <uv_vertex>
+vDnaUv = uv; vDnaUv1 = uv1; vDnaEyeUv = dnaEyeUv; vDnaStocking = smoothstep(0.15, 0.85, dnaMask.g);`
+            )
             let map = "vec4 dnaSample = texture2D(dnaBase, vDnaUv); diffuseColor *= vec4(dnaLinear(dnaSample.rgb), dnaSample.a);"
             if (data.kind === "packed" || data.kind === "weapon")
                 map = `vec4 dnaSample = texture2D(dnaBase, vDnaUv);
-                ${wingMask ? "dnaSample.a = dnaSample.b;" : ""}
+                ${wingMask || billboardMask ? "dnaSample.a = dnaSample.b;" : ""}
                 vec3 dnaDyed = dnaWingDye > 0.5
                     ? dnaWing(dnaSample.rgb, texture2D(dnaDyeMap, vDnaUv1))
                     : dnaPacked(dnaSample.rgb, dnaNormalWeight(texture2D(dnaNormal, vDnaUv).rgb));
+                ${energyCutout ? "dnaSample.a *= dnaSample.b * texture2D(dnaMaskMap, vDnaUv).r;" : ""}
                 diffuseColor *= vec4(dnaDyed, dnaSample.a);`
             if (data.kind === "packed" && data.textures["丝绸混合贴图"] !== undefined)
                 map = `
                 vec4 dnaSample = texture2D(dnaBase, vDnaUv);
                 // 丝绸与其它部位共用同一套色带：色号来自底图线性 G，染色 1~6 全参与。
                 // 早先把缎面/蕾丝硬编码成染色1/染色6，2~5 号位怎么选都不变色。
-                vec3 dnaSilk = dnaPacked(dnaSample.rgb, dnaNormalWeight(texture2D(dnaNormal, vDnaUv).rgb));
-                // 底图 B 是丝绸层的剪影：躯干、手套、鞋处处为 1，腿部只沿荆棘藤蔓为 1、其余为 0。
-                // 覆盖率直接进 alpha，交给 alphaTest 丢弃：腿部非藤蔓处不渲染，露出下面的皮肤层。
+                // 薄纱（SilkTran）的染色覆盖取混合贴图 G 的花纹遮罩，花纹外是白色底布：
+                // 底图 RGB 只是色号/亮度的编码载体，直接拿来当基色会在纱面上压出灰紫色，
+                // 整片纱染色后远看又只剩一片色块（SP15 结丝夜行的白/红染色最明显）。
+                ${
+                    silkTran
+                        ? `vec3 dnaSilk = mix(
+                    vec3(dnaLinear1(dnaSample.r)),
+                    dnaSample.r * dnaRamp(dnaZone(dnaSample.g)),
+                    smoothstep(0.45, 0.8, texture2D(dnaMaskMap, vDnaUv).g)
+                );`
+                        : "vec3 dnaSilk = dnaPacked(dnaSample.rgb, dnaNormalWeight(texture2D(dnaNormal, vDnaUv).rgb));"
+                }
+                // 底图 B 是丝绸层的剪影：躯干、手套、鞋处处为 1，腿部只沿荆棘/蛛网细线为 1、其余为 0。
+                // 细线在贴图里是抗锯齿的半透明边，阈值取高（0.35~0.55）会把线芯之外全裁掉，
+                // 只剩断续的碎点；按线芯的覆盖率裁（0.08~0.25）才连成游戏里那种实心网纹。
                 diffuseColor.rgb = dnaSilk;
-                diffuseColor.a *= smoothstep(0.35, 0.55, dnaSample.b);
+                ${silkCutout ? (silkTran ? "diffuseColor.a *= dnaSample.b * 0.55;" : "diffuseColor.a *= smoothstep(0.08, 0.25, dnaSample.b);") : ""}
                 `
             if (data.kind === "weapon")
                 map =
@@ -465,6 +799,11 @@ export class SkinModelRenderer {
                 diffuseColor *= vec4(dnaHair, dnaSample.a);`
             if (data.kind === "hairPart")
                 map = "vec4 dnaSample = texture2D(dnaBase, vDnaUv); diffuseColor *= vec4(dnaPart(dnaSample.rgb), dnaSample.a);"
+            if (eye)
+                // 眼球是一颗球：底图 UV0 只覆盖巩膜，虹膜花纹在 UV1 上（游戏 PS 用 TEXCOORD.zw 采样）。
+                // 旧导出包没有 UV1 时用 eyeUv() 按仿射补出的 dnaEyeUv。
+                map = `vec4 dnaIris = texture2D(dnaBase, vDnaEyeUv);
+                diffuseColor *= vec4(dnaLinear(dnaIris.rgb), dnaIris.a);`
             shader.fragmentShader =
                 COMMON_SHADER +
                 shader.fragmentShader.replace("#include <map_fragment>", map).replace(
@@ -485,19 +824,68 @@ export class SkinModelRenderer {
                     float dnaFacing = clamp(1.0 - (pow(max(1.0 - dnaNV, 0.0001), dnaFresnel) * 1.27 - 0.27), 0.0, 1.0);
                     dnaFacing = min(dnaFacing, ${data.scalars["高光范围"] ?? 0.08});
                     vec4 dnaKnitSample = texture2D(dnaMaskMap, vDnaUv);
-                    // 混合贴图 G 是编织/藤蔓覆盖率（皮肤≈0.6、网纹≈0.72、藤蔓≥0.8），并入暗部权重；
-                    // R 是 AO 凹缝，只作亮度衰减。B 通道恒 0，不能按 vec3 整体线性化使用。
-                    float dnaPattern = smoothstep(0.62, 0.9, dnaKnitSample.g);
+                    // 混合贴图 B 是丝袜/编织的覆盖遮罩（与本作其它材质 B=剪影的约定一致），G 只是覆盖区内的花纹；
+                    // 只按 G 判定会在 G 饱和的皮肤上把整片裸露皮肤压成暗部色（逐光追雪的 G≈0.98）。
+                    float dnaCoverage = smoothstep(0.35, 0.55, dnaKnitSample.b);
+                    float dnaPattern = smoothstep(0.62, 0.9, dnaKnitSample.g) * dnaCoverage;
                     vec3 dnaStock = diffuseColor.rgb * mix(dnaLight, dnaDark, max(dnaFacing, dnaPattern));
-                    dnaStock *= mix(vec3(1.0), vec3(dnaKnitSample.r), vDnaStocking);
-                    diffuseColor.rgb = mix(diffuseColor.rgb, dnaStock, vDnaStocking * dnaControl);
+                    // R 是编织层的 AO 凹缝，只在覆盖区里衰减亮度：裸皮区的 R 可能为 0（领口、拼接缝），
+                    // 无条件相乘会把脖子、胸口压成纯黑。
+                    dnaStock *= mix(vec3(1.0), vec3(dnaKnitSample.r), vDnaStocking * dnaCoverage);
+                    // 覆盖区外是裸皮：直接保留底图颜色。脸部走另一套材质（base）不套这层亮部/暗部染色，
+                    // 若整片都乘亮部颜色，脸和身体的肤色会对不上（逐光追雪的脸偏白、脖子偏粉）。
+                    diffuseColor.rgb = mix(diffuseColor.rgb, dnaStock, vDnaStocking * dnaControl * dnaCoverage);
                 `
                 )
-            else
+            else if (eye) {
+                // 眼睛是 unlit 材质：游戏 PS 全片没有 N·L / BRDF，最终色由贴图亮度直接驱动，
+                // 走 PBR 会被场景灯照成一片死白。下面四支的系数按参考图与贴图分区取色的
+                // 中位色拟合，七区整体残差 RMS 约 9.6 级 sRGB（最大 19）。
+                shader.fragmentShader = shader.fragmentShader
+                    .replace(
+                        "#include <emissivemap_fragment>",
+                        `
+                    vec4 dnaEyeTex = texture2D(dnaBase, vDnaEyeUv);
+                    vec3 dnaEyeBase = dnaLinear(dnaEyeTex.rgb);
+                    vec3 dnaEyeSclera = dnaEyeBase * 1.06 * vec3(1.06, 0.97, 0.95);
+                    // 图集第 3 格（u>=2）是眼角装饰片，游戏靠 SDF 遮罩把它们藏在眼睑后面。
+                    // 我们不做 SDF，按巩膜处理——套虹膜曲线会在眼角浮出一块发白的矩形。
+                    if (vDnaEyeUv.x >= 2.0) {
+                        totalEmissiveRadiance = dnaEyeSclera;
+                    } else {
+                    float dnaEyeLum = dot(dnaEyeBase, vec3(0.3, 0.59, 0.11));
+                    // 每格一只眼：虹膜圆心与半径由导出器从该角色的贴图量得（dnaEyeAtlas.xy/z）。
+                    vec2 dnaEyeC = vec2(fract(vDnaEyeUv.x), vDnaEyeUv.y) - dnaEyeAtlas.xy;
+                    float dnaEyeR = length(dnaEyeC) / dnaEyeAtlas.z;
+
+                    // ① 虹膜底色：负斜率曲线（抬暗部、收亮部）。参考图虹膜三环几乎同色，
+                    // 对比全在瞳孔与高光上，曲线做成正斜率会让整只眼糊成一片灰。
+                    vec3 dnaEyeIris = dnaEyeBase * (1.445 - 0.593 * dnaEyeLum * dnaEyeLum) * vec3(1.06, 0.95, 0.99);
+                    // ② 角膜缘（虹膜外缘那圈深色）：参考图里它比贴图暗约 1.6 倍，且环更宽。
+                    dnaEyeIris *= mix(1.0, 0.60, smoothstep(0.78, 0.88, dnaEyeR) * (1.0 - smoothstep(1.00, 1.08, dnaEyeR)));
+                    // ③ 瞳孔：用「贴图相对暗度 × 半径」联合遮罩。只用亮度会误伤外环（贴图里
+                    // 外环比瞳孔只亮 2.6 倍），只用半径则画不出星芒/竖缝这些逐角色不同的形态。
+                    float dnaEyeDark = 1.0 - clamp(dnaEyeLum / 0.54, 0.0, 1.0);
+                    float dnaEyePupil = smoothstep(0.30, 0.60, dnaEyeDark) * (1.0 - smoothstep(0.55, 0.85, dnaEyeR));
+                    dnaEyeIris *= 1.0 - 0.90 * dnaEyePupil;
+                    // ④ 上眼睑阴影：参考图虹膜上半被压到下半的约 1/4，贴图里没有这条信息，
+                    // 只能按虹膜内的纵坐标补。
+                    dnaEyeIris *= mix(0.20, 0.81, smoothstep(0.12, 0.50, 0.5 + 0.5 * dnaEyeC.y / dnaEyeAtlas.z));
+                    // 游戏 PS 还会叠一层 matcap 高光，但 T_Matcap19 是上半亮、下半全黑的硬边贴图，
+                    // 任何穹面映射都会在虹膜中央压出一条横贯整只眼的直线；贴图自带的亮斑已够用。
+                    totalEmissiveRadiance = mix(dnaEyeSclera, dnaEyeIris, 1.0 - smoothstep(0.98, 1.10, dnaEyeR));
+                    }
+                `
+                    )
+                    .replace(
+                        "vec3 outgoingLight = totalDiffuse + totalSpecular + totalEmissiveRadiance;",
+                        "vec3 outgoingLight = totalEmissiveRadiance;"
+                    )
+            } else
                 shader.fragmentShader = shader.fragmentShader.replace(
                     "#include <emissivemap_fragment>",
                     `
-                totalEmissiveRadiance += texture2D(dnaEmitMap, vDnaUv).r * dnaEmission * dnaEmissionStrength * dnaHasEmission;
+                totalEmissiveRadiance += dnaLinear1(texture2D(dnaEmitMap, vDnaUv).r) * dnaEmission * dnaEmissionStrength * dnaHasEmission;
             `
                 )
             shader.fragmentShader = shader.fragmentShader.replace(
@@ -508,7 +896,8 @@ export class SkinModelRenderer {
                 `
             )
         }
-        material.customProgramCacheKey = () => `dna-${JSON.stringify(data)}`
+        // 剪裁开关会进着色器源码，同一份材质元数据在帽子与身体上必须编译成两个程序。
+        material.customProgramCacheKey = () => `dna-${JSON.stringify(data)}-${silkCutout ? 1 : 0}-${energyCutout ? 1 : 0}`
         this.dyeMaterials.push({ metadata: data, uniforms })
         return material
     }

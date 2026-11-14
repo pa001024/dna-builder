@@ -709,9 +709,13 @@ function previewTheme(name: string) {
                                 <input type="radio" name="lab-theme" class="theme-controller radio radio-xs" value="ez" disabled />theme
                             </label>
                         </div>
-                        <span class="text-[11px] text-base-content/55">toast（静态展示）</span>
-                        <div class="toast" style="position: static">
-                            <div class="alert alert-success text-xs"><span>toast 通知</span></div>
+                        <span class="text-[11px] text-base-content/55">toast（静态展示，多条堆叠 + 手动关闭）</span>
+                        <div class="toast flex-col gap-2" style="position: static">
+                            <div class="alert alert-success text-sm"><span>toast 通知</span></div>
+                            <div class="alert alert-error max-w-md text-sm">
+                                <span>需手动关闭的 toast 通知</span>
+                                <button class="btn btn-xs btn-ghost btn-circle" aria-label="关闭提示">✕</button>
+                            </div>
                         </div>
                     </div>
                 </div>

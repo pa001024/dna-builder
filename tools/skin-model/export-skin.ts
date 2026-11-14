@@ -3,10 +3,19 @@ import { mkdir, stat } from "node:fs/promises"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { deflateSync } from "node:zlib"
-import { appendAccessors, appendBufferView, mergeGlbs, readAccessorBytes, readGlb, writeGlb } from "../../apps/web/src/utils/skin-model-glb"
+import {
+    appendAccessors,
+    appendBufferView,
+    type GlbDocument,
+    mergeGlbs,
+    readAccessorBytes,
+    readGlb,
+    writeGlb,
+} from "../../apps/web/src/utils/skin-model-glb"
 import { parseArgs } from "../models-pack"
 import { appendUeAnimation, readUeAnim } from "./anim"
 import { characterDirectory, readSkinCatalog, type SkinCatalogEntry } from "./catalog"
+import { decodePng, detectEyeAtlas, eyeUvChannelFromParent, pickEyeUvChannel } from "./eye-atlas"
 import { cutoutBaseNames, isMaskTexture, optimizeGlb } from "./optimize"
 import { attachEffectRoots, bindToSkeleton } from "./rebind"
 import { pickTintRow } from "./tint-row"
@@ -27,7 +36,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 const EFFECT_ATTACH_BONE = "spine_03"
 const { options, flags } = parseArgs(process.argv.slice(2))
 if (flags.has("help")) {
-    console.log(`用法: bun tools/skin-model/export-flora.ts [选项]
+    console.log(`用法: bun tools/skin-model/export-skin.ts [选项]
 
   --all                 导出全部带 SkinTag 的皮肤（默认）
   --skin <id>           只导出指定皮肤，可重复
@@ -52,7 +61,7 @@ const mappings = resolve(
     options.get("mappings") ?? "D:/dev/dna-unpack/4.27.2-0+++UE4+Release-4.27-EM/Mappings/4.27.2-0+++UE4+Release-4.27-EM.usmap"
 )
 const outputDir = resolve(options.get("dir") ?? join(root, "models-src"))
-const work = options.has("cache") ? resolve(options.get("cache")!) : join(root, ".tmp/flora-export", "cache")
+const work = options.has("cache") ? resolve(options.get("cache")!) : join(root, ".tmp/skin-export", "cache")
 
 /** 引擎内置纯色贴图（/Engine/EngineResources/*）的颜色，避免为一格纯色去解引擎 pak。 */
 const ENGINE_COLORS: Record<string, [number, number, number, number]> = {
@@ -392,7 +401,7 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
     // 皮肤品阶效果生物（翅膀等）：独立骨架，合并后挂到脊柱骨骼上。
     const effectMeshes = new Set(entry.effectMeshes)
     meshes.push(...entry.effectMeshes)
-    const documents = []
+    const documents: GlbDocument[] = []
     const skeletons: UeModelBone[] = []
     const effectRoots: string[] = []
     for (const declared of meshes) {
@@ -492,6 +501,8 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
     }
 
     const embedded = new Map<string, number>()
+    /** 贴图索引 → 原始 PNG 字节：眼睛图集要在这里量虹膜几何，不能再解一遍 GLB。 */
+    const embeddedBytes = new Map<number, Uint8Array>()
     /** 贴图导出失败返回 undefined：缺一张图不该让整只皮肤作废。 */
     async function embed(path: string): Promise<number | undefined> {
         const normalized = path.replace(/\.\d+$/, "").replace(/^EM\/Content\//, "/Game/")
@@ -515,6 +526,7 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
         const image = model.json.images.push({ bufferView, mimeType: "image/png", name: normalized.split("/").at(-1) }) - 1
         const texture = model.json.textures.push({ source: image }) - 1
         embedded.set(normalized, texture)
+        embeddedBytes.set(texture, bytes)
         return texture
     }
 
@@ -541,9 +553,10 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
     const hairRowFor = (meshName: string) => pickTintRow(hairTint, meshName)
 
     for (const material of model.json.materials) {
+        const materialName = material.name ?? ""
         // 眼影是纯半透明黑，没有贴图也没有染色参数，各版本共用一套固定值（V10/V14…）。
         // 名字有 `M_EyeShadow_V10` 与 `MI_EyeShadow_V10` 两种写法。
-        if (/^M_?I?_?EyeShadow_V\d+$/i.test(material.name)) {
+        if (/^M_?I?_?EyeShadow_V\d+$/i.test(materialName)) {
             material.pbrMetallicRoughness = { baseColorFactor: [0, 0, 0, 0.2], metallicFactor: 0, roughnessFactor: 1 }
             material.alphaMode = "BLEND"
             material.extras = {
@@ -563,7 +576,7 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
         // 也可能差大小写（MI_FuLuo vs MI_Fuluo），且不一定与网格同目录：直接按名字搜资产再逐个试。
         // 每个部件网格的 Materials 目录都要试：身体材质躺在身体网格旁，不在头发网格旁。
         const meshDirs = [...new Set(entry.partMeshes.map(mesh => mesh.split("/Mesh/")[0]))]
-        const names = [material.name, material.name.replace(/^MI_/, ""), `MI_${material.name.replace(/^MI_/, "")}`]
+        const names = [materialName, materialName.replace(/^MI_/, ""), `MI_${materialName.replace(/^MI_/, "")}`]
         const uniqueNames = [...new Set(names)]
         const candidates = [
             material.extras?.dnaMaterialPath,
@@ -617,6 +630,8 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
             if (index !== undefined) textures[texture.name] = index
         }
         const parent = inspected.parent ?? ""
+        // 眼睛（M_Player_Eye_V*）单独一类：虹膜底图按 UV1 采样、自发光/高光是另一套参数，
+        // 混进 base 会按 UV0 采样底图，只能得到一圈灰蓝色的巩膜。
         const kind = parent.includes("ShopSkin")
             ? "packed"
             : parent.includes("M_Player_Skin")
@@ -625,11 +640,13 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
                 ? "hair"
                 : parent.includes("HairPart")
                   ? "hairPart"
-                  : "base"
+                  : parent.includes("M_Player_Eye")
+                    ? "eye"
+                    : "base"
         // 默认染色：材质实例自己的参数就是游戏里的默认外观，**优先保留**；
         // 数据表只补材质没写的槽（如 `暗部颜色`、部分 `自发光颜色`）。
         // 反过来用表覆盖会把材质精心调过的颜色冲掉，整只皮肤配色失真。
-        const meshHint = material.name.replace(/^MI_/, "").replace(/^Com_/, "")
+        const meshHint = materialName.replace(/^MI_/, "").replace(/^Com_/, "")
         const fillFromRow = (row: Record<string, any> | undefined) => {
             for (const [name, value] of Object.entries(row ?? {})) {
                 if (name === "菲涅尔指数") {
@@ -660,6 +677,55 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
         material.alphaCutoff = inspected.opacityMaskClipValue ?? 0.3333
         material.doubleSided = inspected.twoSided ?? false
         material.extras = { dnaColorize: { version: 1, kind, role: "character", parent, vectors, scalars, textures } }
+        // 虹膜在图集每格内的圆心与半径逐角色不同（瞳孔形状也各异：圆形/竖缝/星芒），
+        // 必须从贴图量出来写进元数据，渲染器才能画出正确的角膜缘与瞳孔遮罩。
+        // 虹膜画在 UV0 还是 UV1 也逐角色不同（V10/V11 → UV0，V14 → UV1），同样按网格实测。
+        if (kind === "eye") {
+            const png = embeddedBytes.get(base)
+            const decoded = png ? decodePng(png) : undefined
+            const atlas = decoded ? detectEyeAtlas(decoded.rgba, decoded.width, decoded.height) : undefined
+            const channel = eyeUvChannel(material, parent)
+            if (atlas) {
+                const data = material.extras?.dnaColorize as Record<string, unknown> | undefined
+                data &&
+                    (data.eyeAtlas = {
+                        center: atlas.center,
+                        radius: atlas.radius,
+                        channel,
+                        ...(atlas.pupil ? { pupil: atlas.pupil } : {}),
+                    })
+            } else {
+                // 图集量不出（Yeer 那种左右眼合在一张图、Baiheng 的虹膜不居中）时仍要写 UV 通道，
+                // 否则渲染器会退回「优先 UV1」把 187 个 V11 角色的眼睛全取错格。
+                const data = material.extras?.dnaColorize as Record<string, unknown> | undefined
+                data && (data.eyeAtlas = { channel })
+                console.warn(`  eye atlas not detected, using default iris geometry: ${material.name}`)
+            }
+        }
+    }
+
+    /** 找出该材质所在网格的 UV 集，判断虹膜图集画在哪套 UV 上。 */
+    function eyeUvChannel(material: { name?: string }, parent: string): 0 | 1 {
+        for (const mesh of model.json.meshes ?? []) {
+            for (const primitive of mesh.primitives) {
+                const target = model.json.materials?.[primitive.material ?? -1]
+                if (target?.name !== material.name) continue
+                const read = (slot: string) => {
+                    const accessor = primitive.attributes[slot]
+                    if (accessor === undefined) return undefined
+                    const bytes = readAccessorBytes(model, accessor)
+                    return new Float32Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))
+                }
+                const position = read("POSITION")
+                if (!position) continue
+                const uv1 = read("TEXCOORD_1")
+                // 没有 UV1 就别看 UV0 的跨度了：旧管线丢 UV1 时 UV0 会「看起来铺满」，
+                // 但真虹膜其实在 UV1 上。此时按材质版本号判。
+                if (!uv1) return eyeUvChannelFromParent(parent)
+                return pickEyeUvChannel(read("TEXCOORD_0"), uv1, position)
+            }
+        }
+        return eyeUvChannelFromParent(parent)
     }
 
     // 效果网格（翅膀）里的水面/能量类材质没有染色底图，渲染器只能退化成不透明纯色，

@@ -17,6 +17,7 @@ import { applyLanguageFontClass, changeLanguage } from "@/i18n"
 import { AI_CONTEXT_WINDOW_STORAGE_KEY, migrateLegacyAiMaxTokens, resolveAiContextWindow, resolveAiMaxTokens } from "@/utils/ai-config"
 import type { CustomTheme } from "@/utils/customTheme"
 import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
+import { isDnaLoginInvalid } from "@/utils/dna-login"
 import { parseDnaUserImportJson } from "@/utils/dna-user-import"
 import type { CustomFontMeta } from "@/utils/font-storage"
 import {
@@ -524,7 +525,12 @@ export const useSettingStore = defineStore("setting", {
                         fetchFn: tauriFetch,
                     })
                     const res = await api.loginLog()
-                    if (res.msg.includes("失效") || res.msg.includes("过期")) {
+                    if (isDnaLoginInvalid(res)) {
+                        // 无 refreshToken 的账号无法自动续期：直接吊销并按未登录处理
+                        if (!user.refreshToken) {
+                            this.invalidateDNAAPI()
+                            return undefined
+                        }
                         const refreshRes = await api.refreshToken(user.refreshToken)
                         if (refreshRes.is_success && refreshRes.data?.token) {
                             api.token = refreshRes.data.token

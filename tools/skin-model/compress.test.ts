@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { type GlbDocument, type GltfMaterial, readGlb } from "../../apps/web/src/utils/skin-model-glb"
-import { classifyTextures, compressGlb, DEFAULT_TEXTURE_BUDGET } from "./compress"
+import { classifyTextures, compressGlb, DEFAULT_TEXTURE_BUDGET, quantizeWeights } from "./compress"
 
 /** 造一个带蒙皮、逆绑定矩阵与动画的最小 GLB，用来回归「压缩不能丢 skin 数据」。 */
 function skinnedGlb(jointCount = 2): Uint8Array {
@@ -161,9 +161,16 @@ describe("texture budget classification", () => {
         expect(kinds.get("T_Face_N")).toBe("normal")
     })
 
-    it("ships a default budget whose cutout tier is lossless", () => {
-        expect(DEFAULT_TEXTURE_BUDGET.cutout.lossless).toBe(true)
-        expect(DEFAULT_TEXTURE_BUDGET.cutout.scale).toBeLessThanOrEqual(1)
+    it("keeps the eye base at full resolution, because the iris is read pixel by pixel", () => {
+        // 虹膜花纹、瞳孔边缘、高光斑都只有几个像素宽；缩到 color 档的 0.5 会把瞳孔糊成一团。
+        const document = fixture([{ name: "MI_Eye", extras: { dnaColorize: { kind: "eye", textures: { 颜色贴图: 0 } } } }], ["T_Eye_D"])
+        expect(classifyTextures(document).get("T_Eye_D")).toBe("cutout")
+    })
+
+    it("keeps the cutout tier at full resolution with a high-quality lossy encode", () => {
+        // 剪影（腿部荆棘/蛛网细线）降采样会被 alphaTest 裁成断线与锯齿，这一档必须保持原分辨率。
+        expect(DEFAULT_TEXTURE_BUDGET.cutout.scale).toBe(1)
+        expect("quality" in DEFAULT_TEXTURE_BUDGET.cutout && DEFAULT_TEXTURE_BUDGET.cutout.quality).toBeGreaterThanOrEqual(90)
         expect(DEFAULT_TEXTURE_BUDGET.mask.lossless).toBe(true)
     })
 })
@@ -191,5 +198,30 @@ describe("compression keeps skin data", () => {
             expect(input.count).toBe(2)
             expect(json.bufferViews[input.bufferView!]).toBeDefined()
         }
+    })
+})
+
+describe("narrowed skin weights", () => {
+    it("re-normalizes quantized weights so the sum stays exactly 1", () => {
+        // 0.5/0.3/0.2 逐个四舍五入会得到 128/77/51，和是 256；着色器不做归一化，
+        // 多出来的 1/255 等于把顶点整体放大，面部近景会露出块状伪影。
+        const source = new Float32Array([0.5, 0.3, 0.2, 0, 0.25, 0.25, 0.25, 0.25, 1, 0, 0, 0, 0.7, 0.2, 0.1, 0])
+        const data = quantizeWeights(source, 4)
+        for (let vertex = 0; vertex < 4; vertex++) {
+            const sum = data[vertex * 4] + data[vertex * 4 + 1] + data[vertex * 4 + 2] + data[vertex * 4 + 3]
+            expect(sum).toBe(255)
+        }
+        // 校准只动最大分量，未使用的通道保持 0
+        expect(data[3]).toBe(0)
+        expect(data[15]).toBe(0)
+        expect(data[8]).toBe(255)
+    })
+
+    it("leaves all-zero and non-normalized weights untouched", () => {
+        const source = new Float32Array([0, 0, 0, 0, 0.5, 0, 0, 0])
+        const data = quantizeWeights(source, 2)
+        expect(Array.from(data.subarray(0, 4))).toEqual([0, 0, 0, 0])
+        // 源权重和不是 1（损坏资产）：保持量化结果，不替它编造权重
+        expect(Array.from(data.subarray(4, 8))).toEqual([128, 0, 0, 0])
     })
 })
