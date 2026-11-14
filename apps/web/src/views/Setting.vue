@@ -1480,11 +1480,12 @@ onUnmounted(() => {
                             </span>
                             <div class="flex shrink-0 items-center gap-2">
                                 <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
+                                <!-- 保持常挂载：定时清理在开关获焦时启动也不会卸载控件，避免键盘焦点丢失 -->
                                 <input
-                                    v-else
                                     type="checkbox"
                                     class="toggle toggle-secondary"
                                     :checked="setting.memCleanEnabled"
+                                    :disabled="setting.memCleanBusy"
                                     :aria-label="$t('setting.memCleanAuto')"
                                     @change="onMemCleanToggle"
                                 />
