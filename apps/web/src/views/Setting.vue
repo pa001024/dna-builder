@@ -1481,9 +1481,11 @@ onUnmounted(() => {
                             <div class="flex shrink-0 items-center gap-2">
                                 <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
                                 <input
+                                    v-else
                                     type="checkbox"
                                     class="toggle toggle-secondary"
                                     :checked="setting.memCleanEnabled"
+                                    :aria-label="$t('setting.memCleanAuto')"
                                     @change="onMemCleanToggle"
                                 />
                             </div>
