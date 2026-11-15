@@ -1,4 +1,5 @@
 import { ref } from "vue"
+import { env } from "@/env"
 import { buildCdnUrl, getOtherCdnBase, readResponseBytesWithProgress } from "./cdn"
 
 /**
@@ -107,15 +108,12 @@ function modelCacheGet(key: string): string | undefined {
     return url
 }
 
-function isDev(): boolean {
-    return Boolean(import.meta.env.DEV)
-}
-
 function fallbackBases(): string[] {
-    if (isDev()) return [DEV_BASE_URL]
     const primary = buildCdnUrl(REMOTE_PREFIX).replace(/\/$/, "")
     const alternate = `${getOtherCdnBase()}/${REMOTE_PREFIX}`.replace(/\/$/, "")
-    return alternate === primary ? [primary] : [primary, alternate]
+    const remote = alternate === primary ? [primary] : [primary, alternate]
+    // 本地 mock 是否参与由 env.ts 的 useLocalModelMock 决定；关闭后开发环境也直接走云端
+    return env.useLocalModelMock ? [DEV_BASE_URL, ...remote] : remote
 }
 
 function patch(patch: Partial<ModelDownloadState>): void {
@@ -131,18 +129,18 @@ export function markModelParsing(): void {
 }
 
 /** 拉取模型清单：先读清单才知道该下哪个文件、多大；所有源都失败时抛错。 */
-async function fetchModelManifest(): Promise<ModelManifest> {
+async function fetchModelManifest(): Promise<{ manifest: ModelManifest; base: string }> {
     const bases = fallbackBases()
     for (const base of bases) {
         const cached = manifestCache.get(base)
-        if (cached) return cached
+        if (cached) return { manifest: cached, base }
         try {
             const response = await fetch(`${base}/${MANIFEST_FILE}`, { cache: "no-store" })
             if (!response.ok) continue
             const manifest = (await response.json()) as ModelManifest
             if (!Array.isArray(manifest?.parts) || !Array.isArray(manifest?.skins)) continue
             manifestCache.set(base, manifest)
-            return manifest
+            return { manifest, base }
         } catch (error) {
             console.warn(`模型清单源失败，换下一个源: ${base}`, error)
         }
@@ -275,7 +273,8 @@ function createProgressPump(total: number): { report: (loaded: number) => void; 
 /** 下载指定皮肤的部件并拼成完整模型，返回可直接交给 GLTFLoader 的 URL（blob:）。 */
 export async function downloadModel(id: number | string, signal?: AbortSignal): Promise<string> {
     const key = String(id)
-    const manifest = await fetchModelManifest()
+    // 部件必须跟清单同源：本地 mock 给出清单却缺文件时，不能拿云端部件拼进 mock 的清单
+    const { manifest, base: manifestBase } = await fetchModelManifest()
     const skin = findSkin(manifest, key)
     if (!skin) throw new Error(`清单中没有模型 ${key}`)
     const entries = skin.parts.map(name => findPart(manifest, name)).filter((entry): entry is ModelPartEntry => Boolean(entry))
@@ -295,6 +294,8 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
     const pump = createProgressPump(total)
 
     const bases = fallbackBases()
+    // 清单来自哪个源就先从哪个源取部件，其余源只做兜底
+    const partBases = [manifestBase, ...bases.filter(base => base !== manifestBase)]
     const loaded = new Map<string, number>()
     const report = (name: string, value: number) => {
         loaded.set(name, value)
@@ -307,7 +308,7 @@ export async function downloadModel(id: number | string, signal?: AbortSignal): 
         let parts: Uint8Array[] | undefined
         let animationBytes: Uint8Array | undefined
         let lastError: unknown
-        for (const base of bases) {
+        for (const base of partBases) {
             try {
                 // 动画与部件同批下载：单独一个文件，绑定的是骨骼名，合并完成后再绑回节点。
                 // 缓存键必须带上字节数，否则更新后仍命中旧缓存。

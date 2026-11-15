@@ -1,5 +1,10 @@
 export const env = {
     isApp: typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window),
+    /**
+     * 是否启用本地 mock 模型源。
+     * 开发环境默认启用（无需联网）；验证云端时改为 false。
+     */
+    useLocalModelMock: import.meta.env.DEV,
     endpoint: "https://dna-builder.cn",
     /** 静态资源基址之一（阿里云 OSS）：图片、数据包、MOD、安装包与差分补丁都从这里取 */
     cdn: "https://cdn.dna-builder.cn",

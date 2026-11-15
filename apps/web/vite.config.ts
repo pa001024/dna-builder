@@ -210,6 +210,7 @@ export default defineConfig(async () => ({
             "js-ini",
             "@tauri-apps/plugin-updater",
             "@tauri-apps/plugin-process",
+            "@tauri-apps/plugin-opener",
             "@tauri-apps/api/path",
             "zod",
             "@chenglou/pretext",

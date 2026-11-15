@@ -207,6 +207,8 @@ uniform vec3 dnaLight;
 uniform float dnaFresnel;
 uniform float dnaControl;
 uniform float dnaEmissionStrength;
+uniform vec3 dnaEmission2;
+uniform vec3 dnaEmission3;
 uniform float dnaHasEmission;
 uniform float dnaQuantize;
 uniform float dnaNormalStrength;
@@ -254,8 +256,7 @@ float dnaZone(float g) {
     return mix(g, floor(g * 6.0) / 6.0, dnaQuantize) * (5.0 + dnaQuantize);
 }
 float dnaNormalWeight(vec3 normalSample) {
-    vec2 xy = normalSample.xy * 2.0 - 1.0;
-    return sqrt(max(0.0, 1.0 - min(dot(xy, xy), 1.0)));
+    return clamp(normalSample.z, 0.0, 1.0);
 }
 vec3 dnaPart(vec3 c) {
     vec3 linear = dnaLinear(c);
@@ -359,6 +360,7 @@ export class SkinModelRenderer {
     private gltf?: GLTF
     private metadata?: SkinModelMetadata
     private dyeMaterials: DyeMaterial[] = []
+    private effectMaterials: { metadata: SkinMaterialMetadata; material: MeshBasicMaterial; fallback: LinearRgb }[] = []
     private textures = new Set<Texture>()
     /** 不随模型更换的贴图（PMREM 环境、ramp 图集）：换模型时保留，销毁时一起释放 */
     private sceneTextures = new Set<Texture>()
@@ -609,6 +611,7 @@ export class SkinModelRenderer {
         this.mixer = undefined
         this.actions = []
         this.dyeMaterials = []
+        this.effectMaterials = []
         this.playing = false
         this.gltf = undefined
         this.metadata = undefined
@@ -1070,6 +1073,7 @@ export class SkinModelRenderer {
             depthWrite: false,
             side: DoubleSide,
         })
+        this.effectMaterials.push({ metadata: data, material, fallback: [r, g, b] as LinearRgb })
         const uniforms = {
             uEffTime: this.effectTime,
             uEffRepeat: { value: new Vector2(repeat[0] || 1, repeat[1] || 1) },
@@ -1209,6 +1213,8 @@ ${shader.fragmentShader}`.replace(
             dnaFresnel: { value: data.scalars.菲涅尔指数 ?? 0.62 },
             dnaControl: { value: data.scalars[data.kind === "hairPart" ? "启用染色" : "整体控制"] ?? 1 },
             dnaEmissionStrength: { value: data.scalars.自发光强度 ?? 1 },
+            dnaEmission2: { value: vector("自发光颜色02", data.vectors.自发光颜色 ?? [1, 1, 1]) },
+            dnaEmission3: { value: vector("突破自发光", data.vectors.自发光颜色 ?? [1, 1, 1]) },
             // 缺少自发光贴图时必须彻底关掉该分支：退回用 base 会把整片 albedo 当自发光，
             // 配合 15+ 的强度会把羽片、袖纱压成发白的方块。
             dnaHasEmission: { value: emitIndex === undefined ? 0 : 1 },
@@ -1247,8 +1253,9 @@ ${shader.fragmentShader}`.replace(
             uniforms.dnaToonClamp = { value: 0.86 }
             // 原版对布料类走 case 14 的收尾曲线；头发/皮肤另有专门分支（Kajiya-Kay / case 5），
             // 我们还没还原那两套，先只对布料开启，避免把发色和肤色压暗。
-            // 主光颜色（线性）：先按场景主光取，后续与原版对齐时改这里
-            uniforms.dnaToonLightColor = { value: new Vector3(0.9, 0.94, 1.1) }
+            // 主光颜色（线性）：实机白区 B/R = 1.07（规格 §5.2），保持这个比例即可；
+            // 之前取 (0.90, 0.94, 1.10) 是 B/R = 1.22，纯黑染成 (16,16,20)、白布发紫都出在这儿。
+            uniforms.dnaToonLightColor = { value: new Vector3(0.96, 0.99, 1.03) }
             // 布料走原版 case 14 的横轴/行内映射/收尾曲线；皮肤与头发另有分支（case 5 / Kajiya-Kay）
             uniforms.dnaClothTone = { value: isClothToneMaterial(data) ? 1 : 0 }
             uniforms.dnaHairRamp = { value: hairMaterial ? 1 : 0 }
@@ -1256,7 +1263,8 @@ ${shader.fragmentShader}`.replace(
             // 1/π 已并在下面的公式外，这里是标定值：按参考图子不语外套实测 a 中位 0.21 时应落在 sRGB 约 200。
             uniforms.dnaToneScale = { value: 1.7 }
             // 天空/环境光（线性）：原版 `_5913`，场景常量，整只模型同一份
-            uniforms.dnaToonSky = { value: new Vector3(0.08, 0.08, 0.09) }
+            // 天空项保持中性：B 单独高一档（0.09 vs 0.08）时，纯黑染色会被抬成 (16,16,20) 的紫黑
+            uniforms.dnaToonSky = { value: new Vector3(0.085, 0.085, 0.085) }
             uniforms.dnaToonOn = { value: 1 }
             // 皮肤次表面：暗部补一层暖色散射，见 §5.2 末尾的 SSS 近似
             uniforms.dnaToonSkin = { value: isSkinMaterial(data) ? 1 : 0 }
@@ -1300,12 +1308,12 @@ ${shader.fragmentShader}`.replace(
             // 顶点色在游戏里是遮罩（丝袜/自发光分区），不参与 albedo 相乘。
             vertexColors: false,
             metalness: data.scalars.金属度 ?? 0,
-            // 能量层/薄纱走灰度 alpha 混合：保留 alphaTest 会把墨迹、纱网硬切成洞。
-            alphaTest: energyCutout || silkTran || expression ? 0 : source.alphaTest,
+            // 薄纱走灰度 alpha 混合：保留 alphaTest 会把墨迹、纱网硬切成洞。
+            alphaTest: silkTran || expression ? 0 : energyCutout ? 0.33 : source.alphaTest,
             // 皮肤网格的躯干/上臂三角形绕序与腿部相反，单面剔除会把胸口、上臂整片裁掉。
             side: data.kind === "stocking" ? DoubleSide : source.side,
-            transparent: source.transparent || energyCutout || silkTran,
-            depthWrite: !energyCutout && !silkTran,
+            transparent: source.transparent || silkTran,
+            depthWrite: !silkTran,
             // 能量层/薄纱整体只比皮肤高零点几毫米，远景深度精度不足时会和皮肤互相遮挡闪成噪点；
             // 用多边形偏移把整层朝相机提一点，稳定压住皮肤。
             polygonOffset: energyCutout || silkTran,
@@ -1479,7 +1487,8 @@ vDnaVertexAlpha = dnaMask.a;`
                     // 自发光贴图本身就是**带颜色的**发光图（实测有颜色的亮像素占 100%，例：芙罗拉胸口的槽是红色
                     // 90/5/6、染 7 号色是青色）。只取 R 当标量就等于把贴图颜色丢掉、让 7 号色原样铺满，
                     // 红色槽位会被染成整块青色。这里取 RGB 再乘 7 号色：灰底（遮罩式）贴图结果不变。
-                    `totalEmissiveRadiance += dnaLinear(texture2D(dnaEmitMap, vDnaUv).rgb) * dnaEmission * dnaEmissionStrength * dnaHasEmission;
+                    `vec3 dnaEmitSample = dnaLinear(texture2D(dnaEmitMap, vDnaUv).rgb);
+            totalEmissiveRadiance += (dnaEmitSample.r * dnaEmission + dnaEmitSample.g * dnaEmission2 + dnaEmitSample.b * dnaEmission3) * dnaEmissionStrength * dnaHasEmission;
             `
                 )
             shader.fragmentShader = shader.fragmentShader.replace(
@@ -1495,12 +1504,7 @@ vDnaVertexAlpha = dnaMask.a;`
                 // 所以这里只用 diffuseColor，不再叠加任何间接光（否则等于把环境光算两遍）。
                 // 插在 lights_fragment_end 之后：阴影、AO、tonemapping 都在后面，照常工作。
                 //
-                // 原版对应关系（01701_f3）：横轴布料走 case 14 的 saturate(N·L)（L1523-1531），
-                // 其余材质用 min(halfLambert(N·L), halfLambert(N·V))；行内映射 x = x0 + _3207*(_5249-min(x0,_5249))
-                // 在展示场景塌成 x=band；布料收尾（L1738-1755）shape=0.35+0.6a+1.5a³-0.35a²、
-                // spec=(59a+√(9-10127a²+13702a)-3)/(502-486a)，各取一半乘 1/π，曲线只在亮度上算再回乘色度；
-                // 受光增益 _5403 = 1 + 1.2*_3207*smoothstep(受光量)；主光乘 _5387；天空光 _5913 直接加在漫反射上；
-                // 头发（19813_f3 L147-160）明暗交界是 0/1 硬掩码；皮肤暗部补暖色次表面。
+                // 原版：01701_f3 的 case 14 收尾（布料）、case 13 直通（头发）、case 12 unlit（眼睛）。
                 shader.fragmentShader = shader.fragmentShader.replace(
                     "#include <lights_fragment_end>",
                     `#include <lights_fragment_end>
@@ -1577,6 +1581,9 @@ vDnaVertexAlpha = dnaMask.a;`
                 colors.forEach((color, index) => uniforms.dnaColors.value[index].set(...color))
                 if (data.kind === "hairPart") uniforms.dnaEmission.value.set(...dye.hairPartEmission)
             }
+        }
+        for (const effect of this.effectMaterials) {
+            effect.material.color.setRGB(...resolveSkinModelColor(this.metadata, ids, 7, effect.fallback))
         }
         this.invalidate()
     }
@@ -1662,5 +1669,6 @@ vDnaVertexAlpha = dnaMask.a;`
         this.renderer.dispose()
         this.renderer.domElement.remove()
         this.dyeMaterials = []
+        this.effectMaterials = []
     }
 }

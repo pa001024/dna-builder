@@ -80,6 +80,8 @@ const sharing = ref(false)
 /** 页面上的标题 / 描述编辑框（新建与编辑模式共用）。 */
 const editTitle = ref("")
 const editDesc = ref("")
+/** 是否处于编辑态：有权限者默认仍为查看状态，点击编辑按钮后才可修改。新建模式恒为编辑态。 */
+const isEditing = ref(false)
 
 /** 分享链接中的方案 ID，为空表示新建模式。 */
 const sharePlanId = computed(() => (typeof route.params.planId === "string" ? route.params.planId : ""))
@@ -90,6 +92,8 @@ const canEdit = computed(() => {
     if (isCreateMode.value) return true
     return !!loadedPlan.value && (loadedPlan.value.userId === user.id || user.isAdmin)
 })
+/** 当前是否可实际修改（新建模式恒可改；方案页需有权限且已进入编辑态）。 */
+const editable = computed(() => isCreateMode.value || (canEdit.value && isEditing.value))
 
 /** 发布页 URL 参数：展示页「发布」按钮传入的角色筛选。 */
 const createCharId = useSearchParam<number>("charId", 0)
@@ -180,6 +184,7 @@ const defaultPlanTitle = computed(() => (selectedSkin.value ? `${selectedSkin.va
 
 /** 初始化当前角色、皮肤和所有部件的默认色。 */
 function resetSelection() {
+    isEditing.value = false
     const character = characters.value[0]
     selectedCharacterId.value = character?.id
     selectedSkinId.value = character ? characterSkins.value[0]?.id : undefined
@@ -208,6 +213,7 @@ function applyCreateFilters() {
 
 /** 切换角色并选择该角色的第一套皮肤。 */
 function selectCharacter(characterId: number) {
+    if (!editable.value) return
     selectedCharacterId.value = characterId
     selectedSkinId.value = characterSkins.value[0]?.id
     selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, () => 0)
@@ -216,6 +222,7 @@ function selectCharacter(characterId: number) {
 
 /** 切换皮肤并清空不应跨皮肤复用的染色方案。 */
 function selectSkin(skinId: number) {
+    if (!editable.value) return
     selectedSkinId.value = skinId
     selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, () => 0)
 }
@@ -245,6 +252,7 @@ function isSwatchValidForActivePart(swatch: SkinColorizeSwatch) {
 
 /** 将色板应用到当前编辑中的部件。 */
 function applyColorToActivePart(swatch: SkinColorizeSwatch) {
+    if (!editable.value) return
     if (!isSwatchValidForActivePart(swatch)) {
         ui.showErrorMessage("该部位不能使用此染剂")
         return
@@ -254,6 +262,7 @@ function applyColorToActivePart(swatch: SkinColorizeSwatch) {
 
 /** 将当前编辑中的部件恢复为默认色。 */
 function resetActivePartColor() {
+    if (!editable.value) return
     selectColor(activePartId.value, 0)
 }
 
@@ -284,16 +293,19 @@ function currentHairSwatch(partId: number): SkinColorizeSwatch | undefined {
 
 /** 将色板应用到当前编辑中的发型部件（发型色位无限制，可用全部色板）。 */
 function applyHairColorToActivePart(swatch: SkinColorizeSwatch) {
+    if (!editable.value) return
     selectHairColor(activeHairPartId.value, swatch.id)
 }
 
 /** 将当前编辑中的发型部件恢复为默认色。 */
 function resetActiveHairPartColor() {
+    if (!editable.value) return
     selectHairColor(activeHairPartId.value, 0)
 }
 
 /** 校验并应用一张用户选择的图片作为预览图。 */
 function handlePreviewFile(file: File) {
+    if (!editable.value) return
     if (!file.type.startsWith("image/")) {
         ui.showErrorMessage("只支持图片格式")
         return
@@ -318,12 +330,19 @@ function handleFileInput(event: Event) {
 /** 拖拽松手处理。 */
 function handleDrop(event: DragEvent) {
     dragging.value = false
+    if (!editable.value) return
     const file = event.dataTransfer?.files?.[0]
     if (file) handlePreviewFile(file)
 }
 
+/** 拖拽悬停：仅编辑态显示投放提示。 */
+function onDragOver() {
+    if (editable.value) dragging.value = true
+}
+
 /** 移除用户上传的预览图。 */
 function clearPreviewImage() {
+    if (!editable.value) return
     if (previewImage.value.startsWith("blob:")) URL.revokeObjectURL(previewImage.value)
     previewImage.value = ""
     previewFile.value = undefined
@@ -471,10 +490,32 @@ async function confirmShare() {
     }
 }
 
+/** 进入编辑态（仅有权限者可见入口，新建模式无需入口）。 */
+function startEditing() {
+    if (isCreateMode.value || isEditing.value) return
+    if (!canEdit.value) {
+        ui.showErrorMessage("仅作者可编辑此方案")
+        return
+    }
+    isEditing.value = true
+}
+
+/** 退出编辑态并重载方案，丢弃未保存的本地修改。 */
+function cancelEditing() {
+    isEditing.value = false
+    if (!isCreateMode.value && sharePlanId.value) void loadDyePlan(sharePlanId.value)
+}
+
+/** 编辑态开关：编辑中则取消并回滚，未编辑则进入编辑态。 */
+function toggleEditing() {
+    if (isEditing.value) cancelEditing()
+    else startEditing()
+}
+
 /** 保存当前染色方案（编辑模式），仅作者或管理员可操作。 */
 async function savePlan() {
     if (!loadedPlan.value || !selectedSkin.value || saving.value) return
-    if (!canEdit.value) {
+    if (!editable.value) {
         ui.showErrorMessage("仅作者可编辑此方案")
         return
     }
@@ -506,6 +547,7 @@ async function savePlan() {
                 updateAt: Date.now(),
             }
             ui.showSuccessMessage("染色方案已保存")
+            isEditing.value = false
         }
     } catch (error) {
         ui.showErrorMessage("保存失败", error instanceof Error ? error.message : String(error))
@@ -517,7 +559,7 @@ async function savePlan() {
 /** 上传新的预览图并更新方案（编辑模式）。 */
 async function uploadPreview() {
     if (!loadedPlan.value || !selectedSkin.value || uploading.value) return
-    if (!canEdit.value) {
+    if (!editable.value) {
         ui.showErrorMessage("仅作者可编辑此方案")
         return
     }
@@ -587,6 +629,13 @@ async function toggleLike() {
     void loadDyePlan(loadedPlan.value.id)
 }
 
+/** 将当前方案的网页链接复制到系统剪贴板。 */
+async function copyPlanLink() {
+    if (!loadedPlan.value) return
+    await copyText(`${env.endpoint}/skin-colorize/${loadedPlan.value.id}`)
+    ui.showSuccessMessage("链接已复制")
+}
+
 /** 将当前社区码复制到系统剪贴板。 */
 async function copyCode() {
     if (!selectedCode.value) return
@@ -618,6 +667,7 @@ function applyHairCode(rawCode: string) {
 
 /** 从系统剪贴板导入发型染色码（发型染色区专用入口）。 */
 async function importHairCode() {
+    if (!editable.value) return
     try {
         const rawCode = (await pasteText()).trim()
         if (!rawCode) throw new Error("剪贴板为空")
@@ -647,6 +697,7 @@ function applySkinCode(rawCode: string) {
 
 /** 从系统剪贴板读取社区码：发型码应用到发型染色，皮肤码应用到皮肤。 */
 async function importCode() {
+    if (!editable.value) return
     try {
         const rawCode = (await pasteText()).trim()
         if (!rawCode) throw new Error("剪贴板为空")
@@ -673,6 +724,7 @@ function onCommentCount(count: number) {
 
 /** 监听全局粘贴事件，方便直接粘贴游戏截图。 */
 function onWindowPaste(event: ClipboardEvent) {
+    if (!editable.value) return
     const target = event.target as HTMLElement
     if (target.closest("input, textarea, [contenteditable]")) return
     const file = event.clipboardData?.files?.[0]
@@ -703,18 +755,13 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="flex h-full min-h-0 w-full flex-col">
-        <div class="min-h-0 flex-1 overflow-y-auto p-4 lg:overflow-hidden">
+        <div class="min-h-0 flex-1 overflow-y-auto p-4 lg:@container-size">
             <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm text-base-content/50">
                 {{ $t("skin-colorize.no_data") }}
             </div>
-            <div v-else class="mx-auto grid max-w-7xl gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_400px]">
-                <!-- 左列：方案信息 / 预览图 / 染色码 / 颜色预览 / 消耗 / 评论（独立滚动，对照右侧调色） -->
-                <div class="min-w-0 space-y-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
-                    <SkinColorizeModelPreview
-                        :skin-id="selectedSkinId"
-                        :color-ids="selectedColorIds"
-                        :hair-color-ids="includeHair ? hairColorIds : undefined"
-                    />
+            <div v-else class="mx-auto grid max-w-7xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
+                <!-- 左列：页面主线内容，随外层容器整体滚动 -->
+                <div class="min-w-0 space-y-4">
                     <!-- 方案信息：标题 / 描述 / 作者与统计 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PLAN" title="方案信息">
@@ -722,6 +769,14 @@ onBeforeUnmount(() => {
                                 <!-- 未登录：点赞/评论/发布都需要账号，这里常驻登录入口 -->
                                 <LoginButton v-if="!user.id" size="xs" variant="outline" />
                                 <OpenInAppButton kind="dye" :id="sharePlanId" class="btn btn-xs" icon-class="size-3.5" />
+                                <button
+                                    v-if="canEdit && !isCreateMode"
+                                    class="btn btn-xs"
+                                    type="button"
+                                    @click="toggleEditing"
+                                >
+                                    {{ isEditing ? "取消编辑" : "编辑" }}
+                                </button>
                                 <button
                                     v-if="loadedPlan && (loadedPlan.userId === user.id || user.isAdmin)"
                                     class="btn btn-xs border-error/40 text-error hover:border-error hover:bg-error/10"
@@ -771,7 +826,7 @@ onBeforeUnmount(() => {
                                         {{ loadedPlan.isOriginal ? "原创" : "转载" }}
                                     </span>
                                     <input
-                                        v-if="canEdit"
+                                        v-if="editable"
                                         v-model="editTitle"
                                         type="text"
                                         class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-lg font-semibold text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -781,7 +836,7 @@ onBeforeUnmount(() => {
                                     <h2 v-else class="min-w-0 flex-1 text-lg font-semibold leading-tight">{{ loadedPlan.title }}</h2>
                                 </div>
                                 <textarea
-                                    v-if="canEdit"
+                                    v-if="editable"
                                     v-model="editDesc"
                                     class="mt-2 w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 text-[13px] leading-relaxed text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     rows="2"
@@ -790,7 +845,7 @@ onBeforeUnmount(() => {
                                 />
                                 <div
                                     v-else-if="loadedPlan.desc"
-                                    class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/70"
+                                    class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/70 select-text"
                                 >
                                     {{ loadedPlan.desc }}
                                 </div>
@@ -817,8 +872,16 @@ onBeforeUnmount(() => {
                                         <Icon icon="ri:message-2-line" class="size-3.5 shrink-0" />{{ loadedPlan.commentsCount }}
                                         评论
                                     </span>
+                                    <button
+                                        class="flex cursor-pointer items-center gap-1 transition-colors duration-150 hover:text-primary"
+                                        type="button"
+                                        title="复制本方案链接"
+                                        @click="copyPlanLink"
+                                    >
+                                        <Icon icon="ri:file-copy-line" class="size-3.5 shrink-0" />复制链接
+                                    </button>
                                 </div>
-                                <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-[11px] text-base-content/50">
+                                <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-[11px] text-base-content/50 select-text">
                                     来源：{{ loadedPlan.source }}
                                 </div>
                             </template>
@@ -830,7 +893,7 @@ onBeforeUnmount(() => {
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PREVIEW" title="预览图">
                             <template #trailing>
-                                <div v-if="canEdit" class="flex shrink-0 items-center gap-1.5">
+                                <div v-if="editable" class="flex shrink-0 items-center gap-1.5">
                                     <button
                                         class="btn btn-xs"
                                         type="button"
@@ -852,7 +915,7 @@ onBeforeUnmount(() => {
 
                         <div
                             class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xs border border-dashed border-base-content/20 bg-base-content/3"
-                            @dragover.prevent="dragging = true"
+                            @dragover.prevent="onDragOver"
                             @dragleave.prevent="dragging = false"
                             @drop.prevent="handleDrop"
                         >
@@ -861,6 +924,7 @@ onBeforeUnmount(() => {
                                 <span>以游戏内截图作为预览图</span>
                                 <span class="text-xs">支持拖拽、粘贴（截图）或点击选择</span>
                                 <button
+                                    v-if="editable"
                                     class="btn btn-xs mt-1"
                                     type="button"
                                     @click="fileInputRef?.click()"
@@ -878,6 +942,12 @@ onBeforeUnmount(() => {
                         </div>
                     </section>
 
+                    <SkinColorizeModelPreview
+                        :skin-id="selectedSkinId"
+                        :color-ids="selectedColorIds"
+                        :hair-color-ids="includeHair ? hairColorIds : undefined"
+                    />
+                    
                     <!-- 染色码：皮肤码 / 发型码（可选） -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="CODE" title="染色码">
@@ -897,6 +967,7 @@ onBeforeUnmount(() => {
                                         复制
                                     </button>
                                     <button
+                                        v-if="editable"
                                         class="btn btn-xs"
                                         type="button"
                                         title="读取剪贴板内容"
@@ -927,6 +998,7 @@ onBeforeUnmount(() => {
                                         复制
                                     </button>
                                     <button
+                                        v-if="editable"
                                         class="btn btn-xs"
                                         type="button"
                                         title="读取剪贴板内容"
@@ -1031,8 +1103,8 @@ onBeforeUnmount(() => {
                     </section>
                 </div>
 
-                <!-- 右列：颜色选择器 / 发型染色 / 保存（独立滚动） -->
-                <aside class="min-w-0 space-y-4 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
+                <!-- 右列：调色浮层，桌面端吸附固定 + 独立内部滚动 -->
+                <aside class="min-w-0 space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100cqh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
                     <!-- 颜色选择器 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PALETTE" title="颜色选择器">
@@ -1042,7 +1114,7 @@ onBeforeUnmount(() => {
                         </SectionHeader>
 
                         <!-- 角色 / 皮肤选择（新建或可编辑时展示） -->
-                        <template v-if="canEdit">
+                        <template v-if="editable">
                             <div class="mb-3 grid grid-cols-2 gap-2">
                                 <Select
                                     class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -1070,6 +1142,7 @@ onBeforeUnmount(() => {
                                 <button
                                     class="btn btn-xs"
                                     type="button"
+                                    :disabled="!editable"
                                     @click="skinFinderShow = true"
                                 >
                                     相似色
@@ -1077,6 +1150,7 @@ onBeforeUnmount(() => {
                                 <button
                                     class="btn btn-xs"
                                     type="button"
+                                    :disabled="!editable"
                                     @click="resetActivePartColor"
                                 >
                                     恢复默认色
@@ -1121,7 +1195,8 @@ onBeforeUnmount(() => {
                                     <button
                                         v-for="swatch in group.swatches"
                                         :key="swatch.id"
-                                        class="size-6 shrink-0 rounded-xs border transition-transform duration-150"
+                                        class="size-6 shrink-0 rounded-xs border transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+                                        :disabled="!editable"
                                         :class="[
                                             currentColorId(activePartId) === swatch.id
                                                 ? 'border-primary ring-1 ring-primary'
@@ -1144,7 +1219,7 @@ onBeforeUnmount(() => {
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="HAIR" title="发型染色" />
                         <label class="flex cursor-pointer items-center gap-2">
-                            <input v-model="includeHair" type="checkbox" class="checkbox checkbox-sm" />
+                            <input v-model="includeHair" type="checkbox" class="checkbox checkbox-sm" :disabled="!editable" />
                             <span class="text-[11px] tracking-wide text-base-content/55">附带发型染色</span>
                         </label>
 
@@ -1155,6 +1230,7 @@ onBeforeUnmount(() => {
                                     <button
                                         class="btn btn-xs"
                                         type="button"
+                                        :disabled="!editable"
                                         @click="hairFinderShow = true"
                                     >
                                         相似色
@@ -1162,6 +1238,7 @@ onBeforeUnmount(() => {
                                     <button
                                         class="btn btn-xs"
                                         type="button"
+                                        :disabled="!editable"
                                         @click="resetActiveHairPartColor"
                                     >
                                         恢复默认色
@@ -1211,7 +1288,8 @@ onBeforeUnmount(() => {
                                         <button
                                             v-for="swatch in group.swatches"
                                             :key="swatch.id"
-                                            class="size-6 shrink-0 cursor-pointer rounded-xs border transition-transform duration-150 hover:scale-110"
+                                            class="size-6 shrink-0 cursor-pointer rounded-xs border transition-transform duration-150 hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
+                                            :disabled="!editable"
                                             :class="
                                                 currentHairColorId(activeHairPartId) === swatch.id
                                                     ? 'border-primary ring-1 ring-primary'
@@ -1232,8 +1310,8 @@ onBeforeUnmount(() => {
                         </template>
                     </section>
 
-                    <!-- 保存 / 上传 -->
-                    <section v-if="canEdit" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <!-- 保存 / 上传（新建模式恒显示；方案页仅编辑态显示） -->
+                    <section v-if="editable" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="ACTION" title="方案操作" />
                         <div class="flex flex-col gap-2">
                             <button
@@ -1279,6 +1357,19 @@ onBeforeUnmount(() => {
                                 </button>
                             </template>
                         </div>
+                    </section>
+                    <section
+                        v-else-if="canEdit"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    >
+                        <SectionHeader no-animate compact kicker="ACTION" title="方案操作" />
+                        <button
+                            class="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.98]"
+                            type="button"
+                            @click="startEditing"
+                        >
+                            编辑方案
+                        </button>
                     </section>
                     <section
                         v-else

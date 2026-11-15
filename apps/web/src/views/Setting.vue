@@ -1637,7 +1637,7 @@ onUnmounted(() => {
                         >
                             <span class="label-text min-w-0">
                                 {{ $t("setting.memCleanLastResult") }}
-                                <div class="break-words text-xs text-base-content/50">{{ memCleanSummary }}</div>
+                                <div class="wrap-break-word text-xs text-base-content/50">{{ memCleanSummary }}</div>
                             </span>
                             <div class="flex shrink-0 items-center gap-2">
                                 <button

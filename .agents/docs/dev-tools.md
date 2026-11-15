@@ -234,3 +234,5 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
   `/Engine/EngineResources/*` 是引擎内置纯色贴图，不在内容 pak 里，脚本按名字合成 2×2 PNG 顶替。
 - dev 环境数据包基址是 `/mock/data-pack`，模型基址是 `/mock/models`，无需联网即可安装；
   vite 用一条通用中间件服务整个 `mock/<子目录>/`（白名单见 `MOCK_DEFAULT_FILES`）。
+  模型清单以本地 mock 优先，mock 目录缺失或中间件关闭时自动回落到 CDN 双源（部件与清单同源）；
+  本地 mock 源本身由 `src/env.ts` 的 `useLocalModelMock` 控制，置 false即从候选里移除。

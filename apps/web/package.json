@@ -1,7 +1,7 @@
 {
     "name": "dna-builder-web",
     "private": true,
-    "version": "1.5.4",
+    "version": "1.5.5",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -24,7 +24,7 @@
     "dependencies": {
         "@antv/g": "^6.3.1",
         "@antv/g6": "^5.1.1",
-        "@chenglou/pretext": "^0.0.4",
+        "@chenglou/pretext": "^1.0.0",
         "@codemirror/commands": "^6.11.1",
         "@codemirror/lang-javascript": "^6.2.5",
         "@codemirror/language": "^6.12.4",

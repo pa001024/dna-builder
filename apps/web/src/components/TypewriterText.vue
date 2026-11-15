@@ -46,6 +46,8 @@ interface StoryCursor {
     sourceOffset: number
 }
 
+const canvasFontSupport = new Map<string, boolean>()
+
 const displayedLength = ref(0)
 const isTyping = ref(false)
 const rootElement = ref<HTMLElement | null>(null)
@@ -93,25 +95,59 @@ const totalVisibleChars = computed(() => {
 })
 
 /**
+ * 判断字体简写能否被 Canvas 解析。
+ * @param font 字体简写
+ * @returns 是否可用
+ */
+function isCanvasFontSupported(font: string): boolean {
+    const cached = canvasFontSupport.get(font)
+    if (cached !== undefined) {
+        return cached
+    }
+
+    let supported = true
+    try {
+        prepareWithSegments("A", font)
+    } catch {
+        supported = false
+    }
+
+    canvasFontSupport.set(font, supported)
+    return supported
+}
+
+/**
  * 生成 canvas 可识别的字体简写。
+ * pretext 1.0 起会拒绝 Canvas 解析不了的字体（RangeError），这里按可用性依次降级。
  * @param style 计算后的样式
  * @returns 字体简写
  */
 function buildCanvasFont(style: CSSStyleDeclaration): string {
+    const candidates: string[] = []
+    const fontSize = style.fontSize || "16px"
+    const fontFamily = style.fontFamily || "sans-serif"
+
     if (style.font) {
-        return style.font
+        candidates.push(style.font)
     }
 
     const fontParts = [
         style.fontStyle && style.fontStyle !== "normal" ? style.fontStyle : "",
-        style.fontVariant && style.fontVariant !== "normal" ? style.fontVariant : "",
+        style.fontVariant === "small-caps" ? style.fontVariant : "",
         style.fontWeight && style.fontWeight !== "400" ? style.fontWeight : "",
-        style.fontStretch && style.fontStretch !== "100%" ? style.fontStretch : "",
-        style.fontSize || "16px",
-        style.fontFamily || "sans-serif",
+        style.fontStretch && /^(ultra-|extra-|semi-)?(condensed|expanded)$/.test(style.fontStretch) ? style.fontStretch : "",
+        fontSize,
+        fontFamily,
     ].filter(Boolean)
+    candidates.push(fontParts.join(" "), `${fontSize} ${fontFamily}`, "16px sans-serif")
 
-    return fontParts.join(" ")
+    for (const candidate of candidates) {
+        if (isCanvasFontSupported(candidate)) {
+            return candidate
+        }
+    }
+
+    return "16px sans-serif"
 }
 
 /**
@@ -305,19 +341,55 @@ const preparedText = computed<PreparedTextWithSegments | null>(() => {
         return null
     }
 
-    return prepareWithSegments(plainText.value, measuredFont.value, { whiteSpace: "pre-wrap" })
+    try {
+        return prepareWithSegments(plainText.value, measuredFont.value, { whiteSpace: "pre-wrap" })
+    } catch {
+        return null
+    }
+})
+
+/**
+ * 当前文本的行布局与固定高度。
+ */
+const storyLayout = computed<{ lines: RenderedStoryLine[]; height: number } | null>(() => {
+    if (!preparedText.value || measuredWidth.value <= 0 || measuredLineHeight.value <= 0) {
+        return null
+    }
+
+    try {
+        const { lines, height } = layoutWithLines(preparedText.value, measuredWidth.value, measuredLineHeight.value)
+        return {
+            lines: buildRenderedStoryLines(lines, fullSegments.value, plainText.value),
+            height,
+        }
+    } catch {
+        return null
+    }
+})
+
+/**
+ * 布局不可用时的兜底：整段文本交给浏览器自然换行，避免正文整体消失。
+ */
+const fallbackStoryLines = computed<RenderedStoryLine[]>(() => {
+    if (!measuredFont.value || !plainText.value) {
+        return []
+    }
+
+    return [
+        {
+            text: plainText.value,
+            renderLength: plainText.value.length,
+            separatorLength: 0,
+            segments: fullSegments.value.map(segment => ({ text: segment.text, tone: segment.tone })),
+        },
+    ]
 })
 
 /**
  * 当前行布局。
  */
 const renderedStoryLines = computed<RenderedStoryLine[]>(() => {
-    if (!preparedText.value || measuredWidth.value <= 0 || measuredLineHeight.value <= 0) {
-        return []
-    }
-
-    const { lines } = layoutWithLines(preparedText.value, measuredWidth.value, measuredLineHeight.value)
-    return buildRenderedStoryLines(lines, fullSegments.value, plainText.value)
+    return storyLayout.value ? storyLayout.value.lines : fallbackStoryLines.value
 })
 
 /**
@@ -382,12 +454,7 @@ const lastVisibleCharacter = computed<RenderedStoryCharacter | null>(() => {
  * 当前文本布局对应的固定高度。
  */
 const fixedTextHeight = computed(() => {
-    if (!preparedText.value || measuredWidth.value <= 0 || measuredLineHeight.value <= 0) {
-        return null
-    }
-
-    const { height } = layoutWithLines(preparedText.value, measuredWidth.value, measuredLineHeight.value)
-    return height
+    return storyLayout.value ? storyLayout.value.height : null
 })
 
 /**
