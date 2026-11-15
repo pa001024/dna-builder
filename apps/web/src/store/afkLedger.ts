@@ -15,25 +15,33 @@ import {
     AFK_LEDGER_DB_NAME,
     AFK_LEDGER_RETENTION_DAYS,
     AFK_LEDGER_STORAGE_KEY,
+    type AfkDay,
     type AfkDrop,
     type AfkDropType,
     type AfkLedgerSnapshot,
     type AfkRun,
+    buildDayCells,
     buildSnapshot,
+    dayIdOf,
     emptySnapshot,
     resolveCraftItem,
+    runDayCells,
+    startOfDay,
 } from "@/utils/afk-ledger"
 
 class AfkLedgerDatabase extends Dexie {
     runs!: Table<AfkRun, number>
     drops!: Table<AfkDrop, number>
+    /** 每日每副本时长聚合格（热力图）：场次收尾时累加，查询只按 dayId 取窗口 */
+    days!: Table<AfkDay, number>
 
     constructor() {
         super(AFK_LEDGER_DB_NAME)
-        // 只有一个版本：账本从第一天起就带 status，不再保留 v1 的迁移路径
-        this.version(2).stores({
+        // v4：days 聚合格（场次收尾时增量维护）
+        this.version(4).stores({
             runs: "++id, startedAt, endedAt, sessionId, dungeonId, status",
             drops: "++id, at, runId, sessionId, dungeonId, rarity",
+            days: "++id, dayId, dungeonId, &[dayId+dungeonId]",
         })
     }
 }
@@ -85,6 +93,19 @@ let awaitingIdle = false
  */
 function ledgerDb() {
     return (database ??= new AfkLedgerDatabase())
+}
+
+/**
+ * 合并多组记录并按自增 id 去重（今日与本次会话的查询结果会有交集）。
+ * @param groups 记录组
+ * @returns 去重后的记录
+ */
+function mergeById<T extends { id?: number }>(...groups: T[][]): T[] {
+    const map = new Map<number, T>()
+    for (const group of groups) {
+        for (const item of group) if (item.id !== undefined) map.set(item.id, item)
+    }
+    return [...map.values()]
 }
 
 /** 事件写入队列：保证 enter → reward → complete 的落库顺序与到达顺序一致。 */
@@ -141,6 +162,10 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
         activeRun: null as ActiveRun | null,
         /** 页面用来感知新数据的版本号 */
         version: 0,
+        /** 场次变化版本号：热力图只随它刷新，掉落事件不必重读场次表 */
+        runsVersion: 0,
+        /** 已知副本（id → 游戏原名）：快照只查今日/本次会话，旧副本靠它补齐筛选列表 */
+        dungeonSeeds: {} as Record<string, string>,
         busy: false,
         error: "",
     }),
@@ -162,6 +187,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                     const cutoff = Date.now() - AFK_LEDGER_RETENTION_DAYS * 86400000
                     await db.runs.where("startedAt").below(cutoff).delete()
                     await db.drops.where("at").below(cutoff).delete()
+                    await db.days.where("dayId").below(dayIdOf(cutoff)).delete()
+                    // v4 升级或聚合表缺失时，从历史场次重建一次（之后只按场次收尾增量维护）
+                    if ((await db.days.count()) === 0) await this.rebuildDayCells()
                     // 还没收到 complete 的场次：
                     // 最近的（可能是重开应用时游戏仍在跑）恢复成「进行中」，等它的 complete 收尾；
                     // 更早的视为已中断，按完成收尾并认领挂起的掉落，作为兜底
@@ -180,9 +208,19 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                             }
                             continue
                         }
-                        await db.runs.update(run.id, { endedAt: run.endedAt ?? run.startedAt, status: "done" })
+                        const endedAt = run.endedAt ?? run.startedAt
+                        await db.runs.update(run.id, { endedAt, status: "done" })
+                        await this.addRunDayCells({
+                            dungeonId: run.dungeonId,
+                            dungeonName: run.dungeonName,
+                            startedAt: run.startedAt,
+                            endedAt,
+                        })
                         await this.attachPending(run)
                     }
+                    // 快照只查今日/本次会话，旧副本从聚合表补齐列表
+                    this.dungeonSeeds = await this.loadDungeonSeeds()
+                    if (this.activeRun) this.rememberDungeon(this.activeRun.dungeonId, this.activeRun.dungeonName)
                     this.initialized = true
                     await this.refreshSnapshot()
                 } catch (error) {
@@ -314,6 +352,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 status: "running",
             })
             this.activeRun = { id, dungeonId, dungeonName, startedAt: at }
+            this.rememberDungeon(dungeonId, dungeonName)
             // 动画只画这一场的掉落：进场先把上一场清空
             await publishRunDrops()
         },
@@ -331,6 +370,8 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             if (active && (!dungeonId || !active.dungeonId || dungeonId === active.dungeonId)) {
                 const name = active.dungeonName || dungeonName
                 await ledgerDb().runs.update(active.id, { endedAt: at, status: "done", dungeonName: name })
+                await this.addRunDayCells({ dungeonId: active.dungeonId, dungeonName: name, startedAt: active.startedAt, endedAt: at })
+                this.runsVersion += 1
                 this.activeRun = null
                 lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: name, endedAt: at }
                 awaitingIdle = true
@@ -361,6 +402,8 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 endedAt: at,
                 status: "done",
             })
+            await this.addRunDayCells({ dungeonId: runDungeonId, dungeonName: runDungeonName, startedAt, endedAt: at })
+            this.runsVersion += 1
             lastFinishedRun = { dungeonId: runDungeonId, dungeonName: runDungeonName, endedAt: at }
             awaitingIdle = true
             await publishRunDrops()
@@ -386,18 +429,105 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             const active = this.activeRun
             if (!active) return
             await ledgerDb().runs.update(active.id, { endedAt: at, status: "done" })
+            await this.addRunDayCells({
+                dungeonId: active.dungeonId,
+                dungeonName: active.dungeonName,
+                startedAt: active.startedAt,
+                endedAt: at,
+            })
+            this.runsVersion += 1
             this.activeRun = null
             lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: active.dungeonName, endedAt: at }
             await publishRunDrops()
             if (flush) await this.attachPending(active)
         },
         /**
-         * 刷新快照并写给屏幕信息条。
+         * 把一场已收尾的场次按天累加进 `days` 聚合格。
+         * @param run 场次的副本与起止时刻（跨零点会拆成两格）
+         */
+        async addRunDayCells(run: Pick<AfkRun, "dungeonId" | "dungeonName" | "startedAt" | "endedAt">) {
+            const db = ledgerDb()
+            await db.transaction("rw", db.days, async () => {
+                for (const cell of runDayCells(run)) {
+                    const existing = await db.days.where("[dayId+dungeonId]").equals([cell.dayId, run.dungeonId]).first()
+                    if (existing?.id !== undefined) {
+                        await db.days.update(existing.id, {
+                            durationMs: existing.durationMs + cell.durationMs,
+                            runs: existing.runs + 1,
+                            dungeonName: run.dungeonName || existing.dungeonName,
+                        })
+                    } else {
+                        await db.days.add({
+                            dayId: cell.dayId,
+                            dungeonId: run.dungeonId,
+                            dungeonName: run.dungeonName,
+                            durationMs: cell.durationMs,
+                            runs: 1,
+                        })
+                    }
+                }
+            })
+            this.rememberDungeon(run.dungeonId, run.dungeonName)
+        },
+        /**
+         * 记下副本 id 与游戏原名（快照补齐旧副本列表用）。
+         * @param id 副本 ID
+         * @param name 游戏下发的名字
+         */
+        rememberDungeon(id: string, name: string) {
+            if (!id) return
+            if (name || !this.dungeonSeeds[id]) this.dungeonSeeds[id] = name || this.dungeonSeeds[id]
+        },
+        /**
+         * 从聚合表读出已知副本列表（id → 任一天的名字）。
+         * @returns 副本名映射
+         */
+        async loadDungeonSeeds() {
+            const seeds: Record<string, string> = {}
+            for (const cell of await ledgerDb().days.toArray()) {
+                if (cell.dungeonId && !seeds[cell.dungeonId]) seeds[cell.dungeonId] = cell.dungeonName
+            }
+            return seeds
+        },
+        /**
+         * 从历史场次全量重建 `days` 聚合格：升级或聚合表缺失时调用一次。
+         */
+        async rebuildDayCells() {
+            const db = ledgerDb()
+            const runs = await db.runs.where("status").equals("done").toArray()
+            const cells = buildDayCells(runs.filter(run => run.endedAt !== null))
+            await db.transaction("rw", db.days, async () => {
+                await db.days.clear()
+                if (cells.length > 0) await db.days.bulkAdd(cells)
+            })
+        },
+        /**
+         * 取热力图用的每日时长格：聚合表按 `dayId` 取窗口，一整年也只有几千行。
+         * @param fromDayId 起始 dayId（含）
+         * @param toDayId 结束 dayId（含）
+         * @returns 格子列表
+         */
+        async loadDayCells(fromDayId: number, toDayId: number) {
+            return ledgerDb().days.where("dayId").between(fromDayId, toDayId, true, true).toArray()
+        },
+        /**
+         * 刷新快照并写给屏幕信息条：只读今日与本次会话的数据，不再全表扫描。
          */
         async refreshSnapshot() {
             const db = ledgerDb()
-            const [runs, drops] = await Promise.all([db.runs.toArray(), db.drops.toArray()])
-            this.snapshot = buildSnapshot(runs, drops, this.sessionId)
+            const now = Date.now()
+            const dayStart = startOfDay(now)
+            const sessionId = this.sessionId
+            const [todayRuns, sessionRuns, todayDrops, sessionDrops] = await Promise.all([
+                db.runs.where("startedAt").aboveOrEqual(dayStart).toArray(),
+                sessionId === null ? [] : db.runs.where("sessionId").equals(sessionId).toArray(),
+                db.drops.where("at").aboveOrEqual(dayStart).toArray(),
+                sessionId === null ? [] : db.drops.where("sessionId").equals(sessionId).toArray(),
+            ])
+            // 今日与本次会话有交集：按 id 去重后交给 buildSnapshot
+            const runs = mergeById(todayRuns, sessionRuns)
+            const drops = mergeById(todayDrops, sessionDrops)
+            this.snapshot = buildSnapshot(runs, drops, sessionId, now, this.dungeonSeeds)
             try {
                 localStorage.setItem(AFK_LEDGER_STORAGE_KEY, JSON.stringify(this.snapshot))
             } catch (error) {
@@ -511,7 +641,13 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 result.drops += 1
             }
 
+            // 导入的场次绕过了收尾记账：整表重建一次聚合，热力图才能看到导入数据
+            if (result.runs > 0) {
+                await this.rebuildDayCells()
+                this.dungeonSeeds = await this.loadDungeonSeeds()
+            }
             this.version += 1
+            if (result.runs > 0) this.runsVersion += 1
             await this.refreshSnapshot()
             return result
         },
@@ -577,11 +713,14 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 const db = ledgerDb()
                 await db.runs.clear()
                 await db.drops.clear()
+                await db.days.clear()
                 this.activeRun = null
                 lastComplete = null
+                this.dungeonSeeds = {}
                 this.snapshot = { ...emptySnapshot(), sessionId: this.sessionId }
                 localStorage.setItem(AFK_LEDGER_STORAGE_KEY, JSON.stringify(this.snapshot))
                 this.version += 1
+                this.runsVersion += 1
             } catch (error) {
                 this.error = String(error)
             } finally {

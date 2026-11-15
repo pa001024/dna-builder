@@ -14,11 +14,14 @@ import {
     type AfkDrop,
     type AfkRun,
     afkDungeonName,
+    buildDayCells,
     buildSnapshot,
+    dayIdOf,
     groupDropsByItem,
     groupStatsByDungeon,
     normalizeAfkSnapshot,
     resolveCraftItem,
+    runDayCells,
     startOfDay,
     trendBuckets,
 } from "@/utils/afk-ledger"
@@ -142,6 +145,17 @@ describe("buildSnapshot", () => {
         const snapshot = buildSnapshot(RUNS, [], SESSION, NOW)
         expect(snapshot.last).toEqual({ today: null, session: null })
         expect(snapshot.dungeons["64102"].last).toEqual({ today: null, session: null })
+    })
+
+    it("已知副本列表补齐没有今日/本次记录的副本", () => {
+        const snapshot = buildSnapshot([], [], SESSION, NOW, { "64102": "扼守/无尽" })
+        expect(snapshot.today).toEqual({ runs: 0, drops: 0, gold: 0 })
+        expect(snapshot.dungeons["64102"]).toEqual({
+            name: "扼守/无尽",
+            today: { runs: 0, drops: 0, gold: 0 },
+            session: { runs: 0, drops: 0, gold: 0 },
+            last: { today: null, session: null },
+        })
     })
 })
 
@@ -316,5 +330,105 @@ describe("铸造产物与进行中的场次", () => {
         const snapshot = buildSnapshot(runs, drops, SESSION, NOW)
         expect(snapshot.today.drops).toBe(2)
         expect(snapshot.today.gold).toBe(2)
+    })
+})
+
+describe("runDayCells / dayIdOf", () => {
+    it("同一日内的场次：一格，时长全额", () => {
+        const run: AfkRun = {
+            sessionId: SESSION,
+            dungeonId: "64102",
+            dungeonName: "扼守/无尽",
+            startedAt: DAY + 8 * 3600_000,
+            endedAt: DAY + 9 * 3600_000,
+            status: "done",
+        }
+        const cells = runDayCells(run, NOW)
+        expect(cells).toEqual([{ dayId: dayIdOf(DAY), durationMs: 3600_000 }])
+    })
+
+    it("跨零点的场次：按本地时区拆成两格", () => {
+        const run: AfkRun = {
+            sessionId: SESSION,
+            dungeonId: "64102",
+            dungeonName: "扼守/无尽",
+            startedAt: DAY + 23 * 3600_000,
+            endedAt: DAY + 25 * 3600_000,
+            status: "done",
+        }
+        const cells = runDayCells(run, NOW)
+        expect(cells).toEqual([
+            { dayId: dayIdOf(DAY), durationMs: 3600_000 },
+            { dayId: dayIdOf(DAY + 86400_000), durationMs: 3600_000 },
+        ])
+    })
+
+    it("running 场次按 now 收尾", () => {
+        const run: AfkRun = {
+            sessionId: SESSION,
+            dungeonId: "64102",
+            dungeonName: "扼守/无尽",
+            startedAt: NOW - 3600_000,
+            endedAt: null,
+            status: "running",
+        }
+        const cells = runDayCells(run, NOW)
+        expect(cells.reduce((s, c) => s + c.durationMs, 0)).toBe(3600_000)
+    })
+
+    it("dayIdOf 与 startOfDay 口径一致", () => {
+        expect(dayIdOf(DAY + 123)).toBe(dayIdOf(DAY))
+        expect(dayIdOf(DAY + 86400_000)).toBe(dayIdOf(DAY) + 1)
+    })
+})
+
+describe("buildDayCells", () => {
+    it("同一天同副本合并时长与场次", () => {
+        const runs: AfkRun[] = [
+            {
+                sessionId: SESSION,
+                dungeonId: "64102",
+                dungeonName: "扼守/无尽",
+                startedAt: DAY + 8 * 3600_000,
+                endedAt: DAY + 9 * 3600_000,
+                status: "done",
+            },
+            {
+                sessionId: SESSION,
+                dungeonId: "64102",
+                dungeonName: "扼守/无尽",
+                startedAt: DAY + 10 * 3600_000,
+                endedAt: DAY + 10 * 3600_000 + 1800_000,
+                status: "done",
+            },
+        ]
+        expect(buildDayCells(runs, NOW)).toEqual([
+            { dayId: dayIdOf(DAY), dungeonId: "64102", dungeonName: "扼守/无尽", durationMs: 5400_000, runs: 2 },
+        ])
+    })
+
+    it("不同副本分格；running 场次算到 now", () => {
+        const runs: AfkRun[] = [
+            {
+                sessionId: SESSION,
+                dungeonId: "64102",
+                dungeonName: "扼守/无尽",
+                startedAt: DAY + 8 * 3600_000,
+                endedAt: DAY + 9 * 3600_000,
+                status: "done",
+            },
+            {
+                sessionId: SESSION,
+                dungeonId: "20",
+                dungeonName: "测试场景",
+                startedAt: NOW - 1800_000,
+                endedAt: null,
+                status: "running",
+            },
+        ]
+        expect(buildDayCells(runs, NOW)).toEqual([
+            { dayId: dayIdOf(DAY), dungeonId: "64102", dungeonName: "扼守/无尽", durationMs: 3600_000, runs: 1 },
+            { dayId: dayIdOf(DAY), dungeonId: "20", dungeonName: "测试场景", durationMs: 1800_000, runs: 1 },
+        ])
     })
 })

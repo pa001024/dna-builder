@@ -6,6 +6,7 @@
  */
 import { t } from "i18next"
 import { charMap, modMap, resourceMap, weaponNameMap } from "@/data/d"
+import { dungeonDisplayName } from "@/utils/dungeon-utils"
 import { getRewardIconUrl } from "@/utils/reward-icon"
 
 /** 账本独立的 IndexedDB 名：与主库 `dna` 分开，互不影响。 */
@@ -17,8 +18,11 @@ export const AFK_LEDGER_STORAGE_KEY = "dna.afkLedger"
 /** 金色品质阈值（游戏内 1=白 … 5=金）。 */
 export const AFK_GOLD_RARITY = 5
 
-/** 账本保留天数。 */
-export const AFK_LEDGER_RETENTION_DAYS = 90
+/** 热力图覆盖的天数：53 周整，与页面筛选无关。 */
+export const AFK_HEATMAP_DAYS = 371
+
+/** 账本保留天数：与热力图窗口一致，否则年度视图后半段永远是空的。 */
+export const AFK_LEDGER_RETENTION_DAYS = AFK_HEATMAP_DAYS
 
 /**
  * 管道里会装扮成副本、但数据包副本表里没有的玩法。
@@ -46,6 +50,16 @@ export function afkDungeonName(id: string, name: string): string {
     return name || id
 }
 
+/**
+ * 副本的展示名：与 /db/dungeon 列表同一套规则（带括号后缀）。
+ * @param id 副本 ID
+ * @param fallback 数据包里查不到时的名字
+ * @returns 展示名
+ */
+export function afkDungeonLabel(id: string, fallback: string): string {
+    return dungeonDisplayName(id, afkDungeonName(id, fallback))
+}
+
 /** 一次挂机场次。 */
 export type AfkRun = {
     /** 自增主键 */
@@ -69,6 +83,89 @@ export type AfkRun = {
 
 /** 场次状态：进行中 / 已结束。 */
 export type AfkRunStatus = "running" | "done"
+
+/**
+ * 一天的副本时长聚合格（热力图数据源）。
+ *
+ * 每个副本每天一格，在场次收尾时按本地时区跨零点切分累加；页面取一整年只需读几十条/天的聚合行，
+ * 不再扫十万级的场次表。
+ */
+export type AfkDay = {
+    /** 自增主键 */
+    id?: number
+    /** 本地时区零点天数（`startOfDay(ts) / 86400000`） */
+    dayId: number
+    /** 副本/委托 ID */
+    dungeonId: string
+    /** 冗余副本名：筛选标签直接用，不查场次 */
+    dungeonName: string
+    /** 该日该副本的总时长（跨零点场次按天切分） */
+    durationMs: number
+    /** 该日有份额的场次数（跨零点场次每天都 +1） */
+    runs: number
+}
+
+/**
+ * 本地时区零点对应的天数下标（聚合格的 `dayId`）。
+ * @param ts 时间戳
+ * @returns 天数下标
+ */
+export function dayIdOf(ts: number): number {
+    return Math.floor(startOfDay(ts) / 86400000)
+}
+
+/**
+ * 把一条场次按本地时区切成分摊到各天的时长格。
+ * 跨零点的场次（如 23:50–00:30）按天拆开，每天一格，使热力图颜色贴近真实挂机日。
+ * @param run 场次（running 也可传：以 now 作为结束时刻）
+ * @param now running 场次的参考结束时刻
+ * @returns 每格 `dayId` + 时长；时长为 0 的场也算当天的份额（runs 计数用）
+ */
+export function runDayCells(run: Pick<AfkRun, "startedAt" | "endedAt">, now = Date.now()): { dayId: number; durationMs: number }[] {
+    const end = run.endedAt ?? now
+    const cells: { dayId: number; durationMs: number }[] = []
+    let cursor = run.startedAt
+    while (true) {
+        const dayStart = startOfDay(cursor)
+        const slice = Math.max(0, Math.min(end, dayStart + 86400000) - cursor)
+        cells.push({ dayId: dayIdOf(cursor), durationMs: slice })
+        const next = dayStart + 86400000
+        if (end <= next) break
+        cursor = next
+    }
+    return cells
+}
+
+/**
+ * 把场次摊成每日每副本的聚合格（热力图数据源）。
+ * 运行中的场次以 now 作为结束时刻计入，不会因为还没收尾而漏掉。
+ * @param runs 场次
+ * @param now 运行中场次的参考结束时刻
+ * @returns 每格 `dayId + dungeonId` 一行
+ */
+export function buildDayCells(runs: AfkRun[], now = Date.now()): AfkDay[] {
+    const cells = new Map<string, AfkDay>()
+    for (const run of runs) {
+        for (const slice of runDayCells(run, now)) {
+            const key = `${slice.dayId}|${run.dungeonId}`
+            const row = cells.get(key)
+            if (row) {
+                row.durationMs += slice.durationMs
+                row.runs += 1
+                if (run.dungeonName) row.dungeonName = run.dungeonName
+            } else {
+                cells.set(key, {
+                    dayId: slice.dayId,
+                    dungeonId: run.dungeonId,
+                    dungeonName: run.dungeonName,
+                    durationMs: slice.durationMs,
+                    runs: 1,
+                })
+            }
+        }
+    }
+    return [...cells.values()]
+}
 
 /** 掉落物品类型（决定图标与详情链接）。 */
 export type AfkDropType = "Mod" | "Resource" | "Weapon" | "Char"
@@ -219,17 +316,33 @@ export function startOfDay(ts: number): number {
 
 /**
  * 把场次与掉落聚合成屏幕信息条快照。
- * @param runs 全部场次
- * @param drops 全部掉落
+ * @param runs 参与统计的场次（调用方只需传今日与本次会话的记录）
+ * @param drops 参与统计的掉落（同上）
  * @param sessionId 当前连接会话
  * @param now 参考时刻
+ * @param knownDungeons 已知副本 id → 游戏原名：补齐没有近期记录、但仍要出现在筛选器里的副本
  * @returns 快照
  */
-export function buildSnapshot(runs: AfkRun[], drops: AfkDrop[], sessionId: number | null, now = Date.now()): AfkLedgerSnapshot {
+export function buildSnapshot(
+    runs: AfkRun[],
+    drops: AfkDrop[],
+    sessionId: number | null,
+    now = Date.now(),
+    knownDungeons: Record<string, string> = {}
+): AfkLedgerSnapshot {
     const dayStart = startOfDay(now)
     const today = emptyTotals()
     const session = emptyTotals()
     const dungeons: Record<string, AfkDungeonTotals> = {}
+
+    for (const [id, name] of Object.entries(knownDungeons)) {
+        dungeons[id] = {
+            name: afkDungeonName(id, name),
+            today: emptyTotals(),
+            session: emptyTotals(),
+            last: { today: null, session: null },
+        }
+    }
 
     const ensure = (id: string, name: string): AfkDungeonTotals | null => {
         if (!id) return null
