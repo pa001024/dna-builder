@@ -6,8 +6,7 @@ import { dungeonMap } from "@/data/d"
 import { env } from "@/env"
 import { formatAfkEvent, useAfkSupportStore } from "@/store/afkSupport"
 import { useSettingStore } from "@/store/setting"
-import { AFK_DUNGEON_ALIASES, afkDungeonName } from "@/utils/afk-ledger"
-import { dungeonDisplayName } from "@/utils/dungeon-utils"
+import { AFK_DUNGEON_ALIASES } from "@/utils/afk-ledger"
 import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 /**
@@ -41,14 +40,13 @@ function eventLink(event: AfkEvent) {
 }
 
 /**
- * 副本事件用带括号的完整副本名，其余事件沿用摘要。
+ * 副本事件与其它事件统一走摘要文案；副本名口径已在 `formatAfkEvent` 内用带括号的完整名，
+ * 这里不再二次替换，避免把完整名里的原始片段再拼一次括号。
  * @param event 协议事件
  * @returns 展示文本
  */
 function eventText(event: AfkEvent) {
-    if (event.kind !== "dungeon") return formatAfkEvent(event)
-    const label = dungeonDisplayName(event.id, afkDungeonName(event.id, event.name))
-    return formatAfkEvent(event).replace(afkDungeonName(event.id, event.name), label)
+    return formatAfkEvent(event)
 }
 
 /**

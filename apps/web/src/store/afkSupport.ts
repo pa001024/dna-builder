@@ -22,6 +22,7 @@ import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { patchAfkAnimState, readAfkAnimState } from "@/utils/afk-anim-state"
 import { afkDungeonName } from "@/utils/afk-ledger"
+import { dungeonDisplayName } from "@/utils/dungeon-utils"
 
 /** 最近事件在内存里保留的条数。 */
 const AFK_EVENT_KEEP = 50
@@ -79,7 +80,7 @@ export function formatAfkEvent(event: AfkEvent): string {
             return t("afk-support.craft_done", { name: event.name, count: event.count })
         case "dungeon":
             return t(event.status === "complete" ? "afk-support.dungeon_complete" : "afk-support.dungeon_enter", {
-                name: afkDungeonName(event.id, event.name),
+                name: dungeonDisplayName(event.id, afkDungeonName(event.id, event.name)),
             })
         case "character":
             return t("afk-support.character", { name: event.name || event.id, state: event.state })
