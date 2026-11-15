@@ -24,6 +24,7 @@
         "dd2": "pnpm --filter dna-builder-web dd2",
         "dp": "bun tools/data-pack.ts build",
         "ip": "bun tools/imgs-pack.ts build",
+        "mp": "bun tools/models-pack.ts",
         "ap": "bun tools/automation-pack.ts build",
         "apk": "bun tools/app-upload.ts",
         "cg": "bun tools/cloudgame-upload.ts build upload",
