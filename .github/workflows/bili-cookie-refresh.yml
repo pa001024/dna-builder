@@ -1,0 +1,31 @@
+name: Refresh Bilibili cookie
+
+# B 站 web cookie 需要定期调用官方续期接口才能长期存活，否则约 3 天失效。
+# 每天检查一次：服务端要求刷新时执行续期，并把新凭据写回 Actions Secrets。
+# 需要 secrets：BILI_COOKIE（或 BILI_SESSDATA/BILI_JCT）、BILI_REFRESH_TOKEN（localStorage 的
+# ac_time_value）、BILI_SECRETS_PAT（能写 Actions secrets 的 PAT；GITHUB_TOKEN 没有该权限）。
+
+on:
+    schedule:
+        - cron: "20 0 * * *"
+    workflow_dispatch:
+
+jobs:
+    refresh:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+            - name: Refresh Bilibili cookie
+              env:
+                  BILI_COOKIE: ${{ secrets.BILI_COOKIE }}
+                  BILI_SESSDATA: ${{ secrets.BILI_SESSDATA }}
+                  BILI_JCT: ${{ secrets.BILI_JCT }}
+                  BILI_BUVID3: ${{ secrets.BILI_BUVID3 }}
+                  BILI_DEDEUSERID: ${{ secrets.BILI_DEDEUSERID }}
+                  BILI_REFRESH_TOKEN: ${{ secrets.BILI_REFRESH_TOKEN }}
+                  GH_TOKEN: ${{ secrets.BILI_SECRETS_PAT }}
+              run: node tools/bili-dynamic/refresh.ts --write-secrets

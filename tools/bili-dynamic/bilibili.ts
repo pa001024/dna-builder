@@ -30,7 +30,7 @@ const BASE_HEADERS: Record<string, string> = {
     "accept-language": "zh-CN,zh;q=0.9",
 }
 
-interface BiliResponse<T> {
+export interface BiliResponse<T> {
     code: number
     message?: string
     msg?: string
@@ -87,6 +87,7 @@ export function readCredentials(env: Record<string, string | undefined> = proces
     const csrf = normalizeCredential(env.BILI_JCT, "bili_jct") || pick("bili_jct")
     const buvid3 = normalizeCredential(env.BILI_BUVID3, "buvid3") || pick("buvid3")
     const dedeUserId = normalizeCredential(env.BILI_DEDEUSERID, "DedeUserID") || pick("DedeUserID")
+    const refreshToken = normalizeCredential(env.BILI_REFRESH_TOKEN, "refresh_token") || undefined
 
     if (!sessdata && !csrf) return { status: "none", missing: ["BILI_COOKIE 或 BILI_SESSDATA/BILI_JCT"], credentials: null }
 
@@ -95,10 +96,10 @@ export function readCredentials(env: Record<string, string | undefined> = proces
     if (!/^[0-9a-f]{32}$/i.test(csrf)) missing.push("BILI_JCT（应为 32 位十六进制）")
     if (missing.length > 0) return { status: "partial", missing, credentials: null }
 
-    return { status: "ok", missing: [], credentials: { sessdata, csrf, buvid3, dedeUserId } }
+    return { status: "ok", missing: [], credentials: { sessdata, csrf, buvid3, dedeUserId, refreshToken } }
 }
 
-async function requestJson<T>(
+export async function requestJson<T>(
     url: string,
     init: RequestInit,
     label: string,
@@ -133,7 +134,7 @@ async function ensureBuvid3(credentials: BiliCredentials): Promise<void> {
     }
 }
 
-function cookieHeader(credentials: BiliCredentials): string {
+export function cookieHeader(credentials: BiliCredentials): string {
     const parts = [`SESSDATA=${credentials.sessdata}`, `bili_jct=${credentials.csrf}`]
     if (credentials.buvid3) parts.push(`buvid3=${credentials.buvid3}`)
     if (credentials.dedeUserId) parts.push(`DedeUserID=${credentials.dedeUserId}`)
