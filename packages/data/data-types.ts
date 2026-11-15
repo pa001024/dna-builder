@@ -67,7 +67,6 @@ export type { Mod, ModConditional } from "./d/mod.data"
 export type { Pet } from "./d/pet.data"
 export type { OptReward, Reward, RewardChild, RewardItem } from "./d/reward.data"
 export type { ForgeData, ForgeSkill, Weapon } from "./d/weapon.data"
-export { WeaponCategory } from "./d/weapon.data"
 export type {
     AttrRates,
     BuffAttr,

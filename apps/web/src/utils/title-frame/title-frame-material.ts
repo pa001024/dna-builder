@@ -17,27 +17,36 @@
  */
 
 /** 图层顶点着色器：把设计坐标系里的图层矩形 + RenderTransform 映射到裁剪空间。 */
+/**
+ * 图层顶点着色器：把设计坐标系里的图层矩形 + RenderTransform 映射到裁剪空间。
+ *
+ * aCorner = 图层局部坐标 0..1；uStage/uStageOrigin/uStageScale/uCanvasSize 做设计坐标→像素→裁剪空间换算；
+ * uCenter/uSize 是图层矩形；uTranslation/uScale/uShear/uRotation 对应 RenderTransform 各字段；
+ * uUvRect 是序列帧图集裁剪 (offsetX, offsetY, scaleX, scaleY)，普通图层为 (0,0,1,1)。
+ *
+ * 变换顺序与 UMG 的 FWidgetTransform 一致：先切变，再旋转，再缩放，最后平移。
+ * 序列帧材质（M_FlipBook）只采样图集里的一格，靠 uUvRect 把 0..1 映射到那一格。
+ */
 export const LAYER_VERTEX_SHADER = `
-attribute vec2 aCorner;      // 图层局部坐标 0..1
+attribute vec2 aCorner;
 
-uniform vec2 uStage;         // 设计画布尺寸（236×34）
-uniform vec2 uStageOrigin;   // 设计画布左上角在画布像素坐标系中的位置
-uniform float uStageScale;   // 设计单位 → 像素
-uniform vec2 uCanvasSize;    // 画布像素尺寸
-uniform vec2 uCenter;        // 图层矩形中心（设计坐标）
-uniform vec2 uSize;          // 图层矩形尺寸
-uniform vec2 uTranslation;   // RenderTransform.Translation
-uniform vec2 uScale;         // RenderTransform.Scale
-uniform vec2 uShear;         // RenderTransform.Shear（角度）
-uniform float uRotation;     // RenderTransform.Angle（角度）
-uniform vec4 uUvRect;        // 序列帧图集裁剪：(offsetX, offsetY, scaleX, scaleY)，普通图层为 (0,0,1,1)
+uniform vec2 uStage;
+uniform vec2 uStageOrigin;
+uniform float uStageScale;
+uniform vec2 uCanvasSize;
+uniform vec2 uCenter;
+uniform vec2 uSize;
+uniform vec2 uTranslation;
+uniform vec2 uScale;
+uniform vec2 uShear;
+uniform float uRotation;
+uniform vec4 uUvRect;
 
 varying vec2 vUv;
 
 void main() {
     vec2 local = (aCorner - 0.5) * uSize;
 
-    // 与 UMG 的 FWidgetTransform 一致：先切变，再旋转，再缩放，最后平移
     vec2 shear = tan(radians(uShear));
     local = vec2(local.x + local.y * shear.x, local.x * shear.y + local.y);
 
@@ -52,13 +61,13 @@ void main() {
     vec2 design = uCenter + local;
     vec2 clip = (design / uStage) * 2.0 - 1.0;
     gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
-    // 序列帧材质（M_FlipBook）只采样图集里的一格，靠 uUvRect 把 0..1 映射到那一格
     vUv = uUvRect.xy + aCorner * uUvRect.zw;
 }
 `
 
 /**
  * 普通贴图图层的片元着色器：UMG 的 Image + Texture2D 画笔就是「贴图 × 色调 × 不透明度」。
+ * uAlphaMask：1 = 贴图 alpha 参与；0 = 只用 tint alpha。
  */
 export const PLAIN_FRAGMENT_SHADER = `
 precision mediump float;
@@ -66,7 +75,7 @@ precision mediump float;
 uniform sampler2D uTexture;
 uniform vec4 uTint;
 uniform float uOpacity;
-uniform float uAlphaMask;    // 1 = 贴图 alpha 参与；0 = 只用 tint alpha
+uniform float uAlphaMask;
 
 varying vec2 vUv;
 
@@ -94,6 +103,12 @@ void main() {
  *   CB2[11].x  → FinalPower               `exp2(log2(c) * p)`
  *   CB2[11].w  → Opacity                  alpha 主乘数
  *   CB2[12].x  → 第二个 alpha 乘数
+
+ * 其它 uniform 口径：uTime 秒、uHueShift 弧度、uTint = 控件 Brush.TintColor / ColorAndOpacity、
+ * uLayerOpacity = 动画 RenderOpacity。main 内的步骤对应 HLSL：1) 平铺+滚动
+ * mad(tiling, mad(speed, time, offset) + uv, -0.5)；2) 随时间旋转的扰动；3) 饱和度；
+ * 4) 色相如 hueRotate（绕 (1,1,1)/√3 轴，照搬 HLSL 写法）；5) 主色 × 控件色调；6) FinalPower；
+ * 7) 向 SelectionColor 偏移（未选中时为 0）。
  */
 export const MATERIAL_FRAGMENT_SHADER = `
 precision mediump float;
@@ -101,14 +116,14 @@ precision mediump float;
 uniform sampler2D uMainTex;
 uniform sampler2D uMaskA;
 uniform sampler2D uMaskB;
-uniform float uTime;              // 秒
+uniform float uTime;
 
 uniform vec2 uTiling;
 uniform vec2 uUvScale;
 uniform vec3 uMainColor;
 uniform vec3 uSelectionColor;
 uniform float uSelectionMix;
-uniform float uHueShift;          // 弧度
+uniform float uHueShift;
 uniform vec2 uScrollSpeed;
 uniform vec2 uScrollOffset;
 uniform float uWaverSpeed;
@@ -117,12 +132,11 @@ uniform float uSaturation;
 uniform float uFinalPower;
 uniform float uOpacity;
 uniform float uOpacity2;
-uniform vec4 uTint;               // 控件 Brush.TintColor / ColorAndOpacity
-uniform float uLayerOpacity;      // 动画 RenderOpacity
+uniform vec4 uTint;
+uniform float uLayerOpacity;
 
 varying vec2 vUv;
 
-/** 绕 (1,1,1)/√3 轴旋转色相，照搬 HLSL 里的写法。 */
 vec3 hueRotate(vec3 color, float angle) {
     const float k = 0.5773502691896258;
     float lum = dot(color, vec3(k));
@@ -137,10 +151,8 @@ vec3 hueRotate(vec3 color, float angle) {
 }
 
 void main() {
-    // 1. 平铺 + 滚动（HLSL: mad(tiling, mad(speed, time, offset) + uv, -0.5)）
     vec2 uv = uTiling * (uScrollSpeed * uTime + uScrollOffset + vUv) - 0.5;
 
-    // 2. 随时间旋转的扰动
     float angle = (uWaverSpeed * uTime + uWaverOffset) * 6.283185307179586;
     float s = sin(angle);
     float c = cos(angle);
@@ -148,20 +160,15 @@ void main() {
 
     vec4 texel = texture2D(uMainTex, uv + 0.5);
 
-    // 3. 饱和度
     float lum = dot(texel.rgb, vec3(0.3, 0.59, 0.11));
     vec3 color = mix(texel.rgb, vec3(lum), uSaturation);
 
-    // 4. 色相
     color = hueRotate(color, uHueShift);
 
-    // 5. 材质主色 × 控件色调
     color *= uMainColor * uTint.rgb;
 
-    // 6. FinalPower
     color = pow(max(color, vec3(0.0)), vec3(uFinalPower));
 
-    // 7. 向 SelectionColor 偏移（未选中时为 0，等价于不生效）
     color = max(mix(color, uSelectionColor, uSelectionMix), vec3(0.0));
 
     float alpha = clamp(texel.a * uOpacity * uTint.a * uOpacity2 * uLayerOpacity, 0.0, 1.0);

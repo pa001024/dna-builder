@@ -2,21 +2,6 @@ import type { CommonAttr, ParamText } from "../data-types"
 import type { BulletType, DmgType, WeaponSkill } from "../leveled/LeveledSkill"
 import { applyVersionGate } from "../versionGate"
 
-export enum WeaponCategory {
-    单手剑 = "单手剑",
-    长柄 = "长柄",
-    重剑 = "重剑",
-    双刀 = "双刀",
-    鞭刃 = "鞭刃",
-    太刀 = "太刀",
-    手枪 = "手枪",
-    双枪 = "双枪",
-    榴炮 = "榴炮",
-    霰弹枪 = "霰弹枪",
-    突击枪 = "突击枪",
-    弓 = "弓",
-}
-
 export interface ForgeSkill {
     id: number
     名称: string
@@ -10787,6 +10772,8 @@ patch(
                                 影响: "技能威力",
                                 伤害类型: "灾厄",
                                 值: 35,
+                                // 上游 BaseAttr 由 ATK_Melee 改为 ATK_Char：按角色面板结算，不吃近战武器面板
+                                基础: "角色",
                                 tag: ["技能"],
                             },
                         ],

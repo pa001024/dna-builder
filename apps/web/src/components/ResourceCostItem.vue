@@ -600,7 +600,21 @@ function handleCardClick() {
         @click="$emit('click')"
     >
         <span class="font-medium truncate">
+            <FullTooltip v-if="mini" side="top">
+                <template #tooltip>
+                    <div class="-mx-3.75 -my-2.5">
+                        <ResourceTooltip :resource="getResourceById(value[1])!" bare />
+                    </div>
+                </template>
+                <img
+                    :src="getResourceIconById(value[1])"
+                    alt=""
+                    class="size-8 inline-block mr-2 cursor-help rounded-xs bg-linear-15"
+                    :class="getResourceBackgroundById(value[1])"
+                />
+            </FullTooltip>
             <img
+                v-else
                 :src="getResourceIconById(value[1])"
                 alt=""
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
