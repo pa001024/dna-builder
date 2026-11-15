@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { t } from "i18next"
-import { computed, ref, watch } from "vue"
+import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { requestBuildIncomes } from "@/composables/useBuildIncomeWorker"
 import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
-import { LeveledMod, LeveledModHelper } from "@/data"
+import { charMap, LeveledMod, LeveledModHelper, weaponMap } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
+import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
+import { encodeModCode, type ParsedModCode, parseModCode } from "@/utils/modCode"
 import type { ModPickerOption } from "@/utils/modPicker"
 import ModPickerDialog from "./ModPickerDialog.vue"
 
@@ -30,10 +32,16 @@ interface Props {
      * `append` 按额外附加计算，仅用于构筑对比页的追加 MOD 区域（追加槽本就是附加语义）。
      */
     incomeMode?: "replace" | "append"
+    /**
+     * 未接入构筑时的代码持有者：节点上显式选择的角色 / 武器。
+     * 有值时导入导出改用当前槽位数据直接编解码，不再依赖 CharBuild。
+     */
+    codeOwner?: { flag: "C" | "W"; id: number }
 }
 
 const props = withDefaults(defineProps<Props>(), { variantIndex: 0, variantCount: 0, incomeMode: "replace" })
 const inv = useInvStore()
+const ui = useUIStore()
 
 const incomeMap = ref<Record<string, number>>({})
 let workerRequestId = 0
@@ -47,7 +55,7 @@ const showCostCalc = ref(false)
 const auraModOptions = computed(() => {
     const options = props.modOptions.filter(option => {
         if (option.ser !== "羽蛇") return false
-        // 未接入构筑（节点未连线）时没有角色属性，中枢候选不做兼容性过滤
+        // 未接入构筑（节点未连线）时没有角色属性，中枢候选只按系列筛选
         if (!props.charBuild) return true
         try {
             return props.charBuild.isAuraCompatible(LeveledModHelper.fromId(option.value))
@@ -153,6 +161,8 @@ const emit = defineEmits<{
     variantAdd: []
     /** 移除末尾的 MOD 变体配置 */
     variantRemove: []
+    /** 导入码确认替换后，把节点上的角色 / 武器上下文换成代码持有者 */
+    importOwner: [owner: { flag: "C" | "W"; id: number }]
     sync: []
 }>()
 
@@ -246,9 +256,84 @@ function handleSelectMod(option: ModPickerOption) {
 }
 
 /**
+ * 按槽位顺序把解析结果写入当前页签：空槽移除、有 id 的槽位按库存等级装上。
+ * @param mods 代码中按槽位顺序还原的 MOD id
+ */
+function applyImportedMods(mods: number[]) {
+    for (let index = 0; index < props.mods.length; index++) {
+        const modId = mods[index] ?? 0
+        if (!modId) {
+            emit("removeMod", index)
+            continue
+        }
+        const lv = inv.getModLv(modId, LeveledModHelper.getQuality(modId)) ?? 10
+        emit("selectMod", [index, modId, lv])
+    }
+}
+
+/** 导入码持有者与当前选择不一致时的三选一结果 */
+type OwnerConflictChoice = "replace" | "keep" | "cancel"
+
+/** 不一致弹窗的展示信息；null 表示未打开 */
+const ownerConflict = ref<{ current: string; incoming: string } | null>(null)
+let ownerConflictResolve: ((choice: OwnerConflictChoice) => void) | null = null
+
+/**
+ * 取角色 / 武器的展示名；数据表查不到时退回 id。
+ * @param flag 代码类型
+ * @param id 角色 / 武器 id
+ * @returns 展示名
+ */
+function ownerLabel(flag: "C" | "W", id: number) {
+    const name = flag === "C" ? charMap.get(id)?.名称 : weaponMap.get(id)?.名称
+    return name ? t(name) : `#${id}`
+}
+
+/**
+ * 打开「导入码持有者与当前选择不一致」弹窗，等待用户选择。
+ * @param current 当前选择的角色 / 武器名
+ * @param incoming 导入码归属的角色 / 武器名
+ * @returns 替换 / 保留 / 取消
+ */
+function askOwnerConflict(current: string, incoming: string) {
+    return new Promise<OwnerConflictChoice>(resolve => {
+        ownerConflict.value = { current, incoming }
+        ownerConflictResolve = resolve
+    })
+}
+
+function resolveOwnerConflict(choice: OwnerConflictChoice) {
+    ownerConflict.value = null
+    const resolve = ownerConflictResolve
+    ownerConflictResolve = null
+    resolve?.(choice)
+}
+
+// 组件卸载时按取消处理，避免导入流程悬在一个永不 resolve 的 Promise 上
+onBeforeUnmount(() => resolveOwnerConflict("cancel"))
+
+/**
+ * 判断导入码是否属于当前页签。
+ * 角色码只能进角色页签；近战 / 远程码按武器大类精确匹配（远程码不能贴进近战页签）；
+ * 同律接受任意武器码——继承型同律使用的就是被继承的近战 / 远程武器代码。
+ * @param parsed 解析后的导入码
+ * @returns 是否与当前页签匹配
+ */
+function codeMatchesCurrentTab(parsed: ParsedModCode) {
+    if (props.type === "角色") return parsed.flag === "C"
+    if (parsed.flag !== "W") return false
+    if (props.type === "同律") return true
+    return weaponMap.get(parsed.ownerId)?.类型[0] === props.type
+}
+
+/**
  * 导入构筑代码。
+ * 未接入构筑时直接解析代码写回当前页签；代码持有者与当前选择不一致时让用户三选一。
+ * 代码的角色 / 武器类型必须与当前页签匹配。
  */
 async function handleImportCode() {
+    // 上一次导入的选择弹窗还没结束时不再叠一个
+    if (ownerConflict.value) return
     let charCode = ""
     try {
         charCode = (await pasteText()) || ""
@@ -256,21 +341,51 @@ async function handleImportCode() {
         charCode = prompt(t("modEditor.inputCode")) || ""
         console.error("导入代码失败:", error)
     }
-    if (!charCode) return
-    const result = props.charBuild?.importCode(charCode, props.type)
-    if (!result) return
-    for (let i = 0; i < result.mods.length; i++) {
-        const modId = result.mods[i]
-        if (!modId) {
-            emit("removeMod", i)
-            continue
+    const compact = charCode.replace(/\s+/g, "")
+    if (!compact) return
+    const parsed = parseModCode(compact)
+    if (!parsed) {
+        ui.showErrorMessage(t("char-build.import_format_invalid"))
+        return
+    }
+    if (!codeMatchesCurrentTab(parsed)) {
+        ui.showErrorMessage(t("modEditor.typeMismatch"))
+        return
+    }
+    if (!props.charBuild) {
+        const current = props.codeOwner
+        if (current && current.id !== parsed.ownerId) {
+            const choice = await askOwnerConflict(
+                ownerLabel(current.flag, current.id),
+                ownerLabel(parsed.flag, parsed.ownerId)
+            )
+            if (choice === "cancel") return
+            if (choice === "replace") emit("importOwner", { flag: parsed.flag, id: parsed.ownerId })
+        } else if (!current) {
+            // 没有选择任何角色 / 武器：按“替换”路径直接写入代码持有者
+            emit("importOwner", { flag: parsed.flag, id: parsed.ownerId })
         }
-        const lv = inv.getModLv(modId, LeveledModHelper.getQuality(modId)) ?? 10
-        emit("selectMod", [i, modId, lv])
     }
-    if (result.auraMod) {
-        emit("selectAuraMod", result.auraMod)
+    const imported = props.charBuild ? props.charBuild.importCode(compact, props.type) : parsed
+    if (!imported) return
+    applyImportedMods(imported.mods)
+    if (imported.auraMod) emit("selectAuraMod", imported.auraMod)
+}
+
+/** 导出当前页签的社区代码：显式上下文优先，其次才用已接入的构筑；同律没有上下文即不可导出 */
+const canExportCode = computed(() => !!props.codeOwner || !!props.charBuild)
+
+/**
+ * 复制当前页签的导入码。
+ * 有显式上下文时按节点的槽位数据编码。
+ */
+async function handleExportCode() {
+    if (props.codeOwner) {
+        const slots = props.mods.map(mod => (mod ? ([mod.id, mod.等级] as [number, number]) : null))
+        await copyText(encodeModCode(props.codeOwner.flag, props.codeOwner.id, slots, props.auraMod ?? 0))
+        return
     }
+    if (props.charBuild) await copyText(props.charBuild.getCode(props.type))
 }
 
 const aMod = computed(() => {
@@ -301,6 +416,34 @@ const auraPolset = computed(
 <template>
     <!-- @container：槽位列数按 ModEditer 自身宽度算，嵌入节点或构筑页都不受外层容器影响 -->
     <div class="@container">
+        <!-- 导入码持有者与当前选择不一致：是 = 替换选择并粘贴，否 = 保留选择只粘贴 MOD，取消 = 不粘贴 -->
+        <Teleport to="body">
+            <dialog class="modal" :class="{ 'modal-open': !!ownerConflict }">
+                <div class="modal-box bg-base-300 max-w-md">
+                    <h3 class="text-base font-bold">{{ t("modEditor.ownerMismatchTitle") }}</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-base-content/70">
+                        {{
+                            t("modEditor.ownerMismatchMessage", {
+                                current: ownerConflict?.current,
+                                incoming: ownerConflict?.incoming,
+                            })
+                        }}
+                    </p>
+                    <div class="modal-action">
+                        <button type="button" class="btn btn-sm btn-ghost" @click="resolveOwnerConflict('cancel')">
+                            {{ t("modEditor.ownerMismatchCancel") }}
+                        </button>
+                        <button type="button" class="btn btn-sm" @click="resolveOwnerConflict('keep')">
+                            {{ t("modEditor.ownerMismatchNo") }}
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" @click="resolveOwnerConflict('replace')">
+                            {{ t("modEditor.ownerMismatchYes") }}
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-backdrop" @click="resolveOwnerConflict('cancel')" />
+            </dialog>
+        </Teleport>
         <ModPickerDialog
             :open="mod_model_show"
             :mod-options="modOptions"
@@ -387,7 +530,6 @@ const auraPolset = computed(
                     </div>
                     <div
                         class="btn btn-ghost btn-sm btn-square border border-base-content/15"
-                        :class="{ 'pointer-events-none opacity-40': !charBuild }"
                         :title="$t('char-build.import_code')"
                         @click="handleImportCode()"
                     >
@@ -395,9 +537,9 @@ const auraPolset = computed(
                     </div>
                     <div
                         class="btn btn-ghost btn-sm btn-square border border-base-content/15"
-                        :class="{ 'pointer-events-none opacity-40': !charBuild }"
+                        :class="{ 'pointer-events-none opacity-40': !canExportCode }"
                         :title="$t('char-build.export_code')"
-                        @click="charBuild && copyText(charBuild.getCode(type))"
+                        @click="handleExportCode()"
                     >
                         <Icon icon="ri:file-copy-line" class="size-4" />
                     </div>

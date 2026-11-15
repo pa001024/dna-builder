@@ -3648,7 +3648,13 @@
         "title": "MOD 管理"
     },
     "modEditor": {
-        "inputCode": "キャラクターまたは武器コードを入力してください"
+        "inputCode": "キャラクターまたは武器コードを入力してください",
+        "ownerMismatchCancel": "キャンセル",
+        "ownerMismatchMessage": "現在の選択は {{current}} ですが、インポートコードは {{incoming}} のものです。現在の選択を置き換えますか？",
+        "ownerMismatchNo": "いいえ",
+        "ownerMismatchTitle": "インポートコードが現在の選択と一致しません",
+        "ownerMismatchYes": "はい",
+        "typeMismatch": "インポートコードの種類が現在のタブと一致しません"
     },
     "mods-detail": {
         "back": "戻る",

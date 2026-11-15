@@ -3696,7 +3696,13 @@
         "title": "MOD 管理"
     },
     "modEditor": {
-        "inputCode": "请输入角色或武器代码"
+        "inputCode": "请输入角色或武器代码",
+        "ownerMismatchCancel": "取消",
+        "ownerMismatchMessage": "当前选择的是 {{current}}，导入代码属于 {{incoming}}。是否替换当前选择？",
+        "ownerMismatchNo": "否",
+        "ownerMismatchTitle": "导入代码与当前选择不一致",
+        "ownerMismatchYes": "是",
+        "typeMismatch": "导入码类型与当前页签不匹配"
     },
     "mods-detail": {
         "back": "返回",

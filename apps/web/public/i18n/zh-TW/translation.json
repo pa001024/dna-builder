@@ -3646,7 +3646,13 @@
         "title": "MOD 管理"
     },
     "modEditor": {
-        "inputCode": "請輸入角色或武器代碼"
+        "inputCode": "請輸入角色或武器代碼",
+        "ownerMismatchCancel": "取消",
+        "ownerMismatchMessage": "目前選擇的是 {{current}}，匯入代碼屬於 {{incoming}}。是否替換目前選擇？",
+        "ownerMismatchNo": "否",
+        "ownerMismatchTitle": "匯入代碼與目前選擇不一致",
+        "ownerMismatchYes": "是",
+        "typeMismatch": "匯入碼類型與目前頁籤不匹配"
     },
     "mods-detail": {
         "back": "返回",

@@ -3670,7 +3670,13 @@
         "title": "MOD Manager"
     },
     "modEditor": {
-        "inputCode": "Please enter character or weapon code"
+        "inputCode": "Please enter character or weapon code",
+        "ownerMismatchCancel": "Cancel",
+        "ownerMismatchMessage": "The current selection is {{current}}, but the imported code belongs to {{incoming}}. Replace the current selection?",
+        "ownerMismatchNo": "No",
+        "ownerMismatchTitle": "Import code does not match the current selection",
+        "ownerMismatchYes": "Yes",
+        "typeMismatch": "The import code type does not match the current tab"
     },
     "mods-detail": {
         "back": "Back",

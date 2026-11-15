@@ -3687,7 +3687,13 @@
         "title": "Gestion des MOD"
     },
     "modEditor": {
-        "inputCode": "Veuillez entrer le code du personnage ou de l'arme"
+        "inputCode": "Veuillez entrer le code du personnage ou de l'arme",
+        "ownerMismatchCancel": "Annuler",
+        "ownerMismatchMessage": "La sélection actuelle est {{current}}, mais le code importé appartient à {{incoming}}. Remplacer la sélection actuelle ?",
+        "ownerMismatchNo": "Non",
+        "ownerMismatchTitle": "Le code importé ne correspond pas à la sélection actuelle",
+        "ownerMismatchYes": "Oui",
+        "typeMismatch": "Le type de code importé ne correspond pas à l'onglet actuel"
     },
     "mods-detail": {
         "back": "Retour",

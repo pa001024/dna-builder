@@ -3649,7 +3649,13 @@
         "title": "MOD 관리"
     },
     "modEditor": {
-        "inputCode": "캐릭터 또는 무기 코드를 입력하세요"
+        "inputCode": "캐릭터 또는 무기 코드를 입력하세요",
+        "ownerMismatchCancel": "취소",
+        "ownerMismatchMessage": "현재 선택은 {{current}}이지만 가져온 코드는 {{incoming}}의 것입니다. 현재 선택을 교체할까요?",
+        "ownerMismatchNo": "아니요",
+        "ownerMismatchTitle": "가져온 코드가 현재 선택과 일치하지 않습니다",
+        "ownerMismatchYes": "예",
+        "typeMismatch": "가져온 코드 유형이 현재 탭과 일치하지 않습니다"
     },
     "mods-detail": {
         "back": "뒤로",

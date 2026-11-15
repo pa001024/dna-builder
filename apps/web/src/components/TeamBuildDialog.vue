@@ -15,7 +15,8 @@ import {
 } from "@/composables/useCharSettings"
 import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
 import { useUIStore } from "@/store/ui"
-import { base36Pad, copyText } from "@/util"
+import { copyText } from "@/util"
+import { encodeModCode } from "@/utils/modCode"
 
 /**
  * 协战构筑弹窗——简洁模式下点击协战角色/协战武器时打开。
@@ -129,29 +130,6 @@ const focusKey = computed(() => {
  */
 function toMods(slots: ModSlot[]): (LeveledMod | null)[] {
     return slots.map((slot): LeveledMod | null => (slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null))
-}
-
-/**
- * 8 槽位魔之楔在社区代码里的排列位置（与 CharBuild.codeSwapR 的交换表一致）：
- * 第 i 个槽位占据代码中的第 SLOT_CODE_POSITIONS[i] 组。
- */
-const SLOT_CODE_POSITIONS = [0, 2, 3, 1, 4, 6, 7, 5]
-
-/**
- * 把一套魔之楔按游戏社区代码格式编码（与专业模式「复制代码」的 CharBuild.getCode 同格式）。
- * 角色组为 C + 角色id + 8 槽 + 中枢，武器组为 W + 武器id + 8 槽，空槽编 0。
- * @param flag 代码类型（C 角色 / W 武器）
- * @param ownerId 角色 id 或武器 id
- * @param slots 8 个普通槽位
- * @param auraId 中枢魔之楔 id（仅角色组使用）
- * @returns 社区代码
- */
-function encodeModCode(flag: "C" | "W", ownerId: number, slots: ModSlot[], auraId = 0) {
-    const groups = Array.from({ length: 8 }, () => "0000")
-    for (let index = 0; index < 8; index += 1) {
-        groups[SLOT_CODE_POSITIONS[index]] = base36Pad(slots[index]?.[0] ?? 0)
-    }
-    return `${flag}${base36Pad(ownerId)}${groups.join("")}${flag === "C" ? base36Pad(auraId) : ""}`
 }
 
 /**

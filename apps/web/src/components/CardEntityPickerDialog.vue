@@ -8,6 +8,12 @@ const props = defineProps<{
     open: boolean
     kind: "char" | "weapon"
     selectedId?: number
+    /** 武器大类过滤（近战 / 远程）；缺省展示全部武器 */
+    weaponType?: string
+    /** 是否提供「不选择」卡片（发送 id 0，用于清空上下文） */
+    allowClear?: boolean
+    /** 弹窗说明文案 */
+    hint?: string
 }>()
 
 const emit = defineEmits<{
@@ -26,12 +32,16 @@ const groups = computed(() => {
     const options: EntityOption[] =
         props.kind === "char"
             ? charData.map(char => ({ value: char.id, label: char.名称, group: char.属性, icon: LeveledChar.url(char.icon) }))
-            : weaponData.map(weapon => ({
-                  value: weapon.id,
-                  label: weapon.名称,
-                  group: weapon.类型[0] ?? "",
-                  icon: LeveledWeapon.url(weapon.icon),
-              }))
+            : weaponData
+                  .filter(weapon => !props.weaponType || weapon.类型[0] === props.weaponType)
+                  .map(weapon => ({
+                      value: weapon.id,
+                      label: weapon.名称,
+                      group: weapon.类型[0] ?? "",
+                      icon: LeveledWeapon.url(weapon.icon),
+                  }))
+    // 清空选项与普通卡片同构：空分组置于最前，由 id 0 表示不选择
+    if (props.allowClear) options.unshift({ value: 0, label: "char-build.pet_none", group: "", icon: "" })
 
     const grouped = new Map<string, EntityOption[]>()
     for (const option of options) {
@@ -40,13 +50,14 @@ const groups = computed(() => {
         else grouped.set(option.group, [option])
     }
     return [...grouped].map(([key, items]) => ({
-        key,
+        key: key || "__none",
         label: key ? (props.kind === "char" ? t(`${key}属性`, key) : t(key)) : "",
         options: items,
     }))
 })
 
 const title = computed(() => (props.kind === "char" ? "选择角色" : "选择武器"))
+const description = computed(() => props.hint ?? "点击卡片选择要展示的条目")
 
 function close() {
     emit("update:open", false)
@@ -81,7 +92,7 @@ function pickClass(id: number) {
                     <Icon icon="ri:close-line" class="size-4" />
                 </button>
                 <h3 class="mb-1 text-lg font-bold">{{ title }}</h3>
-                <p class="mb-4 text-xs text-base-content/60">点击卡片选择要展示的条目</p>
+                <p class="mb-4 text-xs text-base-content/60">{{ description }}</p>
 
                 <div class="max-h-[70vh] overflow-y-auto pr-1">
                     <div v-for="group in groups" :key="group.key" class="mb-3 last:mb-0">
@@ -95,9 +106,13 @@ function pickClass(id: number) {
                                 :class="pickClass(option.value)"
                                 @click="pick(option.value)"
                             >
-                                <span class="grid size-9 place-items-center overflow-hidden border border-base-content/22 bg-base-content/6">
+                                <span
+                                    class="grid size-9 place-items-center overflow-hidden border border-base-content/22 bg-base-content/6"
+                                    :class="{ 'border-dashed': option.value === 0 }"
+                                >
+                                    <Icon v-if="option.value === 0" icon="ri:close-line" class="size-5 opacity-45" />
                                     <img
-                                        v-if="option.icon"
+                                        v-else-if="option.icon"
                                         class="size-full object-cover object-top"
                                         :src="option.icon"
                                         alt=""
