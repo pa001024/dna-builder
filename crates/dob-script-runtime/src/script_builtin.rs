@@ -43,12 +43,9 @@ use crate::{
     input::*,
     jsdnn::register_cv_dnn_namespace,
     jsmat::{IntoJs, JsMat},
-    mono_depth::{
-        MonoDepthInitConfig, init_mono_depth, predict_mono_depth, predict_mono_depth_model_space,
-    },
     ocr::{self, OcrInitConfig},
     predict_rotation::predict_rotation,
-    route::{find_path_direction_coords, predict_depth, predict_mono_route},
+    route::{find_path_direction_coords, predict_depth},
     script::{
         SCRIPT_STOP_INTERRUPT_MESSAGE, capture_current_script_stop_snapshot,
         run_with_script_stop_snapshot, should_stop_current_script,
@@ -2683,57 +2680,6 @@ fn _init_ocr(
     )))
 }
 
-/// 初始化 Lite-Mono：下载模型并预热运行时。
-///
-/// 参数：
-/// - `local_root_dir`：可选，本地模型目录（为空时使用默认目录）；
-/// - `cdn_base_url`：可选，模型根地址（默认 Lite-Mono 官方地址）。
-///
-/// 返回：
-/// - 实际使用的本地模型目录绝对路径。
-fn _init_mono_depth(
-    local_root_dir: Option<JsValue>,
-    cdn_base_url: Option<JsValue>,
-    ctx: &mut Context,
-) -> JsResult<JsValue> {
-    let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
-    let cdn_base_url = cdn_base_url.unwrap_or_else(|| JsValue::undefined());
-
-    let local_root_dir = if local_root_dir.is_undefined() || local_root_dir.is_null() {
-        None
-    } else {
-        let raw = local_root_dir.to_string(ctx)?.to_std_string_lossy();
-        let normalized = raw.trim().to_string();
-        if normalized.is_empty() {
-            None
-        } else {
-            Some(PathBuf::from(&*_resolve_script_resource_path(&normalized)))
-        }
-    };
-
-    let base_url = if cdn_base_url.is_undefined() || cdn_base_url.is_null() {
-        None
-    } else {
-        let raw = cdn_base_url.to_string(ctx)?.to_std_string_lossy();
-        let normalized = raw.trim().to_string();
-        if normalized.is_empty() {
-            None
-        } else {
-            Some(normalized)
-        }
-    };
-
-    let config = MonoDepthInitConfig {
-        local_root_dir,
-        base_url,
-    };
-    let root_dir = init_mono_depth(config)
-        .map_err(|e| JsNativeError::error().with_message(format!("initMonoDepth 失败: {e}")))?;
-    Ok(JsValue::from(js_string!(
-        root_dir.to_string_lossy().to_string()
-    )))
-}
-
 /// OCR 文字识别：输入 Mat，返回 Promise<string>（阻塞识别在后台线程执行）。
 fn _ocr_text(js_img_mat: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let js_img_mat = js_img_mat
@@ -4021,178 +3967,6 @@ fn _predict_depth(
     Ok(result.into())
 }
 
-/// Lite-Mono 单目深度预测函数：输入 Mat，返回 8 位相对深度图。
-fn _mono_depth(js_image: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
-    let js_image = js_image
-        .unwrap_or_else(|| JsValue::undefined())
-        .get_native::<JsMat>()?;
-    let input_mat = js_image.borrow().data().inner.clone();
-    let (promise, resolvers) = JsPromise::new_pending(ctx);
-    let resolvers_clone = resolvers.clone();
-
-    ctx.enqueue_job(
-        NativeAsyncJob::new(async move |context| {
-            let async_result =
-                _spawn_blocking_with_script_stop_snapshot(move || predict_mono_depth(&input_mat))
-                    .await;
-
-            let context = &mut context.borrow_mut();
-            match async_result {
-                Ok(Ok(depth_mat)) => match Box::new(depth_mat).into_js(context) {
-                    Ok(js_depth) => {
-                        resolvers_clone
-                            .resolve
-                            .call(&JsValue::undefined(), &[js_depth], context)
-                    }
-                    Err(error) => {
-                        let message = format!("monoDepth 返回值转换失败: {error:?}");
-                        resolvers_clone.reject.call(
-                            &JsValue::undefined(),
-                            &[JsValue::from(js_string!(message))],
-                            context,
-                        )
-                    }
-                },
-                Ok(Err(message)) => resolvers_clone.reject.call(
-                    &JsValue::undefined(),
-                    &[JsValue::from(js_string!(message))],
-                    context,
-                ),
-                Err(error) => {
-                    let message = format!("monoDepth 线程执行失败: {error}");
-                    resolvers_clone.reject.call(
-                        &JsValue::undefined(),
-                        &[JsValue::from(js_string!(message))],
-                        context,
-                    )
-                }
-            }
-        })
-        .into(),
-    );
-
-    Ok(promise.into())
-}
-
-/// Lite-Mono 单目路线预测函数：返回相对深度图、地形掩码、障碍掩码与候选方向。
-fn _predict_mono_route(
-    js_image: Option<JsValue>,
-    min_region_area: Option<JsValue>,
-    max_candidates: Option<JsValue>,
-    ctx: &mut Context,
-) -> JsResult<JsValue> {
-    let js_image = js_image
-        .unwrap_or_else(|| JsValue::undefined())
-        .get_native::<JsMat>()?;
-    let input_mat = js_image.borrow().data().inner.clone();
-    let min_region_area = min_region_area
-        .unwrap_or_else(|| js_value!(800))
-        .to_number(ctx)? as i32;
-    let max_candidates = max_candidates
-        .unwrap_or_else(|| js_value!(3))
-        .to_number(ctx)? as usize;
-    let (promise, resolvers) = JsPromise::new_pending(ctx);
-    let resolvers_clone = resolvers.clone();
-
-    ctx.enqueue_job(
-        NativeAsyncJob::new(async move |context| {
-            let async_result = _spawn_blocking_with_script_stop_snapshot(move || {
-                let input_size = input_mat
-                    .size()
-                    .map_err(|e| format!("读取 predictMonoRoute 输入尺寸失败: {e}"))?;
-                let mono_started_at = Instant::now();
-                let depth_mat = predict_mono_depth_model_space(&input_mat)?;
-                let mono_cost_ms = mono_started_at.elapsed().as_millis();
-                let depth_size = depth_mat
-                    .size()
-                    .map_err(|e| format!("读取 predictMonoRoute 深度尺寸失败: {e}"))?;
-                let route_started_at = Instant::now();
-                let mono_route = predict_mono_route(&depth_mat, min_region_area, max_candidates)?;
-                let route_cost_ms = route_started_at.elapsed().as_millis();
-                let scale_x = if depth_size.width > 0 {
-                    f64::from(input_size.width) / f64::from(depth_size.width)
-                } else {
-                    1.0
-                };
-                let scale_y = if depth_size.height > 0 {
-                    f64::from(input_size.height) / f64::from(depth_size.height)
-                } else {
-                    1.0
-                };
-                let mapped_directions = mono_route
-                    .directions
-                    .iter()
-                    .map(|point| {
-                        [
-                            ((f64::from(point[0]) * scale_x).round() as i32)
-                                .clamp(0, input_size.width.saturating_sub(1)),
-                            ((f64::from(point[1]) * scale_y).round() as i32)
-                                .clamp(0, input_size.height.saturating_sub(1)),
-                        ]
-                    })
-                    .collect::<Vec<_>>();
-                println!(
-                    "[predictMonoRoute] monoDepth={}ms routePost={}ms total={}ms",
-                    mono_cost_ms,
-                    route_cost_ms,
-                    mono_cost_ms + route_cost_ms
-                );
-                Ok::<_, String>((depth_mat, mono_route, mapped_directions))
-            })
-            .await;
-
-            let context = &mut context.borrow_mut();
-            match async_result {
-                Ok(Ok((depth_mat, mono_route, mapped_directions))) => {
-                    let _ = depth_mat;
-                    let _ = mono_route;
-                    let js_directions = JsArray::new(context);
-                    for point in mapped_directions {
-                        let point_array = js_value!([point[0], point[1]], context);
-                        if let Err(error) = js_directions.push(point_array, context) {
-                            let message = format!("predictMonoRoute 方向列表转换失败: {error:?}");
-                            return resolvers_clone.reject.call(
-                                &JsValue::undefined(),
-                                &[JsValue::from(js_string!(message))],
-                                context,
-                            );
-                        }
-                    }
-
-                    let result = js_object!(
-                        {
-                            // depth: js_depth,
-                            // terrainMask: js_terrain_mask,
-                            // obstacleMask: js_obstacle_mask,
-                            directions: js_directions,
-                        },
-                        context
-                    );
-                    resolvers_clone
-                        .resolve
-                        .call(&JsValue::undefined(), &[result.into()], context)
-                }
-                Ok(Err(message)) => resolvers_clone.reject.call(
-                    &JsValue::undefined(),
-                    &[JsValue::from(js_string!(message))],
-                    context,
-                ),
-                Err(error) => {
-                    let message = format!("predictMonoRoute 线程执行失败: {error}");
-                    resolvers_clone.reject.call(
-                        &JsValue::undefined(),
-                        &[JsValue::from(js_string!(message))],
-                        context,
-                    )
-                }
-            }
-        })
-        .into(),
-    );
-
-    Ok(promise.into())
-}
-
 /// 边框绘制函数
 fn _draw_border(
     hwnd: Option<JsValue>,
@@ -5441,10 +5215,6 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     let f = _init_ocr.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("initOcr"), 4, f)?;
 
-    // Lite-Mono 初始化（自动下载模型并预热运行时）
-    let f = _init_mono_depth.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("initMonoDepth"), 2, f)?;
-
     // OCR 文字识别
     let f = _ocr_text.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("ocrText"), 1, f)?;
@@ -5564,14 +5334,6 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 深度预测函数（双图深度 + 路径方向候选）
     let f = _predict_depth.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("predictDepth"), 6, f)?;
-
-    // Lite-Mono 单目深度预测函数
-    let f = _mono_depth.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("monoDepth"), 1, f)?;
-
-    // Lite-Mono 单目路线预测函数
-    let f = _predict_mono_route.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("predictMonoRoute"), 3, f)?;
 
     // OpenCV DNN 命名空间（cv.dnn.*）
     register_cv_dnn_namespace(context)?;

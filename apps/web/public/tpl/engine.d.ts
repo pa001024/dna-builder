@@ -1617,14 +1617,6 @@ declare function setConfig(name: string, value: string | number | boolean | stri
 declare function setProgramVolume(programName: string, volume: number): void
 
 /**
- * 初始化 Lite-Mono 单目深度模型（自动下载模型并预热运行时）
- * @param localRootDir 本地模型目录，默认使用系统缓存目录
- * @param cdnBaseUrl 模型根地址，默认使用 Lite-Mono 官方地址
- * @returns 实际使用的本地模型目录绝对路径
- */
-declare function initMonoDepth(localRootDir?: string, cdnBaseUrl?: string): string
-
-/**
  * 双图深度预测结果
  */
 interface PredictDepthResult {
@@ -1654,33 +1646,3 @@ declare function predictDepth(
     minRegionArea?: number,
     maxCandidates?: number
 ): PredictDepthResult
-
-/**
- * Lite-Mono 单目深度预测
- * @param image 输入图像 Mat
- * @returns 8 位相对深度图（值越大表示相对更近）
- */
-declare function monoDepth(image: Mat): Promise<Mat>
-
-/**
- * 单目深度避障结果
- */
-interface PredictMonoRouteResult {
-    /** 单目相对深度图（值越大表示相对更近） */
-    depth: Mat
-    /** 可通行地形掩码（0 表示不可走，255 表示候选可通行区域） */
-    terrainMask: Mat
-    /** 障碍物掩码（0 表示非障碍，255 表示需要规避） */
-    obstacleMask: Mat
-    /** 避障后的方向候选坐标 */
-    directions: [number, number][]
-}
-
-/**
- * 基于 Lite-Mono 的单目深度避障候选预测
- * @param image 输入图像 Mat
- * @param minRegionArea 有效连通区域最小面积（像素，默认800）
- * @param maxCandidates 最多返回的方向候选数量（默认3）
- * @returns 相对深度图、可通行地形掩码、障碍掩码与方向候选
- */
-declare function predictMonoRoute(image: Mat, minRegionArea?: number, maxCandidates?: number): Promise<PredictMonoRouteResult>

@@ -159,5 +159,5 @@ tauri-plugin-global-shortcut = "2"
 winit = "0.30"
 raw-window-handle = "0.6"
 ndarray = "0.17"
-ort = { version = "2.0.0-rc.12", features = ["directml"] }
+ort = { version = "2.0.0-rc.14", features = ["directml"] }
 clipper2-rust = "1.0.3"

@@ -17,7 +17,6 @@ pub use dob_script_runtime::jsdnn;
 pub use dob_script_runtime::jsmat;
 pub use dob_script_runtime::jstimer;
 pub use dob_script_runtime::logger;
-pub use dob_script_runtime::mono_depth;
 pub use dob_script_runtime::ocr;
 pub use dob_script_runtime::predict_rotation;
 pub use dob_script_runtime::route;

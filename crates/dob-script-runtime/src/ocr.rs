@@ -463,8 +463,12 @@ fn build_session_with_auto_device(
     use_gpu: bool,
     num_thread: i32,
 ) -> Result<(Session, String), String> {
-    let base_builder =
-        Session::builder().map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
+    let ort_env = ort::environment::init()
+        .with_name(format!("dob-ocr-{label}"))
+        .build()
+        .map_err(|e| format!("创建 {label} ONNX Runtime 环境失败: {e}"))?;
+    let base_builder = Session::builder(&ort_env)
+        .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
 
     if use_gpu
         && let Ok(builder) = base_builder.with_execution_providers([ep::DirectML::default()
@@ -484,12 +488,12 @@ fn build_session_with_auto_device(
         }
     }
 
-    let mut builder =
-        Session::builder().map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
+    let mut builder = Session::builder(&ort_env)
+        .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
     if use_gpu {
         builder = match builder.with_auto_device(AutoDevicePolicy::PreferGPU) {
             Ok(builder) => builder,
-            Err(_) => Session::builder()
+            Err(_) => Session::builder(&ort_env)
                 .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?
                 .with_auto_device(AutoDevicePolicy::Default)
                 .map_err(|e| format!("配置 {label} 自动设备策略失败: {e}"))?,
