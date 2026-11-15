@@ -139,6 +139,24 @@ fn ocr_pool() -> &'static OcrPool {
     })
 }
 
+/// ort 2.x 限制每进程只能创建一个 Environment，多个会话必须共享同一个。
+/// 初始化失败的结果也会被缓存：同一进程内重试必然得到相同结果。
+static ORT_ENVIRONMENT: OnceLock<Result<ort::environment::Environment, String>> =
+    OnceLock::new();
+
+/// 获取全进程共享的 ONNX Runtime 环境，首次调用时创建。
+fn shared_ort_environment() -> Result<&'static ort::environment::Environment, String> {
+    ORT_ENVIRONMENT
+        .get_or_init(|| {
+            ort::environment::init()
+                .with_name("dob-script-runtime")
+                .build()
+                .map_err(|e| format!("创建 ONNX Runtime 环境失败: {e}"))
+        })
+        .as_ref()
+        .map_err(Clone::clone)
+}
+
 /// 构建单个推理实例。
 fn build_one_runtime(spec: &OcrBuildSpec) -> Result<OcrRuntime, String> {
     let (rec_session, _rec_provider) =
@@ -463,11 +481,8 @@ fn build_session_with_auto_device(
     use_gpu: bool,
     num_thread: i32,
 ) -> Result<(Session, String), String> {
-    let ort_env = ort::environment::init()
-        .with_name(format!("dob-ocr-{label}"))
-        .build()
-        .map_err(|e| format!("创建 {label} ONNX Runtime 环境失败: {e}"))?;
-    let base_builder = Session::builder(&ort_env)
+    let ort_env = shared_ort_environment()?;
+    let base_builder = Session::builder(ort_env)
         .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
 
     if use_gpu
@@ -488,12 +503,12 @@ fn build_session_with_auto_device(
         }
     }
 
-    let mut builder = Session::builder(&ort_env)
+    let mut builder = Session::builder(ort_env)
         .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?;
     if use_gpu {
         builder = match builder.with_auto_device(AutoDevicePolicy::PreferGPU) {
             Ok(builder) => builder,
-            Err(_) => Session::builder(&ort_env)
+            Err(_) => Session::builder(ort_env)
                 .map_err(|e| format!("创建 {label} SessionBuilder 失败: {e}"))?
                 .with_auto_device(AutoDevicePolicy::Default)
                 .map_err(|e| format!("配置 {label} 自动设备策略失败: {e}"))?,

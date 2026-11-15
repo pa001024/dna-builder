@@ -907,6 +907,19 @@ function launchLocalScriptInBackground(scriptName: string) {
 }
 
 /**
+ * 列表行内运行按钮入口：模板内直接调用 async 函数时，被拒的 Promise 会冒泡到 ErrorBoundary；
+ * 在这里接住并打到脚本 console，保持与主运行按钮一致的表现。
+ * @param scriptName 本地脚本文件名
+ */
+function runLocalScriptFromList(scriptName: string) {
+    void runLocalScriptByName(scriptName).catch(error => {
+        console.error("运行脚本失败", error)
+        ui.showErrorMessage(t("script-list.run_script_failed"))
+        addConsoleLog("error", t("script-list.run_script_failed_with_error", { error: String(error) }))
+    })
+}
+
+/**
  * 按脚本路径提取文件名。
  * @param scriptPath 脚本完整路径
  * @returns 文件名（提取失败返回空字符串）
@@ -3649,7 +3662,7 @@ onUnmounted(async () => {
                                             v-else
                                             class="w-4 h-4 shrink-0 flex items-center justify-center cursor-pointer relative"
                                             :title="$t('script-list.run_script')"
-                                            @click.stop="runLocalScriptByName(script)"
+                                            @click.stop="runLocalScriptFromList(script)"
                                         >
                                             <Icon icon="ri:file-line" class="w-4 h-4 transition-opacity group-hover:opacity-0" />
                                             <Icon
