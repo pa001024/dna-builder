@@ -11,12 +11,12 @@
  * 不传 -v 就不动 pubspec；传了则写回并保留改动，发布后自行提交。
  */
 
-import { createHash } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { $ } from "bun"
-import { assertStorageConfig, envConfig, getPublicUrl, putFile } from "./object-storage"
+import { assertStorageConfig, envConfig, getPublicUrl, getPublicUrlOn, putFile, putGenerated } from "./object-storage"
+import { sha256File } from "./update-pack"
 
 /** 安装包与发布清单在对象存储上的存放前缀（清单只在 apk 目录内，不动桌面端的根 latest.json） */
 const APK_PREFIX = "apk"
@@ -160,21 +160,6 @@ export function formatApkFileName(version: string): string {
 }
 
 /**
- * 计算文件 sha256。
- * @param filePath 文件路径
- * @returns 十六进制摘要
- */
-async function hashFile(filePath: string): Promise<string> {
-    const hash = createHash("sha256")
-    // 安装包有数十 MB，流式读取避免整包进内存
-    for await (const chunk of fs.createReadStream(filePath)) {
-        hash.update(chunk as Buffer)
-    }
-
-    return hash.digest("hex")
-}
-
-/**
  * 把构建产物按版本号改名落盘，返回可上传的路径与元信息。
  * @param sourcePath 原始安装包路径
  * @param version 版本号
@@ -186,18 +171,7 @@ async function stageVersionedApk(sourcePath: string, version: string): Promise<{
         fs.copyFileSync(sourcePath, apkPath)
     }
 
-    return { apkPath, size: fs.statSync(apkPath).size, sha256: await hashFile(apkPath) }
-}
-
-/**
- * 上传文件到对象存储（OSS 与 R2 双写），超过 1MB 时打印进度（进度逻辑在共用存储模块里）。
- * @param filePath 本地文件路径
- * @param objectKey 对象键名
- */
-async function uploadToStorage(filePath: string, objectKey: string): Promise<void> {
-    console.log(`📤 上传到对象存储: ${objectKey}`)
-    await putFile(objectKey, filePath)
-    console.log(`✅ 上传成功: ${objectKey}`)
+    return { apkPath, size: fs.statSync(apkPath).size, sha256: await sha256File(apkPath) }
 }
 
 async function main(): Promise<void> {
@@ -268,8 +242,15 @@ async function main(): Promise<void> {
     console.log(`   本地快照: ${localManifestPath}`)
 
     if (shouldUpload && !isDryRun) {
-        await uploadToStorage(staged.apkPath, apkKey)
-        await uploadToStorage(localManifestPath, APK_MANIFEST_KEY)
+        console.log(`📤 上传到对象存储: ${apkKey}`)
+        await putFile(apkKey, staged.apkPath)
+        console.log(`✅ 上传成功: ${apkKey}`)
+        // 清单按后端各自生成：url 必须指向该后端自己的域名，否则兜底源拿到的是主源地址。
+        await putGenerated(
+            APK_MANIFEST_KEY,
+            backend => JSON.stringify({ ...latest, url: getPublicUrlOn(backend, apkKey) } satisfies ApkLatest, null, 2),
+            "application/json"
+        )
         console.log(`\n✅ 已发布 ${fileName} -> ${latest.url}`)
         console.log(`✅ 已发布 ${APK_MANIFEST_KEY} -> ${getPublicUrl(APK_MANIFEST_KEY)}`)
         return

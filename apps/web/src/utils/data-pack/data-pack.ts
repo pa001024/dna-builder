@@ -2,7 +2,7 @@ import { decode } from "@msgpack/msgpack"
 import { type Unzipped, unzip } from "fflate"
 import { tauriFetch } from "@/api/app"
 import { env } from "@/env"
-import { getActiveCdnBase, resolveCdnUrls } from "../cdn"
+import { getActiveCdnBase, readResponseBytesWithProgress, resolveCdnUrls } from "../cdn"
 import {
     getRegisteredDataPackModuleKeys,
     hydrateRegisteredDataPackBindings,
@@ -354,54 +354,6 @@ async function readFile(directory: PackDirectoryHandle, fileName: string): Promi
     } catch {
         return null
     }
-}
-
-/**
- * 从响应流中读取全部字节并汇报进度。
- * @param response 响应对象
- * @param onProgress 进度回调
- * @returns 文件字节
- */
-async function readResponseBytes(response: Response, onProgress?: (progress: number) => void): Promise<Uint8Array> {
-    const total = Number(response.headers.get("content-length") || 0)
-
-    if (!response.body?.getReader) {
-        const bytes = new Uint8Array(await response.arrayBuffer())
-        onProgress?.(1)
-        return bytes
-    }
-
-    const reader = response.body.getReader()
-    const chunks: Uint8Array[] = []
-    let received = 0
-
-    for (;;) {
-        const { done, value } = await reader.read()
-        if (done) {
-            break
-        }
-        if (value) {
-            chunks.push(value)
-            received += value.byteLength
-            if (total > 0) {
-                onProgress?.(Math.min(received / total, 1))
-            }
-        }
-    }
-
-    if (chunks.length === 1) {
-        onProgress?.(1)
-        return chunks[0]
-    }
-
-    const bytes = new Uint8Array(received)
-    let offset = 0
-    for (const chunk of chunks) {
-        bytes.set(chunk, offset)
-        offset += chunk.byteLength
-    }
-    onProgress?.(1)
-    return bytes
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
@@ -1120,7 +1072,10 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
                     lastError = new Error(`下载数据包失败: ${response.status} ${response.statusText}`)
                     continue
                 }
-                bytes = await readResponseBytes(response, onProgress)
+                bytes = await readResponseBytesWithProgress(response, progress => {
+                    if (progress.bytesTotal > 0) onProgress?.(Math.min(progress.bytesDownloaded / progress.bytesTotal, 1))
+                })
+                onProgress?.(1)
                 break
             } catch (error) {
                 lastError = error

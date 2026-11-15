@@ -5,6 +5,8 @@
  * - 生成与 daisyui.com/theme-generator 相同格式的主题 CSS
  */
 
+import { hexToRgb, rgbToOklab } from "./color"
+
 /** 主题色键（20 个，与 daisyUI 主题变量一一对应） */
 export type CustomThemeColorKey =
     | "base-100"
@@ -109,35 +111,15 @@ export const CUSTOM_THEME_COLOR_GROUPS: { key: CustomThemeColorKey }[][] = [
     ],
 ]
 
-/** sRGB 非线性值 -> 线性值 */
-function srgbToLinear(c: number): number {
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-}
-
 /**
  * 将 hex 颜色转换为 OKLCH 分量。
  * @param hex #rrggbb 格式
  * @returns l∈[0,1]、c 色度、h 色相角（0-360）
  */
 export function hexToOklch(hex: string): { l: number; c: number; h: number } {
-    const raw = hex.replace("#", "")
-    const r = parseInt(raw.slice(0, 2), 16) / 255
-    const g = parseInt(raw.slice(2, 4), 16) / 255
-    const b = parseInt(raw.slice(4, 6), 16) / 255
-    const rl = srgbToLinear(r)
-    const gl = srgbToLinear(g)
-    const bl = srgbToLinear(b)
-    const l_ = 0.4122214708 * rl + 0.5363325363 * gl + 0.0514459929 * bl
-    const m_ = 0.2119034982 * rl + 0.6806995451 * gl + 0.1073969566 * bl
-    const s_ = 0.0883024619 * rl + 0.2817188376 * gl + 0.6299787005 * bl
-    const l3 = Math.cbrt(l_)
-    const m3 = Math.cbrt(m_)
-    const s3 = Math.cbrt(s_)
-    const L = 0.2104542553 * l3 + 0.793617785 * m3 - 0.0040720468 * s3
-    const a = 1.9779984951 * l3 - 2.428592205 * m3 + 0.4505937099 * s3
-    const bv = 0.0259040371 * l3 + 0.7827717662 * m3 - 0.808675766 * s3
-    const c = Math.sqrt(a * a + bv * bv)
-    let h = (Math.atan2(bv, a) * 180) / Math.PI
+    const [L, a, b] = rgbToOklab(hexToRgb(hex) ?? [0, 0, 0])
+    const c = Math.hypot(a, b)
+    let h = (Math.atan2(b, a) * 180) / Math.PI
     if (h < 0) {
         h += 360
     }

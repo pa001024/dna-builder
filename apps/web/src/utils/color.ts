@@ -21,7 +21,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /** 将 0~255 的 sRGB 分量转为 0~1 的线性光分量。 */
-function toLinear(channel: number): number {
+export function srgbChannelToLinear(channel: number): number {
     const value = channel / 255
     return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
 }
@@ -32,7 +32,7 @@ function toLinear(channel: number): number {
  * @returns OKLab 三元组
  */
 export function rgbToOklab(rgb: Rgb): Oklab {
-    const [r, g, b] = [toLinear(rgb[0]), toLinear(rgb[1]), toLinear(rgb[2])]
+    const [r, g, b] = [srgbChannelToLinear(rgb[0]), srgbChannelToLinear(rgb[1]), srgbChannelToLinear(rgb[2])]
     // 线性 sRGB → LMS 锥体响应
     const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b
     const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b

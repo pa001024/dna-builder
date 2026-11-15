@@ -61,6 +61,9 @@ export const EVENT_SCHEMA: Record<string, CondFieldDef[]> = {
     ],
 }
 
+/** 规则编辑器 kind 单选的固定选项（即 EVENT_SCHEMA 的键）。 */
+export const AFK_KINDS = Object.keys(EVENT_SCHEMA)
+
 /**
  * 给定事件 kind 取字段；kind 为空表示不限种类，返回全量。
  * @param kind 已选 kind

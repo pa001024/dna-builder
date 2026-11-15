@@ -2,7 +2,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { env } from "@/env"
 import {
-    type ApkReleaseInfo,
     AUTO_DOWNLOAD_SECONDS,
     canInstallApk,
     DESKTOP_DOWNLOAD_URL,
@@ -12,6 +11,7 @@ import {
     formatFileSize,
     formatReleaseDate,
     isWeChatBrowser,
+    type ReleaseInfo,
     triggerApkDownload,
 } from "@/utils/app-download"
 
@@ -29,7 +29,7 @@ const canInstall = canInstallApk(platform)
 /** 二维码内容：下载页自身地址，扫码后在手机上继续走本页的下载流程 */
 const pageUrl = DOWNLOAD_PAGE_URL
 
-const release = ref<ApkReleaseInfo | null>(null)
+const release = ref<ReleaseInfo | null>(null)
 const loading = ref(true)
 const loadFailed = ref(false)
 /** 距离自动下载开始还有几秒 */
