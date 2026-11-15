@@ -14,6 +14,10 @@ const props = defineProps<{
     hovered?: boolean
     /** 拖拽落点高亮 */
     dropTarget?: boolean
+    /** 引导线拾取：起点框 */
+    guideSource?: boolean
+    /** 引导线拾取：指针悬停的候选终点框 */
+    guideTarget?: boolean
     /** 绑定了画布节点：只画定位框，真实节点由 Vue Flow 渲染 */
     bound?: boolean
 }>()
@@ -89,7 +93,12 @@ const boundFrameStyle = computed(() => ({ color: color.value }))
     <div
         v-if="bound"
         class="mind-node mind-node--bound absolute rounded-xs"
-        :class="{ 'mind-node--drop': dropTarget, 'mind-node--hovered': hovered }"
+        :class="{
+            'mind-node--drop': dropTarget,
+            'mind-node--hovered': hovered,
+            'mind-node--guide-source': guideSource,
+            'mind-node--guide-target': guideTarget,
+        }"
         :style="{ ...boxStyle, ...boundFrameStyle }"
         :data-mind-id="node.id"
     >
@@ -114,7 +123,14 @@ const boundFrameStyle = computed(() => ({ color: color.value }))
         class="mind-node absolute flex cursor-grab items-center justify-center rounded-xs transition-shadow duration-150"
         :class="[
             skinClass,
-            { 'mind-node--selected': selected, 'mind-node--hovered': hovered, 'mind-node--drop': dropTarget, 'mind-node--editing': editing },
+            {
+                'mind-node--selected': selected,
+                'mind-node--hovered': hovered,
+                'mind-node--drop': dropTarget,
+                'mind-node--editing': editing,
+                'mind-node--guide-source': guideSource,
+                'mind-node--guide-target': guideTarget,
+            },
         ]"
         :style="{ ...boxStyle, ...skinStyle }"
         :data-mind-id="node.id"
@@ -179,6 +195,15 @@ const boundFrameStyle = computed(() => ({ color: color.value }))
 }
 .mind-node--drop {
     outline: 2px dashed currentColor;
+    outline-offset: 2px;
+}
+/* 引导线拾取：起点框与悬停到的候选终点框都描虚线，与拖拽落点的虚线区分开 */
+.mind-node--guide-source {
+    outline: 2px dashed var(--color-primary);
+    outline-offset: 2px;
+}
+.mind-node--guide-target {
+    outline: 2px dashed color-mix(in srgb, var(--color-primary) 60%, transparent);
     outline-offset: 2px;
 }
 .mind-node--editing {

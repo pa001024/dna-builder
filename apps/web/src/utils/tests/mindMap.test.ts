@@ -7,16 +7,25 @@ import {
     createMindMapTree,
     findMindMapNode,
     isMindMapDescendant,
+    MIND_MAP_GUIDE_DEFAULT_TEXT,
     MIND_MAP_LAYOUTS,
     type MindMapNode,
     measureMindMapText,
+    normalizeMindMapGuides,
     normalizeMindMapTree,
     readLayoutMeta,
     remapMindMapTreeNodeIds,
     resolveMindMapStyles,
 } from "@/utils/mindMap"
 import { layoutFishbone, layoutTimeline } from "@/utils/mindMapCustomLayouts"
-import { balanceMindMapSides, buildMindMapEdgePath, layoutMindMap, MIND_MAP_BOX } from "@/utils/mindMapLayout"
+import {
+    balanceMindMapSides,
+    buildMindMapEdgePath,
+    buildMindMapGuideGeometry,
+    layoutMindMap,
+    MIND_MAP_BOX,
+    type MindMapLayoutNode,
+} from "@/utils/mindMapLayout"
 
 /** 测试用测量函数：固定字号下按字符宽度估算，避免依赖 canvas */
 function measure(node: MindMapNode, style: { fontSize: number }) {
@@ -267,6 +276,59 @@ describe("mindMap 连线路径", () => {
     it("鱼骨图从鱼头右中点沿脊柱出线", () => {
         const child = { ...parent, id: "c", x: 150, y: -100 }
         expect(buildMindMapEdgePath(parent, child, "straight", "fishbone")).toBe("M 100 15 L 200 15 L 200 -70")
+    })
+})
+
+describe("mindMap 引导线", () => {
+    /** 固定尺寸的布局盒子，坐标按测试需要覆盖 */
+    const box = (patch: Partial<MindMapLayoutNode> = {}): MindMapLayoutNode => ({
+        id: "a",
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 30,
+        lines: [],
+        style: { fontSize: 14, color: "#000", bg: undefined },
+        depth: 0,
+        ...patch,
+    })
+
+    it("规范化丢弃无效端点并补齐默认文字", () => {
+        const guides = normalizeMindMapGuides([
+            { from: "a", to: "b", text: "关键武器" },
+            { from: "a", to: "a" },
+            { from: "", to: "b" },
+            { from: "a" },
+            null,
+        ])
+        expect(guides).toHaveLength(1)
+        expect(guides[0].id).toHaveLength(8)
+        expect(guides[0].text).toBe("关键武器")
+        expect(normalizeMindMapGuides(undefined)).toEqual([])
+        expect(normalizeMindMapGuides([{ from: "a", to: "b" }])[0].text).toBe(MIND_MAP_GUIDE_DEFAULT_TEXT)
+    })
+
+    it("端点裁到盒子边界，标签落在连线中点", () => {
+        const geometry = buildMindMapGuideGeometry(box(), box({ id: "b", x: 200 }))
+        expect(geometry).toEqual({ x1: 100, y1: 15, x2: 200, y2: 15, labelX: 150, labelY: 15 })
+    })
+
+    it("斜向连线从盒子边框出线", () => {
+        const geometry = buildMindMapGuideGeometry(
+            box({ width: 100, height: 100 }),
+            box({ id: "b", x: 200, y: 100, width: 100, height: 100 })
+        )
+        // 起点中心 (50,50)、终点中心 (250,150)：水平方向先碰到边框
+        expect(geometry).toEqual({ x1: 100, y1: 75, x2: 200, y2: 125, labelX: 150, labelY: 100 })
+    })
+
+    it("上下排列时从上下边框出线", () => {
+        const geometry = buildMindMapGuideGeometry(box({ width: 50, height: 50 }), box({ id: "b", y: 100, width: 50, height: 50 }))
+        expect(geometry).toEqual({ x1: 25, y1: 50, x2: 25, y2: 100, labelX: 25, labelY: 75 })
+    })
+
+    it("中心重合时无法定向", () => {
+        expect(buildMindMapGuideGeometry(box(), box())).toBeNull()
     })
 })
 

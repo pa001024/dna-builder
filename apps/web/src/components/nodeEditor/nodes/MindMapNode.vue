@@ -6,15 +6,18 @@ import { nanoid } from "nanoid"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { NodeType } from "@/store/nodeEditorTypes"
-import { detectImageFormat, encodeImageBytes, imageMimeForFormat } from "@/utils/imagePack"
+import { embedImageFile, findImageFile } from "@/utils/imageEmbed"
 import {
     DEFAULT_FONT_SIZE,
     MIND_MAP_COLORS,
+    MIND_MAP_GUIDE_DEFAULT_TEXT,
     MIND_MAP_LAYOUTS,
     MIND_MAP_TOOLBAR_HEIGHT,
     type MindMapEffectiveStyle,
+    type MindMapGuide,
     type MindMapNode,
     measureMindMapText,
+    measureTextWidth,
     readLayoutMeta,
     resolveMindMapStyles,
     walkMindMap,
@@ -22,6 +25,7 @@ import {
 } from "@/utils/mindMap"
 import {
     buildMindMapEdgePath,
+    buildMindMapGuideGeometry,
     createBoundNodeMeasure,
     layoutMindMap,
     MIND_MAP_BOX,
@@ -222,6 +226,40 @@ const nodes = computed(() =>
 
 /** 主题 id → 布局节点 */
 const nodeMap = computed(() => new Map(nodes.value.map(node => [node.id, node])))
+
+/** 引导线（独立于父子连线的虚线箭头，带可编辑文字） */
+const guides = computed<MindMapGuide[]>(() => (Array.isArray(props.data.guides) ? props.data.guides : []))
+
+/** 创建引导线的起点主题：非空时进入拾取终点模式 */
+const guideFromId = ref<string | null>(null)
+/** 正在编辑文字的引导线 id */
+const guideEditId = ref<string | null>(null)
+const guideDraft = ref("")
+
+/** 引导线标签字号（与模板中的 text-[11px] 保持一致） */
+const GUIDE_LABEL_FONT_SIZE = 11
+
+/** 可见引导线的几何：两端主题都可见才画，折叠分支里的引导线随之隐藏 */
+const guideShapes = computed(() =>
+    guides.value.flatMap(guide => {
+        const from = nodeMap.value.get(guide.from)
+        const to = nodeMap.value.get(guide.to)
+        if (!from || !to) return []
+        const geometry = buildMindMapGuideGeometry(from, to)
+        return geometry ? [{ guide, ...geometry }] : []
+    })
+)
+
+/** 箭头 marker id：多个导图节点同页时不能撞 id */
+const guideArrowId = computed(() => `mind-guide-arrow-${props.id}`)
+
+/** 标签底色与画布一致（bg-base-100/85 叠在 base-200 上），用来遮住从文字下方穿过的虚线 */
+const guideLabelBackground = computed(() =>
+    focusMode.value ? "var(--color-base-200)" : "color-mix(in srgb, var(--color-base-100) 85%, var(--color-base-200))"
+)
+
+/** 编辑中标签输入框的宽度：按文字实测宽度撑开，避免中文被裁切 */
+const guideInputWidth = computed(() => Math.max(48, Math.ceil(measureTextWidth(guideDraft.value || " ", GUIDE_LABEL_FONT_SIZE)) + 24))
 
 /** 子树节点总数（不含自身）：折叠圆点上的数字要反映被隐藏的全部主题 */
 function countDescendants(node: MindMapNode): number {
@@ -451,13 +489,95 @@ function unbindTopic(topicId: string) {
     nextTick(() => refreshBoundNodes())
 }
 
+/**
+ * 进入引导线拾取：起点主题描虚线，指针悬停到的主题也描虚线，点击后连成引导线。
+ * @param fromId 起点主题 id
+ */
+function startGuide(fromId: string) {
+    guideEditId.value = null
+    guideFromId.value = fromId
+    selectOnly(fromId)
+}
+
+/** 取消引导线拾取 */
+function cancelGuide() {
+    guideFromId.value = null
+}
+
+/**
+ * 在起点与终点之间创建引导线并立即编辑文字；同向引导线已存在时直接编辑。
+ * @param from 起点主题 id
+ * @param to 终点主题 id
+ */
+function createGuide(from: string, to: string) {
+    cancelGuide()
+    const existing = guides.value.find(guide => guide.from === from && guide.to === to)
+    if (existing) {
+        startGuideEdit(existing.id)
+        return
+    }
+    const guide: MindMapGuide = { id: nanoid(8), from, to, text: MIND_MAP_GUIDE_DEFAULT_TEXT }
+    props.data.guides = [...guides.value, guide]
+    store.commitHistory("创建引导线")
+    startGuideEdit(guide.id)
+}
+
+/** 开始编辑引导线文字 */
+function startGuideEdit(id: string) {
+    const guide = guides.value.find(item => item.id === id)
+    if (!guide) return
+    guideDraft.value = guide.text
+    guideEditId.value = id
+}
+
+/** 提交引导线文字：空文字回落到默认文字，内容未变不记历史 */
+function commitGuideText(id: string) {
+    if (guideEditId.value !== id) return
+    guideEditId.value = null
+    const text = guideDraft.value.trim() || MIND_MAP_GUIDE_DEFAULT_TEXT
+    const guide = guides.value.find(item => item.id === id)
+    if (!guide || guide.text === text) return
+    props.data.guides = guides.value.map(item => (item.id === id ? { ...item, text } : item))
+    store.commitHistory("编辑引导线")
+}
+
+/** 取消编辑，保留原文字 */
+function cancelGuideEdit() {
+    guideEditId.value = null
+}
+
+/** 删除引导线 */
+function removeGuide(id: string) {
+    if (!guides.value.some(item => item.id === id)) return
+    props.data.guides = guides.value.filter(item => item.id !== id)
+    store.commitHistory("删除引导线")
+}
+
+/** 主题被删除后清理指向它的引导线；历史由调用方的操作一并提交 */
+function pruneGuides(removedIds: Set<string>) {
+    const remaining = guides.value.filter(guide => !removedIds.has(guide.from) && !removedIds.has(guide.to))
+    if (remaining.length !== guides.value.length) props.data.guides = remaining
+}
+
+/** 编辑框挂载后聚焦并全选，输入即替换默认文字 */
+function bindGuideInput(element: unknown) {
+    if (!(element instanceof HTMLInputElement)) return
+    element.focus()
+    element.select()
+}
+
 /** 选中单个主题（清空其它选择） */
 function selectOnly(id: string) {
     selectedIds.value = new Set([id])
 }
 
-/** 点击主题：Shift 追加选择，否则单选 */
+/** 点击主题：引导线拾取时点击作为终点，否则 Shift 追加选择 / 单选 */
 function handleNodeClick(event: MouseEvent, id: string) {
+    if (guideFromId.value) {
+        if (id === guideFromId.value) cancelGuide()
+        else createGuide(guideFromId.value, id)
+        return
+    }
     if (event.shiftKey) {
         const next = new Set(selectedIds.value)
         if (next.has(id)) next.delete(id)
@@ -565,12 +685,20 @@ function findParent(node: MindMapNode, id: string): { parent: MindMapNode; node:
 function removeSelected() {
     const ids = [...activeIds.value].filter(id => id !== root.value.id)
     if (ids.length === 0) return
+    // 连同子树一起删除，指向其中任一主题的引导线也要清理
+    const removed = new Set<string>()
+    ids.forEach(id => {
+        const topic = findNode(root.value, id)
+        if (topic) walkMindMap(topic, node => removed.add(node.id))
+    })
+    if (guideFromId.value && removed.has(guideFromId.value)) cancelGuide()
     // 被删主题绑定的节点留在画布原位，只解除绑定（refreshBoundNodes 会恢复可拖动）
     commitTree("删除主题", rootNode => {
         ids.forEach(id => {
             const located = findParent(rootNode, id)
             if (located) located.parent.children = located.parent.children.filter(child => child.id !== id)
         })
+        pruneGuides(removed)
     })
     selectedIds.value = new Set()
     editingId.value = null
@@ -644,6 +772,8 @@ function isBoundNodeTarget(target: HTMLElement | null): boolean {
 /** 画布空白处按下：与外层保持一致，拖动平移画布，按住 Shift 拖动才框选 */
 function handleCanvasPointerDown(event: PointerEvent) {
     if (event.button !== 0 || editingId.value) return
+    // 拾取引导线时点击空白处取消
+    if (guideFromId.value && !(event.target as HTMLElement).closest(".mind-node")) cancelGuide()
     // 点在主题上时由主题自己接管；点在绑定主题的真实节点上时交给节点本身
     if ((event.target as HTMLElement).closest(".mind-node")) return
     if (isBoundNodeTarget(event.target as HTMLElement | null)) return
@@ -744,6 +874,11 @@ const DRAG_IGNORE_CONTROL_SELECTOR = `${DRAG_IGNORE_SELECTOR}, button, .nodrag`
  */
 function handlePointerDown(event: PointerEvent, id: string, fromNode = false, nodeId?: string) {
     if (event.button !== 0 || editingId.value) return
+    // 拾取引导线终点时不拖拽主题，点击交给 handleNodeClick 连成引导线
+    if (guideFromId.value) {
+        event.preventDefault()
+        return
+    }
     event.preventDefault()
     let grab: { x: number; y: number } | undefined
     if (fromNode && nodeId) {
@@ -783,6 +918,15 @@ function handleBoundNodePointerDown(event: PointerEvent) {
     const nodeId = host?.dataset.id
     const topicId = nodeId ? boundTopicIds.value.get(nodeId) : undefined
     if (!topicId) return
+    // 拾取引导线终点：绑定卡片渲染在导图节点之外，由这里接管点击
+    if (guideFromId.value) {
+        event.preventDefault()
+        event.stopPropagation()
+        if (topicId === guideFromId.value) cancelGuide()
+        else createGuide(guideFromId.value, topicId)
+        swallowNextClick()
+        return
+    }
     const node = store.nodes.find(item => item.id === nodeId)
     if (node?.data?.locked === true) return
     // 沉浸模式没有标题栏，整块内容都可能被标成 nodrag 或包在 button 里，只保留表单控件的原生交互
@@ -900,6 +1044,7 @@ function detachBoundNode(state: NonNullable<typeof dragState>) {
             const index = located.parent.children.indexOf(located.node)
             located.parent.children.splice(index, 1, ...located.node.children)
         }
+        pruneGuides(new Set([state.id]))
     }
     state.detached = true
     dropTargetId.value = null
@@ -1038,10 +1183,17 @@ function isDescendant(node: MindMapNode, ancestorId: string, candidateId: string
 function handleKeyDown(event: KeyboardEvent) {
     const target = event.target as HTMLElement
     if (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.tagName === "SELECT" || target.isContentEditable) return
-    if (event.key === "Escape" && menu.value) {
+    if (event.key === "Escape" && (menu.value || guideMenu.value)) {
         event.preventDefault()
         event.stopImmediatePropagation()
         closeMenu()
+        return
+    }
+    // Esc 取消引导线拾取
+    if (event.key === "Escape" && guideFromId.value) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        cancelGuide()
         return
     }
     if (editingId.value) return
@@ -1091,6 +1243,9 @@ function handleOutsidePointerDown(event: PointerEvent) {
     if (rootRef.value?.contains(target)) return
     if (target.closest("[data-mind-map-popover]")) return
     selectedIds.value = new Set()
+    // 点在绑定的卡片上时由卡片自己接管（选终点 / 拖拽），其余外部点击取消引导线拾取
+    const host = target.closest<HTMLElement>(".vue-flow__node")
+    if (guideFromId.value && !(host?.dataset.id && boundTopicIds.value.has(host.dataset.id))) cancelGuide()
 }
 
 window.addEventListener("pointerdown", handleOutsidePointerDown, true)
@@ -1123,6 +1278,25 @@ function handlePointerOut(event: PointerEvent) {
 window.addEventListener("pointerover", handlePointerOver, true)
 window.addEventListener("pointerout", handlePointerOut, true)
 
+/**
+ * 右键绑定卡片：卡片属于本导图主题，改为弹出主题菜单（与普通主题一致）。
+ * 捕获阶段截断事件，避免 Vue Flow 再弹出画布节点菜单。
+ * @param event 右键事件
+ */
+function handleBoundNodeContextMenu(event: MouseEvent) {
+    const target = event.target as HTMLElement | null
+    if (!target) return
+    const host = target.closest<HTMLElement>(".vue-flow__node")
+    const nodeId = host?.dataset.id
+    const topicId = nodeId ? boundTopicIds.value.get(nodeId) : undefined
+    if (!topicId) return
+    event.preventDefault()
+    event.stopPropagation()
+    openContextMenu(event, topicId)
+}
+
+window.addEventListener("contextmenu", handleBoundNodeContextMenu, true)
+
 /** 挂载后先同步一次绑定关系：旧图里的绑定节点需要重新挂到本导图下 */
 onMounted(() => {
     nextTick(() => refreshBoundNodes())
@@ -1139,6 +1313,7 @@ onBeforeUnmount(() => {
     window.removeEventListener("pointerup", handleExternalNodePointerUp)
     window.removeEventListener("pointerover", handlePointerOver, true)
     window.removeEventListener("pointerout", handlePointerOut, true)
+    window.removeEventListener("contextmenu", handleBoundNodeContextMenu, true)
     window.removeEventListener("pointermove", handlePointerMove)
     window.removeEventListener("pointerup", handlePointerUp)
     window.removeEventListener("pointermove", handleCanvasResize)
@@ -1149,9 +1324,16 @@ onBeforeUnmount(() => {
 const menu = ref<{ x: number; y: number; id: string } | null>(null)
 const menuEl = ref<HTMLElement | null>(null)
 
+/** 引导线标签右键菜单：编辑文字 / 删除 */
+const guideMenu = ref<{ x: number; y: number; id: string } | null>(null)
+const guideMenuEl = ref<HTMLElement | null>(null)
+
 function openContextMenu(event: MouseEvent, id: string) {
     event.preventDefault()
     event.stopPropagation()
+    // 打开菜单视为重新选择操作对象，先退出引导线拾取并收起另一个菜单
+    cancelGuide()
+    guideMenu.value = null
     if (!selectedIds.value.has(id)) selectOnly(id)
     menu.value = { x: event.clientX, y: event.clientY, id }
     // 菜单渲染后按实际尺寸收回视口内，贴边右键时不被截断
@@ -1170,6 +1352,46 @@ function openContextMenu(event: MouseEvent, id: string) {
 
 function closeMenu() {
     menu.value = null
+    guideMenu.value = null
+}
+
+/**
+ * 弹出引导线标签右键菜单，并按实际尺寸收回视口内。
+ * @param event 右键事件
+ * @param id 引导线 id
+ */
+function openGuideMenu(event: MouseEvent, id: string) {
+    event.preventDefault()
+    event.stopPropagation()
+    menu.value = null
+    guideMenu.value = { x: event.clientX, y: event.clientY, id }
+    nextTick(() => {
+        const el = guideMenuEl.value
+        const current = guideMenu.value
+        if (!el || !current) return
+        const rect = el.getBoundingClientRect()
+        guideMenu.value = {
+            ...current,
+            x: Math.max(8, Math.min(current.x, window.innerWidth - rect.width - 8)),
+            y: Math.max(8, Math.min(current.y, window.innerHeight - rect.height - 8)),
+        }
+    })
+}
+
+/** 菜单：编辑引导线文字 */
+function guideMenuEdit() {
+    const id = guideMenu.value?.id
+    if (!id) return
+    closeMenu()
+    startGuideEdit(id)
+}
+
+/** 菜单：删除引导线 */
+function guideMenuRemove() {
+    const id = guideMenu.value?.id
+    if (!id) return
+    closeMenu()
+    removeGuide(id)
 }
 
 /** 右键目标主题的文字 / 子级 / 折叠状态 */
@@ -1205,6 +1427,11 @@ function menuAddSibling() {
 function menuToggleCollapse() {
     const id = menu.value?.id
     if (id) runMenuAction(() => toggleCollapse(id))
+}
+
+function menuCreateGuide() {
+    const id = menu.value?.id
+    if (id) runMenuAction(() => startGuide(id))
 }
 
 function menuFontSize(delta: number) {
@@ -1278,26 +1505,16 @@ function menuUnbind() {
     if (id) runMenuAction(() => unbindTopic(id))
 }
 
-/** 粘贴图片：图片文件编码成内嵌数据，作为新的绑定节点挂到选中主题下 */
-const MAX_EMBED_BYTES = 2 * 1024 * 1024
-
-/**
- * 把剪贴板里的图片插成主题的绑定节点。
- * @param topicId 目标主题 id
- * @param file 图片文件
- */
+/** 粘贴图片：图片文件编码成内嵌数据（PNG 自动转 WebP），作为新的绑定节点挂到选中主题下 */
 async function pasteImageAsTopic(topicId: string, file: File) {
-    if (file.size > MAX_EMBED_BYTES) return
     try {
-        const bytes = new Uint8Array(await file.arrayBuffer())
-        const format = detectImageFormat(bytes)
-        const { encoded } = encodeImageBytes(bytes)
+        const payload = await embedImageFile(file)
         insertNodeAsTopic(topicId, NodeType.IMAGE, {
-            label: file.name || "图片",
+            label: payload.imageName || "图片",
             imageMode: "embed",
-            imageData: encoded,
-            imageMime: file.type || imageMimeForFormat(format) || "application/octet-stream",
-            imageName: file.name,
+            imageData: payload.imageData,
+            imageMime: payload.imageMime,
+            imageName: payload.imageName,
             imageWidth: 320,
             imageHeight: 200,
         })
@@ -1315,12 +1532,18 @@ function handlePaste(event: ClipboardEvent) {
     if (!hovered.value && !focusMode.value && selectedIds.value.size === 0) return
     const target = event.target as HTMLElement | null
     if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
-    const file = Array.from(event.clipboardData?.files ?? []).find(item => item.type.startsWith("image/"))
-    if (!file) return
+    const files = Array.from(event.clipboardData?.files ?? [])
+    if (files.length === 0) return
     event.preventDefault()
     event.stopImmediatePropagation()
     const topicId = [...activeIds.value][0] ?? root.value.id
-    void pasteImageAsTopic(topicId, file)
+    void pasteClipboardImage(topicId, files)
+}
+
+/** 剪贴板图片按魔数挑选：浏览器可能把 PNG 标成 image/jpeg */
+async function pasteClipboardImage(topicId: string, files: File[]) {
+    const file = await findImageFile(files)
+    if (file) await pasteImageAsTopic(topicId, file)
 }
 
 window.addEventListener("paste", handlePaste)
@@ -1372,10 +1595,33 @@ defineExpose({ fitMindMap })
         <!-- 内层画布没有滚动/缩放，滚轮交给外层 Vue Flow，避免形成滚轮死区 -->
         <div
             class="mind-canvas nodrag relative overflow-hidden"
+            :class="{ 'mind-canvas--guide': guideFromId }"
             :style="{ width: `${renderSize.width}px`, height: `${renderSize.height}px` }"
             @pointerdown="handleCanvasPointerDown"
         >
             <svg class="pointer-events-none absolute inset-0" :width="renderSize.width" :height="renderSize.height">
+                <defs>
+                    <marker
+                        :id="guideArrowId"
+                        viewBox="0 0 10 10"
+                        refX="8.6"
+                        refY="5"
+                        markerWidth="7"
+                        markerHeight="7"
+                        markerUnits="userSpaceOnUse"
+                        orient="auto"
+                    >
+                        <path
+                            d="M 1 1 L 9 5 L 1 9"
+                            fill="none"
+                            stroke="var(--color-base-content)"
+                            stroke-opacity="0.55"
+                            stroke-width="1.4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </marker>
+                </defs>
                 <path
                     v-for="edge in edges"
                     :key="edge.id"
@@ -1385,6 +1631,19 @@ defineExpose({ fitMindMap })
                     stroke-width="1.5"
                     stroke-opacity="0.65"
                     stroke-linecap="round"
+                />
+                <!-- 引导线：虚线箭头，文字由下方的标签层渲染 -->
+                <path
+                    v-for="shape in guideShapes"
+                    :key="`guide-${shape.guide.id}`"
+                    :d="`M ${shape.x1} ${shape.y1} L ${shape.x2} ${shape.y2}`"
+                    fill="none"
+                    stroke="var(--color-base-content)"
+                    stroke-opacity="0.55"
+                    stroke-width="1.4"
+                    stroke-dasharray="5 4"
+                    stroke-linecap="round"
+                    :marker-end="`url(#${guideArrowId})`"
                 />
             </svg>
             <!-- 框选矩形 -->
@@ -1410,6 +1669,8 @@ defineExpose({ fitMindMap })
                 :child-count="nodeFlags.get(node.id)?.childCount ?? 0"
                 :hovered="hoveredTopicId === node.id"
                 :drop-target="dropTargetId === node.id"
+                :guide-source="guideFromId === node.id"
+                :guide-target="guideFromId !== null && guideFromId !== node.id && hoveredTopicId === node.id"
                 @click="handleNodeClick($event, node.id)"
                 @dblclick="handleNodeDoubleClick(node.id)"
                 @pointerdown="handlePointerDown($event, node.id)"
@@ -1418,6 +1679,34 @@ defineExpose({ fitMindMap })
                 @commit="commitText"
                 @cancel="cancelEdit"
             />
+            <!-- 引导线标签：双击编辑文字，右键编辑 / 删除 -->
+            <div
+                v-for="shape in guideShapes"
+                :key="`guide-label-${shape.guide.id}`"
+                class="mind-guide-label nodrag nopan absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-text select-none whitespace-nowrap rounded-xs px-1 text-[11px] leading-normal"
+                title="双击编辑文字，右键删除"
+                :style="{
+                    left: `${shape.labelX}px`,
+                    top: `${shape.labelY}px`,
+                    background: guideLabelBackground,
+                    color: 'color-mix(in srgb, var(--color-base-content) 70%, transparent)',
+                }"
+                @pointerdown.stop
+                @dblclick.stop="startGuideEdit(shape.guide.id)"
+                @contextmenu.prevent.stop="openGuideMenu($event, shape.guide.id)"
+            >
+                <input
+                    v-if="guideEditId === shape.guide.id"
+                    :ref="bindGuideInput"
+                    v-model="guideDraft"
+                    class="nodrag nopan nowheel select-text border-0 bg-transparent p-0 text-[11px] leading-normal text-base-content outline-none"
+                    :style="{ width: `${guideInputWidth}px` }"
+                    @keydown.enter.exact.prevent="commitGuideText(shape.guide.id)"
+                    @keydown.esc.prevent.stop="cancelGuideEdit"
+                    @blur="commitGuideText(shape.guide.id)"
+                />
+                <template v-else>{{ shape.guide.text }}</template>
+            </div>
             <!-- 右下角缩放手柄：自由调整画布大小，内容放不下时仍会自动撑大 -->
             <div
                 v-if="!focusMode"
@@ -1469,6 +1758,9 @@ defineExpose({ fitMindMap })
                 </button>
 
                 <div class="my-1 h-px bg-base-content/10" />
+                <button class="menu-item" @click="menuCreateGuide()">创建引导线<span class="menu-hint">→</span></button>
+
+                <div class="my-1 h-px bg-base-content/10" />
                 <!-- 绑定真实节点：插入任意节点 / 解绑，绑定后位置由导图布局驱动 -->
                 <template v-if="!menuBound">
                     <div class="px-2 py-1 text-[10px] text-base-content/40">插入节点作为此主题</div>
@@ -1517,11 +1809,30 @@ defineExpose({ fitMindMap })
                     <button class="menu-item menu-item--danger" @click="menuRemove()">删除主题<span class="menu-hint">Delete</span></button>
                 </template>
             </div>
+
+            <!-- 引导线标签右键菜单 -->
+            <div
+                v-if="guideMenu"
+                ref="guideMenuEl"
+                data-mind-map-popover
+                class="fixed z-100 w-40 rounded-xs border border-base-content/10 bg-base-100 p-1 shadow-lg"
+                :style="{ left: `${guideMenu.x}px`, top: `${guideMenu.y}px` }"
+                @pointerdown.stop
+                @contextmenu.prevent.stop
+                @click.stop
+            >
+                <button class="menu-item" @click="guideMenuEdit()">编辑文字<span class="menu-hint">双击</span></button>
+                <button class="menu-item menu-item--danger" @click="guideMenuRemove()">删除引导线</button>
+            </div>
         </Teleport>
     </div>
 </template>
 
 <style scoped>
+/* 引导线拾取：画布内主题改为十字光标 */
+.mind-canvas--guide :deep(.mind-node) {
+    cursor: crosshair;
+}
 .menu-item {
     display: flex;
     width: 100%;

@@ -13,6 +13,13 @@ export interface NodeData {
     [key: string]: any
 }
 
+/** MOD 输入节点的筛选上下文：按页签记录角色 / 武器 id，仅未接入构筑时生效 */
+export interface ModNodeContext {
+    char?: number
+    melee?: number
+    ranged?: number
+}
+
 /**
  * 边数据接口
  */
@@ -122,6 +129,7 @@ export function paletteNodeDefaults(type: string, data: Record<string, any> = {}
         }
     }
     if (type === NodeType.CARD) return { cardKind: "char" }
+    if (type === NodeType.LABEL) return { text: "" }
     return {}
 }
 
@@ -313,7 +321,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
         label: "标签",
         category: NodeCategory.BASIC,
         icon: "ri:pushpin-2-line",
-        description: "在画布上添加说明文字",
+        description: "点击直接编辑的说明文字，可直接粘贴文本 / MOD 导入码",
     },
     {
         type: NodeType.TEXT_INPUT,

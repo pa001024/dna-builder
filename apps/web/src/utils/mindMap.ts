@@ -22,6 +22,20 @@ export interface MindMapNode {
     children: MindMapNode[]
 }
 
+/** 导图中的引导线：两个主题之间的虚线箭头，文字可编辑 */
+export interface MindMapGuide {
+    id: string
+    /** 起点主题 id */
+    from: string
+    /** 终点主题 id */
+    to: string
+    /** 连线上的文字 */
+    text: string
+}
+
+/** 新建引导线时的默认文字 */
+export const MIND_MAP_GUIDE_DEFAULT_TEXT = "引导线"
+
 /** 连线走向：由布局的展开方向决定，不能靠两个盒子的相对位置去猜 */
 export type MindMapEdgeRouting = "horizontal" | "vertical" | "auto" | "fishbone"
 
@@ -232,6 +246,30 @@ export function normalizeMindMapTree(raw: unknown): MindMapNode | null {
     if (typeof source.note === "string" && source.note) node.note = source.note
     if (typeof source.nodeId === "string" && source.nodeId) node.nodeId = source.nodeId
     return node
+}
+
+/**
+ * 规范化外部传入的引导线：丢弃端点缺失或首尾相同的条目，补齐 id 与文字。
+ * @param raw 原始数据
+ * @returns 合法引导线列表
+ */
+export function normalizeMindMapGuides(raw: unknown): MindMapGuide[] {
+    if (!Array.isArray(raw)) return []
+    const guides: MindMapGuide[] = []
+    for (const item of raw) {
+        if (!item || typeof item !== "object") continue
+        const source = item as Record<string, unknown>
+        const from = typeof source.from === "string" ? source.from : ""
+        const to = typeof source.to === "string" ? source.to : ""
+        if (!from || !to || from === to) continue
+        guides.push({
+            id: typeof source.id === "string" && source.id ? source.id : nanoid(8),
+            from,
+            to,
+            text: typeof source.text === "string" && source.text.trim() ? source.text : MIND_MAP_GUIDE_DEFAULT_TEXT,
+        })
+    }
+    return guides
 }
 
 /** 深度优先遍历主题 */

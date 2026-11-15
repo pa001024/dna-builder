@@ -217,6 +217,49 @@ export function flattenLayoutResult(
     return { nodes, bounds }
 }
 
+/** 引导线几何：两端盒子边界上的端点与标签中心 */
+export interface MindMapGuideGeometry {
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+    labelX: number
+    labelY: number
+}
+
+/**
+ * 计算引导线端点：沿两个主题盒子的中心连线裁到各自边框，标签落在连线中点。
+ * 两个盒子中心重合时无法确定方向，返回 null。
+ * @param from 起点主题
+ * @param to 终点主题
+ * @returns 端点与标签位置
+ */
+export function buildMindMapGuideGeometry(from: MindMapLayoutNode, to: MindMapLayoutNode): MindMapGuideGeometry | null {
+    const dx = to.x + to.width / 2 - (from.x + from.width / 2)
+    const dy = to.y + to.height / 2 - (from.y + from.height / 2)
+    if (dx === 0 && dy === 0) return null
+    const start = clipGuidePoint(from, dx, dy)
+    const end = clipGuidePoint(to, -dx, -dy)
+    return {
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        labelX: (start.x + end.x) / 2,
+        labelY: (start.y + end.y) / 2,
+    }
+}
+
+/** 从盒子中心沿方向射线求与边框的交点 */
+function clipGuidePoint(node: MindMapLayoutNode, dx: number, dy: number): { x: number; y: number } {
+    const cx = node.x + node.width / 2
+    const cy = node.y + node.height / 2
+    const scaleX = dx === 0 ? Number.POSITIVE_INFINITY : node.width / 2 / Math.abs(dx)
+    const scaleY = dy === 0 ? Number.POSITIVE_INFINITY : node.height / 2 / Math.abs(dy)
+    const scale = Math.min(scaleX, scaleY)
+    return { x: cx + dx * scale, y: cy + dy * scale }
+}
+
 /**
  * 计算父子连线路径。走向由布局声明的方向决定：横向布局从左右两侧连，纵向布局从上下两端连，
  * 不能按两盒子的中心距离去猜——同一个布局里外层分支的水平距离很容易大于层高。

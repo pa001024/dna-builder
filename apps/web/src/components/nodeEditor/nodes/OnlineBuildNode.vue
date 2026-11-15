@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { Handle, Position, useVueFlow } from "@vue-flow/core"
 import { computed, onMounted, ref, watch } from "vue"
 import { buildQuery, buildsQuery } from "@/api/graphql"
 import { charMap, LeveledCharHelper } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
+import { getNodePorts, PORT_META } from "@/utils/nodeEditorPorts"
 import { formatDateTime } from "@/utils/time"
 import BaseNode from "./BaseNode.vue"
+import OnlineBuildCard from "./OnlineBuildCard.vue"
 
 const props = defineProps<{
     id: string
@@ -35,6 +38,21 @@ const loadError = ref("")
 let loadedKey: string | null = null
 
 const selectedId = computed(() => (typeof props.data.buildId === "string" ? props.data.buildId : ""))
+
+/** 沉浸查看：只保留配装卡，隐藏选择、刷新等编辑控件 */
+const focusMode = computed(() => props.data.focusMode === true)
+
+/** 沉浸模式下保留左右两侧连接点：只显示边缘锚点，与普通节点的左进右出一致 */
+const ports = computed(() => getNodePorts(props.type, props.data))
+const focusInput = computed(() => ports.value.inputs[0])
+const focusOutput = computed(() => ports.value.outputs[0])
+const focusInputColor = computed(() => (focusInput.value ? PORT_META[focusInput.value.type].color : undefined))
+const focusOutputColor = computed(() => (focusOutput.value ? PORT_META[focusOutput.value.type].color : undefined))
+
+const { updateNodeInternals } = useVueFlow()
+
+// 沉浸切换会替换整块内容与连接点，通知 VueFlow 重新测量锚点位置，避免连线落到节点上下边
+watch(focusMode, () => requestAnimationFrame(() => updateNodeInternals([props.id])))
 
 /** 读取连接到「角色过滤」端口的角色；未连接时返回 null */
 const filterChar = computed(() => {
@@ -228,8 +246,27 @@ onMounted(() => {
 </script>
 
 <template>
-    <BaseNode v-bind="{ id, data, type, selected }">
-        <div class="w-80 max-w-full space-y-1.5">
+    <BaseNode v-bind="{ id, data, type, selected }" :focusable="true">
+        <template v-if="focusMode">
+            <Handle
+                v-if="focusInput"
+                :id="focusInput.id"
+                type="target"
+                :position="Position.Left"
+                class="border! border-base-100!"
+                :style="{ left: '-4px', top: '50%', transform: 'translateY(-50%)', background: focusInputColor }"
+            />
+            <Handle
+                v-if="focusOutput"
+                :id="focusOutput.id"
+                type="source"
+                :position="Position.Right"
+                class="border! border-base-100!"
+                :style="{ right: '-4px', left: 'auto', top: '50%', transform: 'translateY(-50%)', background: focusOutputColor }"
+            />
+        </template>
+        <OnlineBuildCard v-if="focusMode" :data="data" />
+        <div v-else class="w-80 max-w-full space-y-1.5">
             <!-- 角色过滤：由角色输入节点的 CHAR 端口提供 -->
             <div class="flex items-center gap-1.5 border border-base-content/10 bg-base-content/3 px-1.5 py-1">
                 <Icon icon="ri:user-line" class="size-3.5 shrink-0 text-base-content/40" />

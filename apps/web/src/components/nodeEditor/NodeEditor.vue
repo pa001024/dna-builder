@@ -12,14 +12,19 @@ import { computed, defineAsyncComponent, markRaw, nextTick, onMounted, onUnmount
 import { useRoute, useRouter } from "vue-router"
 import { createGraphMutation, graphQuery } from "@/api/graphql"
 import { useCharSettings } from "@/composables/useCharSettings"
-import { charMap } from "@/data"
+import { charMap, LeveledModHelper, type ModSlotType, weaponMap } from "@/data"
 import { env } from "@/env"
+import { useInvStore } from "@/store/inv"
 import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
-import { copyText } from "@/util"
+import { copyText, pasteText } from "@/util"
+import { pasteImageFile } from "@/utils/clipboard-image"
 import { dataPackHydrationKey } from "@/utils/data-pack/data-pack-bridge"
+import { embedImageFile, fitImageBox, readImageFileSize } from "@/utils/imageEmbed"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
 import { collectMindMapNodeIds, normalizeMindMapTree, walkMindMap } from "@/utils/mindMap"
+import { type ParsedModCode, parseModCode } from "@/utils/modCode"
+import { ensureNodeModSettings, type NodeModSettings } from "@/utils/nodeEditorBuild"
 import { resetNodeEditorPerf } from "@/utils/nodeEditorPerf"
 import { getNodePorts, isPortTypeCompatible, PORT_META, PortType, resolvePort } from "@/utils/nodeEditorPorts"
 import AddCalcNode from "./nodes/AddCalcNode.vue"
@@ -57,11 +62,19 @@ import VectorCalcNode from "./nodes/VectorCalcNode.vue"
 import VectorDecomposeNode from "./nodes/VectorDecomposeNode.vue"
 import VectorInputNode from "./nodes/VectorInputNode.vue"
 import WeaponAttrCalcNode from "./nodes/WeaponAttrCalcNode.vue"
-import { type NodeData, PALETTE_ITEMS, type PaletteItem, paletteNodeDefaults } from "./types"
+import {
+    getDefaultLabel,
+    type ModNodeContext,
+    type NodeData,
+    PALETTE_ITEMS,
+    type PaletteItem,
+    paletteNodeDefaults,
+} from "./types"
 
 // Store
 const store = useNodeEditorStore()
 const ui = useUIStore()
+const inv = useInvStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -112,7 +125,8 @@ const shortcutHelpGroups = [
         title: "编辑",
         items: [
             { label: "复制选中节点", keys: "Ctrl+C" },
-            { label: "粘贴节点", keys: "Ctrl+V" },
+            { label: "粘贴节点 / 图片 / 文本 / 导入码", keys: "Ctrl+V" },
+            { label: "粘贴为纯文本", keys: "Ctrl+Shift+V" },
             { label: "删除选中的节点或边", keys: "Delete / Backspace" },
             { label: "撤销", keys: "Ctrl+Z" },
             { label: "重做", keys: "Ctrl+Shift+Z / Ctrl+Y" },
@@ -138,6 +152,8 @@ const shortcutHelpGroups = [
     {
         title: "节点与菜单",
         items: [
+            { label: "编辑文本标签", keys: "单击显示控制点，再次点击文字" },
+            { label: "调整文本标签字号", keys: "拖动四角控制点" },
             { label: "重命名节点", keys: "点击标题" },
             { label: "从端口拖到空白处，选择节点并自动连接", keys: "拖出端口" },
             { label: "取消重命名 / 关闭候选节点菜单", keys: "Esc" },
@@ -447,12 +463,22 @@ function openNodeContextMenu(nodeId: string, position: { x: number; y: number })
     // 锁定节点不弹出菜单
     const node = store.nodes.find(item => item.id === nodeId)
     if (!node || node.data?.locked === true) return
-    closeConnectMenu()
     selectedNode.value = { id: node.id, data: node.data as NodeData }
     selectedEdge.value = null
-    contextMenuTarget.value = resolveContextMenuTarget("node", node.id)
+    openContextMenu(resolveContextMenuTarget("node", node.id), position)
+}
+
+/**
+ * 打开右键菜单并探测剪贴板；节点 / 边 / 选中集合 / 画布四个入口共用。
+ * @param target 菜单作用对象
+ * @param position 菜单弹出位置（屏幕坐标）
+ */
+function openContextMenu(target: ContextMenuTarget, position: { x: number; y: number }) {
+    closeConnectMenu()
+    contextMenuTarget.value = target
     contextMenuPosition.value = position
     contextMenuVisible.value = true
+    void probeClipboardModCode()
 }
 
 // 节点右键菜单事件
@@ -488,25 +514,20 @@ function handleEdgeContextMenu(event: EdgeMouseEvent) {
         event.event.preventDefault()
     }
 
-    closeConnectMenu()
     selectedEdge.value = event.edge as unknown as { id: string; source: string; target: string }
     selectedNode.value = null
-    contextMenuTarget.value = resolveContextMenuTarget("edge", event.edge.id)
 
     // 使用event的absolutePosition或clientX/clientY（根据事件类型）
+    let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     if ("clientX" in event.event) {
-        contextMenuPosition.value = { x: event.event.clientX, y: event.event.clientY }
+        position = { x: event.event.clientX, y: event.event.clientY }
     } else if ("touches" in event.event && event.event.touches.length > 0) {
-        contextMenuPosition.value = {
+        position = {
             x: event.event.touches[0].clientX,
             y: event.event.touches[0].clientY,
         }
-    } else {
-        // 作为 fallback，使用画布中心
-        contextMenuPosition.value = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     }
-
-    contextMenuVisible.value = true
+    openContextMenu(resolveContextMenuTarget("edge", event.edge.id), position)
 }
 
 // 选中元素右键菜单事件
@@ -514,10 +535,7 @@ function handleSelectionContextMenu(event: { event: MouseEvent; nodes: any[] }) 
     // 阻止默认右键菜单
     event.event.preventDefault()
 
-    closeConnectMenu()
-    contextMenuTarget.value = { type: "selection" }
-    contextMenuPosition.value = { x: event.event.clientX, y: event.event.clientY }
-    contextMenuVisible.value = true
+    openContextMenu({ type: "selection" }, { x: event.event.clientX, y: event.event.clientY })
 }
 
 // 画布右键菜单事件
@@ -525,10 +543,7 @@ function handlePaneContextMenu(event: MouseEvent) {
     // 阻止默认右键菜单
     event.preventDefault()
 
-    closeConnectMenu()
-    contextMenuTarget.value = { type: "pane" }
-    contextMenuPosition.value = { x: event.clientX, y: event.clientY }
-    contextMenuVisible.value = true
+    openContextMenu({ type: "pane" }, { x: event.clientX, y: event.clientY })
 }
 
 // 删除节点
@@ -1234,6 +1249,177 @@ function onDelete(event: { nodes: any[]; edges: any[] }) {
     selectedEdge.value = null
 }
 
+/** 画布上最后一次鼠标位置（屏幕坐标）：只在粘贴时读取，不需要响应式 */
+let canvasPointer: { x: number; y: number } | null = null
+
+function trackCanvasPointer(event: MouseEvent) {
+    const target = event.target as Element | null
+    if (!target?.closest?.(".vue-flow")) return
+    canvasPointer = { x: event.clientX, y: event.clientY }
+}
+
+/**
+ * 把落点换算为画布坐标；从未进入画布或超出边界时回退到画布中心。
+ * @param clientPoint 指定屏幕坐标（右键菜单用）；缺省取最后一次鼠标位置
+ */
+function canvasPastePosition(clientPoint?: { x: number; y: number }) {
+    const canvas = document.querySelector<HTMLElement>(".vue-flow__container")
+    const rect = canvas?.getBoundingClientRect()
+    const pointer = clientPoint ?? canvasPointer
+    if (!rect) return screenToFlowCoordinate(pointer ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+    const point = pointer
+        ? { x: clamp(pointer.x, rect.left + 12, rect.right - 12), y: clamp(pointer.y, rect.top + 12, rect.bottom - 12) }
+        : { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+    return screenToFlowCoordinate(point)
+}
+
+/** MOD 库存等级：与构筑导入保持一致，未记录时按满级 10 处理 */
+function modLevel(modId: number) {
+    return inv.getModLv(modId, LeveledModHelper.getQuality(modId)) ?? 10
+}
+
+/**
+ * 把导入码还原成 MOD 输入节点：角色代码进角色页签，武器代码按大类 / 槽数落到近战、远程或同律。
+ * 代码里的持有者同时写成节点的筛选上下文，节点无需接入构筑即可按该角色 / 武器过滤候选。
+ * @param parsed 解析后的导入码
+ * @param position 节点落点（画布坐标）
+ */
+function createModNodeFromCode(parsed: ParsedModCode, position: { x: number; y: number }) {
+    const slots = parsed.mods.map(id => (id > 0 ? ([id, modLevel(id)] as [number, number]) : null))
+    const settings: NodeModSettings = ensureNodeModSettings({})
+    settings.auraMod = parsed.auraMod
+    const modContext: ModNodeContext = {}
+    let activeModTab: ModSlotType = "角色"
+    if (parsed.flag === "C") {
+        settings.charMods = slots
+        if (charMap.has(parsed.ownerId)) modContext.char = parsed.ownerId
+    } else if (parsed.slotCount === 4) {
+        // 4 槽武器代码对应同律武器；同律没有独立武器 id，无法反查持有者
+        activeModTab = "同律"
+        settings.skillWeaponMods = slots.slice(0, settings.skillWeaponMods.length)
+    } else {
+        const weapon = weaponMap.get(parsed.ownerId)
+        if (weapon?.类型[0] === "近战") {
+            activeModTab = "近战"
+            settings.meleeMods = slots
+        } else {
+            activeModTab = "远程"
+            settings.rangedMods = slots
+        }
+        if (weapon) modContext[activeModTab === "近战" ? "melee" : "ranged"] = parsed.ownerId
+    }
+    store.addNode({
+        id: nanoid(),
+        type: NodeType.MOD_INPUT,
+        position,
+        data: { label: getDefaultLabel(NodeType.MOD_INPUT), modSettings: settings, activeModTab, modContext },
+    })
+}
+
+function createLabelNode(text: string, position: { x: number; y: number }) {
+    store.addNode({ id: nanoid(), type: NodeType.LABEL, position, data: { label: getDefaultLabel(NodeType.LABEL), text } })
+}
+
+/**
+ * 把剪贴板图片贴成图片节点：走统一压缩链路后内嵌到节点数据。
+ * @param position 节点落点（画布坐标）
+ * @returns 剪贴板是否有图片（压缩失败也算存在，避免继续回退到文本）
+ */
+async function createImageNodeFromClipboard(position: { x: number; y: number }) {
+    const file = await pasteImageFile()
+    if (!file) return false
+    try {
+        const [payload, size] = await Promise.all([embedImageFile(file), readImageFileSize(file)])
+        // 新节点按图片比例决定显示框，避免默认 320×200 框里出现空白边
+        const box = size ? fitImageBox(size.width, size.height) : null
+        store.addNode({
+            id: nanoid(),
+            type: NodeType.IMAGE,
+            position,
+            data: {
+                label: getDefaultLabel(NodeType.IMAGE),
+                ...paletteNodeDefaults(NodeType.IMAGE),
+                ...(box ? { imageWidth: box.width, imageHeight: box.height } : {}),
+                imageData: payload.imageData,
+                imageMime: payload.imageMime,
+                imageName: payload.imageName,
+            },
+        })
+    } catch (error) {
+        ui.showErrorMessage(error instanceof Error ? error.message : "读取剪贴板图片失败")
+    }
+    return true
+}
+
+/** 内部节点剪贴板按落点粘贴：以复制内容包围盒左上角对齐鼠标位置 */
+function pasteCopiedNodesAt(position: { x: number; y: number }) {
+    const positions = store.copiedNodes.map(node => node.position as { x: number; y: number })
+    if (positions.length === 0) return
+    const minX = Math.min(...positions.map(item => item.x))
+    const minY = Math.min(...positions.map(item => item.y))
+    store.pasteNodes({ x: position.x - minX, y: position.y - minY })
+}
+
+/** 读取剪贴板文本；浏览器权限等原因失败时返回空串 */
+async function readClipboardText() {
+    try {
+        return (await pasteText()) || ""
+    } catch {
+        return ""
+    }
+}
+
+type PasteMode = "auto" | "mod" | "text"
+
+let canvasPastePending = false
+
+/**
+ * 剪贴板落点粘贴。
+ * auto：导入码优先，其次剪贴板图片，再次内部节点剪贴板，最后普通文本；
+ * mod：只把导入码贴成 MOD 节点；
+ * text：不识别导入码，一律贴成文本标签。
+ * 读取剪贴板失败（浏览器权限等）时按空内容处理，auto 模式仍会退回内部节点粘贴。
+ * @param mode 粘贴模式
+ * @param clientPoint 指定落点（右键菜单用）；缺省取最后一次鼠标位置
+ */
+async function pasteAtPointer(mode: PasteMode, clientPoint?: { x: number; y: number }) {
+    if (canvasPastePending) return
+    canvasPastePending = true
+    try {
+        const position = canvasPastePosition(clientPoint)
+        const clipboard = await readClipboardText()
+        if (mode !== "text") {
+            const parsed = parseModCode(clipboard)
+            if (parsed) {
+                createModNodeFromCode(parsed, position)
+                return
+            }
+            if (mode === "mod") return
+        }
+        if (mode === "auto" && (await createImageNodeFromClipboard(position))) return
+        if (mode === "auto" && store.copiedNodes.length > 0) {
+            pasteCopiedNodesAt(position)
+            return
+        }
+        if (clipboard.trim()) createLabelNode(clipboard, position)
+    } finally {
+        canvasPastePending = false
+    }
+}
+
+/** 右键菜单打开时探测剪贴板是否为导入码：是则把「粘贴」换成「粘贴为MOD输入」 */
+const clipboardIsModCode = ref(false)
+let clipboardProbeId = 0
+
+async function probeClipboardModCode() {
+    const probeId = ++clipboardProbeId
+    const parsed = parseModCode(await readClipboardText())
+    if (probeId !== clipboardProbeId) return
+    clipboardIsModCode.value = parsed !== null
+}
+
+
 // 键盘事件处理
 function handleKeyDown(event: KeyboardEvent) {
     // 如果焦点在 input 元素上，不处理快捷键
@@ -1277,9 +1463,15 @@ function handleKeyDown(event: KeyboardEvent) {
             store.copySelectedNodes(getSelectedNodes.value)
         }
     }
-    // Ctrl+V 粘贴节点
-    else if ((event.ctrlKey || event.metaKey) && event.key === "v") {
-        store.pasteNodes()
+    // Ctrl+Shift+V：不识别导入码，直接把剪贴板内容贴成文本标签
+    else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "v") {
+        event.preventDefault()
+        void pasteAtPointer("text")
+    }
+    // Ctrl+V 粘贴：优先识别导入码，其次图片 / 节点剪贴板，最后贴成文本标签
+    else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v") {
+        event.preventDefault()
+        void pasteAtPointer("auto")
     }
     // Ctrl+S 保存图
     else if ((event.ctrlKey || event.metaKey) && event.key === "s") {
@@ -1964,7 +2156,11 @@ async function handleTransfer(charName: string) {
         </aside>
 
         <!-- 节点编辑器画布：移动端侧栏占满整屏时整列隐藏，桌面端始终与侧栏并排 -->
-        <div class="relative min-w-0 flex-1 flex-col" :class="sidebarCollapsed ? 'flex' : 'hidden lg:flex'">
+        <div
+            class="relative min-w-0 flex-1 flex-col"
+            :class="sidebarCollapsed ? 'flex' : 'hidden lg:flex'"
+            @mousemove="trackCanvasPointer"
+        >
             <!-- 工具栏 -->
             <div class="flex flex-none flex-wrap items-center gap-1 border-b border-base-content/10 bg-base-100 px-2 py-1 sm:gap-1.5">
                 <!-- 侧栏收起 / 展开 -->
@@ -2409,32 +2605,30 @@ async function handleTransfer(charName: string) {
                 <div
                     v-if="contextMenuCopyable"
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="
-                        () => {
-                            store.copySelectedNodes(getSelectedNodes)
-                            contextMenuVisible = false
-                        }
-                    "
+                    @click="() => { store.copySelectedNodes(getSelectedNodes); contextMenuVisible = false }"
                 >
                     <Icon class="size-3.5" icon="ri:file-copy-line" />
                     复制选中项
                     <span v-if="getSelectedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ getSelectedNodes.length }}节点) </span>
                     <span class="ml-auto pl-3 text-[10px] opacity-60">Ctrl+C</span>
                 </div>
-                <!-- 粘贴选项 -->
+                <!-- 粘贴选项：剪贴板是导入码时「粘贴」改为「粘贴为MOD输入」 -->
                 <div
-                    v-if="store.copiedNodes.length > 0"
+                    v-if="clipboardIsModCode"
                     class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
-                    @click="
-                        () => {
-                            store.pasteNodes()
-                            contextMenuVisible = false
-                        }
-                    "
+                    @click="() => { void pasteAtPointer('mod', contextMenuPosition); contextMenuVisible = false }"
+                >
+                    <Icon class="size-3.5" icon="ri:grid-line" />
+                    粘贴为MOD输入
+                    <span class="ml-auto pl-3 text-[10px] opacity-60">Ctrl+V</span>
+                </div>
+                <div
+                    v-if="!clipboardIsModCode"
+                    class="group flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-base-content/75 transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                    @click="() => { void pasteAtPointer('auto', contextMenuPosition); contextMenuVisible = false }"
                 >
                     <Icon class="size-3.5" icon="ri:clipboard-line" />
                     粘贴
-                    <span v-if="store.copiedNodes.length > 0" class="ml-1 text-xs opacity-70"> ({{ store.copiedNodes.length }}节点) </span>
                     <span class="ml-auto pl-3 text-[10px] opacity-60">Ctrl+V</span>
                 </div>
                 <!-- 删除选项：按右键命中的目标决定删除对象 -->
@@ -2480,4 +2674,5 @@ async function handleTransfer(charName: string) {
 .vue-flow__node-group {
     z-index: -1 !important;
 }
+
 </style>

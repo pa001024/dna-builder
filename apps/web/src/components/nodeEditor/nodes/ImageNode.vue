@@ -2,7 +2,8 @@
 import { useVueFlow } from "@vue-flow/core"
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { useNodeEditorStore } from "@/store/nodeEditor"
-import { decodeImageBytes, detectImageFormat, encodeImageBytes, imageMimeForFormat } from "@/utils/imagePack"
+import { embedImageFile, findImageFile, fitImageBox, formatByteSize, readImageFileSize } from "@/utils/imageEmbed"
+import { decodeImageBytes, detectImageFormat, imageMimeForFormat } from "@/utils/imagePack"
 import BaseNode from "./BaseNode.vue"
 
 const props = defineProps<{
@@ -13,10 +14,8 @@ const props = defineProps<{
 }>()
 
 const store = useNodeEditorStore()
-const { viewport } = useVueFlow()
+const { nodesDraggable, viewport } = useVueFlow()
 
-/** 单个内嵌文件上限：再大就会把图 JSON、历史快照和自动保存拖垮 */
-const MAX_EMBED_BYTES = 2 * 1024 * 1024
 const MIN_BOX_WIDTH = 120
 const MIN_BOX_HEIGHT = 80
 const MAX_BOX_EDGE = 2400
@@ -28,6 +27,8 @@ const hovered = ref(false)
 const dragOver = ref(false)
 const previewOpen = ref(false)
 const imageFailed = ref(false)
+/** PNG 转 WebP 期间禁用重复上传，避免并发大图编码 */
+const compressing = ref(false)
 
 /** 当前模式：默认内嵌，URL 作为备选 */
 const mode = computed<"url" | "embed">(() => (props.data.imageMode === "url" ? "url" : "embed"))
@@ -110,17 +111,12 @@ function clampSize(value: unknown, min: number, fallback: number, max = MAX_BOX_
     return Number.isFinite(size) && size > 0 ? Math.min(max, Math.max(min, Math.round(size))) : fallback
 }
 
-function formatBytes(value: number): string {
-    if (!value) return "0 B"
-    if (value < 1024) return `${value} B`
-    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`
-    return `${(value / 1024 / 1024).toFixed(2)} MB`
-}
-
 const sizeLabel = computed(() => {
+    if (compressing.value) return "压缩中…"
     if (mode.value === "url") return displayUrl.value ? "URL 引用" : "未设置图片"
     if (!props.data.imageData) return "未内嵌图片"
-    return formatBytes(encodedBytes.value)
+    const size = formatByteSize(encodedBytes.value)
+    return props.data.imageMime === "image/webp" ? `WebP · ${size}` : size
 })
 
 function setMode(next: "url" | "embed") {
@@ -181,28 +177,24 @@ function clearImage() {
 }
 
 async function embedFile(file: File) {
+    if (compressing.value) return
     error.value = ""
-    if (!file.type.startsWith("image/") && !/\.(png|jpe?g|webp|gif|svg)$/i.test(file.name)) {
-        error.value = "请选择图片文件"
-        return
-    }
-    if (file.size > MAX_EMBED_BYTES) {
-        error.value = `图片过大（${formatBytes(file.size)}），请压缩到 ${formatBytes(MAX_EMBED_BYTES)} 以内`
-        return
-    }
-
+    compressing.value = true
     try {
-        const bytes = new Uint8Array(await file.arrayBuffer())
-        const format = detectImageFormat(bytes)
-        const { encoded } = encodeImageBytes(bytes)
+        const [payload, size] = await Promise.all([embedImageFile(file), readImageFileSize(file)])
+        // 显示框长边沿用当前尺寸，宽高比改为图片本身的比例，避免固定框里留空白边
+        const box = size ? fitImageBox(size.width, size.height, Math.max(boxWidth.value, boxHeight.value)) : null
         store.updateNodeData(props.id, {
             imageMode: "embed",
-            imageData: encoded,
-            imageMime: file.type || imageMimeForFormat(format) || "application/octet-stream",
-            imageName: file.name,
+            imageData: payload.imageData,
+            imageMime: payload.imageMime,
+            imageName: payload.imageName,
+            ...(box ? { imageWidth: box.width, imageHeight: box.height } : {}),
         })
     } catch (cause) {
         error.value = cause instanceof Error ? cause.message : "读取图片失败"
+    } finally {
+        compressing.value = false
     }
 }
 
@@ -238,23 +230,78 @@ function handlePaste(event: ClipboardEvent) {
     if (!hovered.value && !props.selected) return
     const target = event.target as HTMLElement | null
     if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
-    const file = Array.from(event.clipboardData?.files ?? []).find(item => item.type.startsWith("image/"))
-    if (!file) return
+    const files = Array.from(event.clipboardData?.files ?? [])
+    if (files.length === 0) return
     event.preventDefault()
     event.stopImmediatePropagation()
-    void embedFile(file)
+    void embedClipboardFile(files)
+}
+
+/** 剪贴板图片按魔数挑选：浏览器可能把 PNG 标成 image/jpeg */
+async function embedClipboardFile(files: File[]) {
+    const file = await findImageFile(files)
+    if (file) await embedFile(file)
 }
 
 /** 右下角拖拽调整显示区域，节点内的图片按 zoom 换算，避免画布缩放后手感漂移 */
 let resizeStart: { x: number; y: number; width: number; height: number; changed: boolean } | null = null
+/** 缩放前节点的可拖动状态：缩放期间关闭，结束后恢复 */
+let draggableBeforeResize: boolean | null = null
+/** 缩放期间钉住的节点位置：某些环境下指针手势会同时触发节点拖动 */
+let pinnedPosition: { x: number; y: number } | null = null
+
+// 缩放期间只要节点位置被外部改动就立即钉回，避免图片变大时节点跟着跑
+watch(
+    () => store.nodes.find(node => node.id === props.id)?.position,
+    position => {
+        if (!resizeStart || !pinnedPosition || !position) return
+        if (position.x === pinnedPosition.x && position.y === pinnedPosition.y) return
+        const node = store.nodes.find(item => item.id === props.id)
+        if (node) node.position = { ...pinnedPosition }
+    },
+    { deep: true, flush: "sync" }
+)
+
+/** 缩放期间吞掉节点拖动起手事件：VueFlow 的拖动监听在 mousedown / touchstart 上 */
+function blockNodeDrag(event: Event) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+}
+
+function addResizeBlockers() {
+    window.addEventListener("pointerdown", blockNodeDrag, true)
+    window.addEventListener("mousedown", blockNodeDrag, true)
+    window.addEventListener("touchstart", blockNodeDrag, { capture: true, passive: false })
+    window.addEventListener("dragstart", blockNodeDrag, true)
+}
+
+function removeResizeBlockers() {
+    window.removeEventListener("pointerdown", blockNodeDrag, true)
+    window.removeEventListener("mousedown", blockNodeDrag, true)
+    window.removeEventListener("touchstart", blockNodeDrag, true)
+    window.removeEventListener("dragstart", blockNodeDrag, true)
+}
+
+function removeResizeListeners() {
+    window.removeEventListener("pointermove", handleResizeMove)
+    window.removeEventListener("pointerup", endResize)
+    window.removeEventListener("pointercancel", endResize)
+    removeResizeBlockers()
+}
 
 function startResize(event: PointerEvent) {
     if (event.button !== 0) return
     event.preventDefault()
     event.stopPropagation()
+    const node = store.nodes.find(item => item.id === props.id)
+    pinnedPosition = node ? { ...node.position } : null
     resizeStart = { x: event.clientX, y: event.clientY, width: boxWidth.value, height: boxHeight.value, changed: false }
+    draggableBeforeResize = nodesDraggable.value
+    nodesDraggable.value = false
+    addResizeBlockers()
     window.addEventListener("pointermove", handleResizeMove)
     window.addEventListener("pointerup", endResize)
+    window.addEventListener("pointercancel", endResize)
 }
 
 function handleResizeMove(event: PointerEvent) {
@@ -269,10 +316,19 @@ function handleResizeMove(event: PointerEvent) {
 }
 
 function endResize() {
+    removeResizeListeners()
+    if (draggableBeforeResize !== null) {
+        nodesDraggable.value = draggableBeforeResize
+        draggableBeforeResize = null
+    }
+    // 松手时再钉一次：拖动结束事件可能晚于最后一次 pointermove
+    if (pinnedPosition) {
+        const node = store.nodes.find(item => item.id === props.id)
+        if (node) node.position = { ...pinnedPosition }
+        pinnedPosition = null
+    }
     if (resizeStart?.changed) store.commitHistory("调整图片尺寸")
     resizeStart = null
-    window.removeEventListener("pointermove", handleResizeMove)
-    window.removeEventListener("pointerup", endResize)
 }
 
 function openPreview() {
@@ -298,8 +354,11 @@ onBeforeUnmount(() => {
     revokeEmbedUrl()
     window.removeEventListener("keydown", handleKeyDown, true)
     window.removeEventListener("paste", handlePaste)
-    window.removeEventListener("pointermove", handleResizeMove)
-    window.removeEventListener("pointerup", endResize)
+    removeResizeListeners()
+    if (draggableBeforeResize !== null) {
+        nodesDraggable.value = draggableBeforeResize
+        draggableBeforeResize = null
+    }
 })
 </script>
 
@@ -373,11 +432,12 @@ onBeforeUnmount(() => {
                 <div v-else class="mb-1 flex items-center gap-1">
                     <button
                         type="button"
-                        class="nodrag flex shrink-0 cursor-pointer items-center gap-1 border border-base-content/15 px-1.5 py-1 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary"
+                        class="nodrag flex shrink-0 cursor-pointer items-center gap-1 border border-base-content/15 px-1.5 py-1 text-[10px] text-base-content/65 transition-colors duration-150 hover:border-primary/40 hover:text-primary disabled:cursor-progress disabled:opacity-50"
+                        :disabled="compressing"
                         @click.stop="pickFile"
                     >
-                        <Icon icon="ri:upload-2-line" class="size-3" />
-                        {{ data.imageData ? "替换" : "选择图片" }}
+                        <Icon :icon="compressing ? 'ri:refresh-line' : 'ri:upload-2-line'" class="size-3" :class="compressing ? 'animate-spin' : ''" />
+                        {{ compressing ? "压缩中" : data.imageData ? "替换" : "选择图片" }}
                     </button>
                     <span v-if="data.imageName" class="min-w-0 flex-1 truncate text-right text-[10px] text-base-content/35" :title="data.imageName">
                         {{ data.imageName }}
@@ -414,10 +474,10 @@ onBeforeUnmount(() => {
 
                 <!-- 缩放手柄 -->
                 <div
-                    v-if="!focusMode"
                     class="nodrag nopan absolute bottom-0 right-0 z-10 size-3.5 cursor-se-resize text-base-content/30 transition-colors duration-150 hover:text-primary"
                     title="拖动调整图片显示区域"
                     @pointerdown="startResize"
+                    @mousedown.stop
                 >
                     <svg viewBox="0 0 16 16" class="size-full">
                         <path d="M15 15H9L15 9V15ZM15 11H13L15 9V11Z" fill="currentColor" />
