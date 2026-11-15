@@ -138,44 +138,46 @@ function matchesSlice(buffer: Uint8Array, offset: number, pattern: Uint8Array): 
 
 const textDecoder = new TextDecoder()
 
+const PNG_MAGIC_8 = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
 /**
- * 通过魔数判断图片容器格式。
+ * 只看文件头魔数判断格式：不校验文件尾，允许带尾随数据。
+ * 剪贴板等来源的 MIME / 扩展名不可信（PNG 常被标成 image/jpeg），格式判断用它。
+ * @param input 图片字节（读文件头即可）
+ * @returns 容器格式
+ */
+export function detectImageFormatBySignature(input: Uint8Array): ImageContainerFormat {
+    if (input.length >= 8 && matchesSlice(input, 0, PNG_MAGIC_8)) return "png"
+    if (input.length >= 2 && input[0] === 0xff && input[1] === 0xd8) return "jpeg"
+    if (input.length >= 12 && matchesSlice(input, 0, RIFF_MAGIC) && matchesSlice(input, 8, WEBP_MAGIC)) return "webp"
+    if (input.length >= 6 && input[0] === 0x47 && input[1] === 0x49 && input[2] === 0x46 && input[3] === 0x38 && input[5] === 0x61) {
+        if (input[4] === 0x39) return "gif89a"
+        if (input[4] === 0x37) return "gif87a"
+    }
+    if (input.length >= 5 && input[0] === 0x3c) {
+        const head = textDecoder.decode(input.subarray(0, Math.min(64, input.length)))
+        if (head.includes("<svg") || head.includes("<?xml")) return "svg"
+    }
+    return "raw"
+}
+
+/**
+ * 通过魔数判断图片容器格式：在签名识别基础上校验文件尾，保证头尾剥离可逆。
  * @param input 图片字节
  * @returns 容器格式
  */
 export function detectImageFormat(input: Uint8Array): ImageContainerFormat {
-    if (input.length > 28 && matchesSlice(input, 0, PNG_PREFIX_16) && matchesSlice(input, input.length - 12, PNG_SUFFIX_12)) {
-        return "png"
+    const format = detectImageFormatBySignature(input)
+    if (format === "png") return input.length > 28 && matchesSlice(input, input.length - 12, PNG_SUFFIX_12) ? "png" : "raw"
+    if (format === "jpeg") {
+        return input.length > 4 && input[input.length - 2] === 0xff && input[input.length - 1] === 0xd9 ? "jpeg" : "raw"
     }
-    if (
-        input.length > 4 &&
-        input[0] === 0xff &&
-        input[1] === 0xd8 &&
-        input[input.length - 2] === 0xff &&
-        input[input.length - 1] === 0xd9
-    ) {
-        return "jpeg"
-    }
-    if (input.length > 12 && matchesSlice(input, 0, RIFF_MAGIC) && matchesSlice(input, 8, WEBP_MAGIC)) {
+    if (format === "webp") {
         const riffSize = (input[4] | (input[5] << 8) | (input[6] << 16) | (input[7] << 24)) >>> 0
-        if (riffSize === input.length - 8) return "webp"
+        return input.length > 12 && riffSize === input.length - 8 ? "webp" : "raw"
     }
-    if (
-        input.length > 7 &&
-        input[0] === 0x47 &&
-        input[1] === 0x49 &&
-        input[2] === 0x46 &&
-        input[3] === 0x38 &&
-        input[5] === 0x61 &&
-        input[input.length - 1] === 0x3b
-    ) {
-        if (input[4] === 0x39) return "gif89a"
-        if (input[4] === 0x37) return "gif87a"
-    }
-    if (input.length > 5 && input[0] === 0x3c) {
-        const head = textDecoder.decode(input.subarray(0, Math.min(64, input.length)))
-        if (head.includes("<svg") || head.includes("<?xml")) return "svg"
-    }
+    if (format === "gif89a" || format === "gif87a") return input.length > 7 && input[input.length - 1] === 0x3b ? format : "raw"
+    if (format === "svg") return input.length > 5 ? "svg" : "raw"
     return "raw"
 }
 

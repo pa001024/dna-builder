@@ -3,6 +3,7 @@ import {
     decodeImageBytes,
     decodeJutf122,
     detectImageFormat,
+    detectImageFormatBySignature,
     encodeImageBytes,
     encodeJutf122,
     imageMimeForFormat,
@@ -129,6 +130,20 @@ describe("image container headers", () => {
         expect(format).toBe("raw")
         expect(stripped[0]).toBe(0xf0)
         expect(bytesEqual(restoreImageContainerHeaders(stripped), input)).toBe(true)
+    })
+
+    it("detects formats by prefix when trailing data defeats strict container checks", () => {
+        const trailing = new Uint8Array([1, 2, 3])
+        const png = concatBytes(fakePng(pseudoRandomBytes(64, 3)), trailing)
+        const jpeg = concatBytes(fakeJpeg(pseudoRandomBytes(64, 3)), trailing)
+        const webp = concatBytes(fakeWebp(pseudoRandomBytes(64, 3)), trailing)
+
+        expect(detectImageFormat(png)).toBe("raw")
+        expect(detectImageFormatBySignature(png)).toBe("png")
+        expect(detectImageFormat(jpeg)).toBe("raw")
+        expect(detectImageFormatBySignature(jpeg)).toBe("jpeg")
+        expect(detectImageFormat(webp)).toBe("raw")
+        expect(detectImageFormatBySignature(webp)).toBe("webp")
     })
 
     it("detects SVG without stripping it", () => {
