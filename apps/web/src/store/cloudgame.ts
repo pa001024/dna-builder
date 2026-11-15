@@ -17,7 +17,9 @@ import {
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import {
+    CLOUDGAME_NATIVE_VERSION,
     downloadCloudgameNative,
+    fetchCloudgameNativeRelease,
     installCloudgameNative,
     isCloudgameNativeInstalled,
     resolveCloudgameNativePaths,
@@ -156,7 +158,7 @@ export const useCloudGameStore = defineStore("cloudgame", {
         },
 
         /**
-         * 启动原生云游戏客户端；本地未部署当前版本时先下载并解压。
+         * 启动原生云游戏客户端；本地部署版本与已发布版本不一致时先更新。
          */
         async launchNativeCloudGame() {
             const ui = useUIStore()
@@ -166,13 +168,16 @@ export const useCloudGameStore = defineStore("cloudgame", {
             this.nativeProgress = 0
             try {
                 const paths = await resolveCloudgameNativePaths()
-                if (!(await isCloudgameNativeInstalled(paths))) {
+                // 清单优先；拿不到（离线 / CDN 故障）时退回常量版本，不阻塞启动
+                const release = await fetchCloudgameNativeRelease()
+                const version = release?.version ?? CLOUDGAME_NATIVE_VERSION
+                if (!(await isCloudgameNativeInstalled(paths, version))) {
                     this.nativePhase = "downloading"
-                    await downloadCloudgameNative(paths, event => {
+                    await downloadCloudgameNative(paths, release, event => {
                         this.nativeProgress = event.progress
                     })
                     this.nativePhase = "deploying"
-                    await installCloudgameNative(paths)
+                    await installCloudgameNative(paths, version)
                 }
                 this.nativePhase = "launching"
                 const launched = (await launchNormal(paths.exePath, "")) as unknown as boolean
