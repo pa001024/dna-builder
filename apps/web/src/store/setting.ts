@@ -1,10 +1,14 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, type DNAUserDataBean } from "dna-api"
 import { defineStore } from "pinia"
+import { ref } from "vue"
 import {
     applyMaterial,
     isLaunchAtStartupEnabled,
     listSystemFonts,
+    memCleanSupported,
+    queryWorkingSet,
+    runAsAdmin,
     setLaunchAtStartupEnabled,
     startHeartbeat,
     stopHeartbeat,
@@ -53,32 +57,47 @@ let apiGeneration = 0
 /** 最近一次心跳完整握手的 promise：快速路径超时后，后续请求失败时等它 resolve 再重试。 */
 let heartbeatReadyPromise: Promise<boolean> | null = null
 
-/** 自动内存清理范围：仅游戏进程 / 仅本应用 / 两者。 */
-export type MemCleanScope = "game" | "app" | "all"
-
 /** 自动清理间隔下限（分钟）：过于频繁会让前台游戏反复缺页而卡顿。 */
 export const MEM_CLEAN_MIN_INTERVAL_MIN = 5
 /** 自动清理间隔上限（分钟）。 */
 export const MEM_CLEAN_MAX_INTERVAL_MIN = 240
+/** 触发阈值下限（MB）：低于此值清理意义不大且容易误触发。 */
+export const MEM_CLEAN_MIN_THRESHOLD_MB = 256
+/** 触发阈值上限（MB）。 */
+export const MEM_CLEAN_MAX_THRESHOLD_MB = 65536
+/** 占用历史采样点数上限（折线图展示窗口）。 */
+export const MEM_CLEAN_HISTORY_MAX = 40
 
 /** 自动清理轮询句柄（模块级：切换页面不中断，停用后清空）。 */
 let memCleanTimer: number | null = null
 /** 当前定时器使用的间隔（毫秒）：间隔未变化时不重置倒计时。 */
 let memCleanTimerIntervalMs: number | null = null
 
+/** 后端探测到的平台支持性（仅 Windows 桌面端为 true）。探测完成前按不支持处理。响应式以便 computed 跟踪。 */
+const memCleanSupportedCache = ref(false)
+
 /** 内存清理依赖 Windows 进程 API：Web 端与非 Windows 桌面端都不支持。 */
 export function isMemCleanSupported(): boolean {
-    return env.isApp && /Windows/i.test(navigator.userAgent)
+    return memCleanSupportedCache.value
 }
 
+let memCleanProbePromise: Promise<boolean> | null = null
+
 /**
- * 把清理范围翻译成后端参数：game 走缺省白名单，app/all 追加自身进程。
- * @param scope 清理范围
+ * 启动时向真实后端探测内存清理支持性并写入缓存。
+ * 不能用 UA 判平台：桌面端为兼容验证码登录会改 UA，Windows 字样可能缺失。
+ * 并发去重：多个调用点共享同一次探测。
  */
-function resolveMemCleanTargets(scope: MemCleanScope): { processNames?: string[]; includeSelf: boolean } {
-    if (scope === "app") return { processNames: [], includeSelf: true }
-    if (scope === "all") return { processNames: undefined, includeSelf: true }
-    return { processNames: undefined, includeSelf: false }
+export function probeMemCleanSupport(): Promise<boolean> {
+    if (memCleanProbePromise) return memCleanProbePromise
+    if (!env.isApp) {
+        memCleanSupportedCache.value = false
+        return (memCleanProbePromise = Promise.resolve(false))
+    }
+    memCleanProbePromise = memCleanSupported()
+        .then(ok => (memCleanSupportedCache.value = ok))
+        .catch(() => (memCleanSupportedCache.value = false))
+    return memCleanProbePromise
 }
 
 // 迁移必须在建立 store 之前完成：useLocalStorage 会先把存储里的旧默认值读进 state
@@ -162,12 +181,21 @@ export const useSettingStore = defineStore("setting", {
             // ===== 内存清理（桌面端工作集修剪）：默认关闭、默认仅游戏、默认 30 分钟 =====
             memCleanEnabled: useLocalStorage("setting_mem_clean_enabled", false),
             memCleanIntervalMin: useLocalStorage("setting_mem_clean_interval_min", 30),
-            memCleanScope: useLocalStorage<MemCleanScope>("setting_mem_clean_scope", "game"),
+            // 触发阈值（MB）：游戏工作集超过它才执行自动清理；0 表示不限制、到点即清
+            memCleanThresholdMb: useLocalStorage("setting_mem_clean_threshold_mb", 0),
             // 上次清理结果与进行中的调用（会话内瞬态，不持久化）
             memCleanLastReport: null as TrimReport | null,
             memCleanLastRunAt: 0,
             memCleanLastError: "",
             memCleanBusy: false,
+            // 当前游戏进程工作集总占用（字节，会话内瞬态，供设置页展示）
+            memCleanUsageBytes: 0,
+            // 游戏进程是否在运行（由占用查询得出）
+            memCleanUsageRunning: false,
+            // 最近占用采样点（字节，最多 MEM_CLEAN_HISTORY_MAX 个，供折线图展示）
+            memCleanUsageHistory: [] as number[],
+            // 上次清理是否因权限不足失败（提示以管理员重启）
+            memCleanNeedsElevation: false,
         }
     },
     getters: {},
@@ -838,6 +866,24 @@ export const useSettingStore = defineStore("setting", {
         },
 
         /**
+         * 设置触发阈值（MB）：0 表示不限制、到点即清；其余钳制在保守区间内。
+         * @param mb 阈值兆字节
+         */
+        setMemCleanThreshold(mb: number) {
+            this.memCleanThresholdMb = this.normalizeMemCleanThresholdValue(mb)
+        },
+
+        /**
+         * 归一化任意候选阈值（MB）：0 保留表示不限制，其余钳制。
+         * @param mb 候选兆字节
+         */
+        normalizeMemCleanThresholdValue(mb: number): number {
+            const rounded = Math.round(Number(mb))
+            if (!Number.isFinite(rounded) || rounded <= 0) return 0
+            return Math.min(MEM_CLEAN_MAX_THRESHOLD_MB, Math.max(MEM_CLEAN_MIN_THRESHOLD_MB, rounded))
+        },
+
+        /**
          * 按当前开关、间隔与范围恢复自动清理轮询；非 Windows 桌面端或未启用时只清理定时器。
          * 间隔未变化时保留现有定时器，避免仅失焦提交就重置倒计时。
          */
@@ -851,7 +897,7 @@ export const useSettingStore = defineStore("setting", {
             this.stopMemCleanPolling()
             memCleanTimerIntervalMs = intervalMs
             memCleanTimer = window.setInterval(() => {
-                void this.trimMemoryNow()
+                void this.trimMemoryNow(false)
             }, intervalMs)
         },
 
@@ -868,17 +914,27 @@ export const useSettingStore = defineStore("setting", {
 
         /**
          * 立即执行一次工作集清理并记录结果（手动按钮与自动轮询共用）。
-         * @returns 本次清理结果；非 Windows 桌面端或已有调用在途时返回 null
+         * @param force 手动触发传 true 跳过阈值判断；自动轮询传 false，占用未超阈值则跳过
+         * @returns 本次清理结果；不支持/在途/未超阈值时返回 null
          */
-        async trimMemoryNow(): Promise<TrimReport | null> {
+        async trimMemoryNow(force = true): Promise<TrimReport | null> {
             if (!isMemCleanSupported() || this.memCleanBusy) return null
             this.memCleanBusy = true
             this.memCleanLastError = ""
             try {
-                const { processNames, includeSelf } = resolveMemCleanTargets(this.memCleanScope)
-                const report = await trimGameWorkingSet(processNames, includeSelf)
+                // 先读当前占用：阈值判断与 UI 展示共用，超阈值才修剪（固定只清游戏进程）
+                const usage = await queryWorkingSet()
+                const total = usage.targets.reduce((sum, t) => sum + (t.workingSetBytes ?? 0), 0)
+                this.memCleanUsageBytes = total
+                this.memCleanUsageRunning = usage.status === "ok"
+                this.pushMemCleanSample(total)
+                if (!force && this.memCleanThresholdMb > 0 && total < this.memCleanThresholdMb * 1024 * 1024) {
+                    return null
+                }
+                const report = await trimGameWorkingSet()
                 this.memCleanLastReport = report
                 this.memCleanLastRunAt = Date.now()
+                this.memCleanNeedsElevation = report.needsElevation ?? false
                 return report
             } catch (error) {
                 const message = error instanceof Error ? error.message : String(error)
@@ -888,6 +944,40 @@ export const useSettingStore = defineStore("setting", {
             } finally {
                 this.memCleanBusy = false
             }
+        },
+
+        /**
+         * 只刷新当前游戏内存占用（设置页展示），不执行清理。
+         */
+        async refreshMemCleanUsage(): Promise<void> {
+            if (!isMemCleanSupported()) return
+            try {
+                const usage = await queryWorkingSet()
+                const total = usage.targets.reduce((sum, t) => sum + (t.workingSetBytes ?? 0), 0)
+                this.memCleanUsageBytes = total
+                this.memCleanUsageRunning = usage.status === "ok"
+                this.pushMemCleanSample(total)
+            } catch {
+                this.memCleanUsageRunning = false
+            }
+        },
+
+        /**
+         * 追加一个占用采样点到历史尾部，超出上限时丢弃最早的点。
+         * @param bytes 总占用字节
+         */
+        pushMemCleanSample(bytes: number) {
+            this.memCleanUsageHistory.push(bytes)
+            if (this.memCleanUsageHistory.length > MEM_CLEAN_HISTORY_MAX) {
+                this.memCleanUsageHistory.splice(0, this.memCleanUsageHistory.length - MEM_CLEAN_HISTORY_MAX)
+            }
+        },
+
+        /**
+         * 以管理员权限重启当前应用（清理因权限不足失败时由用户手动触发）。
+         */
+        async runMemCleanAsAdmin() {
+            await runAsAdmin()
         },
     },
 })

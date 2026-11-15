@@ -75,7 +75,7 @@ export async function launchNormal(path: string, params: string) {
 }
 
 export async function runAsAdmin() {
-    return await invoke<string>("run_as_admin", {})
+    return await invoke<boolean>("run_as_admin", {})
 }
 
 export async function openExplorer(dir: string) {
@@ -172,6 +172,8 @@ export interface TrimItem {
     pid: number
     name: string
     ok: boolean
+    /** 当前工作集占用字节数（查询/修剪前读取，读取失败时缺省） */
+    workingSetBytes?: number
     error?: string
 }
 
@@ -179,6 +181,25 @@ export interface TrimItem {
 export interface TrimReport {
     status: "ok" | "not_running" | "unsupported"
     targets: TrimItem[]
+    /** 是否因权限不足而失败（提示以管理员重启） */
+    needsElevation?: boolean
+}
+
+/**
+ * 查询当前平台是否支持内存清理（仅 Windows 桌面端）。
+ * 前端不能用 UA 判平台（桌面端为兼容验证码登录会改 UA），改由后端按编译目标报告。
+ */
+export async function memCleanSupported() {
+    return await invoke<boolean>("mem_clean_supported")
+}
+
+/**
+ * 查询目标进程当前工作集占用，不修剪。
+ * @param processNames 目标进程名列表；缺省为游戏进程白名单
+ * @param includeSelf 是否同时包含当前应用自身
+ */
+export async function queryWorkingSet(processNames?: string[], includeSelf = false) {
+    return await invoke<TrimReport>("query_working_set", { processNames, includeSelf })
 }
 
 /**

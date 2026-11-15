@@ -11,16 +11,23 @@ const DEFAULT_PROCESS_NAMES: &[&str] = &["EM-Win64-Shipping.exe", "EM.exe"];
 
 /// 单个目标的清理结果。
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TrimItem {
     /// 目标进程 ID
     pub pid: u32,
     /// 目标进程名（快照中的真实名，而非调用方传入的名字）
     pub name: String,
-    /// 是否修剪成功
+    /// 是否修剪成功（仅查询时恒为 true，表示成功读到占用）
     pub ok: bool,
+    /// 当前工作集占用字节数（读取失败时省略）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub working_set_bytes: Option<u64>,
     /// 失败原因（成功时省略）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// 内部标记：本次失败是否因权限不足（不序列化给前端，聚合到 report.needs_elevation）
+    #[serde(skip)]
+    pub needs_elevation: bool,
 }
 
 /// 整体执行状态。
@@ -38,9 +45,13 @@ pub enum TrimStatus {
 
 /// 一次清理的完整结果。
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TrimReport {
     pub status: TrimStatus,
     pub targets: Vec<TrimItem>,
+    /// 是否因权限不足而失败（任一目标 OpenProcess/修剪被拒时置位），前端据此提示以管理员重启
+    #[serde(default)]
+    pub needs_elevation: bool,
 }
 
 impl TrimReport {
@@ -50,7 +61,40 @@ impl TrimReport {
         Self {
             status: TrimStatus::Unsupported,
             targets: Vec::new(),
+            needs_elevation: false,
         }
+    }
+}
+
+/// 返回当前平台是否支持内存清理（仅 Windows 构建为 true）。
+///
+/// 前端不能用 UA 判平台（桌面端为兼容验证码登录会改 UA），改由后端按编译目标报告。
+#[tauri::command]
+pub fn mem_clean_supported() -> bool {
+    cfg!(target_os = "windows")
+}
+
+/// 查询目标进程当前工作集占用，不修剪。
+///
+/// `process_names` 缺省时使用游戏进程白名单；`include_self` 为 true 时同时包含当前应用自身。
+/// 用于前端展示占用与阈值判断，无修改副作用。
+#[tauri::command]
+pub async fn query_working_set(
+    process_names: Option<Vec<String>>,
+    include_self: Option<bool>,
+) -> Result<TrimReport, String> {
+    #[cfg(target_os = "windows")]
+    {
+        tokio::task::spawn_blocking(move || {
+            win_impl::run(process_names, include_self.unwrap_or(false), false)
+        })
+        .await
+        .map_err(|error| format!("内存占用查询失败: {error}"))?
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (process_names, include_self);
+        Ok(TrimReport::unsupported())
     }
 }
 
@@ -68,7 +112,7 @@ pub async fn trim_game_working_set(
     {
         // 枚举与逐进程修剪都是阻塞调用，整体移到阻塞线程池，避免卡住主线程事件循环。
         tokio::task::spawn_blocking(move || {
-            win_impl::trim(process_names, include_self.unwrap_or(false))
+            win_impl::run(process_names, include_self.unwrap_or(false), true)
         })
         .await
         .map_err(|error| format!("内存清理任务执行失败: {error}"))?
@@ -83,12 +127,14 @@ pub async fn trim_game_working_set(
 #[cfg(target_os = "windows")]
 mod win_impl {
     use super::{DEFAULT_PROCESS_NAMES, TrimItem, TrimReport, TrimStatus};
-    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::Foundation::{CloseHandle, ERROR_ACCESS_DENIED};
     use windows::Win32::System::Diagnostics::ToolHelp::{
         CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW,
         TH32CS_SNAPPROCESS,
     };
-    use windows::Win32::System::ProcessStatus::EmptyWorkingSet;
+    use windows::Win32::System::ProcessStatus::{
+        EmptyWorkingSet, GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS,
+    };
     use windows::Win32::System::Threading::{
         GetCurrentProcess, OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_SET_QUOTA,
     };
@@ -100,9 +146,11 @@ mod win_impl {
     }
 
     /// 按名单收集全部同名进程（分身/多开副本会同时命中），再按需追加自身进程。
-    pub fn trim(
+    /// `do_trim` 为 false 时只读工作集占用不修剪。
+    pub fn run(
         process_names: Option<Vec<String>>,
         include_self: bool,
+        do_trim: bool,
     ) -> Result<TrimReport, String> {
         let names: Vec<String> = match process_names {
             Some(list) => list
@@ -131,16 +179,19 @@ mod win_impl {
             return Ok(TrimReport {
                 status: TrimStatus::NotRunning,
                 targets: Vec::new(),
+                needs_elevation: false,
             });
         }
 
-        let items = targets
+        let items: Vec<TrimItem> = targets
             .into_iter()
-            .map(|target| trim_one(target.pid, &target.name))
+            .map(|target| handle_one(target.pid, &target.name, do_trim))
             .collect();
+        let needs_elevation = items.iter().any(|item| item.needs_elevation);
         Ok(TrimReport {
             status: TrimStatus::Ok,
             targets: items,
+            needs_elevation,
         })
     }
 
@@ -221,8 +272,50 @@ mod win_impl {
             .unwrap_or_else(|| "dna-builder.exe".to_string())
     }
 
-    /// 修剪单个进程的工作集；自身进程直接用伪句柄，避免额外的权限/句柄开销。
-    fn trim_one(pid: u32, name: &str) -> TrimItem {
+    /// 读单个进程的工作集占用（字节）；自身进程用伪句柄。
+    fn working_set_bytes(pid: u32) -> Result<u64, windows::core::Error> {
+        let mut counters = PROCESS_MEMORY_COUNTERS::default();
+        if pid == std::process::id() {
+            unsafe {
+                GetProcessMemoryInfo(
+                    GetCurrentProcess(),
+                    &mut counters,
+                    std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32,
+                )
+            }?;
+            return Ok(counters.WorkingSetSize as u64);
+        }
+        let handle = unsafe { OpenProcess(PROCESS_QUERY_INFORMATION, false, pid) }?;
+        let result = unsafe {
+            GetProcessMemoryInfo(
+                handle,
+                &mut counters,
+                std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32,
+            )
+        };
+        let _ = unsafe { CloseHandle(handle) };
+        result.map(|()| counters.WorkingSetSize as u64)
+    }
+
+    /// 处理单个目标：先读工作集占用，`do_trim` 为 true 时再修剪。
+    /// 自身进程直接用伪句柄，避免额外的权限/句柄开销。
+    fn handle_one(pid: u32, name: &str, do_trim: bool) -> TrimItem {
+        let bytes = working_set_bytes(pid).ok();
+        if !do_trim {
+            return TrimItem {
+                pid,
+                name: name.to_string(),
+                ok: bytes.is_some(),
+                working_set_bytes: bytes,
+                error: if bytes.is_some() {
+                    None
+                } else {
+                    Some("读取内存占用失败".to_string())
+                },
+                needs_elevation: false,
+            };
+        }
+
         let result = if pid == std::process::id() {
             unsafe { EmptyWorkingSet(GetCurrentProcess()) }
         } else {
@@ -242,14 +335,22 @@ mod win_impl {
                 pid,
                 name: name.to_string(),
                 ok: true,
+                working_set_bytes: bytes,
                 error: None,
+                needs_elevation: false,
             },
-            Err(error) => TrimItem {
-                pid,
-                name: name.to_string(),
-                ok: false,
-                error: Some(describe(&error)),
-            },
+            Err(error) => {
+                let denied =
+                    error.code() == windows::core::HRESULT::from_win32(ERROR_ACCESS_DENIED.0);
+                TrimItem {
+                    pid,
+                    name: name.to_string(),
+                    ok: false,
+                    working_set_bytes: bytes,
+                    error: Some(describe(&error)),
+                    needs_elevation: denied,
+                }
+            }
         }
     }
 }

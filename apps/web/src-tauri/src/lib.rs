@@ -221,6 +221,8 @@ pub fn run() {
         commands::system::is_launch_at_startup_enabled,
         commands::system::set_launch_at_startup_enabled,
         // 内存清理（仅工作集修剪）
+        commands::mem::mem_clean_supported,
+        commands::mem::query_working_set,
         commands::mem::trim_game_working_set,
         // 运行环境诊断
         commands::diagnostics::get_diagnostics,

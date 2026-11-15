@@ -17,7 +17,7 @@ import { useForgeAlarm } from "./store/forgeAlarm"
 import { useLanSyncStore } from "./store/lanSync"
 import { useMihanNotify } from "./store/mihan"
 import { useScriptRuntimeStore } from "./store/scriptRuntime"
-import { useSettingStore } from "./store/setting"
+import { probeMemCleanSupport, useSettingStore } from "./store/setting"
 import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
 import { installAdminUploadHook, uninstallAdminUploadHook } from "./utils/admin-data-sync"
@@ -274,9 +274,10 @@ if (env.isApp && !isScreenBarWindow && !isDesktopCloneWindow) {
     if (setting.autoSign) {
         setting.startAutoSign()
     }
-    // 自动内存清理：仅主窗口持有轮询定时器（浮窗/分身窗口同样挂载 App，不能重复计时）
+    // 自动内存清理：仅主窗口持有轮询定时器（浮窗/分身窗口同样挂载 App，不能重复计时）。
+    // 支持性须先向真实后端探测（UA 不可靠），探测完成再按开关同步轮询。
     if (isMainWindow) {
-        setting.syncMemCleanPolling()
+        void probeMemCleanSupport().then(() => setting.syncMemCleanPolling())
     }
     void setting.syncLaunchAtStartup().catch(error => {
         console.error("同步开机启动状态失败:", error)
@@ -415,6 +416,8 @@ onMounted(async () => {
     // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
     void setting.initCustomWallpaper()
     void setting.initAppFont()
+    // 内存清理支持性由真实后端探测（不能用 UA：桌面端为兼容验证码登录会改 UA）
+    void probeMemCleanSupport()
     // 后端浮窗不随应用自启：上次开启过就按持久化设置恢复（不阻塞启动）
     void restoreSkillCdOverlay()
     // 屏幕信息条同理：窗口由主窗口按需创建

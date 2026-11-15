@@ -18,8 +18,8 @@
         "tauri": "tauri",
         "tb": "tauri build",
         "mb": "bun run ../../tools/build-msix.ts",
-        "dd": "tauri dev",
-        "dd2": "cross-env DISABLE_REWRITE=1 tauri dev"
+        "dd": "cross-env MBX_DISABLE=1 tauri dev",
+        "dd2": "cross-env MBX_DISABLE=1 DISABLE_REWRITE=1 tauri dev"
     },
     "dependencies": {
         "@antv/g": "^6.3.1",
