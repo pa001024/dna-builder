@@ -12,6 +12,7 @@ import {
     createMindMapTree,
     DEFAULT_FONT_SIZE,
     type MindMapNode,
+    normalizeMindMapGuides,
     normalizeMindMapTree,
     remapMindMapTreeNodeIds,
     walkMindMap,
@@ -217,6 +218,9 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         "cardModId",
         "cardWidth",
         "focusMode",
+        "activeModTab",
+        "modContext",
+        "fontSize",
     ])
 
     /**
@@ -286,6 +290,7 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         if (node.type === NodeType.MIND_MAP) {
             const tree = normalizeMindMapTree(data.tree)
             data.tree = tree ?? createMindMapTree()
+            data.guides = normalizeMindMapGuides(data.guides)
             if (typeof data.layout !== "string") data.layout = "mindmap"
             if (typeof data.baseFontSize !== "number") data.baseFontSize = DEFAULT_FONT_SIZE
         }
