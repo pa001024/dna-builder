@@ -50,6 +50,8 @@ export interface SkillField {
     取消?: number[] | number
     连段?: number[] | number
     段数?: number
+    /** 攻击来源面板（对应上游 BaseAttr：ATK_Char/ATK_Melee…）；缺省按当前归属计算 */
+    基础?: "角色" | "近战" | "远程"
     /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
     tag?: string[]
 }
@@ -314,7 +316,10 @@ export interface LeveledSkillField {
     伤害类型?: SkillField["伤害类型"]
     值: number
     格式?: string
-    基础?: string
+    /** 攻击来源面板（对应上游 BaseAttr：ATK_Char/ATK_Melee…）；缺省按当前归属计算 */
+    基础?: "角色" | "近战" | "远程"
+    /** 属性基数来源（格式串含生命/防御时派生）：该字段以对应角色属性为基数 */
+    属性?: string
     值2?: number
     safeName: string
     /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
@@ -430,7 +435,7 @@ export class LeveledSkill {
                 }
                 if (obj.格式) {
                     const m = obj.格式.match(/生命|防御/g)
-                    if (m) obj.基础 = m[0]
+                    if (m) obj.属性 = m[0]
                 }
                 return obj
             })

@@ -126,6 +126,10 @@ pub struct BuildContext<'a> {
     pub buff_active: Vec<bool>,
     /// 动态槽位：`buffs` 的下标（装配序），取代整表深拷贝。
     pub dynamic_buffs: Vec<usize>,
+    /// 装配期按名剔除的 BUFF（收益计算的移除口径；对应上游 clone 后按名过滤合并 BUFF 表）。
+    /// 只覆盖 settings.buffs 装配不到的两处来源：潜质（settings.traits）与魔灵（settings.pet_id）；
+    /// 常规 BUFF 仍走调用方的 settings 克隆剔除（时间轴重加语义与上游一致）。其余路径恒为空。
+    pub excluded_buffs: Vec<String>,
     pub enemy: LeveledMonster,
     /// 全部 MOD（四槽 + 中枢），顺序与上游 `mods` 一致。
     pub mods: Vec<usize>,
@@ -254,6 +258,29 @@ impl<'a> BuildContext<'a> {
     ///
     /// 返回 `None` 表示关键数据缺失（角色记录/武器记录查不到），调用方应提示而不是崩。
     pub fn new(tables: &'a BuildTables, char_id: i64, settings: &CharSettings) -> Option<Self> {
+        Self::assemble(tables, char_id, settings, &[])
+    }
+
+    /// 带 BUFF 排除集的装配：收益计算的移除口径用（对应上游 clone 后按名过滤合并 BUFF 表）。
+    ///
+    /// 排除集只作用于 settings.buffs 装配不到的潜质 / 魔灵两处来源
+    /// （常规 BUFF 由调用方在 settings 克隆上剔除）；其余调用方走 `new`（空集逐位一致）。
+    pub fn new_excluding(
+        tables: &'a BuildTables,
+        char_id: i64,
+        settings: &CharSettings,
+        excluded: &[String],
+    ) -> Option<Self> {
+        Self::assemble(tables, char_id, settings, excluded)
+    }
+
+    /// `new` / `new_excluding` 的公共装配体。
+    fn assemble(
+        tables: &'a BuildTables,
+        char_id: i64,
+        settings: &CharSettings,
+        excluded: &[String],
+    ) -> Option<Self> {
         crate::prof!("context::new");
         // 角色：上游 `LeveledCharHelper.fromId` 支持「id > 9999 时右移两位」（皎皎角用的 6 位 id）
         let lookup_id = if char_id > 9999 {
@@ -296,6 +323,7 @@ impl<'a> BuildContext<'a> {
             buffs: Vec::new(),
             buff_active: Vec::new(),
             dynamic_buffs: Vec::new(),
+            excluded_buffs: excluded.to_vec(),
             enemy: LeveledMonster::build(
                 default_enemy_record(),
                 80.0,
@@ -613,6 +641,11 @@ impl<'a> BuildContext<'a> {
         skill_weapon.damage_type = source.damage_type.clone();
     }
 
+    /// 该 BUFF 名是否在装配排除集中（收益移除口径用；对应上游按名过滤）。
+    fn is_buff_excluded(&self, name: &str) -> bool {
+        self.excluded_buffs.iter().any(|excluded| excluded == name)
+    }
+
     /// 装配 BUFF 列表；对应上游构造函数里的 `buffs` / `dynamicBuffs` 划分。
     ///
     /// 上游口径：有 `code` **且**没有普通属性的 BUFF 只进 `dynamicBuffs`；
@@ -684,6 +717,10 @@ impl<'a> BuildContext<'a> {
                 "魔灵潜质:{}",
                 trait_record.str_ref("name").unwrap_or("")
             );
+            // 收益移除口径：潜质 BUFF 排除（上游 `魔灵潜质:激进` 这类移除此前恒为 0）。
+            if self.is_buff_excluded(&buff_name) {
+                continue;
+            }
             let trait_level = *level;
             let Some(raw) = self.tables.buffs.get(&buff_name).cloned() else {
                 continue;
@@ -701,32 +738,38 @@ impl<'a> BuildContext<'a> {
         let pet_level = self.effective_pet_level();
         if let Some(pet) = self.tables.pets.get(&self.settings.pet_id) {
             let pet_name = pet.text("名称");
-            if let Some(raw) = self.tables.buffs.get(&pet_name).cloned() {
-                let passive_name = pet_name.clone();
-                buffs.push(self.tables.templates.buff_cached(
-                    &passive_name,
-                    Some(pet_level),
-                    None,
-                    None,
-                    || LeveledBuff::new(raw, Some(pet_level)),
-                ));
+            // 收益移除口径：魔灵被动排除（上游按名过滤只摘该 BUFF，主动保留）。
+            if !self.is_buff_excluded(&pet_name) {
+                if let Some(raw) = self.tables.buffs.get(&pet_name).cloned() {
+                    let passive_name = pet_name.clone();
+                    buffs.push(self.tables.templates.buff_cached(
+                        &passive_name,
+                        Some(pet_level),
+                        None,
+                        None,
+                        || LeveledBuff::new(raw, Some(pet_level)),
+                    ));
+                }
             }
             let active_name = format!("{}(主动)", pet_name);
-            let active_coverage = self.resolve_pet_coverage(pet, pet_level);
-            if let Some(raw) = self.tables.buffs.get(&active_name).cloned() {
-                buffs.push(self.tables.templates.buff_cached(
-                    &active_name,
-                    Some(pet_level),
-                    None,
-                    Some(active_coverage),
-                    || {
-                        // 主动技按覆盖率缩放（自动模式按「时长 / 实际冷却」折算）
-                        let mut active = LeveledBuff::new(raw, Some(pet_level));
-                        active.coverage = active_coverage;
-                        active.update_properties();
-                        active
-                    },
-                ));
+            // 收益移除口径：魔灵主动排除（被动保留）。
+            if !self.is_buff_excluded(&active_name) {
+                let active_coverage = self.resolve_pet_coverage(pet, pet_level);
+                if let Some(raw) = self.tables.buffs.get(&active_name).cloned() {
+                    buffs.push(self.tables.templates.buff_cached(
+                        &active_name,
+                        Some(pet_level),
+                        None,
+                        Some(active_coverage),
+                        || {
+                            // 主动技按覆盖率缩放（自动模式按「时长 / 实际冷却」折算）
+                            let mut active = LeveledBuff::new(raw, Some(pet_level));
+                            active.coverage = active_coverage;
+                            active.update_properties();
+                            active
+                        },
+                    ));
+                }
             }
         }
 

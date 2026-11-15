@@ -157,6 +157,22 @@ pub fn build_value(
     )
 }
 
+/// 带 BUFF 排除集的顶层求值：收益计算的移除口径用（`calc_equipped_buff_income`）。
+///
+/// 与 `build_value` 唯一差别是装配期按名剔除（潜质 / 魔灵来源）；常规 BUFF
+/// 仍由调用方在 settings 克隆上剔除，两处叠加与上游按名过滤一致。
+fn build_value_excluding(
+    tables: &BuildTables,
+    char_id: i64,
+    settings: &CharSettings,
+    excluded: &[String],
+    timeline: Option<&RawTimelineData>,
+) -> f64 {
+    super::timeline::calculate_with_settings_excluding(
+        tables, char_id, settings, excluded, timeline,
+    )
+}
+
 /// 附加口径：候选 MOD 追加后的收益（`CharBuild.ts:4319-4392 calcIncome` 附加分支）。
 ///
 /// `base` 缺省现算；当前总伤害 `|base|<EPS → 0`（`4388-4390`）。
@@ -211,7 +227,10 @@ pub fn calc_income_buff(
 ///
 /// 覆盖动态 `attr` BUFF 的移除路径（`4432-433` 分流到此）与 `code` 复合 BUFF
 /// 双槽移除（`4428-4429`，重建口径下 `settings.buffs` 即双槽之源）。
-/// `|without|<EPS → 0`（`4405`）。
+/// 潜质（`魔灵潜质:<名>`，settings.traits）与魔灵被动/主动（settings.pet_id 派生）在
+/// settings.buffs 里没有对应条目：只 `retain` 会静默无操作、收益恒为 0
+/// （如潜质「激进/振奋」），故额外经装配排除集剔除（`BuildContext::new_excluding`），
+/// 与上游 clone 后按名过滤合并 BUFF 表逐位一致。` |without|<EPS → 0`（`4405`）。
 pub fn calc_equipped_buff_income(
     tables: &BuildTables,
     char_id: i64,
@@ -223,7 +242,8 @@ pub fn calc_equipped_buff_income(
     let base = base.unwrap_or_else(|| build_value(tables, char_id, settings, timeline));
     let mut owned = settings.clone();
     owned.buffs.retain(|(name, _, _)| name != buff_name);
-    let without = build_value(tables, char_id, &owned, timeline);
+    let excluded = [buff_name.to_string()];
+    let without = build_value_excluding(tables, char_id, &owned, &excluded, timeline);
     if without.abs() < EPS {
         return 0.0;
     }

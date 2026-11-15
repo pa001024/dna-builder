@@ -35,7 +35,7 @@ fn dobapp_second_corpus_archived() {
     let cases = [
         ("dobapp_shardBuild1", 5823675267.58358, 5823675267.58358),
         ("dobapp_vy", 1767082952.0447142, 1767082952.0447142),
-        ("dobapp_lieseBathfire1", 27281810428.826473, 21978258684.30798),
+        ("dobapp_lieseBathfire1", 27281810428.826473, 6310636931.0765295),
         ("dobapp_OkdnBN3OlC", 1123660945.245696, 1123660945.245696),
     ];
     for (name, dob_total, ts_calculate) in cases {

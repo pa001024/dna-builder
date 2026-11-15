@@ -144,14 +144,12 @@ describe("全局 code 与技能限定 attr 共存", () => {
     })
 })
 
-describe("[求索]伤害的技能触发折算", () => {
+describe("[求索]伤害按角色面板结算（基础: 角色）", () => {
     /**
-     * 触发按 bonus 模型结算：未触发部分按 1 倍，触发部分按 (1 + bonus)，期望 = base × (1 + bonus × 覆盖率)，
-     * 覆盖率 = min(1, 技能触发 + 武器面板触发)。求索为灾厄伤害且抗性存在时 bonus = 1 + 触发倍率，
-     * 以下构筑均无触发倍率来源故 bonus = 1（触发 2 倍、不触发 1 倍）。
-    /**
-     * 求索伤害触发概率 = 武器面板触发 + 技能触发后封顶（技能触发是固定加值）。
-     * 充盈·巧力（41317，紫）的技能触发随 MOD 等级变化，其他词条不影响求索结算，可做对照。
+     * 求索字段标注 `基础: "角色"`（对应上游 BaseAttr ATK_Char）：按无武器归属的技能伤害链路结算。
+     * 基数 = 35 × 角色攻击（不含近战武器攻击）；增伤池吃技能伤害、追伤吃技能追伤；
+     * 没有暴击/触发档位（近战双爆、武器面板触发、技能触发均不影响）；防御按技能口径（吃技能无视防御）。
+     * 充盈·巧力（41317，紫）的技能触发随 MOD 等级变化，其他词条（充盈威力）不影响求索结算，可做对照。
      */
     function qiusuoBuild(charMods: (LeveledMod | null)[] = [], buffs: LeveledBuff[] = [], meleeMods: (LeveledMod | null)[] = []) {
         const build = new CharBuild({
@@ -184,41 +182,16 @@ describe("[求索]伤害的技能触发折算", () => {
         expect(hi.evaluateAST("角色::[攻击]{转灾厄:1}") / lo.evaluateAST("角色::[攻击]{转灾厄:1}")).toBeCloseTo(1 + Math.min(1, stHi), 5)
     })
 
-    it("求索伤害触发概率 = 武器面板触发 + 技能触发后封顶", () => {
-        const hi = qiusuoBuild([new LeveledMod(41317, 5)])
-        const lo = qiusuoBuild([new LeveledMod(41317, 0)])
-        const stHi = hi.calculateAttributes().技能触发
-        const stLo = lo.calculateAttributes().技能触发
-        const wtHi = hi.calculateWeaponAttributes().weapon!.触发
-        const wtLo = lo.calculateWeaponAttributes().weapon!.触发
-        const cover = (st: number, wt: number) => Math.min(1, Math.max(0, st + wt))
-        // bonus 模型：期望比 = (1 + coverHi) / (1 + coverLo)（bonus = 1）
-        expect(hi.calculateOneTime() / lo.calculateOneTime()).toBeCloseTo((1 + cover(stHi, wtHi)) / (1 + cover(stLo, wtLo)), 5)
-    })
-
-    it("无技能触发来源时按武器面板触发结算（非零）", () => {
-        const build = qiusuoBuild()
-        expect(build.calculateAttributes().技能触发).toBe(0)
+    it("武器面板触发与技能触发均不影响求索伤害", () => {
+        const base = qiusuoBuild().calculateOneTime()
+        // 技能触发（充盈·巧力 0→5 级）无收益：直接灾厄伤害按技能链路没有触发档位
+        expect(qiusuoBuild([new LeveledMod(41317, 5)]).calculateOneTime() / base).toBeCloseTo(1, 10)
+        // 技能触发封顶（浴火E）无收益
         const capped = qiusuoBuild([], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
-        const wt = build.calculateWeaponAttributes().weapon!.触发
-        // bonus 模型：无技能触发时按 (1 + 武器面板触发) 结算，封顶对照为全额 2 倍
-        expect(build.calculateOneTime() / capped.calculateOneTime()).toBeCloseTo((1 + Math.min(1, Math.max(0, wt))) / 2, 5)
-    })
-
-    it("技能触发封顶 100%：浴火E下为全额伤害", () => {
-        const full = qiusuoBuild([], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
-        const hi = qiusuoBuild([new LeveledMod(41317, 5)])
-        const stHi = hi.calculateAttributes().技能触发
-        const wt = hi.calculateWeaponAttributes().weapon!.触发
-        expect(full.calculateOneTime() / hi.calculateOneTime()).toBeCloseTo(2 / (1 + Math.min(1, stHi + wt)), 4)
-    })
-
-    it("浴火E收益有限：移除后回落到武器面板触发", () => {
-        const build = qiusuoBuild([], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
-        const buff = build.buffs.find(b => b.名称 === "黎瑟·浴火E")!
-        const wt = Math.min(1, build.calculateWeaponAttributes().weapon!.触发)
-        // bonus 模型下浴火E收益 = (1 + b) / (1 + b × wt) - 1，b = 1 时恒 ≤ 100%
-        expect(build.calcIncome(buff, true)).toBeCloseTo(2 / (1 + wt) - 1, 4)
+        expect(capped.calculateOneTime() / base).toBeCloseTo(1, 10)
+        // 近战触发（连环·缠缚）无收益
+        const withLianhuan = qiusuoBuild([], [], [new LeveledMod(52203, 10)])
+        expect(withLianhuan.calculateOneTime() / base).toBeCloseTo(1, 10)
     })
 
     it("零基线收益保护：总伤害为 0 时收益为 0 而非 NaN/无限", () => {
@@ -229,8 +202,8 @@ describe("[求索]伤害的技能触发折算", () => {
         expect(build.calcIncome(buff, false)).toBe(0)
     })
 
-    it("封顶后武器触发不再影响求索伤害：连环·缠缚收益为 0", () => {
-        // 浴火E 已把触发概率封顶（1+面板恒为 1），武器触发部分被封顶溢出
+    it("封顶/未封顶武器触发均不影响求索伤害：连环·缠缚收益为 0", () => {
+        // 技能链路无触发档位：无论是否封顶，武器触发部分都不参与结算
         const base = qiusuoBuild([new LeveledMod(41317, 5)], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!], []).calculateOneTime()
         const withLianhuan = qiusuoBuild(
             [new LeveledMod(41317, 5)],
@@ -240,15 +213,34 @@ describe("[求索]伤害的技能触发折算", () => {
         expect(withLianhuan / base - 1).toBeCloseTo(0, 10)
     })
 
-    it("未封顶时武器触发提高求索伤害（加法模型）", () => {
-        const lo = qiusuoBuild()
-        const hi = qiusuoBuild([], [], [new LeveledMod(52203, 10)])
-        const wtLo = lo.calculateWeaponAttributes().weapon!.触发
-        const wtHi = hi.calculateWeaponAttributes().weapon!.触发
-        expect(hi.calculateOneTime() / lo.calculateOneTime()).toBeCloseTo((1 + Math.min(1, wtHi)) / (1 + Math.min(1, wtLo)), 4)
+    it("求索基数只吃角色攻击：近战面板攻击/双爆加成均无收益", () => {
+        const mk = (加成: Record<string, number>, 类型 = "角色") =>
+            new LeveledMod({ id: 999002, 名称: "测", 系列: "测试", 品质: "金", 耐受: 0, 类型, 加成 } as unknown as Mod, 10)
+        const base = qiusuoBuild().calculateOneTime()
+        const ratio = (mod: LeveledMod, slot: "char" | "melee" = "char") => {
+            const charMods = slot === "char" ? [mod] : []
+            const meleeMods = slot === "melee" ? [mod] : []
+            return qiusuoBuild(charMods, [], meleeMods).calculateOneTime() / base
+        }
+        // 角色攻击变化 → 求索伤害严格同比例变化（基数 = 35 × 角色攻击）
+        const b0 = qiusuoBuild()
+        const b1 = qiusuoBuild([mk({ 攻击: 1 })])
+        expect(b1.calculateOneTime() / b0.calculateOneTime()).toBeCloseTo(b1.calculateAttributes().攻击 / b0.calculateAttributes().攻击, 4)
+        // 近战武器面板整体不参与结算
+        expect(ratio(mk({ 攻击: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 暴击: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 暴伤: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 触发: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
     })
 
-    it("求索伤害吃技能伤害/技能无视防御/双爆，不吃武器伤害/武器追伤", () => {
+    it("角色没有暴击属性：求索伤害取暴击档位等于期望伤害", () => {
+        const build = qiusuoBuild()
+        // 无武器归属时暴击倍率为 1，.暴击 成员与裸伤害完全一致
+        expect(build.evaluateAST("求索::[求索]伤害.暴击")).toBeCloseTo(build.calculateOneTime(), 10)
+        expect(build.evaluateAST("求索::[求索]伤害.未暴击")).toBeCloseTo(build.calculateOneTime(), 10)
+    })
+
+    it("求索伤害吃技能伤害/技能追伤/技能独立增伤/技能无视防御，不吃武器伤害/武器追伤/双爆", () => {
         const mk = (加成: Record<string, number>, 类型 = "角色") =>
             new LeveledMod({ id: 999002, 名称: "测", 系列: "测试", 品质: "金", 耐受: 0, 类型, 加成 } as unknown as Mod, 10)
         // 浴火E 把技能触发封顶，隔离覆盖因子，只看乘区归属
@@ -259,8 +251,27 @@ describe("[求索]伤害的技能触发折算", () => {
             return qiusuoBuild(charMods, [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!], meleeMods).calculateOneTime() / base
         }
         expect(ratio(mk({ 技能伤害: 1 }))).toBeCloseTo(2, 5)
+        // 追伤/独立增伤按各自乘区成正比（基线自带武器 10199 的 0.5 技能追伤，不假设翻倍）
+        const chaseBase = qiusuoBuild([new LeveledMod(41317, 5)], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
+        const chaseAttrs = chaseBase.calculateAttributes()
+        const chaseHi = qiusuoBuild([new LeveledMod(41317, 5), mk({ 技能追伤: 1 })], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
+        expect(chaseHi.calculateOneTime() / chaseBase.calculateOneTime()).toBeCloseTo(
+            (1 + chaseHi.calculateAttributes().技能追伤) / (1 + chaseAttrs.技能追伤),
+            8
+        )
+        const indepBase = chaseBase
+        const indepAttrs = chaseAttrs
+        const indepHi = qiusuoBuild([new LeveledMod(41317, 5), mk({ 技能独立增伤: 1 })], [LeveledBuffHelper.fromName("黎瑟·浴火E", 1)!])
+        const indepHiAttrs = indepHi.calculateAttributes()
+        expect(indepHi.calculateOneTime() / indepBase.calculateOneTime()).toBeCloseTo(
+            ((1 + indepHiAttrs.独立增伤) * (1 + indepHiAttrs.技能独立增伤)) / ((1 + indepAttrs.独立增伤) * (1 + indepAttrs.技能独立增伤)),
+            8
+        )
         expect(ratio(mk({ 技能无视防御: 0.3 }))).toBeGreaterThan(1)
-        expect(ratio(mk({ 暴伤: 1 }))).toBeGreaterThan(1)
+        // 技能链路没有暴击档位：角色/近战双爆加成均无收益
+        expect(ratio(mk({ 暴击: 1 }))).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 暴伤: 1 }))).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 暴伤: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
         expect(ratio(mk({ 武器伤害: 1 }))).toBeCloseTo(1, 10)
         expect(ratio(mk({ 追加伤害: 1 }, "melee"))).toBeCloseTo(1, 10)
     })

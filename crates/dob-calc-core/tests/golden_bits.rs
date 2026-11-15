@@ -48,7 +48,7 @@ const CASES: &[(&str, u64, u64, u64)] = &[
     ),
     (
         "lise_fire",
-        0x42150de9714a7419,
+        0x41f8dd2e555bf74c,
         0x2f14232ad92742cb,
         0x572484f0347beb10,
     ),
@@ -60,7 +60,7 @@ const CASES: &[(&str, u64, u64, u64)] = &[
     ),
     (
         "dobapp_lieseBathfire1",
-        0x4214780673f13b5f,
+        0x41f7824ad8313977,
         0x98d0ad44c26b1ecb,
         0x48d64b2f9da879fa,
     ),

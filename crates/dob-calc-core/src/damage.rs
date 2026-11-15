@@ -416,17 +416,16 @@ impl<'a> BuildContext<'a> {
 
         // 分量（tag）：武器池 + 有面板走武器攻分量（角色攻击/武器攻击占比）；
         // 其余（技能池、无面板回退）走纯元素基座；
-        // 灾厄转化（原武器路径口径，武器归属时生效）：转为纯物理分量，不吃抗性，
+        // 灾厄转化：直接灾厄伤害一律转为纯物理分量，不吃抗性（不吃属性克制），
         // 按物理类型触发规则结算；
-        // inherit + atk=all 的同律武器保持纯元素结算；无武器归属（角色技能）
-        // 沿用原技能路径的纯元素结算。
+        // inherit + atk=all 的同律武器保持纯元素结算。
         let inherit_all_skill_weapon = weapon == Some(WeaponRef::Skill)
             && self
                 .skill_weapon
                 .as_ref()
                 .map(|item| item.inherit.is_some() && item.atk.as_deref() == Some("all"))
                 .unwrap_or(false);
-        let calamity_physical = has_weapon && damage_type == "灾厄" && !inherit_all_skill_weapon;
+        let calamity_physical = damage_type == "灾厄" && !inherit_all_skill_weapon;
         // 分量：(结算前系数, 抗性因子, 触发加成, 是否元素结算)。
         // 上限 = 武器分流 2 + 属克属逆 2 + 转物理 4×2 = 12，栈数组零分配。
         let mut parts: [(f64, f64, f64, bool); 12] = [(0.0, 0.0, 0.0, false); 12];

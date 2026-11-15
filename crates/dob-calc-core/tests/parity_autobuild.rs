@@ -1,7 +1,8 @@
 //! 自动配装对齐回归：与 TS `benchmark-autobuild.ts` 同输入同结果。
 //!
 //! 起始 lise_fire 推荐构筑 + 全量 510 候选 + 三槽全搜 + 武器固定。
-//! TS 基线（`bun tools/benchmark-autobuild.ts`）：`target=27230213718.39851 slots=8/8/8`（技速 280% 上限后）。
+//! TS 基线（同输入复刻 TS autoBuild）：`target=7889096288.612461 slots=8/0/8`。
+//! 求索改按角色面板结算后，旧 8 件近战楔（经武器面板喂求索的收益）全部归零，近战槽置空。
 //! Rust 曾因条件预热/排序逻辑与上游失配给出 8556M（错误结果），此处锁定：
 //! 1. 目标值逐位一致；2. 三槽 id 集合一致（顺序是收益序，允许不同）。
 
@@ -71,7 +72,7 @@ fn autobuild_matches_ts_baseline() {
     .target_value;
     assert_eq!(
         target.to_bits(),
-        27230213718.39851f64.to_bits(),
+        7889096288.612461f64.to_bits(),
         "autobuild 目标值与 TS 基线逐位一致"
     );
     assert_eq!(
@@ -81,8 +82,8 @@ fn autobuild_matches_ts_baseline() {
     );
     assert_eq!(
         sorted_ids(&result.settings.melee_mods),
-        vec![42002, 42003, 42321, 52007, 52008, 52010, 52011, 52013],
-        "近战槽集合"
+        Vec::<i64>::new(),
+        "近战槽集合（求索改角色链路后近战楔无收益，置空）"
     );
     assert_eq!(
         sorted_ids(&result.settings.ranged_mods),
