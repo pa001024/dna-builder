@@ -14,7 +14,13 @@ import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
 import { useLanSyncStore } from "@/store/lanSync"
-import { useSettingStore } from "@/store/setting"
+import {
+    isMemCleanSupported,
+    MEM_CLEAN_MAX_INTERVAL_MIN,
+    MEM_CLEAN_MAX_THRESHOLD_MB,
+    MEM_CLEAN_MIN_INTERVAL_MIN,
+    useSettingStore,
+} from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import {
@@ -136,12 +142,16 @@ async function focusDeepLinkTarget() {
 
 /** 滚动布局引用：目录高亮与点击跳转由 ScrollSpyLayout 内部接管 */
 const scrollLayoutRef = ref<{ contentEl: HTMLElement | null; scrollToKey: (key: string) => void } | null>(null)
+/** 内存清理依赖 Windows 进程 API：Web 端与非 Windows 桌面端都不展示入口 */
+const supportsMemClean = computed(() => isMemCleanSupported())
+/** 桌面端专属区块（Web 端目录需一并隐藏） */
+const APP_ONLY_SECTION_KEYS = new Set(["skill-cd", "screen-bar", "desktop-clone", "afk-support", "mem-clean"])
 /**
  * 设置页目录。
  *
  * key 必须与内容区各区块的 data-scroll-section 一一对应，顺序也要一致 ——
  * 滚动高亮按 DOM 顺序判定，目录顺序错位会让高亮指到隔壁区块。
- * 技能 CD 指示器是桌面端专属区块，Web 端不渲染，目录里也要一并去掉。
+ * 技能 CD 指示器、内存清理是桌面端专属区块，Web 端不渲染，目录里也要一并去掉。
  */
 const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }[]>(() => {
     const items: { key: string; title: string; icon: IconTypes }[] = [
@@ -151,17 +161,16 @@ const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }
         { key: "screen-bar", title: t("screenBar.sectionTitle"), icon: "ri:broadcast-line" },
         { key: "desktop-clone", title: t("desktop_clone.section_title"), icon: "ri:windows-fill" },
         { key: "afk-support", title: t("afk-support.title"), icon: "ri:gamepad-line" },
+        { key: "mem-clean", title: t("setting.memCleanTitle"), icon: "ri:delete-bin-line" },
         { key: "data-pack", title: t("setting.dataPackManagement"), icon: "ri:database-2-line" },
         { key: "account", title: t("setting.account"), icon: "ri:user-line" },
         { key: "story", title: t("setting.storyText"), icon: "ri:book-open-line" },
         { key: "ai", title: t("setting.ai"), icon: "ri:robot-2-line" },
         { key: "other", title: t("setting.other"), icon: "ri:settings-4-line" },
     ]
-    return env.isApp
-        ? items
-        : items.filter(
-              item => item.key !== "skill-cd" && item.key !== "screen-bar" && item.key !== "afk-support" && item.key !== "desktop-clone"
-          )
+    if (!env.isApp) return items.filter(item => !APP_ONLY_SECTION_KEYS.has(item.key))
+    if (!supportsMemClean.value) return items.filter(item => item.key !== "mem-clean")
+    return items
 })
 
 /** 当前环境的 More 入口（含 show 标记，解析时过滤） */
@@ -229,6 +238,85 @@ const imgsDownloadProgressValue = computed(() => {
 
     return Math.round((state.completed / state.total) * 100)
 })
+
+/** 上次内存清理结果的可读摘要（失败时逐进程列出原因）。 */
+const memCleanSummary = computed(() => {
+    if (setting.memCleanLastError) {
+        return `${t("setting.memCleanError")}: ${setting.memCleanLastError}`
+    }
+    const report = setting.memCleanLastReport
+    if (!report) return t("setting.memCleanLastNever")
+    if (report.status === "unsupported") return t("setting.memCleanUnsupported")
+    const time = setting.memCleanLastRunAt ? new Date(setting.memCleanLastRunAt).toLocaleTimeString() : ""
+    if (report.status === "not_running") return `${time} · ${t("setting.memCleanNotRunning")}`
+    const total = report.targets.length
+    const ok = report.targets.filter(item => item.ok).length
+    const head = t("setting.memCleanResult", { ok, total })
+    const failed = report.targets.filter(item => !item.ok)
+    if (failed.length === 0) return `${time} · ${head}`
+    const detail = failed.map(item => `${item.name} (${item.pid}) ${item.error ?? ""}`.trim()).join("; ")
+    return `${time} · ${head} · ${detail}`
+})
+
+/**
+ * 自动清理开关：交由 store 同步启停轮询。
+ * @param event checkbox change 事件
+ */
+function onMemCleanToggle(event: Event) {
+    setting.setMemCleanEnabled((event.target as HTMLInputElement).checked)
+}
+
+/** 把字节数格式化为易读的内存占用文本（自动选 MB/GB）。 */
+function formatMemUsage(bytes: number): string {
+    if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+    return `${Math.round(bytes / 1024 / 1024)} MB`
+}
+
+/** 当前游戏内存占用的展示文本；进程未运行时给出占位说明。 */
+const memCleanUsageText = computed(() => {
+    if (!setting.memCleanUsageRunning) return t("setting.memCleanNotRunning")
+    return formatMemUsage(setting.memCleanUsageBytes)
+})
+
+/** 折线图坐标点：历史采样映射到 96×28 视口，x 均布、y 按最大值归一（顶部留 1px 呼吸位）。 */
+const memCleanUsagePoints = computed(() => {
+    const history = setting.memCleanUsageHistory
+    if (history.length < 2) return ""
+    const max = Math.max(...history, 1)
+    const stepX = 96 / (history.length - 1)
+    return history
+        .map((bytes, i) => `${(i * stepX).toFixed(1)},${(27 - (bytes / max) * 26).toFixed(1)}`)
+        .join(" ")
+})
+
+/** 折线末端高亮点坐标（与 memCleanUsagePoints 同一换算）。 */
+const memCleanUsageLastPoint = computed<[number, number] | null>(() => {
+    const history = setting.memCleanUsageHistory
+    if (history.length < 2) return null
+    const max = Math.max(...history, 1)
+    const last = history[history.length - 1]
+    return [96, 27 - (last / max) * 26]
+})
+
+/** 内存占用轮询句柄：仅设置页可见时刷新，避免后台空转。 */
+let memCleanUsageTimer: number | null = null
+
+/** 启动占用轮询并立刻刷一次（进入设置页时调用）。 */
+function startMemCleanUsagePolling() {
+    if (memCleanUsageTimer !== null) return
+    void setting.refreshMemCleanUsage()
+    memCleanUsageTimer = window.setInterval(() => {
+        void setting.refreshMemCleanUsage()
+    }, 3000)
+}
+
+/** 停止占用轮询（离开设置页时调用）。 */
+function stopMemCleanUsagePolling() {
+    if (memCleanUsageTimer !== null) {
+        window.clearInterval(memCleanUsageTimer)
+        memCleanUsageTimer = null
+    }
+}
 
 const dataPackVersions = computed(() => {
     const versions = dataPack.status?.versions || []
@@ -859,6 +947,8 @@ onMounted(() => {
     // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
     void setting.loadSystemFonts()
     void syncSkillCdOverlayOnMount()
+    // 设置页可见期间轮询游戏内存占用（桌面端才发 IPC；Web 端 supportsMemClean 为 false）
+    startMemCleanUsagePolling()
     // 用户自行滚动时停止深链补滚，别跟用户抢滚动条
     for (const eventName of DEEP_LINK_ABORT_EVENTS) {
         window.addEventListener(eventName, abortDeepLinkFocus, { passive: true, capture: true })
@@ -868,6 +958,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+    stopMemCleanUsagePolling()
     // 清理补滚定时器，避免组件销毁后回调仍触发
     abortDeepLinkFocus()
     for (const eventName of DEEP_LINK_ABORT_EVENTS) {
@@ -1429,6 +1520,145 @@ onUnmounted(() => {
                                 </p>
                             </div>
                         </template>
+                    </div>
+                </div>
+            </section>
+
+            <section v-if="supportsMemClean" data-scroll-section="mem-clean" class="flex flex-col">
+                <SectionHeader no-animate compact :title="$t('setting.memCleanTitle')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.03s' }"
+                >
+                    <div class="flex flex-col gap-2">
+                        <!-- 自动清理总开关 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanAuto") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanDesc") }}</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
+                                <!-- 保持常挂载：定时清理在开关获焦时启动也不会卸载控件，避免键盘焦点丢失 -->
+                                <input
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
+                                    :checked="setting.memCleanEnabled"
+                                    :disabled="setting.memCleanBusy"
+                                    :aria-label="$t('setting.memCleanAuto')"
+                                    @change="onMemCleanToggle"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- 清理间隔 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanInterval") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanIntervalDesc") }}</div>
+                            </span>
+                            <DragNumberInput
+                                v-model="setting.memCleanIntervalMin"
+                                :min="MEM_CLEAN_MIN_INTERVAL_MIN"
+                                :max="MEM_CLEAN_MAX_INTERVAL_MIN"
+                                :step="1"
+                                :precision="0"
+                                suffix="min"
+                                :aria-label="$t('setting.memCleanInterval')"
+                                @change="setting.setMemCleanInterval"
+                            />
+                        </div>
+
+                        <!-- 当前游戏内存占用：折线图 + 实时值 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text min-w-0">
+                                {{ $t("setting.memCleanUsage") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanUsageDesc") }}</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2.5">
+                                <svg
+                                    v-if="setting.memCleanUsageRunning && memCleanUsagePoints"
+                                    viewBox="0 0 96 28"
+                                    class="h-7 w-24 overflow-visible"
+                                    aria-hidden="true"
+                                >
+                                    <polyline
+                                        :points="memCleanUsagePoints"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                        stroke-linejoin="round"
+                                        stroke-linecap="round"
+                                        class="text-primary"
+                                    />
+                                    <circle
+                                        v-if="memCleanUsageLastPoint"
+                                        :cx="memCleanUsageLastPoint[0]"
+                                        :cy="memCleanUsageLastPoint[1]"
+                                        r="1.8"
+                                        class="fill-primary"
+                                    />
+                                </svg>
+                                <span class="text-sm" :class="setting.memCleanUsageRunning ? 'text-base-content' : 'text-base-content/40'">
+                                    {{ memCleanUsageText }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 触发阈值 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.memCleanThreshold") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.memCleanThresholdDesc") }}</div>
+                            </span>
+                            <DragNumberInput
+                                v-model="setting.memCleanThresholdMb"
+                                :min="0"
+                                :max="MEM_CLEAN_MAX_THRESHOLD_MB"
+                                :step="256"
+                                :precision="0"
+                                suffix="MB"
+                                :aria-label="$t('setting.memCleanThreshold')"
+                                @change="setting.setMemCleanThreshold"
+                            />
+                        </div>
+
+                        <!-- 立即清理与上次结果 -->
+                        <div
+                            class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text min-w-0">
+                                {{ $t("setting.memCleanLastResult") }}
+                                <div class="break-words text-xs text-base-content/50">{{ memCleanSummary }}</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <button
+                                    v-if="setting.memCleanNeedsElevation"
+                                    type="button"
+                                    class="btn btn-sm btn-warning"
+                                    @click="setting.runMemCleanAsAdmin()"
+                                >
+                                    {{ $t("setting.memCleanRunAsAdmin") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline"
+                                    :disabled="setting.memCleanBusy"
+                                    @click="setting.trimMemoryNow()"
+                                >
+                                    <span v-if="setting.memCleanBusy" class="loading loading-spinner loading-xs" />
+                                    {{ $t("setting.memCleanRunNow") }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
