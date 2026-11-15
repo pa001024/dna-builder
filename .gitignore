@@ -57,6 +57,9 @@ INTRO.md
 packages/dna-api/java/
 packages/dna-api/js/
 mock/
+# 3D 模型源文件（14MB+ 的原始 GLB）：由 tools/models-pack.ts 压缩后发布到对象存储，
+# 不进 public/ 也不入库，避免安装包与仓库被撑大。
+models-src/
 output/playwright/
 public/imgs/map
 apps/server/.env
