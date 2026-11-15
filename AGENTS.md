@@ -22,6 +22,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 |桌面端自动更新（exe 差量包、feed 格式、本地测试、发布流程）|[updater.md](.agents/docs/updater.md)|
 |桌面分身（Windows child session、ActiveX 嵌入、投送/输入、排障与限制）|[desktop-clone.md](.agents/docs/desktop-clone.md)|
 |B 站动态自动发布（DeepSeek 富文本、卡片渲染、Secrets 配置）|[bili-dynamic.md](.agents/docs/bili-dynamic.md)|
+|皮肤模型二次元渲染（卡通光照 / ramp LUT / 描边，对标游戏截图）|`specs/skin-toon-render.md`|
 
 其他冷路径不列出 `.agents/docs/*.md`
 
@@ -120,5 +121,7 @@ crates/               # Rust crates（buildhub-core 解释器+wasm ABI、buildhu
 9. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.
 10. put all temporary files in `.tmp` directory
 11. **Don't touch git**: Never use git for test, like add, stash, commit, push, pull, merge, rebase, cherry-pick, etc.
+12. 工作文档（任务书、调研报告、基准图等过程产物）放 `.docs/`（已被 gitignore，不入库）；`.agents/docs/` 只放稳定的项目文档
+13. JavaScript expression in vue template must be single line
 
 </system_rules>
