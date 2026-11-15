@@ -33,6 +33,7 @@
         "core:window:allow-primary-monitor",
         "core:window:allow-current-monitor",
         "clipboard-manager:allow-read-text",
+        "clipboard-manager:allow-read-image",
         "clipboard-manager:allow-write-text",
         "deep-link:default",
         "dialog:default",

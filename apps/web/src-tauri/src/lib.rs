@@ -217,6 +217,7 @@ pub fn run() {
         commands::system::get_os_version,
         commands::system::get_documents_dir,
         commands::system::list_system_fonts,
+        commands::system::read_clipboard_html,
         commands::system::is_launch_at_startup_enabled,
         commands::system::set_launch_at_startup_enabled,
         // 运行环境诊断

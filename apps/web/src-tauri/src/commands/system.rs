@@ -212,3 +212,10 @@ pub fn set_launch_at_startup_enabled(
         Err("当前平台暂不支持开机启动设置".to_string())
     }
 }
+
+/// 读取剪贴板 HTML 片段：富文本复制时图片可能只存在于 HTML 中，剪贴板插件不提供该格式。
+#[tauri::command]
+pub fn read_clipboard_html() -> Option<String> {
+    let mut clipboard = arboard::Clipboard::new().ok()?;
+    clipboard.get().html().ok()
+}
