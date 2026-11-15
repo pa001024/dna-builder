@@ -766,12 +766,47 @@ pub async fn run_script_with_stdio_console(
     .map_err(|e| format!("任务执行失败: {}", e))?
 }
 
+/// 尝试为脚本路径原子占住一个运行槽位；占用成功返回占位守卫（丢弃即释放）。
+/// 与 `ScriptRunningGuard::enter` 的计数写入共用同一把锁，避免 check-then-enter 竞态
+/// 让同一路径并行堆叠出 count=2。
+fn try_reserve_script_path_slot(script_path: &str) -> Option<ScriptPathSlotReservation> {
+    let mut guard = SCRIPT_RUNNING_PATH_COUNTS.lock().ok()?;
+    // 键存在即视为已占用：count>0 是运行中，count=0 是另一个并发占位（尚未 enter）。
+    if guard.contains_key(script_path) {
+        return None;
+    }
+    guard.insert(script_path.to_string(), 0);
+    Some(ScriptPathSlotReservation {
+        script_path: script_path.to_string(),
+    })
+}
+
+/// `try_reserve_script_path_slot` 的占位守卫：存活期间占住路径键（计数保持 0），
+/// 释放时若计数仍为 0（说明正式守卫从未 enter）则移除键；已由正式守卫接管计数时不干预。
+struct ScriptPathSlotReservation {
+    script_path: String,
+}
+
+impl Drop for ScriptPathSlotReservation {
+    fn drop(&mut self) {
+        if let Ok(mut guard) = SCRIPT_RUNNING_PATH_COUNTS.lock() {
+            if guard.get(&self.script_path).copied().unwrap_or(0) == 0 {
+                guard.remove(&self.script_path);
+            }
+        }
+    }
+}
+
 /// 运行脚本（对外入口）：先做路径规范化，再执行脚本。
+/// 同一路径已在运行（含停止信号尚未收尾的实例）时直接拒绝，避免同一脚本并行堆叠出 count=2。
 pub async fn run_script_file(
     script_path: String,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     let normalized_path = normalize_script_path(script_path)?;
+    // 占位守卫须活到 run 结束：正式守卫 enter/drop 会自行增减计数，占位键只兜“从未 enter”的早退路径。
+    let _slot = try_reserve_script_path_slot(&normalized_path)
+        .ok_or_else(|| format!("脚本已在运行中: {normalized_path}"))?;
     clear_last_background_activated_hwnd();
     run_script_with_tauri_console(normalized_path, app_handle).await
 }
