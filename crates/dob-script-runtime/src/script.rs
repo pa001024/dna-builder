@@ -14,6 +14,8 @@ use crate::script_builtin::{
 };
 use crate::script_console::{Console, ConsoleState, Logger};
 use crate::script_module::ScriptModuleLoader;
+#[cfg(feature = "dob-script-cli")]
+use crate::script_module::{fetch_remote_script_source, is_http_url};
 use boa_engine::builtins::error::Error as BoaErrorObject;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::context::ContextBuilder;
@@ -364,6 +366,51 @@ mod program_tests {
     }
 }
 
+/// 读取指定脚本路径当前的停止代际。
+fn current_script_path_stop_generation(script_path: &str) -> u64 {
+    SCRIPT_STOP_PATH_GENERATIONS
+        .lock()
+        .ok()
+        .and_then(|guard| guard.get(script_path).copied())
+        .unwrap_or(0)
+}
+
+/// 将当前线程标记为“正在运行指定脚本”，供停止信号比对。
+fn set_current_script_stop_snapshot(script_path: &str) {
+    let stop_generation = SCRIPT_STOP_GENERATION.load(Ordering::Acquire);
+    let path_generation = current_script_path_stop_generation(script_path);
+    CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
+        *storage.borrow_mut() = Some(ScriptStopSnapshot {
+            global_generation: stop_generation,
+            path_generation,
+            script_path: script_path.to_string(),
+        });
+    });
+}
+
+/// 清除当前线程的停止快照。
+fn clear_current_script_stop_snapshot() {
+    CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
+        *storage.borrow_mut() = None;
+    });
+}
+
+/// 仅维护停止快照的守卫：运行态由外层连续运行会话持有，不参与计数与广播。
+struct ScriptStopSnapshotGuard;
+
+impl ScriptStopSnapshotGuard {
+    fn enter(script_path: &str) -> Self {
+        set_current_script_stop_snapshot(script_path);
+        Self
+    }
+}
+
+impl Drop for ScriptStopSnapshotGuard {
+    fn drop(&mut self) {
+        clear_current_script_stop_snapshot();
+    }
+}
+
 /// 脚本运行状态守卫，确保运行状态在任意退出路径都能复位。
 struct ScriptRunningGuard {
     script_path: String,
@@ -373,19 +420,7 @@ struct ScriptRunningGuard {
 impl ScriptRunningGuard {
     /// 进入运行态并返回守卫实例。
     fn enter(script_path: String, app_handle: tauri::AppHandle) -> Self {
-        let stop_generation = SCRIPT_STOP_GENERATION.load(Ordering::Acquire);
-        let path_generation = SCRIPT_STOP_PATH_GENERATIONS
-            .lock()
-            .ok()
-            .and_then(|guard| guard.get(&script_path).copied())
-            .unwrap_or(0);
-        CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
-            *storage.borrow_mut() = Some(ScriptStopSnapshot {
-                global_generation: stop_generation,
-                path_generation,
-                script_path: script_path.clone(),
-            });
-        });
+        set_current_script_stop_snapshot(&script_path);
 
         if let Ok(mut guard) = SCRIPT_RUNNING_PATH_COUNTS.lock() {
             let counter = guard.entry(script_path.clone()).or_insert(0);
@@ -415,9 +450,7 @@ impl Drop for ScriptRunningGuard {
             SCRIPT_RUNNING.store(has_running, Ordering::Release);
             should_hide_border = !has_running;
         }
-        CURRENT_SCRIPT_STOP_SNAPSHOT.with(|storage| {
-            *storage.borrow_mut() = None;
-        });
+        clear_current_script_stop_snapshot();
         if should_hide_border {
             // 最后一个脚本退出时立即清除边框，避免残留到延时隐藏线程触发。
             hide_border_immediately();
@@ -470,6 +503,16 @@ pub async fn run_script_with_tauri_console(
     script_path: String,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
+    run_script_with_tauri_console_inner(script_path, app_handle, true).await
+}
+
+/// 执行脚本；`manage_running_state` 为 false 表示运行态由外层连续运行会话持有，
+/// 本轮只维护停止快照，避免重复向前端广播启停事件。
+async fn run_script_with_tauri_console_inner(
+    script_path: String,
+    app_handle: tauri::AppHandle,
+    manage_running_state: bool,
+) -> Result<String, String> {
     // 使用 spawn_blocking 在阻塞线程中执行脚本，避免 Context 的 Send 约束问题
     tokio::task::spawn_blocking(move || {
         let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
@@ -505,7 +548,10 @@ pub async fn run_script_with_tauri_console(
         set_script_event_app_handle(app_handle.clone());
         set_current_script_path(script_path.clone());
         register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
-        let _running_guard = ScriptRunningGuard::enter(script_path.clone(), app_handle.clone());
+        let _running_guard = manage_running_state
+            .then(|| ScriptRunningGuard::enter(script_path.clone(), app_handle.clone()));
+        let _stop_snapshot_guard =
+            (!manage_running_state).then(|| ScriptStopSnapshotGuard::enter(script_path.as_str()));
         let source_bytes = std::fs::read(Path::new(&script_path))
             .map_err(|e| format!("无法读取文件 {:?}: {}", script_path, e))?;
         let program = parse_script_program(&source_bytes, Some(Path::new(&script_path)), context)
@@ -669,7 +715,99 @@ pub async fn exec_script_with_tauri_console(
     .map_err(|e| format!("任务执行失败: {}", e))?
 }
 
-/// 运行脚本并将控制台输出写入当前进程标准输出/标准错误（CLI 模式）。
+/// 在阻塞线程中执行脚本源码，并将控制台输出写入当前进程标准输出/标准错误（CLI 模式）。
+///
+/// # 参数
+/// - `source_bytes`: 脚本源码
+/// - `script_path`: 脚本文件路径或远程地址（用于作用域与相对路径解析）
+/// - `script_config`: 可选脚本配置（用于 readConfig）
+/// - `script_config_file_path`: 可选配置文件路径（用于 setConfig 回写文件）
+///
+/// # 返回
+/// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
+#[cfg(feature = "dob-script-cli")]
+fn run_script_source_with_stdio_console_blocking(
+    source_bytes: Vec<u8>,
+    script_path: String,
+    script_config: Option<serde_json::Value>,
+    script_config_file_path: Option<String>,
+) -> Result<String, String> {
+    let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
+    let context = &mut ContextBuilder::new()
+        .job_executor(job_executor.clone())
+        .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
+        .build()
+        .unwrap();
+
+    context
+        .register_global_class::<JsMat>()
+        .map_err(|e| format!("注册 JsMat 失败: {:?}", e))?;
+    context
+        .register_global_class::<JsDnnNet>()
+        .map_err(|e| format!("注册 JsDnnNet 失败: {:?}", e))?;
+    context
+        .register_global_class::<JsTimer>()
+        .map_err(|e| format!("注册 JsTimer 失败: {:?}", e))?;
+
+    // 注册 timeout 扩展，并挂载终端 console 实现。
+    boa_runtime::register((boa_runtime::extensions::TimeoutExtension,), None, context)
+        .map_err(|e| format!("注册 Timeout Extension 失败: {:?}", e))?;
+    Console::register_with_logger(StdioLogger, context)
+        .map_err(|e| format!("注册终端 Console 失败: {:?}", e))?;
+
+    // CLI 模式下不绑定 Tauri 事件发送器，但保持脚本路径上下文可用。
+    set_script_cli_config(script_config, script_config_file_path)
+        .map_err(|e| format!("设置 CLI 脚本配置失败: {e}"))?;
+    set_current_script_path(script_path.clone());
+    register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
+    let program = parse_script_program(&source_bytes, Some(Path::new(&script_path)), context)
+        .map_err(|e| format!("解析脚本失败: {:?}", e))?;
+    match evaluate_script_program(program, &job_executor, context) {
+        Ok(result) => {
+            // 某些脚本会“返回 Error 对象”而不是直接 throw，
+            // 这类场景也视为异常退出，避免 CLI 误判为执行成功。
+            if result
+                .as_object()
+                .is_some_and(|obj| obj.downcast_ref::<BoaErrorObject>().is_some())
+            {
+                let error_detail = result
+                    .to_string(context)
+                    .map(|s| s.to_std_string_escaped())
+                    .unwrap_or_else(|_| format!("{:?}", result));
+                let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
+                return Err(emit_script_error_cli(script_path.as_str(), error_message));
+            }
+
+            // 将脚本返回值转成字符串供 CLI 主程序按需输出。
+            let result_text = if result.is_undefined() || result.is_null() {
+                String::new()
+            } else {
+                result
+                    .to_string(context)
+                    .map(|s| s.to_std_string_escaped())
+                    .unwrap_or_else(|_| format!("{:?}", result))
+            };
+            Ok::<String, String>(result_text)
+        }
+        Err(e) => {
+            // 识别“主动停止”中断并按正常停止返回。
+            let opaque = e.to_opaque(context);
+            let detail = opaque
+                .to_string(context)
+                .map(|s| s.to_std_string_escaped())
+                .unwrap_or_else(|_| format!("{:?}", opaque));
+            if detail.contains(SCRIPT_STOP_INTERRUPT_MESSAGE) {
+                return Ok(String::new());
+            }
+
+            // 解析或运行时异常时，输出到标准错误。
+            let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
+            Err(emit_script_error_cli(script_path.as_str(), error_message))
+        }
+    }
+}
+
+/// 运行本地脚本文件并将控制台输出写入当前进程标准输出/标准错误（CLI 模式）。
 ///
 /// # 参数
 /// - `script_path`: 脚本文件路径（建议为规范化绝对路径）
@@ -686,81 +824,43 @@ pub async fn run_script_with_stdio_console(
 ) -> Result<String, String> {
     // 使用 spawn_blocking 在阻塞线程中执行脚本，避免 Context 的 Send 约束问题
     tokio::task::spawn_blocking(move || {
-        let job_executor = std::rc::Rc::new(TokioJobExecutor::new());
-        let context = &mut ContextBuilder::new()
-            .job_executor(job_executor.clone())
-            .module_loader(std::rc::Rc::new(ScriptModuleLoader::default()))
-            .build()
-            .unwrap();
-
-        context
-            .register_global_class::<JsMat>()
-            .map_err(|e| format!("注册 JsMat 失败: {:?}", e))?;
-        context
-            .register_global_class::<JsDnnNet>()
-            .map_err(|e| format!("注册 JsDnnNet 失败: {:?}", e))?;
-        context
-            .register_global_class::<JsTimer>()
-            .map_err(|e| format!("注册 JsTimer 失败: {:?}", e))?;
-
-        // 注册 timeout 扩展，并挂载终端 console 实现。
-        boa_runtime::register((boa_runtime::extensions::TimeoutExtension,), None, context)
-            .map_err(|e| format!("注册 Timeout Extension 失败: {:?}", e))?;
-        Console::register_with_logger(StdioLogger, context)
-            .map_err(|e| format!("注册终端 Console 失败: {:?}", e))?;
-
-        // CLI 模式下不绑定 Tauri 事件发送器，但保持脚本路径上下文可用。
-        set_script_cli_config(script_config, script_config_file_path)
-            .map_err(|e| format!("设置 CLI 脚本配置失败: {e}"))?;
-        set_current_script_path(script_path.clone());
-        register_builtin_functions(context).map_err(|e| format!("注册内置函数失败: {:?}", e))?;
         let source_bytes = std::fs::read(Path::new(&script_path))
             .map_err(|e| format!("无法读取文件 {:?}: {}", script_path, e))?;
-        let program = parse_script_program(&source_bytes, Some(Path::new(&script_path)), context)
-            .map_err(|e| format!("解析脚本失败: {:?}", e))?;
-        match evaluate_script_program(program, &job_executor, context) {
-            Ok(result) => {
-                // 某些脚本会“返回 Error 对象”而不是直接 throw，
-                // 这类场景也视为异常退出，避免 CLI 误判为执行成功。
-                if result
-                    .as_object()
-                    .is_some_and(|obj| obj.downcast_ref::<BoaErrorObject>().is_some())
-                {
-                    let error_detail = result
-                        .to_string(context)
-                        .map(|s| s.to_std_string_escaped())
-                        .unwrap_or_else(|_| format!("{:?}", result));
-                    let error_message = format!("JavaScript 返回 Error 对象: {}", error_detail);
-                    return Err(emit_script_error_cli(script_path.as_str(), error_message));
-                }
+        run_script_source_with_stdio_console_blocking(
+            source_bytes,
+            script_path,
+            script_config,
+            script_config_file_path,
+        )
+    })
+    .await
+    .map_err(|e| format!("任务执行失败: {}", e))?
+}
 
-                // 将脚本返回值转成字符串供 CLI 主程序按需输出。
-                let result_text = if result.is_undefined() || result.is_null() {
-                    String::new()
-                } else {
-                    result
-                        .to_string(context)
-                        .map(|s| s.to_std_string_escaped())
-                        .unwrap_or_else(|_| format!("{:?}", result))
-                };
-                Ok::<String, String>(result_text)
-            }
-            Err(e) => {
-                // 识别“主动停止”中断并按正常停止返回。
-                let opaque = e.to_opaque(context);
-                let detail = opaque
-                    .to_string(context)
-                    .map(|s| s.to_std_string_escaped())
-                    .unwrap_or_else(|_| format!("{:?}", opaque));
-                if detail.contains(SCRIPT_STOP_INTERRUPT_MESSAGE) {
-                    return Ok(String::new());
-                }
-
-                // 解析或运行时异常时，输出到标准错误。
-                let error_message = format_js_error_message(context, "JavaScript 执行错误", &e);
-                Err(emit_script_error_cli(script_path.as_str(), error_message))
-            }
-        }
+/// 运行内存中的脚本源码并将控制台输出写入当前进程标准输出/标准错误（CLI 模式）。
+///
+/// # 参数
+/// - `script_source`: 脚本源码
+/// - `script_path`: 脚本文件路径或远程地址（用于作用域与相对路径解析）
+/// - `script_config`: 可选脚本配置（用于 readConfig）
+/// - `script_config_file_path`: 可选配置文件路径（用于 setConfig 回写文件）
+///
+/// # 返回
+/// 返回执行结果字符串，如果成功则返回 Ok(String)，否则返回错误信息
+#[cfg(feature = "dob-script-cli")]
+pub async fn run_script_source_with_stdio_console(
+    script_source: Vec<u8>,
+    script_path: String,
+    script_config: Option<serde_json::Value>,
+    script_config_file_path: Option<String>,
+) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        run_script_source_with_stdio_console_blocking(
+            script_source,
+            script_path,
+            script_config,
+            script_config_file_path,
+        )
     })
     .await
     .map_err(|e| format!("任务执行失败: {}", e))?
@@ -811,13 +911,61 @@ pub async fn run_script_file(
     run_script_with_tauri_console(normalized_path, app_handle).await
 }
 
-/// CLI 对外入口：先做路径规范化，再执行脚本。
+/// 连续运行脚本（按住 / 切换循环）：整段循环只进入一次运行态，
+/// 仅广播一次开始与结束事件；每轮仍使用独立的脚本上下文执行。
+/// `should_continue` 在每轮开始前调用，返回 false 即结束循环。
+pub async fn run_script_file_looped(
+    script_path: String,
+    app_handle: tauri::AppHandle,
+    should_continue: Arc<dyn Fn() -> bool + Send + Sync>,
+) -> Result<String, String> {
+    let normalized_path = normalize_script_path(script_path)?;
+    let _slot = try_reserve_script_path_slot(&normalized_path)
+        .ok_or_else(|| format!("脚本已在运行中: {normalized_path}"))?;
+    if !should_continue() {
+        return Ok(String::new());
+    }
+
+    // 运行态覆盖整段循环：循环期间 is_script_path_running 恒为 true，停止信号可随时打断当前轮。
+    let _running_guard = ScriptRunningGuard::enter(normalized_path.clone(), app_handle.clone());
+    let stop_generation = SCRIPT_STOP_GENERATION.load(Ordering::Acquire);
+    let path_stop_generation = current_script_path_stop_generation(&normalized_path);
+    let mut last_result = String::new();
+    while should_continue() {
+        clear_last_background_activated_hwnd();
+        last_result =
+            run_script_with_tauri_console_inner(normalized_path.clone(), app_handle.clone(), false)
+                .await?;
+        // 停止按钮或按路径停止会打断当前轮，连续循环随之结束。
+        if SCRIPT_STOP_GENERATION.load(Ordering::Acquire) != stop_generation
+            || current_script_path_stop_generation(&normalized_path) != path_stop_generation
+        {
+            break;
+        }
+    }
+    Ok(last_result)
+}
+
+/// CLI 对外入口：本地路径先做规范化，HTTP(S) 地址则先下载源码，再执行脚本。
 #[cfg(feature = "dob-script-cli")]
 pub async fn run_script_file_cli(
     script_path: String,
     script_config: Option<serde_json::Value>,
     script_config_file_path: Option<String>,
 ) -> Result<String, String> {
+    let trimmed_path = script_path.trim();
+    if is_http_url(trimmed_path) {
+        let (final_url, source_bytes) = fetch_remote_script_source(trimmed_path).await?;
+        clear_last_background_activated_hwnd();
+        return run_script_source_with_stdio_console(
+            source_bytes,
+            final_url,
+            script_config,
+            script_config_file_path,
+        )
+        .await;
+    }
+
     let normalized_path = normalize_script_path(script_path)?;
     clear_last_background_activated_hwnd();
     run_script_with_stdio_console(normalized_path, script_config, script_config_file_path).await

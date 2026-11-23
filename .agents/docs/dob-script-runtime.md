@@ -22,6 +22,16 @@
 - `#[cfg(feature = "dob-script-cli")]`：CLI 专用的 StdioLogger 与 readConfig/setConfig
   文件直读直写；该 feature 只属于本 crate，应用侧已移除同名 feature
 
+## 远程脚本（CLI）
+
+- CLI 第一个参数可以是 `http://` / `https://` 地址：先下载源码再执行，
+  作用域与 ESM 基准地址均取跟随重定向后的最终 URL
+- 远程 ESM 的相对 `import` 基于引用模块地址用 `Url::join` 解析并下载；
+  `cap` 仍走内存模块，本地脚本的模块解析逻辑不变
+- 模块加载会在 `TokioJobExecutor` 内发起异步 HTTP 请求，因此 `run_jobs` 的
+  current-thread runtime 必须 `enable_all()`（只开 `enable_time` 时 reqwest 会因
+  IO driver 未启用而失败）
+
 ## 应用侧兼容垫片
 
 - `apps/web/src-tauri/src/submodules/mod.rs` 不再包含实现，

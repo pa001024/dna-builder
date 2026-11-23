@@ -31,14 +31,18 @@ fn normalize_command_name(program_name: &str) -> String {
 /// 打印命令行帮助信息。
 fn print_help(command_name: &str) {
     eprintln!("用法:");
-    eprintln!("  {command_name} <script.js> [--config <json|config.json>]");
+    eprintln!("  {command_name} <script.js|url> [--config <json|config.json>]");
     eprintln!();
     eprintln!("选项:");
     eprintln!("  -h, --help          显示帮助信息");
     eprintln!("  --config <value>    传入 readConfig 使用的配置（JSON 字符串或 JSON 文件路径）");
     eprintln!();
+    eprintln!("脚本参数:");
+    eprintln!("  <script.js|url>     本地脚本路径，或 http:// / https:// 开头的远程脚本地址");
+    eprintln!();
     eprintln!("示例:");
     eprintln!("  {command_name} ./demo.js");
+    eprintln!("  {command_name} https://example.com/demo.js");
     eprintln!("  {command_name} ./demo.js --config '{{\"speed\": 2}}'");
     eprintln!("  {command_name} ./demo.js --config ./config.json");
 }
@@ -140,7 +144,7 @@ fn parse_cli_args() -> Result<CliArgs, ExitCode> {
         }
 
         if script_path.is_some() {
-            eprintln!("仅支持传入一个脚本文件路径。");
+            eprintln!("仅支持传入一个脚本文件路径或远程地址。");
             print_help(command_name.as_str());
             return Err(ExitCode::from(2));
         }

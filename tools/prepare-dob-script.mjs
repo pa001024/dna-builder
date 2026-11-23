@@ -8,7 +8,10 @@ const sourceExecutablePath = resolve(projectRoot, "crates", "dob-script-runtime"
 const targetExecutablePath = resolve(projectRoot, "packages", "dob-script", "bin", "dob-script.exe")
 const sourceOpenCvDllPath = resolve(projectRoot, "crates", "dob-script-runtime", "target", "release", "opencv_world490.dll")
 const targetOpenCvDllPath = resolve(projectRoot, "packages", "dob-script", "bin", "opencv_world490.dll")
-const sourceDirectMLDllPath = resolve(projectRoot, "crates", "dob-script-runtime", "target", "release", "examples", "DirectML.dll")
+const directMlDllCandidates = [
+    resolve(projectRoot, "crates", "dob-script-runtime", "target", "release", "examples", "DirectML.dll"),
+    resolve(projectRoot, "crates", "dob-script-runtime", "target", "release", "DirectML.dll"),
+]
 const targetDirectMLDllPath = resolve(projectRoot, "packages", "dob-script", "bin", "DirectML.dll")
 
 /**
@@ -21,6 +24,17 @@ function ensureFileExists(filePath) {
         throw new Error(`未找到构建产物: ${filePath}`)
     }
 }
+
+/**
+ * 在候选路径中取第一个存在的构建产物（缓存命中的 build script 可能不会复制到 examples）。
+ *
+ * @param {string[]} candidates 候选文件绝对路径
+ */
+function resolveFirstExisting(candidates) {
+    return candidates.find(candidate => existsSync(candidate)) ?? candidates[0]
+}
+
+const sourceDirectMLDllPath = resolveFirstExisting(directMlDllCandidates)
 
 /**
  * 准备 npm 包内的可执行文件。

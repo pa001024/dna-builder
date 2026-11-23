@@ -128,8 +128,9 @@ impl JobExecutor for TokioJobExecutor {
 
     // While the sync flavor of `run_jobs` will block the current thread until all the jobs have finished...
     fn run_jobs(self: Rc<Self>, context: &mut Context) -> JsResult<()> {
+        // 启用 IO：远程 ESM 模块加载在任务执行器内发起 HTTP 请求。
         let runtime = tokio::runtime::Builder::new_current_thread()
-            .enable_time()
+            .enable_all()
             .build()
             .unwrap();
 
