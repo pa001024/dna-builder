@@ -803,10 +803,11 @@ export async function listSystemFonts() {
 /**
  * 创建指向游戏主程序的桌面快捷方式（名称固定为「二重螺旋」）。
  * @param path 游戏主程序（EM.exe）路径
+ * @param args 写入快捷方式的启动参数
  * @returns 创建结果消息
  */
-export async function createDesktopShortcut(path: string) {
-    return await invoke<string>("create_desktop_shortcut", { path })
+export async function createDesktopShortcut(path: string, args: string) {
+    return await invoke<string>("create_desktop_shortcut", { path, args })
 }
 /**
  * 获取本地登录的QQ号

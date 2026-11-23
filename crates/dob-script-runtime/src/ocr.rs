@@ -78,6 +78,16 @@ impl Default for OcrInitConfig {
     }
 }
 
+/// 一行 OCR 结果：文本 + 四个角点 + 置信度。
+#[derive(Debug, Clone, PartialEq)]
+pub struct OcrTextLine {
+    pub text: String,
+    /// 顺序同上游 CropImg：左上 / 右上 / 右下 / 左下（含 50px padding 偏移）。
+    pub points: [[i32; 2]; 4],
+    pub det_score: f32,
+    pub rec_score: f32,
+}
+
 /// OCR 运行时状态。
 struct OcrRuntime {
     det_session: Option<Session>,
@@ -1125,11 +1135,11 @@ fn detect_and_crop_text_blocks(
     Ok(crops)
 }
 
-/// 将裁剪块解码为最终文本。
-fn recognize_text_blocks(
+/// 将裁剪块解码为结构化文本行。
+fn recognize_text_lines(
     blocks: Vec<(TextBoxPoints, f32, Mat)>,
     runtime: &mut OcrRuntime,
-) -> Result<String, String> {
+) -> Result<Vec<OcrTextLine>, String> {
     let mut crops: Vec<(TextBoxPoints, f32, Mat)> = blocks;
     if let Some(cls_session) = runtime.cls_session.as_mut() {
         let cls_output_name = first_output_name(cls_session, "分类模型")?;
@@ -1178,7 +1188,7 @@ fn recognize_text_blocks(
         }
     }
 
-    let mut lines = Vec::new();
+    let mut lines = Vec::with_capacity(crops.len());
     for (box_points, det_score, crop) in crops {
         let rec_array = mat_to_rec_array(&crop, (3, REC_IMAGE_HEIGHT, REC_IMAGE_WIDTH))?;
         let rec_output_name = first_output_name(&runtime.rec_session, "识别模型")?;
@@ -1216,17 +1226,40 @@ fn recognize_text_blocks(
             &runtime.dictionary,
         );
 
-        lines.push((box_points, det_score, decoded, rec_score));
+        let mut points = [[0i32; 2]; 4];
+        for (index, point) in box_points.iter().enumerate() {
+            points[index] = [point.x, point.y];
+        }
+        lines.push(OcrTextLine {
+            text: decoded,
+            points,
+            det_score,
+            rec_score,
+        });
     }
 
+    Ok(lines)
+}
+
+/// 把识别行拼成脚本 `ocrText` 使用的文本：行间 `\n`，无末尾换行。
+fn join_ocr_lines(lines: &[OcrTextLine]) -> String {
     let mut result = String::new();
-    for (index, (_box_points, _det_score, text, _rec_score)) in lines.iter().enumerate() {
+    for (index, line) in lines.iter().enumerate() {
         if index > 0 {
             result.push('\n');
         }
-        result.push_str(text);
+        result.push_str(&line.text);
     }
-    Ok(result)
+    result
+}
+
+/// 将裁剪块解码为最终文本（逐字节保持旧 `ocrText` 输出）。
+fn recognize_text_blocks(
+    blocks: Vec<(TextBoxPoints, f32, Mat)>,
+    runtime: &mut OcrRuntime,
+) -> Result<String, String> {
+    let lines = recognize_text_lines(blocks, runtime)?;
+    Ok(join_ocr_lines(&lines))
 }
 
 #[cfg(test)]
@@ -1238,7 +1271,8 @@ pub fn ocr_test_assets_root() -> PathBuf {
 pub fn ocr_test_image_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
-        .map(|parent| parent.join("misc").join("1.png"))
+        .and_then(Path::parent)
+        .map(|root| root.join("misc").join("1.png"))
         .unwrap_or_else(|| PathBuf::from("misc").join("1.png"))
 }
 
@@ -1330,14 +1364,66 @@ pub fn init_ocr(config: OcrInitConfig) -> Result<PathBuf, String> {
 
 /// 识别 Mat 中的文本：独占一个池实例，调用间真正并行。
 pub fn ocr_text_from_mat(input: &Mat) -> Result<String, String> {
-    let channels = input.channels();
-    if channels != 1 && channels != 3 && channels != 4 {
-        return Err(format!("OCR 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"));
-    }
+    check_mat_channels(input)?;
     let (mut instance, generation) = checkout_ocr_runtime()?;
     let result = ocr_text_with_runtime(input, &mut instance);
     checkin_ocr_runtime(instance, generation);
     result
+}
+
+/// 检查 Mat 通道数是否受支持。
+fn check_mat_channels(input: &Mat) -> Result<(), String> {
+    let channels = input.channels();
+    if channels != 1 && channels != 3 && channels != 4 {
+        return Err(format!("OCR 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"));
+    }
+    Ok(())
+}
+
+/// 识别 Mat 中的文本行：文本 + 四点框 + 置信度。
+pub fn ocr_lines_from_mat(input: &Mat) -> Result<Vec<OcrTextLine>, String> {
+    check_mat_channels(input)?;
+    let (mut instance, generation) = checkout_ocr_runtime()?;
+    let result = ocr_lines_with_runtime(input, &mut instance);
+    checkin_ocr_runtime(instance, generation);
+    result
+}
+
+/// 解码图像字节（PNG/JPEG 等）并识别为文本行。
+pub fn ocr_lines_from_image_bytes(bytes: &[u8]) -> Result<Vec<OcrTextLine>, String> {
+    if bytes.is_empty() {
+        return Err("OCR 输入图像为空".to_string());
+    }
+    let mat = opencv::imgcodecs::imdecode(
+        &opencv::core::Vector::<u8>::from(bytes.to_vec()),
+        opencv::imgcodecs::IMREAD_COLOR,
+    )
+    .map_err(|e| format!("OCR 图像解码失败: {e}"))?;
+    if mat.empty() {
+        return Err("OCR 图像为空或格式不受支持".to_string());
+    }
+    ocr_lines_from_mat(&mat)
+}
+
+fn ocr_lines_with_runtime(
+    input: &Mat,
+    runtime: &mut OcrRuntime,
+) -> Result<Vec<OcrTextLine>, String> {
+    let normalized = normalize_input_mat(input)?;
+    let size = normalized
+        .size()
+        .map_err(|e| format!("读取 OCR 输入尺寸失败: {e}"))?;
+    if size.width <= 0 || size.height <= 0 {
+        return Err("OCR 输入 Mat 尺寸无效".to_string());
+    }
+
+    let crops = detect_and_crop_text_blocks(&normalized, runtime)?;
+    let mut lines = recognize_text_lines(crops, runtime)?;
+    // 无文字图像会走整图兜底识别并得到空文本行：全部为空时返回空数组
+    if lines.iter().all(|line| line.text.is_empty()) {
+        lines.clear();
+    }
+    Ok(lines)
 }
 
 fn ocr_text_with_runtime(input: &Mat, runtime: &mut OcrRuntime) -> Result<String, String> {
@@ -1631,5 +1717,93 @@ mod tests {
             dll_avg,
             ratio
         );
+    }
+
+    /// 空字节与无法解码的字节必须返回明确错误，不得 panic。
+    #[test]
+    fn ocr_lines_from_image_bytes_rejects_empty_and_invalid_input() {
+        assert!(ocr_lines_from_image_bytes(&[]).is_err());
+        assert!(ocr_lines_from_image_bytes(b"not an image").is_err());
+    }
+
+    /// 结构化行 API：资源齐全时识别仓库内升华装备附图；资源缺失时跳过（不 panic）。
+    #[test]
+    fn ocr_lines_from_image_bytes_recognizes_gear_sample() {
+        let root_dir = ocr_test_assets_root();
+        let models_dir = root_dir.join("models");
+        let has_onnx = std::fs::read_dir(&models_dir)
+            .map(|entries| {
+                entries.flatten().any(|entry| {
+                    entry
+                        .path()
+                        .extension()
+                        .is_some_and(|ext| ext.eq_ignore_ascii_case("onnx"))
+                })
+            })
+            .unwrap_or(false);
+        let image_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(Path::parent)
+            .map(|root| {
+                root.join(".docs")
+                    .join("transcendence-db")
+                    .join("u90")
+                    .join("gear-sample.png")
+            });
+        let Some(image_path) = image_path.filter(|path| path.exists()) else {
+            eprintln!("跳过结构化 OCR 测试：附图不存在");
+            return;
+        };
+        if !has_onnx {
+            eprintln!(
+                "跳过结构化 OCR 测试：OCR 模型不存在 ({})",
+                models_dir.display()
+            );
+            return;
+        }
+
+        prepare_direct_ocr(&root_dir).expect("初始化直接 OCR 失败");
+        let bytes = std::fs::read(&image_path).expect("读取附图失败");
+        let lines = ocr_lines_from_image_bytes(&bytes).expect("识别附图失败");
+        eprintln!(
+            "structured ocr lines={} texts={:?}",
+            lines.len(),
+            lines.iter().map(|line| line.text.as_str()).collect::<Vec<_>>()
+        );
+        if let Some(first) = lines.first() {
+            eprintln!(
+                "first line text={:?} points={:?} det={:.4} rec={:.4}",
+                first.text, first.points, first.det_score, first.rec_score
+            );
+        }
+
+        assert!(!lines.is_empty(), "附图应至少识别出一行");
+        assert!(
+            lines
+                .iter()
+                .any(|line| line.text.contains("强度") || line.text.contains("护胸")),
+            "附图应至少识别出「强度」或「护胸」"
+        );
+        for line in &lines {
+            assert!(!line.text.is_empty(), "行文本不得为空");
+            let xs = line.points.iter().map(|point| point[0]);
+            let ys = line.points.iter().map(|point| point[1]);
+            let width = xs.clone().max().unwrap() - xs.min().unwrap();
+            let height = ys.clone().max().unwrap() - ys.min().unwrap();
+            assert!(width > 0 && height > 0, "行包围盒必须为正: {line:?}");
+        }
+
+        // 新旧实现对拍：结构化行拼接（加末尾换行）必须逐字节等于旧 ocrText 输出
+        let mat = ocr_test_load_mat(&image_path).expect("读取附图 Mat 失败");
+        let lines_from_mat = ocr_lines_from_mat(&mat).expect("结构化 Mat OCR 失败");
+        assert_eq!(lines_from_mat, lines, "Mat 与字节两个入口结果必须一致");
+        let text = ocr_text_from_mat(&mat).expect("旧文本 OCR 失败");
+        let joined = join_ocr_lines(&lines);
+        let expected = if joined.is_empty() {
+            String::new()
+        } else {
+            format!("{joined}\n")
+        };
+        assert_eq!(expected, text, "结构化行拼接必须与旧文本输出一致");
     }
 }

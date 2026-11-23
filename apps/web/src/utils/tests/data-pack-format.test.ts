@@ -34,6 +34,7 @@ describe("数据包格式 major", () => {
     it("只接受当前支持范围内的包", () => {
         expect(isDataPackMajorSupported(1, "1.6.208.6")).toBe(true)
         expect(isDataPackMajorSupported(2, "1.7.4.1")).toBe(true)
+        expect(isDataPackMajorSupported(3, "1.7.229.1")).toBe(true)
         expect(isDataPackMajorSupported(DATA_PACK_FORMAT_MAJOR + 1, "9.9.9.9")).toBe(false)
         expect(isDataPackMajorSupported(undefined, "1.6.208.6")).toBe(true)
     })

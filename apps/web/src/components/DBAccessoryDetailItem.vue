@@ -8,6 +8,7 @@ import shopData from "@/data/d/shop.data"
 import type { TitleFrame } from "@/data/d/titleframe.data"
 import { getWanhuaSkinUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
+import { headFrameIdToKey } from "@/utils/head-frame/head-frame.generated"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
@@ -480,7 +481,15 @@ const accessoryUnlock = computed(() => {
             />
             <div class="relative flex items-start gap-3.5">
                 <!-- 图标底色按稀有度渐变（头像框 / 头像没有稀有度，用中性底） -->
+                <HeadFrameRender
+                    v-if="isHeadFrameAccessory(accessory)"
+                    :head-frame-id="accessory.id"
+                    :icon="accessory.icon"
+                    :alt="$t(accessoryName)"
+                    class="size-14"
+                />
                 <img
+                    v-else
                     :src="accessoryIcon"
                     :alt="accessoryName"
                     class="size-14 shrink-0 rounded-xs object-cover"
@@ -540,6 +549,16 @@ const accessoryUnlock = computed(() => {
             <SectionHeader no-animate compact kicker="TITLE FRAME" :title="$t('accessory.titleFramePreview')" />
             <div class="mt-3 flex justify-center overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6">
                 <TitleFrameRender class="w-full max-w-90" :frame="accessory.frame" :title="$t(accessoryName)" />
+            </div>
+        </section>
+
+        <section
+            v-if="isHeadFrameAccessory(accessory) && headFrameIdToKey[accessory.id]"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="HEAD FRAME" :title="$t('accessory.head_frame_preview')" />
+            <div class="mt-3 flex justify-center rounded-xs border border-base-content/10 bg-base-content/3 p-6">
+                <HeadFrameRender :head-frame-id="accessory.id" :alt="$t(accessoryName)" class="w-60 max-w-full" />
             </div>
         </section>
 

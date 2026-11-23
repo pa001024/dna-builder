@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { type RankingList, type RankingListItem, rankingListQuery, rankingListsQuery } from "@/api/graphql"
 import { normalizeCharSettings } from "@/composables/useCharSettings"
-import { charMap, LeveledChar } from "@/data"
+import { buffData, buffMap, charMap, LeveledChar } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { useInvStore } from "@/store/inv"
 import { format100 } from "@/util"
@@ -36,9 +36,41 @@ const rankedItems = ref<RankedItem[]>([])
 const enemyResistanceOptions = [0, 0.5, -4]
 /** 敌人抗性覆盖：null = 沿用构筑自身的敌人抗性，其余值 = 覆盖到榜单全部构筑的敌人抗性 */
 const resistanceOverride = ref<number | null>(null)
-/** 是否正在按覆盖后的抗性重算榜单 DPS */
+/** 防御覆盖可用木桩：木桩怪物 id 即其防御值（见 monster.data.ts 中的生命木桩） */
+const enemyDefenseOptions = [130, 200, 300, 1200, 3000]
+/** 敌人防御覆盖：null = 沿用构筑自身的敌人，其余值 = 把敌人怪物 id 替换为对应防御木桩 */
+const defenseOverride = ref<number | null>(null)
+/** 月阶场地 BUFF 名称前缀：静态表中的名称为「狩月人之阶」「狩月人之阶2」…… */
+const MOON_BUFF_PREFIX = "狩月人之阶"
+/**
+ * 月阶 BUFF 显示名：第 1–8 期呈现为 1.1–1.8，
+ * 第 9 期起进入 2.x（预期第 9 期就是 2.0 月阶，故显示为 2.0）。
+ * @param name BUFF 名称
+ * @returns 显示名
+ */
+function moonBuffLabel(name: string) {
+    const period = Number(name.slice(MOON_BUFF_PREFIX.length)) || 1
+    return period >= 9 ? `2.${period - 9}` : `1.${period}`
+}
+/**
+ * 月阶场地 BUFF 可选值：显示名按期数编码，原始名称用于写入构筑配置。
+ */
+const moonBuffOptions = buffData
+    .filter(buff => buff.名称.startsWith(MOON_BUFF_PREFIX))
+    .map(buff => ({
+        name: buff.名称,
+        label: moonBuffLabel(buff.名称),
+        description: buff.描述,
+    }))
+/** 月阶 BUFF 覆盖：null = 不追加，其余值 = 给榜单全部构筑追加该月阶场地 BUFF */
+const moonBuffOverride = ref<string | null>(null)
+/** 当前所选月阶 BUFF 的显示名 */
+const moonBuffOverrideLabel = computed(
+    () => moonBuffOptions.find(option => option.name === moonBuffOverride.value)?.label ?? ""
+)
+/** 是否正在按覆盖后的抗性/防御重算榜单 DPS */
 const computing = ref(false)
-/** 榜单条目的服务端原始数据：抗性覆盖后基于它重新计算，无需重复请求 */
+/** 榜单条目的服务端原始数据：覆盖抗性/防御后基于它重新计算，无需重复请求 */
 const rawItems = ref<RankingListItem[]>([])
 /** 重算任务令牌：覆盖值被再次修改时用于丢弃过期的重算任务 */
 let recomputeToken = 0
@@ -46,18 +78,33 @@ let recomputeToken = 0
 const rankingId = computed(() => String(route.params.id || ""))
 
 /**
- * 计算构筑 DPS；传入抗性覆盖值时，先将构筑中的敌人抗性字段替换为所选值再计算。
+ * 计算构筑 DPS；传入覆盖值时，先替换构筑中的敌人抗性与敌人怪物 id、追加月阶 BUFF 再计算。
  * @param build 榜单条目关联的构筑
  * @param resistanceValue 抗性覆盖值（null 表示沿用构筑自身敌人抗性）
+ * @param defenseValue 防御覆盖值，即木桩怪物 id（null 表示沿用构筑自身敌人）
+ * @param moonBuffValue 月阶 BUFF 名称（null 表示不追加）
  * @returns 基础信息与计算出的 DPS
  */
-function calcBuildDps(build: RankingListItem["build"], resistanceValue: number | null) {
+function calcBuildDps(
+    build: RankingListItem["build"],
+    resistanceValue: number | null,
+    defenseValue: number | null,
+    moonBuffValue: string | null
+) {
     if (!build) return
     try {
         const settings = normalizeCharSettings(JSON.parse(build.charSettings))
         // 抗性覆盖：覆盖构筑中的敌人抗性字段后重新计算 DPS
         if (resistanceValue !== null) {
             settings.enemyResistance = resistanceValue
+        }
+        // 防御覆盖：替换底层敌人怪物 id，复用木桩自带的防御值重算 DPS
+        if (defenseValue !== null) {
+            settings.enemyId = defenseValue
+        }
+        // 月阶 BUFF 覆盖：构筑未自带时追加所选场地 BUFF，等级取其默认最大层数
+        if (moonBuffValue !== null && !settings.buffs.some(([name]) => name === moonBuffValue)) {
+            settings.buffs.push([moonBuffValue, buffMap.get(moonBuffValue)?.mx || 1])
         }
         const charBuild = createCharBuildFromSettings(build.charId, settings, inv)
         const result = charBuild.calculate()
@@ -73,7 +120,31 @@ function calcBuildDps(build: RankingListItem["build"], resistanceValue: number |
 }
 
 /**
- * 按当前抗性覆盖值重算全部条目 DPS 并重新排序。
+ * 切换防御覆盖值；null 表示恢复为各构筑默认的敌人，切换后立即按新防御重算榜单。
+ * @param value 防御覆盖值（木桩怪物 id）
+ */
+function setDefenseOverride(value: number | null) {
+    if (defenseOverride.value === value) return
+    defenseOverride.value = value
+    if (rawItems.value.length > 0) {
+        void rebuildRankedItems()
+    }
+}
+
+/**
+ * 切换月阶 BUFF 覆盖值；null 表示不追加，切换后立即按新 BUFF 重算榜单。
+ * @param value 月阶 BUFF 名称
+ */
+function setMoonBuffOverride(value: string | null) {
+    if (moonBuffOverride.value === value) return
+    moonBuffOverride.value = value
+    if (rawItems.value.length > 0) {
+        void rebuildRankedItems()
+    }
+}
+
+/**
+ * 按当前抗性/防御/月阶 BUFF 覆盖值重算全部条目 DPS 并重新排序。
  * 分批让出主线程执行，避免条目较多时重算长时间阻塞界面。
  */
 async function rebuildRankedItems() {
@@ -86,7 +157,7 @@ async function rebuildRankedItems() {
             // 覆盖值在重算过程中被再次修改时，丢弃本次过期结果
             if (token !== recomputeToken) return
             const item = source[index]
-            const r = calcBuildDps(item.build, resistanceOverride.value)
+            const r = calcBuildDps(item.build, resistanceOverride.value, defenseOverride.value, moonBuffOverride.value)
             const char = charMap.get(item.charId)
             next.push({
                 id: item.id,
@@ -247,40 +318,114 @@ onMounted(async () => {
                             </div>
                         </ScrollArea>
 
-                        <!-- 敌人抗性覆盖：选择抗性后覆盖榜单构筑中的敌人抗性字段并重算 DPS -->
-                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-base-content/8 pt-3">
-                            <span class="mr-1 shrink-0 text-xs text-base-content/55">{{
-                                $t("ranking-view.enemy_resistance_coverage")
-                            }}</span>
-                            <button
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    resistanceOverride === null
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="setResistanceOverride(null)"
-                            >
-                                {{ $t("默认") }}
-                            </button>
-                            <button
-                                v-for="res in enemyResistanceOptions"
-                                :key="res"
-                                type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    resistanceOverride === res
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="setResistanceOverride(res)"
-                            >
-                                {{ format100(res) }}
-                            </button>
-                            <span class="text-[11px] tabular-nums text-base-content/40">
-                                {{ resistanceOverride === null ? "使用默认抗性" : `抗性统一为 ${format100(resistanceOverride)}` }}
-                            </span>
+                        <!-- 覆盖选择器组：内部行间不留分隔线，仅保留小间距 -->
+                        <div class="flex flex-col gap-2">
+                            <!-- 敌人抗性覆盖：选择抗性后覆盖榜单构筑中的敌人抗性字段并重算 DPS -->
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-base-content/8 pt-3">
+                                <span class="mr-1 shrink-0 text-xs text-base-content/55">{{
+                                    $t("ranking-view.enemy_resistance_coverage")
+                                }}</span>
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        resistanceOverride === null
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setResistanceOverride(null)"
+                                >
+                                    {{ $t("默认") }}
+                                </button>
+                                <button
+                                    v-for="res in enemyResistanceOptions"
+                                    :key="res"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        resistanceOverride === res
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setResistanceOverride(res)"
+                                >
+                                    {{ format100(res) }}
+                                </button>
+                                <span class="text-[11px] tabular-nums text-base-content/40">
+                                    {{ resistanceOverride === null ? "使用默认抗性" : `抗性统一为 ${format100(resistanceOverride)}` }}
+                                </span>
+                            </div>
+
+                            <!-- 敌人防御覆盖：把榜单构筑的敌人替换为对应防御木桩（怪物 id）并重算 DPS -->
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                                <span class="mr-1 shrink-0 text-xs text-base-content/55">{{
+                                    $t("ranking-view.enemy_defense_coverage")
+                                }}</span>
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        defenseOverride === null
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setDefenseOverride(null)"
+                                >
+                                    {{ $t("默认") }}
+                                </button>
+                                <button
+                                    v-for="def in enemyDefenseOptions"
+                                    :key="def"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        defenseOverride === def
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setDefenseOverride(def)"
+                                >
+                                    {{ def.toLocaleString() }}
+                                </button>
+                                <span class="text-[11px] tabular-nums text-base-content/40">
+                                    {{ defenseOverride === null ? "使用默认防御" : `防御统一为 ${defenseOverride.toLocaleString()}` }}
+                                </span>
+                            </div>
+
+                            <!-- 月阶 BUFF 覆盖：给榜单构筑追加所选月阶场地 BUFF 后重算 DPS -->
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                                <span class="mr-1 shrink-0 text-xs text-base-content/55">{{ $t("ranking-view.moon_rank_buff") }}</span>
+                                <button
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        moonBuffOverride === null
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setMoonBuffOverride(null)"
+                                >
+                                    {{ $t("默认") }}
+                                </button>
+                                <button
+                                    v-for="buff in moonBuffOptions"
+                                    :key="buff.name"
+                                    type="button"
+                                    :title="buff.description"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        moonBuffOverride === buff.name
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="setMoonBuffOverride(buff.name)"
+                                >
+                                    {{ buff.label }}
+                                </button>
+                                <span class="text-[11px] tabular-nums text-base-content/40">
+                                    {{ moonBuffOverride === null ? "未添加月阶BUFF" : `已添加 ${moonBuffOverrideLabel}` }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </section>

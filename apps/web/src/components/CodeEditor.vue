@@ -299,7 +299,7 @@ function initEditor() {
                         outline: "none",
                     },
                     ".cm-scroller": {
-                        fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
+                        fontFamily: '"CaskaydiaCove", Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
                         lineHeight: "1.5",
                     },
                     ".cm-content": {

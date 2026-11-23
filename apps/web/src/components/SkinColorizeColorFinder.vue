@@ -239,7 +239,7 @@ onBeforeUnmount(() => {
                         <span class="min-w-0 flex-1 truncate text-xs">{{ dyeName(item.swatch) }}</span>
                         <CopyID :id="item.swatch.id" class="shrink-0" />
                         <ResourceCostItem
-                            mini
+                            icon-only
                             :name="dyeName(item.swatch)"
                             :value="[1, dyeResourceId(item.swatch), 'Resource']"
                             class="w-9 shrink-0"

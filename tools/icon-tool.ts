@@ -4,6 +4,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
 import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import { format } from "prettier"
+import { bitmapToSvgPath } from "./bitmap-to-svg-path"
 
 /** 以下相对路径一律相对仓库根：切到工具所在目录的上级，保证从任何 cwd 调用口径一致 */
 process.chdir(join(dirname(fileURLToPath(import.meta.url)), ".."))
@@ -15,6 +16,8 @@ const IGNORE_LIST_FILE = "tools/.icon_ignore"
 // radix 图标缓存目录（被 .gitignore 忽略，丢失时由本工具自动重建）
 const RADIX_ICONS_DIR = join(__dirname, "radix-icons")
 const RADIX_ICON_PREFIX = "radix-icons:"
+// remixicon 在 Icon.vue 中的键前缀；命令行中可省略
+const REMIXICON_PREFIX = "ri:"
 // radix-icons 的 viewBox 与 Icon.vue 中登记的 size 均为 15
 const RADIX_ICON_SIZE = 15
 // radix 图标上游数据源：iconify 的 radix-icons 集合。锁 1.2.1 —— 该版几何与 Icon.vue 中已有 radix 图标同源
@@ -102,6 +105,22 @@ async function saveIconVueData(data: Record<string, any>): Promise<void> {
     })
 
     await writeFile(ICON_FILE, formattedContent, "utf-8")
+}
+
+async function importBitmap(file: string, iconName: string, force: boolean): Promise<void> {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(iconName)) {
+        throw new Error("图标名必须为小写的 命名空间:名称，例如 gi:final-forge")
+    }
+
+    const iconVueData = await loadIconVueData()
+    if (!force && Object.hasOwn(iconVueData, iconName)) {
+        console.log(`⚠️  图标 ${iconName} 已存在于 Icon.vue 中，未覆盖（可用 --force 重新生成）`)
+        return
+    }
+
+    iconVueData[iconName] = [await bitmapToSvgPath(file)]
+    await saveIconVueData(iconVueData)
+    console.log(`✅ 已将 ${file} 导入为矢量图标 ${iconName}`)
 }
 
 /** 上游 radix 图标集合的内存缓存，避免同一次运行内重复下载 */
@@ -294,7 +313,13 @@ async function syncRadixCache(extraNames: string[]): Promise<void> {
     }
 }
 
-async function addIcon(iconName: string): Promise<void> {
+async function addIcon(rawIconName: string): Promise<void> {
+    // remixicon 名的 ri: 前缀可省略，统一去掉后再查表
+    const iconName = rawIconName.startsWith(REMIXICON_PREFIX) ? rawIconName.slice(REMIXICON_PREFIX.length) : rawIconName
+    if (!iconName) {
+        console.error("❌ 图标名不能为空")
+        return
+    }
     console.log(`正在添加图标: ${iconName}`)
 
     // 处理 radix-icons 前缀：SVG 来自 iconify，tools/radix-icons/ 仅作本地缓存
@@ -344,7 +369,7 @@ async function addIcon(iconName: string): Promise<void> {
     }
 
     const iconVueData = await loadIconVueData()
-    const key = `ri:${iconName}`
+    const key = `${REMIXICON_PREFIX}${iconName}`
 
     if (iconVueData[key]) {
         console.log(`⚠️  图标 ${key} 已存在于 Icon.vue 中`)
@@ -714,7 +739,22 @@ async function cleanIcons(): Promise<void> {
     deletedIcons.sort().forEach(icon => console.log(`  - ${icon}`))
 }
 
-async function ignoreIcon(iconName: string): Promise<void> {
+/**
+ * 将 ignore / unignore 的入参归一化为 Icon.vue 中的键：裸 remixicon 名自动补 ri: 前缀，
+ * 已带命名空间（或 po-A 之类自定义键）时原样返回。
+ * @param name 用户输入的图标名
+ * @returns Icon.vue 中的图标键
+ */
+async function normalizeIconKey(name: string): Promise<string> {
+    if (name.includes(":")) {
+        return name
+    }
+    const remixiconData = await loadRemixiconData()
+    return remixiconData[name] ? `${REMIXICON_PREFIX}${name}` : name
+}
+
+async function ignoreIcon(rawIconName: string): Promise<void> {
+    const iconName = await normalizeIconKey(rawIconName)
     const ignoredIcons = await loadIgnoreList()
 
     if (ignoredIcons.has(iconName)) {
@@ -728,7 +768,8 @@ async function ignoreIcon(iconName: string): Promise<void> {
     console.log(`✅ 已将图标 ${iconName} 添加到忽略列表`)
 }
 
-async function unignoreIcon(iconName: string): Promise<void> {
+async function unignoreIcon(rawIconName: string): Promise<void> {
+    const iconName = await normalizeIconKey(rawIconName)
     const ignoredIcons = await loadIgnoreList()
 
     if (!ignoredIcons.has(iconName)) {
@@ -797,7 +838,10 @@ async function main(): Promise<void> {
 
     if (!command || command === "help") {
         console.log("图标管理工具 - 用法:")
-        console.log("  bun tools/icon-tool.ts add <icon-name> [icon-name ...] - 添加图标到 Icon.vue（remixicon 名或 radix-icons:xxx）")
+        console.log(
+            "  bun tools/icon-tool.ts add <icon-name> [icon-name ...] - 添加图标到 Icon.vue（remixicon 名可省略 ri: 前缀，或 radix-icons:xxx）"
+        )
+        console.log("  bun icon import <bitmap> <namespace:name> [--force] - 将位图拟合为单色 SVG path 并登记到 Icon.vue")
         console.log("  bun tools/icon-tool.ts check             - 检查图标使用情况，标记未使用的图标")
         console.log("  bun tools/icon-tool.ts clean             - 删除 Icon.vue 中未使用的图标")
         console.log("  bun tools/icon-tool.ts ignore <icon>     - 将图标添加到忽略列表（不清除）")
@@ -830,6 +874,10 @@ async function main(): Promise<void> {
             for (const iconName of iconNames) {
                 await addIcon(iconName)
             }
+        } else if (command === "import") {
+            const force = args[3] === "--force"
+            if (args.length !== (force ? 4 : 3)) throw new Error("用法: bun icon import <bitmap> <namespace:name> [--force]")
+            await importBitmap(args[1], args[2], force)
         } else if (command === "check") {
             await checkIcons()
         } else if (command === "clean") {

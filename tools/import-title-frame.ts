@@ -18,6 +18,11 @@
  *   FMODEL_CLI        fmodel-cli.exe 路径
  *   TITLE_FRAME_LUA   反编译后的 TitleFrame.lua 路径
  *   TITLE_FRAME_CACHE CLI 原始输出的缓存目录（默认 .tmp/titleframe-cache）
+ *   TITLE_FRAME_EXPORTS  FModel 导出根目录（默认 D:/dev/dna-unpack/Fmodel/Output/Exports）
+ *
+ * 资产优先从导出目录里的本地 .uasset 读（read-file / inspect-file / export-tex-file），
+ * 只有本地没有该包时才回退到 pak（read / inspect / export-tex）。新客户端资产常常
+ * 还没有进本地 pak，直接从 FModel 导出物解码即可，不需要打补充包。
  *
  * 用法：
  *   bun tools/import-title-frame.ts                # 增量导入
@@ -42,20 +47,34 @@ import type {
     TitleFrameTransformCurves,
 } from "../apps/web/src/utils/title-frame/title-frame"
 import { TITLE_FONT_LINE_RATIO, unionBounds } from "../apps/web/src/utils/title-frame/title-frame"
+import { normalizeFrameAnimationLabel, parseUiFrameEntries, type UiFrameEntry } from "./import-ui-frame-lib"
+import { additivePng } from "./ui-frame-alpha"
 
 const ROOT_DIR = path.resolve(import.meta.dir, "..")
+const FRAME_KIND = process.env.UI_FRAME_KIND === "head" ? "head" : "title"
+const IS_HEAD_FRAME = FRAME_KIND === "head"
+const FRAME_LABEL = IS_HEAD_FRAME ? "头像框" : "称号框"
+const FRAME_DIR = `${FRAME_KIND}frame`
+const IMAGE_DIR = IS_HEAD_FRAME ? "headframe/dynamic" : FRAME_DIR
+const ENV_PREFIX = IS_HEAD_FRAME ? "HEAD_FRAME" : "TITLE_FRAME"
 const CLI = process.env.FMODEL_CLI ?? "D:/dev/fmodel-mcp/Cli/bin/publish/fmodel-cli.exe"
-const TITLE_FRAME_LUA = process.env.TITLE_FRAME_LUA ?? "D:/dev/dna-unpack/lua/EM/Content/Script/Datas/TitleFrame.lua"
-const CACHE_DIR = process.env.TITLE_FRAME_CACHE ?? path.join(ROOT_DIR, ".tmp", "titleframe-cache")
-const OUTPUT_DATA = path.join(ROOT_DIR, "apps", "web", "src", "utils", "title-frame", "title-frame.generated.ts")
+const TITLE_FRAME_LUA =
+    process.env[`${ENV_PREFIX}_LUA`] ?? `D:/dev/dna-unpack/lua/EM/Content/Script/Datas/${IS_HEAD_FRAME ? "HeadFrame" : "TitleFrame"}.lua`
+const CACHE_DIR = process.env[`${ENV_PREFIX}_CACHE`] ?? path.join(ROOT_DIR, ".tmp", `${FRAME_DIR}-cache`)
+/**
+ * FModel 导出根目录：本地 .uasset 现货所在处，结构与游戏内包路径同构。
+ * 新客户端刚导出的资产（如 1.8 的 16_x）只在本地导出目录里有，本地 pak 尚未更新。
+ */
+const EXPORT_ROOT = resolveExportRoot()
+const OUTPUT_DATA = path.join(ROOT_DIR, "apps", "web", "src", "utils", `${FRAME_KIND}-frame`, `${FRAME_KIND}-frame.generated.ts`)
 /**
  * 贴图清单：webp 文件名 → 游戏内包路径。
  *
  * 称号框贴图遇到同名冲突会被改写成带父目录前缀的名字（如 13_T_PersonalInfo_Title_13_08.webp），
  * 靠 basename 已经反查不回源 PNG。这里把映射落盘，tools/webp-import.ts 读它来补齐这些引用。
  */
-const OUTPUT_TEXTURE_MANIFEST = path.join(ROOT_DIR, "apps", "web", "src", "utils", "title-frame", "title-frame-textures.json")
-const OUTPUT_IMAGES = path.join(ROOT_DIR, "apps", "web", "public", "imgs", "titleframe")
+const OUTPUT_TEXTURE_MANIFEST = path.join(path.dirname(OUTPUT_DATA), `${FRAME_KIND}-frame-textures.json`)
+const OUTPUT_IMAGES = path.join(ROOT_DIR, "apps", "web", "public", "imgs", IMAGE_DIR)
 
 /** 动画时间轴刻度：UMG 默认 60000 tick / 秒。 */
 const DEFAULT_TICK_RESOLUTION = 60000
@@ -84,6 +103,35 @@ const onlyFrames = (getArgValue("--frames") ?? "")
 // ---------------------------------------------------------------------------
 
 /**
+ * 定位 FModel 导出根目录（其下有 `EM/Content/...`）。
+ *
+ * 优先级：TITLE_FRAME_EXPORTS / DNA_UNPACK_EXPORTS > 默认 D 盘解包目录 > 仓库同级 dna-unpack。
+ * 都找不到时返回空串，调用方全部回退到 pak 读取。
+ *
+ * @returns 导出根目录，未找到时为空串
+ */
+function resolveExportRoot(): string {
+    const override = process.env[`${ENV_PREFIX}_EXPORTS`] ?? process.env.DNA_UNPACK_EXPORTS
+    const candidates = [
+        override,
+        "D:/dev/dna-unpack/Fmodel/Output/Exports",
+        path.join(ROOT_DIR, "..", "dna-unpack", "Fmodel", "Output", "Exports"),
+    ].filter((value): value is string => Boolean(value))
+    return candidates.find(dir => fs.existsSync(path.join(dir, "EM", "Content"))) ?? ""
+}
+
+/**
+ * 包路径对应的本地 .uasset 文件（导出目录与包路径同构）。
+ * @param pkg 包路径，如 `EM/Content/UI/.../WBP_PersonalInfo_Title_16_1`
+ * @returns 绝对路径；本地不存在时 null
+ */
+function localUasset(pkg: string): string | null {
+    if (!EXPORT_ROOT) return null
+    const candidate = `${path.join(EXPORT_ROOT, ...pkg.split("/"))}.uasset`
+    return fs.existsSync(candidate) ? candidate : null
+}
+
+/**
  * 调用 fmodel-cli 并解析其 stdout JSON。
  * @param cliArgs 子命令与参数
  * @returns 解析后的 JSON 对象
@@ -110,6 +158,8 @@ function cachePathFor(kind: string, pkg: string): string {
 
 /**
  * 读取（带缓存）某个包的导出对象 JSON。
+ *
+ * 本地导出目录有该包时用 `read-file` 直接解码 .uasset，否则回退 pak 的 `read`。
  * @param pkg 包路径，例如 `EM/Content/.../WBP_PersonalInfo_Title_07_1`
  * @returns 导出对象数组
  */
@@ -118,7 +168,8 @@ function readPackage(pkg: string): Record<string, any>[] {
     if (!FORCE && fs.existsSync(cacheFile)) {
         return JSON.parse(fs.readFileSync(cacheFile, "utf8"))
     }
-    const payload = runCli(["read", pkg])
+    const local = localUasset(pkg)
+    const payload = runCli(local ? ["read-file", local] : ["read", pkg])
     const objects = payload.objects as Record<string, any>[]
     fs.mkdirSync(CACHE_DIR, { recursive: true })
     fs.writeFileSync(cacheFile, JSON.stringify(objects), "utf8")
@@ -144,7 +195,8 @@ function inspectMaterial(pkg: string): MaterialSummary {
     if (!FORCE && fs.existsSync(cacheFile)) {
         return JSON.parse(fs.readFileSync(cacheFile, "utf8"))
     }
-    const payload = runCli(["inspect", pkg])
+    const local = localUasset(pkg)
+    const payload = runCli(local ? ["inspect-file", local] : ["inspect", pkg])
     const summary = (payload.objects as MaterialSummary[])[0]
     fs.mkdirSync(CACHE_DIR, { recursive: true })
     fs.writeFileSync(cacheFile, JSON.stringify(summary), "utf8")
@@ -153,6 +205,9 @@ function inspectMaterial(pkg: string): MaterialSummary {
 
 /**
  * 导出贴图 PNG（带缓存），返回 PNG 绝对路径与尺寸。
+ *
+ * 优先用本地 .uasset 解码（export-tex-file，支持外置 .ubulk），本地没有该包时才读 pak
+ * （export-tex）；两者都失败再退回 FModel 已烘焙的 PNG。
  * @param pkg 贴图包路径
  * @returns PNG 路径与宽高
  */
@@ -161,21 +216,32 @@ function exportTexture(pkg: string): { pngPath: string; width: number; height: n
     if (!FORCE && fs.existsSync(cacheFile)) {
         return JSON.parse(fs.readFileSync(cacheFile, "utf8"))
     }
-    try {
-        const payload = runCli(["export-tex", pkg])
-        const info = { pngPath: String(payload.outputPath), width: Number(payload.width), height: Number(payload.height) }
-        fs.mkdirSync(CACHE_DIR, { recursive: true })
-        fs.writeFileSync(cacheFile, JSON.stringify(info), "utf8")
-        return info
-    } catch (error) {
-        // 补充包场景：新客户端纹理缺 .uasset，只有 FModel 烘焙的 PNG（如 15_x 主贴图），用它代替
-        const fallback = bakedPngFallback(pkg)
-        if (!fallback) throw error
-        console.warn(`  ~ ${pkg} 无 pak 资源，改用烘焙 PNG ${path.relative(ROOT_DIR, fallback.pngPath)}`)
-        fs.mkdirSync(CACHE_DIR, { recursive: true })
-        fs.writeFileSync(cacheFile, JSON.stringify(fallback), "utf8")
-        return fallback
+    const local = localUasset(pkg)
+    const attempts = local
+        ? [
+              ["export-tex-file", local],
+              ["export-tex", pkg],
+          ]
+        : [["export-tex", pkg]]
+    let lastError: unknown
+    for (const cliArgs of attempts) {
+        try {
+            const payload = runCli(cliArgs)
+            const info = { pngPath: String(payload.outputPath), width: Number(payload.width), height: Number(payload.height) }
+            fs.mkdirSync(CACHE_DIR, { recursive: true })
+            fs.writeFileSync(cacheFile, JSON.stringify(info), "utf8")
+            return info
+        } catch (error) {
+            lastError = error
+        }
     }
+    // 补充包场景：新客户端纹理缺 .uasset，只有 FModel 烘焙的 PNG（如 15_x 主贴图），用它代替
+    const fallback = bakedPngFallback(pkg)
+    if (!fallback) throw lastError
+    console.warn(`  ~ ${pkg} 无可用 uasset/pak 资源，改用烘焙 PNG ${path.relative(ROOT_DIR, fallback.pngPath)}`)
+    fs.mkdirSync(CACHE_DIR, { recursive: true })
+    fs.writeFileSync(cacheFile, JSON.stringify(fallback), "utf8")
+    return fallback
 }
 
 let cachedExportsRoot: string | null = null
@@ -643,10 +709,10 @@ function measure(node: WidgetNode, parentWidth: number, parentHeight: number): {
                 if (!slot.content) continue
                 const childSize = measure(slot.content, parentWidth, parentHeight)
                 const padding = readPadding(slot)
-                if (mapAlignH(slot.props.HorizontalAlignment) !== "fill") {
+                if (IS_HEAD_FRAME || mapAlignH(slot.props.HorizontalAlignment) !== "fill") {
                     width = Math.max(width, childSize.width + padding[0] + padding[2])
                 }
-                if (mapAlignV(slot.props.VerticalAlignment) !== "fill") {
+                if (IS_HEAD_FRAME || mapAlignV(slot.props.VerticalAlignment) !== "fill") {
                     height = Math.max(height, childSize.height + padding[1] + padding[3])
                 }
             }
@@ -658,8 +724,18 @@ function measure(node: WidgetNode, parentWidth: number, parentHeight: number): {
             for (const slot of node.slots) {
                 if (!slot.content) continue
                 const rect = arrangeCanvasSlot(slot.props, parentWidth, parentHeight, measure(slot.content, parentWidth, parentHeight))
-                width = Math.max(width, rect.left + rect.width)
-                height = Math.max(height, rect.top + rect.height)
+                width = Math.max(
+                    width,
+                    IS_HEAD_FRAME && !parentWidth
+                        ? rect.width + Math.abs(Number(slot.props.LayoutData?.Offsets?.Left ?? 0)) * 2
+                        : rect.left + rect.width
+                )
+                height = Math.max(
+                    height,
+                    IS_HEAD_FRAME && !parentHeight
+                        ? rect.height + Math.abs(Number(slot.props.LayoutData?.Offsets?.Top ?? 0)) * 2
+                        : rect.top + rect.height
+                )
             }
             return { width, height }
         }
@@ -697,11 +773,11 @@ function arrangeCanvasSlot(
 
     const stretchX = maxX > minX
     const stretchY = maxY > minY
-    const width = stretchX ? parentWidth * (maxX - minX) + offRight - offLeft : offRight || desired.width
-    const height = stretchY ? parentHeight * (maxY - minY) + offBottom - offTop : offBottom || desired.height
+    const width = stretchX ? parentWidth * (maxX - minX) - offLeft + (IS_HEAD_FRAME ? -offRight : offRight) : offRight || desired.width
+    const height = stretchY ? parentHeight * (maxY - minY) - offTop + (IS_HEAD_FRAME ? -offBottom : offBottom) : offBottom || desired.height
     return {
-        left: parentWidth * minX + offLeft - width * Number(alignment.X ?? 0),
-        top: parentHeight * minY + offTop - height * Number(alignment.Y ?? 0),
+        left: parentWidth * minX + offLeft - width * (IS_HEAD_FRAME && stretchX ? 0 : Number(alignment.X ?? 0)),
+        top: parentHeight * minY + offTop - height * (IS_HEAD_FRAME && stretchY ? 0 : Number(alignment.Y ?? 0)),
         width,
         height,
     }
@@ -873,7 +949,7 @@ function parseAnimations(objects: Record<string, any>[]): Record<string, TitleFr
 
     for (const animation of objects) {
         if (animation.Type !== "WidgetAnimation") continue
-        const label = String(animation.Properties?.DisplayLabel ?? animation.Name.replace(/_INST$/, "")).toLowerCase()
+        const label = normalizeFrameAnimationLabel(String(animation.Properties?.DisplayLabel ?? animation.Name))
         const scene = resolveRef(index, animation.Properties?.MovieScene?.ObjectName)
         if (!scene) continue
 
@@ -1218,10 +1294,7 @@ function assignTextureFileNames(packages: Set<string>): Map<string, string> {
 // ---------------------------------------------------------------------------
 
 /** TitleFrame.lua 解析结果。 */
-interface TitleFrameEntry {
-    id: number
-    widget: string
-}
+type TitleFrameEntry = UiFrameEntry
 
 /**
  * 解析反编译后的 TitleFrame.lua，得到 ID → WBP 映射。
@@ -1229,17 +1302,10 @@ interface TitleFrameEntry {
  */
 function parseTitleFrameLua(): TitleFrameEntry[] {
     if (!fs.existsSync(TITLE_FRAME_LUA)) {
-        throw new Error(`未找到 ${TITLE_FRAME_LUA}，请设置 TITLE_FRAME_LUA 指向反编译后的 TitleFrame.lua`)
+        throw new Error(`未找到 ${TITLE_FRAME_LUA}，请设置 ${ENV_PREFIX}_LUA 指向反编译后的数据表`)
     }
     const source = fs.readFileSync(TITLE_FRAME_LUA, "utf8")
-    const entries: TitleFrameEntry[] = []
-    const blockRegex = /\[(\d+)\]\s*=\s*\{([^}]*)\}/g
-    let match: RegExpExecArray | null
-    while ((match = blockRegex.exec(source))) {
-        const widget = /FramePath\s*=\s*"([^"]+)"/.exec(match[2])?.[1].match(/WBP_PersonalInfo_Title_[A-Za-z0-9_]+/)?.[0]
-        if (widget) entries.push({ id: Number(match[1]), widget })
-    }
-    return entries
+    return parseUiFrameEntries(source, FRAME_KIND)
 }
 
 /**
@@ -1248,7 +1314,7 @@ function parseTitleFrameLua(): TitleFrameEntry[] {
  * @returns frame key
  */
 function widgetToKey(widget: string): string {
-    return widget.replace(/^WBP_PersonalInfo_Title_/, "")
+    return widget.replace(IS_HEAD_FRAME ? /^WBP_DynamicFrame_/ : /^WBP_PersonalInfo_Title_/, "")
 }
 
 /**
@@ -1256,10 +1322,6 @@ function widgetToKey(widget: string): string {
  * @param widget WBP 资源名
  * @returns 包路径
  */
-function widgetToPackage(widget: string): string {
-    return `EM/Content/UI/WBP/PersonalInfo/Widget/Title/Title/${widget}`
-}
-
 /** 生成文件头部注释。 */
 const GENERATED_HEADER = `/**
  * 本文件由 \`bun tools/import-title-frame.ts\` 从游戏 pak 生成，请勿手工修改。
@@ -1338,14 +1400,17 @@ function toTsLiteral(value: unknown, depth = 0): string {
  * @returns 文件文本
  */
 function renderGeneratedFile(frames: Record<string, TitleFrameDef>, idToKey: Record<number, string>): string {
-    return `${GENERATED_HEADER}
+    const header = IS_HEAD_FRAME
+        ? `/** 本文件由 \`bun tools/import-head-frame.ts\` 从 HeadFrame.lua 的 DynamicPath 与游戏控件树生成，请勿手工修改。 */\n`
+        : GENERATED_HEADER
+    return `${header}
 import type { TitleFrameDef } from "@/utils/title-frame/title-frame"
 
-/** 全部称号框数据，key 为 WBP 资源名后缀（如 "07_2"）。 */
-export const titleFrames: Record<string, TitleFrameDef> = ${toTsLiteral(frames)}
+/** 全部${FRAME_LABEL}数据，key 为 WBP 资源名后缀。 */
+export const ${FRAME_KIND}Frames: Record<string, TitleFrameDef> = ${toTsLiteral(frames)}
 
-/** 称号框 ID → \`titleFrames\` 的 key。 */
-export const titleFrameIdToKey: Record<number, string> = ${toTsLiteral(idToKey)}
+/** ${FRAME_LABEL} ID → \`${FRAME_KIND}Frames\` 的 key。 */
+export const ${FRAME_KIND}FrameIdToKey: Record<number, string> = ${toTsLiteral(idToKey)}
 `
 }
 
@@ -1365,7 +1430,7 @@ async function main(): Promise<void> {
     if (onlyFrames.length > 0) {
         widgets = widgets.filter(widget => onlyFrames.includes(widgetToKey(widget)))
     }
-    console.log(`称号框资源：${widgets.length} 个 WBP，共 ${entries.length} 个 ID`)
+    console.log(`${FRAME_LABEL}资源：${widgets.length} 个 WBP，共 ${entries.length} 个 ID`)
 
     // 阶段一：读取所有 WBP，收集图层草稿与材质/贴图清单
     interface Draft {
@@ -1380,7 +1445,9 @@ async function main(): Promise<void> {
     for (const widget of widgets) {
         let objects: Record<string, any>[]
         try {
-            objects = readPackage(widgetToPackage(widget))
+            const entry = entries.find(entry => entry.widget === widget)
+            if (!entry) continue
+            objects = readPackage(entry.package)
         } catch (error) {
             // TitleFrame.lua 会包含尚未投放 / 已下线的称号框，pak 里查不到时跳过即可
             console.warn(`  ! ${widget} 读取失败，跳过：${error instanceof Error ? error.message.slice(0, 160) : error}`)
@@ -1466,6 +1533,20 @@ async function main(): Promise<void> {
 
     // 阶段四：导出用到的贴图并转成 WebP
     const textureFileNames = assignTextureFileNames(texturePackages)
+    const additiveTextures = new Set(
+        laidOut.filter(layer => IS_HEAD_FRAME && layer.resolved.blend === "add").map(layer => layer.resolved.texturePackage)
+    )
+    for (const layer of laidOut) {
+        if (layer.resolved.blend !== "add") additiveTextures.delete(layer.resolved.texturePackage)
+        for (const pkg of layer.resolved.maskPackages) additiveTextures.delete(pkg)
+        for (const [parameter, pkg] of Object.entries(layer.resolved.texturePackages)) {
+            if (parameter !== "MainTex") additiveTextures.delete(pkg)
+        }
+    }
+    for (const pkg of additiveTextures) {
+        const name = textureFileNames.get(pkg)
+        if (name) textureFileNames.set(pkg, name.replace(/\.webp$/, "_additive.webp"))
+    }
     console.log(`导出贴图 ${texturePackages.size} 张 → ${path.relative(ROOT_DIR, OUTPUT_IMAGES)}`)
     for (const pkg of texturePackages) {
         const exported = exportTexture(pkg)
@@ -1475,7 +1556,8 @@ async function main(): Promise<void> {
         const destPath = path.join(OUTPUT_IMAGES, fileName)
         if (FORCE || !fs.existsSync(destPath)) {
             fs.mkdirSync(OUTPUT_IMAGES, { recursive: true })
-            await new Bun.Image(exported.pngPath).webp({ quality: 100, lossless: true }).write(destPath)
+            const input = additiveTextures.has(pkg) ? additivePng(fs.readFileSync(exported.pngPath)) : exported.pngPath
+            await new Bun.Image(input).webp({ quality: 100, lossless: true }).write(destPath)
         }
     }
 
@@ -1491,6 +1573,7 @@ async function main(): Promise<void> {
 
     // 写下贴图清单，供 webp-import 反查源 PNG（新文件名带前缀，basename 对不上）
     const manifest = Object.fromEntries([...textureFileNames].map(([pkg, fileName]) => [fileName, pkg]))
+    fs.mkdirSync(path.dirname(OUTPUT_TEXTURE_MANIFEST), { recursive: true })
     fs.writeFileSync(OUTPUT_TEXTURE_MANIFEST, `${JSON.stringify(manifest, null, 4)}\n`, "utf8")
     console.log(`贴图清单 ${textureFileNames.size} 条 → ${path.relative(ROOT_DIR, OUTPUT_TEXTURE_MANIFEST)}`)
 
@@ -1506,24 +1589,29 @@ async function main(): Promise<void> {
         }
         const size = textureSizes.get(laid.resolved.texturePackage) ?? { width: 0, height: 0 }
         const transform = readRenderTransform(laid.item.node)
+        const stage = stages.get(laid.frameKey)
+        const rect = laid.item.rect
         const list = layersByFrame.get(laid.frameKey) ?? []
         list.push({
             key: laid.item.node.name,
-            src: `/imgs/titleframe/${fileName}`,
-            masks: masks.map(name => `/imgs/titleframe/${name}`),
+            src: `/imgs/${IMAGE_DIR}/${fileName}`,
+            masks: masks.map(name => `/imgs/${IMAGE_DIR}/${name}`),
             textures: Object.fromEntries(
                 Object.entries(laid.resolved.texturePackages)
                     .map(([param, pkg]) => [param, textureFileNames.get(pkg)])
                     .filter(([, name]) => Boolean(name))
-                    .map(([param, name]) => [param, `/imgs/titleframe/${name}`])
+                    .map(([param, name]) => [param, `/imgs/${IMAGE_DIR}/${name}`])
             ),
             textureWidth: size.width,
             textureHeight: size.height,
-            width: laid.brush.width,
-            height: laid.brush.height,
-            alignH: laid.resolved.alignH,
-            alignV: laid.resolved.alignV,
-            padding: laid.resolved.padding,
+            width: IS_HEAD_FRAME ? rect.width : laid.brush.width,
+            height: IS_HEAD_FRAME ? rect.height : laid.brush.height,
+            alignH: IS_HEAD_FRAME ? "fill" : laid.resolved.alignH,
+            alignV: IS_HEAD_FRAME ? "fill" : laid.resolved.alignV,
+            padding:
+                IS_HEAD_FRAME && stage
+                    ? [rect.left, rect.top, stage.width - rect.left - rect.width, stage.height - rect.top - rect.height]
+                    : laid.resolved.padding,
             translation: transform.translation,
             scale: transform.scale,
             shear: transform.shear,
@@ -1578,7 +1666,7 @@ async function main(): Promise<void> {
 
     fs.mkdirSync(path.dirname(OUTPUT_DATA), { recursive: true })
     fs.writeFileSync(OUTPUT_DATA, renderGeneratedFile(frames, idToKey), "utf8")
-    console.log(`已写入 ${path.relative(ROOT_DIR, OUTPUT_DATA)}（${Object.keys(frames).length} 个称号框）`)
+    console.log(`已写入 ${path.relative(ROOT_DIR, OUTPUT_DATA)}（${Object.keys(frames).length} 个${FRAME_LABEL}）`)
 }
 
 /**
@@ -1657,7 +1745,7 @@ function resolveLayer(
         const texturePackages: Record<string, string> = {}
         if (material) {
             const baseName = (parentToPackage(material.parent) ?? "").split("/").pop() ?? ""
-            const wanted = PORTED_MATERIAL_TEXTURES[baseName]
+            const wanted = IS_HEAD_FRAME ? ["MainTex", "Mask", "Mask2", "DistortionTex"] : PORTED_MATERIAL_TEXTURES[baseName]
             if (wanted) {
                 const candidates = collectTextureCandidates(material)
                 for (const name of wanted) {

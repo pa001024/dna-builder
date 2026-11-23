@@ -120,6 +120,7 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         // APP 下载页只服务网页端访客（Tauri 桌面端已经是完整客户端，不需要再装移动端）
         { name: "download", path: "/download", icon: "ri:download-2-line", show: !isApp },
         { name: "game-launcher", path: "/game-launcher", icon: "ri:rocket-2-line" },
+        { name: "log-analysis", path: "/log-analysis", icon: "ri:line-chart-line", show: isApp },
         // 狩月账本只消费桌面端的奖励管道，网页端没有数据源
         { name: "afk-ledger", path: "/afk", icon: "ri:file-list-line", show: isApp },
         // 技能 CD 浮窗依赖 Tauri 后端（原生置顶浮窗），网页端不显示。

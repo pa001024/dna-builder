@@ -92,7 +92,7 @@
     --font-mona: "Mona Sans", sans-serif;
     --font-wt: "WorldText02", sans-serif;
     /* 等宽中文回退指向 is-app-font 簇，避免中文字符落到系统 monospace */
-    --font-mono: Consolas, var(--app-user-font, "HarmonyOS Sans SC", var(--app-font-fallback)), monospace;
+    --font-mono: "CaskaydiaCove", Consolas, var(--app-user-font, "HarmonyOS Sans SC", var(--app-font-fallback)), monospace;
 
     /* 尘埃粒子自下而上缓慢上浮 */
     @keyframes mote-rise {
@@ -438,6 +438,38 @@ body {
     font-weight: 400;
     font-display: swap;
     src: url("/fonts/HarmonyOS_Sans_SC_Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "CaskaydiaCove";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/CaskaydiaCove-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "CaskaydiaCove";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/CaskaydiaCove-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "CaskaydiaCove";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/CaskaydiaCove-Italic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "CaskaydiaCove";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/CaskaydiaCove-BoldItalic.ttf") format("truetype");
 }
 
 :root {

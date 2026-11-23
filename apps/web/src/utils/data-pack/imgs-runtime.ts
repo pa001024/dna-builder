@@ -5,6 +5,10 @@ import { env } from "@/env"
 import { buildCdnUrl, getOtherCdnBase, readResponseBytesWithProgress } from "../cdn"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
+/** 图片服务工作线程（sw-app.js）写入的运行时图片缓存 */
+const IMGS_RUNTIME_CACHE_NAME = "dna-builder-imgs-runtime"
+/** 网页版 PWA（sw.js）的图片运行时缓存 */
+const WEB_IMAGE_CACHE_NAME = "image-cache"
 
 const IMGS_PACK_VERSIONS_FILE = "versions.json"
 const IMGS_INSTALL_MARKER_FILE = ".installed.json"
@@ -638,17 +642,133 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
 }
 
 /**
- * 删除图片缓存目录。
+ * 图片缓存当前状态：OPFS 安装标识与占用、运行时缓存与图片服务状态。
  */
-export async function deleteImgsCache(): Promise<void> {
-    if (!hasOpfs()) {
-        return
+export type ImgsCacheStatus = {
+    supported: boolean
+    installedVersion: string | null
+    manifestHash: string | null
+    fileCount: number
+    totalBytes: number
+    runtimeCacheEntries: number
+    serviceWorkerActive: boolean
+}
+
+/**
+ * 递归统计目录中的文件数与总字节数（安装标识不计入图片数量）。
+ * @param directory 目录句柄
+ * @returns 文件数与总字节数
+ */
+async function measureDirectory(directory: FileSystemDirectoryHandle): Promise<{ fileCount: number; totalBytes: number }> {
+    let fileCount = 0
+    let totalBytes = 0
+    for await (const [name, handle] of directory.entries()) {
+        if (handle.kind === "directory") {
+            const nested = await measureDirectory(handle)
+            fileCount += nested.fileCount
+            totalBytes += nested.totalBytes
+            continue
+        }
+
+        if (name === IMGS_INSTALL_MARKER_FILE) {
+            continue
+        }
+
+        try {
+            const file = await handle.getFile()
+            fileCount += 1
+            totalBytes += file.size
+        } catch {
+            // 读取失败的文件按未缓存处理
+        }
     }
 
-    const root = await getRootDirectory()
+    return { fileCount, totalBytes }
+}
+
+/**
+ * 读取当前图片缓存状态（OPFS 安装标识、文件占用、运行时缓存与服务线程）。
+ * @returns 图片缓存状态
+ */
+export async function getImgsCacheStatus(): Promise<ImgsCacheStatus> {
+    const status: ImgsCacheStatus = {
+        supported: hasOpfs(),
+        installedVersion: null,
+        manifestHash: null,
+        fileCount: 0,
+        totalBytes: 0,
+        runtimeCacheEntries: 0,
+        serviceWorkerActive: false,
+    }
+    if (!status.supported) {
+        return status
+    }
+
     try {
-        await root.removeEntry(IMGS_CACHE_DIR, { recursive: true })
-    } catch {}
+        const root = await getRootDirectory()
+        const imgsDirectory = await root.getDirectoryHandle(IMGS_CACHE_DIR, { create: false }).catch(() => null)
+        if (imgsDirectory) {
+            const markerBytes = await readFile(imgsDirectory, IMGS_INSTALL_MARKER_FILE)
+            if (markerBytes) {
+                try {
+                    const marker = JSON.parse(new TextDecoder().decode(markerBytes)) as Partial<ImgsInstallMarker>
+                    status.installedVersion = marker.installedVersion || null
+                    status.manifestHash = marker.manifestHash || null
+                } catch {
+                    // 标识损坏按未安装处理，但保留已有文件统计
+                }
+            }
+            const measured = await measureDirectory(imgsDirectory)
+            status.fileCount = measured.fileCount
+            status.totalBytes = measured.totalBytes
+        }
+    } catch {
+        // OPFS 不可读时保留默认值
+    }
+
+    if (typeof caches !== "undefined") {
+        try {
+            if (await caches.has(IMGS_RUNTIME_CACHE_NAME)) {
+                const cache = await caches.open(IMGS_RUNTIME_CACHE_NAME)
+                status.runtimeCacheEntries = (await cache.keys()).length
+            }
+        } catch {
+            // 运行时缓存不可读时忽略
+        }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.serviceWorker) {
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations()
+            status.serviceWorkerActive = registrations.some(
+                registration => Boolean(registration.active) && Boolean(registration.active?.scriptURL.endsWith("/sw-app.js"))
+            )
+        } catch {
+            // 无法查询注册信息时按未启用处理
+        }
+    }
+
+    return status
+}
+
+/**
+ * 删除图片缓存：OPFS 图片目录与运行时 Cache Storage（不卸载图片服务线程）。
+ */
+export async function deleteImgsCache(): Promise<void> {
+    if (hasOpfs()) {
+        try {
+            const root = await getRootDirectory()
+            await root.removeEntry(IMGS_CACHE_DIR, { recursive: true })
+        } catch {}
+    }
+
+    if (typeof caches !== "undefined") {
+        for (const cacheName of [IMGS_RUNTIME_CACHE_NAME, WEB_IMAGE_CACHE_NAME]) {
+            try {
+                await caches.delete(cacheName)
+            } catch {}
+        }
+    }
 
     resetImgsDownloadState()
 }

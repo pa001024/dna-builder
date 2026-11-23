@@ -2,6 +2,7 @@
 import { useTranslation } from "i18next-vue"
 import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
 import { titleData } from "@/data/d/title.data"
+import { headFrameIdToKey } from "@/utils/head-frame/head-frame.generated"
 import { getDropModeText, getRewardTypeText } from "@/utils/i18n-utils"
 import { getRewardIconBackground, getRewardIconUrl } from "@/utils/reward-icon"
 import { getRewardDetailLink } from "@/utils/reward-link"
@@ -24,6 +25,8 @@ interface Props {
     rewardId?: number | string
     typeFilter?: string[]
     header?: boolean | string
+    /** 标题行不显示奖励组 ID（赛季档位 / 螺旋通关奖励按 §90 口径） */
+    hideId?: boolean
 }
 
 const props = defineProps<Props>()
@@ -239,7 +242,7 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
     <div v-else class="space-y-1">
         <div class="flex items-center gap-2 mb-1" v-if="reward && header">
             <span class="text-xs font-medium"
-                >{{ typeof header === "string" ? header : $t("reward-item.reward_group") }} <CopyID :id="reward.id" /></span
+                >{{ typeof header === "string" ? header : $t("reward-item.reward_group") }} <CopyID v-if="!hideId" :id="reward.id" /></span
             >
             <slot></slot>
             <span class="badge badge-sm" :class="reward.m === 'Independent' ? 'badge-success' : 'badge-warning'">
@@ -253,31 +256,43 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
                 <div class="flex items-start gap-2 text-xs">
                     <div class="flex-1">
                         <div class="flex items-center gap-2">
-                            <span class="flex min-w-0 items-center gap-1">
-                                <img
-                                    v-if="item.t !== 'Reward'"
-                                    :src="getRewardIcon(item)"
-                                    :alt="getRewardDisplayName(item)"
-                                    class="size-6 shrink-0 rounded bg-linear-45"
-                                    :class="getRewardBackgroundColor(item)"
-                                />
-                                <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
-                                    {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
-                                    {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
-                                    {{ getRewardDisplayName(item) }}
-                                </SRouterLink>
-                                <span v-else>
-                                    {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
-                                    {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
-                                    {{ getRewardDisplayName(item) }}
+                            <TooltipWrapper :type="item.t" :id="item.id">
+                                <span class="flex min-w-0 items-center gap-1">
+                                    <HeadFrameRender
+                                        v-if="item.t === 'HeadFrame' && headFrameIdToKey[item.id]"
+                                        :head-frame-id="item.id"
+                                        :alt="getRewardDisplayName(item)"
+                                        class="size-6"
+                                    />
+                                    <img
+                                        v-else-if="item.t !== 'Reward'"
+                                        :src="getRewardIcon(item)"
+                                        :alt="getRewardDisplayName(item)"
+                                        class="size-6 shrink-0 rounded bg-linear-45"
+                                        :class="getRewardBackgroundColor(item)"
+                                    />
+                                    <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
+                                        {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
+                                        {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
+                                        {{ getRewardDisplayName(item) }}
+                                    </SRouterLink>
+                                    <span v-else>
+                                        {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
+                                        {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
+                                        {{ getRewardDisplayName(item) }}
+                                    </span>
+                                    <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                                 </span>
-                                <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
-                            </span>
+                            </TooltipWrapper>
                             <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
                             <span v-if="isFixedRewardGroup(item)" class="text-base-content/70">{{ $t("reward-item.fixed") }}</span>
                             <span v-if="getParentShareText(item)" class="text-base-content/70">{{ getParentShareText(item) }}</span>
                             <!-- 显示掉落模式 -->
-                            <span v-if="item.t === 'Reward'" class="badge badge-sm" :class="item.m === 'Independent' ? 'badge-success' : 'badge-warning'">
+                            <span
+                                v-if="item.t === 'Reward'"
+                                class="badge badge-sm"
+                                :class="item.m === 'Independent' ? 'badge-success' : 'badge-warning'"
+                            >
                                 {{ $t(getDropModeText(item.m || "")) }}
                                 <span v-if="item.totalP">{{ $t("reward-item.total_capacity", { count: item.totalP }) }}</span>
                             </span>

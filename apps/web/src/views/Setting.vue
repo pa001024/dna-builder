@@ -29,10 +29,12 @@ import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import {
     clearAllDataPackStorage,
     type DataPackSourceKind,
+    type DataPackVersionInfo,
     getInstalledDataPackVersions,
     getMergedDataPackVersions,
 } from "@/utils/data-pack/data-pack"
-import { deleteImgsCache, imgsDownloadState } from "@/utils/data-pack/imgs-runtime"
+import { isDataPackMajorSupported } from "@/utils/data-pack/data-pack-format"
+import { deleteImgsCache, getImgsCacheStatus, type ImgsCacheStatus, imgsDownloadState } from "@/utils/data-pack/imgs-runtime"
 import {
     getMoreItems,
     mergeSidebarCatalog,
@@ -97,6 +99,7 @@ const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
 const isClearingDataPackStorage = ref(false)
+const isCleaningDataPackVersions = ref(false)
 const formatSize = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1 })
 const dataPackLoadingRemoteVersions = ref(false)
 
@@ -242,6 +245,84 @@ const imgsDownloadProgressValue = computed(() => {
     return Math.round((state.completed / state.total) * 100)
 })
 
+/** 图片缓存状态快照（OPFS 占用 / 运行时缓存 / 图片服务） */
+const imgsCacheStatus = ref<ImgsCacheStatus | null>(null)
+const isLoadingImgsCacheStatus = ref(false)
+const isClearingImgsCache = ref(false)
+
+/** 图片缓存状态：下载中优先，其次是安装标识与当前数据包是否一致 */
+const imgsCacheState = computed<"downloading" | "scanning" | "unknown" | "unsupported" | "missing" | "stale" | "ready">(() => {
+    if (imgsDownloadState.value.active) {
+        return "downloading"
+    }
+
+    const status = imgsCacheStatus.value
+    if (!status) {
+        return isLoadingImgsCacheStatus.value ? "scanning" : "unknown"
+    }
+    if (!status.supported) {
+        return "unsupported"
+    }
+    if (!status.fileCount) {
+        return "missing"
+    }
+
+    const expectedVersion = dataPack.status?.version
+    const expectedHash = dataPack.status?.manifest?.imgsHash
+    const mismatch =
+        (Boolean(expectedVersion) && status.installedVersion !== expectedVersion) || (Boolean(expectedHash) && status.manifestHash !== expectedHash)
+    return mismatch ? "stale" : "ready"
+})
+
+/** 图片缓存状态文案 */
+const imgsCacheStateLabel = computed(() => {
+    const labels = {
+        downloading: t("setting.imgsCacheStatusDownloading"),
+        scanning: t("setting.imgsCacheStatusScanning"),
+        unknown: t("setting.unknown"),
+        unsupported: t("setting.imgsCacheUnsupported"),
+        missing: t("setting.imgsCacheStatusMissing"),
+        stale: t("setting.imgsCacheStatusStale"),
+        ready: t("setting.imgsCacheStatusReady"),
+    }
+    return labels[imgsCacheState.value]
+})
+
+/** 图片缓存明细：版本、文件数与占用、运行时缓存条数；异常时补上图片服务状态 */
+const imgsCacheDetailLabel = computed(() => {
+    const status = imgsCacheStatus.value
+    if (!status || !status.supported || !status.fileCount) {
+        return ""
+    }
+
+    const parts = [
+        t("setting.imgsCacheVersion", { version: status.installedVersion || t("setting.unknown") }),
+        t("setting.imgsCacheFileCount", {
+            count: status.fileCount,
+            size: `${formatSize.format(status.totalBytes / 1024 / 1024)} MB`,
+        }),
+    ]
+    if (status.runtimeCacheEntries > 0) {
+        parts.push(t("setting.imgsCacheRuntimeCount", { count: status.runtimeCacheEntries }))
+    }
+    if (!status.serviceWorkerActive) {
+        parts.push(t("setting.imgsCacheSwInactive"))
+    }
+    return parts.join(" · ")
+})
+
+/** 图片缓存状态圆点配色 */
+const imgsCacheStateDotClass = computed(() => {
+    const state = imgsCacheState.value
+    if (state === "ready") {
+        return "bg-success"
+    }
+    if (state === "downloading" || state === "stale") {
+        return "bg-warning"
+    }
+    return "bg-base-content/30"
+})
+
 /** 上次内存清理结果的可读摘要（失败时逐进程列出原因）。 */
 const memCleanSummary = computed(() => {
     if (setting.memCleanLastError) {
@@ -359,6 +440,12 @@ function gotoDataPackPage(page: number) {
 
 const installedDataPackVersions = computed(() => {
     return new Set(dataPack.installedVersions)
+})
+
+/** 已安装但非激活的版本：一键清理只卸载这些 */
+const inactiveDataPackVersions = computed(() => {
+    const activeVersion = dataPack.status?.version
+    return dataPack.installedVersions.filter(version => version !== activeVersion)
 })
 
 // 主题清单抽到 utils/themes 共享:主设置页与屏幕信息条的独立主题选择共用一份
@@ -963,6 +1050,11 @@ function isCurrentDataPackVersion(version: string) {
     return dataPack.status?.version === version
 }
 
+/** 版本清单里的 major 超出当前应用支持范围时，安装入口置灰。 */
+function isDataPackVersionCompatible(version: DataPackVersionInfo) {
+    return isDataPackMajorSupported(version.major, version.version)
+}
+
 function onVersionDragStart(event: DragEvent, version: string) {
     if (!event.dataTransfer || !isDownloadedVersion(version)) {
         event.preventDefault()
@@ -1017,6 +1109,27 @@ async function uninstallDataPackVersion(version: string) {
     await dataPack.uninstallVersion(version)
 }
 
+async function cleanInactiveDataPackVersions() {
+    const count = inactiveDataPackVersions.value.length
+    if (!count) {
+        return
+    }
+
+    if (!(await ui.showDialog(t("setting.cleanInactiveDataPacks"), t("setting.cleanInactiveDataPacksConfirm", { count })))) {
+        return
+    }
+
+    isCleaningDataPackVersions.value = true
+    try {
+        await dataPack.cleanInactiveVersions()
+    } catch (error) {
+        console.error("清理非激活数据包版本失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+        isCleaningDataPackVersions.value = false
+    }
+}
+
 async function clearDataPackStorage() {
     if (!(await ui.showDialog(t("setting.reset"), "清空后会删除所有数据包和图片缓存，且无法恢复。"))) {
         return
@@ -1027,6 +1140,7 @@ async function clearDataPackStorage() {
         await clearAllDataPackStorage()
         await deleteImgsCache()
         await refreshDataPackStatus(true)
+        await refreshImgsCacheStatus()
     } catch (error) {
         console.error("清空数据包存储失败", error)
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
@@ -1034,6 +1148,63 @@ async function clearDataPackStorage() {
         isClearingDataPackStorage.value = false
     }
 }
+
+/**
+ * 刷新图片缓存状态（仅桌面端有本地图片缓存）。
+ */
+async function refreshImgsCacheStatus() {
+    if (!env.isApp) {
+        return
+    }
+
+    isLoadingImgsCacheStatus.value = true
+    try {
+        imgsCacheStatus.value = await getImgsCacheStatus()
+    } catch (error) {
+        console.error("读取图片缓存状态失败", error)
+    } finally {
+        isLoadingImgsCacheStatus.value = false
+    }
+}
+
+/**
+ * 清空图片缓存：删除 OPFS 图片与运行时 Cache Storage，不卸载图片服务线程。
+ */
+async function clearImgsCacheWithConfirm() {
+    if (!(await ui.showDialog(t("setting.imgsCacheClear"), t("setting.imgsCacheClearConfirm")))) {
+        return
+    }
+
+    isClearingImgsCache.value = true
+    try {
+        await deleteImgsCache()
+        ui.showSuccessMessage(t("setting.imgsCacheClearDone"))
+    } catch (error) {
+        console.error("清空图片缓存失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+        isClearingImgsCache.value = false
+        await refreshImgsCacheStatus()
+    }
+}
+
+// 图片下载结束后（启动预热或换包触发）重新统计缓存占用
+watch(
+    () => imgsDownloadState.value.active,
+    active => {
+        if (!active) {
+            void refreshImgsCacheStatus()
+        }
+    }
+)
+
+// 切换数据包后安装标识可能变化，重新核对缓存是否为当前数据包版本
+watch(
+    () => dataPack.status?.version,
+    () => {
+        void refreshImgsCacheStatus()
+    }
+)
 
 // ===== 技能 CD 倒计时浮窗 =====
 // 详细配置(任意多按键、客户区百分比位置、外观等)已拆到独立页面 src/views/SkillCdOverlayView.vue,
@@ -1112,6 +1283,7 @@ onMounted(() => {
     if (!dataPack.status) {
         void dataPack.bootstrap()
     }
+    void refreshImgsCacheStatus()
     // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
     void setting.loadSystemFonts()
     void syncSkillCdOverlayOnMount()
@@ -1865,21 +2037,54 @@ onUnmounted(() => {
                                 {{ builtinSourceDisplay }}
                             </div>
                             <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
+                            <button
+                                class="btn btn-sm"
+                                :disabled="isCleaningDataPackVersions || inactiveDataPackVersions.length === 0"
+                                @click="cleanInactiveDataPackVersions"
+                            >
+                                <span v-if="isCleaningDataPackVersions" class="loading loading-spinner loading-xs" />
+                                {{ $t("setting.cleanInactiveDataPacks") }}
+                            </button>
                             <button class="btn btn-sm btn-error" :disabled="isClearingDataPackStorage" @click="clearDataPackStorage">
                                 清空
                             </button>
                         </div>
                     </div>
 
-                    <div class="mt-3 mb-2 flex items-center justify-between gap-2">
-                        <div class="text-xs text-base-content/60">{{ $t("setting.versionList") }}</div>
-                        <button class="btn btn-ghost btn-xs" :disabled="dataPack.isBootstrapping" @click="refreshDataPackVersions">
-                            {{ $t("setting.refresh") }}
-                        </button>
-                    </div>
+                    <!-- 图片缓存：常驻展示当前图片包加载状态，下载进度也在这里 -->
+                    <div v-if="env.isApp" class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex min-w-0 items-center gap-2 text-xs text-base-content/60">
+                                <Icon icon="ri:image-2-line" class="size-3.5 shrink-0" />
+                                <span class="truncate">{{ $t("setting.imgsCacheTitle") }}</span>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    class="btn btn-ghost btn-xs"
+                                    :disabled="isLoadingImgsCacheStatus || isClearingImgsCache"
+                                    @click="refreshImgsCacheStatus"
+                                >
+                                    <span v-if="isLoadingImgsCacheStatus" class="loading loading-spinner loading-xs" />
+                                    {{ $t("setting.refresh") }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-error btn-xs"
+                                    :disabled="isClearingImgsCache || imgsDownloadState.active"
+                                    @click="clearImgsCacheWithConfirm"
+                                >
+                                    {{ $t("setting.imgsCacheClear") }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-base-content/60">
+                            <span class="size-1.5 shrink-0 rounded-full" :class="imgsCacheStateDotClass" />
+                            <span>{{ imgsCacheStateLabel }}</span>
+                        </div>
+                        <div v-if="imgsCacheDetailLabel" class="mt-0.5 text-[11px] text-base-content/50">{{ imgsCacheDetailLabel }}</div>
 
-                    <div v-if="imgsDownloadState.active || imgsDownloadState.total > 0" class="mb-2">
-                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-3">
+                        <div v-if="imgsDownloadState.active || imgsDownloadState.total > 0" class="mt-2">
                             <div class="flex items-center justify-between gap-2 text-xs text-base-content/70">
                                 <span>{{ imgsDownloadProgressLabel }}</span>
                                 <span class="font-orbitron text-[13px] font-semibold text-primary"> {{ imgsDownloadProgressValue }}% </span>
@@ -1905,6 +2110,13 @@ onUnmounted(() => {
                             <div v-else class="mt-1 text-[11px] text-base-content/50">{{ imgsDownloadSummary }}</div>
                             <progress class="progress progress-primary w-full mt-2" :value="imgsDownloadProgressValue" max="100" />
                         </div>
+                    </div>
+
+                    <div class="mt-3 mb-2 flex items-center justify-between gap-2">
+                        <div class="text-xs text-base-content/60">{{ $t("setting.versionList") }}</div>
+                        <button class="btn btn-ghost btn-xs" :disabled="dataPack.isBootstrapping" @click="refreshDataPackVersions">
+                            {{ $t("setting.refresh") }}
+                        </button>
                     </div>
 
                     <div>
@@ -1944,6 +2156,12 @@ onUnmounted(() => {
                                                 $t("setting.downloaded")
                                             }}</span
                                         >
+                                        <span
+                                            v-if="!isDataPackVersionCompatible(version)"
+                                            class="rounded-xs border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning"
+                                        >
+                                            {{ $t("setting.dataPackRequiresAppUpdate") }}
+                                        </span>
                                     </div>
                                     <div class="text-xs text-base-content/60">
                                         <span>{{ formatVersionDate(version.builtAt) }}</span>
@@ -1980,7 +2198,8 @@ onUnmounted(() => {
                                     <button
                                         v-else
                                         class="btn btn-primary btn-sm w-full"
-                                        :disabled="dataPack.isDownloading"
+                                        :disabled="dataPack.isDownloading || !isDataPackVersionCompatible(version)"
+                                        :title="isDataPackVersionCompatible(version) ? undefined : $t('setting.dataPackRequiresAppUpdate')"
                                         @click="downloadDataPack(version.version)"
                                     >
                                         {{ $t("setting.download") }}

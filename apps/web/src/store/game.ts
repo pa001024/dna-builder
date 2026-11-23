@@ -18,6 +18,7 @@ import {
 import { env } from "../env"
 import { sleep } from "../util"
 import { resolveGameVersion } from "../utils/game-download"
+import { buildGameLaunchParams } from "../utils/game-launch"
 import { type CustomEntity, db, type Mod, STANDALONE_ENTITY, type UCustomEntity, type UMod } from "./db"
 
 const GAME_RUNNING_POLL_MS = 1000
@@ -142,6 +143,7 @@ export const useGameStore = defineStore("game", {
         return {
             dx11Enable: useLocalStorage("game.dx11_enable", false),
             modEnable: useLocalStorage("game.mod_enable", false),
+            logAnalysisEnable: useLocalStorage("game.log_analysis_enable", false),
             modLoader: useLocalStorage("game.mod_loader", "legacy"),
             pathEnable: useLocalStorage("game.path_enable", true),
             beforeGameEnable: useLocalStorage("game.before_enable", false),
@@ -169,6 +171,10 @@ export const useGameStore = defineStore("game", {
         gameDir: state => state.path.replace(/EM\.exe$/, ""),
         gameExeExists: state => state.installed,
         modsDir: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\~mods"),
+        /** 当前设置对应的 EM.exe 启动参数；启动与桌面快捷方式共用。 */
+        gameLaunchParams(state): string {
+            return buildGameLaunchParams(state)
+        },
     },
     actions: {
         /**
@@ -202,14 +208,7 @@ export const useGameStore = defineStore("game", {
             }
             if (this.path && this.pathEnable) {
                 console.log("game start")
-                let p = this.pathParams
-                if (this.modEnable && this.modLoader === "legacy") {
-                    p += ` -fileopenlog`
-                }
-                if (this.dx11Enable) {
-                    p += ` -dx11`
-                }
-                await launchExe(this.path, p)
+                await launchExe(this.path, this.gameLaunchParams)
                 console.log("game exited")
             }
             if (this.afterGame && this.afterGameEnable) {

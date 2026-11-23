@@ -130,7 +130,7 @@ const launchGame = async () => {
 }
 
 /**
- * 在桌面创建指向游戏主程序（EM.exe）的快捷方式，名称为「二重螺旋」。
+ * 在桌面创建指向游戏主程序（EM.exe）的快捷方式，名称为「二重螺旋」，并固化当前启动参数。
  */
 const createDesktopShortcut = async () => {
     if (!game.path) {
@@ -138,7 +138,7 @@ const createDesktopShortcut = async () => {
         return
     }
     try {
-        await createShortcut(game.path)
+        await createShortcut(game.path, game.gameLaunchParams)
         ui.showSuccessMessage(t("game-launcher.desktopShortcutCreated"))
     } catch (error) {
         console.error("创建桌面快捷方式失败:", error)
@@ -259,6 +259,13 @@ onMounted(async () => {
                         :data-tip="$t('game-launcher.modManager')"
                     >
                         <Icon icon="ri:puzzle-line" class="size-4" />
+                    </RouterLink>
+                    <RouterLink
+                        to="/log-analysis"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
+                        :data-tip="$t('log-analysis.title')"
+                    >
+                        <Icon icon="ri:line-chart-line" class="size-4" />
                     </RouterLink>
                     <button
                         type="button"
@@ -441,6 +448,19 @@ onMounted(async () => {
                                     <span class="label-text text-sm">{{ $t("game-launcher.legacy") }}</span>
                                 </label>
                             </div>
+                        </div>
+                        <div class="flex flex-row flex-wrap items-center justify-between gap-2">
+                            <label
+                                class="label tooltip cursor-pointer items-center justify-start gap-2 px-0 py-1"
+                                :data-tip="$t('game-launcher.logAnalysisEnableTip')"
+                            >
+                                <input
+                                    v-model="game.logAnalysisEnable"
+                                    type="checkbox"
+                                    class="checkbox checkbox-primary checkbox-sm"
+                                />
+                                <span class="label-text text-sm">{{ $t("game-launcher.logAnalysisEnable") }}</span>
+                            </label>
                         </div>
                     </div>
                 </section>

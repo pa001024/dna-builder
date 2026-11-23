@@ -6,6 +6,7 @@ import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
 import { charAccessoryData, weaponAccessoryData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { titleData } from "@/data/d/title.data"
+import { headFrameIdToKey } from "@/utils/head-frame/head-frame.generated"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getRewardIconBackground, getRewardIconUrl } from "@/utils/reward-icon"
 import { getRewardDetailLink } from "@/utils/reward-link"
@@ -20,11 +21,11 @@ const { t } = useTranslation()
  * @param name 奖励名或奖励名数组
  * @returns 翻译后的展示文本
  */
-function tName(name: string | string[]): string {
+function tName(name: string | string[] | undefined): string {
     if (Array.isArray(name)) {
         return name.map(item => t(item)).join(" / ")
     }
-    return t(name)
+    return name ? t(name) : ""
 }
 
 /**
@@ -42,7 +43,8 @@ function getTitleById(titleId: number | string) {
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{
-    name: string | string[]
+    /** 展示名兜底：Resource / Char / Weapon 等分支会按 id 从数据表取名称，无需传入 */
+    name?: string | string[]
     value:
         | number
         | [
@@ -67,7 +69,10 @@ const props = defineProps<{
                   | "WeaponSkin"
               ),
           ]
+    /** 胶囊模式：图标 + 名称 + 数量的行内小卡 */
     mini?: boolean
+    /** 纯图标模式：只显示图标，不显示名称与数量（窄槽位用） */
+    iconOnly?: boolean
     /** 行内模式：只显示图标+数量，悬停弹出 ResourceTooltip（用于周阶段建设点这类单资源计数） */
     inline?: boolean
 }>()
@@ -76,7 +81,59 @@ const nameString = computed(() => {
     if (Array.isArray(props.name)) {
         return props.name.join(" / ")
     }
-    return props.name
+    return props.name ?? ""
+})
+
+/** 未传名称时的展示兜底：元组取 id，纯数值条目没有可回退的名称 */
+const fallbackName = computed(() => nameString.value || (Array.isArray(props.value) ? `${props.value[1]}` : ""))
+
+/** 三种模式的容器类名：mini 为胶囊，iconOnly 为裸图标，默认是卡片 */
+const boxClass = computed(() => {
+    if (props.iconOnly) {
+        return "flex items-center transition-colors duration-200"
+    }
+    if (props.mini) {
+        return "inline-flex max-w-full items-center gap-1.5 rounded-xs border border-base-content/10 bg-base-content/3 px-1.5 py-1 transition-colors duration-200 hover:border-primary/40"
+    }
+    return "flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
+})
+
+/** 图标与名称的分组容器：三种模式统一 flex 排布，避免 preflight 的块级图片把名称挤到下一行 */
+const labelGroupClass = computed(() => {
+    if (props.mini) {
+        return "inline-flex min-w-0 items-center gap-1.5"
+    }
+    if (props.iconOnly) {
+        return "flex min-w-0 items-center"
+    }
+    return "flex min-w-0 flex-1 items-center gap-2"
+})
+
+/** 图标尺寸：mini 20px，其余 32px */
+const iconClass = computed(() => (props.mini ? "size-5 shrink-0 rounded-xs" : "size-8 shrink-0 rounded-xs"))
+
+/** 名称样式：mini 截断并按链接悬停变色，卡片截断后保留下划线 */
+const nameClass = computed(() =>
+    props.mini
+        ? "max-w-40 truncate text-[11px] text-base-content/70 transition-colors duration-150 hover:text-primary"
+        : "min-w-0 truncate hover:underline"
+)
+
+/** 数量样式：mini 用小号金色字，卡片右上角粗体 */
+const countClass = computed(() =>
+    props.mini ? "shrink-0 font-orbitron text-[11px] font-semibold text-primary" : "ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary"
+)
+
+/** 是否展示数量：纯图标模式不展示；mini 下数量传 0 表示不显示数字（角色/武器这类单件条目） */
+const showCount = computed(() => {
+    if (props.iconOnly) {
+        return false
+    }
+    if (!props.mini) {
+        return true
+    }
+    const count = Array.isArray(props.value) ? props.value[0] : props.value
+    return Number(count) !== 0
 })
 
 const emit = defineEmits<{
@@ -325,15 +382,11 @@ function handleCardClick() {
 </script>
 <template>
     <template v-if="inline && Array.isArray(value)">
-        <FullTooltip
+        <TooltipWrapper
             v-if="(value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])"
-            side="top"
+            :type="value[2]"
+            :id="value[1]"
         >
-            <template #tooltip>
-                <div class="-mx-3.75 -my-2.5">
-                    <ResourceTooltip :resource="getResourceById(value[1])!" bare />
-                </div>
-            </template>
             <SRouterLink
                 :to="getRewardDetailLink('Resource', value[1])"
                 class="inline-flex cursor-pointer items-center gap-1 hover:underline"
@@ -347,13 +400,13 @@ function handleCardClick() {
                 <span class="text-xs">{{ tName(getResourceById(value[1])!.name) }}</span>
                 <span class="text-xs">{{ value[0] }}</span>
             </SRouterLink>
-        </FullTooltip>
-        <ShowProps
+        </TooltipWrapper>
+        <TooltipWrapper
             v-else-if="value[2] === 'Mod'"
             v-for="mod in [createLeveledMod(value[1])]"
             :key="mod.id"
-            :mod="mod"
-            :link="getRewardDetailLink('Mod', mod.id)"
+            type="Mod"
+            :id="value[1]"
         >
             <SRouterLink
                 :to="getRewardDetailLink('Mod', mod.id)"
@@ -368,13 +421,13 @@ function handleCardClick() {
                 <span class="text-xs">{{ $t(mod.名称) }}</span>
                 <span class="text-xs">{{ value[0] }}</span>
             </SRouterLink>
-        </ShowProps>
-        <ShowProps
+        </TooltipWrapper>
+        <TooltipWrapper
             v-else-if="value[2] === 'Weapon'"
             v-for="weapon in [createLeveledWeapon(value[1])]"
             :key="weapon.id"
-            :weapon="weapon"
-            :link="getRewardDetailLink('Weapon', weapon.id)"
+            type="Weapon"
+            :id="value[1]"
         >
             <SRouterLink
                 :to="getRewardDetailLink('Weapon', weapon.id)"
@@ -389,13 +442,13 @@ function handleCardClick() {
                 <span class="text-xs">{{ $t(weapon.名称) }}</span>
                 <span class="text-xs">{{ value[0] }}</span>
             </SRouterLink>
-        </ShowProps>
-        <ShowProps
+        </TooltipWrapper>
+        <TooltipWrapper
             v-else-if="value[2] === 'Char'"
             v-for="char in [createLeveledChar(value[1])]"
             :key="char.id"
-            :char="char"
-            :link="getRewardDetailLink('Char', char.id)"
+            type="Char"
+            :id="value[1]"
         >
             <SRouterLink
                 :to="getRewardDetailLink('Char', char.id)"
@@ -410,7 +463,7 @@ function handleCardClick() {
                 <span class="text-xs">{{ $t(char.名称) }}</span>
                 <span class="text-xs">{{ value[0] }}</span>
             </SRouterLink>
-        </ShowProps>
+        </TooltipWrapper>
         <SRouterLink
             v-else-if="value[2] === 'Draft' && getDraftByIdOrProductId(value[1])"
             :to="getRewardDetailLink('Draft', value[1])"
@@ -451,306 +504,242 @@ function handleCardClick() {
         </span>
     </template>
     <template v-else>
-    <ShowProps
+    <TooltipWrapper
         v-if="Array.isArray(value) && value[2] === 'Mod'"
         v-for="mod in [createLeveledMod(value[1])]"
         :key="mod.id"
-        :mod="mod"
-        :link="getRewardDetailLink('Mod', mod.id)"
+        type="Mod"
+        :id="value[1]"
     >
-        <div
-            v-bind="$attrs"
-            :class="
-                mini
-                    ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-            "
-            @click="handleCardClick"
-        >
-            <span class="font-medium truncate">
+        <div v-bind="$attrs" :class="boxClass" @click="handleCardClick">
+            <span :class="labelGroupClass">
                 <img
                     :src="mod.url"
                     :alt="mod.名称"
-                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
-                    :class="getRarityGradientClass(mod.品质)"
+                    class="rounded-xs bg-linear-45"
+                    :class="[iconClass, getRarityGradientClass(mod.品质)]"
                 />
-                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Mod', mod.id)" stop class="hover:underline">
+                <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Mod', mod.id)" stop :class="nameClass">
                     {{ value[2] === "Mod" ? $t(mod.名称) : `${$t("UI_FORGING_BLUEPRINT")}${mod.名称}` }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+            <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
         </div>
-    </ShowProps>
-    <ShowProps
+    </TooltipWrapper>
+    <TooltipWrapper
         v-else-if="Array.isArray(value) && value[2] === 'Weapon'"
         v-for="weapon in [createLeveledWeapon(value[1])]"
         :key="weapon.id"
-        :weapon="weapon"
-        :link="getRewardDetailLink('Weapon', weapon.id)"
+        type="Weapon"
+        :id="value[1]"
     >
-        <div
-            v-bind="$attrs"
-            :class="
-                mini
-                    ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-            "
-            @click="handleCardClick"
-        >
-            <span class="font-medium truncate">
+        <div v-bind="$attrs" :class="boxClass" @click="handleCardClick">
+            <span :class="labelGroupClass">
                 <img
                     :src="weapon.url"
                     :alt="weapon.名称"
-                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
-                    :class="getRarityGradientClass(5)"
+                    class="rounded-xs bg-linear-45"
+                    :class="[iconClass, getRarityGradientClass(5)]"
                 />
-                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Weapon', weapon.id)" stop class="hover:underline">
+                <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Weapon', weapon.id)" stop :class="nameClass">
                     {{ $t(weapon.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+            <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
         </div>
-    </ShowProps>
-    <ShowProps
+    </TooltipWrapper>
+    <TooltipWrapper
         v-else-if="Array.isArray(value) && value[2] === 'Char'"
         v-for="char in [createLeveledChar(value[1])]"
         :key="char.id"
-        :char="char"
-        :link="getRewardDetailLink('Char', char.id)"
+        type="Char"
+        :id="value[1]"
     >
-        <div
-            v-bind="$attrs"
-            :class="
-                mini
-                    ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-            "
-            @click="handleCardClick"
-        >
-            <span class="font-medium truncate">
+        <div v-bind="$attrs" :class="boxClass" @click="handleCardClick">
+            <span :class="labelGroupClass">
                 <img
                     :src="char.url"
                     :alt="char.名称"
-                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
-                    :class="getRarityGradientClass(5)"
+                    class="rounded-xs bg-linear-45"
+                    :class="[iconClass, getRarityGradientClass(5)]"
                 />
-                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Char', char.id)" stop class="hover:underline">
+                <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Char', char.id)" stop :class="nameClass">
                     {{ $t(char.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+            <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
         </div>
-    </ShowProps>
+    </TooltipWrapper>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Draft' && getDraftByIdOrProductId(value[1])"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
             <img
                 :src="getDraftIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
-                :class="getDraftBackgroundColor(value[1])"
+                class="rounded-xs bg-linear-45"
+                :class="[iconClass, getDraftBackgroundColor(value[1])]"
             />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Draft', value[1])" stop class="hover:underline">
+            <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Draft', value[1])" stop :class="nameClass">
                 {{ $t("设计稿") }}: {{ tName(Array.isArray(name) ? name : getDraftByIdOrProductId(value[1])!.n) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Walnut' && getWalnutReward(value[1]).walnut"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
             <img
                 :src="getWalnutIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
-                :class="getWalnutBackgroundColor(value[1])"
+                class="rounded-xs bg-linear-45"
+                :class="[iconClass, getWalnutBackgroundColor(value[1])]"
             />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Walnut', value[1])" stop class="hover:underline">
+            <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Walnut', value[1])" stop :class="nameClass">
                 {{ tName(getWalnutReward(value[1]).walnut?.名称 || String(value[1])) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
-    <div
+    <TooltipWrapper
         v-else-if="
             Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])
         "
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
-        v-bind="$attrs"
-        @click="$emit('click')"
+        :type="value[2]"
+        :id="value[1]"
     >
-        <span class="font-medium truncate">
-            <FullTooltip v-if="mini" side="top">
-                <template #tooltip>
-                    <div class="-mx-3.75 -my-2.5">
-                        <ResourceTooltip :resource="getResourceById(value[1])!" bare />
-                    </div>
-                </template>
+        <div :class="boxClass" class="cursor-help" v-bind="$attrs" @click="$emit('click')">
+            <span :class="labelGroupClass">
                 <img
                     :src="getResourceIconById(value[1])"
                     alt=""
-                    class="size-8 inline-block mr-2 cursor-help rounded-xs bg-linear-15"
-                    :class="getResourceBackgroundById(value[1])"
+                    class="rounded-xs bg-linear-15"
+                    :class="[iconClass, getResourceBackgroundById(value[1])]"
                 />
-            </FullTooltip>
-            <img
-                v-else
-                :src="getResourceIconById(value[1])"
-                alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getResourceBackgroundById(value[1])"
-            />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Resource', value[1])" stop class="hover:underline">
-                {{ tName(getResourceById(value[1])!.name) }}
-            </SRouterLink>
-        </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
-    </div>
+                <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Resource', value[1])" stop :class="nameClass">
+                    {{ tName(getResourceById(value[1])!.name) }}
+                </SRouterLink>
+            </span>
+            <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
+        </div>
+    </TooltipWrapper>
     <div
         v-else-if="
             Array.isArray(value) &&
             (value[2] === 'IronTicket' || nameString.startsWith('IronTicket_')) &&
             iconticketMap.get(Number(value[1]))
         "
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
             <img
                 :src="getIronTicketIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getIronTicketBackgroundById(value[1])"
+                class="rounded-xs bg-linear-15"
+                :class="[iconClass, getIronTicketBackgroundById(value[1])]"
             />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('IronTicket', value[1])" stop class="hover:underline">
+            <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('IronTicket', value[1])" stop :class="nameClass">
                 {{ tName(iconticketMap.get(Number(value[1]))?.name || name) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Title' && getTitleById(value[1])"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
             <img
                 src="/imgs/webp/T_Icon_Random_Title.webp"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getRarityGradientClass(4)"
+                class="rounded-xs bg-linear-15"
+                :class="[iconClass, getRarityGradientClass(4)]"
             />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Title', value[1])" stop class="hover:underline">
+            <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink('Title', value[1])" stop :class="nameClass">
                 {{ tName(getTitleById(value[1])?.name ?? "") }}
             </SRouterLink>
-            <span v-else>{{ tName(getTitleById(value[1])?.name ?? "") }}</span>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isFashionCostType(value[2])"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
+            <HeadFrameRender
+                v-if="value[2] === 'HeadFrame' && headFrameIdToKey[Number(value[1])]"
+                :head-frame-id="Number(value[1])"
+                :alt="tName(name)"
+                :class="iconClass"
+                class="inline-block align-middle"
+            />
             <img
+                v-else
                 :src="getFashionIcon(value[2], value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getFashionBackgroundColor(value[2], value[1])"
+                class="rounded-xs bg-linear-15"
+                :class="[iconClass, getFashionBackgroundColor(value[2], value[1])]"
             />
             <SRouterLink
-                v-if="!mini && getRewardDetailLink(value[2], value[1])"
+                v-if="!iconOnly && getRewardDetailLink(value[2], value[1])"
                 :to="getRewardDetailLink(value[2], value[1])"
                 stop
-                class="hover:underline"
+                :class="nameClass"
             >
                 {{ value[2] === "Skin" ? getSkinDisplayName(value[1], nameString) : tName(nameString) }}
             </SRouterLink>
-            <span v-else-if="!mini">{{ tName(name) }}</span>
+            <span v-else-if="!iconOnly" :class="nameClass">{{ tName(name) }}</span>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isAccessoryCostType(value[2]) && getAccessoryByType(value[2], value[1])"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
+        :class="boxClass"
         v-bind="$attrs"
         @click="$emit('click')"
     >
-        <span class="font-medium truncate">
+        <span :class="labelGroupClass">
             <img
                 :src="getFashionIcon(value[2], value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getFashionBackgroundColor(value[2], value[1])"
+                class="rounded-xs bg-linear-15"
+                :class="[iconClass, getFashionBackgroundColor(value[2], value[1])]"
             />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink(value[2], value[1])" stop class="hover:underline">
+            <SRouterLink v-if="!iconOnly" :to="getRewardDetailLink(value[2], value[1])" stop :class="nameClass">
                 {{ tName(getAccessoryByType(value[2], value[1])?.name || name) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value[0] }}</span>
+        <span v-if="showCount" :class="countClass">{{ value[0] }}</span>
     </div>
-    <div
-        v-else
-        v-bind="$attrs"
-        :class="
-            mini
-                ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
-        "
-        @click="$emit('click')"
-    >
-        <span class="font-medium truncate">
-            <img
-                :src="getIcon(nameString)"
-                alt=""
-                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
-                :class="getRarityColor(nameString)"
-            />
-            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Resource', nameString)" stop class="hover:underline">
-                {{ $t(nameString) }}
-            </SRouterLink>
-        </span>
-        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold text-primary">{{ value }}</span>
-    </div>
+    <TooltipWrapper v-else type="Resource" :id="nameString">
+        <div v-bind="$attrs" :class="boxClass" class="cursor-help" @click="$emit('click')">
+            <span :class="labelGroupClass">
+                <img
+                    :src="getIcon(nameString)"
+                    alt=""
+                    class="rounded-xs bg-linear-15"
+                    :class="[iconClass, getRarityColor(nameString)]"
+                />
+                <SRouterLink v-if="!iconOnly && fallbackName" :to="getRewardDetailLink('Resource', fallbackName)" stop :class="nameClass">
+                    {{ $t(fallbackName) }}
+                </SRouterLink>
+                <span v-else-if="!iconOnly" :class="nameClass">{{ $t(fallbackName) }}</span>
+            </span>
+            <span v-if="showCount" :class="countClass">{{ Array.isArray(value) ? value[0] : value }}</span>
+        </div>
+    </TooltipWrapper>
     </template>
 </template>

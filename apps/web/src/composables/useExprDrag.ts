@@ -17,6 +17,12 @@ const DRAG_THRESHOLD = 6
 /** 放置目标选择器：带 data-expr-drop 属性的元素均可接收字段 */
 const DROP_TARGET_SELECTOR = "[data-expr-drop]"
 
+/** 拖动时指针距滚动容器上下边缘多近开始自动滚动（px） */
+const EDGE_SCROLL_THRESHOLD = 40
+
+/** 自动滚动每帧的滚动距离（px） */
+const EDGE_SCROLL_STEP = 14
+
 /** 已抓起的字段（拖动中，或点击抓起后等待放置） */
 const payload = ref<ExprDragPayload | null>(null)
 /** 是否处于「点击抓起 → 点击放置」状态（鼠标与触控行为一致） */
@@ -41,6 +47,66 @@ let pointerType = ""
 let dropHandler: ExprDropHandler | null = null
 /** 全局指针监听是否已挂载 */
 let listening = false
+/** 边缘自动滚动的动画帧（0 表示未运行） */
+let scrollFrame = 0
+/** 最近一次指针位置（自动滚动按帧读取） */
+let lastPointer = { x: 0, y: 0 }
+
+/**
+ * 查找指针位置下最近的可纵向滚动祖先。
+ * @param x 视口 x 坐标
+ * @param y 视口 y 坐标
+ * @returns 可滚动容器；不存在时为 null
+ */
+function findScrollableAncestor(x: number, y: number): HTMLElement | null {
+    let node = document.elementFromPoint(x, y) as HTMLElement | null
+    while (node && node !== document.body && node !== document.documentElement) {
+        const overflowY = getComputedStyle(node).overflowY
+        if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) return node
+        node = node.parentElement
+    }
+    return null
+}
+
+/**
+ * 拖动中的边缘自动滚动：指针靠近滚动容器上下边缘时按帧滚动，并刷新指针下的悬停目标。
+ * 解决 900 高视口下顶部字段无法一次连续拖到底部目标表达式的问题；
+ * 指针已落在放置目标上时停止滚动，避免目标在松手前被滚走。
+ */
+function tickEdgeScroll() {
+    scrollFrame = 0
+    if (!dragging.value) return
+    const dropKey = findDropTarget(lastPointer.x, lastPointer.y)
+    hoveredDropKey.value = dropKey
+    const container = dropKey ? null : findScrollableAncestor(lastPointer.x, lastPointer.y)
+    if (container) {
+        const rect = container.getBoundingClientRect()
+        const delta =
+            lastPointer.y - rect.top < EDGE_SCROLL_THRESHOLD
+                ? -EDGE_SCROLL_STEP
+                : rect.bottom - lastPointer.y < EDGE_SCROLL_THRESHOLD
+                  ? EDGE_SCROLL_STEP
+                  : 0
+        if (delta !== 0) {
+            const before = container.scrollTop
+            container.scrollTop = before + delta
+            if (container.scrollTop !== before) hoveredDropKey.value = findDropTarget(lastPointer.x, lastPointer.y)
+        }
+    }
+    scrollFrame = requestAnimationFrame(tickEdgeScroll)
+}
+
+/** 开始边缘自动滚动（拖动期间按帧运行） */
+function startEdgeScroll() {
+    if (scrollFrame || typeof requestAnimationFrame === "undefined") return
+    scrollFrame = requestAnimationFrame(tickEdgeScroll)
+}
+
+/** 停止边缘自动滚动 */
+function stopEdgeScroll() {
+    if (scrollFrame && typeof cancelAnimationFrame !== "undefined") cancelAnimationFrame(scrollFrame)
+    scrollFrame = 0
+}
 
 /**
  * 查找指针位置下方的放置目标。
@@ -54,6 +120,19 @@ function findDropTarget(x: number, y: number): string | null {
     return target?.dataset.exprDrop ?? null
 }
 
+/**
+ * 窗口失焦 / 页面隐藏兜底：指针在页面外松开时 `pointerup` 会丢失，
+ * 直接丢弃本次拖动或点击抓起状态，停止 rAF 自动滚动与 ghost，避免状态滞留。
+ */
+function onWindowBlur() {
+    if (pressedPayload || payload.value) reset()
+}
+
+/** 页面切到后台视同失焦（同上） */
+function onVisibilityChange() {
+    if (document.hidden) onWindowBlur()
+}
+
 /** 挂载全局指针监听（拖动与抓起期间都需要跨元素追踪指针以驱动浮动标签） */
 function listen() {
     if (listening) return
@@ -61,6 +140,8 @@ function listen() {
     window.addEventListener("pointermove", onPointerMove)
     window.addEventListener("pointerup", onPointerUp)
     window.addEventListener("pointercancel", onPointerCancel)
+    window.addEventListener("blur", onWindowBlur)
+    document.addEventListener("visibilitychange", onVisibilityChange)
 }
 
 /** 卸载全局指针监听 */
@@ -70,6 +151,8 @@ function unlisten() {
     window.removeEventListener("pointermove", onPointerMove)
     window.removeEventListener("pointerup", onPointerUp)
     window.removeEventListener("pointercancel", onPointerCancel)
+    window.removeEventListener("blur", onWindowBlur)
+    document.removeEventListener("visibilitychange", onVisibilityChange)
 }
 
 /** 按当前状态挂载 / 卸载全局指针监听：仅在手势中或已抓起时需要 */
@@ -85,6 +168,7 @@ function reset() {
     dragging.value = false
     picked.value = false
     hoveredDropKey.value = null
+    stopEdgeScroll()
     syncListening()
 }
 
@@ -101,6 +185,7 @@ function arm(field: ExprDragPayload, x: number, y: number) {
     pressedPayload = null
     dragging.value = false
     ghostPosition.value = { x, y }
+    stopEdgeScroll()
     syncListening()
 }
 
@@ -125,6 +210,9 @@ function onPointerMove(event: PointerEvent) {
     }
     ghostPosition.value = { x: event.clientX, y: event.clientY }
     hoveredDropKey.value = findDropTarget(event.clientX, event.clientY)
+    // 按住拖动到滚动容器边缘时自动滚动，顶部字段也能一次拖到底部目标
+    lastPointer = { x: event.clientX, y: event.clientY }
+    startEdgeScroll()
 }
 
 /**

@@ -9,6 +9,7 @@ import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
 import { dataPackBootstrapLoading, isDataPackRewriteDisabled } from "@/utils/data-pack/data-pack-bridge"
+import { isDataPackMajorSupported } from "@/utils/data-pack/data-pack-format"
 import pg from "../../package.json"
 
 const router = useRouter()
@@ -41,7 +42,14 @@ const currentVersion = `v${pg.version}`
 const dataPackChecked = ref(false)
 const lastApply = useLocalStorage("datapack.lastApply", 0)
 
-const latestVersionInfo = computed(() => dataPack.status?.remote || dataPack.status?.versions[0] || null)
+// 远端列表会带出当前应用读不了的版本（设置页置灰展示）；自动更新只取受支持的最新版本
+const latestVersionInfo = computed(() => {
+    const status = dataPack.status
+    if (!status) {
+        return null
+    }
+    return status.remote ?? status.versions.find(item => isDataPackMajorSupported(item.major, item.version)) ?? null
+})
 const latestVersion = computed(() => latestVersionInfo.value?.version || "")
 const latestNotes = computed(() => latestVersionInfo.value?.notes?.trim() || "")
 const currentPackVersion = computed(() => dataPack.status?.version || "")

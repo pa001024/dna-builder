@@ -52,6 +52,7 @@ pub fn run() {
             );
     }
     app = app.manage(submodules::desktop_clone::CloneManager::new());
+    app = app.manage(commands::log_analysis::LogAnalysisState::default());
     app.setup(|app| {
         // helper 退出后旧 exe 的锁才会释放，启动时顺手清理
         if let Ok(current_exe) = std::env::current_exe() {
@@ -231,6 +232,12 @@ pub fn run() {
         commands::afk_support::afk_bridge_start,
         commands::afk_support::afk_bridge_stop,
         commands::afk_support::afk_bridge_status,
+        // 实时日志分析（EM.log 监听）
+        commands::log_analysis::log_analysis_start,
+        commands::log_analysis::log_analysis_stop,
+        commands::log_analysis::log_analysis_status,
+        // 截图 OCR（升华装备截图导入）
+        commands::ocr::ocr_recognize_lines,
         // 游戏
         commands::game::get_game_install,
         commands::game::is_game_running,

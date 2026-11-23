@@ -141,9 +141,9 @@ pub fn check_is_admin() -> bool {
     }
 }
 
-/// 创建指向游戏主程序的桌面快捷方式（名称固定为「二重螺旋」）。
+/// 创建指向游戏主程序的桌面快捷方式（名称固定为「二重螺旋」），并写入当前启动参数。
 #[tauri::command]
-pub fn create_desktop_shortcut(path: String) -> Result<String, String> {
+pub fn create_desktop_shortcut(path: String, args: String) -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
         use widestring::{U16CStr, U16CString};
@@ -178,14 +178,18 @@ pub fn create_desktop_shortcut(path: String) -> Result<String, String> {
                 U16CString::from_str(game_dir).map_err(|error| format!("路径编码失败: {error}"))?;
             let save_path = U16CString::from_str(&shortcut_path)
                 .map_err(|error| format!("路径编码失败: {error}"))?;
+            let arguments =
+                U16CString::from_str(&args).map_err(|error| format!("参数编码失败: {error}"))?;
             let description = U16CString::from_str(SHORTCUT_NAME)
                 .map_err(|error| format!("名称编码失败: {error}"))?;
 
-            // 创建快捷方式对象并设置目标、工作目录与描述
+            // 创建快捷方式对象并设置目标、启动参数、工作目录与描述
             let link: IShellLinkW = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER)
                 .map_err(|error| format!("创建快捷方式实例失败: {error}"))?;
             link.SetPath(PCWSTR(target.as_ptr()))
                 .map_err(|error| format!("设置快捷方式目标失败: {error}"))?;
+            link.SetArguments(PCWSTR(arguments.as_ptr()))
+                .map_err(|error| format!("设置快捷方式参数失败: {error}"))?;
             link.SetWorkingDirectory(PCWSTR(work_dir.as_ptr()))
                 .map_err(|error| format!("设置工作目录失败: {error}"))?;
             link.SetDescription(PCWSTR(description.as_ptr()))

@@ -663,11 +663,12 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
     remoteState.promise = (async () => {
         try {
             const info = await fetchDataPackVersions(source.versionsUrls)
-            const supported = info.filter(item => isDataPackMajorSupported(item.major, item.version))
-            supported.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
+            // 不过滤 major 不兼容的版本：设置页照常展示，下载按钮按 major 置灰，
+            // 让用户看到「需要更新应用」而不是版本凭空消失。安装入口自行挑选受支持的版本。
+            info.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
             remoteState.hasCached = true
-            remoteState.cached = supported
-            return supported
+            remoteState.cached = info
+            return info
         } catch {
             remoteState.hasCached = true
             remoteState.cached = null
@@ -848,7 +849,8 @@ export async function getDataPackInstallStatus(
         ready: Boolean(installed && manifest),
         version: installed?.version || null,
         manifest,
-        remote: remoteVersions[0] ?? null,
+        // 自动更新只认当前应用能读的最新包；更高的 major 留给设置页置灰展示
+        remote: remoteVersions.find(item => isDataPackMajorSupported(item.major, item.version)) ?? null,
         versions: versions.length ? versions : localVersions,
     }
 }
@@ -961,6 +963,27 @@ export async function removeInstalledDataPackVersion(version: string): Promise<v
 }
 
 /**
+ * 卸载所有非激活版本，仅保留当前激活版本。
+ * @returns 实际卸载的版本号列表
+ */
+export async function removeInactiveDataPackVersions(): Promise<string[]> {
+    if (!(await isPackStorageAvailable())) {
+        return []
+    }
+
+    const installed = await readInstalledInfo()
+    const activeVersion = installed?.version ?? null
+    const installedVersions = await getInstalledDataPackVersions()
+    const inactiveVersions = installedVersions.filter(item => item.version !== activeVersion)
+
+    for (const version of inactiveVersions) {
+        await removeInstalledDataPackVersion(version.version)
+    }
+
+    return inactiveVersions.map(item => item.version)
+}
+
+/**
  * 通过服务端差分接口下载新数据包字节。
  *
  * 差分接口 `POST /api/download/diff` 接收 `{ old, new }` 两个官方包名，后端只回重定向：
@@ -1049,7 +1072,7 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
               packageFile: `${version}.zip`,
               version,
           })
-        : remoteVersions[0]
+        : remoteVersions.find(item => isDataPackMajorSupported(item.major, item.version))
     if (!remote) {
         throw new Error("无法获取数据包版本信息")
     }

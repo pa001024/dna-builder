@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { type CSSProperties, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { headFramePulse, headFrameUv } from "@/utils/head-frame/head-frame-material"
 import {
     computeLayerRect,
     flipBookCellAt,
@@ -25,6 +26,8 @@ const props = withDefaults(
         title?: string
         /** 是否播放动画 */
         playing?: boolean
+        materialMotion?: boolean
+        fitBounds?: boolean
         /** 是否循环播放 In 之后的 Loop 动画 */
         loop?: boolean
         /** 固定到指定播放时间（毫秒）；提供时忽略 `playing`，用于静态快照与测试 */
@@ -99,7 +102,7 @@ function updateScale() {
     if (!root) return
     boxWidth.value = root.clientWidth
     boxHeight.value = root.clientHeight
-    const designWidth = frame.value.width
+    const designWidth = props.fitBounds ? frame.value.bounds.width : frame.value.width
     const fit = boxWidth.value > 0 && designWidth > 0 ? boxWidth.value / designWidth : 1
     scale.value = props.scale ?? fit
 }
@@ -131,8 +134,8 @@ function draw() {
     canvas.style.width = `${cssWidth}px`
     canvas.style.height = `${cssHeight}px`
 
-    const stageLeft = (boxWidth.value - frame.value.width * scale.value) / 2
-    const stageTop = (boxHeight.value - frame.value.height * scale.value) / 2
+    const stageLeft = props.fitBounds ? -frame.value.bounds.x * scale.value : (boxWidth.value - frame.value.width * scale.value) / 2
+    const stageTop = props.fitBounds ? -frame.value.bounds.y * scale.value : (boxHeight.value - frame.value.height * scale.value) / 2
     instance.render({
         frame: frame.value,
         canvasWidth: width,
@@ -248,8 +251,8 @@ const sample = computed(() => {
  * 会照常溢出到容器外，不做任何裁切。
  */
 const stageStyle = computed(() => ({
-    left: `${(boxWidth.value - frame.value.width * scale.value) / 2}px`,
-    top: `${(boxHeight.value - frame.value.height * scale.value) / 2}px`,
+    left: `${props.fitBounds ? -frame.value.bounds.x * scale.value : (boxWidth.value - frame.value.width * scale.value) / 2}px`,
+    top: `${props.fitBounds ? -frame.value.bounds.y * scale.value : (boxHeight.value - frame.value.height * scale.value) / 2}px`,
     width: `${frame.value.width}px`,
     height: `${frame.value.height}px`,
     transform: `scale(${scale.value})`,
@@ -259,7 +262,7 @@ const stageStyle = computed(() => ({
  * 容器样式：默认按设计画布的宽高比撑开；调用方给出固定高度时会覆盖它，
  * 组件尺寸因此与贴图实际大小无关。
  */
-const rootStyle = computed(() => ({ aspectRatio: `${frame.value.width} / ${frame.value.height}` }))
+const rootStyle = computed(() => ({ aspectRatio: props.fitBounds ? `${frame.value.bounds.width} / ${frame.value.bounds.height}` : `${frame.value.width} / ${frame.value.height}` }))
 
 watch(
     () => props.scale,
@@ -359,7 +362,7 @@ function layerStyle(layer: TitleFrameLayer): CSSProperties {
         width: `${rect.width}px`,
         height: `${rect.height}px`,
         transform: layerTransform(layer),
-        opacity: String(layerOpacity(layer) * tint.alpha),
+        opacity: String(layerOpacity(layer) * tint.alpha * (props.materialMotion ? headFramePulse(layer, props.timeMs ?? elapsedMs.value) : 1)),
         mixBlendMode: layer.blend === "add" ? "plus-lighter" : layer.blend === "multiply" ? "multiply" : "normal",
     }
 }
@@ -434,7 +437,10 @@ function isFlipBook(layer: TitleFrameLayer): boolean {
 function layerMaskStyle(layer: TitleFrameLayer, includeSource: boolean): CSSProperties {
     const entries: { url: string; crop: { size: string; position: string } | null }[] = []
     if (includeSource) entries.push({ url: layer.src, crop: flipBookCrop(layer) })
-    for (const mask of layer.masks) entries.push({ url: mask, crop: null })
+    for (const mask of layer.masks) {
+        const prefix = layer.textures?.Mask2 === mask ? "Mask2" : "Mask"
+        entries.push({ url: mask, crop: props.materialMotion ? headFrameUv(layer, prefix, props.timeMs ?? elapsedMs.value) : null })
+    }
     if (entries.length === 0) return {}
     return {
         maskImage: entries.map(entry => `url("${entry.url}")`).join(", "),
@@ -443,8 +449,8 @@ function layerMaskStyle(layer: TitleFrameLayer, includeSource: boolean): CSSProp
         WebkitMaskSize: entries.map(entry => entry.crop?.size ?? "100% 100%").join(", "),
         maskPosition: entries.map(entry => entry.crop?.position ?? "0% 0%").join(", "),
         WebkitMaskPosition: entries.map(entry => entry.crop?.position ?? "0% 0%").join(", "),
-        maskRepeat: entries.map(() => "no-repeat").join(", "),
-        WebkitMaskRepeat: entries.map(() => "no-repeat").join(", "),
+        maskRepeat: entries.map(entry => props.materialMotion && entry.url !== layer.src ? "repeat" : "no-repeat").join(", "),
+        WebkitMaskRepeat: entries.map(entry => props.materialMotion && entry.url !== layer.src ? "repeat" : "no-repeat").join(", "),
         // UE 里遮罩是按 R 通道（或灰度）取的，而 CSS 默认按 alpha 通道取。
         // VX_T_Mask_* 这类遮罩是不透明的灰度图，按 alpha 取等于「全通过」——
         // 效果层于是铺满整块框面，把主体糊掉。改成按亮度取才与着色器一致。
@@ -454,6 +460,12 @@ function layerMaskStyle(layer: TitleFrameLayer, includeSource: boolean): CSSProp
         // 效果层的可见范围被放大一大圈，主体被糊住。
         maskComposite: entries.map(() => "intersect").join(", "),
     }
+}
+
+function materialTextureStyle(layer: TitleFrameLayer): CSSProperties {
+    if (!props.materialMotion) return {}
+    const motion = headFrameUv(layer, "Main", props.timeMs ?? elapsedMs.value)
+    return { transform: `rotate(${motion.rotation}deg)` }
 }
 
 /**
@@ -550,14 +562,14 @@ const textStyle = computed(() => {
                         v-else-if="layerTint(layer).plain"
                         class="title-frame__image"
                         :src="layer.src"
-                        :style="layerMaskStyle(layer, false)"
+                        :style="{ ...layerMaskStyle(layer, false), ...materialTextureStyle(layer) }"
                         alt=""
                         draggable="false"
                     />
                     <span
                         v-else
                         class="title-frame__mask"
-                        :style="{ backgroundColor: layerTint(layer).color, ...layerMaskStyle(layer, true) }"
+                        :style="{ backgroundColor: layerTint(layer).color, ...layerMaskStyle(layer, true), ...materialTextureStyle(layer) }"
                     />
                 </div>
             </template>

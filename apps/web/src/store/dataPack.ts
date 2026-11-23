@@ -9,6 +9,7 @@ import {
     getDataPackSourceInfo,
     getInstalledDataPackVersions,
     importDataPackFile,
+    removeInactiveDataPackVersions,
     removeInstalledDataPackVersion,
     setActiveDataPackVersion,
     setDataPackSourceBaseUrl,
@@ -113,6 +114,11 @@ export const useDataPackStore = defineStore("dataPack", {
         async uninstallVersion(version: string) {
             await removeInstalledDataPackVersion(version)
             await this.refreshStatus(true)
+        },
+        async cleanInactiveVersions() {
+            const removed = await removeInactiveDataPackVersions()
+            await this.refreshStatus(true)
+            return removed
         },
     },
 })

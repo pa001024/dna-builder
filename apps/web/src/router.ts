@@ -136,6 +136,12 @@ export const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(320, 360),
     },
     {
+        name: "log-analysis",
+        path: "/log-analysis",
+        component: env.isApp ? () => import("./views/LogAnalysisView.vue") : () => undefined,
+        beforeEnter: () => setMinSize(720, 520),
+    },
+    {
         name: "afk-ledger",
         path: "/afk",
         component: () => import("./views/AfkLedgerView.vue"),

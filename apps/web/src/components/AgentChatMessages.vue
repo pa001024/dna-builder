@@ -1436,7 +1436,7 @@ onBeforeUnmount(() => {
 .db-md :deep(code) {
     padding: 0.1em 0.3em;
     background: color-mix(in srgb, var(--color-base-content) 8%, transparent);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: "CaskaydiaCove", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.82em;
 }
 

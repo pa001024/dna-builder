@@ -99,7 +99,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                                         v-if="slot.currentItem"
                                         :name="slot.currentItem.name"
                                         :value="slot.currentItem.value"
-                                        mini
+                                        icon-only
                                     />
                                     <div v-else class="h-8 w-8" />
                                 </div>
@@ -113,7 +113,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                                     >
                                         NEW
                                     </span>
-                                    <ResourceCostItem :name="slot.nextItem.name" :value="slot.nextItem.value" mini />
+                                    <ResourceCostItem :name="slot.nextItem.name" :value="slot.nextItem.value" icon-only />
                                 </div>
                             </div>
                         </div>

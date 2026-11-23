@@ -60,6 +60,12 @@ export const useUIStore = defineStore("ui", {
                 show: env.isApp,
             },
             {
+                name: "log-analysis",
+                path: "/log-analysis",
+                icon: "ri:line-chart-line",
+                show: env.isApp,
+            },
+            {
                 name: "char-build",
                 path: "/char",
                 icon: "ri:hammer-line",

@@ -18,6 +18,7 @@ import {
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { type TitleFrame, titleFrameData } from "@/data/d/titleframe.data"
 import { getAccessoryUnlockLabelKey, getWanhuaSkinUnlock, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { headFrameIdToKey } from "@/utils/head-frame/head-frame.generated"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass, getRarityName, getRaritySwatchClass } from "@/utils/rarity-utils"
 import { titleFrameIdToKey } from "@/utils/title-frame/title-frame.generated"
@@ -455,7 +456,14 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                             <div class="p-3">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex min-w-0 items-start gap-2.5">
+                                        <HeadFrameRender
+                                            v-if="accessory.accessoryType === 'headframe' && headFrameIdToKey[accessory.id]"
+                                            :head-frame-id="accessory.id"
+                                            :alt="$t(accessory.name)"
+                                            class="size-10"
+                                        />
                                         <img
+                                            v-else
                                             :src="getAccessoryIcon(accessory)"
                                             :alt="accessory.name"
                                             class="size-10 shrink-0 rounded-xs object-cover"

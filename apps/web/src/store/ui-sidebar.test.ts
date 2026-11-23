@@ -99,7 +99,7 @@ describe("侧边栏布局持久化", () => {
         expect(raw.length).toBeGreaterThan(0)
         // 回归：null 默认曾被推导为 any 序列化器，数组被 String() 压成逗号串
         expect(() => JSON.parse(raw)).not.toThrow()
-        const expected = ["/", "/game-launcher", "/char", "/map-tool", "/db", "/chat", "/timeline", "/dna", "/more"]
+        const expected = ["/", "/game-launcher", "/log-analysis", "/char", "/map-tool", "/db", "/chat", "/timeline", "/dna", "/more"]
         expect(JSON.parse(raw)).toEqual(expected)
 
         // 模拟刷新：全新 pinia 实例重读同一份落盘（后端 Map 不动）
@@ -122,12 +122,32 @@ describe("侧边栏布局持久化", () => {
         expect(ui.isSidebarLayoutCustomized).toBe(true)
         ui.resetSidebarLayout()
         expect(ui.isSidebarLayoutCustomized).toBe(false)
-        expect(ui.sidebarLayoutPaths).toEqual(["/", "/game-launcher", "/char", "/map-tool", "/db", "/chat", "/dna", "/more"])
+        expect(ui.sidebarLayoutPaths).toEqual([
+            "/",
+            "/game-launcher",
+            "/log-analysis",
+            "/char",
+            "/map-tool",
+            "/db",
+            "/chat",
+            "/dna",
+            "/more",
+        ])
         await nextTick()
     })
 
     it("历史坏盘数据解析失败时回默认布局，不崩散", async () => {
         const ui = await openStore({ [LAYOUT_KEY]: "/,/game-launcher,/char,/timeline,/more" })
-        expect(ui.sidebarLayoutPaths).toEqual(["/", "/game-launcher", "/char", "/map-tool", "/db", "/chat", "/dna", "/more"])
+        expect(ui.sidebarLayoutPaths).toEqual([
+            "/",
+            "/game-launcher",
+            "/log-analysis",
+            "/char",
+            "/map-tool",
+            "/db",
+            "/chat",
+            "/dna",
+            "/more",
+        ])
     })
 })

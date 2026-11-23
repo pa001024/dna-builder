@@ -16,7 +16,7 @@ const emits = defineEmits<{
     select: [id: number]
 }>()
 
-const STUB_IDS = new Set([0, 130, 200, 300])
+const STUB_IDS = new Set([0, 130, 200, 300, 1200, 3000])
 
 type MonsterTab = "all" | "normal" | "elite" | "boss" | "stub"
 

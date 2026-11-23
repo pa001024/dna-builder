@@ -5,7 +5,7 @@
  * 时把这个值加一。抓取侧只接受 major <= 当前值的包，新格式包由新版应用/SDK 消费，老版本自动
  * 跳过，从而向前兼容。加字段是纯 additive，老版本读包忽略未知字段，不受影响。
  */
-export const DATA_PACK_FORMAT_MAJOR = 3
+export const DATA_PACK_FORMAT_MAJOR = 4
 
 /**
  * 历史分割线：1.6.208.7 把 MOD 数值挪进 `加成`（dict），旧读包侧会把 dict 当数值除而崩溃。
