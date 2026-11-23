@@ -1800,7 +1800,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
         // 属性节点：attrs 取整块面板，属性键取逐项值；旧边没有 handle 时仍按整块面板处理
         if (nodeType === NodeType.ATTR_CALC || nodeType === NodeType.WEAPON_ATTR_CALC) {
             if (!handleId || handleId === "attrs") return result.attrs
-            return result[handleId] ?? result.attrs
+            // 未知数值 handle 不得回退整块面板：只有命中逐项输出时才返回值
+            return handleId in result ? result[handleId] : undefined
         }
         if (handleId && typeof result === "object" && handleId in result) return result[handleId]
         return result

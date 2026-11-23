@@ -134,10 +134,22 @@ describe("赛季默认选中与安全模式版本门限一致", () => {
     })
 
     it("安全模式开启时默认选中版本门限内的最新赛季", () => {
-        const limit = getCurrentVersionLimit()
-        const season = getDefaultRaidSeason()
-        expect(getRaidSeasonVersion(season)).toBeLessThanOrEqual(limit)
-        expect(getRaidSeasonVersion(season)).toBeCloseTo(DNA_SAFE_VERSION_LIMIT)
+        const previousLimit = getCurrentVersionLimit()
+        // 测试环境无 localStorage 时门限为 Infinity（等同关闭安全模式），这里显式写入安全模式门限再断言
+        setCurrentVersionLimit(DNA_SAFE_VERSION_LIMIT)
+        try {
+            const allowed = Object.values(RaidSeason)
+                .map(item => item.RaidSeason)
+                .filter(seasonId => getRaidSeasonVersion(seasonId) <= DNA_SAFE_VERSION_LIMIT)
+                .sort((a, b) => a - b)
+            const season = getDefaultRaidSeason()
+            // 当前安全门限为 1.8（DNA_SAFE_VERSION_LIMIT），1008 赛季仍在门限内，默认选中最新赛季
+            expect(season).toBe(allowed.at(-1))
+            expect(season).toBe(1008)
+            expect(getRaidSeasonVersion(season)).toBeLessThanOrEqual(DNA_SAFE_VERSION_LIMIT)
+        } finally {
+            setCurrentVersionLimit(previousLimit)
+        }
     })
 
     it("关闭安全模式后默认选中最新赛季", () => {

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+defineOptions({ inheritAttrs: false })
+
 defineProps<{
     title?: string
     side?: "top" | "right" | "bottom" | "left"

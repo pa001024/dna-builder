@@ -1,5 +1,6 @@
 use crate::submodules::script::{
-    is_script_path_running, normalize_script_path, run_script_file, stop_script_by_path,
+    is_script_path_running, normalize_script_path, run_script_file, run_script_file_looped,
+    stop_script_by_path,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -1011,6 +1012,27 @@ fn _binding_matches(
     true
 }
 
+/// 判断本次释放的按键是否构成该绑定的热键松开。
+/// 只有当释放的键属于绑定组合（触发键、组合前缀键或修饰键），且释放后组合不再成立时才算松开；
+/// 脚本自身注入的其它键（如左键连点脚本的鼠标抬起）不会中断按住循环。
+fn _is_binding_released(parsed: &ParsedHotkey, vk: u32, pressed: &HashSet<u32>) -> bool {
+    let modifier_released = (parsed.ctrl && _vk_matches(VK_CONTROL.0 as u32, vk))
+        || (parsed.alt && _vk_matches(VK_MENU.0 as u32, vk))
+        || (parsed.shift && _vk_matches(VK_SHIFT.0 as u32, vk))
+        || (parsed.win && (vk == VK_LWIN.0 as u32 || vk == VK_RWIN.0 as u32));
+    let key_released = _vk_matches(parsed.key_vk, vk)
+        || parsed
+            .combo_prefix_vk
+            .is_some_and(|prefix_vk| _vk_matches(prefix_vk, vk));
+    if !key_released && !modifier_released {
+        return false;
+    }
+
+    let mut remaining = pressed.clone();
+    remaining.remove(&vk);
+    !_is_binding_held(parsed, &remaining)
+}
+
 /// 判断按住循环时热键是否仍处于“按住”状态。
 fn _is_binding_held(parsed: &ParsedHotkey, pressed: &HashSet<u32>) -> bool {
     if !_is_vk_pressed(parsed.key_vk, pressed) {
@@ -1079,30 +1101,34 @@ fn _spawn_hold_loop(binding: RuntimeHotkeyBinding, app_handle: tauri::AppHandle)
             }),
         );
 
-        loop {
-            if !loop_flag.load(Ordering::Acquire) {
-                break;
-            }
-            let should_continue = if let Ok(pressed) = _hotkey_state().pressed_keys.lock() {
-                _is_binding_held(&binding.parsed, &pressed) && _binding_condition_matches(&binding)
-            } else {
-                false
-            };
-            if !should_continue {
-                break;
-            }
+        // 按住期间整段循环只维护一次运行态，避免每轮向 IPC 广播脚本启停事件。
+        let should_continue = {
+            let loop_flag = loop_flag.clone();
+            Arc::new(move || {
+                if !loop_flag.load(Ordering::Acquire) {
+                    return false;
+                }
+                match _hotkey_state().pressed_keys.lock() {
+                    Ok(pressed) => {
+                        _is_binding_held(&binding.parsed, &pressed)
+                            && _binding_condition_matches(&binding)
+                    }
+                    Err(_) => false,
+                }
+            })
+        };
 
-            if let Err(error) = run_script_file(script_path.clone(), app_handle.clone()).await {
-                let _ = app_handle.emit(
-                    "script-console",
-                    serde_json::json!({
-                        "scope": script_path.clone(),
-                        "level": "error",
-                        "message": format!("热键按住循环执行失败: {}，错误: {}", script_path, error),
-                    }),
-                );
-                break;
-            }
+        if let Err(error) =
+            run_script_file_looped(script_path.clone(), app_handle.clone(), should_continue).await
+        {
+            let _ = app_handle.emit(
+                "script-console",
+                serde_json::json!({
+                    "scope": script_path.clone(),
+                    "level": "error",
+                    "message": format!("热键按住循环执行失败: {}，错误: {}", script_path, error),
+                }),
+            );
         }
 
         if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
@@ -1144,26 +1170,24 @@ fn _spawn_toggle_loop(binding: RuntimeHotkeyBinding, app_handle: tauri::AppHandl
             }),
         );
 
-        loop {
-            if !loop_flag.load(Ordering::Acquire) {
-                break;
-            }
+        let should_continue = {
+            let loop_flag = loop_flag.clone();
+            Arc::new(move || {
+                loop_flag.load(Ordering::Acquire) && _binding_condition_matches(&binding)
+            })
+        };
 
-            if !_binding_condition_matches(&binding) {
-                break;
-            }
-
-            if let Err(error) = run_script_file(script_path.clone(), app_handle.clone()).await {
-                let _ = app_handle.emit(
-                    "script-console",
-                    serde_json::json!({
-                        "scope": script_path.clone(),
-                        "level": "error",
-                        "message": format!("热键切换循环执行失败: {}，错误: {}", script_path, error),
-                    }),
-                );
-                break;
-            }
+        if let Err(error) =
+            run_script_file_looped(script_path.clone(), app_handle.clone(), should_continue).await
+        {
+            let _ = app_handle.emit(
+                "script-console",
+                serde_json::json!({
+                    "scope": script_path.clone(),
+                    "level": "error",
+                    "message": format!("热键切换循环执行失败: {}，错误: {}", script_path, error),
+                }),
+            );
         }
 
         if let Ok(mut guard) = _hotkey_state().hold_loop_flags.lock() {
@@ -1213,8 +1237,9 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
             if !binding.hold_to_loop {
                 continue;
             }
-            // 仅当按键/修饰键组合仍与绑定匹配时，才视为该热键的释放动作。
-            if !_is_binding_held(&binding.parsed, pressed) || !_binding_condition_matches(binding) {
+            // 仅当本次释放真正松开了该热键组合时才停止；脚本注入的无关按键（例如
+            // 左键连点脚本的鼠标抬起）不能让按住循环中断。
+            if !_is_binding_released(&binding.parsed, vk, pressed) {
                 continue;
             }
 
@@ -1862,6 +1887,35 @@ mod tests {
         let parsed = _parse_ahk_hotkey("RButton & XButton1").expect("should parse mouse combo");
         assert_eq!(parsed.combo_prefix_vk, Some(VK_RBUTTON.0 as u32));
         assert_eq!(parsed.key_vk, VK_XBUTTON1.0 as u32);
+    }
+
+    #[test]
+    fn hold_loop_ignores_release_of_unrelated_keys() {
+        let parsed = _parse_ahk_hotkey("CapsLock & x").expect("should parse combo hotkey");
+        let mut pressed = HashSet::new();
+        pressed.insert(VK_CAPITAL.0 as u32);
+        pressed.insert('X' as u32);
+        pressed.insert(VK_LBUTTON.0 as u32);
+
+        let mut after_click_release = pressed.clone();
+        after_click_release.remove(&(VK_LBUTTON.0 as u32));
+        assert!(_is_binding_held(&parsed, &after_click_release));
+        assert!(!_is_binding_released(
+            &parsed,
+            VK_LBUTTON.0 as u32,
+            &pressed
+        ));
+    }
+
+    #[test]
+    fn hold_loop_stops_when_hotkey_key_released() {
+        let parsed = _parse_ahk_hotkey("CapsLock & x").expect("should parse combo hotkey");
+        let mut pressed = HashSet::new();
+        pressed.insert(VK_CAPITAL.0 as u32);
+        pressed.insert('X' as u32);
+
+        assert!(_is_binding_released(&parsed, 'X' as u32, &pressed));
+        assert!(_is_binding_released(&parsed, VK_CAPITAL.0 as u32, &pressed));
     }
 
     #[test]

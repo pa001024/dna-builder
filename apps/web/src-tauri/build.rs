@@ -30,6 +30,10 @@ fn inject_common_controls_manifest() {
     println!(
         "cargo:rustc-link-arg-bins=/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
     );
+    // lib 测试可执行文件同样需要 v6 清单，否则 comctl32 5.82 缺少 TaskDialogIndirect 入口点
+    println!(
+        "cargo:rustc-link-arg=/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
+    );
 }
 
 /**
