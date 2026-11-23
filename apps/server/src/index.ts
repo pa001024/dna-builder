@@ -13,6 +13,8 @@ import { scheduleAiLogRetention } from "./ai-log-store"
 import { apiPlugin } from "./api"
 import { agentSkillPlugin } from "./api/agent-skill"
 import { aiLogPlugin } from "./api/ai-log"
+import { bugAssetsPlugin } from "./api/bug-assets"
+import { bugsPlugin } from "./api/bugs"
 import { installPlugin } from "./api/install"
 import { modApiPlugin } from "./api/mod"
 import { syncDataPackDiffBackendsOnce } from "./api/package-diff"
@@ -31,6 +33,8 @@ const app = new Elysia()
     // .use(staticPlugin({ prefix: "/", assets: "../dist", indexHTML: false, alwaysStatic: true }))
     // .use(cronPlugin())
     .use(apiPlugin())
+    .use(bugAssetsPlugin())
+    .use(bugsPlugin())
     .use(installPlugin())
     .use(modApiPlugin())
     .use(raceLotteryPlugin())

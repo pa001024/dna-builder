@@ -238,6 +238,42 @@ export const routes: readonly RouteRecordRaw[] = [
             { name: "room", path: ":room", component: () => import("./views/ChatRoom.vue") }, //
         ],
     },
+    // BUG 库：公开页，不依赖游戏数据包（未安装数据包也能反馈）
+    {
+        name: "bug-list",
+        path: "/bugs",
+        component: () => import("./views/BugListView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
+    {
+        name: "bug-new",
+        path: "/bugs/new",
+        component: () => import("./views/BugNewView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
+    {
+        name: "bug-mine",
+        path: "/bugs/mine",
+        component: () => import("./views/BugMineView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
+    {
+        name: "bug-submission",
+        path: "/bugs/submissions/:submissionId",
+        component: () => import("./views/BugSubmissionView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
+    {
+        name: "bug-detail",
+        path: "/bugs/:bugId",
+        component: () => import("./views/BugDetailView.vue"),
+        beforeEnter: () => setMinSize(320, 360),
+        meta: { requireData: false },
+    },
     // admin
     {
         path: "/admin",
@@ -329,6 +365,21 @@ export const routes: readonly RouteRecordRaw[] = [
                 name: "admin-ai-recharge",
                 path: "ai-recharge",
                 component: () => import("./admin/AiRechargeManagement.vue"),
+            },
+            {
+                name: "admin-bugs",
+                path: "bugs",
+                component: () => import("./admin/BugManagement.vue"),
+            },
+            {
+                name: "admin-bug-jobs",
+                path: "bug-jobs",
+                component: () => import("./admin/BugJobsManagement.vue"),
+            },
+            {
+                name: "admin-bug-sync",
+                path: "bug-sync",
+                component: () => import("./admin/BugSyncManagement.vue"),
             },
         ],
     },

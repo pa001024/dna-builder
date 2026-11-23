@@ -27,6 +27,7 @@ import {
 import { describeCollection, resolveDashVectorConfig } from "../rag/dashvector"
 import { resolveEmbeddingConfig } from "../rag/embedding"
 import { getVectorIndexStatus, RagQueryTimeoutError, searchVectors } from "../rag/search"
+import { RateLimiter } from "../util/rate-limit"
 
 /** 每账号每分钟允许的检索次数（向量化成本极低，限流只是为了挡住脚本刷接口）；压测时可用 RAG_SEARCH_RATE_LIMIT 调高 */
 const RATE_LIMIT_PER_MINUTE = Number(process.env.RAG_SEARCH_RATE_LIMIT ?? "") || 60
@@ -34,38 +35,8 @@ const RATE_LIMIT_PER_MINUTE = Number(process.env.RAG_SEARCH_RATE_LIMIT ?? "") ||
 /** 限流窗口（毫秒） */
 const RATE_WINDOW = 60_000
 
-/** 每账号的调用时间戳队列 */
-const rateBuckets = new Map<string, number[]>()
-
-/**
- * 记账一次调用并判定是否超限。
- * @param userId 账号 id
- * @returns 是否允许本次调用
- */
-function allowRequest(userId: string): boolean {
-    const now = Date.now()
-    const recent = (rateBuckets.get(userId) ?? []).filter(timestamp => now - timestamp < RATE_WINDOW)
-
-    if (recent.length >= RATE_LIMIT_PER_MINUTE) {
-        rateBuckets.set(userId, recent)
-
-        return false
-    }
-
-    recent.push(now)
-    rateBuckets.set(userId, recent)
-
-    // 桶数量随账号增长，定期丢弃已经空掉的桶，避免长期运行内存只增不减
-    if (rateBuckets.size > 5000) {
-        for (const [key, timestamps] of rateBuckets) {
-            if (!timestamps.some(timestamp => now - timestamp < RATE_WINDOW)) {
-                rateBuckets.delete(key)
-            }
-        }
-    }
-
-    return true
-}
+/** 每账号的滑动窗口限流（进程内，多实例各自计数） */
+const searchLimiter = new RateLimiter(RATE_LIMIT_PER_MINUTE, RATE_WINDOW)
 
 /** 支持的数据语言（与索引/指纹的语言口径一致） */
 const LANGS = SUPPORTED_LANGS
@@ -149,10 +120,15 @@ export const ragPlugin = () =>
                     return { error: "unauthorized", message: "需要登录令牌（token 或 Authorization: Bearer）" }
                 }
 
-                if (!allowRequest(user.id)) {
+                const limit = searchLimiter.allow(user.id)
+                if (!limit.allowed) {
                     set.status = 429
 
-                    return { error: "rate_limited", message: `每分钟最多 ${RATE_LIMIT_PER_MINUTE} 次检索` }
+                    return {
+                        error: "rate_limited",
+                        message: `每分钟最多 ${RATE_LIMIT_PER_MINUTE} 次检索`,
+                        retry_after_ms: limit.retryAfterMs,
+                    }
                 }
 
                 const status = await getVectorIndexStatus()

@@ -21,6 +21,10 @@
         "loop": "bun ./src/cli.ts loop",
         "serve": "bun ./src/cli.ts serve",
         "dev": "bun run --watch src/cli.ts serve",
-        "frpc:compose": "bun ./src/cli.ts frpc-compose"
+        "frpc:compose": "bun ./src/cli.ts frpc-compose",
+        "bug-sync:once": "bun ./src/bug-sync/index.ts once",
+        "bug-sync:loop": "bun ./src/bug-sync/index.ts loop",
+        "bug-sync:webhook": "bun ./src/bug-sync/index.ts webhook",
+        "bug-sync:test": "bun test src/bug-sync/"
     }
 }

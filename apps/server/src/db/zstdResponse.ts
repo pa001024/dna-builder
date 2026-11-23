@@ -41,7 +41,7 @@ export async function maybeCompressGraphqlResponse(request: Request, response: R
     if (!clientAcceptsZstd(request)) return response
     if (response.body === null) return response
 
-    const raw = Buffer.from(await response.arrayBuffer())
+    const raw = new Uint8Array(await response.arrayBuffer())
     if (raw.length <= ZSTD_THRESHOLD_BYTES) {
         return new Response(raw, {
             status: response.status,
@@ -50,7 +50,7 @@ export async function maybeCompressGraphqlResponse(request: Request, response: R
         })
     }
 
-    const compressed = await Bun.zstdCompress(raw)
+    const compressed = new Uint8Array(await Bun.zstdCompress(raw))
     const headers = new Headers(response.headers)
     headers.set("content-encoding", "zstd")
     headers.set("content-length", String(compressed.length))

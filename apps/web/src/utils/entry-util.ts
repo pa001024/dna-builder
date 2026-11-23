@@ -132,6 +132,7 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         { name: "timeline", path: "/timeline", icon: "ri:timeline-view" },
         { name: "map-tool", path: "/map-tool", icon: "ri:map-2-line" },
         { name: "help", path: "/help", icon: "ri:question-line" },
+        { name: "bug-list", path: "/bugs", icon: "ri:bug-line" },
         { name: "game-accounts", path: "/game-accounts", icon: "ri:user-line", show: isApp },
         { name: "unpack", path: "/unpack", icon: "ri:file-zip-line", show: isApp && !envs.safeMode },
         { name: "skin-colorize", path: "/skin-colorize", icon: "ri:palette-line" },

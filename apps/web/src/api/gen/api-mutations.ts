@@ -934,6 +934,286 @@ export const clearBuildTargetValueCacheMutation = typedMutation<number>(/* Graph
     }
 `)
 
+export const adminUpdateBugMutation = typedMutation<
+    Types.AdminBugResult,
+    { bugId: string; fields: Types.AdminBugFields; reason: string; expectedVersion: number }
+>(/* GraphQL */ `
+    mutation ($bugId: ID!, $fields: AdminBugFields!, $reason: String!, $expectedVersion: Int!) {
+        adminUpdateBug(bugId: $bugId, fields: $fields, reason: $reason, expectedVersion: $expectedVersion) {
+            bug {
+                id
+                version
+                tagVersion
+            }
+            changed
+        }
+    }
+`)
+
+export const adminMergeBugsMutation = typedMutation<
+    Types.AdminBugResult,
+    { sourceBugIds: string[]; targetBugId: string; reason: string; expectedVersions: number[] }
+>(/* GraphQL */ `
+    mutation ($sourceBugIds: [ID!]!, $targetBugId: ID!, $reason: String!, $expectedVersions: [Int!]!) {
+        adminMergeBugs(sourceBugIds: $sourceBugIds, targetBugId: $targetBugId, reason: $reason, expectedVersions: $expectedVersions) {
+            bug {
+                id
+                version
+                tagVersion
+            }
+            changed
+        }
+    }
+`)
+
+export const adminRevertMergeMutation = typedMutation<
+    Types.AdminBugResult,
+    { mergeEventId: string; reason: string; expectedVersions: number[] }
+>(/* GraphQL */ `
+    mutation ($mergeEventId: ID!, $reason: String!, $expectedVersions: [Int!]!) {
+        adminRevertMerge(mergeEventId: $mergeEventId, reason: $reason, expectedVersions: $expectedVersions) {
+            bug {
+                id
+                version
+                tagVersion
+            }
+            changed
+        }
+    }
+`)
+
+export const adminSetRelationMutation = typedMutation<
+    Types.AdminBugResult,
+    { bugId: string; targetBugId: string; relationType: Types.RelationType; evidenceRefs?: string[]; expectedGraphVersion: number }
+>(/* GraphQL */ `
+    mutation ($bugId: ID!, $targetBugId: ID!, $relationType: RelationType!, $evidenceRefs: [String!], $expectedGraphVersion: Int!) {
+        adminSetRelation(
+            bugId: $bugId
+            targetBugId: $targetBugId
+            relationType: $relationType
+            evidenceRefs: $evidenceRefs
+            expectedGraphVersion: $expectedGraphVersion
+        ) {
+            bug {
+                id
+                version
+                tagVersion
+            }
+            changed
+        }
+    }
+`)
+
+export const adminRemoveRelationMutation = typedMutation<
+    Types.AdminBugResult,
+    { relationId: string; reason: string; expectedRelationVersion: number }
+>(/* GraphQL */ `
+    mutation ($relationId: ID!, $reason: String!, $expectedRelationVersion: Int!) {
+        adminRemoveRelation(relationId: $relationId, reason: $reason, expectedRelationVersion: $expectedRelationVersion) {
+            bug {
+                id
+                version
+                tagVersion
+            }
+            changed
+        }
+    }
+`)
+
+export const adminSetTrackingTagsMutation = typedMutation<
+    Types.TagSyncResult,
+    { bugId: string; tagKeys: string[]; expectedTagVersion: number; reason: string; fixedVersion?: string; evidenceRefs?: string[] }
+>(/* GraphQL */ `
+    mutation (
+        $bugId: ID!
+        $tagKeys: [String!]!
+        $expectedTagVersion: Int!
+        $reason: String!
+        $fixedVersion: String
+        $evidenceRefs: [String!]
+    ) {
+        adminSetTrackingTags(
+            bugId: $bugId
+            tagKeys: $tagKeys
+            expectedTagVersion: $expectedTagVersion
+            reason: $reason
+            fixedVersion: $fixedVersion
+            evidenceRefs: $evidenceRefs
+        ) {
+            added
+            removed
+            tagVersion
+            fixStage
+            eventId
+        }
+    }
+`)
+
+export const adminSetGithubBindingMutation = typedMutation<
+    boolean,
+    { tagKey: string; repositoryId: string; labelName: string; expectedRegistryVersion: number }
+>(/* GraphQL */ `
+    mutation ($tagKey: String!, $repositoryId: String!, $labelName: String!, $expectedRegistryVersion: Int!) {
+        adminSetGithubBinding(
+            tagKey: $tagKey
+            repositoryId: $repositoryId
+            labelName: $labelName
+            expectedRegistryVersion: $expectedRegistryVersion
+        )
+    }
+`)
+
+export const adminRetryJobMutation = typedMutation<boolean, { jobId: string; step: string }>(/* GraphQL */ `
+    mutation ($jobId: ID!, $step: String!) {
+        adminRetryJob(jobId: $jobId, step: $step)
+    }
+`)
+
+export const adminReconcileMutation = typedMutation<boolean, { syncId: string }>(/* GraphQL */ `
+    mutation ($syncId: ID!) {
+        adminReconcile(syncId: $syncId)
+    }
+`)
+
+export const submitBugMutation = typedMutation<Types.SubmissionReceipt, { input: Types.SubmitBugInput; idempotencyKey: string }>(
+    /* GraphQL */ `
+        mutation ($input: SubmitBugInput!, $idempotencyKey: String!) {
+            submitBug(input: $input, idempotencyKey: $idempotencyKey) {
+                submissionId
+                revision
+                state
+                processingMode
+                receiptToken
+                suggestedPollAfterSeconds
+            }
+        }
+    `
+)
+
+export const addBugRevisionMutation = typedMutation<
+    Types.SubmissionReceipt,
+    { submissionId: string; input: Types.SubmitBugInput; idempotencyKey: string }
+>(/* GraphQL */ `
+    mutation ($submissionId: ID!, $input: SubmitBugInput!, $idempotencyKey: String!) {
+        addBugRevision(submissionId: $submissionId, input: $input, idempotencyKey: $idempotencyKey) {
+            submissionId
+            revision
+            state
+            processingMode
+            receiptToken
+            suggestedPollAfterSeconds
+        }
+    }
+`)
+
+export const withdrawSubmissionMutation = typedMutation<boolean, { submissionId: string }>(/* GraphQL */ `
+    mutation ($submissionId: ID!) {
+        withdrawSubmission(submissionId: $submissionId)
+    }
+`)
+
+export const addFeedbackMutation = typedMutation<Types.FeedbackReceipt, { bugId: string; input: Types.FeedbackInput }>(/* GraphQL */ `
+    mutation ($bugId: ID!, $input: FeedbackInput!) {
+        addFeedback(bugId: $bugId, input: $input) {
+            feedbackId
+            submissionId
+            bugId
+            state
+            receiptToken
+            suggestedPollAfterSeconds
+        }
+    }
+`)
+
+export const addCommentMutation = typedMutation<Types.CommentResult, { bugId: string; body: string; visibility?: Types.Visibility }>(
+    /* GraphQL */ `
+        mutation ($bugId: ID!, $body: String!, $visibility: Visibility) {
+            addComment(bugId: $bugId, body: $body, visibility: $visibility) {
+                ok
+                comment {
+                    id
+                    bugId
+                    source
+                    author
+                    body
+                    revision
+                    visibility
+                    deleted
+                    createdAt
+                }
+            }
+        }
+    `
+)
+
+export const editCommentMutation = typedMutation<Types.CommentResult, { commentId: string; body: string; expectedRevision: number }>(
+    /* GraphQL */ `
+        mutation ($commentId: ID!, $body: String!, $expectedRevision: Int!) {
+            editComment(commentId: $commentId, body: $body, expectedRevision: $expectedRevision) {
+                ok
+                comment {
+                    id
+                    bugId
+                    source
+                    author
+                    body
+                    revision
+                    visibility
+                    deleted
+                    createdAt
+                }
+            }
+        }
+    `
+)
+
+export const deleteBugCommentMutation = typedMutation<Types.CommentResult, { commentId: string }>(/* GraphQL */ `
+    mutation ($commentId: ID!) {
+        deleteBugComment(commentId: $commentId) {
+            ok
+            comment {
+                id
+                bugId
+                source
+                author
+                body
+                revision
+                visibility
+                deleted
+                createdAt
+            }
+        }
+    }
+`)
+
+export const setVoteMutation = typedMutation<Types.VoteResult, { bugId: string; active: boolean }>(/* GraphQL */ `
+    mutation ($bugId: ID!, $active: Boolean!) {
+        setVote(bugId: $bugId, active: $active) {
+            bugId
+            active
+            votes
+            reporters
+        }
+    }
+`)
+
+export const setSubscriptionMutation = typedMutation<boolean, { bugId: string; channels?: string[]; preferences?: unknown }>(/* GraphQL */ `
+    mutation ($bugId: ID!, $channels: [String!], $preferences: JSON) {
+        setSubscription(bugId: $bugId, channels: $channels, preferences: $preferences)
+    }
+`)
+
+export const requestReopenMutation = typedMutation<Types.ReopenResult, { bugId: string; feedbackId: string }>(/* GraphQL */ `
+    mutation ($bugId: ID!, $feedbackId: ID!) {
+        requestReopen(bugId: $bugId, feedbackId: $feedbackId) {
+            ok
+            bugId
+            status
+            eventId
+        }
+    }
+`)
+
 export const adminCreateRechargeBatchMutation = typedMutation<
     Types.RechargeBatchResult,
     { amountYuan: number; count: number; expiresInDays?: number }

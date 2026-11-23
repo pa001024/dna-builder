@@ -3,6 +3,8 @@ import { resolvers as abyssUsageResolvers, typeDefs as abyssUsageSchema } from "
 import { resolvers as activityResolvers, typeDefs as activitySchema } from "./activity"
 import { resolvers as adminResolvers, typeDefs as adminSchema } from "./admin"
 import { resolvers as aiRechargeResolvers, typeDefs as aiRechargeSchema } from "./aiRecharge"
+import { resolvers as bugResolvers, typeDefs as bugSchema } from "./bug"
+import { resolvers as bugAdminResolvers, typeDefs as bugAdminSchema } from "./bugAdmin"
 import { resolvers as buildResolvers, typeDefs as buildSchema } from "./build"
 import { resolvers as commentResolvers, typeDefs as commentSchema } from "./comment"
 import { resolvers as dpsResolvers, typeDefs as dpsSchema } from "./dps"
@@ -50,6 +52,8 @@ export function schemaWith(ctx: any) {
         scriptCategorySchema,
         shopSchema,
         aiRechargeSchema,
+        bugSchema,
+        bugAdminSchema,
     ]
     const resolvers = mergeResolvers(
         userResolvers,
@@ -75,7 +79,9 @@ export function schemaWith(ctx: any) {
         scriptResolvers,
         scriptCategoryResolvers,
         shopResolvers,
-        aiRechargeResolvers
+        aiRechargeResolvers,
+        bugResolvers,
+        bugAdminResolvers
     )
 
     function mergeResolvers(...items: any[]) {
@@ -112,8 +118,8 @@ export function schemaWith(ctx: any) {
 
 // util
 export const getSubSelection = (info: GraphQLResolveInfo, subKey: string = "msgs") => {
-    function getSub(p: FieldNode, key: string) {
-        if (p.selectionSet) {
+    function getSub(p: FieldNode | undefined, key: string): FieldNode | undefined {
+        if (p?.selectionSet) {
             for (const selection of p.selectionSet.selections) {
                 if (selection.kind === Kind.FIELD && selection.name.value === key) {
                     return selection
@@ -123,7 +129,9 @@ export const getSubSelection = (info: GraphQLResolveInfo, subKey: string = "msgs
     }
     const subarray = subKey.split(".")
     if (subarray.length === 0) return
-    let field = info.fieldNodes[0]
+    let field: FieldNode | undefined = info?.fieldNodes?.[0]
+    // 选择集不可用（如直接调用 resolver 的测试）时按「需要」处理，保持未裁剪时的行为
+    if (!field) return new SubSelection()
     for (const key of subarray) {
         const sub = getSub(field, key)
         if (!sub) return
@@ -133,19 +141,19 @@ export const getSubSelection = (info: GraphQLResolveInfo, subKey: string = "msgs
 }
 
 export class SubSelection {
-    constructor(public selection: FieldNode) {}
+    constructor(public selection?: FieldNode) {}
 
     hasArg(name: string) {
-        return this.selection.arguments?.some((arg: any) => arg.name.value === name)
+        return this.selection?.arguments?.some((arg: any) => arg.name.value === name)
     }
 
     getArg(name: string) {
-        const arg = this.selection.arguments?.find((arg: any) => arg.name.value === name)
+        const arg = this.selection?.arguments?.find((arg: any) => arg.name.value === name)
         return arg ? (arg.value as any).value : null
     }
 
     args() {
-        return this.selection.arguments?.reduce((acc: any, arg: any) => {
+        return this.selection?.arguments?.reduce((acc: any, arg: any) => {
             acc[arg.name.value] = arg.value.value
             return acc
         }, {})

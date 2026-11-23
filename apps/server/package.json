@@ -12,6 +12,8 @@
     },
     "dependencies": {
         "@duckdb/node-api": "^2.0.0-r.1",
+        "@earendil-works/pi-agent-core": "1.5.2",
+        "@earendil-works/pi-ai": "1.5.2",
         "@elysiajs/cors": "^1.4.2",
         "@elysiajs/graphql-yoga": "^1.4.1",
         "@elysiajs/static": "^1.4.10",

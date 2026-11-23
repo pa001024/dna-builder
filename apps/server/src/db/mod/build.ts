@@ -1,12 +1,27 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, desc, eq, like, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
+import { computeBuildType, resolveBuildType } from "../../build-info"
 import { clearBuildTargetValueCache, getBuildTargetValue, invalidateBuildTargetValue } from "../../build-target-value"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
 
 export const typeDefs = /* GraphQL */ `
+    "构筑类型"
+    enum BuildType {
+        "普通构筑"
+        normal
+        "升华构筑"
+        transcend
+    }
+
+    "构筑摘要信息"
+    type BuildInfo {
+        "构筑类型（普通 / 升华）"
+        buildType: BuildType!
+    }
+
     type Build {
         id: String!
         title: String!
@@ -24,6 +39,8 @@ export const typeDefs = /* GraphQL */ `
         isLiked: Boolean
         "目标函数计算结果"
         targetValue: Float
+        "构筑摘要信息（优先读入库 build_type，仅缺列值 / 迁移前数据才解析 charSettings）"
+        info: BuildInfo!
     }
 
     input BuildInput {
@@ -45,8 +62,8 @@ export const typeDefs = /* GraphQL */ `
     }
 
     type Query {
-        builds(search: String, charId: Int, userId: String, limit: Int = 20, offset: Int = 0, sortBy: String): [Build!]!
-        buildsCount(search: String, charId: Int): Int!
+        builds(search: String, charId: Int, userId: String, limit: Int = 20, offset: Int = 0, sortBy: String, buildType: BuildType): [Build!]!
+        buildsCount(search: String, charId: Int, buildType: BuildType): Int!
         recommendedBuilds(limit: Int = 10): [Build!]!
         trendingBuilds(limit: Int = 10): [Build!]!
         build(id: String!): Build
@@ -62,10 +79,19 @@ export const resolvers = {
          */
         targetValue: (parent: { id: string; charId: number; charSettings: string }) =>
             getBuildTargetValue(parent.id, parent.charId, parent.charSettings),
+        /**
+         * 构筑类型（普通 / 升华）：优先读写入时落库的 build_type，迁移前数据才按配置原文回退。
+         * 字段级 resolver，只有选择 `info` 时 GraphQL 才会调用。
+         * @param parent 上层返回的构筑记录
+         * @returns 构筑摘要信息
+         */
+        info: (parent: { charSettings: string; buildType?: string | null }) => ({
+            buildType: resolveBuildType(parent.buildType, parent.charSettings),
+        }),
     },
     Query: {
         builds: async (_parent, args, context, info) => {
-            const { search, charId, userId, limit = 20, offset = 0, sortBy = "latest" } = args || {}
+            const { search, charId, userId, limit = 20, offset = 0, sortBy = "latest", buildType } = args || {}
             const conditions = []
 
             if (search) {
@@ -76,6 +102,9 @@ export const resolvers = {
             }
             if (userId) {
                 conditions.push(eq(schema.builds.userId, userId))
+            }
+            if (buildType) {
+                conditions.push(eq(schema.builds.buildType, buildType))
             }
 
             let orderBy: any[]
@@ -123,6 +152,7 @@ export const resolvers = {
         buildsCount: async (_parent, args) => {
             const search = args?.search
             const charId = args?.charId
+            const buildType = args?.buildType
             const conditions = []
 
             if (search) {
@@ -131,6 +161,10 @@ export const resolvers = {
 
             if (charId) {
                 conditions.push(eq(schema.builds.charId, charId))
+            }
+
+            if (buildType) {
+                conditions.push(eq(schema.builds.buildType, buildType))
             }
 
             const whereClause = conditions.length > 0 ? and(...conditions) : undefined
@@ -252,6 +286,7 @@ export const resolvers = {
                 .insert(schema.builds)
                 .values({
                     ...input,
+                    buildType: computeBuildType(input.charSettings),
                     userId: context.user.id,
                     updateAt: schema.now(),
                 })
@@ -304,7 +339,7 @@ export const resolvers = {
 
             const [updated] = await db
                 .update(schema.builds)
-                .set({ ...input, updateAt: schema.now() })
+                .set({ ...input, buildType: computeBuildType(input.charSettings), updateAt: schema.now() })
                 .where(eq(schema.builds.id, id))
                 .returning()
 

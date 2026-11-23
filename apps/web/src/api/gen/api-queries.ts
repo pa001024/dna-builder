@@ -1438,8 +1438,16 @@ export const commentsCountQuery = typedQuery(
 
 export const buildsQuery = typedQuery(
     /* GraphQL */ `
-        query ($search: String, $charId: Int, $userId: String, $limit: Int, $offset: Int, $sortBy: String) {
-            builds(search: $search, charId: $charId, userId: $userId, limit: $limit, offset: $offset, sortBy: $sortBy) {
+        query ($search: String, $charId: Int, $userId: String, $limit: Int, $offset: Int, $sortBy: String, $buildType: BuildType) {
+            builds(
+                search: $search
+                charId: $charId
+                userId: $userId
+                limit: $limit
+                offset: $offset
+                sortBy: $sortBy
+                buildType: $buildType
+            ) {
                 id
                 title
                 desc
@@ -1458,18 +1466,24 @@ export const buildsQuery = typedQuery(
                     qq
                 }
                 isLiked
+                info {
+                    buildType
+                }
             }
         }
     ` as const
-)<Types.Build[], { search?: string; charId?: number; userId?: string; limit?: number; offset?: number; sortBy?: string }>()
+)<
+    Types.Build[],
+    { search?: string; charId?: number; userId?: string; limit?: number; offset?: number; sortBy?: string; buildType?: Types.BuildType }
+>()
 
 export const buildsCountQuery = typedQuery(
     /* GraphQL */ `
-        query ($search: String, $charId: Int) {
-            buildsCount(search: $search, charId: $charId)
+        query ($search: String, $charId: Int, $buildType: BuildType) {
+            buildsCount(search: $search, charId: $charId, buildType: $buildType)
         }
     ` as const
-)<number, { search?: string; charId?: number }>()
+)<number, { search?: string; charId?: number; buildType?: Types.BuildType }>()
 
 export const recommendedBuildsQuery = typedQuery(
     /* GraphQL */ `
@@ -1549,6 +1563,276 @@ export const buildQuery = typedQuery(
         }
     ` as const
 )<Types.Build, { id: string }>()
+
+export const adminBugJobsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($filter: AdminBugJobFilter, $offset: Int) {
+            adminBugJobs(filter: $filter, offset: $offset) {
+                total
+                items {
+                    id
+                    kind
+                    state
+                    priority
+                    attempt
+                    leaseOwner
+                    leaseUntil
+                    lastError
+                    createdAt
+                }
+                counts {
+                    state
+                    count
+                }
+            }
+        }
+    ` as const
+)<Types.AdminBugJobsResult, { filter?: Types.AdminBugJobFilter; offset?: number }>()
+
+export const adminBugMergeEventsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($bugId: ID!) {
+            adminBugMergeEvents(bugId: $bugId) {
+                id
+                sourceBugIds
+                targetBugId
+                revertedAt
+                createdAt
+            }
+        }
+    ` as const
+)<Types.AdminBugMergeEvent[], { bugId: string }>()
+
+export const adminBugQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: ID!) {
+            adminBug(id: $id) {
+                id
+                displayKey
+                title
+                primaryCategory
+                severity
+                status
+                resolution
+                fixStage
+                version
+                votes
+                reporters
+                duplicateOf
+                fixedVersion
+                createdAt
+                lastActivityAt
+                githubIssue {
+                    issueNumber
+                    htmlUrl
+                }
+            }
+        }
+    ` as const
+)<Types.Bug, { id: string }>()
+
+export const bugQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: ID!) {
+            bug(id: $id) {
+                bug {
+                    id
+                    displayKey
+                }
+            }
+        }
+    ` as const
+)<Types.PublicBugDetail, { id: string }>()
+
+export const bugsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($filter: BugFilter, $sort: BugSort, $offset: Int, $limit: Int) {
+            bugs(filter: $filter, sort: $sort, offset: $offset, limit: $limit) {
+                total
+                offset
+                limit
+                items {
+                    id
+                    displayKey
+                    title
+                    environment {
+                        platform
+                        gameVersion
+                    }
+                    primaryCategory
+                    severity
+                    severitySource
+                    status
+                    fixStage
+                    votes
+                    reporters
+                    duplicateOf
+                    createdAt
+                    lastActivityAt
+                    githubIssue {
+                        issueNumber
+                        htmlUrl
+                    }
+                }
+            }
+        }
+    ` as const
+)<Types.BugPage, { filter?: Types.BugFilter; sort?: Types.BugSort; offset?: number; limit?: number }>()
+
+export const bugDiscussionQuery = typedQuery(
+    /* GraphQL */ `
+        query ($bugId: ID!, $offset: Int, $limit: Int) {
+            bugDiscussion(bugId: $bugId, offset: $offset, limit: $limit) {
+                total
+                offset
+                limit
+                items {
+                    id
+                    source
+                    author
+                    body
+                    createdAt
+                }
+            }
+        }
+    ` as const
+)<Types.DiscussionPage, { bugId: string; offset?: number; limit?: number }>()
+
+export const bugRelationsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($bugId: ID!) {
+            bugRelations(bugId: $bugId) {
+                id
+                sourceBugId
+                targetBugId
+                relationType
+            }
+        }
+    ` as const
+)<Types.BugRelation[], { bugId: string }>()
+
+export const bugTagRegistryQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            bugTagRegistry {
+                registryVersion
+                tags {
+                    tagKey
+                    displayI18nKey
+                }
+                exclusiveGroups {
+                    group
+                    tagKeys
+                }
+            }
+        }
+    ` as const
+)<Types.TagRegistry>()
+
+export const rawSubmissionsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($bugId: ID!) {
+            rawSubmissions(bugId: $bugId) {
+                submissionId
+                revision
+                text
+                createdAt
+            }
+        }
+    ` as const
+)<Types.RawSubmission[], { bugId: string }>()
+
+export const myBugsQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            myBugs {
+                submissions {
+                    submissionId
+                    state
+                    revision
+                    createdAt
+                    bugIds
+                }
+                votedBugIds
+                subscribedBugIds
+            }
+        }
+    ` as const
+)<Types.MyBugPage>()
+
+export const mySubmissionQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: ID!) {
+            mySubmission(id: $id) {
+                submission {
+                    submissionId
+                    gameId
+                    state
+                    currentRevision
+                    createdAt
+                    retentionUntil
+                }
+                versions {
+                    revision
+                    text
+                    context {
+                        platform
+                        region
+                        gameVersion
+                        frequency
+                    }
+                    publicationPolicy
+                    createdAt
+                }
+                assets {
+                    assetId
+                    mime
+                    width
+                    height
+                    scanState
+                }
+                bugIds
+            }
+        }
+    ` as const
+)<Types.SubmissionDetail, { id: string }>()
+
+export const submissionQuery = typedQuery(
+    /* GraphQL */ `
+        query ($id: ID!) {
+            submission(id: $id) {
+                submission {
+                    submissionId
+                    gameId
+                    state
+                    currentRevision
+                    createdAt
+                    retentionUntil
+                }
+                versions {
+                    revision
+                    text
+                    context {
+                        platform
+                        region
+                        gameVersion
+                        frequency
+                    }
+                    publicationPolicy
+                    createdAt
+                }
+                assets {
+                    assetId
+                    mime
+                    width
+                    height
+                    scanState
+                }
+                bugIds
+            }
+        }
+    ` as const
+)<Types.SubmissionDetail, { id: string }>()
 
 export const aiQuotaQuery = typedQuery(
     /* GraphQL */ `

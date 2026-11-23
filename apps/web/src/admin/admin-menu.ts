@@ -47,6 +47,15 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
         ],
     },
     {
+        name: "反馈",
+        label: "Feedback",
+        items: [
+            { name: "BUG 管理", path: "/admin/bugs", icon: "ri:bug-line" },
+            { name: "BUG 任务", path: "/admin/bug-jobs", icon: "ri:task-line" },
+            { name: "BUG 同步", path: "/admin/bug-sync", icon: "ri:git-pull-request-line" },
+        ],
+    },
+    {
         name: "运营",
         label: "Commerce",
         items: [

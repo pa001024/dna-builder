@@ -665,6 +665,10 @@ export const builds = sqliteTable(
         desc: text("desc"),
         charId: integer("char_id").notNull(),
         charSettings: text("char_settings").notNull(),
+        /** 构筑类型（普通 / 升华）：写构筑时由服务端按 charSettings 判定，供列表过滤 */
+        buildType: text("build_type", { enum: ["normal", "transcend"] })
+            .notNull()
+            .default("normal"),
         userId: text("user_id")
             .notNull()
             .references(() => users.id, { onDelete: "cascade" }),
@@ -677,6 +681,7 @@ export const builds = sqliteTable(
     },
     builds => [
         index("builds_char_id_idx").on(builds.charId),
+        index("builds_build_type_idx").on(builds.buildType),
         index("builds_user_id_idx").on(builds.userId),
         index("builds_is_recommended_idx").on(builds.isRecommended),
         index("builds_char_id_update_at_idx").on(builds.charId, builds.updateAt),
@@ -1370,4 +1375,650 @@ export const aiRechargeCredits = sqliteTable("ai_recharge_credits", {
 
 export const aiRechargeCreditsRelations = relations(aiRechargeCredits, ({ one }) => ({
     user: one(users, { fields: [aiRechargeCredits.userId], references: [users.id] }),
+}))
+
+/* ------------------------------------------------------------------------------------------------------------------
+ * 游戏 BUG 收集、AI 归并与 GitHub 双向协作（契约：specs/game-bug-intake.md §8）
+ * 这些表只由服务端 BUG Module 的领域事务读写，不注册为通用 CRUD 入口。
+ * ---------------------------------------------------------------------------------------------------------------- */
+
+/** 一次反馈（Submission）的处理状态，spec §9.1。 */
+export type BugSubmissionState =
+    | "received"
+    | "queued"
+    | "processing"
+    | "processed"
+    | "needs_info"
+    | "privacy_blocked"
+    | "filtered"
+    | "retry_wait"
+    | "failed"
+    | "withdrawn"
+
+/** 规范 BUG 状态，spec §9.2。 */
+export type BugStatus =
+    | "untriaged"
+    | "needs_info"
+    | "confirmed"
+    | "in_progress"
+    | "resolved"
+    | "closed"
+    | "reopen_requested"
+    | "duplicate"
+    | "rejected"
+
+/** 严重程度，spec §14.2。 */
+export type BugSeverity = "S0" | "S1" | "S2" | "S3" | "S4" | "U"
+
+/** 可见性：private 不出现在公开库、搜索结果与 GitHub 导出中。 */
+export type BugVisibility = "public" | "private"
+
+/** 公开发布策略，spec §10。 */
+export type BugPublicationPolicy = "internal_only" | "catalog_safe" | "github_safe"
+
+/** 领域事件来源身份；不保存邮箱、IP 或回执 token 原文。 */
+export type BugActorRef = { kind: "user" | "anonymous" | "system" | "worker" | "github"; id: string }
+
+/** 自报环境，缺失字段表示未知。 */
+export type BugEnvironment = {
+    platform?: string | null
+    region?: string | null
+    gameVersion?: string | null
+    frequency?: string | null
+}
+
+/** AI 抽取的证据引用，spec §11.2（文字用 code point 偏移，图片用 0..1 归一化坐标）。 */
+export type BugEvidenceRef =
+    | { type: "text"; versionId: string; start: number; end: number; quote: string }
+    | { type: "image"; assetId: string; region: [number, number, number, number] | null; observation: string }
+
+/** 站内关联类型，spec §12.4。 */
+export type BugRelationType = "possible_duplicate" | "related" | "regression_of" | "duplicate_of"
+
+/** 评论来源，spec §16。 */
+export type BugDiscussionSource = "local" | "github" | "system"
+
+/** 再次反馈的复现结论，"未遇到"不等于反对票。 */
+export type BugReproductionResult = "reproduced" | "not_reproduced" | "unknown"
+
+/** 后台任务状态，spec §13.2。 */
+export type BugJobState = "queued" | "running" | "retry_wait" | "awaiting_input" | "cancelled" | "failed" | "completed"
+
+/** 任务优先级，仅由可信策略分配。 */
+export type BugJobPriority = "critical" | "high" | "normal" | "low"
+
+/** 出站操作状态，spec §17.2。 */
+export type BugOutboxState = "queued" | "sending" | "delivered" | "retry_wait" | "unknown_effect" | "blocked" | "conflict" | "failed"
+
+/** Issue 映射角色：每个 Bug + 仓库只有一个当前 primary。 */
+export type GithubIssueLinkRole = "primary" | "legacy_duplicate"
+
+/** Webhook Inbox 消费状态。 */
+export type BugInboxState = "pending" | "processing" | "consumed" | "ignored" | "failed"
+
+/** AI run 的 token 用量。 */
+export type BugTokenUsage = { inputTokens?: number; outputTokens?: number; cachedInputTokens?: number; imageCalls?: number }
+
+/** 请求幂等键：同 actor + op + key 只产生一次业务效果，重放返回同一结果。 */
+export const bugIdempotencyKeys = sqliteTable(
+    "bug_idempotency_keys",
+    {
+        /** 身份键，如 `user:<id>` / `anon:<anonActorId>`。 */
+        actorKey: text("actor_key").notNull(),
+        /** 操作名，如 `submit` / `addFeedback`。 */
+        op: text("op").notNull(),
+        /** 客户端生成的随机幂等键。 */
+        key: text("key").notNull(),
+        /** 请求体摘要，同键不同 payload 判为 conflict。 */
+        requestHash: text("request_hash").notNull(),
+        /** 首次成功结果（submissionId 等），重放时原样返回。 */
+        resultId: text("result_id"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [primaryKey({ columns: [table.actorKey, table.op, table.key] })]
+)
+
+/** 原始反馈：先持久化再回执，匿名与登录作者并存。 */
+export const bugSubmissions = sqliteTable(
+    "bug_submissions",
+    {
+        id: text("id").$default(id).primaryKey(),
+        gameId: text("game_id").notNull(),
+        /** 登录作者；与 anonActorId 二选一。 */
+        userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+        /** 匿名作者标识（不含回执 token 原文）。 */
+        anonActorId: text("anon_actor_id"),
+        /** 回执 token 的 SHA-256 摘要；登录用户为空。 */
+        receiptDigest: text("receipt_digest"),
+        state: text("state").$type<BugSubmissionState>().notNull().default("received"),
+        /** 当前版本号（`bug_submission_versions.revision`）。 */
+        currentRevision: integer("current_revision").notNull().default(0),
+        createdAt: integer("created_at").$default(now),
+        /** 原始私有内容保留截止时间（毫秒）。 */
+        retentionUntil: integer("retention_until"),
+    },
+    table => [
+        index("bug_submissions_game_state_idx").on(table.gameId, table.state),
+        index("bug_submissions_user_idx").on(table.userId),
+        index("bug_submissions_anon_actor_idx").on(table.anonActorId),
+        uniqueIndex("bug_submissions_receipt_uq").on(table.receiptDigest),
+    ]
+)
+
+/** 反馈版本：只追加不覆盖，保留作者原文与发布策略。 */
+export const bugSubmissionVersions = sqliteTable(
+    "bug_submission_versions",
+    {
+        submissionId: text("submission_id")
+            .notNull()
+            .references(() => bugSubmissions.id, { onDelete: "cascade" }),
+        revision: integer("revision").notNull(),
+        /** 作者原文（私有），逻辑上不可被 AI 改写。 */
+        rawTextPrivate: text("raw_text_private"),
+        contentSha256: text("content_sha256").notNull(),
+        context: text("context", { mode: "json" }).$type<BugEnvironment>(),
+        publicationPolicy: text("publication_policy").$type<BugPublicationPolicy>().notNull().default("internal_only"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [primaryKey({ columns: [table.submissionId, table.revision] })]
+)
+
+/** 上传图片：原图永远私有，只有通过策略的脱敏派生图可公开。 */
+export const bugAssets = sqliteTable(
+    "bug_assets",
+    {
+        id: text("id").$default(id).primaryKey(),
+        /** 版本键（`bug_submission_versions` 为复合主键，这里存调用方的版本标识）。 */
+        submissionVersionId: text("submission_version_id").notNull(),
+        privateObjectKey: text("private_object_key").notNull(),
+        sha256: text("sha256").notNull(),
+        /** 魔数校验得到的真实 MIME，不信任上传扩展名。 */
+        actualMime: text("actual_mime").notNull(),
+        bytes: integer("bytes").notNull(),
+        dimensions: text("dimensions", { mode: "json" }).$type<{ width: number; height: number }>(),
+        /** 安全扫描状态：pending / clean / rejected / failed。 */
+        scanState: text("scan_state").notNull().default("pending"),
+        /** 脱敏状态：pending / redacted / not_required / failed。 */
+        redactionState: text("redaction_state").notNull().default("pending"),
+        /** 可公开的派生图对象 key；为空表示没有可公开素材。 */
+        publicDerivativeKey: text("public_derivative_key"),
+        publicationPolicy: text("publication_policy").$type<BugPublicationPolicy>().notNull().default("internal_only"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        index("bug_assets_version_idx").on(table.submissionVersionId),
+        index("bug_assets_sha_idx").on(table.sha256),
+        index("bug_assets_scan_idx").on(table.scanState),
+    ]
+)
+
+/** 规范 BUG：可能汇集多个反馈，不代表已经复现。 */
+export const bugs = sqliteTable(
+    "bugs",
+    {
+        id: text("id").$default(id).primaryKey(),
+        /** 对外展示编号（如 `BUG-123`）。 */
+        displayKey: text("display_key").notNull(),
+        gameId: text("game_id").notNull(),
+        primaryCategory: text("primary_category").notNull().default("other"),
+        /** 规范 tagKey 投影。 */
+        tags: text("tags", { mode: "json" }).$type<string[]>().notNull().default([]),
+        title: text("title").notNull(),
+        summary: text("summary").notNull(),
+        expected: text("expected"),
+        actual: text("actual"),
+        steps: text("steps", { mode: "json" }).$type<string[]>().notNull().default([]),
+        environment: text("environment", { mode: "json" }).$type<BugEnvironment>(),
+        status: text("status").$type<BugStatus>().notNull().default("untriaged"),
+        /** GitHub state_reason 语义：completed / not_planned / duplicate / unknown。 */
+        resolution: text("resolution"),
+        /** 修复阶段 tagKey（`fix.*`），权威来源见 fixStageSource。 */
+        fixStage: text("fix_stage"),
+        /** 修复阶段来源：maintainer / github / deterministic / ai。 */
+        fixStageSource: text("fix_stage_source"),
+        /** 修复证据状态：present / missing / contradicted。 */
+        fixEvidenceStatus: text("fix_evidence_status"),
+        /** 标签集合版本（乐观并发校验）。 */
+        tagVersion: integer("tag_version").notNull().default(0),
+        visibility: text("visibility").$type<BugVisibility>().notNull().default("public"),
+        suggestedSeverity: text("suggested_severity").$type<BugSeverity>(),
+        confirmedSeverity: text("confirmed_severity").$type<BugSeverity>(),
+        /** 严重程度来源：ai / maintainer / deterministic。 */
+        severitySource: text("severity_source"),
+        /** 记录版本（管理动作的 expectedVersion）。 */
+        version: integer("version").notNull().default(1),
+        /** 归并目标；禁止成环，由领域层保证。 */
+        duplicateOf: text("duplicate_of").references((): AnySQLiteColumn => bugs.id, { onDelete: "set null" }),
+        fixedVersion: text("fixed_version"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        index("bugs_game_vis_status_cat_idx").on(table.gameId, table.visibility, table.status, table.primaryCategory),
+        uniqueIndex("bugs_display_key_uq").on(table.displayKey),
+        index("bugs_duplicate_of_idx").on(table.duplicateOf),
+    ]
+)
+
+/** 证据关联：一个 Part 只能有一个当前归属，重复发帖不计多个受影响用户。 */
+export const bugOccurrences = sqliteTable(
+    "bug_occurrences",
+    {
+        id: text("id").$default(id).primaryKey(),
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        submissionVersionId: text("submission_version_id").notNull(),
+        partId: text("part_id").notNull(),
+        evidenceRefs: text("evidence_refs", { mode: "json" }).$type<BugEvidenceRef[]>().notNull().default([]),
+        reportedEnvironment: text("reported_environment", { mode: "json" }).$type<BugEnvironment>(),
+        sourceActor: text("source_actor", { mode: "json" }).$type<BugActorRef>().notNull(),
+        /** 该 Part 与 Bug 的归属关系：original / merged / reopened。 */
+        relation: text("relation").notNull().default("original"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("bug_occurrences_version_part_uq").on(table.submissionVersionId, table.partId),
+        index("bug_occurrences_bug_idx").on(table.bugId),
+        index("bug_occurrences_version_idx").on(table.submissionVersionId),
+    ]
+)
+
+/** 已有 Bug 上的再次反馈（文字与图片仍由 Submission 版本保存）。 */
+export const bugFeedback = sqliteTable(
+    "bug_feedback",
+    {
+        id: text("id").$default(id).primaryKey(),
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        submissionVersionId: text("submission_version_id").notNull(),
+        /** 反馈类型：evidence / reproduction / other。 */
+        feedbackKind: text("feedback_kind").notNull(),
+        reproductionResult: text("reproduction_result").$type<BugReproductionResult>(),
+        gameVersion: text("game_version"),
+        sourceActor: text("source_actor", { mode: "json" }).$type<BugActorRef>().notNull(),
+        visibility: text("visibility").$type<BugVisibility>().notNull().default("public"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [index("bug_feedback_bug_idx").on(table.bugId), index("bug_feedback_version_idx").on(table.submissionVersionId)]
+)
+
+/** 讨论条目：本站与 GitHub 评论并存，来源与作者保留，不冒充另一平台账号。 */
+export const bugDiscussionEntries = sqliteTable(
+    "bug_discussion_entries",
+    {
+        id: text("id").$default(id).primaryKey(),
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        source: text("source").$type<BugDiscussionSource>().notNull().default("local"),
+        /** 来源侧作者标识：本站 userId / 匿名 actor / GitHub user ID。 */
+        sourceActorId: text("source_actor_id"),
+        /** 展示名（GitHub login 或用户公开昵称）。 */
+        displayAuthor: text("display_author"),
+        /** 安全投影后的正文，原站内容不能被本站用户编辑。 */
+        bodySafe: text("body_safe").notNull(),
+        revision: integer("revision").notNull().default(1),
+        visibility: text("visibility").$type<BugVisibility>().notNull().default("public"),
+        feedbackId: text("feedback_id").references(() => bugFeedback.id, { onDelete: "set null" }),
+        deletedAt: integer("deleted_at"),
+        /** 外发策略：仅 github_safe 的内容才能进入 GitHub。 */
+        exportPolicy: text("export_policy").$type<BugPublicationPolicy>().notNull().default("internal_only"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [index("bug_discussion_bug_time_idx").on(table.bugId, table.createdAt, table.id)]
+)
+
+/** 投票意图：保留原始投票目标，合并/解除误合并时按用户集合恢复。 */
+export const bugVoteIntents = sqliteTable(
+    "bug_vote_intents",
+    {
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        originalBugId: text("original_bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        active: integer("active", { mode: "boolean" }).notNull().default(true),
+        updatedAt: integer("updated_at").$default(now).$onUpdate(now),
+    },
+    table => [
+        primaryKey({ columns: [table.userId, table.originalBugId] }),
+        index("bug_vote_intents_bug_active_idx").on(table.originalBugId, table.active),
+    ]
+)
+
+/** 关注订阅：登录账号或匿名回执范围。 */
+export const bugSubscriptions = sqliteTable(
+    "bug_subscriptions",
+    {
+        /** 身份键，如 `user:<id>` / `anon:<anonActorId>`。 */
+        actorKey: text("actor_key").notNull(),
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        channels: text("channels", { mode: "json" }).$type<string[]>().notNull().default([]),
+        preferences: text("preferences", { mode: "json" }).$type<Record<string, unknown>>(),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [primaryKey({ columns: [table.actorKey, table.bugId] })]
+)
+
+/** AI 运行记录：只留结构化结论与成本，不要求暴露隐藏思维链。 */
+export const bugAiRuns = sqliteTable(
+    "bug_ai_runs",
+    {
+        id: text("id").$default(id).primaryKey(),
+        jobId: text("job_id").references(() => bugJobs.id, { onDelete: "set null" }),
+        inputHash: text("input_hash").notNull(),
+        modelProvider: text("model_provider"),
+        harnessVersion: text("harness_version"),
+        promptHash: text("prompt_hash"),
+        toolManifestHash: text("tool_manifest_hash"),
+        schemaVersion: integer("schema_version"),
+        result: text("result", { mode: "json" }).$type<Record<string, unknown>>(),
+        tokenUsage: text("token_usage", { mode: "json" }).$type<BugTokenUsage>(),
+        costMicros: integer("cost_micros").notNull().default(0),
+        startedAt: integer("started_at"),
+        finishedAt: integer("finished_at"),
+        error: text("error"),
+    },
+    table => [index("bug_ai_runs_job_idx").on(table.jobId), index("bug_ai_runs_input_hash_idx").on(table.inputHash)]
+)
+
+/** 可恢复的后台任务：租约 + fencingToken 保证旧 worker 不能提交过期结果。 */
+export const bugJobs = sqliteTable(
+    "bug_jobs",
+    {
+        id: text("id").$default(id).primaryKey(),
+        /** 任务类型，如 `process_submission` / `sync_issue`。 */
+        kind: text("kind").notNull(),
+        inputRevision: integer("input_revision").notNull().default(0),
+        idempotencyKey: text("idempotency_key").notNull(),
+        state: text("state").$type<BugJobState>().notNull().default("queued"),
+        /** 最早可领取时间（退避与调度窗口）。 */
+        eligibleAt: integer("eligible_at").notNull().$default(now),
+        priorityClass: text("priority_class").$type<BugJobPriority>().notNull().default("normal"),
+        attempt: integer("attempt").notNull().default(0),
+        leaseOwner: text("lease_owner"),
+        leaseUntil: integer("lease_until"),
+        /** 每次领取递增；提交结果必须匹配。 */
+        fencingToken: integer("fencing_token").notNull().default(0),
+        inputHash: text("input_hash"),
+        /** 结果引用（Proposal id / run id 等）。 */
+        resultRef: text("result_ref"),
+        lastError: text("last_error"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("bug_jobs_idempotency_uq").on(table.idempotencyKey),
+        index("bug_jobs_state_eligible_idx").on(table.state, table.eligibleAt, table.priorityClass),
+        index("bug_jobs_lease_idx").on(table.leaseUntil),
+    ]
+)
+
+/** 领域变更审计：与 outbox 同事务写入，一个事件只产生一次本地业务效果。 */
+export const bugEvents = sqliteTable(
+    "bug_events",
+    {
+        eventId: text("event_id").$default(id).primaryKey(),
+        bugId: text("bug_id").references(() => bugs.id, { onDelete: "set null" }),
+        submissionId: text("submission_id").references(() => bugSubmissions.id, { onDelete: "set null" }),
+        kind: text("kind").notNull(),
+        actor: text("actor", { mode: "json" }).$type<BugActorRef>(),
+        payloadSafe: text("payload_safe", { mode: "json" }).$type<Record<string, unknown>>(),
+        entityVersion: integer("entity_version"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        index("bug_events_bug_idx").on(table.bugId),
+        index("bug_events_submission_idx").on(table.submissionId),
+        index("bug_events_kind_idx").on(table.kind),
+        index("bug_events_created_idx").on(table.createdAt),
+    ]
+)
+
+/** 归并日志：保留可解除误合并的关系历史与迁移证据。 */
+export const bugMergeEvents = sqliteTable(
+    "bug_merge_events",
+    {
+        id: text("id").$default(id).primaryKey(),
+        sourceBugIds: text("source_bug_ids", { mode: "json" }).$type<string[]>().notNull().default([]),
+        targetBugId: text("target_bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        decisionEvidence: text("decision_evidence", { mode: "json" }).$type<Record<string, unknown>>(),
+        /** 归并前各 Bug 的 version 快照，解除时校验。 */
+        beforeVersions: text("before_versions", { mode: "json" }).$type<Record<string, number>>(),
+        movedOccurrenceIds: text("moved_occurrence_ids", { mode: "json" }).$type<string[]>().notNull().default([]),
+        actor: text("actor", { mode: "json" }).$type<BugActorRef>(),
+        revertedAt: integer("reverted_at"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [index("bug_merge_events_target_idx").on(table.targetBugId), index("bug_merge_events_reverted_idx").on(table.revertedAt)]
+)
+
+/** 站内关联：带类型、方向与证据，关联不等于归并。 */
+export const bugRelations = sqliteTable(
+    "bug_relations",
+    {
+        id: text("id").$default(id).primaryKey(),
+        sourceBugId: text("source_bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        targetBugId: text("target_bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        relationType: text("relation_type").$type<BugRelationType>().notNull(),
+        /** 对称关系的规范键（排序后的 pair + 类型），方向关系为空。 */
+        symmetryKey: text("symmetry_key"),
+        evidenceRefs: text("evidence_refs", { mode: "json" }).$type<BugEvidenceRef[]>().notNull().default([]),
+        /** 关系来源：ai / maintainer / user / system。 */
+        origin: text("origin").notNull().default("user"),
+        actor: text("actor", { mode: "json" }).$type<BugActorRef>(),
+        revision: integer("revision").notNull().default(1),
+        visibility: text("visibility").$type<BugVisibility>().notNull().default("public"),
+        /** 关系状态：active / removed。 */
+        state: text("state").notNull().default("active"),
+        deletedAt: integer("deleted_at"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("bug_relations_symmetry_uq").on(table.symmetryKey).where(sql`${table.symmetryKey} is not null`),
+        index("bug_relations_pair_idx").on(table.sourceBugId, table.targetBugId, table.relationType, table.state),
+        index("bug_relations_target_idx").on(table.targetBugId, table.relationType, table.state),
+    ]
+)
+
+/** 标签语义字典：tagKey 稳定，显示名与 GitHub label 只是绑定。 */
+export const bugTagDefinitions = sqliteTable("bug_tag_definitions", {
+    tagKey: text("tag_key").primaryKey(),
+    /** 命名空间：fix / category / severity / platform / region / env。 */
+    namespace: text("namespace").notNull(),
+    /** 互斥组，如 `fix_stage`；组内只能有一个有效标签。 */
+    exclusiveGroup: text("exclusive_group"),
+    /** 六语言文案的 i18n key。 */
+    displayI18nKey: text("display_i18n_key").notNull(),
+    semanticDescription: text("semantic_description"),
+    /** 允许发起该标签的来源（ai / maintainer / github / system）。 */
+    allowedSources: text("allowed_sources", { mode: "json" }).$type<string[]>().notNull().default([]),
+    /** 证据要求说明（如 fix.released 需要版本或验证证据）。 */
+    evidencePolicy: text("evidence_policy"),
+    registryVersion: integer("registry_version").notNull().default(1),
+    retiredAt: integer("retired_at"),
+})
+
+/** 标签赋值历史：removedAt 为空表示当前生效。 */
+export const bugTagAssignments = sqliteTable(
+    "bug_tag_assignments",
+    {
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        tagKey: text("tag_key")
+            .notNull()
+            .references(() => bugTagDefinitions.tagKey, { onDelete: "cascade" }),
+        /** 标签来源：maintainer / github / ai / system。 */
+        source: text("source").notNull(),
+        actor: text("actor", { mode: "json" }).$type<BugActorRef>(),
+        evidenceRefs: text("evidence_refs", { mode: "json" }).$type<BugEvidenceRef[]>().notNull().default([]),
+        /** 所属 Bug 的记录版本。 */
+        entityVersion: integer("entity_version").notNull().default(1),
+        eventId: text("event_id"),
+        removedAt: integer("removed_at"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        index("bug_tag_assignments_bug_tag_idx").on(table.bugId, table.tagKey, table.removedAt),
+        index("bug_tag_assignments_tag_idx").on(table.tagKey),
+    ]
+)
+
+/** Bug ↔ GitHub Issue 的持久映射；未知外部枚举保留原值。 */
+export const githubIssueLinks = sqliteTable(
+    "github_issue_links",
+    {
+        id: text("id").$default(id).primaryKey(),
+        bugId: text("bug_id")
+            .notNull()
+            .references(() => bugs.id, { onDelete: "cascade" }),
+        repositoryId: text("repository_id").notNull(),
+        /** GitHub Issue 数据库 id（不是 number）。 */
+        issueId: text("issue_id").notNull(),
+        issueNodeId: text("issue_node_id"),
+        issueNumber: integer("issue_number").notNull(),
+        htmlUrl: text("html_url").notNull(),
+        role: text("role").$type<GithubIssueLinkRole>().notNull().default("primary"),
+        /** 同步状态：synced / pending / conflict / blocked / failed。 */
+        syncState: text("sync_state").notNull().default("pending"),
+        remoteUpdatedAt: integer("remote_updated_at"),
+        remoteState: text("remote_state"),
+        remoteStateReason: text("remote_state_reason"),
+        /** 外部 duplicate 目标（未验证前不据此强合并）。 */
+        remoteDuplicateTarget: text("remote_duplicate_target"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("github_issue_links_primary_uq").on(table.bugId, table.repositoryId).where(sql`${table.role} = 'primary'`),
+        index("github_issue_links_repo_issue_idx").on(table.repositoryId, table.issueId),
+        index("github_issue_links_bug_role_idx").on(table.bugId, table.role),
+    ]
+)
+
+/** 讨论条目 ↔ GitHub 评论的镜像映射。 */
+export const githubCommentLinks = sqliteTable(
+    "github_comment_links",
+    {
+        discussionEntryId: text("discussion_entry_id")
+            .notNull()
+            .references(() => bugDiscussionEntries.id, { onDelete: "cascade" }),
+        repositoryId: text("repository_id").notNull(),
+        issueId: text("issue_id").notNull(),
+        commentId: text("comment_id").notNull(),
+        /** 评论来源：local / github。 */
+        sourceOrigin: text("source_origin").notNull(),
+        lastLocalRevision: integer("last_local_revision"),
+        lastRemoteHash: text("last_remote_hash"),
+        deletedAt: integer("deleted_at"),
+    },
+    table => [
+        uniqueIndex("github_comment_links_repo_comment_uq").on(table.repositoryId, table.commentId),
+        index("github_comment_links_entry_idx").on(table.discussionEntryId),
+    ]
+)
+
+/** GitHub label 与 tagKey 的正式绑定；改 label 名不自动改变语义。 */
+export const githubLabelBindings = sqliteTable(
+    "github_label_bindings",
+    {
+        repositoryId: text("repository_id").notNull(),
+        labelName: text("label_name").notNull(),
+        tagKey: text("tag_key")
+            .notNull()
+            .references(() => bugTagDefinitions.tagKey, { onDelete: "cascade" }),
+        registryVersion: integer("registry_version").notNull().default(1),
+        /** 绑定状态：active / conflict / paused / retired。 */
+        state: text("state").notNull().default("active"),
+    },
+    table => [primaryKey({ columns: [table.repositoryId, table.labelName] }), index("github_label_bindings_tag_idx").on(table.tagKey)]
+)
+
+/** 每个 IssueLink × 标签组的同步基线，用于增删与并发对账。 */
+export const githubTagSyncState = sqliteTable(
+    "github_tag_sync_state",
+    {
+        issueLinkId: text("issue_link_id")
+            .notNull()
+            .references(() => githubIssueLinks.id, { onDelete: "cascade" }),
+        /** 标签组键（互斥组名或单标签 namespace）。 */
+        groupKey: text("group_key").notNull(),
+        lastSyncedTagKeys: text("last_synced_tag_keys", { mode: "json" }).$type<string[]>().notNull().default([]),
+        localTagVersion: integer("local_tag_version").notNull().default(0),
+        pendingEventId: text("pending_event_id"),
+        conflict: integer("conflict", { mode: "boolean" }).notNull().default(false),
+        verifiedAt: integer("verified_at"),
+    },
+    table => [primaryKey({ columns: [table.issueLinkId, table.groupKey] })]
+)
+
+/** Webhook Inbox：验签后先持久化再 ACK，重复 delivery 不重复产生业务效果。 */
+export const githubWebhookInbox = sqliteTable(
+    "github_webhook_inbox",
+    {
+        deliveryId: text("delivery_id").primaryKey(),
+        event: text("event").notNull(),
+        action: text("action"),
+        repositoryId: text("repository_id"),
+        installationId: text("installation_id"),
+        /** 原始 payload（私有，含 GitHub 作者信息），不对公开接口输出。 */
+        payloadPrivate: text("payload_private").notNull(),
+        processingState: text("processing_state").$type<BugInboxState>().notNull().default("pending"),
+        attempt: integer("attempt").notNull().default(0),
+        receivedAt: integer("received_at").notNull().$default(now),
+        lastError: text("last_error"),
+    },
+    table => [index("github_webhook_inbox_state_idx").on(table.processingState, table.receivedAt)]
+)
+
+/** 出站操作：本地事务写事件 + outbox，GitHub 写入结果单独记录。 */
+export const bugOutbox = sqliteTable(
+    "bug_outbox",
+    {
+        eventId: text("event_id").notNull(),
+        /** 操作名，如 `create_issue` / `comment` / `label_add`。 */
+        operation: text("operation").notNull(),
+        /** 目标映射键（repositoryId 等）。 */
+        targetMapping: text("target_mapping").notNull(),
+        sourceRevision: integer("source_revision"),
+        payloadHash: text("payload_hash"),
+        state: text("state").$type<BugOutboxState>().notNull().default("queued"),
+        attempt: integer("attempt").notNull().default(0),
+        nextAttemptAt: integer("next_attempt_at"),
+        remoteResult: text("remote_result", { mode: "json" }).$type<Record<string, unknown>>(),
+        lastError: text("last_error"),
+        createdAt: integer("created_at").$default(now),
+    },
+    table => [
+        uniqueIndex("bug_outbox_event_operation_target_uq").on(table.eventId, table.operation, table.targetMapping),
+        index("bug_outbox_state_next_idx").on(table.state, table.nextAttemptAt),
+    ]
+)
+
+/** Bug 与内联表的关系：GQL 查询用 `with` 一次取回，避免多次查询手动拼接。 */
+export const bugsRelations = relations(bugs, ({ many }) => ({
+    issueLinks: many(githubIssueLinks),
+    occurrences: many(bugOccurrences),
+    events: many(bugEvents),
+}))
+
+export const githubIssueLinksRelations = relations(githubIssueLinks, ({ one }) => ({
+    bug: one(bugs, { fields: [githubIssueLinks.bugId], references: [bugs.id] }),
+}))
+
+export const bugOccurrencesRelations = relations(bugOccurrences, ({ one }) => ({
+    bug: one(bugs, { fields: [bugOccurrences.bugId], references: [bugs.id] }),
+}))
+
+export const bugEventsRelations = relations(bugEvents, ({ one }) => ({
+    bug: one(bugs, { fields: [bugEvents.bugId], references: [bugs.id] }),
 }))

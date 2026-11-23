@@ -106,6 +106,7 @@ const TILE_THEMES: Record<string, string> = {
     inventory: "#43e97b",
     timeline: "#a6c1ee",
     help: "#f7971e",
+    "bug-list": "#f83600",
     "game-accounts": "#f5576c",
     unpack: "#30cfd0",
     "skin-colorize": "#12c2e9",
