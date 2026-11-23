@@ -3,6 +3,14 @@ import { type ASTNode, parseAST } from "./ast"
 import type { CharBuildSettingsInput } from "./CharBuildHelper"
 import { type CharSkillLevels, normalizeCharSkillLevels, resolveCharSkillLevel } from "./charSettings"
 import type { AbstractMod, Buff, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
+import {
+    ADDITIONAL_DAMAGE_KEYS,
+    additionalDamageDotElementCount,
+    LEGACY_ADDITIONAL_DAMAGE_KEY,
+    normalizeAdditionalDamageKey,
+    recomputeAdditionalDamage,
+    warnLegacyAdditionalDamage,
+} from "./leveled/additionalDamage"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import type { LeveledChar } from "./leveled/LeveledChar"
 import type { CharBuildInvSnapshot } from "./leveled/LeveledHelpers"
@@ -12,13 +20,30 @@ import { type BuffFieldConditional, LeveledSkill } from "./leveled/LeveledSkill"
 import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
 import { isMultiplicativeAttr } from "./leveled/minusAttr"
+import { resolveEffectiveSkillLevels, SKILL_LEVEL_ATTR_KEYS } from "./skillLevels"
+import type { TeamResolver, TeamRole } from "./teamResolver"
 import type { RawTimelineData } from "./timeline-data"
+import type { TranscendTeamSideContext } from "./transcend"
+import { applyTranscendSkillReplacement, type TranscendSkillReplacement, warnSkillReplacementConflict } from "./transcendSkills"
 
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
     const base36 = num.toString(36).toUpperCase()
     return base36.padStart(4, "0")
 }
+
+/** 六元素弱点键（U95）：与敌人抗性同区加算，正值 = 受到该元素伤害提高，负值 = 受到该元素伤害降低 */
+export const ELEMENT_WEAKNESS_KEYS = ["火", "水", "雷", "风", "光", "暗"].map(element => `${element}属性弱点`) as [
+    "火属性弱点",
+    "水属性弱点",
+    "雷属性弱点",
+    "风属性弱点",
+    "光属性弱点",
+    "暗属性弱点",
+]
+
+/** 全属性弱点键（U95）：只作用于六元素分量，不含物理 */
+export const ALL_ELEMENT_WEAKNESS_KEY = "全属性弱点"
 
 export interface CharAttr {
     // 基础属性
@@ -36,6 +61,22 @@ export interface CharAttr {
     背水: number
     增伤: number
     元素增伤: number
+    /** 元素专属伤害率（U14b）：只对匹配元素的角色计入 元素增伤 */
+    火属性增伤?: number
+    水属性增伤?: number
+    雷属性增伤?: number
+    风属性增伤?: number
+    光属性增伤?: number
+    暗属性增伤?: number
+    /** 元素弱点（U95）：正值 = 受到该元素伤害提高（弱点），负值 = 降低（抗性）；与敌人抗性同区加算 */
+    火属性弱点?: number
+    水属性弱点?: number
+    雷属性弱点?: number
+    风属性弱点?: number
+    光属性弱点?: number
+    暗属性弱点?: number
+    /** 全属性弱点（U95）：对六元素分量生效，不含物理 */
+    全属性弱点?: number
     物理增伤: number
     属性攻击: number
     武器伤害: number
@@ -46,6 +87,8 @@ export interface CharAttr {
     /** 技能独立增伤 0开始：只作用于技能伤害池的独立乘区（武器伤害池不吃） */
     技能独立增伤: number
     属性穿透: number
+    /** 赛季增伤（0 起始，赛季专属伤害率分区 S0DamageRate）：自身累加，伤害结算时作为独立乘区 */
+    赛季增伤?: number
     无视防御: number
     技能无视防御: number
     技能速度: number
@@ -77,12 +120,10 @@ export interface CharAttr {
     转充盈?: number
     转属克?: number
     转属逆?: number
-    /** 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总） */
+    /** 充盈威力（角色属性，1 起始总倍率）：基础 1 + 角色 MOD 加成 + Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总） */
     充盈威力: number
     /** 技能触发（角色属性，0 起始）：技能伤害 DOT 的触发值，由 MOD 词条提供（如 充盈·巧力） */
     技能触发: number
-    /** 异常数量（角色属性，去重后元素种数）：武器伤害附加元素种数的来源（如 菲娜Q 追加 4；非光暗角色自身属性与附加异常重叠 1 种 → n=4，光暗角色 n=5） */
-    异常数量: number
     /**
      * 魔灵CD（角色属性，单位秒）：所选魔灵支援技能（魔灵主动技）的实际冷却。
      * = 魔灵主动技原始冷却 × (1 - 魔灵CD缩减)；未选择魔灵时为 0。
@@ -98,6 +139,13 @@ export interface CharAttr {
      * 一次性回复（魔灵主动等）改记单次神智回复，不计入本属性。
      */
     神智回复: number
+    /**
+     * 技能等级加成（标准属性）：`E/Q/P技能等级` 与其它属性一样从 BUFF / MOD / 装备派生 BUFF 汇总（`+N`，可为负）。
+     * 最终有效等级由 `ensureSkillLevels()` 从基础等级 + 三键聚合值二次解析，二者不重复相加。
+     */
+    E技能等级?: number
+    Q技能等级?: number
+    P技能等级?: number
 }
 
 export interface WeaponAttr {
@@ -123,7 +171,16 @@ export interface WeaponAttr {
     弹药: number
     /** 独立增伤 0开始 */
     独立增伤: number
-    /** 追加伤害 0开始 */
+    /** 元素追伤分量（0 起始）：武器面板口径，武器伤害池的追伤因子由 Σ 七分量产生 */
+    火属性追伤?: number
+    水属性追伤?: number
+    雷属性追伤?: number
+    风属性追伤?: number
+    光属性追伤?: number
+    暗属性追伤?: number
+    /** 自属性追伤（0 起始）：与其它追伤分量等同，仅计入求和 */
+    自属性追伤?: number
+    /** 追加伤害（只读聚合 = Σ 七分量）：供展示 / 表达式读取，不得作为属性输入 */
     追加伤害: number
     /** 武器倍率 0开始 */
     武器倍率: number
@@ -182,7 +239,7 @@ export interface DotSourceConfig {
     cap: number
     /** 用户输入频率（每秒次数，可高于计算上限） */
     freq: number
-    /** 其余属性元素种数（仅武器来源；技能固定 1 且不参与其余属性） */
+    /** 其余属性元素种数（仅武器来源；技能来源固定 0 且不参与其余属性） */
     otherElementCount: number
     /** 本属性追加伤害是否大于 0（满足翻倍条件时频率翻倍） */
     hasAdditionalDamage: boolean
@@ -271,12 +328,26 @@ const characterBonusAttributes = [
     "背水",
     "增伤",
     "元素增伤",
+    "火属性增伤",
+    "水属性增伤",
+    "雷属性增伤",
+    "风属性增伤",
+    "光属性增伤",
+    "暗属性增伤",
+    "火属性弱点",
+    "水属性弱点",
+    "雷属性弱点",
+    "风属性弱点",
+    "光属性弱点",
+    "暗属性弱点",
+    "全属性弱点",
     "物理增伤",
     "武器伤害",
     "技能伤害",
     "技能追伤",
     "技能速度",
     "属性穿透",
+    "赛季增伤",
     "失衡易伤",
     "歧视",
     "秽兽增伤",
@@ -300,9 +371,11 @@ const characterBonusAttributes = [
     "转属逆",
     "充盈威力",
     "技能触发",
-    "异常数量",
     "魔灵CD缩减",
     "神智回复",
+    "E技能等级",
+    "Q技能等级",
+    "P技能等级",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -349,6 +422,12 @@ const temporaryFlatAttributeMap: Record<string, keyof CharAttr> = {
     固定生命: "生命",
 }
 
+/** 武器 / 角色命名空间的固定别名：`bindAstSkillContexts` 白名单与求值回落共用 */
+const WEAPON_NAMESPACE_ALIASES = new Set(["角色", "char", "character", "近战", "远程", "同律", "melee", "ranged", "skillweapon"])
+
+/** 依赖当前角色面板的括号伪字段：协战命名空间下不可读（一律 0） */
+const MAIN_PANEL_PSEUDO_FIELDS = new Set(["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"])
+
 /** 魔之楔极性类型（趋向） */
 type PolarityType = "A" | "D" | "V" | "O"
 /** 极性遍历顺序（用于极化方案的确定性） */
@@ -360,6 +439,14 @@ const POLARITY_TYPES: PolarityType[] = ["V", "D", "A", "O"]
  * 且属性汇总会以同一批属性名反复调用，故跨构筑共享缓存。
  */
 const attributePrefixScopeCache = new Map<string, string>()
+
+/**
+ * 武器面板来源。
+ * `ordinary` 为普通近战/远程武器面板（唯一读取 `普通近战/普通远程*` 前缀的面板）；
+ * `skill` 为同律武器面板，包含继承型（剑非剑/圆舞/疑星落）——继承只改变计算用的基础武器，
+ * 不改变面板归属，因此同样不读取 `普通*`。
+ */
+type WeaponPanelSource = "ordinary" | "skill"
 
 /**
  * 一次 AST 求值所需的派生数据。
@@ -388,10 +475,6 @@ interface AstEvalContext {
     customFunctionDefinitions: Map<string, { params: string[]; expression: string }>
     /** 自定义函数体的 AST 缓存 */
     functionBodyAstCache: Map<string, ASTNode>
-    /** 本次求值内无临时属性时的伤害结果缓存 */
-    damageCache: Map<string, DamageResult>
-    /** 本次求值内按「是否武器伤害」区分的防御乘区缓存 */
-    defCache: Map<boolean, number>
 }
 
 /**
@@ -484,7 +567,10 @@ export interface CharBuildOptions {
     targetFunction?: string
     customVariables?: [string, string][]
     customBuff?: [string, number][]
-    /** 技能等级 `[E, Q, 被动]`：兼容老格式单个数字（视为三项相同） */
+    /**
+     * 基础技能等级 `[E, Q, 被动]`：兼容老格式单个数字（视为三项相同）。
+     * 最终等级 = `clamp(round(base + Σ 三键属性), 1..30)`，由 `ensureSkillLevels()` 二次解析。
+     */
     skillLevel?: number | CharSkillLevels | readonly number[]
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
@@ -498,6 +584,10 @@ export interface CharBuildOptions {
     petBaseCd?: number
     /** 生成该构筑的原始配置：worker 的 wasm 收益路径据此复现构筑，缺失时回退 TS 快照 */
     settings?: CharBuildSettingsInput
+    /** 升华词条技能替换（原技能 id → 载荷）：角色技能与武器技能共用；MOD 同源时 MOD 优先 */
+    skillReplacements?: Record<number, TranscendSkillReplacement>
+    /** 角色位（默认主控）：主控由 settings 派生完整解析器，协战位派生 restricted 解析器 */
+    teamRole?: TeamRole
 }
 
 export class CharBuild {
@@ -505,8 +595,12 @@ export class CharBuild {
         selectedChar: number,
         charSettings: CharBuildSettingsInput,
         inv?: CharBuildInvSnapshot,
-        timeline?: CharBuildTimeline
+        timeline?: CharBuildTimeline,
+        teamRole?: TeamRole,
+        teamSides?: readonly TranscendTeamSideContext[]
     ) => CharBuild
+    /** 由 CharBuildHelper 注册：从完整 settings 派生跨角色属性解析器（避免 CharBuild 依赖静态数据表） */
+    static createTeamResolver?: (settings: CharBuildSettingsInput, role: TeamRole, mainCharId?: number) => TeamResolver | undefined
 
     // 静态宏定义: 用于AST表达式的宏替换
     static macros: Record<string, string> = {
@@ -535,6 +629,8 @@ export class CharBuild {
         this._char = char
         // 从skills表中获取角色技能数组，用三元组技能等级[E, Q, 被动]按索引初始化LeveledSkill后储存为属性skills数组
         this.skills = this.char.技能.map((skill, index) => new LeveledSkill(skill.skillData, resolveCharSkillLevel(this.skillLevel, index)))
+        // 升华词条替换先于同律武器派生：同律吃替换后的字段
+        this.skills = this.applyAffixSkillReplacements(this.skills)
 
         // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为字段skillWeapon
         if (this.char.同律武器) {
@@ -608,20 +704,40 @@ export class CharBuild {
     }
 
     /**
-     * 根据装备的魔之楔将武器技能替换为对应版本
+     * 按升华词条替换载荷替换角色技能（E/Q/被动），保留原技能等级与武器名。
+     * @param skills 原始角色技能
+     * @returns 替换后的技能列表
+     */
+    private applyAffixSkillReplacements(skills: LeveledSkill[]) {
+        if (!Object.keys(this.skillReplacements).length) return skills
+        return skills.map(skill => {
+            const replacement = this.skillReplacements[skill.id]
+            if (!replacement) return skill
+            return new LeveledSkill(applyTranscendSkillReplacement(skill.skillData, replacement), skill.等级, skill.武器名)
+        })
+    }
+
+    /**
+     * 按装备的魔之楔与升华词条将武器技能替换为对应版本：MOD 优先，同源时词条不再覆盖。
      * @param weaponSkills 原始武器技能列表
      * @param mods 生效魔之楔列表
      * @returns 替换后的武器技能列表
      */
-    private replaceWeaponSkillsByMods(weaponSkills: LeveledSkill[], mods: (LeveledMod | null)[]) {
+    private replaceWeaponSkills(weaponSkills: LeveledSkill[], mods: (LeveledMod | null)[]) {
         const replaceMap = this.getSkillReplaceMap(mods)
-        if (Object.keys(replaceMap).length === 0) return weaponSkills
+        const affixMap = this.skillReplacements
+        if (Object.keys(replaceMap).length === 0 && Object.keys(affixMap).length === 0) return weaponSkills
 
         return weaponSkills.map(skill => {
-            const replacedSkill = replaceMap[skill.id]
-            if (!replacedSkill) return skill
-            const normalizedSkill = this.normalizeWeaponSkillToSkill(replacedSkill, skill)
-            return new LeveledSkill(normalizedSkill, skill.等级, skill.武器名)
+            const modReplacement = replaceMap[skill.id]
+            if (modReplacement) {
+                if (affixMap[skill.id]) warnSkillReplacementConflict(skill.id)
+                const normalizedSkill = this.normalizeWeaponSkillToSkill(modReplacement, skill)
+                return new LeveledSkill(normalizedSkill, skill.等级, skill.武器名)
+            }
+            const affixReplacement = affixMap[skill.id]
+            if (!affixReplacement) return skill
+            return new LeveledSkill(applyTranscendSkillReplacement(skill.skillData, affixReplacement), skill.等级, skill.武器名)
         })
     }
 
@@ -654,13 +770,13 @@ export class CharBuild {
     }
 
     get meleeWeaponSkills() {
-        return this.replaceWeaponSkillsByMods(this.meleeWeapon.技能 || [], this.meleeMods)
+        return this.replaceWeaponSkills(this.meleeWeapon.技能 || [], this.meleeMods)
     }
     get rangedWeaponSkills() {
-        return this.replaceWeaponSkillsByMods(this.rangedWeapon.技能 || [], this.rangedMods)
+        return this.replaceWeaponSkills(this.rangedWeapon.技能 || [], this.rangedMods)
     }
     get skillWeaponSkills() {
-        return this.replaceWeaponSkillsByMods(this.skillWeapon?.技能 || [], this.skillMods)
+        return this.replaceWeaponSkills(this.skillWeapon?.技能 || [], this.skillMods)
     }
     get weaponSkills() {
         return [...this.meleeWeaponSkills, ...this.rangedWeaponSkills, ...this.skillWeaponSkills]
@@ -668,8 +784,50 @@ export class CharBuild {
     get allSkills() {
         return [...this.skills, ...this.weaponSkills]
     }
-    /** 技能等级 `[E, Q, 被动]`：构造与 char setter 均经归一化，兼容老格式单个数字 */
-    public skillLevel: CharSkillLevels = [12, 12, 12]
+    /** 基础技能等级 `[E, Q, 被动]`：构造参数原值（已归一化），等级二次解析的起点 */
+    public baseSkillLevel: CharSkillLevels = [10, 10, 10]
+    /** 有效技能等级 `[E, Q, 被动]`：外部读数；由 `ensureSkillLevels()` 从基础值 + 三键属性聚合解析 */
+    public skillLevel: CharSkillLevels = [10, 10, 10]
+    /** 技能等级二次解析防重入：char setter 重建技能期间不再聚合 */
+    private resolvingSkillLevels = false
+
+    /**
+     * 二次解析技能等级：用 `E/Q/P技能等级` 标准属性聚合值（静态数值）计算有效等级，
+     * 与当前值不同时经 char setter 重建角色技能与同律武器。构造末尾 / 计算入口 / 读等级处调用。
+     */
+    private ensureSkillLevels() {
+        if (this.resolvingSkillLevels) return
+        this.resolvingSkillLevels = true
+        try {
+            const bonus = SKILL_LEVEL_ATTR_KEYS.map(key => this.getStaticSkillLevelBonus(key)) as unknown as CharSkillLevels
+            const next = resolveEffectiveSkillLevels(this.baseSkillLevel, bonus)
+            if (next[0] === this.skillLevel[0] && next[1] === this.skillLevel[1] && next[2] === this.skillLevel[2]) return
+            this.skillLevel = next
+            // char setter 按新三元组重建技能、应用替换并重建同律武器
+            this.char = this._char
+            this.syncInheritedSkillWeapon()
+            this.syncWeaponForgeEffective()
+        } finally {
+            this.resolvingSkillLevels = false
+        }
+    }
+
+    /**
+     * 三键属性的静态数值聚合：字符串表达式（动态 attr）不驱动技能等级，
+     * 需从 `values` 聚合值中扣掉表达式求值结果（`applyAttr` 会把求值结果回写 values）。
+     * @param attribute 三键属性名
+     * @returns 静态数值加成
+     */
+    private getStaticSkillLevelBonus(attribute: string): number {
+        let bonus = this.getTotalBonus(attribute)
+        for (const buff of this.buffs) {
+            // 与属性表同口径：被 MOD 禁用 / 条件 BUFF 本就不参与汇总，扣减也跳过
+            if (this.isBuffDisabled(buff) || isFieldConditionalBuff(buff)) continue
+            if (typeof buff._originalBuffData.attr?.[attribute] !== "string") continue
+            bonus -= buff.values[attribute] ?? 0
+        }
+        return bonus
+    }
 
     /**
      * 按角色技能索引取对应的技能等级（0→E，1→Q，2 及之后→被动）。
@@ -677,6 +835,7 @@ export class CharBuild {
      * @returns 该技能的等级
      */
     public getSkillLevel(index: number): number {
+        this.ensureSkillLevels()
         return resolveCharSkillLevel(this.skillLevel, index)
     }
 
@@ -685,6 +844,7 @@ export class CharBuild {
      * @returns 选中技能的等级
      */
     public get selectedSkillLevel(): number {
+        this.ensureSkillLevels()
         const index = this.skills.findIndex(skill => skill.名称 === this.baseName)
         return resolveCharSkillLevel(this.skillLevel, index === -1 ? 2 : index)
     }
@@ -714,6 +874,10 @@ export class CharBuild {
         weapon.setForgeEffective(!this._char || this.isWeaponForgeEffective(weapon))
     }
     public teamWeaponCategories: string[] = []
+    /** 角色位（主控 / 协战）：随 settings 一起序列化，clone() 透传 */
+    public teamRole: TeamRole = "main"
+    /** 跨角色属性解析器：构造时由 settings 派生，协战 build 在首次查询属性时才懒构造 */
+    public teamResolver?: TeamResolver
     public baseName = ""
     public imbalance = false
     _enemyId: number = 130
@@ -764,6 +928,8 @@ export class CharBuild {
     public petBaseCd = 0
     /** 生成该构筑的原始配置：随快照带到 worker，供 wasm 收益路径复现构筑 */
     public settings?: CharBuildSettingsInput
+    /** 升华词条技能替换（原技能 id → 载荷）：角色技能与武器技能共用 */
+    public skillReplacements: Record<number, TranscendSkillReplacement>
 
     get baseWithTarget() {
         return `${this.baseName}::${this.targetFunction}`
@@ -793,10 +959,33 @@ export class CharBuild {
         战姿: "震荡",
     }
 
+    /**
+     * 从 `teamWeapons` 的数值项派生队友武器类别（页面与工厂共用同一构造口径）。
+     * 字符串 / `"-"` / 0 忽略；解析器未注册或武器不存在时忽略该项，不阻断构筑构造。
+     * @param teamWeapons 协战武器 id 列表
+     * @returns 武器类别列表
+     */
+    private static deriveTeamWeaponCategories(teamWeapons: readonly (number | string)[] | undefined): string[] {
+        const categories: string[] = []
+        for (const weapon of teamWeapons ?? []) {
+            if (typeof weapon !== "number" || !Number.isFinite(weapon) || weapon <= 0) continue
+            try {
+                const category = new LeveledWeapon(weapon).类别
+                if (category) categories.push(category)
+            } catch {
+                // 数据表未注册 / 武器不存在：保持空类别，不影响其它构建字段
+            }
+        }
+        return categories
+    }
+
     constructor(options: CharBuildOptions) {
         this.extraMastery = options.extraMastery || ""
-        // 先归一化技能等级再挂载角色：char setter 据此按索引初始化各技能等级
-        this.skillLevel = normalizeCharSkillLevels(options.skillLevel ?? 10)
+        // 技能替换与技能等级都要先于 char setter：各自在 setter 内应用
+        this.skillReplacements = options.skillReplacements ?? {}
+        // 基础技能等级先归一化再挂载角色：char setter 据此按三元组初始化各技能等级
+        this.baseSkillLevel = normalizeCharSkillLevels(options.skillLevel ?? 10)
+        this.skillLevel = [...this.baseSkillLevel] as CharSkillLevels
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
         this.resonanceGain = options.resonanceGain
@@ -824,10 +1013,18 @@ export class CharBuild {
         this.customBuff = this.createCustomBuffs(options.customBuff || [])
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
-        this.teamWeaponCategories = options.teamWeaponCategories || []
+        // 未显式给类别时从 `teamWeapons` 派生（页面 `new CharBuild` 与工厂因此同源）
+        this.teamWeaponCategories = options.teamWeaponCategories ?? CharBuild.deriveTeamWeaponCategories(options.teamWeapons)
+        this.teamRole = options.teamRole ?? "main"
+        this.settings = options.settings
+        this.teamResolver =
+            options.settings && CharBuild.createTeamResolver
+                ? CharBuild.createTeamResolver(options.settings, this.teamRole, this.char.id)
+                : undefined
         this.dotSettings = { ...defaultDotFrequencySettings, ...(options.dotSettings || {}) }
         this.petBaseCd = options.petBaseCd || 0
-        this.settings = options.settings
+        // buffs / MOD / 武器装配完成后再聚合三键属性，重建技能等级
+        this.ensureSkillLevels()
     }
 
     /**
@@ -1033,6 +1230,7 @@ export class CharBuild {
      *
      * 失效来源只有四条，全部可廉价判定：MOD 槽位变化（modsCache 换对象）、
      * 三类来源改写自身数值（各自的版本号）、武器实例被替换、BUFF 数组增删换（逐项浅拷贝比对）。
+     * 技能等级三键已并入 BUFF 属性池，不再单独快照。
      * @param cache 已缓存的作用域属性表
      * @returns 缓存是否有效
      */
@@ -1077,35 +1275,44 @@ export class CharBuild {
          * @param source 来源记录
          * @param keys 限定遍历的键；缺省遍历来源自身的全部可枚举键
          */
-        const accumulate = (target: Map<string, number>, source: Record<string, unknown> | undefined | null, keys?: string[]) => {
+        const accumulate = (
+            target: Map<string, number>,
+            source: Record<string, unknown> | undefined | null,
+            keys?: string[],
+            sourceLabel?: string
+        ) => {
             if (!source) return
-            for (const key of keys ?? Object.keys(source)) {
-                const value = source[key]
-                if (typeof value === "number") target.set(key, (target.get(key) ?? 0) + value)
+            for (const rawKey of keys ?? Object.keys(source)) {
+                const value = source[rawKey]
+                if (typeof value !== "number") continue
+                // 旧数据 / 旧包 / 自定义输入的字面 `追加伤害` 迁移为 `自属性追伤`，不得作为独立输入加算
+                const key = normalizeAdditionalDamageKey(rawKey)
+                if (key !== rawKey) warnLegacyAdditionalDamage(sourceLabel ?? "旧数据")
+                target.set(key, (target.get(key) ?? 0) + value)
             }
         }
 
-        accumulate(table.char, this.char.加成)
-        accumulate(table.melee, this.meleeWeapon as unknown as Record<string, unknown>)
-        accumulate(table.ranged, this.rangedWeapon as unknown as Record<string, unknown>)
-        accumulate(table.weaponBuffProps, this.meleeWeapon.buffProps)
-        accumulate(table.weaponBuffProps, this.rangedWeapon.buffProps)
+        accumulate(table.char, this.char.加成, undefined, "角色基础加成")
+        accumulate(table.melee, this.meleeWeapon as unknown as Record<string, unknown>, undefined, `武器 ${this.meleeWeapon.id}`)
+        accumulate(table.ranged, this.rangedWeapon as unknown as Record<string, unknown>, undefined, `武器 ${this.rangedWeapon.id}`)
+        accumulate(table.weaponBuffProps, this.meleeWeapon.buffProps, undefined, `武器 ${this.meleeWeapon.id} 特效`)
+        accumulate(table.weaponBuffProps, this.rangedWeapon.buffProps, undefined, `武器 ${this.rangedWeapon.id} 特效`)
 
         for (const mod of mods) {
             // 词条属性：`properties` 与 `getAddAttrValue` 同源（显式属性键表，均只含 MOD 层数值属性）
             const properties = mod.properties
-            accumulate(table.modsAll, mod as unknown as Record<string, unknown>, properties)
+            accumulate(table.modsAll, mod as unknown as Record<string, unknown>, properties, `MOD ${mod.id}`)
             let scopeBucket = table.modsByScope.get(mod.attrType)
             if (!scopeBucket) {
                 scopeBucket = new Map()
                 table.modsByScope.set(mod.attrType, scopeBucket)
             }
-            accumulate(scopeBucket, mod as unknown as Record<string, unknown>, properties)
+            accumulate(scopeBucket, mod as unknown as Record<string, unknown>, properties, `MOD ${mod.id}`)
             // 角色槽 MOD 额外单列：暴击/暴伤等可穿透属性在武器作用域下也要吃到角色槽词条
             if (mod.attrType === "角色") {
-                accumulate(table.modsChar, mod as unknown as Record<string, unknown>, properties)
+                accumulate(table.modsChar, mod as unknown as Record<string, unknown>, properties, `MOD ${mod.id}`)
             }
-            accumulate(table.modsBuffProps, mod.buffProps)
+            accumulate(table.modsBuffProps, mod.buffProps, undefined, `MOD ${mod.id} 特效`)
         }
 
         for (const buff of this.buffs) {
@@ -1113,7 +1320,7 @@ export class CharBuild {
             if (this.isBuffDisabled(buff)) continue
             // 条件BUFF（技能/tag限定）只对命中条件的字段生效，不进全局汇总表
             if (isFieldConditionalBuff(buff)) continue
-            accumulate(table.buffs, buff.values)
+            accumulate(table.buffs, buff.values, undefined, `BUFF「${buff.名称}」`)
         }
 
         return table
@@ -1258,6 +1465,8 @@ export class CharBuild {
                 const props: Record<string, number> = {}
                 for (const [key, value] of Object.entries(result)) {
                     if (typeof value !== "number") continue
+                    // 聚合由分量派生，字段级增量只回放分量，避免聚合被重复计入
+                    if (key === LEGACY_ADDITIONAL_DAMAGE_KEY) continue
                     const before = (snapshot as unknown as Record<string, number | undefined>)[key]
                     if (typeof before !== "number" || value === before) continue
                     if (isMultiplicativeAttr(key)) {
@@ -1317,9 +1526,12 @@ export class CharBuild {
                 if (tag) entry.tag = tag
                 list.push(entry)
             }
-            for (const prop of buff.properties) {
-                const value = buff.getAttrValue(prop)
+            for (const rawProp of buff.properties) {
+                const value = buff.getAttrValue(rawProp)
                 if (typeof value !== "number" || value === 0) continue
+                // 条件 BUFF 的旧字面 `追加伤害` 同样迁回 `自属性追伤`
+                const prop = normalizeAdditionalDamageKey(rawProp)
+                if (prop !== rawProp) warnLegacyAdditionalDamage(`条件 BUFF「${buff.名称}」`)
                 if (isMultiplicativeAttr(prop)) {
                     entry.props[prop] = (1 + (entry.props[prop] || 0)) * (1 + value) - 1
                 } else {
@@ -1414,11 +1626,15 @@ export class CharBuild {
     }
 
     get skillWeaponAttrs() {
-        return this.skillWeapon ? this.calculateWeaponAttributes(this.skillWeapon).weapon : undefined
+        return this.skillWeapon
+            ? this.calculateWeaponAttributes(this.skillWeapon, false, false, { panelSource: "skill" }).weapon
+            : undefined
     }
 
     // 计算角色所有属性（基础属性和其他属性）
     public calculateAttributes(nocode = false, attrApplied = false): CharAttr {
+        // 属性求值前先让技能等级跟上三键属性池（BUFF / MOD 变化后无需手动刷新）
+        this.ensureSkillLevels()
         const char = this.char
         const bonuses = this.getCharacterBonusVector()
 
@@ -1444,6 +1660,20 @@ export class CharBuild {
         let desperate = bonuses[characterBonusIndex.背水]
         let damageIncrease = bonuses[characterBonusIndex.增伤]
         let elementDamageIncrease = bonuses[characterBonusIndex.元素增伤]
+        // 元素专属伤害率：六元素各自独立成桶，MOD属性加权只落在同名键上（不得并入通用 `元素增伤`）
+        let fireDamageIncrease = bonuses[characterBonusIndex.火属性增伤]
+        let waterDamageIncrease = bonuses[characterBonusIndex.水属性增伤]
+        let thunderDamageIncrease = bonuses[characterBonusIndex.雷属性增伤]
+        let windDamageIncrease = bonuses[characterBonusIndex.风属性增伤]
+        let lightDamageIncrease = bonuses[characterBonusIndex.光属性增伤]
+        let darkDamageIncrease = bonuses[characterBonusIndex.暗属性增伤]
+        // 元素弱点（U95）：与敌人抗性同区加算，六元素 + 全属性各自独立成键
+        const weaknessKeys = [...ELEMENT_WEAKNESS_KEYS, ALL_ELEMENT_WEAKNESS_KEY] as const
+        const weaknessValues = Object.fromEntries(weaknessKeys.map(key => [key, bonuses[characterBonusIndex[key]]])) as Record<
+            (typeof weaknessKeys)[number],
+            number
+        >
+        // 追伤不属于角色属性：武器追伤只在武器面板，技能追伤是角色侧独立乘区
         let physicalDamageIncrease = bonuses[characterBonusIndex.物理增伤]
         let weaponDamage = bonuses[characterBonusIndex.武器伤害]
         let skillDamage = bonuses[characterBonusIndex.技能伤害]
@@ -1451,6 +1681,8 @@ export class CharBuild {
         let skillAdditionalDamage = bonuses[characterBonusIndex.技能追伤]
         let skillSpeed = bonuses[characterBonusIndex.技能速度]
         let penetration = bonuses[characterBonusIndex.属性穿透]
+        // 赛季增伤（0 起始）：赛季专属伤害率分区，自身累加后作为独立乘区
+        let seasonDamageIncrease = bonuses[characterBonusIndex.赛季增伤]
         let imbalanceDamageBonus = bonuses[characterBonusIndex.失衡易伤]
         // 阵营增伤（角色侧：角色槽 MOD + 全局 BUFF；武器槽部分由武器面板叠加，见 calculateWeaponAttributes/calculateDamage）
         const discriminationBonus = bonuses[characterBonusIndex.歧视]
@@ -1482,12 +1714,11 @@ export class CharBuild {
         const convertFullness = bonuses[characterBonusIndex.转充盈]
         const convertRestraint = bonuses[characterBonusIndex.转属克]
         const convertReverse = bonuses[characterBonusIndex.转属逆]
-        // 角色 MOD 的充盈威力词条加成（如 56201 充盈·巧击），经公共加成向量汇总
-        const fullnessBonus = bonuses[characterBonusIndex.充盈威力]
+        // 充盈威力为 1 起始总倍率（与上游 BattleCharAttr.HyperTriggerRate.DefaultValue = 1 对齐）：
+        // 基础 1 + 角色 MOD 词条加成（如 56201 充盈·巧击），经公共加成向量汇总
+        const fullnessBonus = 1 + bonuses[characterBonusIndex.充盈威力]
         // 技能触发（0 起始）：技能伤害 DOT 触发值（如 充盈·巧力 的 54%/100% 概率）
         const skillTrigger = bonuses[characterBonusIndex.技能触发]
-        // 异常数量（0 起始增量）：武器伤害附加元素种数，如 菲娜Q 追加 4（去重见 attrs.异常数量 赋值处）
-        const anomalyCountBonus = bonuses[characterBonusIndex.异常数量]
         // 魔灵CD缩减（0 起始）：魔灵支援技能冷却缩减比例，由魔灵潜质（如 敏锐）等提供
         const petCdReduce = bonuses[characterBonusIndex.魔灵CD缩减]
         // 神智回复（0 起始，每 3 秒额外回复量）：BUFF / MOD 的持续性额外回复
@@ -1515,12 +1746,19 @@ export class CharBuild {
             desperate += modAttributeBonus * this.getModsBonus(modsBySeries, "背水")
             damageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "增伤")
             elementDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "元素增伤")
+            fireDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "火属性增伤")
+            waterDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "水属性增伤")
+            thunderDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "雷属性增伤")
+            windDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "风属性增伤")
+            lightDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "光属性增伤")
+            darkDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "暗属性增伤")
             physicalDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "物理增伤")
             weaponDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "武器伤害")
             skillDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能伤害")
             skillAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能追伤")
             skillSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "技能速度")
             penetration += modAttributeBonus * this.getModsBonus(modsBySeries, "属性穿透")
+            seasonDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "赛季增伤")
             imbalanceDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "失衡易伤")
             skillAdd += modAttributeBonus * this.getModsBonus(modsBySeries, "技能倍率加数")
             summonAttrInheritRatio += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物属性继承比例")
@@ -1569,6 +1807,13 @@ export class CharBuild {
             背水: desperate,
             增伤: damageIncrease,
             元素增伤: elementDamageIncrease,
+            火属性增伤: fireDamageIncrease,
+            水属性增伤: waterDamageIncrease,
+            雷属性增伤: thunderDamageIncrease,
+            风属性增伤: windDamageIncrease,
+            光属性增伤: lightDamageIncrease,
+            暗属性增伤: darkDamageIncrease,
+            ...weaknessValues,
             物理增伤: physicalDamageIncrease,
             属性攻击: elemDamageBonus,
             武器伤害: weaponDamage,
@@ -1577,6 +1822,7 @@ export class CharBuild {
             独立增伤: independentDamageIncrease,
             技能独立增伤: skillIndependentDamageIncrease,
             属性穿透: penetration,
+            赛季增伤: seasonDamageIncrease,
             无视防御: ignoreDefense,
             技能无视防御: skillIgnoreDefense,
             技能速度: Math.min(1 + skillSpeed, 2.8), // 技速上限 280%
@@ -1605,19 +1851,19 @@ export class CharBuild {
             转充盈: convertFullness,
             转属克: convertRestraint,
             转属逆: convertReverse,
-            // 充盈威力为角色属性：角色 MOD 充盈威力加成（向量汇总），武器转化部分由 calculateWeaponAttributes 累加
+            // 充盈威力为 1 起始总倍率：基础 1 + 角色 MOD 加成（向量汇总），武器转化部分由 calculateWeaponAttributes 累加
             充盈威力: fullnessBonus,
             技能触发: skillTrigger,
-            // 异常数量（去重后元素种数）：基础 1 为角色自身属性；
-            // 附加异常（如 菲娜Q 追加 4）为水/火/雷/风四种非光暗元素：光/暗角色不重叠 → n = 1 + 追加；
-            // 非光暗角色自身属性与其中一种重叠 → n = 追加（至少 1，如 黎瑟雷 + 菲娜Q → 4）
-            异常数量: ["光", "暗"].includes(this.char.属性) ? 1 + anomalyCountBonus : Math.max(1, anomalyCountBonus),
             // 魔灵CD：按所选魔灵主动技原始冷却折算成秒（未选魔灵时为 0），缩减上限 100% 避免负冷却
             魔灵CD: Math.max(0, this.petBaseCd * (1 - Math.max(0, Math.min(1, petCdReduce)))),
             // 魔灵CD缩减：缩减比例本身（钳制在 [0,1]）
             魔灵CD缩减: Math.max(0, Math.min(1, petCdReduce)),
             // 神智回复总量（每 3 秒）：自然回复 + BUFF / MOD 持续性额外回复
             神智回复: sanityRegenBonus + 2 + Math.floor(sanity / 200),
+            // 技能等级加成（U99b）：属性值 = 加成池（实例加成 + BUFF / MOD 同名键），不是最终等级
+            E技能等级: bonuses[characterBonusIndex.E技能等级],
+            Q技能等级: bonuses[characterBonusIndex.Q技能等级],
+            P技能等级: bonuses[characterBonusIndex.P技能等级],
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
@@ -1642,6 +1888,7 @@ export class CharBuild {
                 attrs = rest
             }
         }
+        // 角色属性不持有追伤：动态 code 的裸追伤写入已重定向到武器面板
         return attrs
     }
 
@@ -1741,14 +1988,16 @@ export class CharBuild {
      * 计算单个武器的触发率与充盈转化。
      * 触发率数值允许溢出（不钳制 100% 上限），加成逻辑与 calculateWeaponAttributes 保持一致。
      * @param weapon 武器
+     * @param panelSource 调用点显式声明的面板来源
      * @returns 触发率与充盈转化
      */
-    private getWeaponFullness(weapon: LeveledWeapon | LeveledSkillWeapon) {
+    private getWeaponFullness(weapon: LeveledWeapon | LeveledSkillWeapon, panelSource?: WeaponPanelSource) {
+        const ordinaryPrefix = this.getOrdinaryPanelPrefix(weapon, panelSource)
         if (weapon.inherit) {
             weapon = weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
         }
         const prefix = weapon.类型
-        let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
+        let triggerRateBonus = this.getWeaponPanelBonus("触发", prefix, ordinaryPrefix)
         if (prefix.startsWith("同律")) {
             const lowerPrefix = prefix.substring(2)
             // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器
@@ -1772,7 +2021,7 @@ export class CharBuild {
         value: number
     }[] {
         return this.getAllFullnessWeapons().map(w => {
-            const { triggerRate, conversionRate } = this.getWeaponFullness(w)
+            const { triggerRate, conversionRate } = this.getWeaponFullness(w, this.panelSourceOf(w))
             return { weapon: w, triggerRate, conversionRate, value: Math.max(0, triggerRate - 1) * conversionRate }
         })
     }
@@ -1781,14 +2030,16 @@ export class CharBuild {
      * 计算单个武器的攻速与召唤物攻击速度转化。
      * 攻速加成逻辑与 calculateWeaponAttributes 保持一致（含 200% 上限），供召唤物攻速转化汇总使用。
      * @param weapon 武器
+     * @param panelSource 调用点显式声明的面板来源
      * @returns 攻速与召唤物攻击速度转化
      */
-    private getWeaponSummonSpeed(weapon: LeveledWeapon | LeveledSkillWeapon) {
+    private getWeaponSummonSpeed(weapon: LeveledWeapon | LeveledSkillWeapon, panelSource?: WeaponPanelSource) {
+        const ordinaryPrefix = this.getOrdinaryPanelPrefix(weapon, panelSource)
         if (weapon.inherit) {
             weapon = weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
         }
         const prefix = weapon.类型
-        let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
+        let attackSpeedBonus = this.getWeaponPanelBonus("攻速", prefix, ordinaryPrefix)
         if (prefix.startsWith("同律")) {
             const lowerPrefix = prefix.substring(2)
             // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器
@@ -1800,38 +2051,62 @@ export class CharBuild {
     }
 
     // 计算武器属性
+    /**
+     * 计算武器面板。
+     * @param weapon 目标武器（继承型同律会解析到被继承的普通武器）
+     * @param nocode 跳过 code 型动态 BUFF
+     * @param nochar 跳过角色侧汇总（只取 .weapon 面板）
+     * @param opts.panelSource 调用点显式声明的面板来源（同律槽传 "skill"），未传时按实例/类型兜底
+     */
     public calculateWeaponAttributes(
         weapon = this.selectedWeapon || (this.selectedSkill?.召唤物 && this.meleeWeapon),
         nocode = false,
-        nochar = false
+        nochar = false,
+        opts?: { panelSource?: WeaponPanelSource }
     ): CharAttr & { weapon?: WeaponAttr } {
         const char = this.char
         let attrs: CharAttr & { weapon?: WeaponAttr } = nochar ? ({} as any) : this.calculateAttributes(true) // code因为底下会算 所以角色属性不需要计算了
 
         if (weapon) {
+            // 面板来源在解析继承前确定：继承型同律武器会换成被继承的普通武器计算，但面板仍属同律，
+            // 普通近战/远程专属加成不得进入（见 getOrdinaryPanelPrefix）。
+            const ordinaryPrefix = this.getOrdinaryPanelPrefix(weapon, opts?.panelSource)
             if (weapon.inherit) {
                 weapon = weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
             }
             const prefix = weapon.类型
             // 计算各种加成
-            let attackBonus = this.getTotalBonus(`${prefix}攻击`, prefix) + this.getTotalBonus(`攻击`, prefix)
+            let attackBonus = this.getWeaponPanelBonus("攻击", prefix, ordinaryPrefix)
             // 武器物理加成：泛化 `物理`（旧口径兜底）+ 按武器伤害类型匹配的具体口径 `<切割|贯穿|震荡>攻击`；
             // mod.data 已迁移到具体口径（如 切割攻击），限定与伤害类型一致时命中（见 isModSlotCompatible）
             const damageTypeAttack = (weapon as LeveledWeapon).伤害类型 ? `${(weapon as LeveledWeapon).伤害类型}攻击` : undefined
             const physicalBonus = this.getTotalBonus("物理", prefix) + (damageTypeAttack ? this.getTotalBonus(damageTypeAttack, prefix) : 0)
-            let critRateBonus = this.getTotalBonus(`${prefix}暴击`, prefix) + this.getTotalBonus(`暴击`, prefix)
-            let critDamageBonus = this.getTotalBonus(`${prefix}暴伤`, prefix) + this.getTotalBonus(`暴伤`, prefix)
-            let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
-            let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
-            let multiShotBonus = this.getTotalBonus(`${prefix}多重`, prefix) + this.getTotalBonus(`多重`, prefix)
-            let damageIncrease = this.getTotalBonus(`${prefix}增伤`, prefix) + this.getTotalBonus(`增伤`, prefix)
-            let reloadTimeBonus = this.getTotalBonus(`${prefix}装填`, prefix) + this.getTotalBonus(`装填`, prefix)
-            let magazineBonus = this.getTotalBonus(`${prefix}弹匣`, prefix) + this.getTotalBonus(`弹匣`, prefix)
-            let ammoBonus = this.getTotalBonus(`${prefix}弹药`, prefix) + this.getTotalBonus(`弹药`, prefix)
-            let additionalDamage = this.getTotalBonus("追加伤害")
-            let weaponDamageMul = this.getTotalBonus(`${prefix}武器倍率`, prefix) + this.getTotalBonus(`武器倍率`, prefix)
+            let critRateBonus = this.getWeaponPanelBonus("暴击", prefix, ordinaryPrefix)
+            let critDamageBonus = this.getWeaponPanelBonus("暴伤", prefix, ordinaryPrefix)
+            let triggerRateBonus = this.getWeaponPanelBonus("触发", prefix, ordinaryPrefix)
+            let attackSpeedBonus = this.getWeaponPanelBonus("攻速", prefix, ordinaryPrefix)
+            let multiShotBonus = this.getWeaponPanelBonus("多重", prefix, ordinaryPrefix)
+            let damageIncrease = this.getWeaponPanelBonus("增伤", prefix, ordinaryPrefix)
+            let reloadTimeBonus = this.getWeaponPanelBonus("装填", prefix, ordinaryPrefix)
+            let magazineBonus = this.getWeaponPanelBonus("弹匣", prefix, ordinaryPrefix)
+            let ammoBonus = this.getWeaponPanelBonus("弹药", prefix, ordinaryPrefix)
+            // 追伤七分量：面板分别汇总（含 MOD属性类加成），聚合仅由分量求和产生
+            let fireAdditionalDamage = this.getTotalBonus("火属性追伤")
+            let waterAdditionalDamage = this.getTotalBonus("水属性追伤")
+            let thunderAdditionalDamage = this.getTotalBonus("雷属性追伤")
+            let windAdditionalDamage = this.getTotalBonus("风属性追伤")
+            let lightAdditionalDamage = this.getTotalBonus("光属性追伤")
+            let darkAdditionalDamage = this.getTotalBonus("暗属性追伤")
+            let selfAdditionalDamage = this.getTotalBonus("自属性追伤")
+            let weaponDamageMul = this.getWeaponPanelBonus("武器倍率", prefix, ordinaryPrefix)
+            // 独立增伤各自成乘区：`<prefix>独立增伤`、`普通<prefix>独立增伤` 与裸 `独立增伤` 分别一个因子。
+            // 普通前缀不得加性并进前缀因子（(1+a+b) 会把两个独立乘区折叠成一个）。
+            const prefixIndependent = this.getWeaponPanelMulBonuses("独立增伤", prefix, ordinaryPrefix)
             let independentDamageIncrease =
-                (1 + this.getTotalBonusMul(`${prefix}独立增伤`, prefix)) * (1 + this.getTotalBonusMul("独立增伤", prefix)) - 1
+                (1 + prefixIndependent.prefixValue) *
+                    (1 + prefixIndependent.ordinaryValue) *
+                    (1 + this.getTotalBonusMul("独立增伤", prefix)) -
+                1
 
             // 应用MOD属性加成
             const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
@@ -1840,7 +2115,13 @@ export class CharBuild {
                 const modsBySeries = this.charMods.filter(
                     (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
                 )
-                additionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "追加伤害")
+                fireAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "火属性追伤")
+                waterAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "水属性追伤")
+                thunderAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "雷属性追伤")
+                windAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "风属性追伤")
+                lightAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "光属性追伤")
+                darkAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "暗属性追伤")
+                selfAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "自属性追伤")
             }
 
             if (prefix.startsWith("同律")) {
@@ -1897,6 +2178,14 @@ export class CharBuild {
             multiShot = Math.round(multiShot * 100) / 100
             independentDamageIncrease = Math.round(independentDamageIncrease * 1000) / 1000
 
+            const totalAdditionalDamage =
+                fireAdditionalDamage +
+                waterAdditionalDamage +
+                thunderAdditionalDamage +
+                windAdditionalDamage +
+                lightAdditionalDamage +
+                darkAdditionalDamage +
+                selfAdditionalDamage
             const weaponAttrs: WeaponAttr = {
                 攻击: attack,
                 暴击: critRate,
@@ -1906,7 +2195,14 @@ export class CharBuild {
                 多重: multiShot,
                 增伤: damageIncrease,
                 独立增伤: independentDamageIncrease,
-                追加伤害: additionalDamage,
+                火属性追伤: fireAdditionalDamage,
+                水属性追伤: waterAdditionalDamage,
+                雷属性追伤: thunderAdditionalDamage,
+                风属性追伤: windAdditionalDamage,
+                光属性追伤: lightAdditionalDamage,
+                暗属性追伤: darkAdditionalDamage,
+                自属性追伤: selfAdditionalDamage,
+                追加伤害: totalAdditionalDamage,
                 装填: reloadTime,
                 弹匣: magazine,
                 弹药: ammo,
@@ -1929,19 +2225,19 @@ export class CharBuild {
         // nochar 调用方（getAllWeaponsAttrs / getAllWeaponSkillsAttrs）只取 .weapon 面板，
         // 下面的角色侧汇总（充盈威力 / 召唤物转化）会写进一个随即被丢弃的 attrs，故直接跳过。
         if (nochar) return attrs
-        // 充盈威力（角色属性）= 角色 MOD 充盈威力加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈转化。
+        // 充盈威力（角色属性，1 起始总倍率）= 基础 1 + 角色 MOD 加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈转化。
         // 各武器的转化率只作用于该武器自身溢出的触发率，不跨武器累加转化率。
         let totalFullness = 0
         for (const w of this.getAllFullnessWeapons()) {
-            const { triggerRate, conversionRate } = this.getWeaponFullness(w)
+            const { triggerRate, conversionRate } = this.getWeaponFullness(w, this.panelSourceOf(w))
             totalFullness += Math.max(0, triggerRate - 1) * conversionRate
         }
-        attrs.充盈威力 = (attrs.充盈威力 || 0) + totalFullness
+        attrs.充盈威力 = (attrs.充盈威力 ?? 1) + totalFullness
         // 召唤物转化（角色属性）汇总，仿充盈转化范式：转化词条在武器作用域，转化结果计入角色属性。
         // 召唤物绑定近战武器，攻速转化以近战武器攻速全额为来源（如攻速 1.75 × 转化 0.495）；范围转化以角色技能范围为来源（由 LeveledSkill 公式应用技能范围）。
         // 近战槽位为空武器（未装备）时不存在攻速来源，跳过转化避免空占位（射速兜底 1）产生虚假加成。
         if (this.meleeWeapon && !this.meleeWeapon.isEmpty) {
-            const { attackSpeed, conversionRate } = this.getWeaponSummonSpeed(this.meleeWeapon)
+            const { attackSpeed, conversionRate } = this.getWeaponSummonSpeed(this.meleeWeapon, "ordinary")
             attrs.召唤物攻击速度 = (attrs.召唤物攻击速度 || 0) + Math.max(0, attackSpeed) * conversionRate
             attrs.召唤物范围 = (attrs.召唤物范围 || 0) + this.getTotalBonus("召唤物范围转化", "近战")
         }
@@ -1961,6 +2257,8 @@ export class CharBuild {
                 attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
             }
         }
+        // 动态 code 可能改写面板分量：返回前只重算武器面板的只读聚合
+        if (attrs.weapon) recomputeAdditionalDamage(attrs.weapon)
         return attrs
     }
 
@@ -1978,7 +2276,13 @@ export class CharBuild {
      */
     getAllWeaponsAttrs(weapon?: LeveledWeapon | LeveledSkillWeapon, weaponAttrs?: WeaponAttr) {
         return this.getAllWeapons(weapon)
-            .map(w => (w ? (w.名称 === weapon?.名称 ? { weapon: weaponAttrs } : this.calculateWeaponAttributes(w, true, true)) : undefined))
+            .map(w =>
+                w
+                    ? w.名称 === weapon?.名称
+                        ? { weapon: weaponAttrs }
+                        : this.calculateWeaponAttributes(w, true, true, { panelSource: this.panelSourceOf(w) })
+                    : undefined
+            )
             .map(a => a?.weapon)
     }
 
@@ -2004,18 +2308,13 @@ export class CharBuild {
 
     getAllWeaponSkillsAttrs() {
         const map = new Map([
-            ["远程", this.calculateWeaponAttributes(this.rangedWeapon, true, true).weapon],
-            ["近战", this.calculateWeaponAttributes(this.meleeWeapon, true, true).weapon],
+            ["远程", this.calculateWeaponAttributes(this.rangedWeapon, true, true, { panelSource: "ordinary" }).weapon],
+            ["近战", this.calculateWeaponAttributes(this.meleeWeapon, true, true, { panelSource: "ordinary" }).weapon],
         ])
         if (this.skillWeapon) {
-            map.set(
-                "同律",
-                this.skillWeapon.inherit === "melee"
-                    ? map.get("近战")!
-                    : this.skillWeapon.inherit === "ranged"
-                      ? map.get("远程")!
-                      : this.calculateWeaponAttributes(this.skillWeapon, true, true).weapon
-            )
+            // 继承型同律也单独计算面板：面板来源仍是同律，不能直接复用近战/远程面板
+            // （否则普通近战/远程专属加成会漏进同律面板，见 getOrdinaryPanelPrefix）。
+            map.set("同律", this.calculateWeaponAttributes(this.skillWeapon, true, true, { panelSource: "skill" }).weapon)
         }
         // add english alias
         map.set("melee", map.get("近战")!)
@@ -2031,6 +2330,8 @@ export class CharBuild {
 
     /**
      * 将细分武器前缀收敛到装备槽位，用于 MOD/武器归属过滤。
+     * `普通近战/普通远程` 是普通武器面板专属前缀，归入近战/远程作用域后只匹配普通面板，
+     * 不会进入同律面板（含继承型同律）；同律面板也不主动查询 `普通*`。
      * @param prefix 属性前缀
      * @returns 装备槽位前缀
      */
@@ -2040,7 +2341,9 @@ export class CharBuild {
         const cached = attributePrefixScopeCache.get(prefix)
         if (cached !== undefined) return cached
         let scope = prefix
-        if (prefix.startsWith("同律近战")) scope = "同律近战"
+        if (prefix.startsWith("普通近战")) scope = "近战"
+        else if (prefix.startsWith("普通远程")) scope = "远程"
+        else if (prefix.startsWith("同律近战")) scope = "同律近战"
         else if (prefix.startsWith("同律远程")) scope = "同律远程"
         else if (prefix.startsWith("近战")) scope = "近战"
         else if (prefix.startsWith("远程")) scope = "远程"
@@ -2060,6 +2363,78 @@ export class CharBuild {
             return prefixScope === attributeScope
         }
         return true
+    }
+
+    /**
+     * 解析面板来源：优先采用调用点显式传入的值（同律槽调用点传 "skill"），
+     * 缺省时按武器实例判定，最后按武器自身类型前缀兜底（兼容裸对象反序列化；
+     * 继承型同律武器自身类型仍为 `同律近战/同律远程`，兜底同样判为同律）。
+     * @param weapon 解析继承前的武器
+     * @param panelSource 调用点显式声明的面板来源
+     * @returns 面板来源
+     */
+    private resolvePanelSource(weapon: LeveledWeapon | LeveledSkillWeapon, panelSource?: WeaponPanelSource): WeaponPanelSource {
+        if (panelSource) return panelSource
+        if (weapon instanceof LeveledSkillWeapon) return "skill"
+        return weapon.类型.startsWith("同律") ? "skill" : "ordinary"
+    }
+
+    /**
+     * 按武器所在槽位确定面板来源：同律槽（含继承型）为 "skill"，近战/远程槽为 "ordinary"。
+     * 遍历多把武器的调用点用它显式传入来源，避免依赖 `weapon.类型` 推断。
+     * @param weapon 武器
+     * @returns 面板来源
+     */
+    private panelSourceOf(weapon?: LeveledWeapon | LeveledSkillWeapon): WeaponPanelSource {
+        return weapon && weapon === this.skillWeapon ? "skill" : "ordinary"
+    }
+
+    /**
+     * 解析普通武器面板的专属前缀（`普通近战` / `普通远程`）。
+     * 继承型同律武器会解析到被继承的普通武器计算，但面板仍属同律，
+     * 因此这里返回 undefined（`普通*` 只作用于普通面板）。
+     * @param weapon 解析继承前的武器
+     * @param panelSource 调用点显式声明的面板来源
+     * @returns 普通面板专属前缀；同律面板返回 undefined
+     */
+    private getOrdinaryPanelPrefix(weapon: LeveledWeapon | LeveledSkillWeapon, panelSource?: WeaponPanelSource) {
+        if (this.resolvePanelSource(weapon, panelSource) === "skill") return undefined
+        const prefix = weapon.类型
+        return prefix === "近战" || prefix === "远程" ? `普通${prefix}` : undefined
+    }
+
+    /**
+     * 汇总武器面板单个属性基名的加成：`<prefix><base>` + 裸 `<base>`，
+     * 普通武器面板额外追加 `普通<prefix><base>`；同律面板（含继承型）传 undefined 不读取 `普通*`。
+     * @param attribute 属性基名（攻击/暴击/触发等）
+     * @param prefix 武器作用域前缀
+     * @param ordinaryPrefix 普通面板专属前缀
+     * @returns 加成值
+     */
+    private getWeaponPanelBonus(attribute: string, prefix: string, ordinaryPrefix?: string): number {
+        let bonus = this.getTotalBonus(`${prefix}${attribute}`, prefix) + this.getTotalBonus(attribute, prefix)
+        if (ordinaryPrefix) bonus += this.getTotalBonus(`${ordinaryPrefix}${attribute}`, prefix)
+        return bonus
+    }
+
+    /**
+     * 与 getWeaponPanelBonus 同口径，用于乘法属性（独立增伤）的净增量汇总。
+     * `普通<prefix>独立增伤` 与 `<prefix>独立增伤` 是两个独立乘区：本方法返回两者各自的净增量，
+     * 由调用方按 `(1+a)(1+b)` 相乘，不得加性合并。
+     * @param attribute 属性基名
+     * @param prefix 武器作用域前缀
+     * @param ordinaryPrefix 普通面板专属前缀
+     * @returns 净增量对（前缀键、普通前缀键）
+     */
+    private getWeaponPanelMulBonuses(
+        attribute: string,
+        prefix: string,
+        ordinaryPrefix?: string
+    ): { prefixValue: number; ordinaryValue: number } {
+        return {
+            prefixValue: this.getTotalBonusMul(`${prefix}${attribute}`, prefix),
+            ordinaryValue: ordinaryPrefix ? this.getTotalBonusMul(`${ordinaryPrefix}${attribute}`, prefix) : 0,
+        }
     }
 
     /**
@@ -2090,9 +2465,11 @@ export class CharBuild {
     ) {
         if (!fieldName) return undefined
         const skill = skillContext || this.allSkills.find(s => s.名称 === baseName)
-        const field = skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
+        const field = skill?.字段.find(f => f.safeName.includes(fieldName) || f.exprName.includes(fieldName) || f.名称.includes(fieldName))
         if (field?.tag) return field.tag
-        const weaponField = weapon?.技能?.flatMap(s => s.字段).find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
+        const weaponField = weapon?.技能
+            ?.flatMap(s => s.字段)
+            .find(f => f.safeName.includes(fieldName) || f.exprName.includes(fieldName) || f.名称.includes(fieldName))
         return weaponField?.tag
     }
 
@@ -2106,29 +2483,63 @@ export class CharBuild {
         const aliasIndex: Record<string, number> = { E: 0, e: 0, Q: 1, q: 1, P: 2, p: 2 }
         const alias = aliasIndex[namespace]
         if (alias !== undefined) return this.skills[alias]
-        return this.allSkills.find(skill => skill.名称 === namespace || skill.safeName === namespace)
+        return this.allSkills.find(skill => skill.名称 === namespace || skill.safeName === namespace || skill.exprName === namespace)
+    }
+
+    /**
+     * 判断命名空间是否属于团队语义：协战角色名 / 槽位别名，或当前角色自身名。
+     * 自身名不进入 resolver（直接读当前面板），但命名空间白名单与函数报错按团队口径处理。
+     * @param ns 表达式命名空间
+     * @returns 是否为团队命名空间
+     */
+    private isTeamNamespace(ns: string) {
+        return ns === this.char.名称 || !!this.teamResolver?.isTeamNamespace(ns)
+    }
+
+    /**
+     * 是否为团队技能命名空间：协战角色的技能名 / safeName / 表达式标识符。
+     * @param ns 表达式命名空间
+     * @returns 是否为协战技能命名空间
+     */
+    private isTeamSkillNamespace(ns: string) {
+        return !!this.teamResolver?.hasSkillNamespace?.(ns)
     }
 
     /**
      * 绑定 AST 中的技能命名空间，尽早暴露无效命名空间。
+     * 团队命名空间（队友角色名 / 槽位别名 / 自身角色名）只放行属性读取，函数调用显式报错。
      * @param ast 已解析的表达式 AST
      * @param throwOnInvalid 是否对未知命名空间抛出错误
      */
     private bindAstSkillContexts(ast: ASTNode, throwOnInvalid = true) {
-        const weaponNamespaces = new Set(["角色", "char", "character", "近战", "远程", "同律", "melee", "ranged", "skillweapon"])
+        const weaponNamespaces = new Set(WEAPON_NAMESPACE_ALIASES)
         for (const key of this.getAllWeaponsByBase().keys()) weaponNamespaces.add(key)
         const visit = (node: ASTNode) => {
             if (node.type === "property") {
                 if (node.namespace) {
-                    const skill = this.resolveSkillContext(node.namespace)
+                    const namespace = node.namespace
+                    const skill = this.resolveSkillContext(namespace)
                     if (skill) node.skillContext = skill
-                    else if (throwOnInvalid && !weaponNamespaces.has(node.namespace)) throw new Error(`无效命名空间: "${node.namespace}"`)
+                    else if (
+                        !weaponNamespaces.has(namespace) &&
+                        !this.isTeamNamespace(namespace) &&
+                        !this.isTeamSkillNamespace(namespace) &&
+                        throwOnInvalid
+                    )
+                        throw new Error(`无效命名空间: "${namespace}"`)
                 }
                 return
             }
             if (node.type === "function") {
-                if (node.namespace && !weaponNamespaces.has(node.namespace) && !this.resolveSkillContext(node.namespace) && throwOnInvalid)
-                    throw new Error(`无效命名空间: "${node.namespace}"`)
+                if (node.namespace) {
+                    const namespace = node.namespace
+                    const known = weaponNamespaces.has(namespace) || !!this.resolveSkillContext(namespace)
+                    // 团队命名空间没有函数语义：必须显式报错，不得静默按主控执行
+                    if (!known && this.isTeamNamespace(namespace)) throw new Error(`团队命名空间不支持函数: "${namespace}::${node.name}"`)
+                    if (!known && this.isTeamSkillNamespace(namespace))
+                        throw new Error(`技能命名空间不支持函数: "${namespace}::${node.name}"`)
+                    if (!known && throwOnInvalid) throw new Error(`无效命名空间: "${namespace}"`)
+                }
                 node.args.forEach(visit)
                 return
             }
@@ -2149,10 +2560,14 @@ export class CharBuild {
      * 获取当前武器伤害字段适用的细分加成。
      * 攻击细分类型由字段 tag 判断（如 tag 含「蓄力攻击」→ 蓄力），不再依赖字段名关键字解析；
      * 同律武器字段未标注攻击类型时回退到武器的「视为」声明。
+     * 普通近战/远程面板额外读取 `普通<prefix><attackType>增伤/独立增伤`；同律面板（含继承型与降级路径）绝不读取。
      * @param weaponPrefix 武器前缀
      * @param baseName 技能名称
      * @param fieldName 字段名称
      * @param attribute 加成属性
+     * @param weapon 字段所属武器
+     * @param skillContext 技能上下文
+     * @param panelSource 调用点显式声明的面板来源
      * @returns 细分增伤加成
      */
     private getWeaponAttackTypeBonus(
@@ -2161,7 +2576,8 @@ export class CharBuild {
         fieldName: string | undefined,
         attribute: "增伤" | "独立增伤",
         weapon?: LeveledWeapon | LeveledSkillWeapon,
-        skillContext?: LeveledSkill
+        skillContext?: LeveledSkill,
+        panelSource?: WeaponPanelSource
     ) {
         // 从字段 tag 判断攻击细分类型（如 tag ["近战","武器","蓄力攻击"] → 蓄力）
         const attackTypePrefix = this.getWeaponAttackTypePrefixFromTags(this.getFieldTags(baseName, fieldName, weapon, skillContext))
@@ -2172,26 +2588,115 @@ export class CharBuild {
         if (!weaponAttackTypePrefix) return 0
         const prefixScope = this.getAttributePrefixScope(weaponPrefix)
         const multiplicative = attribute.endsWith("独立增伤")
-        const getBonus = (attr: string, prefix: string, includeMods?: boolean) =>
-            multiplicative ? this.getTotalBonusMul(attr, prefix, { includeMods }) : this.getTotalBonus(attr, prefix, { includeMods })
-        let bonus = getBonus(`${weaponPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope)
-        if (weaponPrefix.includes("近战")) {
-            bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, prefixScope)
-        }
+        const getBonus = (attr: string, prefix: string, includeMods?: boolean, includeBuffs?: boolean) =>
+            multiplicative
+                ? this.getTotalBonusMul(attr, prefix, { includeMods, includeBuffs })
+                : this.getTotalBonus(attr, prefix, { includeMods, includeBuffs })
+        // 面板来源：调用点显式传入；缺省时按武器实例判定，最后按前缀兜底（继承型同律自身前缀仍为 同律*）。
+        const resolvedPanelSource =
+            panelSource ??
+            (weapon ? this.resolvePanelSource(weapon) : undefined) ??
+            (weaponPrefix.startsWith("同律") ? "skill" : "ordinary")
+        const keys = this.getWeaponAttackTypeBonusKeys(weaponPrefix, weaponAttackTypePrefix, attribute)
+        // 非 BUFF 来源按候选键逐层累计（MOD 只在其自身作用域生效，不随降级穿透）
+        let bonus = getBonus(keys[0], prefixScope, true, false)
         if (weaponPrefix.startsWith("同律")) {
             const lowerPrefix = weaponPrefix.substring(2)
             const lowerScope = this.getAttributePrefixScope(lowerPrefix)
             // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器（MOD 只作用于自身槽位）
-            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, lowerScope, false)
-            if (lowerPrefix.includes("近战")) {
-                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, lowerScope, false)
-            }
+            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, lowerScope, false, false)
             // 同律槽位 MOD 直接作用于同律武器自身：其下位作用域（近战/远程）的细分属性同样生效。
             // 仅统计同律作用域 MOD，不随前缀降级穿透的规则只约束近战/远程槽位 MOD。
             bonus += this.getModsScopeBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope, multiplicative)
         }
+        // 近战系裸键（如 `下落增伤`）：普通/同律近战都只在这里计一次，降级分支不得重复累加
+        if (weaponPrefix.includes("近战")) {
+            bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, prefixScope, true, false)
+        }
+        // MOD/武器效果层（buffProps）与 BUFF 同口径：每层按精确度短路只取最精确一档；
+        // 独立增伤不走效果层（与 getTotalBonusMul 既有口径一致）。
+        if (!multiplicative) bonus += this.getWeaponAttackTypeEffectBonus(keys)
+        // BUFF 共享池：按精确度短路，每个来源只在最精确的一档计一次（CSS specificity 式）。
+        const buffBonus = this.getWeaponAttackTypeBuffBonus(keys, multiplicative)
+        if (multiplicative) {
+            // 非 BUFF 与 BUFF 各自成因子：Π(1+v) 无法由净增量相加还原
+            bonus = (1 + bonus) * (1 + buffBonus) - 1
+        } else {
+            bonus += buffBonus
+        }
+        // 普通近战/远程专属细分键：只进普通面板；独立增伤与既有前缀键各自成因子，不做加性合并。
+        if (resolvedPanelSource === "ordinary" && (weaponPrefix === "近战" || weaponPrefix === "远程")) {
+            const ordinaryBonus = getBonus(`普通${weaponPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope)
+            if (multiplicative) return (1 + bonus) * (1 + ordinaryBonus) - 1
+            bonus += ordinaryBonus
+        }
         return bonus
     }
+
+    /**
+     * 攻击细分乘区的候选键，按精确度从高到低排列（CSS specificity 式）。
+     *
+     * 分词为 `同律近战 / 普通近战 / 近战`（远程同构）：面板专属键最精确，`近战`/`远程` 是普通与同律
+     * 共享的次精确档，裸键 `<攻击类型><增伤>` 只对近战系生效、作为兜底档。
+     * @param weaponPrefix 武器作用域前缀（近战 / 远程 / 同律近战 / 同律远程）
+     * @param attackTypePrefix 攻击类型前缀（普攻 / 蓄力 / 下落 / 滑行）
+     * @param attribute 属性名（增伤 / 独立增伤）
+     * @returns 候选键（从最精确到最宽泛）
+     */
+    private getWeaponAttackTypeBonusKeys(weaponPrefix: string, attackTypePrefix: string, attribute: string): string[] {
+        const keys = [`${weaponPrefix}${attackTypePrefix}${attribute}`]
+        if (weaponPrefix.startsWith("同律")) {
+            keys.push(`${weaponPrefix.substring(2)}${attackTypePrefix}${attribute}`)
+        }
+        if (weaponPrefix.includes("近战")) {
+            keys.push(`${attackTypePrefix}${attribute}`)
+        }
+        return keys
+    }
+
+    /**
+     * BUFF 共享池在攻击细分乘区上的合计：同一来源命中多个候选键时只取最精确的一档（短路），
+     * 不逐层累加；不同来源之间互不影响。
+     * @param keys 候选键（从最精确到最宽泛）
+     * @param multiplicative 是否按独立乘区（Π(1+v)）聚合
+     * @returns 净加成（乘法时为 Π(1+v)-1）
+     */
+    private getWeaponAttackTypeBuffBonus(keys: string[], multiplicative: boolean): number {
+        let total = multiplicative ? 1 : 0
+        for (const buff of this.buffs) {
+            if (this.isBuffDisabled(buff)) continue
+            if (isFieldConditionalBuff(buff)) continue
+            for (const key of keys) {
+                const value = buff.getAttrValue(key)
+                if (value === undefined) continue
+                if (multiplicative) total *= 1 + value
+                else total += value
+                break
+            }
+        }
+        return multiplicative ? total - 1 : total
+    }
+
+    /**
+     * MOD 效果层（`modsBuffProps`）与武器效果层（`weaponBuffProps`）在攻击细分乘区上的合计。
+     * 与 BUFF 共享池同口径：每层按候选键精确度短路，只取最精确的一档，避免同一效果被多层重复计入。
+     * @param keys 候选键（从最精确到最宽泛）
+     * @returns 加性净加成
+     */
+    private getWeaponAttackTypeEffectBonus(keys: string[]): number {
+        const table = this.getBonusSourceTable()
+        let total = 0
+        for (const pool of [table.modsBuffProps, table.weaponBuffProps]) {
+            for (const key of keys) {
+                const value = pool.get(key)
+                if (value === undefined) continue
+                total += value
+                break
+            }
+        }
+        return total
+    }
+
     /**
      * 统计指定作用域 MOD 对某属性的加成（仅 MOD，不含 BUFF/武器/角色基础加成）。
      * 供同律武器的下位作用域查询使用：近战/远程槽位 MOD 不随前缀降级穿透到同律武器，
@@ -2221,9 +2726,17 @@ export class CharBuild {
      * @param opts.includeMods 是否纳入 MOD 加成。前缀降级查询（同律武器继承下位作用域的加成）
      *                         时传 false：MOD 只作用于自身槽位（仅 attrAllowCharToWeapon 属性可跨作用域），
      *                         不可随降级穿透到同律武器；BUFF/武器效果则可正常降级。
+     * @param opts.includeBuffs 是否纳入 BUFF 共享池。攻击细分乘区按来源做精确度短路时由调用方
+     *                          单独聚合并传 false，避免同一 BUFF 被多个候选键重复计入。
      * @returns 总加成
      */
-    public getTotalBonus(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
+    public getTotalBonus(attribute: string, prefix = "角色", opts?: { includeMods?: boolean; includeBuffs?: boolean }): number {
+        // 聚合只读：`追加伤害` 只由七分量求和产生，不接受任何独立输入
+        if (attribute === LEGACY_ADDITIONAL_DAMAGE_KEY) {
+            let total = 0
+            for (const key of ADDITIONAL_DAMAGE_KEYS) total += this.getTotalBonus(key, prefix, opts)
+            return total
+        }
         const table = this.getBonusSourceTable()
         const prefixScope = this.getAttributePrefixScope(prefix)
         let bonus = 0
@@ -2253,19 +2766,19 @@ export class CharBuild {
             prefixScope === "角色" || (attribute !== "攻击" && attribute !== "增伤" && !isFactionBonusAttribute(attribute))
 
         // 添加BUFF加成
-        if (buffInScope && scopeAllowsSharedPool) {
+        if (buffInScope && scopeAllowsSharedPool && opts?.includeBuffs !== false) {
             bonus += table.buffs.get(attribute) ?? 0
         }
 
         // 添加MOD效果层加成（特效中以 @ 前缀声明的属性，见 LeveledMod.buffProps）：
         // 与武器效果（buffProps）同理按 BUFF 口径汇总，不受 MOD 槽位作用域限制
         // （如远程槽 MOD 的近战增伤），只按属性自身作用域判定。
-        if (buffInScope && scopeAllowsSharedPool) {
+        if (buffInScope && scopeAllowsSharedPool && opts?.includeBuffs !== false) {
             bonus += table.modsBuffProps.get(attribute) ?? 0
         }
 
         // 武器效果层（buffProps）：按属性名直接取表，避免逐键遍历
-        if (scopeAllowsSharedPool) {
+        if (scopeAllowsSharedPool && opts?.includeBuffs !== false) {
             bonus += table.weaponBuffProps.get(attribute) ?? 0
         }
 
@@ -2346,9 +2859,10 @@ export class CharBuild {
      * @param attribute 属性名
      * @param prefix 属性作用域前缀
      * @param opts.includeMods 是否纳入 MOD 加成，同 getTotalBonus（前缀降级查询时传 false）。
+     * @param opts.includeBuffs 是否纳入 BUFF 共享池，同 getTotalBonus（攻击细分精确度短路时传 false）。
      * @returns 净增量（0 表示无加成）
      */
-    private getTotalBonusMul(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
+    private getTotalBonusMul(attribute: string, prefix = "角色", opts?: { includeMods?: boolean; includeBuffs?: boolean }): number {
         const table = this.getBonusSourceTable()
         const prefixScope = this.getAttributePrefixScope(prefix)
         let bonus = 1
@@ -2367,7 +2881,7 @@ export class CharBuild {
         // 添加BUFF加成
         const buffInScope = this.isBuffAttributeInScope(attribute, prefixScope)
         const scopeAllowsSharedPool = prefixScope === "角色" || attribute !== "独立增伤"
-        if (buffInScope && scopeAllowsSharedPool) {
+        if (buffInScope && scopeAllowsSharedPool && opts?.includeBuffs !== false) {
             bonus *= this.getBuffsMulBonus(table, attribute)
         }
 
@@ -2448,17 +2962,18 @@ export class CharBuild {
     }
 
     /**
-     * 计算转属克/转属逆后的有效敌人抗性因子（即原计算中的 max(0, 1 - 敌人抗性)）。
+     * 计算转属克/转属逆后的有效敌人抗性因子（即原计算中的 max(0, 1 - 敌人抗性 + 弱点)）。
      * 两种属性方向相反、各自独立生效（总比例各自钳制到 [0,1]）：
      * - 转属逆：只把负抗（弱抗，如 -4）翻转为正抗 0.5；敌人抗性为 0 或正抗时不做处理。
      * - 转属克：只把正抗（强抗，如 0.5）翻转为负抗 -4；敌人抗性为 0 或负抗时不做处理。
      * - 敌人 0 抗始终不做处理（视为 0 抗）。
      * 生效的转换按比例混合：转换比例 c 的部分按翻转后的抗性结算，其余部分按原抗性结算。
      * @param attrs 属性（含可选的 转属克/转属逆）
+     * @param weakness 该元素的弱点值（U95：与抗性同区加算，正值提高受到伤害）
      * @returns 混合后的抗性因子（恒 >= 0）
      */
-    private getResistanceFactor(attrs: CharAttr): number {
-        const factor = (r: number) => Math.max(0, 1 - r)
+    private getResistanceFactor(attrs: CharAttr, weakness = 0): number {
+        const factor = (r: number) => Math.max(0, 1 - r + weakness)
         const r = this.enemyResistance
         if (r === 0) return factor(0)
         if (r < 0) {
@@ -2475,7 +2990,9 @@ export class CharBuild {
      * 统一伤害结算
      * - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器面板走武器双爆，无武器（角色技能）不结算双爆；
      * - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
-     * - tag 含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
+     * - tag 含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器攻分量；
+     * - 追伤分池：武器池取武器面板 `1 + Σ 七分量`，技能池只取角色侧 `1 + 技能追伤`，两者完全不交叉；
+     *   不吃抗性 / 弱点 / 元素增伤、不参与转属拆分；对 DOT 的唯一特殊作用是频率（见 `calculateDotFrequencies`）；
      * - 无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
      */
     public calculateDamage(
@@ -2509,6 +3026,8 @@ export class CharBuild {
         const hpMore = boostMultiplier * desperateMultiplier
         // 属性穿透对所有结算类型整体生效（与原两条路径一致）
         const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
+        // 赛季增伤：赛季专属伤害率分区，自身累加后作为独立乘区（与属性穿透同口径，非负钳制）
+        const seasonDamageMultiplier = Math.max(0, 1 + (attrs.赛季增伤 || 0))
 
         // 阵营增伤与普通增伤同池加算：角色侧（attrs，含 BUFF）+ 武器侧（panel，本槽 MOD；技能池无面板只取角色侧）；
         // 泛化 `歧视`（旧口径兜底，对全阵营生效）+ 按敌方阵营取具体口径（秽兽/军团/神弃者/神使/华胥增伤）
@@ -2525,7 +3044,12 @@ export class CharBuild {
             (isSkillPool
                 ? 1 + attrs.增伤 + attrs.技能伤害 + (isSummon ? attrs.召唤物伤害 : 0) + factionBonus
                 : 1 + attrs.增伤 + (panel?.增伤 ?? 0) + attrs.武器伤害 + factionBonus) + attackTypeDamageBonus
-        const elementDamageIncrease = attrs.元素增伤 || 0
+        // 元素增伤 / 弱点：泛化 `元素增伤` + 角色元素的 `<元素>属性增伤`；弱点与敌人抗性同区加算。
+        // 基础分量只按角色元素结算
+        const charElement = this.char.属性
+        const elementDamageIncrease =
+            (attrs.元素增伤 || 0) + ((attrs[`${charElement}属性增伤` as keyof CharAttr] as number | undefined) || 0)
+        const elementWeakness = ((attrs[`${charElement}属性弱点` as keyof CharAttr] as number | undefined) || 0) + (attrs.全属性弱点 || 0)
         const physicalDamageIncrease = attrs.物理增伤 || 0
         // 独立增伤：技能池吃角色侧 × 技能独立增伤；武器池为角色侧 × 武器侧（除惩罚因子，如箭雨降伤只作用于武器自身攻击）
         const independentDamageIncrease =
@@ -2533,8 +3057,9 @@ export class CharBuild {
                 ? (1 + attrs.独立增伤) * (1 + attrs.技能独立增伤)
                 : ((1 + attrs.独立增伤) * (1 + (panel?.独立增伤 ?? 0))) / (1 + weaponIndependentPenalty)) *
             (1 + attackTypeIndependentBonus)
-        // 追加伤害（tag）：技能池吃技能追伤，武器池吃武器追加伤害
-        const additionalDamage = isSkillPool ? 1 + (attrs.技能追伤 || 0) : 1 + (panel?.追加伤害 ?? 0)
+        // 追伤分池（§135）：武器池吃面板 Σ 七分量，技能池只吃 `技能追伤`；
+        // 只随 Σ 本身增减，不吃抗性 / 弱点 / 元素增伤、不参与转属拆分
+        const additionalDamage = isSkillPool ? Math.max(0, 1 + (attrs.技能追伤 || 0)) : Math.max(0, 1 + (panel?.追加伤害 ?? 0))
         // 召唤物独立增伤：字段 tag 含召唤物时生效
         const summonIndependentDamageMultiplier = isSummon ? 1 + attrs.召唤物独立增伤 : 1
         const otherMore =
@@ -2542,18 +3067,21 @@ export class CharBuild {
             additionalDamage *
             summonIndependentDamageMultiplier *
             imbalanceDamageMultiplier *
-            resistancePenetration
+            resistancePenetration *
+            seasonDamageMultiplier
         const commonMore = hpMore * otherMore
-        // per-part 有效增伤：元素分量取元素池，物理分量取物理池，均与增伤基座同池加算
+        // per-part 有效增伤：元素分量取角色元素增伤池，物理分量取物理池，均与增伤基座同池加算
         const partDamageIncrease = (p: { settlesElement: boolean }) =>
             p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
 
         // 转物理（转切割/转贯穿/转震荡/转灾厄）与转属克/转属逆共享同一转换比例池（原两条路径一致）：
         // 合计超过 100% 等比重压缩，不足时剩余按原始分量结算
         const enemyResistance = this.enemyResistance
-        const resistanceFactorOf = (r: number) => Math.max(0, 1 - r)
+        // 元素弱点（U95）：`<元素>属性弱点` + `全属性弱点`，与敌人抗性同区加算，只按角色元素结算；
+        // 物理分量（resistanceFactor: 1）不吃弱点。正负 / 转换判定仍只看基础 enemyResistance
+        const resistanceFactorOf = (r: number) => Math.max(0, 1 - r + elementWeakness)
         const flippedResistance = enemyResistance > 0 ? -4 : 0.5
-        const flippedFactor = Math.max(0, 1 - flippedResistance)
+        const flippedFactor = resistanceFactorOf(flippedResistance)
         const activeElementKey: "转属克" | "转属逆" | undefined =
             enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
         const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
@@ -2744,7 +3272,9 @@ export class CharBuild {
     ): DamageResult {
         // 召唤物伤害按字段 tag 判断：字段 tag 含「召唤物」即视为召唤物伤害，不再依赖字段名或技能声明
         const skill = skillContext || this.allSkills.find(s => s.名称 === baseName)
-        const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
+        const field = fieldName
+            ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.exprName.includes(fieldName) || f.名称.includes(fieldName))
+            : undefined
         return this.calculateDamage(attrs, undefined, undefined, {
             fieldTag: field?.tag,
             isSummon: !!field?.tag?.includes("召唤物"),
@@ -2777,29 +3307,26 @@ export class CharBuild {
      * - 各来源上限 = 1 / (0.4 × 触发)，触发为 0 时隐藏滑块（防止除零）。
      * - 角色自身属性 DOT 频率由 技能→近战→远程 依次填充，共享上限（各来源上限最大值）：
      *   技能造成角色自身属性 DOT 频率达到上限时，武器伤害的角色自身属性 DOT 部分视为 0。
-     * - 其余属性 DOT 频率 = Σ 武器有效频率 × 元素种数（n-1，n 为去重后异常数量：非光暗如 黎瑟雷+菲娜Q → n=4、光暗 → n=5；异常数量 = 1 时无其余属性）。
+     * - 其余属性 DOT 频率 = Σ 武器有效频率 × 该来源其余属性元素种数（`{角色元素} ∪ {六元素追伤非零项}` 去重后 - 1；
+     *   自属性追伤并入角色元素桶、不新增元素；技能来源固定 0）。
      * - 光暗角色：来源于 MOD 的追加伤害 > 0 时该来源频率翻倍；其他角色：总追加伤害 > 0 时该来源频率翻倍（不超过该来源上限）。
      * - 武器来源携带对应武器的最终攻击（weaponAttack）供 DOT 结算使用；技能来源为 0。
      * @param inputattrs 预计算的武器属性（可选，复用角色属性部分）
      * @returns 各来源配置与频率分解
      */
     public calculateDotFrequencies(inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>): DotFrequencyResult {
-        const attrs = inputattrs || this.calculateWeaponAttributes()
-        const meleeAttrs = this.calculateWeaponAttributes(this.meleeWeapon)
-        const rangedAttrs = this.calculateWeaponAttributes(this.rangedWeapon)
-        const skillWeaponAttrs = this.skillWeapon ? this.calculateWeaponAttributes(this.skillWeapon) : undefined
-        // 异常数量属性（去重后元素种数）：如 黎瑟雷(非光暗)+菲娜Q → 4、光暗角色 → 5；无 buff 时 = 1
-        const anomalyCount = Math.max(1, attrs.异常数量 || 1)
-        /**
-         * 计算武器来源的其余属性元素种数。
-         * 规则：其余属性数量 = n-1（n 为去重后异常数量）；异常数量 = 1 时无其余属性（n-1 = 0）。
-         * 去重已在属性层完成：非光暗角色自身属性与附加异常重叠 1 种 → n=4（其余 3 种）；光暗角色不重叠 → n=5（其余 4 种）。
-         * @returns 其余属性元素种数
-         */
-        const otherElementCount = () => {
-            if (anomalyCount <= 1) return 0
-            return anomalyCount - 1
-        }
+        const attrs =
+            inputattrs || this.calculateWeaponAttributes(undefined, false, false, { panelSource: this.panelSourceOf(this.selectedWeapon) })
+        const meleeAttrs = this.calculateWeaponAttributes(this.meleeWeapon, false, false, { panelSource: "ordinary" })
+        const rangedAttrs = this.calculateWeaponAttributes(this.rangedWeapon, false, false, { panelSource: "ordinary" })
+        const skillWeaponAttrs = this.skillWeapon
+            ? this.calculateWeaponAttributes(this.skillWeapon, false, false, { panelSource: "skill" })
+            : undefined
+        // 其余属性元素种数：按该来源的武器面板推导，集合天然去重（多个 BUFF 同元素只算 1 种）
+        const charElement = this.char.属性
+        const meleeElementCount = additionalDamageDotElementCount(meleeAttrs.weapon, charElement)
+        const rangedElementCount = additionalDamageDotElementCount(rangedAttrs.weapon, charElement)
+        const skillWeaponElementCount = additionalDamageDotElementCount(skillWeaponAttrs?.weapon, charElement)
         /**
          * 构建单个 DOT 来源配置（含上限、有效频率与翻倍标记）。
          * @param type 来源类型
@@ -2848,18 +3375,28 @@ export class CharBuild {
         // 同律武器触发：读取同律武器自身触发（未装备同律武器时为 0，滑块隐藏）
         const skillWeaponTrigger = Math.min(1, Math.max(0, skillWeaponAttrs?.weapon?.触发 || 0))
         const isLightOrDark = this.char.属性 === "光" || this.char.属性 === "暗"
-        const modAdditionalDamage = this.mods.reduce((sum, mod) => sum + (mod.addAttr.追加伤害 || 0), 0)
-        const totalAdditionalDamage = this.getTotalBonus("追加伤害")
+        // 追伤七分量：MOD 侧逐键读取（旧字面 `追加伤害` 兜底），角色侧走来源表聚合查询
+        const modAdditionalDamage = this.mods.reduce((sum, mod) => {
+            let value = 0
+            for (const key of ADDITIONAL_DAMAGE_KEYS) value += mod.getAddAttrValue(key) ?? 0
+            const legacy = mod.getAddAttrValue(LEGACY_ADDITIONAL_DAMAGE_KEY)
+            if (legacy !== undefined) {
+                warnLegacyAdditionalDamage(`MOD ${mod.id}`)
+                value += legacy
+            }
+            return sum + value
+        }, 0)
+        const totalAdditionalDamage = this.getTotalBonus(LEGACY_ADDITIONAL_DAMAGE_KEY)
         const hasAdditionalDamage =
             this.dotSettings.forceOwnAdditionalDamage || (isLightOrDark ? modAdditionalDamage > 0 : totalAdditionalDamage > 0)
         const sources: DotSourceConfig[] = [
-            buildSource("skill", "技能", skillTrigger, this.dotSettings.skill, 1, hasAdditionalDamage, 0),
+            buildSource("skill", "技能", skillTrigger, this.dotSettings.skill, 0, hasAdditionalDamage, 0),
             buildSource(
                 "melee",
                 this.meleeWeapon.名称,
                 meleeTrigger,
                 this.dotSettings.melee,
-                otherElementCount(),
+                meleeElementCount,
                 hasAdditionalDamage,
                 meleeAttrs.weapon?.攻击 || 0
             ),
@@ -2868,7 +3405,7 @@ export class CharBuild {
                 this.rangedWeapon.名称,
                 rangedTrigger,
                 this.dotSettings.ranged,
-                otherElementCount(),
+                rangedElementCount,
                 hasAdditionalDamage,
                 rangedAttrs.weapon?.攻击 || 0
             ),
@@ -2877,7 +3414,7 @@ export class CharBuild {
                 this.skillWeapon?.名称 || "同律",
                 skillWeaponTrigger,
                 this.dotSettings.skillweapon,
-                otherElementCount(),
+                skillWeaponElementCount,
                 hasAdditionalDamage,
                 skillWeaponAttrs?.weapon?.攻击 || 0
             ),
@@ -2929,21 +3466,23 @@ export class CharBuild {
      * @returns 其余属性抗性反转等效因子
      */
     private getOtherDotResistanceFactor(attrs: CharAttr, freqs: DotFrequencyResult): number {
-        // 其余属性种数取武器来源（技能来源的 otherElementCount 为占位 1，排除）
+        // 其余属性种数取武器来源最大值（技能来源固定 0，天然排除）
         const otherCount = Math.max(...freqs.sources.filter(source => source.type !== "skill").map(source => source.otherElementCount), 0)
-        const normal = Math.max(0, this.getResistanceFactor(attrs))
+        // 其余属性只吃全属性弱点；角色元素弱点不得带给其它元素
+        const allWeakness = attrs.全属性弱点 || 0
+        const normal = Math.max(0, this.getResistanceFactor(attrs, allWeakness))
         const r = this.enemyResistance
         if (r === 0 || otherCount <= 0) return normal
-        if (r < 0) return Math.max(0, 1 - 0.5)
+        if (r < 0) return Math.max(0, 1 - 0.5 + allWeakness)
         // 正抗：其中一种属性做 -4（因子 5），其余 otherCount-1 种保持原抗性
-        return (Math.max(0, 1 - -4) + normal * (otherCount - 1)) / otherCount
+        return (Math.max(0, 1 - -4 + allWeakness) + normal * (otherCount - 1)) / otherCount
     }
 
     /**
      * 计算每秒 DOT 伤害。
-     * 公式：Σ各来源 (角色攻击 + 来源武器攻击) × 0.2 × 6 × 4 × (1 + 充盈威力) × (1 + 增伤) × 昂扬乘区 × 背水乘区 × (来源自身属性频率 × 正常抗性区 + 来源其余属性频率 × 反转抗性区)
+     * 公式：Σ各来源 (角色攻击 + 来源武器攻击) × 0.2 × 6 × 4 × 充盈威力 × (1 + 增伤) × 昂扬乘区 × 背水乘区 × (来源自身属性频率 × 正常抗性区 + 来源其余属性频率 × 反转抗性区)
      * 技能来源无武器攻击（仅角色攻击）；武器来源（近战/远程/同律）额外吃对应武器的最终攻击。
-     * 角色自身属性部分按正常抗性区（含转属克/转属逆）；其余属性部分按抗性反转区（怪物抗性不为 0 时：负抗 → 0.5，正抗 → 其中一种 -4）。
+     * 角色自身属性部分按正常抗性区（含转属克/转属逆 与 角色元素弱点 + 全属性弱点）；其余属性部分按抗性反转区（怪物抗性不为 0 时：负抗 → 0.5，正抗 → 其中一种 -4），只吃全属性弱点。
      * 抗性区含属性穿透。
      * @param namespace 命名空间：空/undefined 全部来源；"角色" 技能分量；"melee"/"近战" 近战分量；"ranged"/"远程" 远程分量；"skillweapon"/"同律" 同律武器分量
      * @param inputattrs 预计算的武器属性（可选，复用角色属性部分）
@@ -2955,11 +3494,16 @@ export class CharBuild {
         const sources = this.getDotNamespaceSources(namespace, freqs)
         // 抗性区含属性穿透：与技能伤害结算一致（转属克/转属逆 经 getResistanceFactor 改变敌人抗性因子，属性穿透整体相乘）
         const penetration = 1 + (attrs.属性穿透 || 0)
-        const ownZone = Math.max(0, this.getResistanceFactor(attrs) * penetration)
+        // 自身属性分量吃角色元素弱点 + 全属性弱点（U95，与抗性同区加算）；其余属性分量只吃全属性弱点
+        const ownWeakness = ((attrs[`${this.char.属性}属性弱点` as keyof CharAttr] as number | undefined) || 0) + (attrs.全属性弱点 || 0)
+        const ownZone = Math.max(0, this.getResistanceFactor(attrs, ownWeakness) * penetration)
         const otherZone = this.getOtherDotResistanceFactor(attrs, freqs) * penetration
+        // 赛季增伤：赛季专属伤害率分区，自身累加后作为独立乘区（与属性穿透同口径，非负钳制）
+        const seasonDamageMultiplier = Math.max(0, 1 + (attrs.赛季增伤 || 0))
         // 昂扬/背水乘区与技能伤害共用同一结算（hpPercent 钳制规则一致）
         const hpMore = this.calculateBoostMultiplier(attrs) * this.calculateDesperateMultiplier(attrs)
-        const fullnessMultiplier = 1 + (attrs.充盈威力 || 0)
+        // 充盈威力为 1 起始总倍率，直接作为乘区，不再额外 +1
+        const fullnessMultiplier = attrs.充盈威力 ?? 1
         // 阵营增伤与普通增伤同池加算：角色侧全局 + 各来源武器槽 MOD（技能来源仅角色侧）
         const factionKey = factionBonusKeyForEnemy(this.enemy?.f)
         const charFactionBonus = (attrs.歧视 || 0) + (factionKey ? (attrs[factionKey as keyof CharAttr] as number) || 0 : 0)
@@ -2973,13 +3517,20 @@ export class CharBuild {
         for (const source of sources) {
             const damageIncreaseMultiplier = 1 + (attrs.增伤 || 0) + charFactionBonus + modBonusForSource(source.type)
             const base = (attrs.攻击 + source.weaponAttack) * 0.2 * 6 * 4 * fullnessMultiplier * damageIncreaseMultiplier * hpMore
-            total += base * (source.ownFreq * ownZone + source.otherFreq * otherZone)
+            total += base * (source.ownFreq * ownZone + source.otherFreq * otherZone) * seasonDamageMultiplier
         }
         return total
     }
 
     /**
      * 计算随机伤害 (immutable)
+     *
+     * 已知缺口（U128 复审 P2）：防御乘区仍按全局属性结算（`calculateDefenseMultiplier(attrs, ...)`），
+     * 字段级条件防御属性（如 2007 `技能无视防御`、420101 `无视防御`）不进入随机伤害 / 护盾模拟。
+     * 复用字段级 `getDef` 所需上下文：`fieldName` 取 `target`（`baseName::target` 的目标函数 token，
+     * 缺省 "伤害"）或由 `calculateByBasename` 回传实际结算字段；`skillContext` 可用
+     * `this.resolveSkillContext(baseName)` 从 E/Q/P 别名或技能名解析。当前 `getDef` 仍是
+     * `evaluateAstWithContext` 的内部闭包，抽取会改动求值上下文，故本单只登记缺口、不改数值。
      */
     public calculateRandomDamage(baseWithTarget: string, enemy?: DynamicMonster) {
         const [baseName, target] = baseWithTarget.split("::")
@@ -3097,7 +3648,7 @@ export class CharBuild {
                 (skillContext
                     ? skillContext.getFieldsWithAttr(attrs, undefined, rangedMulti)
                     : skillAttrs?.get(base || this.baseName)
-                )?.find(v => v.safeName.includes(fieldName))
+                )?.find(v => v.safeName.includes(fieldName) || v.exprName.includes(fieldName))
 
             this.bindAstSkillContexts(ast)
 
@@ -3136,10 +3687,26 @@ export class CharBuild {
                     case "property": {
                         const fieldName = node.name
                         if (knownIdentifiers?.has(fieldName)) break
-                        if (["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"].includes(fieldName)) break
+                        // 协战命名空间优先隔离（自身名除外）：只接受 CharAttr 键（键集合与主控一致），
+                        // 不构造协战 build；括号伪字段 / DOT伤害 / 技能字段一律按不存在处理
+                        if (node.namespace && node.namespace !== this.char.名称 && this.teamResolver?.isTeamNamespace(node.namespace)) {
+                            if (typeof attrs[fieldName as keyof typeof attrs] === "number") break
+                            return `找不到标识符: "${node.namespace}::${fieldName}"`
+                        }
+                        // 协战技能命名空间：字段存在性由协战构筑判定（不构造主控面板伪字段）
+                        if (node.namespace && !node.forceAttr && this.isTeamSkillNamespace(node.namespace)) {
+                            if (this.teamResolver?.hasSkillField?.(node.namespace, fieldName)) break
+                            return `找不到标识符: "${node.namespace}::${fieldName}"`
+                        }
+                        if (MAIN_PANEL_PSEUDO_FIELDS.has(fieldName)) break
                         // DOT伤害 特殊标识符：支持 角色::DOT伤害 / melee::DOT伤害 / 近战::DOT伤害 / 远程::DOT伤害 等命名空间
                         if (fieldName === "DOT伤害") break
                         if (!node.namespace && !node.forceAttr && customVariableNames.has(fieldName)) break
+                        // 自身角色名只认同当前面板（与求值分支一致，技能/武器字段不参与）
+                        if (node.namespace === this.char.名称) {
+                            if (typeof attrs[fieldName as keyof typeof attrs] === "number") break
+                            return `找不到标识符: "${node.namespace}::${fieldName}"`
+                        }
                         // ! 后缀强制按属性解析：技能字段不参与匹配
                         const isSkillField = node.forceAttr ? undefined : getSkillAttr(fieldName, node.namespace, node.skillContext)
                         const isAttr = fieldName in attrs
@@ -3449,8 +4016,6 @@ export class CharBuild {
             customVariableExpressions: new Map(this.getValidCustomVariables()),
             customFunctionDefinitions: this.getValidCustomFunctions(),
             functionBodyAstCache: new Map<string, ASTNode>(),
-            damageCache: new Map<string, DamageResult>(),
-            defCache: new Map<boolean, number>(),
         }
     }
 
@@ -3489,7 +4054,7 @@ export class CharBuild {
             (skillContext
                 ? skillContext.getFieldsWithAttr(attrs, conditionalProps, rangedMulti)
                 : skillAttrs?.get(base || this.baseName)
-            )?.find(v => v.safeName.includes(fieldName))
+            )?.find(v => v.safeName.includes(fieldName) || v.exprName.includes(fieldName))
         type TemporaryAttributes = Record<string, number>
         /**
          * 字段攻击来源覆写（对应上游 BaseAttr：ATK_Char/ATK_Melee…）。
@@ -3596,7 +4161,9 @@ export class CharBuild {
             const summonSkill = skillContext || this.allSkills.find(skill => skill.名称 === key)
             // 召唤物属性继承判断：字段 tag 含「召唤物」（如「[召唤物·战车]技能伤害」字段带 tag:["召唤物"]）即继承召唤物属性，不再依赖字段名或技能声明
             const summonField = fieldName
-                ? summonSkill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
+                ? summonSkill?.字段.find(
+                      f => f.safeName.includes(fieldName) || f.exprName.includes(fieldName) || f.名称.includes(fieldName)
+                  )
                 : undefined
             const isSummonField = !!summonField?.tag?.includes("召唤物")
             const summonRatio = isSummonField ? attrs.召唤物属性继承比例 : 1
@@ -3653,7 +4220,8 @@ export class CharBuild {
         const isDamageSkillField = (fieldName: string, base?: string, skillContext?: LeveledSkill) => {
             if (["[攻击]", "[防御]", "[生命]"].includes(fieldName) || getWeaponFieldBase(fieldName)) return true
             const field = getSkillAttr(fieldName, base, skillContext)
-            return !!field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率"))
+            // 仅名称以「伤害」结尾的字段是伤害量；「…伤害倍率」是逐级倍率，表达式按原值读取
+            return !!field && field.名称.endsWith("伤害")
         }
         const damageCache = new Map<string, DamageResult>()
         const getWeaponAttackTypeBonus = (
@@ -3667,7 +4235,8 @@ export class CharBuild {
             const weaponFieldBase = getWeaponFieldBase(fieldName)
             const key = weaponFieldBase || base || this.baseName
             const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
-            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute, weapon, skillContext)
+            // 面板来源按字段所属武器槽位显式传入：继承型同律字段仍归属同律槽（不读 `普通*`）
+            return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute, weapon, skillContext, this.panelSourceOf(weapon))
         }
         const getDamage = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes, skillContext?: LeveledSkill) => {
             const weaponFieldBase = getWeaponFieldBase(fieldName)
@@ -3714,17 +4283,17 @@ export class CharBuild {
                 weaponIndependentPenalty: arrowRainPenalty,
             })
             // 充盈乘区（独立额外乘区，统一在字段层结算，覆盖武器伤害与技能伤害）：
-            // 1) 字段带 tag ["充盈"] 时，伤害整体 × (1 + 充盈威力)（充盈威力为角色属性：角色 MOD 加成 + 武器溢出触发 × 充盈转化汇总）。
-            // 2) 否则按 转充盈 属性：转充盈: X 把 X 比例伤害视为充盈伤害并享受充盈威力加成，等价于整体 × (1 + X × 充盈威力)。
+            // 1) 字段带 tag ["充盈"] 时，伤害整体 × 充盈威力（1 起始总倍率 = 基础 1 + 角色 MOD 加成 + 武器溢出触发 × 充盈转化汇总）。
+            // 2) 否则按 转充盈 属性：转充盈: X 把 X 比例伤害视为充盈伤害并享受充盈威力加成，等价于整体 × (1 + X × (充盈威力 - 1))。
             // 3) 两者互斥：字段已是充盈类型时 转充盈 不再重复计乘。
             // 用字段上下文属性（skillAttrsContext 已汇总字段临时属性，如 {转充盈:1,充盈威力:1}）。
             const fullnessField = field
             let fullnessMultiplier = 1
             if (fullnessField?.tag?.includes("充盈")) {
-                fullnessMultiplier = 1 + (skillAttrsContext.充盈威力 || 0)
+                fullnessMultiplier = skillAttrsContext.充盈威力 ?? 1
             } else {
                 const convertFullness = Math.max(0, skillAttrsContext.转充盈 || 0)
-                if (convertFullness > 0) fullnessMultiplier = 1 + convertFullness * (skillAttrsContext.充盈威力 || 0)
+                if (convertFullness > 0) fullnessMultiplier = 1 + convertFullness * ((skillAttrsContext.充盈威力 ?? 1) - 1)
             }
             if (fullnessMultiplier !== 1) {
                 for (const key of Object.keys(damage) as (keyof DamageResult)[]) {
@@ -3737,20 +4306,22 @@ export class CharBuild {
             if (!temporaryAttributes) damageCache.set(cacheKey, damage)
             return damage
         }
-        const defCache = new Map<boolean, number>()
+        const defCache = new Map<string, number>()
         const getDef = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes, skillContext?: LeveledSkill) => {
             const key = base || this.baseName
             // 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御；基础覆写为"角色"同样走技能口径
             const fieldForDef = fieldName ? getSkillAttr(fieldName, base, skillContext) : undefined
             const isSkillField = (fieldForDef?.tag?.includes("技能") ?? false) || fieldForDef?.基础 === "角色"
             const isWeapon = !isSkillField && !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
-            if (!temporaryAttributes && defCache.has(isWeapon)) return defCache.get(isWeapon)!
+            // 条件BUFF按字段命中：防御乘区始终取字段级属性上下文，缓存键带上字段条件签名（命名空间 + 字段名）
+            const cacheKey = `${isWeapon ? "weapon" : "skill"}::${key}::${fieldName ?? ""}`
+            if (!temporaryAttributes && defCache.has(cacheKey)) return defCache.get(cacheKey)!
             const def = this.calculateDefenseMultiplier(
-                temporaryAttributes ? getSummonAttrs(key, temporaryAttributes, fieldName, skillContext) : attrs,
+                getSummonAttrs(key, temporaryAttributes, fieldName, skillContext),
                 undefined,
                 !isWeapon
             )
-            if (!temporaryAttributes) defCache.set(isWeapon, def)
+            if (!temporaryAttributes) defCache.set(cacheKey, def)
             return def
         }
         /**
@@ -3865,6 +4436,16 @@ export class CharBuild {
             currentScope?: Map<string, number>,
             skillContext?: LeveledSkill
         ) => {
+            // 协战命名空间优先隔离（自身名除外）：只读协战最终属性，不参与技能 / 武器 / 主控面板查询；
+            // 括号伪字段与 DOT伤害 依赖当前面板，不属于协战最终属性
+            if (ns && ns !== this.char.名称 && this.teamResolver?.isTeamNamespace(ns)) {
+                if (fieldName === "DOT伤害" || MAIN_PANEL_PSEUDO_FIELDS.has(fieldName)) return 0
+                return this.teamResolver.attrOf(ns, fieldName) ?? 0
+            }
+            // 协战技能命名空间：在协战构筑上下文中求值该字段（本地同名技能优先，已绑定 skillContext）
+            if (ns && !forceAttr && !skillContext && this.isTeamSkillNamespace(ns)) {
+                return this.teamResolver?.skillFieldOf?.(ns, fieldName) ?? 0
+            }
             // DOT伤害 特殊标识符：无命名空间为全部来源，加命名空间只计算该命名空间内的 DOT 伤害
             // （如 角色::DOT伤害 技能分量 / melee::DOT伤害 近战分量 / ranged::DOT伤害 远程分量）
             if (fieldName === "DOT伤害") {
@@ -3875,20 +4456,23 @@ export class CharBuild {
                 const customValue = evaluateCustomVariable(fieldName)
                 if (customValue !== undefined) return customValue
             }
-            if (ns)
-                return (
-                    (forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes, skillContext)) ||
-                    evaluateWeaponAttr(fieldName, ns) ||
-                    evaluateAttr(fieldName, ns, temporaryAttributes, skillContext) ||
-                    0
-                )
-            else
-                return (
-                    (forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes, skillContext)) ||
-                    evaluateAttr(fieldName, ns, temporaryAttributes, skillContext) ||
-                    evaluateWeaponAttr(fieldName, ns) ||
-                    0
-                )
+            if (ns) {
+                // 自身角色名：直接读当前面板（主控即来源 / 协战自身引用），不新建 build
+                if (ns === this.char.名称) return evaluateAttr(fieldName, ns, temporaryAttributes, skillContext) || 0
+                const skillValue = forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes, skillContext)
+                if (skillValue) return skillValue
+                const weaponValue = evaluateWeaponAttr(fieldName, ns)
+                if (weaponValue) return weaponValue
+                // 未知命名空间（如未 bind 的函数体里拼错的角色名）直接 0，不得回落主控属性
+                if (!WEAPON_NAMESPACE_ALIASES.has(ns) && !weaponsMap.has(ns) && !this.resolveSkillContext(ns)) return 0
+                return evaluateAttr(fieldName, ns, temporaryAttributes, skillContext) || 0
+            }
+            return (
+                (forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes, skillContext)) ||
+                evaluateAttr(fieldName, ns, temporaryAttributes, skillContext) ||
+                evaluateWeaponAttr(fieldName, ns) ||
+                0
+            )
         }
 
         function evaluateMember(
@@ -4000,8 +4584,10 @@ export class CharBuild {
         ) => {
             const mergedAttributes = { ...inheritedAttributes }
             for (const attribute of attributes) {
-                mergedAttributes[attribute.name] =
-                    (mergedAttributes[attribute.name] || 0) + evaluate(attribute.value, inheritedAttributes, currentScope)
+                // 字面 `追加伤害` 是只读聚合，表达式输入统一迁移为 `自属性追伤`（并告警）
+                const name = normalizeAdditionalDamageKey(attribute.name)
+                if (name !== attribute.name) warnLegacyAdditionalDamage("表达式临时属性")
+                mergedAttributes[name] = (mergedAttributes[name] || 0) + evaluate(attribute.value, inheritedAttributes, currentScope)
             }
             return mergedAttributes
         }
@@ -4135,6 +4721,8 @@ export class CharBuild {
                     }
 
                     const memberName = node.property
+                    // `.原值`：取技能字段逐级原值，不乘伤害成员系数（与 Rust `member == "原值"` 同口径）
+                    if (memberName === "原值") return objectValue
                     if (
                         propertyContext &&
                         (propertyContext.property.forceAttr ||
@@ -4274,6 +4862,7 @@ export class CharBuild {
      * @returns 目标函数结果
      */
     public calculate(): number {
+        this.ensureSkillLevels()
         this.enemy.resetHP()
         const timeline = this.timeline
         if (!timeline) {
@@ -4693,8 +5282,8 @@ export class CharBuild {
             enemyResistance: this.enemyResistance,
             targetFunction: this.targetFunction,
             customVariables: this.customVariables.map(variable => [...variable] as [string, string]),
-            // 克隆需保留 E/Q/被动三项等级：只取首项会丢掉另外两项的分级
-            skillLevel: [this.getSkillLevel(0), this.getSkillLevel(1), this.getSkillLevel(2)] as CharSkillLevels,
+            // 克隆只传基础等级：三键加成本身已在 buffs 里，重建时由引擎二次解析（避免双计）
+            skillLevel: [...this.baseSkillLevel] as CharSkillLevels,
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],
@@ -4702,6 +5291,10 @@ export class CharBuild {
             dotSettings: { ...this.dotSettings },
             petBaseCd: this.petBaseCd,
             settings: this.settings,
+            // 替换载荷来自静态数据，按引用共享即可
+            skillReplacements: this.skillReplacements,
+            // 解析器不复制：新实例按同一份 settings / 角色位重建（协战属性缓存各实例独立）
+            teamRole: this.teamRole,
         })
         return cloned
     }

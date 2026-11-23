@@ -43,7 +43,9 @@ fn effect_removal_income_matches_ts() {
     let base = build_value(&tables, request.char_id, &request.settings, None);
     let cases = [
         ("m", 51942, 0.2866230033406101, "不动万钧"),
-        ("w", 10199, 0.5540305666584648, "无解谜题"),
+        // `无解谜题` 移除后目标受条件 BUFF 命中影响：TS 首次 `calculate()` 冷缓存会漏条件池
+        // （见 `CharBuild.ts` 的 `applyBuffAttr` 重入注释），热缓存 / 完整重建为 0.582874…
+        ("w", 10199, 0.5828742768887012, "无解谜题"),
         ("w", 20306, 0.23435778338690794, "活着的重量"),
     ];
     for (prefix, id, expected, name) in cases {

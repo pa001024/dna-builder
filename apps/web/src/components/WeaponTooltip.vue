@@ -18,9 +18,12 @@ const props = defineProps<{
     bare?: boolean
     /** 未生效属性（熔炼潜能关闭时）：对应行显示删除线 */
     ineffective?: ReadonlySet<string> | readonly string[]
+    /** 标题覆盖：协战页签注入「武器名 (协战一)」，其余内容不变 */
+    title?: string
 }>()
 
 const { gt, gpt } = useGameText()
+const displayTitle = computed(() => props.title ?? gt(props.weapon.名称))
 const detail = computed(() => props.weapon.getProperties())
 const hiddenKeys = computed(() => new Set<string>([...BASE_KEYS, ...AMMO_KEYS, ...HIDDEN_KEYS]))
 const extraEntries = computed(() => Object.entries(detail.value).filter(([key, val]) => val && !hiddenKeys.value.has(key)))
@@ -49,7 +52,7 @@ const refineLabel = computed(() => (props.weapon.hasForge ? gt("熔炼") : `${gt
         </div>
         <div class="flex flex-col gap-2 p-3">
             <div class="text-sm font-bold">
-                <SRouterLink :to="link" class="cursor-pointer hover:underline">{{ gt(weapon.名称) }}</SRouterLink>
+                <SRouterLink :to="link" class="cursor-pointer hover:underline">{{ displayTitle }}</SRouterLink>
             </div>
             <div class="text-xs font-bold text-neutral-500">{{ typeLine }}</div>
             <div class="grid grid-cols-2 gap-x-3 gap-y-1.5">

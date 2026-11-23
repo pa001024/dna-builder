@@ -5,6 +5,7 @@ import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useExprDrag } from "@/composables/useExprDrag"
 import { CharAttr, CharBuild, CommonAttr, LeveledChar, LeveledMod } from "@/data"
+import { formatSkillLevelBonus, isAttrValueVisible } from "@/data/skillLevels"
 import { format100r } from "@/util"
 import { resolveCharFieldExpression } from "@/utils/expr-field"
 import { copyExprField } from "@/utils/expr-field-copy"
@@ -17,7 +18,7 @@ const props = withDefaults(
         includeKeys?: string[]
     }>(),
     {
-        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例", "异常数量"],
+        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例"],
     }
 )
 const charIdRef = computed(() => props.charBuild?.char?.id || 0)
@@ -387,6 +388,11 @@ function hasModAttrWeightedBase(key: string): boolean {
 }
 
 /**
+ * 技能等级属性（U99b）：值为等级加成 `+N`，按带符号整数展示，不按百分比。
+ */
+const SKILL_LEVEL_ATTR_KEYS = new Set(["E技能等级", "Q技能等级", "P技能等级"])
+
+/**
  * 动态来源的展示格式与主属性保持一致：数值型属性（攻击/生命/护盾/防御/神智/有效生命/神智回复）按带符号数值展示，
  * 其余百分比型属性按带符号百分比展示，避免 flat 差值（如「法露茜Q」将攻击百位转化生命）被误显示为百分比。
  * 神智回复的「每 3 秒」口径见属性说明（attrDesc.神智回复），数值本身不带单位后缀。
@@ -397,6 +403,9 @@ function hasModAttrWeightedBase(key: string): boolean {
 function formatDynamicSource(key: string, value: number): string {
     if (key === "魔灵CD") {
         return `${value >= 0 ? "+" : ""}${+value.toFixed(1)}s`
+    }
+    if (SKILL_LEVEL_ATTR_KEYS.has(key)) {
+        return formatSkillLevelBonus(value)
     }
     if (["神智回复"].includes(key)) {
         return `${value >= 0 ? "+" : ""}${+value.toFixed(0)}`
@@ -432,7 +441,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
 <template>
     <FullTooltip
         v-for="[key, val] in Object.entries(attributes).filter(([k, v]) =>
-            includeKeys ? includeKeys.includes(k) : !excludeKeys.includes(k) && typeof v === 'number' && v
+            includeKeys ? includeKeys.includes(k) : !excludeKeys.includes(k) && isAttrValueVisible(v)
         )"
         :key="key"
         side="bottom"
@@ -611,6 +620,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
             <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
             <div class="text-primary font-bold text-sm font-orbitron">
                 <template v-if="key === '魔灵CD'">{{ +val.toFixed(1) }}s</template>
+                <template v-else-if="SKILL_LEVEL_ATTR_KEYS.has(key)">{{ formatDynamicSource(key, val) }}</template>
                 <template v-else-if="['攻击', '生命', '护盾', '防御', '神智', '有效生命', '神智回复'].includes(key)">
                     {{ +val.toFixed(key === "攻击" ? 2 : 0) }}
                 </template>

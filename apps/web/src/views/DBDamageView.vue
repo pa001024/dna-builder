@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, reactive, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { CharBuild, CharBuildTimeline, charMap, LeveledCharHelper } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
+import { ADDITIONAL_DAMAGE_KEYS } from "@/data/leveled/additionalDamage"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
 import { useUIStore } from "@/store/ui"
+import {
+    type AdditionalDamageComponentKey,
+    type AdditionalDamageComponents,
+    additionalDamageZone,
+    createAdditionalDamageComponents,
+    resolveAdditionalDamageComponents,
+} from "@/utils/additionalDamageZone"
+import { type FormulaStepDefinition, resolveStepFormula } from "@/utils/damageStepFormula"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
 type CalcMode = "weapon" | "skill" | "dot"
@@ -32,8 +42,9 @@ type WeaponNumberFieldKey =
     | "weaponDamageBonus"
     | "independentBonus"
     | "weaponIndependentBonus"
-    | "additionalDamageBonus"
+    | AdditionalDamageComponentKey
     | "enemyResistance"
+    | "enemyWeakness"
     | "penetrationBonus"
     | "enemyDefense"
     | "ignoreDefense"
@@ -53,6 +64,7 @@ type WeaponNumberFieldKey =
 
 type SkillNumberFieldKey =
     | "enemyResistance"
+    | "enemyWeakness"
     | "penetrationBonus"
     | "enemyDefense"
     | "ignoreDefense"
@@ -91,9 +103,11 @@ type DotNumberFieldKey =
     | "desperateBonus"
     | "hpPercent"
     | "enemyResistance"
+    | "enemyWeakness"
     | "penetrationBonus"
 
-interface WeaponDamageInput {
+/** 武器模式输入：追伤七分量由 AdditionalDamageComponents 提供（六元素 + 自属性） */
+type WeaponDamageInput = AdditionalDamageComponents & {
     charBaseAttack: number
     charAttackBonus: number
     resonanceGain: number
@@ -112,8 +126,9 @@ interface WeaponDamageInput {
     weaponDamageBonus: number
     independentBonus: number
     weaponIndependentBonus: number
-    additionalDamageBonus: number
     enemyResistance: number
+    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
+    enemyWeakness: number
     penetrationBonus: number
     enemyDefense: number
     ignoreDefense: number
@@ -142,6 +157,8 @@ interface WeaponDamageInput {
 
 interface SkillDamageInput {
     enemyResistance: number
+    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
+    enemyWeakness: number
     penetrationBonus: number
     enemyDefense: number
     ignoreDefense: number
@@ -186,6 +203,8 @@ interface DotDamageInput {
     desperateBonus: number
     hpPercent: number
     enemyResistance: number
+    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
+    enemyWeakness: number
     penetrationBonus: number
 }
 
@@ -195,10 +214,9 @@ interface DamageStepContext<TInput> {
     get: (stepId: string) => number
 }
 
-interface DamageStepDefinition<TInput> {
+interface DamageStepDefinition<TInput> extends FormulaStepDefinition<TInput> {
     id: string
     title: string
-    formula: string
     compute: (context: DamageStepContext<TInput>) => number
     explain: (context: DamageStepContext<TInput>, value: number) => string
 }
@@ -319,6 +337,8 @@ function roundByDigits(value: number, digits = 2): number {
  */
 function createDefaultWeaponInput(): WeaponDamageInput {
     return {
+        ...createAdditionalDamageComponents(),
+        火属性追伤: 0.12,
         charBaseAttack: 1200,
         charAttackBonus: 0.4,
         resonanceGain: 0,
@@ -337,8 +357,8 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         weaponDamageBonus: 0.22,
         independentBonus: 0.15,
         weaponIndependentBonus: 0.1,
-        additionalDamageBonus: 0.12,
         enemyResistance: 0.2,
+        enemyWeakness: 0,
         penetrationBonus: 0.5,
         enemyDefense: 300,
         ignoreDefense: 0,
@@ -359,7 +379,8 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         sameDamageType: true,
         imbalanceEnabled: false,
         fullnessConversion: 0,
-        fullnessModBonus: 0,
+        // 充盈威力 1 起始：无加成时为 1（100% 基准）
+        fullnessModBonus: 1,
         fullnessFieldEnabled: false,
     }
 }
@@ -371,6 +392,7 @@ function createDefaultWeaponInput(): WeaponDamageInput {
 function createDefaultSkillInput(): SkillDamageInput {
     return {
         enemyResistance: 0.2,
+        enemyWeakness: 0,
         penetrationBonus: 0.15,
         enemyDefense: 300,
         ignoreDefense: 0,
@@ -393,7 +415,7 @@ function createDefaultSkillInput(): SkillDamageInput {
         skillFlatDamage: 0,
         skillPowerMultiplier: 1,
         imbalanceEnabled: false,
-        fullnessPower: 0,
+        fullnessPower: 1,
         fullnessFieldEnabled: false,
     }
 }
@@ -406,7 +428,7 @@ function createDefaultDotInput(): DotDamageInput {
     return {
         charAttack: 1200,
         weaponAttack: 800,
-        fullnessPower: 5.5,
+        fullnessPower: 6.5,
         baseDamageBonus: 0.25,
         skillFreq: 0,
         weaponOwnFreq: 2.5,
@@ -415,12 +437,15 @@ function createDefaultDotInput(): DotDamageInput {
         desperateBonus: 0,
         hpPercent: 0.7,
         enemyResistance: 0.2,
+        enemyWeakness: 0,
         penetrationBonus: 0.15,
     }
 }
 
 const ui = useUIStore()
 const inv = useInvStore()
+// 步骤说明在 computed 内取词；i18next-vue 的 t 会记录语言依赖，切换语言时步骤重算
+const { t } = useTranslation()
 const selectedCharForImport = useLocalStorage("selectedChar", "赛琪")
 const selectedCharForImportId = computed(() => charMap.get(selectedCharForImport.value)?.id || 0)
 const charSettingsForImport = useCharSettings(selectedCharForImportId)
@@ -629,6 +654,16 @@ function createBuildFromCurrentCharView(): CharBuild {
 }
 
 /**
+ * 导入构筑时的元素弱点：角色元素弱点 + 全属性弱点（U95，与敌人抗性同区加算）。
+ * @param build 当前构筑
+ * @param attrs 已算好的角色/武器属性
+ * @returns 弱点合计
+ */
+function resolveCharElementWeakness(build: CharBuild, attrs: ReturnType<CharBuild["calculateWeaponAttributes"]>): number {
+    return ((attrs[`${build.char.属性}属性弱点` as keyof typeof attrs] as number | undefined) || 0) + (attrs.全属性弱点 || 0)
+}
+
+/**
  * 将 CharBuild 快照映射为武器模式输入参数。
  * @param build 当前构筑
  * @returns 武器模式输入
@@ -687,13 +722,10 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.weaponDamageBonus = attrs.武器伤害
     result.independentBonus = attrs.独立增伤
     result.weaponIndependentBonus = weaponAttrs?.独立增伤 || 0
-    /**
-     * 追加伤害在部分构筑中可能通过不同链路注入（武器属性汇总/全局加成）。
-     * 导入时取两者中的有效较大值，避免遗漏当前构筑页已生效的追加伤害来源。
-     */
-    const totalAdditionalDamageBonus = build.getTotalBonus("追加伤害")
-    result.additionalDamageBonus = Math.max(weaponAttrs?.追加伤害 || 0, totalAdditionalDamageBonus)
+    // 追伤按引擎口径回填七分量；聚合「追加伤害」是只读 Σ，不进入因子，也不回填为输入。
+    Object.assign(result, resolveAdditionalDamageComponents(weaponAttrs))
     result.enemyResistance = build.enemyResistance
+    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
     result.penetrationBonus = attrs.属性穿透
     result.enemyDefense = build.enemy.def || 300
     result.ignoreDefense = attrs.无视防御
@@ -714,7 +746,7 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.sameDamageType = sameDamageType
     result.imbalanceEnabled = build.imbalance
     /**
-     * 充盈：充盈威力（角色属性）= 角色MOD充盈威力加成 + Σ各武器溢出触发 × 该武器充盈转化。
+     * 充盈：充盈威力（角色属性，1 起始总倍率）= 100% 基础 + 角色MOD充盈威力加成 + Σ各武器溢出触发 × 该武器充盈转化。
      * 本页武器模式只建模当前武器，导入时扣除当前武器的溢出转化，避免与“武器转化充盈威力”步骤重复计算。
      */
     const weaponFullnessConversion = weaponAttrs?.充盈转化 || 0
@@ -742,6 +774,7 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 
     result.enemyResistance = build.enemyResistance
+    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
     result.penetrationBonus = attrs.属性穿透
     result.enemyDefense = build.enemy.def || 300
     result.ignoreDefense = attrs.无视防御
@@ -767,7 +800,7 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     // 充盈：充盈威力为角色属性（MOD加成 + 武器溢出转化汇总），技能模式直接取汇总结果。
     // 注意：calculateAttributes 只含角色MOD加成，武器溢出转化需经 calculateWeaponAttributes 汇总。
     const weaponAttrsForFullness = build.calculateWeaponAttributes()
-    result.fullnessPower = weaponAttrsForFullness.充盈威力 || 0
+    result.fullnessPower = weaponAttrsForFullness.充盈威力 ?? 1
     result.fullnessFieldEnabled = isResolvedFieldFullness(build)
     return result
 }
@@ -791,7 +824,7 @@ function buildDotInputFromCharBuild(build: CharBuild): DotDamageInput {
     )
     result.charAttack = attrs.攻击
     result.weaponAttack = weaponFreq > Number.EPSILON ? weightedWeaponAttack / weaponFreq : 0
-    result.fullnessPower = attrs.充盈威力 || 0
+    result.fullnessPower = attrs.充盈威力 ?? 1
     result.baseDamageBonus = attrs.增伤
     result.skillFreq = skillFreq
     result.weaponOwnFreq = freqs.ownFreq - skillFreq
@@ -800,6 +833,7 @@ function buildDotInputFromCharBuild(build: CharBuild): DotDamageInput {
     result.desperateBonus = attrs.背水
     result.hpPercent = build.hpPercent
     result.enemyResistance = build.enemyResistance
+    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
     result.penetrationBonus = attrs.属性穿透
     return result
 }
@@ -958,11 +992,11 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "resistance",
             title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance) * (1 + input.penetrationBonus)),
+            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
             explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
+                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
             },
         },
         {
@@ -1007,9 +1041,10 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "additionalDamage",
             title: "追加伤害乘区",
-            formula: "追加伤害乘区 = 1 + 追加伤害",
-            compute: ({ input }) => 1 + input.additionalDamageBonus,
-            explain: ({ input }, value) => `1 + ${formatNumber(input.additionalDamageBonus)} = ${formatNumber(value)}`,
+            formula: "追加伤害乘区 = 1 + Σ 七分量",
+            compute: ({ input }) => additionalDamageZone(input),
+            explain: ({ input }, value) =>
+                `1 + ${formatNumber(additionalDamageZone(input) - 1)} = ${formatNumber(value)}（额外造成一段可触发额外效果的属性伤害）`,
         },
         {
             id: "imbalanceDamageMultiplier",
@@ -1192,7 +1227,7 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "fullnessPower",
             title: "总充盈威力",
-            formula: "总充盈威力 = 充盈威力基础(角色MOD+其他武器) + 武器转化充盈威力",
+            formula: "总充盈威力 = 充盈威力基础(100%基础+角色MOD+其他武器) + 武器转化充盈威力",
             compute: ({ input, get }) => input.fullnessModBonus + get("weaponFullnessPower"),
             explain: ({ input, get }, value) =>
                 `${formatNumber(input.fullnessModBonus)} + ${formatNumber(get("weaponFullnessPower"))} = ${formatNumber(value)}`,
@@ -1200,11 +1235,11 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "fullnessMultiplier",
             title: "充盈乘区",
-            formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
-            compute: ({ input, get }) => (input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1),
+            formula: "充盈乘区 = 视为充盈伤害时总充盈威力（1 起始总倍率），否则为 1",
+            compute: ({ input, get }) => (input.fullnessFieldEnabled ? get("fullnessPower") : 1),
             explain: ({ input, get }, value) => {
                 const power = get("fullnessPower")
-                const expression = input.fullnessFieldEnabled ? `1 + ${formatNumber(power)}` : "1"
+                const expression = input.fullnessFieldEnabled ? `${formatNumber(power)}` : "1"
                 return `${expression} = ${formatNumber(value)}`
             },
         },
@@ -1284,11 +1319,11 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "resistancePenetration",
             title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance) * (1 + input.penetrationBonus)),
+            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
             explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
+                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
             },
         },
         {
@@ -1422,11 +1457,11 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "fullnessMultiplier",
             title: "充盈乘区",
-            formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
-            compute: ({ input, get }) => (input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1),
+            formula: "充盈乘区 = 视为充盈伤害时总充盈威力（1 起始总倍率），否则为 1",
+            compute: ({ input, get }) => (input.fullnessFieldEnabled ? get("fullnessPower") : 1),
             explain: ({ input, get }, value) => {
                 const power = get("fullnessPower")
-                const expression = input.fullnessFieldEnabled ? `1 + ${formatNumber(power)}` : "1"
+                const expression = input.fullnessFieldEnabled ? `${formatNumber(power)}` : "1"
                 return `${expression} = ${formatNumber(value)}`
             },
         },
@@ -1529,9 +1564,9 @@ function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
         {
             id: "fullnessMultiplier",
             title: "充盈乘区",
-            formula: "充盈乘区 = 1 + 充盈威力",
-            compute: ({ input }) => 1 + input.fullnessPower,
-            explain: ({ input }, value) => `1 + ${formatNumber(input.fullnessPower)} = ${formatNumber(value)}`,
+            formula: "充盈乘区 = 充盈威力（1 起始总倍率）",
+            compute: ({ input }) => input.fullnessPower,
+            explain: ({ input }, value) => `${formatNumber(input.fullnessPower)} = ${formatNumber(value)}`,
         },
         {
             id: "damageIncrease",
@@ -1599,11 +1634,11 @@ function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
         {
             id: "resistancePenetration",
             title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance) * (1 + input.penetrationBonus)),
+            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
             explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
+                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
             },
         },
         {
@@ -1643,7 +1678,8 @@ const dotStepDefinitions = buildDotStepDefinitions()
 
 interface NumberFieldConfig<TField extends string> {
     key: TField
-    label: string
+    /** 展示标签；追伤七分量的标签取属性名翻译，可不填 */
+    label?: string
     step: string
 }
 
@@ -1659,6 +1695,8 @@ interface GroupOutputConfig {
 
 interface NumberFieldGroup<TNumberField extends string, TToggleField extends string> {
     title: string
+    /** 是否在该分组顶部显示追伤乘区说明 */
+    chaseNote?: boolean
     fields: NumberFieldConfig<TNumberField>[]
     toggles?: ToggleFieldConfig<TToggleField>[]
     outputs?: GroupOutputConfig[]
@@ -1696,12 +1734,13 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
     },
     {
         title: "增伤",
+        chaseNote: true,
         fields: [
             { key: "baseDamageBonus", label: "增伤", step: "0.01" },
             { key: "weaponDamageBonus", label: "武器伤害", step: "0.01" },
             { key: "independentBonus", label: "独立增伤", step: "0.01" },
             { key: "weaponIndependentBonus", label: "武器独立增伤", step: "0.01" },
-            { key: "additionalDamageBonus", label: "追加伤害", step: "0.01" },
+            ...ADDITIONAL_DAMAGE_KEYS.map(key => ({ key, step: "0.01" })),
         ],
         outputs: [{ label: "增伤乘区", stepId: "damageIncrease" }],
     },
@@ -1730,7 +1769,7 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         title: "充盈",
         fields: [
             { key: "fullnessConversion", label: "充盈转化", step: "0.01" },
-            { key: "fullnessModBonus", label: "充盈威力基础(角色MOD+其他武器)", step: "0.01" },
+            { key: "fullnessModBonus", label: "充盈威力基础(100%基础+角色MOD+其他武器)", step: "0.01" },
         ],
         toggles: [{ key: "fullnessFieldEnabled", label: "视为充盈伤害" }],
         outputs: [
@@ -1766,6 +1805,7 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
+            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
             { key: "imbalanceBonus", label: "失衡易伤", step: "0.01" },
         ],
@@ -1844,6 +1884,7 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
+            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
             { key: "imbalanceBonus", label: "失衡易伤", step: "0.01" },
         ],
@@ -1923,6 +1964,7 @@ const dotNumberGroups: NumberFieldGroup<DotNumberFieldKey, never>[] = [
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
+            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
         ],
         outputs: [{ label: "抗性乘区", stepId: "resistancePenetration" }],
@@ -2009,7 +2051,7 @@ function evaluateDamageSteps<TInput extends object>(
         return {
             id: definition.id,
             title: definition.title,
-            formula: definition.formula,
+            formula: resolveStepFormula(definition, input),
             detail: definition.explain(context, finalValue),
             autoValue,
             finalValue,
@@ -2274,13 +2316,14 @@ function getSkillFieldStep(key: SkillNumberFieldKey, fallback: string): string {
 }
 
 /**
- * 获取武器字段展示标签。
+ * 获取武器字段展示标签；追伤七分量未配置标签时取属性名翻译。
  * @param key 字段键
- * @param label 原始标签
+ * @param label 原始标签（追伤七分量配置里不填）
  * @returns 展示标签
  */
-function getWeaponFieldLabel(key: WeaponNumberFieldKey, label: string): string {
-    return usePercentInput.value && isWeaponPercentField(key) ? `${label}(%)` : label
+function getWeaponFieldLabel(key: WeaponNumberFieldKey, label = ""): string {
+    const percentSuffix = usePercentInput.value && isWeaponPercentField(key) ? "(%)" : ""
+    return `${label || t(key)}${percentSuffix}`
 }
 
 /**
@@ -2289,7 +2332,7 @@ function getWeaponFieldLabel(key: WeaponNumberFieldKey, label: string): string {
  * @param label 原始标签
  * @returns 展示标签
  */
-function getSkillFieldLabel(key: SkillNumberFieldKey, label: string): string {
+function getSkillFieldLabel(key: SkillNumberFieldKey, label = ""): string {
     return usePercentInput.value && isSkillPercentField(key) ? `${label}(%)` : label
 }
 
@@ -2357,7 +2400,7 @@ function getDotFieldStep(key: DotNumberFieldKey, fallback: string): string {
  * @param label 原始标签
  * @returns 展示标签
  */
-function getDotFieldLabel(key: DotNumberFieldKey, label: string): string {
+function getDotFieldLabel(key: DotNumberFieldKey, label = ""): string {
     return usePercentInput.value && isDotPercentField(key) ? `${label}(%)` : label
 }
 
@@ -2669,6 +2712,9 @@ onBeforeUnmount(() => {
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                         >
                             <h4 class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ group.title }}</h4>
+                            <p v-if="group.chaseNote" class="mb-2 text-[11px] text-base-content/50">
+                                {{ $t("db-damage.chase_approximation_note") }}
+                            </p>
                             <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getWeaponFieldLabel(field.key, field.label) }}</div>

@@ -30,13 +30,20 @@ fn full_tables() -> Option<BuildTables> {
 
 #[test]
 fn dobapp_second_corpus_archived() {
-    // 4 份 dob-app 第二语料：当前 TS 重算 total 与 dob 旧 total 一致（冲突检查全绿），
-    // 唯 lieseBathfire1 例外：dob 旧 total 未做技速 280% 上限，当前 TS 赢（冲突见 fixtures README）。
+    // 4 份 dob-app 第二语料：`dobTotal` 是 dob-app 旧口径存档（只读锚点），
+    // `ts_calculate` 是当前 TS 模型重算值。充盈威力改为 1 起始总倍率（U9）后，
+    // 含 DOT / 充盈字段的构筑不再与旧存档相等，差值即语义修正量（见 fixtures README）。
+    // U112（追伤分池）：`菲娜Q` 四元素追伤只进武器池 Σ 因子（不再按元素结算），
+    // shardBuild1 target 由 10472549917.063034 变为 5635352346.508682。
     let cases = [
-        ("dobapp_shardBuild1", 5823675267.58358, 5823675267.58358),
-        ("dobapp_vy", 1767082952.0447142, 1767082952.0447142),
-        ("dobapp_lieseBathfire1", 27281810428.826473, 6310636931.0765295),
-        ("dobapp_OkdnBN3OlC", 1123660945.245696, 1123660945.245696),
+        ("dobapp_shardBuild1", 5823675267.58358, 5635352346.508682),
+        ("dobapp_vy", 1767082952.0447142, 1710229858.1583598),
+        (
+            "dobapp_lieseBathfire1",
+            27281810428.826473,
+            6310636931.0765295,
+        ),
+        ("dobapp_OkdnBN3OlC", 1123660945.245696, 1105222774.6837754),
     ];
     for (name, dob_total, ts_calculate) in cases {
         let fixture = load_fixture(name);

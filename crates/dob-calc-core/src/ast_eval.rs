@@ -25,6 +25,14 @@ use super::models::{AttrMap, BuffFieldConditional, is_multiplicative_attr};
 /// 求值时的字段临时属性（`[攻击]{增伤:0.2}`）。
 pub type TemporaryAttrs = HashMap<String, f64>;
 
+/// 依赖当前角色面板的括号伪字段：协战命名空间下不可读（一律 0）。
+fn is_main_panel_pseudo_field(name: &str) -> bool {
+    matches!(
+        name,
+        "[攻击]" | "[防御]" | "[生命]" | "[近战]" | "[远程]" | "[同律]"
+    )
+}
+
 /// 字段引用：共享字段表 + 下标，克隆只加引用计数（避免每次查找深拷贝 `SkillField`）。
 #[derive(Clone)]
 struct FieldRef {
@@ -66,8 +74,8 @@ pub struct Evaluator<'a, 'b> {
     conditional_buff_cache: HashMap<String, Option<AttrMap>>,
     /// 伤害缓存：`字段键::字段名` → 伤害。
     damage_cache: HashMap<String, DamageResult>,
-    /// 防御乘区缓存：`是否技能` → 乘区。
-    def_cache: HashMap<bool, f64>,
+    /// 防御乘区缓存：`是否技能::命名空间::字段名` → 乘区（条件BUFF按字段命中，键须含字段条件签名）。
+    def_cache: HashMap<String, f64>,
     /// 自定义变量值与解析中标记。
     variable_cache: HashMap<String, f64>,
     resolving_variables: Vec<String>,
@@ -183,7 +191,76 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             return Ok(0.0);
         }
         let ast = parse_cached(expression)?;
+        self.validate_ast(&ast)?;
         self.eval(&ast, &TemporaryAttrs::new())
+    }
+
+    /// 命名空间前置校验；对应上游 `bindAstSkillContexts`。
+    ///
+    /// 未知命名空间与团队命名空间函数在 TS 侧是「整条表达式求值失败 → 0」，
+    /// 不能只让单个属性取 0（否则 `1+未知::攻击` 会留下 1）。
+    fn validate_ast(&self, node: &AstNode) -> Result<(), String> {
+        match node {
+            AstNode::Property {
+                namespace: Some(namespace),
+                ..
+            } => {
+                if !self.is_known_namespace(namespace)
+                    && !self.context.is_team_namespace(namespace)
+                    && !self.context.is_peer_skill_namespace(namespace)
+                    && namespace != self.context.char.name.as_str()
+                {
+                    return Err(format!("无效命名空间: \"{namespace}\""));
+                }
+                Ok(())
+            }
+            AstNode::Property { .. } => Ok(()),
+            AstNode::Function {
+                name,
+                namespace: Some(namespace),
+                args,
+            } => {
+                if !self.is_known_namespace(namespace) {
+                    if self.context.is_team_namespace(namespace)
+                        || namespace == self.context.char.name.as_str()
+                    {
+                        return Err(format!(
+                            "团队命名空间不支持函数: \"{namespace}::{name}\""
+                        ));
+                    }
+                    if self.context.is_peer_skill_namespace(namespace) {
+                        return Err(format!(
+                            "技能命名空间不支持函数: \"{namespace}::{name}\""
+                        ));
+                    }
+                    return Err(format!("无效命名空间: \"{namespace}\""));
+                }
+                for arg in args {
+                    self.validate_ast(arg)?;
+                }
+                Ok(())
+            }
+            AstNode::Function { args, .. } => {
+                for arg in args {
+                    self.validate_ast(arg)?;
+                }
+                Ok(())
+            }
+            AstNode::MemberAccess { object, .. } => self.validate_ast(object),
+            AstNode::TemporaryAttributes { target, attributes } => {
+                self.validate_ast(target)?;
+                for (_, value) in attributes {
+                    self.validate_ast(value)?;
+                }
+                Ok(())
+            }
+            AstNode::Binary { left, right, .. } => {
+                self.validate_ast(left)?;
+                self.validate_ast(right)
+            }
+            AstNode::Unary { argument, .. } => self.validate_ast(argument),
+            AstNode::Number(_) => Ok(()),
+        }
     }
 
     /// 求值某个节点。
@@ -279,6 +356,10 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                     force_attr,
                     &field_temporary,
                 )?;
+                // `.原值`：取技能字段逐级原值，不乘伤害成员系数（伤害倍率类字段的数值化入口）
+                if property == "原值" {
+                    return Ok(object_value);
+                }
                 // 非伤害字段的成员访问按上游返回对象值本身
                 if force_attr || !self.is_damage_skill_field(&name, namespace.as_deref()) {
                     return Ok(object_value);
@@ -300,8 +381,8 @@ impl<'a, 'b> Evaluator<'a, 'b> {
 
     /// 解析属性值；对应上游 `evaluateIdentity`。
     ///
-    /// 查找顺序（无命名空间）：自定义变量 → 技能字段 → 角色属性 → 武器属性；
-    /// 带命名空间时：技能字段 → 武器属性 → 角色属性。
+    /// 查找顺序：团队命名空间 → DOT伤害 → 自定义变量/形参（无命名空间）
+    /// → 技能字段 → 武器属性 → 角色属性；协战 peer 内团队命名空间一律不可解析。
     fn evaluate_identity(
         &mut self,
         name: &str,
@@ -309,7 +390,33 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         force_attr: bool,
         temporary: &TemporaryAttrs,
     ) -> Result<f64, String> {
-        // DOT伤害 特殊标识符：无命名空间为全部来源，加命名空间只算该来源
+        // 协战命名空间优先隔离（自身名除外）：只读协战最终属性，不参与 DOT / 技能 / 武器 / 主控面板查询；
+        // 括号伪字段与 DOT伤害 依赖当前面板，不属于协战最终属性
+        if let Some(ns) = namespace {
+            let is_self = ns == self.context.char.name.as_str();
+            if !is_self && self.context.is_team_namespace(ns) {
+                if name == "DOT伤害" || is_main_panel_pseudo_field(name) {
+                    return Ok(0.0);
+                }
+                if self.context.restricted_namespaces {
+                    return Ok(0.0);
+                }
+                let Some(side) = self.context.team_side_of(ns) else {
+                    return Ok(0.0);
+                };
+                return Ok(self.context.peer_attribute(side, name).unwrap_or(0.0));
+            }
+        }
+        // 协战技能命名空间：在 peer 上下文中求值该字段（本地同名技能优先，等价 TS 已绑定的 skillContext）；
+        // peer 内团队命名空间仍为 0。不可解析按 0，不落入主控属性回落。
+        if let Some(ns) = namespace
+            && !force_attr
+            && !self.skill_keys.contains_key(ns)
+            && let Some(side) = self.context.peer_skill_side_of(ns)
+        {
+            return Ok(self.context.peer_skill_field(side, ns, name).unwrap_or(0.0));
+        }
+        // DOT伤害 特殊标识符：无命名空间为全部来源，加命名空间只计算该来源
         // （如 角色::DOT伤害 技能分量 / 近战::DOT伤害 近战分量）；对应上游 evaluateIdentity。
         if name == "DOT伤害" {
             // 上游 `calculateDotDamage(ns, attrs)` 复用求值上下文的武器属性（含充盈叠加）
@@ -325,6 +432,12 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                 return Ok(value);
             }
         }
+        // 自身角色名：直接读当前面板（主控即来源 / 协战自身引用），不新建 peer
+        if let Some(ns) = namespace
+            && ns == self.context.char.name.as_str()
+        {
+            return Ok(self.attribute_value(name, temporary));
+        }
         let skill = if force_attr {
             0.0
         } else {
@@ -333,10 +446,14 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         if skill != 0.0 {
             return Ok(skill);
         }
-        if namespace.is_some() {
+        if let Some(ns) = namespace {
             let weapon = self.weapon_field_value(name, namespace, temporary);
             if weapon != 0.0 {
                 return Ok(weapon);
+            }
+            // 未知命名空间（如未配置协战的角色名 / 拼错的技能名）直接 0，不得回落主控属性
+            if !self.is_known_namespace(ns) {
+                return Ok(0.0);
             }
             return Ok(self.attribute_value(name, temporary));
         }
@@ -345,6 +462,24 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             return Ok(attribute);
         }
         Ok(self.weapon_field_value(name, namespace, temporary))
+    }
+
+    /// 命名空间是否可解析（固定武器别名 / 武器面板 / 技能名），镜像 TS `evaluateIdentity` 的回落白名单。
+    fn is_known_namespace(&self, namespace: &str) -> bool {
+        matches!(
+            namespace,
+            "角色"
+                | "char"
+                | "character"
+                | "近战"
+                | "远程"
+                | "同律"
+                | "melee"
+                | "ranged"
+                | "skillweapon"
+        ) || self.panel_keys.contains_key(namespace)
+            || self.skill_keys.contains_key(namespace)
+            || self.context.weapons_by_base().contains_key(namespace)
     }
 
     /// 角色属性取值（含字段临时属性的平值加算）。
@@ -457,7 +592,9 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             let current = self.summon_attrs(base, temporary, Some(name), namespace, None);
             let attack = current.get("攻击").copied().unwrap_or(0.0)
                 + self.weapon_field_value("攻击", Some(base), temporary);
-            return Ok(attack * self.defense_for(Some(base), None, None));
+            return Ok(
+                attack * self.defense_for(&current, Some(base), Some(name), None, None, temporary)
+            );
         }
 
         match name {
@@ -466,20 +603,24 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 let attack = current.get("攻击").copied().unwrap_or(0.0)
                     + self.weapon_field_value("攻击", namespace, temporary);
-                return Ok(attack * self.defense_for(namespace, None, None));
+                return Ok(
+                    attack * self.defense_for(&current, namespace, Some(name), None, None, temporary)
+                );
             }
             "[防御]" => {
                 let field_base = namespace.unwrap_or("");
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 return Ok(
-                    current.get("防御").copied().unwrap_or(0.0) * self.defense_for(namespace, None, None)
+                    current.get("防御").copied().unwrap_or(0.0)
+                        * self.defense_for(&current, namespace, Some(name), None, None, temporary)
                 );
             }
             "[生命]" => {
                 let field_base = namespace.unwrap_or("");
                 let current = self.summon_attrs(field_base, temporary, Some(name), namespace, None);
                 return Ok(
-                    current.get("生命").copied().unwrap_or(0.0) * self.defense_for(namespace, None, None)
+                    current.get("生命").copied().unwrap_or(0.0)
+                        * self.defense_for(&current, namespace, Some(name), None, None, temporary)
                 );
             }
             _ => {}
@@ -529,7 +670,14 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             }
             return Ok(
                 base_damage
-                    * self.defense_for(namespace, Some(&field.tags), field.attack_base.as_deref()),
+                    * self.defense_for(
+                        &current,
+                        namespace,
+                        Some(name),
+                        Some(&field.tags),
+                        field.attack_base.as_deref(),
+                        temporary,
+                    ),
             );
         }
         Ok(field.value)
@@ -659,11 +807,14 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         if temporary.is_empty() {
             return result;
         }
-        // 字段临时属性：已在武器面板承载的不重复加到角色属性
-        let on_weapon_panel = weapon_damage_field_base(field_name.unwrap_or(""))
-            .map(|weapon_base| self.weapon_panels.contains_key(weapon_base))
-            .unwrap_or(false);
+        // 字段临时属性：已在武器面板承载的不重复加到角色属性。
+        // 上游逐属性判定（`getSummonAttrs`）：仅当字段有武器基座、且该属性本身存在于
+        // 对应武器面板时才跳过；其余（如 `{元素增伤:0.5}` / `{光属性增伤:0.3}`）仍并入角色属性。
+        let weapon_field_base = weapon_damage_field_base(field_name.unwrap_or(""));
         for (attribute, value) in temporary {
+            let on_weapon_panel = weapon_field_base
+                .and_then(|base| self.weapon_panels.get(base))
+                .is_some_and(|panel| panel.get(attribute).is_some());
             if on_weapon_panel {
                 continue;
             }
@@ -738,9 +889,12 @@ impl<'a, 'b> Evaluator<'a, 'b> {
     /// `基础` 覆写为「角色」同样走技能口径。
     fn defense_for(
         &mut self,
+        field_attrs: &AttrMap,
         namespace: Option<&str>,
+        field_name: Option<&str>,
         field_tag: Option<&[String]>,
         attack_base: Option<&str>,
+        temporary: &TemporaryAttrs,
     ) -> f64 {
         crate::prof!("ast_eval::defense_for");
         let is_skill_field = field_tag
@@ -762,11 +916,18 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                 .get(key)
                 .is_some_and(|resolved| self.weapon_panels.contains_key(resolved.as_str()));
         let is_skill = !has_weapon;
-        if let Some(cached) = self.def_cache.get(&is_skill) {
+        // 条件BUFF按字段命中：防御乘区与伤害乘区取同一份字段级属性上下文（召唤继承 + 条件增量 + 临时属性），
+        // 缓存键带上字段条件签名，避免不同字段共用一份乘区。
+        let cache_key = format!("{is_skill}::{key}::{}", field_name.unwrap_or(""));
+        if temporary.is_empty()
+            && let Some(cached) = self.def_cache.get(&cache_key)
+        {
             return *cached;
         }
-        let value = self.context.defense_multiplier(&self.attrs, None, is_skill);
-        self.def_cache.insert(is_skill, value);
+        let value = self.context.defense_multiplier(field_attrs, None, is_skill);
+        if temporary.is_empty() {
+            self.def_cache.insert(cache_key, value);
+        }
         value
     }
 
@@ -779,7 +940,8 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             return true;
         }
         self.field_of(name, namespace).is_some_and(|field| {
-            field.get().name.ends_with("伤害") || field.get().name.ends_with("伤害倍率")
+            // 仅「…伤害」是伤害量；「…伤害倍率」是逐级倍率，表达式按原值读取（与 TS 同口径）
+            field.get().name.ends_with("伤害")
         })
     }
 
@@ -942,19 +1104,20 @@ impl<'a, 'b> Evaluator<'a, 'b> {
             .calculate_damage(&wrapped, weapon_opt, panel, &options);
         self.last_damage = Some(damage);
 
-        // 充盈乘区：字段 tag 含「充盈」直接整体加成，否则按 转充盈 比例加成（两者互斥）
+        // 充盈乘区（`充盈威力` 为 1 起始总倍率）：字段 tag 含「充盈」直接整体加成，
+        // 否则按 转充盈 比例折算溢出部分，两者互斥。
         let mut fullness_multiplier = 1.0;
         if field
             .as_ref()
             .map(|item| item.get().tags.iter().any(|tag| tag == "充盈"))
             .unwrap_or(false)
         {
-            fullness_multiplier = 1.0 + context_attrs.get("充盈威力").copied().unwrap_or(0.0);
+            fullness_multiplier = context_attrs.get("充盈威力").copied().unwrap_or(1.0);
         } else {
             let convert = context_attrs.get("转充盈").copied().unwrap_or(0.0).max(0.0);
             if convert > 0.0 {
                 fullness_multiplier =
-                    1.0 + convert * context_attrs.get("充盈威力").copied().unwrap_or(0.0);
+                    1.0 + convert * (context_attrs.get("充盈威力").copied().unwrap_or(1.0) - 1.0);
             }
         }
         if fullness_multiplier != 1.0 {
@@ -1021,32 +1184,25 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         scope: &str,
     ) -> f64 {
         let multiplicative = attribute.ends_with("独立增伤");
-        let get = |attr: &str, prefix: &str, include_mods: bool| -> f64 {
-            if multiplicative {
-                self.context.total_bonus_mul(attr, prefix, include_mods)
-            } else {
-                self.context.total_bonus(attr, prefix, include_mods)
+        let get = |attr: &str, prefix: &str, include_mods: bool, include_buffs: bool| -> f64 {
+            match (multiplicative, include_buffs) {
+                (true, true) => self.context.total_bonus_mul(attr, prefix, include_mods),
+                (true, false) => self
+                    .context
+                    .total_bonus_mul_without_buffs(attr, prefix, include_mods),
+                (false, true) => self.context.total_bonus(attr, prefix, include_mods),
+                (false, false) => self
+                    .context
+                    .total_bonus_without_buffs(attr, prefix, include_mods),
             }
         };
-        let mut bonus = get(
-            &format!("{}{}{}", weapon_prefix, prefix, attribute),
-            scope,
-            true,
-        );
-        if weapon_prefix.contains("近战") {
-            bonus += get(&format!("{}{}", prefix, attribute), scope, true);
-        }
-        if weapon_prefix.starts_with("同律") {
-            let lower: String = weapon_prefix.chars().skip(2).collect();
-            let lower_scope = super::context::prefix_scope(&lower);
-            bonus += get(
-                &format!("{}{}{}", lower, prefix, attribute),
-                lower_scope,
-                false,
-            );
-            if lower.contains("近战") {
-                bonus += get(&format!("{}{}", prefix, attribute), lower_scope, false);
-            }
+        // 候选键：按精确度从高到低（同律近战 / 近战 / 裸键；远程同构）。
+        let keys = attack_type_keys(weapon_prefix, prefix, attribute);
+        // 非 BUFF 来源逐层累计（MOD 只在自身作用域，降级不带 MOD）。
+        let mut bonus = get(&keys[0], scope, true, false);
+        if let Some(lower) = weapon_prefix.strip_prefix("同律") {
+            let lower_scope = super::context::prefix_scope(lower);
+            bonus += get(&format!("{}{}{}", lower, prefix, attribute), lower_scope, false, false);
             // 同律槽位 MOD 直接作用于同律武器自身：其下位作用域（近战/远程）的细分属性同样生效。
             // 只有同律作用域 MOD 参与，近战/远程槽位 MOD 不随前缀降级穿透。
             if multiplicative {
@@ -1059,6 +1215,37 @@ impl<'a, 'b> Evaluator<'a, 'b> {
                     .context
                     .scoped_mods_bonus(&format!("{}{}{}", lower, prefix, attribute), scope);
             }
+        }
+        // 近战系裸键（如 `下落增伤`）：普通/同律近战都只在这里计一次，降级分支不得重复累加。
+        if weapon_prefix.contains("近战") {
+            bonus += get(&format!("{}{}", prefix, attribute), scope, true, false);
+        }
+        // MOD/武器效果层（buffProps）与 BUFF 同口径：每层按精确度短路只取最精确一档；
+        // 独立增伤不走效果层（与 total_bonus_mul 既有口径一致）。
+        if !multiplicative {
+            bonus += self.context.attack_type_effect_bonus(&keys);
+        }
+        // BUFF 共享池：按精确度短路，每个来源只在最精确的一档计一次（CSS specificity 式）。
+        let buff_bonus = self.context.attack_type_buff_bonus(&keys, multiplicative);
+        if multiplicative {
+            // 非 BUFF 与 BUFF 各自成因子：Π(1+v) 无法由净增量相加还原
+            bonus = (1.0 + bonus) * (1.0 + buff_bonus) - 1.0;
+        } else {
+            bonus += buff_bonus;
+        }
+        // 普通近战/远程专属细分键（`普通近战普攻增伤` 等）：只进普通面板，同律（含继承）不追加。
+        // 独立增伤与既有前缀键各自成因子，不做加性合并。
+        if weapon_prefix == "近战" || weapon_prefix == "远程" {
+            let ordinary = get(
+                &format!("普通{}{}{}", weapon_prefix, prefix, attribute),
+                scope,
+                true,
+                true,
+            );
+            if multiplicative {
+                return (1.0 + bonus) * (1.0 + ordinary) - 1.0;
+            }
+            bonus += ordinary;
         }
         bonus
     }
@@ -1185,7 +1372,11 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         };
         self.resolving_variables.push(name.to_string());
         let value = match ast {
-            Some(ast) => self.eval(&ast, &TemporaryAttrs::new()).unwrap_or(0.0),
+            // 变量表达式同样先校验命名空间；失败按上游「该变量求值 0」处理
+            Some(ast) if self.validate_ast(&ast).is_ok() => {
+                self.eval(&ast, &TemporaryAttrs::new()).unwrap_or(0.0)
+            }
+            Some(_) => 0.0,
             None => 0.0,
         };
         self.resolving_variables.pop();
@@ -1240,7 +1431,9 @@ impl<'a, 'b> Evaluator<'a, 'b> {
         let mut merged = inherited.clone();
         for (name, node) in attributes {
             let increment = self.eval(node, inherited)?;
-            *merged.entry(name.clone()).or_insert(0.0) += increment;
+            // 字面 `追加伤害` 是只读聚合，表达式输入统一迁移为 `自属性追伤`
+            let name = crate::additional_damage::normalize_source_key(name);
+            *merged.entry(name.to_string()).or_insert(0.0) += increment;
         }
         Ok(merged)
     }
@@ -1438,7 +1631,7 @@ impl ArithParser<'_> {
         Some(if negative { -value } else { value })
     }
 }
-/// 命名空间 → 技能字段表键：别名（E/Q/P）优先，其次技能名 / `safeName`。
+/// 命名空间 → 技能字段表键：别名（E/Q/P）优先，其次技能名 / `safeName` / 表达式标识符。
 pub(crate) fn build_skill_keys(context: &BuildContext<'_>) -> HashMap<String, String> {
     let mut keys = HashMap::new();
     for (index, aliases) in [["E", "e"], ["Q", "q"], ["P", "p"]].iter().enumerate() {
@@ -1452,6 +1645,9 @@ pub(crate) fn build_skill_keys(context: &BuildContext<'_>) -> HashMap<String, St
         keys.entry(skill.name.clone())
             .or_insert_with(|| skill.safe_name.clone());
         keys.entry(skill.safe_name.clone())
+            .or_insert_with(|| skill.safe_name.clone());
+        // 表达式标识符：技能名含引号 / 感叹号等词法器不接受的标点时仍可写进表达式
+        keys.entry(super::models::to_expr_identifier(&skill.name))
             .or_insert_with(|| skill.safe_name.clone());
     }
     keys
@@ -1579,5 +1775,102 @@ pub fn weapon_damage_field_base(field_name: &str) -> Option<&'static str> {
         "[远程]" => Some("远程"),
         "[同律]" => Some("同律"),
         _ => None,
+    }
+}
+
+/// 攻击细分乘区的候选键，按精确度从高到低排列（CSS specificity 式）；对应上游 `getWeaponAttackTypeBonusKeys`。
+///
+/// 分词为 `同律近战 / 普通近战 / 近战`（远程同构）：面板专属键最精确，`近战`/`远程` 是普通与同律
+/// 共享的次精确档，裸键 `<攻击类型><增伤>` 只对近战系生效、作为兜底档。
+fn attack_type_keys(weapon_prefix: &str, prefix: &str, attribute: &str) -> Vec<String> {
+    let mut keys = vec![format!("{}{}{}", weapon_prefix, prefix, attribute)];
+    if let Some(lower) = weapon_prefix.strip_prefix("同律") {
+        keys.push(format!("{}{}{}", lower, prefix, attribute));
+    }
+    if weapon_prefix.contains("近战") {
+        keys.push(format!("{}{}", prefix, attribute));
+    }
+    keys
+}
+
+#[cfg(test)]
+mod aggregate_tests {
+    use super::*;
+    use crate::config::CharSettings;
+    use crate::record::Record;
+    use crate::tables::BuildTables;
+    use serde_json::json;
+
+    #[test]
+    fn summon_attrs_skips_char_chase_conditional_props() {
+        let mut tables = BuildTables::default();
+        tables.chars.insert(
+            1,
+            Record::from_value(&json!({
+                "id": 1, "名称": "测试角色", "属性": "光", "精通": ["重剑"],
+                "基础攻击": 100, "基础生命": 1000, "基础防御": 100,
+                "基础护盾": 100, "基础神智": 100,
+                "技能": [{
+                    "id": 101, "名称": "测试技能", "类型": "E",
+                    "字段": [{"名称": "[暗影奔袭]伤害", "影响": "技能威力", "值": 1.0}]
+                }]
+            })),
+        );
+        tables.monsters.insert(
+            130,
+            Record::from_value(&json!({
+                "id": 130, "n": "木桩", "atk": 10, "def": 300, "hp": 1000
+            })),
+        );
+        let buff = Record::from_value(&json!({
+            "id": 2, "名称": "U71条件追伤", "技能": "暗影奔袭", "自属性追伤": 0.3
+        }));
+        tables.buffs.insert(buff.text("名称"), buff);
+        let settings = CharSettings {
+            base_name: "测试技能".to_string(),
+            melee_weapon: 0,
+            ranged_weapon: 0,
+            aura_mod: 0,
+            enemy_id: 130,
+            buffs: vec![("U71条件追伤".to_string(), 1.0, None)],
+            ..Default::default()
+        };
+        let mut context = BuildContext::new(&tables, 1, &settings).expect("装配构筑");
+        let mut evaluator = Evaluator::new(&mut context);
+        let attrs = evaluator.summon_attrs(
+            "测试技能",
+            &TemporaryAttrs::new(),
+            Some("[暗影奔袭]伤害"),
+            None,
+            None,
+        );
+        // 角色不持有追伤：条件分量键不在角色属性中，合并时被跳过，也不产生聚合
+        assert_eq!(attrs.get("自属性追伤"), None);
+        assert_eq!(attrs.get("追加伤害"), None);
+
+        // AST 临时属性：BonusDamage* 不产生追伤语义（只迁 追加伤害）
+        let merged = evaluator
+            .merge_temporary(
+                &[(
+                    "BonusDamage_Fire".to_string(),
+                    crate::ast_parser::AstNode::Number(0.3),
+                )],
+                &TemporaryAttrs::new(),
+            )
+            .expect("merge");
+        assert_eq!(merged.get("BonusDamage_Fire"), Some(&0.3));
+        assert_eq!(merged.get("火属性追伤"), None);
+        assert_eq!(merged.get("自属性追伤"), None);
+        let merged = evaluator
+            .merge_temporary(
+                &[(
+                    "追加伤害".to_string(),
+                    crate::ast_parser::AstNode::Number(0.3),
+                )],
+                &TemporaryAttrs::new(),
+            )
+            .expect("merge");
+        assert_eq!(merged.get("自属性追伤"), Some(&0.3));
+        assert_eq!(merged.get("追加伤害"), None);
     }
 }

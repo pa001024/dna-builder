@@ -14,9 +14,12 @@ const props = defineProps<{
     bare?: boolean
     /** 精通行覆盖：缺省时用角色自身的精通 + 额外精通 */
     mastery?: string[]
+    /** 标题覆盖：协战页签注入「角色名 (协战一)」，其余内容不变 */
+    title?: string
 }>()
 
 const { gt } = useGameText()
+const displayTitle = computed(() => props.title ?? gt(props.char.名称))
 const detail = computed(() => props.char.getProperties())
 const extraEntries = computed(() =>
     Object.entries(detail.value).filter(([key, val]) => val && !(BASE_KEYS as readonly string[]).includes(key))
@@ -46,7 +49,7 @@ const link = computed(() => props.link ?? `/db/char/${props.char.id}`)
                 <img :src="char.elementUrl" :alt="char.属性" class="size-5 shrink-0 object-contain" />
                 <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-bold">
-                        <SRouterLink :to="link" class="cursor-pointer hover:underline">{{ gt(char.名称) }}</SRouterLink>
+                        <SRouterLink :to="link" class="cursor-pointer hover:underline">{{ displayTitle }}</SRouterLink>
                     </div>
                     <div class="truncate text-[11px] text-base-content/45">{{ gt(`${char.属性}属性`) }}</div>
                 </div>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
+import { normalizeCharSettings } from "@/data/charSettings"
 import { liseFireBuildCharId, liseFireBuildSettings } from "@/data/tests/fixtures/liseFireBuild"
 import { createImportedGraphSpec } from "@/utils/importCharSettingsToNodeEditor"
 import { collectCoreInputNodes, createSettingsFromNodeInputs } from "@/utils/nodeEditorBuild"
@@ -21,8 +22,9 @@ describe("节点编辑器与标准构筑求值口径一致", () => {
         const { charId, settings } = buildFromImportedNodes()
         expect(charId).toBe(liseFireBuildCharId)
 
-        // 目标函数改为由显式 AST 节点提供，其余配置字段必须与标准构筑逐项一致
-        expect({ ...settings, targetFunction: liseFireBuildSettings.targetFunction }).toEqual(liseFireBuildSettings)
+        // 目标函数改为由显式 AST 节点提供，其余配置字段归一化后必须与标准构筑逐项一致
+        // （节点图不携带溯源关闭列表：undefined = 按旧字段迁移，与夹具的空列表同义）
+        expect(normalizeCharSettings({ ...settings, targetFunction: liseFireBuildSettings.targetFunction })).toEqual(liseFireBuildSettings)
 
         const migrated = createCharBuildFromSettings(charId, settings)
         const target = "综合DPS"

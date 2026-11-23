@@ -4,7 +4,8 @@
 //! - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器面板走武器双爆，
 //!   无武器（角色技能）不结算双爆；
 //! - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
-//!   含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
+//!   含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害） + 武器攻分量；
+//! - 追伤分池：武器池取武器面板 `1 + Σ 七分量`，技能池只取 `1 + 技能追伤`，两者不交叉；
 //! - 无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
 //!
 //! 两处**不在**这里的乘区需要特别注意：
@@ -15,6 +16,10 @@
 //! 转换池（转属克 / 转属逆 / 转切割 / 转贯穿 / 转震荡 / 转灾厄）是这里最绕的一段：
 //! 六者共享同一个比例池，合计超过 100% 时等比重压缩，剩余部分按原始物理/元素比例结算。
 
+use super::additional_damage::{
+    ELEMENT_KEYS as ADDITIONAL_DAMAGE_ELEMENT_KEYS,
+    KEYS as ADDITIONAL_DAMAGE_KEYS, LEGACY_KEY as LEGACY_ADDITIONAL_DAMAGE_KEY,
+};
 use super::attributes::WeaponAttributes;
 use super::context::{BuildContext, WeaponRef};
 use super::models::AttrMap;
@@ -63,6 +68,25 @@ pub struct DamageCalcOptions<'a> {
 
 /// 转物理类型关键词（顺序与上游 `physicalConvertKeywords` 一致）。
 const PHYSICAL_CONVERT_KEYWORDS: &[&str] = &["转切割", "转贯穿", "转震荡", "转灾厄"];
+
+/// 六元素名（顺序与 [`ADDITIONAL_DAMAGE_ELEMENT_KEYS`] 一致）。
+const ELEMENTS: [&str; 6] = ["火", "水", "雷", "风", "光", "暗"];
+
+/// 其余属性元素种数（对齐 TS `additionalDamageDotElementCount`）：
+/// `{角色元素} ∪ {六元素追伤非零项}` 去重后 - 1。
+///
+/// 自属性追伤并入角色元素桶、不新增元素；`技能追伤` 不计入。
+/// 非零按有限且 `!= 0` 判定（负值也视为存在该元素）。
+fn dot_other_element_count(panel: &AttrMap, char_element: &str) -> f64 {
+    let mut count = 0usize;
+    for (index, key) in ADDITIONAL_DAMAGE_ELEMENT_KEYS.iter().enumerate() {
+        let value = panel.get(*key).copied().unwrap_or(0.0);
+        if value.is_finite() && value != 0.0 && ELEMENTS[index] != char_element {
+            count += 1;
+        }
+    }
+    count as f64
+}
 
 /// 敌方当前血量类型对应的伤害类型（上游 `hpTypeDMG`）：木桩类怪物无护盾/战姿状态，
 /// `currentHPType` 恒为「生命」，故恒为「贯穿」。
@@ -189,7 +213,7 @@ impl<'a> BuildContext<'a> {
     /// - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器实例 + 武器面板
     ///   才结算双爆（暴击/触发期望），无武器（角色技能）不结算双爆；
     /// - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
-    ///   含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
+    ///   含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器攻分量 + 逐元素追伤分量；
     /// - 无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
     pub fn calculate_damage(
         &self,
@@ -243,6 +267,9 @@ impl<'a> BuildContext<'a> {
         // 属性穿透对所有结算类型整体生效（与原两条路径一致）
         let resistance_penetration =
             (1.0 + char_attrs.get("属性穿透").copied().unwrap_or(0.0)).max(0.0);
+        // 赛季增伤：赛季专属伤害率分区，自身累加后作为独立乘区（与属性穿透同口径，非负钳制）
+        let season_damage_multiplier =
+            (1.0 + char_attrs.get("赛季增伤").copied().unwrap_or(0.0)).max(0.0);
 
         // 阵营增伤与普通增伤同池加算：角色侧（char_attrs，含 BUFF）+ 武器侧（panel，本槽 MOD；技能池无面板只取角色侧）；
         // 泛化 `歧视`（旧口径兜底，对全阵营生效）+ 按敌方阵营取具体口径（秽兽/军团/神弃者/神使/华胥增伤）
@@ -281,7 +308,18 @@ impl<'a> BuildContext<'a> {
                 + char_attrs.get("武器伤害").copied().unwrap_or(0.0)
                 + faction_bonus
         }) + attack_type_damage_bonus;
-        let element_increase = char_attrs.get("元素增伤").copied().unwrap_or(0.0);
+        // 元素增伤 / 弱点：泛化键 + 角色元素的 `<元素>属性增伤 / 弱点`，弱点与抗性同区加算
+        let char_element = self.char.element.as_str();
+        let element_increase = char_attrs.get("元素增伤").copied().unwrap_or(0.0)
+            + char_attrs
+                .get(format!("{}属性增伤", char_element).as_str())
+                .copied()
+                .unwrap_or(0.0);
+        let element_weakness = char_attrs
+            .get(format!("{}属性弱点", char_element).as_str())
+            .copied()
+            .unwrap_or(0.0)
+            + char_attrs.get("全属性弱点").copied().unwrap_or(0.0);
         let physical_increase = char_attrs.get("物理增伤").copied().unwrap_or(0.0);
         // 独立增伤：技能池吃角色侧 × 技能独立增伤；武器池为角色侧 × 武器侧
         //（除惩罚因子，如箭雨降伤只作用于武器自身攻击）
@@ -296,13 +334,15 @@ impl<'a> BuildContext<'a> {
                         .unwrap_or(0.0)))
                 / (1.0 + weapon_independent_penalty)
         }) * (1.0 + attack_type_independent_bonus);
-        // 追加伤害（tag）：技能池吃技能追伤，武器池吃武器追加伤害
+        // 追伤分池（§135）：武器池吃面板 Σ 七分量，技能池只吃 `技能追伤`
         let additional_damage = if is_skill_pool {
-            1.0 + char_attrs.get("技能追伤").copied().unwrap_or(0.0)
+            (1.0 + char_attrs.get("技能追伤").copied().unwrap_or(0.0)).max(0.0)
         } else {
-            1.0 + panel
-                .and_then(|item| item.get("追加伤害").copied())
-                .unwrap_or(0.0)
+            (1.0
+                + panel
+                    .and_then(|item| item.get(LEGACY_ADDITIONAL_DAMAGE_KEY).copied())
+                    .unwrap_or(0.0))
+            .max(0.0)
         };
         // 召唤物独立增伤：字段 tag 含召唤物时生效
         let summon_independent = if is_summon {
@@ -314,9 +354,10 @@ impl<'a> BuildContext<'a> {
             * additional_damage
             * summon_independent
             * imbalance
-            * resistance_penetration;
+            * resistance_penetration
+            * season_damage_multiplier;
         let common_more = hp_more * other_more;
-        // per-part 有效增伤：元素分量取元素池，物理分量取物理池，均与增伤基座同池加算
+        // per-part 有效增伤：元素分量取元素增伤池，物理分量取物理池，均与增伤基座同池加算
         let part_increase = |settles_element: bool| {
             if settles_element {
                 damage_increase_base + element_increase
@@ -328,9 +369,12 @@ impl<'a> BuildContext<'a> {
         // 转物理（转切割/转贯穿/转震荡/转灾厄）与转属克/转属逆共享同一转换比例池
         //（原两条路径一致）：合计超过 100% 时等比重压缩，不足时剩余按原始分量结算
         let enemy_resistance = self.settings.enemy_resistance;
-        let resistance_factor_of = |resistance: f64| (1.0 - resistance).max(0.0);
+        // 元素弱点与敌人抗性同区加算；正负 / 转换判定仍只看基础 enemy_resistance，
+        // 物理分量（因子 1）不吃弱点
+        let resistance_factor_of =
+            |resistance: f64| (1.0 - resistance + element_weakness).max(0.0);
         let flipped_resistance: f64 = if enemy_resistance > 0.0 { -4.0 } else { 0.5 };
-        let flipped_factor = (1.0 - flipped_resistance).max(0.0);
+        let flipped_factor = resistance_factor_of(flipped_resistance);
         let active_element_key = if enemy_resistance > 0.0 {
             Some("转属克")
         } else if enemy_resistance < 0.0 {
@@ -426,9 +470,9 @@ impl<'a> BuildContext<'a> {
                 .map(|item| item.inherit.is_some() && item.atk.as_deref() == Some("all"))
                 .unwrap_or(false);
         let calamity_physical = damage_type == "灾厄" && !inherit_all_skill_weapon;
-        // 分量：(结算前系数, 抗性因子, 触发加成, 是否元素结算)。
-        // 上限 = 武器分流 2 + 属克属逆 2 + 转物理 4×2 = 12，栈数组零分配。
-        let mut parts: [(f64, f64, f64, bool); 12] = [(0.0, 0.0, 0.0, false); 12];
+        // 分量：(结算前系数, 抗性因子, 触发加成, 是否元素结算, 该分量有效增伤)。
+        // 上限 = 12 份，栈数组零分配。
+        let mut parts: [(f64, f64, f64, bool, f64); 12] = [(0.0, 0.0, 0.0, false, 0.0); 12];
         let mut part_count = 0usize;
         macro_rules! push_part {
             ($entry:expr) => {{
@@ -484,7 +528,13 @@ impl<'a> BuildContext<'a> {
                 // 同律 inherit+atk=all：纯元素伤害，无物理分量、不吃触发加成
                 //（触发倍率仅按物理伤害类型结算）
                 if unconverted > 0.0 {
-                    push_part!((elemental_part * unconverted, 1.0, 0.0, true));
+                    push_part!((
+                        elemental_part * unconverted,
+                        1.0,
+                        0.0,
+                        true,
+                        part_increase(true)
+                    ));
                 }
             } else {
                 // 未转换的物理部分（原物理类型，按原始伤害类型触发）；
@@ -494,11 +544,18 @@ impl<'a> BuildContext<'a> {
                         physical_base * unconverted,
                         1.0,
                         trigger_multiplier(damage_type.as_ref()),
-                        false
+                        false,
+                        part_increase(false)
                     ));
                 }
                 if unconverted > 0.0 {
-                    push_part!((elemental_part * unconverted, 1.0, 0.0, true));
+                    push_part!((
+                        elemental_part * unconverted,
+                        1.0,
+                        0.0,
+                        true,
+                        part_increase(true)
+                    ));
                 }
             }
             if let Some(key) = active_element_key {
@@ -507,9 +564,21 @@ impl<'a> BuildContext<'a> {
                     // 转属克/转属逆：物理→属克/属逆元素（翻转抗性结算、无触发）；
                     // 元素分量已实现翻转，直接计入元素
                     if !inherit_all_skill_weapon && physical_base > 0.0 {
-                        push_part!((physical_base * ratio, flipped_factor, 0.0, true));
+                        push_part!((
+                            physical_base * ratio,
+                            flipped_factor,
+                            0.0,
+                            true,
+                            part_increase(true)
+                        ));
                     }
-                    push_part!((elemental_part * ratio, 1.0, 0.0, true));
+                    push_part!((
+                        elemental_part * ratio,
+                        1.0,
+                        0.0,
+                        true,
+                        part_increase(true)
+                    ));
                 }
             }
             for key in PHYSICAL_CONVERT_KEYWORDS {
@@ -521,12 +590,30 @@ impl<'a> BuildContext<'a> {
                 // 按物理类型触发规则结算
                 let trigger_add = trigger_multiplier(&key[3..]);
                 if inherit_all_skill_weapon {
-                    push_part!((elemental_part * ratio, 1.0, trigger_add, false));
+                    push_part!((
+                        elemental_part * ratio,
+                        1.0,
+                        trigger_add,
+                        false,
+                        part_increase(false)
+                    ));
                 } else {
                     if physical_base > 0.0 {
-                        push_part!((physical_base * ratio, 1.0, trigger_add, false));
+                        push_part!((
+                            physical_base * ratio,
+                            1.0,
+                            trigger_add,
+                            false,
+                            part_increase(false)
+                        ));
                     }
-                    push_part!((elemental_part * ratio, 1.0, trigger_add, false));
+                    push_part!((
+                        elemental_part * ratio,
+                        1.0,
+                        trigger_add,
+                        false,
+                        part_increase(false)
+                    ));
                 }
             }
         } else {
@@ -544,13 +631,25 @@ impl<'a> BuildContext<'a> {
                 // 灾厄转化：纯物理基座，不吃抗性（原武器路径口径）；
                 // 转属克/转属逆部分按翻转抗性计入元素
                 if unconverted > 0.0 {
-                    push_part!((unconverted, 1.0, skill_trigger_add, false));
+                    push_part!((
+                        unconverted,
+                        1.0,
+                        skill_trigger_add,
+                        false,
+                        part_increase(false)
+                    ));
                 }
                 if let Some(key) = active_element_key {
                     let ratio =
                         char_attrs.get(key).copied().unwrap_or(0.0).max(0.0) * convert_scale;
                     if ratio > 0.0 {
-                        push_part!((ratio, flipped_factor, 0.0, true));
+                        push_part!((
+                            ratio,
+                            flipped_factor,
+                            0.0,
+                            true,
+                            part_increase(true)
+                        ));
                     }
                 }
             } else {
@@ -559,14 +658,21 @@ impl<'a> BuildContext<'a> {
                         unconverted,
                         resistance_factor_of(enemy_resistance),
                         skill_trigger_add,
-                        true
+                        true,
+                        part_increase(true)
                     ));
                 }
                 if let Some(key) = active_element_key {
                     let ratio =
                         char_attrs.get(key).copied().unwrap_or(0.0).max(0.0) * convert_scale;
                     if ratio > 0.0 {
-                        push_part!((ratio, flipped_factor, skill_trigger_add, true));
+                        push_part!((
+                            ratio,
+                            flipped_factor,
+                            skill_trigger_add,
+                            true,
+                            part_increase(true)
+                        ));
                     }
                 }
             }
@@ -584,7 +690,7 @@ impl<'a> BuildContext<'a> {
                 } else {
                     0.0
                 };
-                push_part!((ratio, 1.0, trigger_add, false));
+                push_part!((ratio, 1.0, trigger_add, false, part_increase(false)));
             }
         }
 
@@ -594,9 +700,8 @@ impl<'a> BuildContext<'a> {
         let mut full_trigger_part = 0.0f64;
         let mut physical_expected = 0.0f64;
         let mut element_expected = 0.0f64;
-        for (ratio, resistance, trigger, settles) in parts.iter().take(part_count) {
+        for (ratio, resistance, trigger, settles, increase) in parts.iter().take(part_count) {
             let base = ratio * resistance;
-            let increase = part_increase(*settles);
             no_trigger_part += base * increase;
             let expected = base * (1.0 + trigger * trigger_rate) * increase;
             expected_trigger_part += expected;
@@ -707,6 +812,8 @@ impl<'a> BuildContext<'a> {
     /// DOT 频率分解（技能 / 近战 / 远程 / 同律四来源）；
     /// 对应上游 `calculateDotFrequencies`。
     ///
+    /// 其余属性元素种数 = `{角色元素} ∪ {该来源武器面板六元素追伤非零项}` 去重后 - 1
+    /// （[`dot_other_element_count`]）；自属性追伤并入角色元素桶、技能来源固定 0。
     /// 返回按「技能 → 近战 → 远程 → 同律」顺序的来源表（含上限共享后的
     /// 自身频率 / 其余属性频率 / 结算用武器攻击）。
     ///
@@ -737,20 +844,28 @@ impl<'a> BuildContext<'a> {
                 .calculate_weapon_attributes(Some(super::context::WeaponRef::Skill))
                 .panel
                 .unwrap_or_default();
-            // 异常数量属性（去重后元素种数）；无 buff 时为 1。
-            let anomaly_count = attrs.get("异常数量").copied().unwrap_or(1.0).max(1.0);
-            // 其余属性元素种数 = n-1（n 为去重后异常数量）；异常数量为 1 时无其余属性。
-            let other_elements = if anomaly_count <= 1.0 {
-                0.0
-            } else {
-                anomaly_count - 1.0
-            };
+            // 其余属性元素种数按该来源武器面板推导（自属性追伤并入角色元素桶、不新增元素；
+            // 集合天然去重，多个 BUFF 同元素只算 1 种）
+            let melee_elements =
+                dot_other_element_count(&melee_panel, self.char.element.as_str());
+            let ranged_elements =
+                dot_other_element_count(&ranged_panel, self.char.element.as_str());
+            let skill_weapon_elements =
+                dot_other_element_count(&skill_panel, self.char.element.as_str());
             let is_light_or_dark = self.char.element == "光" || self.char.element == "暗";
+            // 追伤七分量求和：MOD 侧逐键读取（旧数据字面 `追加伤害` 仍兜底计入），
+            // 角色侧走聚合只读查询（`total_bonus(追加伤害)` = Σ 七分量）
             let mod_additional: f64 = self
                 .iter_mods()
-                .filter_map(|item| item.add_attr_value("追加伤害"))
+                .map(|item| {
+                    let mut value = 0.0;
+                    for key in ADDITIONAL_DAMAGE_KEYS {
+                        value += item.add_attr_value(key).unwrap_or(0.0);
+                    }
+                    value + item.add_attr_value(LEGACY_ADDITIONAL_DAMAGE_KEY).unwrap_or(0.0)
+                })
                 .sum();
-            let total_additional = self.total_bonus("追加伤害", "角色", true);
+            let total_additional = self.total_bonus(LEGACY_ADDITIONAL_DAMAGE_KEY, "角色", true);
             let has_additional = self.settings.dot_settings.force_own_additional_damage
                 || (if is_light_or_dark {
                     mod_additional > 0.0
@@ -775,7 +890,7 @@ impl<'a> BuildContext<'a> {
                         .unwrap_or(0.0)
                         .clamp(0.0, 1.0),
                     dot.melee,
-                    other_elements,
+                    melee_elements,
                     has_additional,
                     melee_panel.get("攻击").copied().unwrap_or(0.0),
                 ),
@@ -787,7 +902,7 @@ impl<'a> BuildContext<'a> {
                         .unwrap_or(0.0)
                         .clamp(0.0, 1.0),
                     dot.ranged,
-                    other_elements,
+                    ranged_elements,
                     has_additional,
                     ranged_panel.get("攻击").copied().unwrap_or(0.0),
                 ),
@@ -799,7 +914,7 @@ impl<'a> BuildContext<'a> {
                         .unwrap_or(0.0)
                         .clamp(0.0, 1.0),
                     dot.skillweapon,
-                    other_elements,
+                    skill_weapon_elements,
                     has_additional,
                     skill_panel.get("攻击").copied().unwrap_or(0.0),
                 ),
@@ -827,9 +942,9 @@ impl<'a> BuildContext<'a> {
         last
     }
 
-    /// DOT 抗性区（含转属克/转属逆）；对应上游 `getResistanceFactor`。
-    fn dot_resistance_factor(&self, attrs: &AttrMap) -> f64 {
-        let factor = |resistance: f64| (1.0 - resistance).max(0.0);
+    /// DOT 抗性区（含转属克/转属逆 与 元素弱点）；对应上游 `getResistanceFactor`。
+    fn dot_resistance_factor(&self, attrs: &AttrMap, weakness: f64) -> f64 {
+        let factor = |resistance: f64| (1.0 - resistance + weakness).max(0.0);
         let enemy_resistance = self.settings.enemy_resistance;
         if enemy_resistance == 0.0 {
             return factor(0.0);
@@ -845,24 +960,30 @@ impl<'a> BuildContext<'a> {
     }
 
     /// 其余属性 DOT 的抗性反转等效因子；对应上游 `getOtherDotResistanceFactor`。
-    fn other_dot_resistance_factor(&self, attrs: &AttrMap, sources: &[DotSourceFreq]) -> f64 {
+    /// `weakness` 只传全属性弱点（角色元素弱点不得带给其它元素）。
+    fn other_dot_resistance_factor(
+        &self,
+        attrs: &AttrMap,
+        sources: &[DotSourceFreq],
+        weakness: f64,
+    ) -> f64 {
         // 其余属性种数取武器来源（技能来源不参与其余属性）。
         let other_count = sources
             .iter()
             .filter(|source| source.source != DotSource::Skill)
             .map(|source| source.other_elements)
             .fold(0.0, f64::max);
-        let normal = self.dot_resistance_factor(attrs).max(0.0);
+        let normal = self.dot_resistance_factor(attrs, weakness).max(0.0);
         let enemy_resistance = self.settings.enemy_resistance;
         if enemy_resistance == 0.0 || other_count <= 0.0 {
             return normal;
         }
         if enemy_resistance < 0.0 {
             // 负抗：全部其余属性按翻转抗性 0.5。
-            return (1.0f64 - 0.5).max(0.0);
+            return (1.0f64 - 0.5 + weakness).max(0.0);
         }
         // 正抗：其中一种其余属性做 -4，其余保持原抗性。
-        ((1.0f64 - -4.0).max(0.0) + normal * (other_count - 1.0)) / other_count
+        ((1.0f64 - -4.0 + weakness).max(0.0) + normal * (other_count - 1.0)) / other_count
     }
 
     /// 每秒 DOT 伤害；对应上游 `calculateDotDamage`。
@@ -897,11 +1018,24 @@ impl<'a> BuildContext<'a> {
         };
         // 抗性区含属性穿透（与技能伤害结算一致）。
         let penetration = 1.0 + attrs.get("属性穿透").copied().unwrap_or(0.0);
-        let own_zone = (self.dot_resistance_factor(&attrs) * penetration).max(0.0);
-        let other_zone = self.other_dot_resistance_factor(&attrs, &sources) * penetration;
+        // 自身属性分量吃角色元素弱点 + 全属性弱点（U95）；其余属性分量只吃全属性弱点
+        let own_element_weakness_key = format!("{}属性弱点", self.char.element);
+        let own_weakness = attrs
+            .get(own_element_weakness_key.as_str())
+            .copied()
+            .unwrap_or(0.0)
+            + attrs.get("全属性弱点").copied().unwrap_or(0.0);
+        let all_weakness = attrs.get("全属性弱点").copied().unwrap_or(0.0);
+        let own_zone = (self.dot_resistance_factor(&attrs, own_weakness) * penetration).max(0.0);
+        let other_zone =
+            self.other_dot_resistance_factor(&attrs, &sources, all_weakness) * penetration;
+        // 赛季增伤：赛季专属伤害率分区，自身累加后作为独立乘区（与属性穿透同口径，非负钳制）
+        let season_damage_multiplier =
+            (1.0 + attrs.get("赛季增伤").copied().unwrap_or(0.0)).max(0.0);
         // 昂扬/背水乘区与技能伤害共用同一结算。
         let hp_more = self.boost_multiplier(&attrs, None) * self.desperate_multiplier(&attrs, None);
-        let fullness_multiplier = 1.0 + attrs.get("充盈威力").copied().unwrap_or(0.0);
+        // 充盈威力为 1 起始总倍率，直接作为乘区（不再额外 +1）
+        let fullness_multiplier = attrs.get("充盈威力").copied().unwrap_or(1.0);
         let attack = attrs.get("攻击").copied().unwrap_or(0.0);
         // 阵营增伤与普通增伤同池加算：角色侧全局 + 各来源武器槽 MOD（技能来源仅角色侧）
         let faction_key = crate::context::faction_bonus_key_for_enemy(self.enemy.faction);
@@ -909,6 +1043,7 @@ impl<'a> BuildContext<'a> {
             + faction_key
                 .map(|key| attrs.get(key).copied().unwrap_or(0.0))
                 .unwrap_or(0.0);
+        // DOT 只吃增伤池：`元素增伤` 与六元素 `*属性增伤` 均不参与（与上游 `calculateDotDamage` 一致）
         let base_increase = 1.0 + attrs.get("增伤").copied().unwrap_or(0.0) + char_faction_bonus;
         let mut total = 0.0;
         for source in selected {
@@ -938,7 +1073,9 @@ impl<'a> BuildContext<'a> {
                 * fullness_multiplier
                 * damage_increase
                 * hp_more;
-            total += base * (source.own_freq * own_zone + source.other_freq * other_zone);
+            total += base
+                * (source.own_freq * own_zone + source.other_freq * other_zone)
+                * season_damage_multiplier;
         }
         total
     }

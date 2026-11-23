@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { nextTick, ref } from "vue"
 import {
     addModVariant,
     createDefaultCharSettings,
@@ -13,8 +14,10 @@ import {
     removeLastModVariant,
     resolveModVariantLetter,
     serializeCharSettings,
+    serializeCharSettingsForShare,
     setModVariantAura,
-} from "./useCharSettings"
+} from "@/data/charSettings"
+import { createMaxedReachableTalentLevels } from "@/data/transcendSettings"
 
 describe("useCharSettings helpers", () => {
     it("默认角色配置应包含自定义BUFF列表", () => {
@@ -370,5 +373,158 @@ describe("useCharSettings helpers", () => {
             hp: [],
             bgs: [],
         })
+    })
+})
+
+describe("useCharSettings 本地持久化（U96-fix）", () => {
+    afterEach(() => {
+        vi.unstubAllGlobals()
+    })
+
+    // localStorage 后端：node_modules 外部化后不受 resetModules 影响，
+    // composable 模块只动态导入一次，靠替换后端 Map 隔离用例、模拟刷新。
+    const holder: { map: Map<string, string>; writes: { key: string; value: string }[] } = { map: new Map(), writes: [] }
+    let settingsModule: typeof import("./useCharSettings") | null = null
+
+    function stubBrowser() {
+        const localStorage = {
+            getItem: (key: string) => holder.map.get(key) ?? null,
+            setItem: (key: string, value: string) => {
+                holder.map.set(key, value)
+                holder.writes.push({ key, value })
+            },
+            removeItem: (key: string) => {
+                holder.map.delete(key)
+            },
+        }
+        // useStorage 在模块加载时锁定 window，必须先 stub 再动态导入；Storage / document 桩同侧边栏测试
+        const documentStub = { createElement: () => ({}) }
+        vi.stubGlobal("Storage", class {})
+        vi.stubGlobal("document", documentStub)
+        vi.stubGlobal("window", {
+            document: documentStub,
+            localStorage,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => true,
+        })
+        vi.stubGlobal("localStorage", localStorage)
+    }
+
+    async function open(charId = 1101, prefill: Record<string, string> = {}) {
+        holder.map = new Map(Object.entries(prefill))
+        stubBrowser()
+        if (!settingsModule) settingsModule = await import("./useCharSettings")
+        return settingsModule.useCharSettings(ref(charId))
+    }
+
+    it("本地主存档写入 serializeCharSettings 压缩格式", async () => {
+        const settings = await open()
+        settings.value.baseName = "普通攻击"
+        settings.value.transcend.enabled = true
+        settings.value.transcend.talentLevels = createMaxedReachableTalentLevels()
+        await nextTick()
+
+        const raw = holder.map.get("build.1101")
+        expect(raw).toBeDefined()
+        expect(raw).toBe(serializeCharSettings(settings.value))
+        const payload = JSON.parse(raw as string).transcend
+        expect(payload.enabled).toBe(1)
+        expect("talentLevels" in payload).toBe(false)
+        expect("mainGear" in payload).toBe(false)
+        expect(Array.isArray(payload.gearVariants[0])).toBe(true)
+    })
+
+    it("刷新读取压缩存档与归一化结果一致", async () => {
+        const source = createDefaultCharSettings()
+        source.baseName = "普通攻击"
+        source.transcend = { ...source.transcend, enabled: true, talentLevels: createMaxedReachableTalentLevels() }
+        const serialized = serializeCharSettings(source)
+        const settings = await open(1101, { "build.1101": serialized })
+
+        expect(settings.value).toEqual(normalizeCharSettings(JSON.parse(serialized)))
+        expect(settings.value.transcend.talentLevels).toEqual(createMaxedReachableTalentLevels())
+    })
+
+    it("损坏 JSON 回退该角色默认配置", async () => {
+        const settings = await open(1101, { "build.1101": "{not-json" })
+
+        expect(settings.value).toEqual(createDefaultCharSettings())
+    })
+
+    it("切换角色时读取各自键的存档", async () => {
+        const other = createDefaultCharSettings()
+        other.baseName = "另一个技能"
+        const charId = ref(1101)
+        holder.map = new Map([["build.2201", serializeCharSettings(other)]])
+        stubBrowser()
+        if (!settingsModule) settingsModule = await import("./useCharSettings")
+        const settings = settingsModule.useCharSettings(charId)
+
+        expect(settings.value.baseName).not.toBe("另一个技能")
+        charId.value = 2201
+        await nextTick()
+        expect(settings.value.baseName).toBe("另一个技能")
+    })
+
+    it("换键读入部分 assist 字段的旧存档后补齐默认，且不产生多余写", async () => {
+        // 模拟旧存档：assist1 只有 charLevel，缺 charSkillLevel / customVariables / dotSettings
+        const partial = { ...normalizeCharSettings({ baseName: "普通攻击" }), assist1: { charLevel: 55 } }
+        const charId = ref(1101)
+        holder.map = new Map([["build.2201", JSON.stringify(partial)]])
+        holder.writes = []
+        stubBrowser()
+        if (!settingsModule) settingsModule = await import("./useCharSettings")
+        const settings = settingsModule.useCharSettings(charId)
+
+        holder.writes = []
+        charId.value = 2201
+        await nextTick()
+
+        expect(settings.value.assist1.charLevel).toBe(55)
+        expect(settings.value.assist1.charSkillLevel).toEqual([10, 10, 10])
+        expect(settings.value.assist1.customVariables).toEqual([])
+        expect(settings.value.assist1.dotSettings).toEqual({
+            skill: 0,
+            melee: 0,
+            ranged: 0,
+            skillweapon: 0,
+            forceOwnAdditionalDamage: false,
+        })
+        // 读取端已归一化；换键最多产生一次「旧格式 → 压缩格式」的规范化回写，不会重复写
+        const targetWrites = holder.writes.filter(entry => entry.key === "build.2201")
+        expect(targetWrites.length).toBeLessThanOrEqual(1)
+        for (const entry of targetWrites) expect(entry.value).toBe(serializeCharSettings(settings.value))
+    })
+
+    it("换键后对旧值的归一化不会回写旧键", async () => {
+        const charId = ref(1101)
+        holder.map = new Map()
+        holder.writes = []
+        stubBrowser()
+        if (!settingsModule) settingsModule = await import("./useCharSettings")
+        const settings = settingsModule.useCharSettings(charId)
+        // 直接把内存值改成旧存档形状（模拟无 Storage 环境下的直接赋值）
+        settings.value = { ...settings.value, assist1: { charLevel: 66 } } as typeof settings.value
+        await nextTick()
+        holder.writes = []
+        charId.value = 2201
+        await nextTick()
+
+        expect(settings.value.assist1.charSkillLevel).toEqual([10, 10, 10])
+        expect(holder.writes.filter(entry => entry.key === "build.1101")).toEqual([])
+    })
+
+    it("载入未使用升华的分享不会清空本地升华", async () => {
+        const { mergeSharedCharSettings } = await import("@/utils/transcend-gear/gain-context")
+        const local = createDefaultCharSettings().transcend
+        local.enabled = true
+        local.talentLevels = [[100001, 1]]
+        const share = JSON.parse(serializeCharSettingsForShare(createDefaultCharSettings()))
+
+        expect("transcend" in share).toBe(false)
+        const merged = mergeSharedCharSettings(share, local)
+        expect(merged.transcend.enabled).toBe(true)
+        expect(merged.transcend.talentLevels).toEqual([[100001, 1]])
     })
 })

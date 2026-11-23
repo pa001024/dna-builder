@@ -26,6 +26,14 @@ const YUMING: &str = r#"{"id": 3, "名称": "煜明2溯", "技能": "酣战", "�
 const NIFFLER: &str =
     r#"{"id": 4, "名称": "妮弗尔夫人2溯", "技能": "月猎|日食", "技能伤害": 0.75}"#;
 
+/// 召唤物破防：技能无视防御 17.5% 只作用于 tag 含「召唤物」的字段。
+const SUMMON_BREAK: &str =
+    r#"{"id": 5, "名称": "召唤破防", "tag": ["召唤物"], "技能无视防御": 0.175}"#;
+
+/// 星河破防：无视防御 100% 只作用于名称含「星河寥落」且 tag 含「下落攻击」的字段。
+const STAR_BREAK: &str =
+    r#"{"id": 6, "名称": "星河破防", "技能": "星河寥落", "tag": ["下落攻击"], "无视防御": 1.0}"#;
+
 /// 测试角色：一个技能带 6 个伤害字段（分别被上面各条件 BUFF 命中 / 不命中）。
 fn char_record() -> serde_json::Value {
     json!({
@@ -37,7 +45,11 @@ fn char_record() -> serde_json::Value {
                 {"名称": "[暗影奔袭]伤害", "影响": "技能威力", "值": 1.0},
                 {"名称": "[暗影一刺]伤害", "影响": "技能威力", "值": 1.0},
                 {"名称": "[酣战]伤害", "影响": "技能威力", "值": 1.0},
-                {"名称": "[星河寥落]伤害", "影响": "技能威力", "值": 1.0},
+                {"名称": "[星河寥落]伤害", "影响": "技能威力", "值": 1.0, "tag": ["近战", "武器", "下落攻击"]},
+                {"名称": "[疑星落]伤害", "影响": "技能威力", "值": 1.0, "tag": ["近战", "武器", "下落攻击"]},
+                {"名称": "[奔雷]伤害", "影响": "技能威力", "值": 1.0, "tag": ["技能", "战技"]},
+                {"名称": "[星河寥落]技能伤害", "影响": "技能威力", "值": 1.0, "tag": ["技能", "战技"]},
+                {"名称": "[召唤物·战车]技能伤害", "影响": "技能威力", "值": 1.0, "tag": ["技能", "召唤物"]},
                 {"名称": "[月猎]伤害", "影响": "技能威力", "值": 1.0},
                 {"名称": "[裂伤]伤害", "影响": "技能威力", "值": 1.0}
             ]
@@ -127,6 +139,67 @@ fn conditional_buff_alternation_and_mul() {
     let ratio = evaluate_with(&mut with, "E::[星河寥落]伤害")
         / evaluate_with(&mut without, "E::[星河寥落]伤害");
     crate::common::assert_close(ratio, 1.0, "未命中字段");
+}
+
+/// U128：条件 `技能无视防御` / `无视防御` 只进入命中字段的防御乘区（与 TS `getDef` 同口径）。
+#[test]
+fn conditional_ignore_defense_only_applies_to_matching_fields() {
+    let with_tables = build_tables(&[buff_record(SUMMON_BREAK), buff_record(STAR_BREAK)]);
+    let without_tables = build_tables(&[]);
+    let with_settings = settings(&[("召唤破防", 1.0), ("星河破防", 1.0)]);
+    let without_settings = settings(&[]);
+    let mut without = BuildContext::new(&without_tables, 1, &without_settings).expect("装配");
+    let mut with = BuildContext::new(&with_tables, 1, &with_settings).expect("装配");
+    let ratio = |with: &mut BuildContext<'_>, without: &mut BuildContext<'_>, expr: &str| {
+        evaluate_with(with, expr) / evaluate_with(without, expr)
+    };
+    // 木桩 def=300、双方 80 级：基线防御乘区 1-300/600 = 0.5
+    // 召唤物字段：300×(1-0.175)=247.5 → 乘区 1-247.5/547.5，相对基线 0.5 → 1.0958904…
+    crate::common::assert_close(
+        ratio(&mut with, &mut without, "E::[召唤物·战车]技能伤害"),
+        600.0 / 547.5,
+        "召唤物字段命中技能无视防御",
+    );
+    // 非召唤字段不吃：奔雷 / 疑星落与基线一致
+    for expr in ["E::[奔雷]伤害", "E::[疑星落]伤害"] {
+        crate::common::assert_close(ratio(&mut with, &mut without, expr), 1.0, expr);
+    }
+    // 星河寥落：无视 100% 防御 → 乘区 1，相对基线 0.5 → ×2
+    crate::common::assert_close(ratio(&mut with, &mut without, "E::[星河寥落]伤害"), 2.0, "星河寥落命中无视防御");
+    // name-hit / tag-miss：名称含「星河寥落」但 tag 不含「下落攻击」不生效
+    crate::common::assert_close(
+        ratio(&mut with, &mut without, "E::[星河寥落]技能伤害"),
+        1.0,
+        "名称命中但 tag 未命中",
+    );
+    // 条件 BUFF 不进全局属性池：两条防御键全局均为 0
+    {
+        let attrs = with.attrs();
+        crate::common::assert_close(attrs.get("技能无视防御").copied().unwrap_or(0.0), 0.0, "全局技能无视防御");
+        crate::common::assert_close(attrs.get("无视防御").copied().unwrap_or(0.0), 0.0, "全局无视防御");
+    }
+    // 跨字段缓存：命中 / 未命中字段任意求值顺序同值（旧 `是否技能` 键会让第二字段复用第一字段乘区）
+    let star_hit = evaluate_with(&mut with, "E::[星河寥落]伤害");
+    let yi_hit = evaluate_with(&mut with, "E::[疑星落]伤害");
+    for expr in [
+        "E::[星河寥落]伤害 + E::[疑星落]伤害",
+        "E::[疑星落]伤害 + E::[星河寥落]伤害",
+    ] {
+        crate::common::assert_close(evaluate_with(&mut with, expr), star_hit + yi_hit, expr);
+    }
+    // 临时属性：条件 0.175 + 临时 0.1 = 0.275（300/517.5）；基线仅临时 0.1（300/570）→ 570/517.5
+    let temp_expr = "E::[召唤物·战车]技能伤害{技能无视防御:0.1}";
+    let temp_hit = evaluate_with(&mut with, temp_expr);
+    let temp_base = evaluate_with(&mut without, temp_expr);
+    crate::common::assert_close(temp_hit / temp_base, 570.0 / 517.5, "临时属性叠加条件增量");
+    // 同一求值内混合临时 / 无临时：各自乘区独立，等于分开求值之和（无临时属性不读写缓存）
+    let plain_hit = evaluate_with(&mut with, "E::[召唤物·战车]技能伤害");
+    for expr in [
+        "E::[召唤物·战车]技能伤害{技能无视防御:0.1} + E::[召唤物·战车]技能伤害",
+        "E::[召唤物·战车]技能伤害 + E::[召唤物·战车]技能伤害{技能无视防御:0.1}",
+    ] {
+        crate::common::assert_close(evaluate_with(&mut with, expr), temp_hit + plain_hit, expr);
+    }
 }
 
 /// 自拼构筑的属性自洽：`attr` 缺键按 0、`assert_attrs_close` 全字段容差。

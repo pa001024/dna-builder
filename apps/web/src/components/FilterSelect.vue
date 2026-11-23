@@ -8,6 +8,8 @@ export interface FilterSelectOption {
     label: string
     swatch?: number | string
     dotClass?: string
+    /** 选项计数，菜单右侧弱化展示；不参与选中态文本 */
+    count?: number
 }
 
 const props = withDefaults(
@@ -18,8 +20,10 @@ const props = withDefaults(
         clearValue?: string | number
         clearTitle?: string
         menuWidth?: string
+        /** 必选项（如视图 / 排序）隐藏清空按钮 */
+        clearable?: boolean
     }>(),
-    { clearValue: "" }
+    { clearValue: "", clearable: true }
 )
 
 const emit = defineEmits<{ "update:modelValue": [value: string | number] }>()
@@ -63,7 +67,7 @@ function menuLabel(option: FilterSelectOption) {
                 <Icon v-if="!isSelected" icon="radix-icons:chevron-down" class="size-3 shrink-0 text-base-content/40" />
             </PopoverTrigger>
             <button
-                v-if="isSelected"
+                v-if="isSelected && clearable"
                 type="button"
                 class="inline-flex h-full shrink-0 cursor-pointer items-center px-1.5 text-primary-content transition-colors duration-150 hover:text-primary-content/60"
                 :title="clearTitle"
@@ -91,6 +95,7 @@ function menuLabel(option: FilterSelectOption) {
                     <span v-if="option.swatch" :class="getRaritySwatchClass(option.swatch)" />
                     <span v-else-if="option.dotClass" class="inline-block size-2.5 shrink-0 rounded-xs border" :class="option.dotClass" />
                     <span class="min-w-0 flex-1 truncate">{{ menuLabel(option) }}</span>
+                    <span v-if="option.count !== undefined" class="shrink-0 text-[10px] tabular-nums text-base-content/40">{{ option.count }}</span>
                     <Icon v-if="option.value === modelValue" icon="radix-icons:check" class="size-3.5 shrink-0 text-primary" />
                 </button>
             </PopoverContent>

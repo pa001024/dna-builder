@@ -195,7 +195,7 @@ fn fixture_json() -> serde_json::Value {
 }
 
 /// 引擎侧同一场景的期望值（`dob-calc-core` 的 `dobapp_vy` 目标 `总和DPS`）。
-const ENGINE_TARGET: f64 = 1767082952.0447142;
+const ENGINE_TARGET: f64 = 1767462704.1968727;
 
 fn assert_close(actual: f64, expected: f64, label: &str) {
     let tolerance = if expected.abs() < 1e-9 {

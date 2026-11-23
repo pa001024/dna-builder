@@ -274,9 +274,10 @@ describe("魔灵 BUFF 与技能等级", () => {
     })
 
     it("未装备魔灵时被动物与主动技都不进入构筑", () => {
-        const base = createCharBuildFromSettings(1504, { ...createDefaultCharSettings(), baseName: "射击" })
+        const base = createCharBuildFromSettings(1504, { ...createDefaultCharSettings(), traceLevel: 0, baseName: "射击" })
         const withPet = createCharBuildFromSettings(1504, {
             ...createDefaultCharSettings(),
+            traceLevel: 0,
             baseName: "射击",
             petId: HEIYAO_PET_ID,
             petLevel: 4,
@@ -290,6 +291,7 @@ describe("魔灵 BUFF 与技能等级", () => {
         // 同元素验证：光属性角色 + 欧泊艾尔芙（光属性攻击）攻击提升
         const withLightPet = createCharBuildFromSettings(1504, {
             ...createDefaultCharSettings(),
+            traceLevel: 0,
             baseName: "射击",
             petId: 4261,
             petLevel: 4,

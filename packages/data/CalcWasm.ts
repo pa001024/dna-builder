@@ -4,6 +4,7 @@ import { modEffectMap, petMap, weaponEffectMap } from "./d"
 import { petEntrys } from "./d/pet.data"
 import type { Mod, Weapon } from "./data-types"
 import { buffData, charData, modData, monsterData, weaponData } from "./index"
+import { withWasmTranscendPayload } from "./transcend-wasm"
 
 export interface WasmModOption {
     data: Mod
@@ -148,6 +149,19 @@ export interface WasmCallResult<T> {
  * @param action 同步调用
  * @returns 调用结果与耗时
  */
+/**
+ * wasm 模块在当前环境不可用（文件缺失 / 导出缺失 / 会话建立失败）。
+ *
+ * 这是唯一允许切换到 TS 引擎的原因（环境选择）；wasm 执行错误必须原样上报，
+ * 不得用 TS 结果顶替——Rust 与 TS 的逐值等价由 parity 测试保证。
+ */
+export class WasmUnavailableError extends Error {
+    constructor(message = "wasm 不可用") {
+        super(message)
+        this.name = "WasmUnavailableError"
+    }
+}
+
 function callTimed<T>(action: () => T): WasmCallResult<T> {
     const startedAt = performance.now()
     const value = action()
@@ -210,7 +224,8 @@ export function takeWasmSessionSetupMs(): number | undefined {
 
 export function buildWasmAutobuildRequest(input: WasmAutobuildInput): string {
     return JSON.stringify({
-        base: { charId: input.charId, settings: input.settings },
+        // 升华效果随 settings 走：Rust 按 `transcendSide` 选三侧载荷装配
+        base: { charId: input.charId, settings: withWasmTranscendPayload(input.charId, input.settings) },
         modCandidates: input.modOptions.map(mod => ({
             id: mod.data.id,
             level: mod.level,
@@ -257,7 +272,7 @@ function callDobcc<T>(wasm: DobccExports, invoke: (reqPtr: number, reqLen: numbe
 
 export async function runWasmAutobuild(input: WasmAutobuildInput): Promise<WasmCallResult<WasmAutobuildResult>> {
     const ready = await getSession()
-    if (!ready) throw new Error("wasm 不可用")
+    if (!ready) throw new WasmUnavailableError()
     return callTimed(() =>
         callDobcc<WasmAutobuildResult>(
             ready.exports,
@@ -274,12 +289,13 @@ export async function runWasmAutobuild(input: WasmAutobuildInput): Promise<WasmC
  */
 export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmCallResult<WasmEvaluateResult>> {
     const ready = await getSession()
-    if (!ready) throw new Error("wasm 不可用")
+    if (!ready) throw new WasmUnavailableError()
+    const payloadSettings = withWasmTranscendPayload(input.charId, input.settings)
     const settings =
         input.targetFunction === undefined && input.baseName === undefined
-            ? input.settings
+            ? payloadSettings
             : {
-                  ...input.settings,
+                  ...payloadSettings,
                   targetFunction: input.targetFunction ?? input.settings.targetFunction,
                   baseName: input.baseName ?? input.settings.baseName,
               }
@@ -299,12 +315,12 @@ export async function runWasmEvaluate(input: WasmEvaluateInput): Promise<WasmCal
  */
 export async function runWasmPanels(input: WasmPanelsInput): Promise<WasmCallResult<WasmPanelsResult>> {
     const ready = await getSession()
-    if (!ready) throw new Error("wasm 不可用")
+    if (!ready) throw new WasmUnavailableError()
     return callTimed(() =>
         callDobcc<WasmPanelsResult>(
             ready.exports,
             (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_panels(ready.session, reqPtr, reqLen, lenPtr),
-            JSON.stringify({ charId: input.charId, settings: input.settings, panels: input.panels })
+            JSON.stringify({ charId: input.charId, settings: withWasmTranscendPayload(input.charId, input.settings), panels: input.panels })
         )
     )
 }
@@ -330,18 +346,31 @@ export interface WasmIncomeResult {
     values: Record<string, number>
 }
 
+/**
+ * 收益请求 JSON：base 与每条 `target` 条目都按自身 settings / charId 携带升华载荷。
+ * @param input 收益请求
+ * @returns 请求 JSON
+ */
+export function buildWasmIncomeRequest(input: WasmIncomeInput): string {
+    // target 条目可能来自不同构筑（targetValues 批量），载荷必须逐条生成
+    const items = input.items.map(item =>
+        item.kind === "target" ? { ...item, settings: withWasmTranscendPayload(item.charId, item.settings) } : item
+    )
+    return JSON.stringify({
+        base: { charId: input.charId, settings: withWasmTranscendPayload(input.charId, input.settings) },
+        skillInherit: input.skillInherit,
+        items,
+    })
+}
+
 export async function runWasmIncome(input: WasmIncomeInput): Promise<WasmCallResult<WasmIncomeResult>> {
     const ready = await getSession()
-    if (!ready) throw new Error("wasm 不可用")
+    if (!ready) throw new WasmUnavailableError()
     return callTimed(() =>
         callDobcc<WasmIncomeResult>(
             ready.exports,
             (reqPtr, reqLen, lenPtr) => ready.exports.dobcc_income(ready.session, reqPtr, reqLen, lenPtr),
-            JSON.stringify({
-                base: { charId: input.charId, settings: input.settings },
-                skillInherit: input.skillInherit,
-                items: input.items,
-            })
+            buildWasmIncomeRequest(input)
         )
     )
 }

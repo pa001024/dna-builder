@@ -288,7 +288,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                         <!-- 极性 / 耐受方章 -->
                         <div
                             v-if="mod.极性 || mod.耐受"
-                            class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/15 bg-base-content/3 px-2 py-0.5 font-mono text-xs tabular-nums text-base-content/70"
+                            class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/15 bg-base-content/3 px-2 py-0.5 font-mono text-xs tabular-nums text-base-content/70"
                         >
                             {{ leveledMod.耐受 }}
                             <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />

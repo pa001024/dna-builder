@@ -455,66 +455,7 @@ defineExpose({
 </template>
 
 <style lang="less">
-:root {
-    --cm-foreground: #ccc;
-    --cm-comment: #999;
-    --cm-keyword: #b38cff;
-    --cm-string: #82d99f;
-    --cm-number: #f48cad;
-    --cm-function: #f28c4d;
-    --cm-class: #81cfd4;
-    --cm-property: #f8c555;
-    --cm-operator: #67cdcc;
-    --cm-gutter-foreground: #999;
-    --cm-gutter-border: #999;
-    --cm-active-line: rgba(255, 255, 255, 0.05);
-    --cm-selection: rgba(128, 203, 196, 0.24);
-    --cm-caret: #ffffff;
-
-    /* AST 表达式语言配色（与 ASTHelp 面板的 AST 树一致） */
-    --ast-number: #22d3ee;
-    --ast-keyword: #2dd4bf;
-    --ast-property: #34d399;
-    --ast-member: #38bdf8;
-    --ast-attr: #f472b6;
-    --ast-function: #a78bfa;
-    --ast-namespace: #a78bfa;
-    --ast-type: #818cf8;
-    --ast-macro: #f0abfc;
-    --ast-operator: #fcd34d;
-    --ast-punctuation: #9ca3af;
-}
-
-[data-theme="light"] {
-    --cm-foreground: #000;
-    --cm-comment: #708090;
-    --cm-keyword: #5f36b2;
-    --cm-string: #6aa621;
-    --cm-number: #e54595;
-    --cm-function: #4078f2;
-    --cm-class: #b15ef2;
-    --cm-property: #17181a;
-    --cm-operator: #9a6e3a;
-    --cm-gutter-foreground: #708090;
-    --cm-gutter-border: #708090;
-    --cm-active-line: rgba(0, 0, 0, 0.04);
-    --cm-selection: rgba(66, 133, 244, 0.22);
-    --cm-caret: #111111;
-
-    /* AST 表达式语言配色（亮色主题） */
-    --ast-number: #0ea5e9;
-    --ast-keyword: #0d9488;
-    --ast-property: #059669;
-    --ast-member: #0284c7;
-    --ast-attr: #db2777;
-    --ast-function: #7c3aed;
-    --ast-namespace: #7c3aed;
-    --ast-type: #6366f1;
-    --ast-macro: #c026d3;
-    --ast-operator: #d97706;
-    --ast-punctuation: #6b7280;
-}
-
+/* 配色变量移到全局 style.css：ExprInput 会在 CodeEditor 未加载时使用 --ast-* / --cm-* */
 .code-editor-wrap {
     width: 100%;
     height: 100%;

@@ -21,19 +21,33 @@ export interface WeaponAttrFieldCandidate {
     includeMods: boolean
 }
 
+/** 构造字段候选时的面板来源选项。 */
+export interface WeaponAttrCandidateOptions {
+    /** 当前面板是否同律武器面板。继承型同律武器解析到被继承的普通武器后仍是同律面板，不读取 `普通*` */
+    isSkillWeaponPanel?: boolean
+}
+
 /**
  * 构造武器属性的来源字段候选，顺序与 CharBuild.calculateWeaponAttributes 的属性查询一致：
- * ① 武器作用域前缀字段（近战触发）→ ② 无前缀字段（触发）→ ③ 同律武器的下位作用域字段（近战触发）。
- * 其中 ③ 由同律武器的「前缀降级」而来，只覆盖 BUFF 与武器效果：近战/远程槽位 MOD 不随降级穿透到同律武器。
+ * ① 武器作用域前缀字段（近战触发）→ ② 无前缀字段（触发）→ ③ 普通面板专属字段（普通近战触发）
+ * → ④ 同律武器的下位作用域字段（近战触发）。
+ * 其中 ③ 只作用于普通近战/远程面板，同律面板（含继承型）不读取；
+ * ④ 由同律武器的「前缀降级」而来，只覆盖 BUFF 与武器效果：近战/远程槽位 MOD 不随降级穿透到同律武器。
  * @param key 武器属性键名（如 触发）
  * @param scope 参与结算的武器类型前缀（近战 / 远程 / 同律近战 / 同律远程）
+ * @param opts.isSkillWeaponPanel 当前面板是否同律武器面板
  * @returns 字段候选列表
  */
-export function getWeaponAttrFieldCandidates(key: string, scope: string): WeaponAttrFieldCandidate[] {
+export function getWeaponAttrFieldCandidates(key: string, scope: string, opts?: WeaponAttrCandidateOptions): WeaponAttrFieldCandidate[] {
     const candidates: WeaponAttrFieldCandidate[] = [
         { field: `${scope}${key}`, scope, includeMods: true },
         { field: key, scope, includeMods: true },
     ]
+    // 普通近战/远程专属前缀：只在普通武器面板计入，同律面板（含继承型）绝不读取
+    const isOrdinaryScope = scope === "近战" || scope === "远程"
+    if (isOrdinaryScope && !opts?.isSkillWeaponPanel) {
+        candidates.push({ field: `普通${scope}${key}`, scope, includeMods: true })
+    }
     // 同律前缀降级：同律近战 → 近战、同律远程 → 远程
     if (scope.startsWith("同律")) {
         const lowerScope = scope.slice("同律".length)
@@ -62,11 +76,17 @@ function scopedWeaponOf(build: CharBuild, scope: string): LeveledWeapon | undefi
  * @param build 构筑
  * @param scope 参与结算的武器类型前缀（近战 / 远程 / 同律近战 / 同律远程）
  * @param key 武器属性键名
+ * @param opts.isSkillWeaponPanel 当前面板是否同律武器面板
  * @returns 来源列表，顺序为 角色加成 → 武器词条 → 武器效果 → MOD → MOD 效果（@ 属性） → BUFF
  */
-export function collectWeaponAttrSources(build: CharBuild, scope: string, key: string): WeaponAttrSource[] {
+export function collectWeaponAttrSources(
+    build: CharBuild,
+    scope: string,
+    key: string,
+    opts?: WeaponAttrCandidateOptions
+): WeaponAttrSource[] {
     const sources: WeaponAttrSource[] = []
-    const candidates = getWeaponAttrFieldCandidates(key, scope)
+    const candidates = getWeaponAttrFieldCandidates(key, scope, opts)
 
     /** 记录一条非零来源：值为 0 的字段对面板没有贡献，不进明细。 */
     const push = (name: string, value: number) => {

@@ -57,10 +57,17 @@ import { AST_VECTORS, createAstBuild } from "./ast-vectors"
 const TS_BASELINE: string = packageJson.version
 const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "crates", "dob-calc-core", "tests", "fixtures")
 
-type FixtureDoc = {
-    meta: { sourceFile: string; caseName: string; tsBaseline: string; kind: string }
+type FixtureCase = {
+    name: string
     request: { charId: number; settings: Record<string, unknown> }
     expected: Record<string, unknown>
+}
+
+type FixtureDoc = {
+    meta: { sourceFile: string; caseName: string; tsBaseline: string; kind: string }
+    request?: { charId: number; settings: Record<string, unknown> }
+    expected?: Record<string, unknown>
+    cases?: FixtureCase[]
 }
 
 /** JSON 深拷贝（CharSettings/快照/面板均为纯数据，可安全序列化）。 */
@@ -662,6 +669,277 @@ function extractDobApp(): void {
         })
     }
 }
+// ── U17: 普通近战/远程前缀 vs 同律面板 ────────────────────────────────
+
+/** 普通前缀用例的设置：同律武器由角色数据派生，这里只指定近战/远程武器。 */
+function ordinarySettings(
+    baseName: string,
+    meleeWeapon: number,
+    rangedWeapon: number,
+    customBuff: [string, number][],
+    extraBuffs: [string, number][] = [],
+    targetFunction = ""
+): CharSettings {
+    const buffs: [string, number][] = [...(customBuff.length ? [["自定义BUFF", 1] as [string, number]] : []), ...extraBuffs]
+    return normalizeCharSettings({
+        ...createDefaultCharSettings(),
+        auraMod: 0,
+        baseName,
+        meleeWeapon,
+        rangedWeapon,
+        buffs,
+        customBuff,
+        targetFunction,
+    } as Partial<CharSettings>)
+}
+
+function extractOrdinaryPrefix(): void {
+    const specs = [
+        {
+            name: "ordinary_prefix",
+            charName: "贝蕾妮卡",
+            baseName: "普通攻击",
+            meleeWeapon: 10302,
+            rangedWeapon: 20601,
+            ordinary: "普通近战攻击",
+            bare: "近战攻击",
+        },
+        {
+            name: "ordinary_ranged",
+            charName: "赛琪",
+            baseName: "普通攻击",
+            meleeWeapon: 10302,
+            rangedWeapon: 20601,
+            ordinary: "普通远程攻击",
+            bare: "远程攻击",
+        },
+        {
+            name: "ordinary_inherit",
+            charName: "煜明",
+            baseName: "疑星落",
+            meleeWeapon: 10303,
+            rangedWeapon: 20601,
+            ordinary: "普通近战攻击",
+            bare: "近战攻击",
+        },
+        {
+            name: "ordinary_inherit_circle",
+            charName: "芙罗拉",
+            baseName: "圆舞",
+            meleeWeapon: 10303,
+            rangedWeapon: 20601,
+            ordinary: "普通近战攻击",
+            bare: "近战攻击",
+        },
+        {
+            name: "ordinary_inherit_sword",
+            charName: "刻舟",
+            baseName: "剑非剑",
+            meleeWeapon: 10303,
+            rangedWeapon: 20601,
+            ordinary: "普通近战攻击",
+            bare: "近战攻击",
+        },
+    ] as const
+    for (const spec of specs) {
+        const charId = charData.find(char => char.名称 === spec.charName)!.id
+        const variants: [string, [string, number][]][] = [
+            ["baseline", []],
+            ["ordinary", [[spec.ordinary, 0.1]]],
+            ["bare", [[spec.bare, 0.1]]],
+        ]
+        const cases = variants.map(([name, customBuff]) => {
+            const settings = ordinarySettings(spec.baseName, spec.meleeWeapon, spec.rangedWeapon, customBuff)
+            const panels = createCharBuildFromSettings(charId, settings).getAllWeaponSkillsAttrs()
+            return {
+                name,
+                request: { charId, settings: fullSettings(settings) },
+                expected: {
+                    melee: toJson(panels.get("近战") ?? null),
+                    ranged: toJson(panels.get("远程") ?? null),
+                    skill: toJson(panels.get("同律") ?? null),
+                },
+            }
+        })
+        writeFixture(spec.name, {
+            meta: {
+                sourceFile: "crates/dob-calc-core/tests/parity_ordinary_prefix.rs",
+                caseName: `${spec.charName} 普通前缀 / 同律面板`,
+                tsBaseline: TS_BASELINE,
+                kind: "panels",
+            },
+            cases,
+        })
+    }
+}
+
+/** 12 类武器面板 base（与引擎 `weapon_panel` 一致）。 */
+const ORDINARY_MELEE_BASES = [
+    "攻击",
+    "暴击",
+    "暴伤",
+    "触发",
+    "攻速",
+    "多重",
+    "增伤",
+    "装填",
+    "弹匣",
+    "弹药",
+    "武器倍率",
+    "独立增伤",
+] as const
+
+/** 普通面板用例的公共期望：三槽静态面板。 */
+function ordinaryPanels(charId: number, baseName: string, meleeWeapon: number, rangedWeapon: number, customBuff: [string, number][]) {
+    const settings = ordinarySettings(baseName, meleeWeapon, rangedWeapon, customBuff)
+    const panels = createCharBuildFromSettings(charId, settings).getAllWeaponSkillsAttrs()
+    return {
+        request: { charId, settings: fullSettings(settings) },
+        expected: {
+            melee: toJson(panels.get("近战") ?? null),
+            ranged: toJson(panels.get("远程") ?? null),
+            skill: toJson(panels.get("同律") ?? null),
+        },
+    }
+}
+
+/** 12 类 base 的普通面板正例（同律面板逐字段不变）；近战/远程各一组。 */
+function extractOrdinaryAllBases(): void {
+    const charId = charData.find(char => char.名称 === "贝蕾妮卡")!.id
+    const allMelee = ORDINARY_MELEE_BASES.map(base => [`普通近战${base}`, 0.1] as [string, number])
+    const allRanged = ORDINARY_MELEE_BASES.map(base => [`普通远程${base}`, 0.1] as [string, number])
+    const cases = [
+        // 近战武器 10302：装填/弹匣/弹药基础值为 0，面板看不出变化
+        { name: "baseline", ...ordinaryPanels(charId, "普通攻击", 10302, 20601, []) },
+        { name: "all_bases", ...ordinaryPanels(charId, "普通攻击", 10302, 20601, allMelee) },
+        // 远程武器 20101：装填/弹匣/弹药基础值非 0，覆盖其余 3 类 base
+        { name: "ranged-baseline", ...ordinaryPanels(charId, "普通攻击", 10302, 20101, []) },
+        { name: "ranged-all_bases", ...ordinaryPanels(charId, "普通攻击", 10302, 20101, allRanged) },
+    ]
+    writeFixture("ordinary_all_bases", {
+        meta: {
+            sourceFile: "crates/dob-calc-core/tests/parity_ordinary_prefix.rs",
+            caseName: "贝蕾妮卡 12 类普通 base（近战/远程）",
+            tsBaseline: TS_BASELINE,
+            kind: "panels",
+        },
+        cases,
+    })
+}
+
+/** 混合独立因子：`近战独立增伤` 与 `普通近战独立增伤` 各自成因子。 */
+function extractOrdinaryMixedIndependent(): void {
+    const charId = charData.find(char => char.名称 === "贝蕾妮卡")!.id
+    const variants: [string, [string, number][]][] = [
+        ["prefix", [["近战独立增伤", 0.2]]],
+        ["ordinary", [["普通近战独立增伤", 0.3]]],
+        [
+            "mixed",
+            [
+                ["近战独立增伤", 0.2],
+                ["普通近战独立增伤", 0.3],
+            ],
+        ],
+    ]
+    const cases = variants.map(([name, customBuff]) => ({
+        name,
+        ...ordinaryPanels(charId, "普通攻击", 10302, 20601, customBuff),
+    }))
+    writeFixture("ordinary_mixed_independent", {
+        meta: {
+            sourceFile: "crates/dob-calc-core/tests/parity_ordinary_prefix.rs",
+            caseName: "贝蕾妮卡 混合独立因子",
+            tsBaseline: TS_BASELINE,
+            kind: "panels",
+        },
+        cases,
+    })
+}
+
+/** 攻击细分普通键：4 类攻击 × `增伤/独立增伤`，以及继承型同律不追加。 */
+function extractOrdinaryAttackType(): void {
+    const meleeId = charData.find(char => char.名称 === "贝蕾妮卡")!.id
+    const attackTypes = [
+        { name: "普攻", expr: "普通攻击::一段伤害", add: "普通近战普攻增伤", indep: "普通近战普攻独立增伤" },
+        { name: "蓄力", expr: "蓄力攻击::蓄力攻击伤害", add: "普通近战蓄力增伤", indep: "普通近战蓄力独立增伤" },
+        { name: "下落", expr: "下落攻击::下落攻击伤害", add: "普通近战下落增伤", indep: "普通近战下落独立增伤" },
+        { name: "滑行", expr: "滑行攻击::滑行攻击伤害", add: "普通近战滑行增伤", indep: "普通近战滑行独立增伤" },
+    ]
+    const makeCase = (charId: number, baseName: string, melee: number, name: string, expr: string, customBuff: [string, number][]) => {
+        const settings = ordinarySettings(baseName, melee, 20601, customBuff, [], expr)
+        const build = createCharBuildFromSettings(charId, settings)
+        return {
+            name,
+            request: { charId, settings: fullSettings(settings) },
+            expected: {
+                value: build.evaluateAST(expr, build.calculateWeaponAttributes()),
+                snapshot: toJson(createWorkerSnapshot(build)),
+            },
+        }
+    }
+    const cases: ReturnType<typeof makeCase>[] = []
+    for (const type of attackTypes) {
+        cases.push(makeCase(meleeId, "蓄力攻击", 10302, `${type.name}-baseline`, type.expr, []))
+        cases.push(makeCase(meleeId, "蓄力攻击", 10302, `${type.name}-add`, type.expr, [[type.add, 0.1]]))
+        cases.push(makeCase(meleeId, "蓄力攻击", 10302, `${type.name}-indep`, type.expr, [[type.indep, 0.1]]))
+    }
+    // 继承型同律（疑星落，字段 tag 为下落攻击）：普通键不追加，裸键仍按降级口径生效
+    const inheritId = charData.find(char => char.名称 === "煜明")!.id
+    const inheritExpr = "疑星落::[疑星落]伤害"
+    cases.push(makeCase(inheritId, "疑星落", 10303, "inherit-baseline", inheritExpr, []))
+    cases.push(makeCase(inheritId, "疑星落", 10303, "inherit-ordinary", inheritExpr, [["普通近战下落增伤", 0.1]]))
+    cases.push(makeCase(inheritId, "疑星落", 10303, "inherit-bare", inheritExpr, [["近战下落增伤", 0.1]]))
+    writeFixture("ordinary_attack_type", {
+        meta: {
+            sourceFile: "crates/dob-calc-core/tests/parity_ordinary_prefix.rs",
+            caseName: "攻击细分普通键（4 类 × 增伤/独立增伤）",
+            tsBaseline: TS_BASELINE,
+            kind: "ast-vector",
+        },
+        cases,
+    })
+}
+
+/**
+ * 继承型同律 + 读取 `skillWeaponAttr` 的 code BUFF（琳恩裂伤特性 `攻击 += skillWeaponAttr.攻击`）。
+ * `普通近战攻击` 不得经继承槽的面板别名泄漏到同律面板/角色属性。
+ */
+function extractOrdinaryInheritCode(): void {
+    const spec = { charName: "煜明", baseName: "疑星落", meleeWeapon: 10303, rangedWeapon: 20601 }
+    const charId = charData.find(char => char.名称 === spec.charName)!.id
+    const variants: [string, [string, number][]][] = [
+        ["baseline", []],
+        ["ordinary", [["普通近战攻击", 0.1]]],
+    ]
+    const cases = variants.map(([name, customBuff]) => {
+        const settings = ordinarySettings(spec.baseName, spec.meleeWeapon, spec.rangedWeapon, customBuff, [["琳恩裂伤特性", 1]])
+        const build = createCharBuildFromSettings(charId, settings)
+        const panels = build.getAllWeaponSkillsAttrs()
+        return {
+            name,
+            request: { charId, settings: fullSettings(settings) },
+            expected: {
+                snapshot: toJson(createWorkerSnapshot(build)),
+                ...triple(build),
+                panels: {
+                    melee: toJson(panels.get("近战") ?? null),
+                    ranged: toJson(panels.get("远程") ?? null),
+                    skill: toJson(panels.get("同律") ?? null),
+                },
+            },
+        }
+    })
+    writeFixture("ordinary_inherit_code", {
+        meta: {
+            sourceFile: "crates/dob-calc-core/tests/parity_ordinary_prefix.rs",
+            caseName: "煜明 继承同律 code 面板读取",
+            tsBaseline: TS_BASELINE,
+            kind: "e2e",
+        },
+        cases,
+    })
+}
+
 /** 全量模块表落盘：供 Rust 真实求值建表（`BuildPayload::from_json` 输入形状）。 */
 function extractModules(): void {
     const modules = {
@@ -690,5 +968,10 @@ extractCharBuildFixed()
 extractShardE2E()
 extractEffectCode()
 extractDobApp()
+extractOrdinaryPrefix()
+extractOrdinaryAllBases()
+extractOrdinaryMixedIndependent()
+extractOrdinaryAttackType()
+extractOrdinaryInheritCode()
 extractModules()
 console.log(`done, tsBaseline=${TS_BASELINE}`)

@@ -1,7 +1,8 @@
-import { beforeAll, describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 import { ref } from "vue"
-import { createDefaultCharSettings, normalizeCharSettings } from "@/composables/useCharSettings"
-import { CharBuild, LeveledChar, LeveledWeapon } from "@/data"
+import { createDefaultCharSettings, normalizeCharSettings, serializeCharSettings } from "@/composables/useCharSettings"
+import { CharBuild, charMap, createMaxedReachableTalentLevels, LeveledChar, LeveledWeapon } from "@/data"
+import { createAssistBuildFromSettings, createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { isPetRelatedBuffName } from "@/data/petTrait"
 import { BUILD_API_DTS } from "@/shared/buildApiContract"
 import { type BuildApiHost, createBuildApi } from "@/utils/build-api"
@@ -88,6 +89,33 @@ describe("createBuildApi", () => {
         raw.customVariables = [["测试", "1 + 1"]]
         expect(await api.import(raw)).toMatchObject({ ok: true })
         expect((await api.raw()).customVariables).toEqual([["测试", "1 + 1"]])
+    })
+
+    it("raw 对非归一化宿主也返回完整内存结构且无压缩载荷（U96-fix）", async () => {
+        const settings = createDefaultCharSettings()
+        settings.transcend = {
+            ...settings.transcend,
+            enabled: true,
+            talentLevels: createMaxedReachableTalentLevels(),
+            mainGear: [{ slotId: 1, affixId: 102, rollLevel: 10, masterworkLevel: 0, ancient: false, finalMasterwork: false }],
+        }
+        const compressed = JSON.parse(serializeCharSettings(settings))
+        // 宿主直接塞入压缩载荷 + 大量缺失字段的原始对象
+        const host = {
+            charSettings: ref({ baseName: "普通攻击", transcend: compressed.transcend }),
+            selectedChar: ref("法露茜"),
+            charBuild: ref(null),
+            inv: undefined,
+            setChar: () => {},
+        } as unknown as BuildApiHost
+        const raw = await createBuildApi(host).raw()
+
+        expect(raw.transcend.talentLevels).toHaveLength(createMaxedReachableTalentLevels().length)
+        expect(Array.isArray(raw.transcend.gearVariants[0])).toBe(false)
+        expect(Array.isArray(raw.transcend.gearVariants[0].mainGear)).toBe(true)
+        expect(Array.isArray(raw.transcend.mainGear)).toBe(true)
+        expect((raw.transcend.mainGear[0] as { slotId: number }).slotId).toBe(1)
+        expect("actions" in raw).toBe(false)
     })
 
     it("util 能归一化与序列化残缺设置", async () => {
@@ -264,5 +292,136 @@ describe("build.weapon 灾厄唯一限制", () => {
         // 此时再装远程灾厄放行
         expect(await api.weapon({ slot: "ranged", name: "血染织羽" })).toMatchObject({ ok: true })
         expect((await api.state()).ranged).toMatchObject({ name: "血染织羽" })
+    })
+})
+
+const CROSS_CHAR_MAIN = "黎瑟"
+const CROSS_CHAR_ASSIST = "扶疏"
+
+/**
+ * 跨角色目标函数配置：主控 + 1 号协战完整 loadout，目标值直接读协战面板。
+ * @returns 已归一化的角色配置
+ */
+function createCrossCharSettings() {
+    const main = charMap.get(CROSS_CHAR_MAIN)
+    const assist = charMap.get(CROSS_CHAR_ASSIST)
+    if (!main || !assist) throw new Error("测试角色缺失")
+    const settings = createDefaultCharSettings()
+    settings.baseName = main.技能?.[0]?.名称 ?? ""
+    settings.team1 = assist.id
+    settings.team1Weapon = 10302
+    settings.assist1 = {
+        ...settings.assist1,
+        charLevel: 70,
+        charSkillLevel: [10, 10, 10],
+        baseName: assist.技能?.[0]?.名称 ?? "",
+        charMods: [[41001, 10], null, null, null, null, null, null, null],
+        buffs: [["菲娜4溯", 10]],
+        customBuff: [["技能威力", 0.6]],
+    }
+    settings.targetFunction = `${assist.名称}::技能威力*0.7`
+    return normalizeCharSettings(settings)
+}
+
+describe("compute.build 跨角色目标函数（settings 驱动）", () => {
+    it("协战 loadout 生效：目标值等于协战面板技能威力 × 0.7", async () => {
+        const api = makeApi()
+        const settings = createCrossCharSettings()
+        const assist = createAssistBuildFromSettings(settings, "assist1")
+        expect(assist).toBeDefined()
+        expect(assist!.char.等级).toBe(70)
+        const expected = assist!.calculateAttributes().技能威力 * 0.7
+        expect(expected).toBeGreaterThan(0)
+
+        const value = await (await api.compute.build(CROSS_CHAR_MAIN, settings)).damage()
+        expect(value).toBeCloseTo(expected, 6)
+    })
+
+    it("协战已配置但缺武器：查询为 0 且不打印命名空间错误", async () => {
+        const api = makeApi()
+        const settings = createCrossCharSettings()
+        settings.team1Weapon = "-"
+        const normalized = normalizeCharSettings(settings)
+        const error = vi.spyOn(console, "error").mockImplementation(() => {})
+        try {
+            expect(await (await api.compute.build(CROSS_CHAR_MAIN, normalized)).damage()).toBe(0)
+            // 命名空间已注册（角色存在），只是没有可查询的面板：干净 0，不走报错路径
+            expect(error).not.toHaveBeenCalled()
+        } finally {
+            error.mockRestore()
+        }
+    })
+
+    it("完全未配置协战时表达式为 0（走无效命名空间路径，与 U89a 口径一致）", async () => {
+        const api = makeApi()
+        const settings = normalizeCharSettings(createDefaultCharSettings())
+        settings.targetFunction = `${CROSS_CHAR_ASSIST}::技能威力`
+        const error = vi.spyOn(console, "error").mockImplementation(() => {})
+        try {
+            expect(await (await api.compute.build(CROSS_CHAR_MAIN, settings)).damage()).toBe(0)
+        } finally {
+            expect(error).toHaveBeenCalled()
+            error.mockRestore()
+        }
+    })
+
+    it("2 号协战（assist2）同样按协战面板求值", async () => {
+        const api = makeApi()
+        const settings = createCrossCharSettings()
+        // 把协战从 1 号挪到 2 号，loadout 与表达式保持一致
+        settings.team1 = "-"
+        settings.team1Weapon = "-"
+        settings.team2 = charMap.get(CROSS_CHAR_ASSIST)!.id
+        settings.team2Weapon = 10302
+        settings.assist2 = { ...settings.assist1, charLevel: 65 }
+        settings.assist1 = createDefaultCharSettings().assist1
+        settings.targetFunction = `协战2::技能威力*0.7`
+
+        const normalized = normalizeCharSettings(settings)
+        const assist = createAssistBuildFromSettings(normalized, "assist2")
+        expect(assist).toBeDefined()
+        expect(assist!.char.等级).toBe(65)
+        const expected = assist!.calculateAttributes().技能威力 * 0.7
+        expect(expected).toBeGreaterThan(0)
+
+        expect(await (await api.compute.build(CROSS_CHAR_MAIN, normalized)).damage()).toBeCloseTo(expected, 6)
+    })
+})
+
+describe("worker realm 注册 CharBuild.createTeamResolver（U89b1-fix P1）", () => {
+    /**
+     * 在全新模块图里只加载 CharBuild 系列与目标 worker 模块，验证 hook 是否被注册、快照重建能否解析跨角色属性。
+     * 隔离前提：仅加载 `CharBuildSnapshot` 时 `CharBuild.createTeamResolver` 必须仍是 undefined
+     * （否则回归测试无法暴露「worker realm 漏 import helper」）。
+     * @param modulePath 目标 worker 模块路径（其 import 图应包含 CharBuildHelper）
+     */
+    async function expectRealmRegistered(modulePath: string) {
+        vi.resetModules()
+        const [{ CharBuild }, snapshotModule] = await Promise.all([import("@/data/CharBuild"), import("@/data/CharBuildSnapshot")])
+        expect(CharBuild.createTeamResolver).toBeUndefined()
+
+        await import(modulePath)
+        expect(typeof CharBuild.createTeamResolver).toBe("function")
+
+        // hook 注册后用快照重建：协战属性可解析，且不打印命名空间错误
+        const settings = createCrossCharSettings()
+        const assistPower = createAssistBuildFromSettings(settings, "assist1")!.calculateAttributes().技能威力
+        const snapshot = snapshotModule.createWorkerSnapshot(createCharBuildFromSettings(charMap.get(CROSS_CHAR_MAIN)!.id, settings))
+        const restored = snapshotModule.createBuildFromSnapshot(snapshot)
+        const error = vi.spyOn(console, "error").mockImplementation(() => {})
+        try {
+            expect(restored.evaluateAST(`${CROSS_CHAR_ASSIST}::技能威力`)).toBeCloseTo(assistPower, 6)
+            expect(error).not.toHaveBeenCalled()
+        } finally {
+            error.mockRestore()
+        }
+    }
+
+    it("build-sandbox-runtime 的 import 图注册 hook", async () => {
+        await expectRealmRegistered("@/utils/build-sandbox-runtime")
+    })
+
+    it("transcend-gear/income-core 的 import 图注册 hook", async () => {
+        await expectRealmRegistered("@/utils/transcend-gear/income-core")
     })
 })

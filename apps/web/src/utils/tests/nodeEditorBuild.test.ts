@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createDefaultCharSettings } from "@/composables/useCharSettings"
-import { modData } from "@/data"
+import { charMap, modData } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { NodeType } from "@/store/nodeEditorTypes"
 import {
@@ -862,5 +862,53 @@ describe("nodeEditorBuild", () => {
         expect(sortDownstreamIds([], diamond)).toEqual([])
         // 环路兜底：不断不重，一个不少
         expect(sortDownstreamIds(["a"], [...diamond, { source: "d", target: "a" }]).sort()).toEqual(["a", "b", "c", "d"])
+    })
+})
+
+describe("nodeEditorBuild 协战 loadout 往返（U88a-fix）", () => {
+    /**
+     * 构造一个只带角色节点与 BUFF 节点的最小图输入。
+     * @param buffData BUFF 节点数据
+     * @returns 节点图输入
+     */
+    function createTeamInputs(buffData: Record<string, unknown>): NodeBuildInputs {
+        return {
+            charInput: { id: "char", type: NodeType.CHAR_INPUT, data: { charId: CHAR_ID, charLevel: 80 } },
+            modInputs: [],
+            buffInputs: [{ id: "buff", type: NodeType.BUFF_INPUT, data: buffData }],
+            duplicates: [],
+        }
+    }
+
+    it("旧 BUFF 节点不含 assist 键时保留基底 assist1", () => {
+        const settings = createDefaultCharSettings()
+        settings.assist1.auraMod = 31524
+        settings.assist1.charMods[0] = [51441, 10]
+        settings.assist1.buffs = [["某BUFF", 2]]
+        const baseBuild = { charId: CHAR_ID, settings, charBuild: createCharBuildFromSettings(CHAR_ID, settings), missing: [] }
+
+        const { settings: resolved } = createSettingsFromNodeInputs(
+            createTeamInputs({ buffs: [], team1: CHAR_ID, team1Weapon: 10206 }),
+            {},
+            { baseBuild }
+        )
+
+        expect(resolved.assist1).toEqual(settings.assist1)
+        expect(resolved.assist1.charMods[0]).toEqual([51441, 10])
+    })
+
+    it("节点携带残缺协战 loadout 时按默认值归一化", () => {
+        const { settings } = createSettingsFromNodeInputs(
+            createTeamInputs({ buffs: [], team1: CHAR_ID, assist1: { charSkillLevel: 12 }, assist2: {} }),
+            {}
+        )
+
+        const firstSkill = charMap.get(CHAR_ID)?.技能?.[0]?.名称 ?? ""
+        expect(firstSkill).not.toBe("")
+        expect(settings.assist1.charSkillLevel).toEqual([12, 12, 12])
+        expect(settings.assist1.charMods).toEqual(Array(8).fill(null))
+        expect(settings.assist1.baseName).toBe(firstSkill)
+        expect(settings.assist2.enabled).toBe(false)
+        expect(settings.assist2.baseName).toBe("")
     })
 })

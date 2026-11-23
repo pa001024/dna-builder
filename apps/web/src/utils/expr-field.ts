@@ -1,5 +1,6 @@
 import type { CharBuild } from "@/data"
 import { TokenType, tokenizeAST } from "@/data/ast"
+import { toExprIdentifier } from "@/data/expr-name"
 
 /** 表达式左边界字符：以这些字符结尾时，其后插入字段无需补 "+" 连接符 */
 const LEFT_NO_PLUS_RE = /[+\-*/%(=[{,:.]$/
@@ -36,8 +37,8 @@ export function joinExprText(existing: string, insert: string, index: number = e
 
 /**
  * 获取技能字段对应的 AST 命名空间。
- * 角色主技能按 e/q/p 映射；其余技能（含武器技能）按技能 safeName 映射，
- * 与 evaluateAST 的 skillAttrs 键一致（skillAttrs 仅按技能名与 e/q/p 建立索引）。
+ * 角色主技能按 e/q/p 映射；其余技能（含武器技能）按技能的表达式标识符映射，
+ * 与 evaluateAST 的技能命名空间绑定一致（技能名 / safeName / 表达式标识符均可命中）。
  * @param charBuild 当前构筑
  * @param fieldName 字段名
  * @returns 命名空间；非当前选中技能的字段返回空字符串
@@ -45,27 +46,31 @@ export function joinExprText(existing: string, insert: string, index: number = e
 export function resolveSkillFieldNamespace(charBuild: CharBuild | undefined | null, fieldName: string): string {
     const skill = charBuild?.selectedSkill
     if (!charBuild || !skill) return ""
-    const isField = skill.字段.some(field => field.名称 === fieldName || field.safeName === fieldName)
+    const isField = skill.字段.some(field => field.名称 === fieldName || field.safeName === fieldName || field.exprName === fieldName)
     if (!isField) return ""
     const index = charBuild.skills.findIndex(s => s.名称 === skill.名称)
-    if (index >= 0) return ["e", "q", "p"][index] || skill.safeName
-    return skill.safeName
+    if (index >= 0) return ["e", "q", "p"][index] || skill.exprName
+    return skill.exprName
 }
 
 /**
  * 将角色属性 / 技能字段解析为可直接写入表达式的文本，供「点击追加」与「拖拽放置」共用，
  * 保证同一字段无论点击还是拖拽都得到完全相同的表达式片段。
  * 已带命名空间的字段原样返回（仅把 / 替换为 _）；技能字段补全技能命名空间；
+ * 指定 `namespace` 时以该角色名作为命名空间（协战面板注入自身角色名，供其他角色跨角色引用）；
  * 其余角色属性补 角色:: 前缀并以 ! 强制按属性解析（如 角色::攻击!）。
  * @param charBuild 当前构筑
  * @param fieldName 字段名（角色属性键或技能字段名）
+ * @param namespace 命名空间覆盖（角色名）；缺省按当前角色口径
  * @returns 表达式字段文本
  */
-export function resolveCharFieldExpression(charBuild: CharBuild | undefined | null, fieldName: string): string {
-    const cleaned = fieldName.replace(/\//g, "_")
-    if (cleaned.includes("::")) return cleaned
-    const namespace = resolveSkillFieldNamespace(charBuild, cleaned)
-    if (namespace) return `${namespace}::${cleaned}`
+export function resolveCharFieldExpression(charBuild: CharBuild | undefined | null, fieldName: string, namespace?: string): string {
+    const raw = fieldName.replace(/\//g, "_")
+    if (raw.includes("::")) return raw
+    const cleaned = toExprIdentifier(raw)
+    if (namespace) return `${namespace}::${cleaned}!`
+    const skillNamespace = resolveSkillFieldNamespace(charBuild, cleaned)
+    if (skillNamespace) return `${skillNamespace}::${cleaned}`
     return `角色::${cleaned}!`
 }
 

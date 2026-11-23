@@ -298,9 +298,9 @@ describe("evaluateAST函数测试", () => {
 
             // 充盈转化（武器属性）= 基础转化 1 + 该武器作用域 MOD 充盈转化
             expect(attrs.weapon!.充盈转化).toBe(2)
-            // 充盈威力（角色属性）= 溢出触发 × 充盈转化（仅近战溢出）
+            // 充盈威力（角色属性，1 起始）= 1 + 溢出触发 × 充盈转化（仅近战溢出）
             const overflow = Math.max(0, attrs.weapon!.触发 - 1)
-            expect(attrs.充盈威力).toBeCloseTo(overflow * 2, 6)
+            expect(attrs.充盈威力).toBeCloseTo(1 + overflow * 2, 6)
             // 作为角色属性可被 AST 表达式引用
             expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
         })
@@ -336,7 +336,7 @@ describe("evaluateAST函数测试", () => {
             const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
             expect(attrs.weapon!.充盈转化).toBe(2.5)
             const overflow = Math.max(0, attrs.weapon!.触发 - 1)
-            expect(attrs.充盈威力).toBeCloseTo(overflow * 2.5, 6)
+            expect(attrs.充盈威力).toBeCloseTo(1 + overflow * 2.5, 6)
         })
 
         it("充盈转化为武器属性（各自作用域），充盈威力为角色汇总属性", () => {
@@ -379,8 +379,8 @@ describe("evaluateAST函数测试", () => {
             // 充盈转化（武器属性）：近战/远程 MOD 的转化只作用于各自武器
             expect(aMelee.weapon!.充盈转化).toBe(2)
             expect(aRanged.weapon!.充盈转化).toBe(2)
-            // 充盈威力（角色属性）= Σ 各武器溢出触发 × 该武器充盈转化，与武器上下文无关
-            const expected = (meleeOverflow + rangedOverflow) * 2
+            // 充盈威力（角色属性，1 起始）= 1 + Σ 各武器溢出触发 × 该武器充盈转化，与武器上下文无关
+            const expected = 1 + (meleeOverflow + rangedOverflow) * 2
             expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
             expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
         })
@@ -419,7 +419,7 @@ describe("evaluateAST函数测试", () => {
             expect(aMelee.weapon!.充盈转化).toBe(2)
             expect(aRanged.weapon!.充盈转化).toBe(1)
             // 充盈威力为角色汇总属性：近战溢出已计入，与武器上下文无关
-            const expected = Math.max(0, aMelee.weapon!.触发 - 1) * 2
+            const expected = 1 + Math.max(0, aMelee.weapon!.触发 - 1) * 2
             expect(expected).toBeGreaterThan(0)
             expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
             expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
@@ -459,7 +459,7 @@ describe("evaluateAST函数测试", () => {
             const skillOverflow = Math.max(0, aSkill.weapon!.触发 - 1)
             expect(skillOverflow).toBeGreaterThan(0)
             expect(aSkill.weapon!.充盈转化).toBe(2)
-            expect(aSkill.充盈威力).toBeCloseTo(skillOverflow * 2, 6)
+            expect(aSkill.充盈威力).toBeCloseTo(1 + skillOverflow * 2, 6)
             // 同律 MOD 不作用于近战武器：近战武器保留基础转化 = 1，但角色充盈威力汇总已含同律溢出
             const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
             expect(aMelee.weapon!.充盈转化).toBe(1)
@@ -513,12 +513,12 @@ describe("evaluateAST函数测试", () => {
             const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
 
             // 角色 MOD 提供充盈威力 +1（角色属性，经公共加成向量汇总）
-            expect(build.calculateAttributes(true).充盈威力).toBe(1)
+            expect(build.calculateAttributes(true).充盈威力).toBe(2)
             // 武器转化 = 溢出触发 × 该武器充盈转化
             const weaponConverted = Math.max(0, attrs.weapon!.触发 - 1) * attrs.weapon!.充盈转化
             expect(weaponConverted).toBeGreaterThan(0)
-            // 角色充盈威力 = 角色 MOD 加成 + 武器转化，正常累加
-            expect(attrs.充盈威力).toBeCloseTo(1 + weaponConverted, 6)
+            // 角色充盈威力 = 基础 1 + 角色 MOD 加成 + 武器转化，正常累加
+            expect(attrs.充盈威力).toBeCloseTo(2 + weaponConverted, 6)
             // AST 引用同样返回累加值
             expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
         })
@@ -564,12 +564,12 @@ describe("evaluateAST函数测试", () => {
             }
             // 至少近战武器贡献非零溢出转化
             expect(sources.some(source => source.value > 0)).toBe(true)
-            // 武器转化来源合计 = 角色充盈威力（本构建无角色 MOD 充盈威力加成）
+            // 基础 1 + 武器转化来源合计 = 角色充盈威力（本构建无角色 MOD 充盈威力加成）
             const total = sources.reduce((sum, source) => sum + source.value, 0)
-            expect(total).toBeCloseTo(attrs.充盈威力, 6)
+            expect(1 + total).toBeCloseTo(attrs.充盈威力, 6)
         })
 
-        it("技能字段带 tag 充盈 时，最终伤害应乘以 (1+充盈威力)", () => {
+        it("技能字段带 tag 充盈 时，最终伤害应乘以充盈威力（1 起始总倍率）", () => {
             const mkFullnessMod = (id: number, 充盈威力: number) =>
                 new LeveledMod({
                     id,
@@ -599,17 +599,17 @@ describe("evaluateAST函数测试", () => {
                     enemyResistance: 0,
                     targetFunction: "充盈伤害",
                 })
-            // 无充盈威力：充盈字段按原倍率结算
+            // 无充盈威力加成（基础 1）：充盈字段按原倍率结算
             const baseBuild = createBuild([])
-            expect(baseBuild.calculateWeaponAttributes().充盈威力).toBe(0)
+            expect(baseBuild.calculateWeaponAttributes().充盈威力).toBe(1)
             const baseFullnessDamage = baseBuild.calculateTargetFunction(undefined, "充盈伤害")
             const baseAdditionalDamage = baseBuild.calculateTargetFunction(undefined, "附加伤害")
             const baseNormalDamage = baseBuild.calculateTargetFunction(undefined, "伤害")
             expect(baseFullnessDamage).toBeGreaterThan(0)
 
-            // 角色 MOD 提供充盈威力 +1：带 充盈 tag 的字段伤害 × (1+1) = ×2，未带 tag 的字段不变
+            // 角色 MOD 提供充盈威力 +1：带 充盈 tag 的字段伤害 × 2（基础 1 + 加成 1），未带 tag 的字段不变
             const buffedBuild = createBuild([mkFullnessMod(999901, 1)])
-            expect(buffedBuild.calculateWeaponAttributes().充盈威力).toBe(1)
+            expect(buffedBuild.calculateWeaponAttributes().充盈威力).toBe(2)
             const buffedFullnessDamage = buffedBuild.calculateTargetFunction(undefined, "充盈伤害")
             const buffedAdditionalDamage = buffedBuild.calculateTargetFunction(undefined, "附加伤害")
             const buffedNormalDamage = buffedBuild.calculateTargetFunction(undefined, "伤害")
@@ -619,13 +619,13 @@ describe("evaluateAST函数测试", () => {
             // 未带 充盈 tag 的伤害字段不受充盈威力加成
             expect(buffedNormalDamage / baseNormalDamage).toBeCloseTo(1, 6)
 
-            // 成员访问（如无血量因数 .N）同样整体乘以 (1+充盈威力)
+            // 成员访问（如无血量因数 .N）同样整体乘以充盈威力
             const buffedNoHp = buffedBuild.calculateTargetFunction(undefined, "充盈伤害.N")
             const baseNoHp = baseBuild.calculateTargetFunction(undefined, "充盈伤害.N")
             expect(buffedNoHp / baseNoHp).toBeCloseTo(2, 6)
         })
 
-        it("转充盈 覆盖技能伤害：非充盈技能字段按 1 + 转充盈×充盈威力 加成", () => {
+        it("转充盈 覆盖技能伤害：非充盈技能字段按 1 + 转充盈×(充盈威力-1) 加成", () => {
             // 法露茜「坠入黑渊」的「伤害」为技能伤害（经 calculateSkillDamage 结算），验证 转充盈 在字段层统一生效
             const build = new CharBuild({
                 char: new LeveledChar("法露茜"),
@@ -640,16 +640,16 @@ describe("evaluateAST函数测试", () => {
                 enemyResistance: 0,
                 targetFunction: "伤害",
             })
-            const F = build.calculateWeaponAttributes().充盈威力 || 0
+            const F = build.calculateWeaponAttributes().充盈威力 ?? 1
             const base = build.evaluateAST("伤害")
             const full = build.evaluateAST("伤害{转充盈:1,充盈威力:1}")
             const half = build.evaluateAST("伤害{转充盈:0.5,充盈威力:1}")
-            expect(full).toBeCloseTo(base * (1 + (F + 1)), 3)
-            expect(half).toBeCloseTo(base * (1 + 0.5 * (F + 1)), 3)
+            expect(full).toBeCloseTo(base * (1 + F), 3)
+            expect(half).toBeCloseTo(base * (1 + 0.5 * F), 3)
         })
 
         it("转充盈 与 充盈 tag 互斥：已带 tag 的字段不重复计乘", () => {
-            // 「充盈伤害」字段自带 tag ["充盈"]，本身已整体 ×(1+充盈威力)，叠加 转充盈 不应再次计乘
+            // 「充盈伤害」字段自带 tag ["充盈"]，本身已整体 ×充盈威力，叠加 转充盈 不应再次计乘
             const build = new CharBuild({
                 char: new LeveledChar("法露茜"),
                 skillLevel: 10,

@@ -7,6 +7,7 @@ export function getRarityName(rarity: number): string {
             4: "紫",
             5: "金",
             6: "红",
+            10: "红",
         }[rarity] || "白"
     )
 }
@@ -24,7 +25,7 @@ export function getRarityValue(rarity: string): number {
     )
 }
 
-/** 稀有度对应的品质色（白绿蓝紫金），供图表与内联样式使用。 */
+/** 稀有度对应的品质色（白绿蓝紫金红），10 为高稀有度、与 6 同色。 */
 const RARITY_COLORS: Record<number, string> = {
     1: "#c3ccd9",
     2: "#4bd07a",
@@ -32,11 +33,12 @@ const RARITY_COLORS: Record<number, string> = {
     4: "#b06bff",
     5: "#f2c14e",
     6: "#ff5c5c",
+    10: "#ff5c5c",
 }
 
 /**
  * 根据稀有度返回品质色（十六进制）。
- * @param rarity 稀有度（1~6 或中文名）
+ * @param rarity 稀有度（1~6 与 10，10 与 6 同样式；或中文名）
  * @returns 十六进制颜色
  */
 export function getRarityColor(rarity: number | string): string {
@@ -44,9 +46,9 @@ export function getRarityColor(rarity: number | string): string {
 }
 
 /**
- * 根据稀有度返回背景渐变色。
- * @param rarity 稀有度（1~6 或中文名）
- * @returns Tailwind 渐变类名
+ * 根据稀有度返回背景渐变类名（含方向类，开箱即用）。
+ * @param rarity 稀有度（1~6 与 10，10 与 6 同样式；或中文名）
+ * @returns Tailwind 渐变类名（含 bg-linear-15 方向类，调用处无需再补）
  */
 export function getRarityGradientClass(rarity: number | string): string {
     const rarityMap: Record<number, string> = {
@@ -56,8 +58,10 @@ export function getRarityGradientClass(rarity: number | string): string {
         4: "from-purple-900/80 to-purple-100/80",
         5: "from-yellow-900/80 to-yellow-100/80",
         6: "from-red-900/80 to-red-100/80",
+        10: "from-red-900/80 to-red-100/80",
     }
-    return rarityMap[typeof rarity === "string" ? getRarityValue(rarity) : rarity] || rarityMap[1]
+    const key = typeof rarity === "string" ? getRarityValue(rarity) : rarity
+    return `bg-linear-15 ${rarityMap[key] || rarityMap[1]}`
 }
 
 /**
@@ -66,7 +70,7 @@ export function getRarityGradientClass(rarity: number | string): string {
  * 界面**只用颜色**表示稀有度，不显示文字：稀有度在数据里是「白/绿/蓝/紫/金/红」这类单字简写，
  * 它们同时也是游戏原文（剧情人物「白」、道具与场景名等），拿简写当翻译键会把同名文本一起翻错。
  * 返回值包含完整形状（内联块 / 尺寸 / 圆角 / 边框），调用处无需再补形状类。
- * @param rarity 稀有度（1~6 或中文名"白绿蓝紫金红"）
+ * @param rarity 稀有度（1~6 与 10，10 与 6 同样式；或中文名"白绿蓝紫金红"）
  * @returns 完整色块类名，可直接绑定到 :class
  */
 export function getRaritySwatchClass(rarity: number | string): string {
@@ -77,6 +81,7 @@ export function getRaritySwatchClass(rarity: number | string): string {
         4: "border-purple-500/50 bg-purple-500/80",
         5: "border-yellow-500/50 bg-yellow-500/80",
         6: "border-red-500/50 bg-red-500/80",
+        10: "border-red-500/50 bg-red-500/80",
     }
     const key = typeof rarity === "string" ? getRarityValue(rarity) : rarity
     const color = colorMap[key] || colorMap[1]

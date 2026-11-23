@@ -14,6 +14,7 @@ import {
 import { type BuildSummary, type BuildSummaryWeapon, useBuildSummaries } from "@/composables/useBuildSummaries"
 import { useCharRemote } from "@/composables/useCharRemote"
 import { CharSettings, serializeCharSettings, useCharSettings } from "@/composables/useCharSettings"
+import { serializeCharSettingsForShare } from "@/data"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
@@ -250,7 +251,8 @@ async function confirmEdit() {
                 title: edit_title.value,
                 desc: edit_desc.value,
                 charId: savedCharId,
-                charSettings: serializeCharSettings(charSettings.value),
+                // 上传用分享安全序列化（只带当前激活升华变体），满足服务端 20,000 上限
+                charSettings: serializeCharSettingsForShare(charSettings.value),
             },
         })
 

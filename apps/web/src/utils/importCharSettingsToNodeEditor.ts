@@ -227,6 +227,9 @@ export function createImportedGraphSpec(charName: string, settings: CharSettings
             team2Weapon: settings.team2Weapon,
             team2Build: settings.team2Build,
             team2BuildVariant: settings.team2BuildVariant,
+            // 协战完整 loadout 随队友配置一起往返（深拷贝，节点数据不持有构筑设置引用）
+            assist1: clonePlain(settings.assist1),
+            assist2: clonePlain(settings.assist2),
         },
     })
     nodes.push({

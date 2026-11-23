@@ -3,6 +3,7 @@ import { computed } from "vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
 import type { CharSettings } from "@/composables/useCharSettings"
 import type { CharAttr, CharBuild } from "@/data"
+import { formatSkillLevelBonus, isAttrValueVisible } from "@/data/skillLevels"
 import { formatSkillProp } from "@/util"
 
 const props = defineProps<{
@@ -63,6 +64,23 @@ function getWeaponAttackLabelPrefix(key: string) {
  */
 function attrName(key: string): string {
     return getAttrName(key, getWeaponAttackLabelPrefix(key))
+}
+
+/**
+ * 技能等级属性（U99b）：值为等级加成 `+N`，按带符号整数展示，不按百分比。
+ */
+const SKILL_LEVEL_ATTR_KEYS = new Set(["E技能等级", "Q技能等级", "P技能等级"])
+
+/**
+ * 角色属性的展示格式：技能等级按带符号整数（`+N`），数值型属性按平值，其余按百分比。
+ * @param key 属性键名
+ * @param value 属性值
+ * @returns 展示字符串
+ */
+function formatCharAttrValue(key: string, value: number): string {
+    if (SKILL_LEVEL_ATTR_KEYS.has(key)) return formatSkillLevelBonus(value)
+    if (["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)) return `${+value.toFixed(key === "攻击" ? 2 : 0)}`
+    return `${+(value * 100).toFixed(2)}%`
 }
 </script>
 <template>
@@ -144,7 +162,7 @@ function attrName(key: string): string {
                     </div>
                 </div>
                 <div
-                    v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && typeof v === 'number' && v)"
+                    v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && isAttrValueVisible(v))"
                     :key="key"
                     class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 p-3 transition-colors duration-200"
                 >
@@ -152,11 +170,7 @@ function attrName(key: string): string {
                         {{ $t(attrName(key)) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
-                        {{
-                            ["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)
-                                ? `${+val.toFixed(key === "攻击" ? 2 : 0)}`
-                                : `${+(val * 100).toFixed(2)}%`
-                        }}
+                        {{ formatCharAttrValue(key, val) }}
                     </div>
                 </div>
             </div>

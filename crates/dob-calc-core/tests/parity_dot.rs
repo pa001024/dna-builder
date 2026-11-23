@@ -5,7 +5,8 @@
 
 mod common;
 
-use dob_calc_core::evaluate::evaluate_build;
+use dob_calc_core::evaluate::{BuildRequest, evaluate_build};
+use dob_calc_core::session::BuildPayload;
 use dob_calc_core::tables::BuildTables;
 
 use crate::common::{assert_attrs_close, assert_close, attr, load_fixture, request_from_fixture};
@@ -156,4 +157,222 @@ fn dot_attrs_self_consistent(fixture: &serde_json::Value) {
             .unwrap_or_default(),
         "技能触发",
     );
+}
+
+// ── U101b：DOT 其余属性种数 = `{角色元素} ∪ {六元素追伤非零项}` 去重 - 1 ──────────
+
+/// 全量建表（`modules.json` 缺失时返回 `None`，调用方跳过真实求值）。
+fn full_tables() -> Option<BuildTables> {
+    let mut path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("tests");
+    path.push("fixtures");
+    path.push("modules.json");
+    let text = std::fs::read_to_string(&path).ok()?;
+    BuildPayload::from_json(&text)
+        .map(|payload| payload.tables)
+        .ok()
+}
+
+/// 读取角色 id 与首个技能名（`baseName` 占位，DOT 目标不依赖具体字段）。
+fn char_entry(name: &str) -> (i64, String) {
+    let mut path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("tests");
+    path.push("fixtures");
+    path.push("modules.json");
+    let text = std::fs::read_to_string(&path).expect("modules.json");
+    let root: serde_json::Value = serde_json::from_str(&text).expect("modules.json 解析");
+    let chars = root["char.data"].as_array().expect("char.data");
+    let entry = chars
+        .iter()
+        .find(|item| item["名称"].as_str() == Some(name))
+        .unwrap_or_else(|| panic!("角色 {name} 不在 char.data"));
+    let id = entry["id"].as_i64().expect("角色 id");
+    let base_name = entry["技能"][0]["名称"].as_str().expect("首个技能名");
+    (id, base_name.to_string())
+}
+
+/// 受控 DOT 请求：铸铁者 10302（切割 / 触发 0.3）、木桩 130、抗性 0、
+/// `forceOwnAdditionalDamage` 统一打开以消除翻倍差异，比值只反映其余属性种数。
+fn dot_value(
+    tables: &BuildTables,
+    char_name: &str,
+    custom: serde_json::Value,
+    extra_buffs: &[&str],
+    dot_settings: serde_json::Value,
+) -> f64 {
+    let (char_id, base_name) = char_entry(char_name);
+    let mut buffs = vec![serde_json::json!(["自定义BUFF", 1])];
+    for name in extra_buffs {
+        buffs.push(serde_json::json!([name, 12]));
+    }
+    let request = BuildRequest::from_json(&serde_json::json!({
+        "charId": char_id,
+        "settings": {
+            "charLevel": 80,
+            "charSkillLevel": [10, 10, 10],
+            "hpPercent": 0.5,
+            "resonanceGain": 2,
+            "meleeWeapon": 10302,
+            "rangedWeapon": 10302,
+            "auraMod": 0,
+            "baseName": base_name,
+            "enemyId": 130,
+            "enemyLevel": 80,
+            "enemyResistance": 0,
+            // `菲娜Q` 的追伤表达式引用 `下午茶开始了::追加伤害倍率`，需协战位才能求值
+            "team2": 1801,
+            "team2Weapon": 20601,
+            "assist2": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "baseName": "“下午茶开始了！”",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "enabled": true
+            },
+            "buffs": buffs,
+            "customBuff": custom,
+            "dotSettings": dot_settings,
+            "targetFunction": "melee::DOT伤害"
+        }
+    }))
+    .expect("受控 DOT 请求");
+    let result = evaluate_build(tables, &request);
+    assert!(result.error.is_none(), "受控 DOT 求值失败：{:?}", result.error);
+    result.target_value
+}
+
+/// 单点近战频率 + 强制翻倍：DOT ∝ (2 + 2 × 其余属性种数)。
+fn melee_dot(tables: &BuildTables, char_name: &str, custom: serde_json::Value, extra_buffs: &[&str]) -> f64 {
+    dot_value(
+        tables,
+        char_name,
+        custom,
+        extra_buffs,
+        serde_json::json!({
+            "skill": 0,
+            "melee": 1,
+            "ranged": 0,
+            "skillweapon": 0,
+            "forceOwnAdditionalDamage": true
+        }),
+    )
+}
+
+#[test]
+fn dot_other_element_count_follows_chase_component_set() {
+    let Some(tables) = full_tables() else {
+        eprintln!("modules.json 缺失，跳过真实求值");
+        return;
+    };
+    let base = melee_dot(&tables, "黎瑟", serde_json::json!([]), &[]);
+    // 仅自属性：并入角色元素桶，不新增元素
+    let self_only = melee_dot(&tables, "黎瑟", serde_json::json!([["自属性追伤", 0.3]]), &[]);
+    assert_close(self_only, base, "仅自属性追伤 → 其余属性 0 种");
+    // 单非自身元素 → 1 种
+    let water = melee_dot(&tables, "黎瑟", serde_json::json!([["水属性追伤", 0.3]]), &[]);
+    assert_close(water, base * 2.0, "单非自身元素 → 1 种");
+    // 同元素多来源去重：种数仍 1
+    let water_twice = melee_dot(
+        &tables,
+        "黎瑟",
+        serde_json::json!([["水属性追伤", 0.3], ["水属性追伤", 0.3]]),
+        &[],
+    );
+    assert_close(water_twice, base * 2.0, "同元素多来源去重 → 1 种");
+    // 两元素 → 2 种
+    let fire_water = melee_dot(
+        &tables,
+        "黎瑟",
+        serde_json::json!([["火属性追伤", 0.2], ["水属性追伤", 0.2]]),
+        &[],
+    );
+    assert_close(fire_water, base * 3.0, "两元素 → 2 种");
+    // 雷黎瑟 + 菲娜Q（火水雷风）→ {雷,火,水,风} = 4 → 其余 3 种
+    let q_thunder = melee_dot(&tables, "黎瑟", serde_json::json!([]), &["菲娜Q"]);
+    assert_close(q_thunder, base * 4.0, "雷 + 菲娜Q → 其余 3 种");
+    // 光菲娜 + 菲娜Q → {光,火,水,雷,风} = 5 → 其余 4 种
+    // （DOT 基数含角色攻击，跨角色比值以各自基线为准）
+    let fina_base = melee_dot(&tables, "菲娜", serde_json::json!([]), &[]);
+    let q_light = melee_dot(&tables, "菲娜", serde_json::json!([]), &["菲娜Q"]);
+    assert_close(q_light, fina_base * 5.0, "光 + 菲娜Q → 其余 4 种");
+}
+
+#[test]
+fn dot_skill_source_never_has_other_elements() {
+    let skill_dot = serde_json::json!({
+        "skill": 1,
+        "melee": 0,
+        "ranged": 0,
+        "skillweapon": 0,
+        "forceOwnAdditionalDamage": true
+    });
+    let Some(tables) = full_tables() else {
+        eprintln!("modules.json 缺失，跳过真实求值");
+        return;
+    };
+    let (char_id, base_name) = char_entry("黎瑟");
+    let evaluate = |custom: serde_json::Value| {
+        let request = BuildRequest::from_json(&serde_json::json!({
+            "charId": char_id,
+            "settings": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "hpPercent": 0.5,
+                "resonanceGain": 2,
+                "meleeWeapon": 10302,
+                "rangedWeapon": 10302,
+                "auraMod": 0,
+                "baseName": base_name,
+                "enemyId": 130,
+                "enemyLevel": 80,
+                "enemyResistance": 0,
+                "buffs": [["自定义BUFF", 1]],
+                "customBuff": custom,
+                "dotSettings": skill_dot,
+                "targetFunction": "角色::DOT伤害"
+            }
+        }))
+        .expect("技能 DOT 请求");
+        let result = evaluate_build(&tables, &request);
+        assert!(result.error.is_none(), "{:?}", result.error);
+        result.target_value
+    };
+    let base = evaluate(serde_json::json!([["技能触发", 0.5]]));
+    assert!(base > 0.0, "技能来源 DOT 应 > 0");
+    let hit = evaluate(serde_json::json!([["技能触发", 0.5], ["火属性追伤", 0.5]]));
+    assert_eq!(
+        hit.to_bits(),
+        base.to_bits(),
+        "技能来源不产生其余属性，追伤分量不得改变技能 DOT"
+    );
+}
+
+#[test]
+fn dot_fixtures_have_no_anomaly_attribute() {
+    for index in 0..12 {
+        let name = format!("dot_{index:02}");
+        let fixture = load_fixture(&name);
+        let attributes = &fixture["expected"]["attributes"];
+        assert!(
+            attributes.get("异常数量").is_none(),
+            "{name}: `异常数量` 已从 CharAttr 删除"
+        );
+        let Some(sources) = fixture["expected"]["dotFrequencies"]["sources"].as_array() else {
+            continue;
+        };
+        for source in sources {
+            // 夹具构筑没有非自身追伤分量 → 其余属性种数 0
+            assert_eq!(
+                source["otherElementCount"].as_f64(),
+                Some(0.0),
+                "{name}: {source:?}"
+            );
+            assert_eq!(
+                source["otherFreq"].as_f64(),
+                Some(0.0),
+                "{name}: {source:?}"
+            );
+        }
+    }
 }

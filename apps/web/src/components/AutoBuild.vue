@@ -287,7 +287,6 @@ function buildMods() {
     )
         .then(data => {
             if (id !== workerRequestId) return
-            if (data.wasmError) console.warn("wasm 自动配装回退 TS：", data.wasmError)
             const newBuild =
                 data.engine === "wasm" && data.settings
                     ? createCharBuildFromSettings(props.charId!, normalizeCharSettings(data.settings), {

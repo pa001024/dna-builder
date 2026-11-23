@@ -697,6 +697,28 @@ pub fn merge_conditional_props(base: &AttrMap, props: &AttrMap) -> AttrMap {
     merged
 }
 
+#[cfg(test)]
+mod conditional_props_tests {
+    use super::*;
+
+    #[test]
+    fn merge_does_not_recompute_char_aggregate() {
+        // 角色不持有追伤：条件分量并入字段视图，但不再产生/刷新聚合键
+        let mut base = AttrMap::new();
+        base.insert("火属性追伤".to_string(), 1.0);
+        base.insert("追加伤害".to_string(), 1.0);
+        let mut props = AttrMap::new();
+        props.insert("水属性追伤".to_string(), 0.5);
+        props.insert("自属性追伤".to_string(), 0.2);
+        let merged = merge_conditional_props(&base, &props);
+        assert_eq!(merged.get("火属性追伤"), Some(&1.0));
+        assert_eq!(merged.get("水属性追伤"), Some(&0.5));
+        assert_eq!(merged.get("自属性追伤"), Some(&0.2));
+        // 传入的聚合值原样保留，不按分量重算
+        assert_eq!(merged.get("追加伤害"), Some(&1.0));
+    }
+}
+
 /// 命中字段的条件BUFF增量合并；对应上游 `getFieldsWithAttr` 里的
 /// `matched.reduce((current, c) => mergeConditionalProps(current, c.props), attrs)`。
 fn merge_field_conditional_attrs(
@@ -714,6 +736,34 @@ fn merge_field_conditional_attrs(
         merged = Some(merge_conditional_props(&base, &conditional.props));
     }
     merged.unwrap_or_else(|| attrs.clone())
+}
+
+/// 名称 → 表达式标识符；镜像 TS `toExprIdentifier`。
+///
+/// `/` 换 `_`，词法器不接受的字符剔除（保留字母 / 数字 / 下划线 / 汉字 / `·` / `[]`），
+/// 数字开头补 `_`，清洗后为空返回 `_`。
+pub fn to_expr_identifier(name: &str) -> String {
+    let mut cleaned = String::with_capacity(name.len());
+    for ch in name.chars() {
+        let keep = ch == '·'
+            || ch == '['
+            || ch == ']'
+            || ch.is_ascii_alphanumeric()
+            || ch == '_'
+            || ('\u{4e00}'..='\u{9fa5}').contains(&ch);
+        if ch == '/' {
+            cleaned.push('_');
+        } else if keep {
+            cleaned.push(ch);
+        }
+    }
+    if cleaned.is_empty() {
+        return "_".to_string();
+    }
+    if cleaned.starts_with(|value: char| value.is_ascii_digit()) {
+        cleaned.insert(0, '_');
+    }
+    cleaned
 }
 
 /// 技能实例；对应上游 `LeveledSkill`。
@@ -734,6 +784,8 @@ pub struct LeveledSkill {
     pub summon: Option<Record>,
     /// 玩家技能序号（上游 `E/Q/P` 别名映射用；武器技能与同律武器技能为 `None`）。
     pub player_skill_index: Option<usize>,
+    /// 原始技能记录（技能替换按源字段重建时用）。
+    pub raw: Record,
 }
 
 impl LeveledSkill {
@@ -769,6 +821,7 @@ impl LeveledSkill {
                 None
             },
             player_skill_index,
+            raw,
         };
         // 上游 `this.等级 = 等级 || 10`：0 / NaN 都落到 10
         let level = match level {
@@ -779,9 +832,9 @@ impl LeveledSkill {
         skill
     }
 
-    /// 设置技能等级；对应上游 `set 等级`（钳制到 1-12）。
+    /// 设置技能等级；对应上游 `set 等级`（钳制到 1-30）。
     pub fn set_level(&mut self, value: f64) {
-        self.level = value.clamp(1.0, 12.0);
+        self.level = value.clamp(1.0, 30.0);
         self.update_properties();
     }
 
@@ -1608,6 +1661,8 @@ impl LeveledBuff {
                 if text.is_empty() { None } else { Some(text) }
             },
             attr_expressions: {
+                // 只收字符串表达式；数字 / 数字数组由 `update_properties` 按等级物化进 `props`
+                // （对应 TS `updatePropertiesByLevel`），这里再转成表达式会被 `apply_attr` 二次乘覆盖率。
                 let attr = raw.obj("attr");
                 attr.keys()
                     .into_iter()
@@ -2208,9 +2263,9 @@ impl LeveledMonster {
         instance
     }
 
-    /// 设置等级（钳制 1-240）；对应上游 `set 等级`。
+    /// 设置等级（钳制到曲线表长）；对应上游 `set 等级`。
     pub fn set_level(&mut self, value: f64, mob_level_up: &[[f64; 5]]) {
-        let next = value.clamp(1.0, 240.0);
+        let next = value.clamp(1.0, mob_level_up.len() as f64);
         if self.level != next {
             self.level = next;
             self.update_by_level(next, mob_level_up);
@@ -2218,7 +2273,7 @@ impl LeveledMonster {
     }
 
     fn update_by_level(&mut self, level: f64, mob_level_up: &[[f64; 5]]) {
-        let clamped = level.clamp(1.0, 240.0);
+        let clamped = level.clamp(1.0, mob_level_up.len() as f64);
         let Some(multiplier) = mob_level_up.get(clamped as usize - 1).copied() else {
             return;
         };
@@ -2389,6 +2444,22 @@ mod tests {
         assert_eq!(skill.field("伤害").unwrap().value, 3.0);
         skill.set_level(12.0);
         assert_eq!(skill.field("伤害").unwrap().value, 12.0);
+    }
+
+    #[test]
+    fn skill_level_30_reads_real_values_and_clamps() {
+        let values: Vec<f64> = (1..=30).map(|level| level as f64).collect();
+        let raw = record(json!({
+            "id": 1, "名称": "测试技能", "类型": "伤害",
+            "字段": [{"名称": "伤害", "影响": "技能威力", "值": values}]
+        }));
+        let mut skill = LeveledSkill::new(raw, Some(18.0), None, String::new());
+        assert_eq!(skill.field("伤害").unwrap().value, 18.0);
+        skill.set_level(30.0);
+        assert_eq!(skill.field("伤害").unwrap().value, 30.0);
+        // 上限 30：越界取 30 级值而不是越界回退
+        skill.set_level(31.0);
+        assert_eq!(skill.field("伤害").unwrap().value, 30.0);
     }
 
     #[test]

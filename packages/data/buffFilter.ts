@@ -1,5 +1,6 @@
 import { charMap, weaponMap } from "./d"
 import type { Buff } from "./data-types"
+import { isHiddenLegacyTraceBuff } from "./traceEffects"
 
 /**
  * BUFF 在前端呈现时的过滤上下文。
@@ -11,6 +12,8 @@ export interface BuffSelectContext {
     mainIds: Set<number>
     /** 助战角色 id + 助战武器 id（同一集合） */
     phantomIds: Set<number>
+    /** 可选元素集合（多构筑位合并上下文用）；缺省回退到 `charElm` */
+    elements?: Set<string>
 }
 
 /**
@@ -25,12 +28,48 @@ export function createBuffSelectContext(options: {
     mainIds: number[]
     /** 助战角色 id + 助战武器 id */
     phantomIds: number[]
+    /** 可选元素集合（多构筑位合并时传入） */
+    elements?: string[]
 }): BuffSelectContext {
-    return {
+    const context: BuffSelectContext = {
         charElm: options.charElm,
         mainIds: new Set(options.mainIds),
         phantomIds: new Set(options.phantomIds),
     }
+    if (options.elements) context.elements = new Set(options.elements.filter(Boolean) as string[])
+    return context
+}
+
+/**
+ * 合并多个构筑位的过滤上下文：任一构筑位可选即视为可选（用于列出全部可用 BUFF）。
+ * @param contexts 各构筑位上下文
+ * @returns 合并后的上下文
+ */
+export function unionBuffSelectContexts(contexts: readonly BuffSelectContext[]): BuffSelectContext {
+    const ids = new Set<number>()
+    const elements = new Set<string>()
+    for (const context of contexts) {
+        context.mainIds.forEach(id => ids.add(id))
+        context.phantomIds.forEach(id => ids.add(id))
+        if (context.charElm) elements.add(context.charElm)
+        context.elements?.forEach(element => elements.add(element))
+    }
+    return {
+        charElm: contexts[0]?.charElm ?? "",
+        mainIds: new Set(ids),
+        phantomIds: new Set(ids),
+        elements,
+    }
+}
+
+/**
+ * 判断 BUFF 是否由魔之楔（MOD）提供：数据 `禁用` 非空即表示同名增益来自 MOD，
+ * 升华玩法不使用 MOD，此类 BUFF 必须从可选列表与注入中排除（如「全盛·振奋」）。
+ * @param buff BUFF 数据
+ * @returns 是否魔之楔提供
+ */
+export function isModProvidedBuff(buff: { 禁用?: number[] }): boolean {
+    return (buff.禁用?.length ?? 0) > 0
 }
 
 /**
@@ -49,13 +88,15 @@ export function createBuffSelectContext(options: {
  * @returns 是否可选
  */
 export function isBuffSelectable(buff: Buff, ctx: BuffSelectContext): boolean {
+    // 0. 已由溯源区接管 / 旧存档兼容的 `*溯` 条目：由溯源区与存档迁移生成，通用选择器不再提供
+    if (isHiddenLegacyTraceBuff(buff.名称)) return false
     // 1. 限定行为不变：仅过滤当前角色（限定已是角色 id）
     if (buff.限定) {
         if (typeof buff.限定 === "number") return ctx.mainIds.has(buff.限定)
-        // 旧格式兜底：角色名 → 主控角色；属性 → 主控元素
+        // 旧格式兜底：角色名 → 主控角色；属性 → 可选元素集合
         const char = charMap.get(buff.限定)
         if (char) return ctx.mainIds.has(char.id)
-        return buff.限定 === ctx.charElm
+        return ctx.elements ? ctx.elements.has(buff.限定) : buff.限定 === ctx.charElm
     }
     // 2. 无来源 id 的通用 BUFF 始终可选
     if (buff.id === undefined) return true

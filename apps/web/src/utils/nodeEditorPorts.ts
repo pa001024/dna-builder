@@ -1,3 +1,4 @@
+import { ADDITIONAL_DAMAGE_KEYS, LEGACY_ADDITIONAL_DAMAGE_KEY } from "@/data/leveled/additionalDamage"
 import { NodeType } from "@/store/nodeEditorTypes"
 
 /**
@@ -240,7 +241,7 @@ export const NODE_PORTS: Partial<Record<NodeType, NodePortSchema>> = {
     },
 }
 
-/** 计算属性节点可逐项输出的角色属性（对齐 CharAttrShow：不列召唤物 / 异常数量等内部量） */
+/** 计算属性节点可逐项输出的角色属性（对齐 CharAttrShow：不列召唤物等内部量） */
 export const CHAR_ATTR_OUTPUT_KEYS = [
     "攻击",
     "生命",
@@ -255,6 +256,12 @@ export const CHAR_ATTR_OUTPUT_KEYS = [
     "背水",
     "增伤",
     "元素增伤",
+    "火属性增伤",
+    "水属性增伤",
+    "雷属性增伤",
+    "风属性增伤",
+    "光属性增伤",
+    "暗属性增伤",
     "物理增伤",
     "属性攻击",
     "武器伤害",
@@ -263,6 +270,7 @@ export const CHAR_ATTR_OUTPUT_KEYS = [
     "独立增伤",
     "技能独立增伤",
     "属性穿透",
+    "赛季增伤",
     "无视防御",
     "技能无视防御",
     "技能速度",
@@ -307,7 +315,9 @@ export const WEAPON_ATTR_OUTPUT_KEYS = [
     "弹匣",
     "弹药",
     "独立增伤",
-    "追加伤害",
+    // 追伤七分量逐项输出；聚合「追加伤害」保留只读输出端口（Σ 七分量），兼容旧图连线与表达式读取
+    ...ADDITIONAL_DAMAGE_KEYS,
+    LEGACY_ADDITIONAL_DAMAGE_KEY,
     "武器倍率",
     "充盈转化",
     "秽兽增伤",
@@ -317,6 +327,11 @@ export const WEAPON_ATTR_OUTPUT_KEYS = [
     "华胥增伤",
 ] as const
 
+/** 属性输出端口展示标签：只读聚合项加注 Σ，端口 id 仍用属性名以兼容旧图 */
+const ATTR_OUTPUT_LABELS: Record<string, string> = {
+    [LEGACY_ADDITIONAL_DAMAGE_KEY]: "追加伤害（Σ七分量，只读）",
+}
+
 /**
  * 属性节点的逐项输出端口：向量构筑输出向量，单个构筑输出数值。
  * @param keys 属性键名
@@ -325,7 +340,7 @@ export const WEAPON_ATTR_OUTPUT_KEYS = [
  */
 function attributeOutputPorts(keys: readonly string[], vector: boolean): PortDef[] {
     const type = vector ? PortType.VECTOR : PortType.NUMBER
-    return keys.map(key => output(key, type, key))
+    return keys.map(key => output(key, type, ATTR_OUTPUT_LABELS[key] ?? key))
 }
 
 /**

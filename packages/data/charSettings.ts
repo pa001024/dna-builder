@@ -2,6 +2,23 @@ import type { DotFrequencySettings } from "./CharBuild"
 import { charMap, petMap, weaponNameMap } from "./d"
 import { PET_BREAKTHROUGH_MAX_LEVEL } from "./leveled/LeveledPet"
 import { normalizeTraitSlots, resolvePetBuffName, TRAIT_MAX_LEVEL, type TraitSlot } from "./petTrait"
+import {
+    migrateLegacyTraceBuffs,
+    normalizeTraceStacks,
+    resolveHighestActiveRoot,
+    resolveTraceOffRoots,
+    TRACE_LEVEL_MAX,
+    type TraceStack,
+    warnUnmappedLegacyTraceBuffs,
+} from "./traceEffects"
+import {
+    createDefaultTranscendSettings,
+    encodeTranscendSettings,
+    getActiveGearVariant,
+    isEmptyTranscendSettings,
+    normalizeTranscendSettings,
+    type TranscendSettings,
+} from "./transcendSettings"
 
 /** 浮点尾差归一化 */
 export function roundBuffValue(value: number, digits = 6): number {
@@ -22,15 +39,15 @@ export type CharSkillLevels = [number, number, number]
 
 /** 技能等级下限 */
 export const CHAR_SKILL_LEVEL_MIN = 1
-/** 技能等级上限 */
-export const CHAR_SKILL_LEVEL_MAX = 12
+/** 技能等级上限（源数据 `DataConst.MaxSkillLevel`） */
+export const CHAR_SKILL_LEVEL_MAX = 30
 /** 技能等级默认值（E/Q/被动均为 10 级） */
 export const CHAR_SKILL_LEVEL_DEFAULT = 10
 
 /**
  * 归一化技能等级为 `[E, Q, 被动]` 三元组（原地返回新数组，不修改入参）。
  * 兼容老格式：单个数字视为三项相同（如 `12` → `[12, 12, 12]`）。
- * 数组缺项时用首项（无首项则用默认值）补齐，各项钳制到 1-12 并取整。
+ * 数组缺项时用首项（无首项则用默认值）补齐，各项钳制到 1-30 并取整。
  * @param value 原始技能等级（数字 | 数组 | 其他）
  * @returns 归一化后的三元组
  */
@@ -221,6 +238,89 @@ export function normalizeInlineActions(value: unknown): InlineActions {
 export type { DotFrequencySettings } from "./CharBuild"
 
 /**
+ * 协战角色配置：让协战也能被完整构筑（等级 / 技能 / 单武器 / MOD / BUFF / 特效）。
+ *
+ * 角色 id 与武器 id 仍以 `teamN` / `teamNWeapon` 为唯一真源，这里不重复存 id；
+ * 敌人环境继承主控，时间线与魔灵暂不参与协战构筑。
+ */
+export interface AssistCharSettings {
+    /** 角色等级 1-80 */
+    charLevel: number
+    /** 技能等级 `[E, Q, 被动]` */
+    charSkillLevel: CharSkillLevels
+    /** 溯源等级 0..该角色最大溯级（6/7）：缺省取最大，1..N 溯全部生效 */
+    traceLevel: number
+    /** 关闭的根源序号（1..该角色最大根源）；缺省 = 全部激活 */
+    traceOffRoots?: number[]
+    /** 溯源层数 / 覆盖率设置 `[根源, 等级, 覆盖率?]`；缺省 = 全部按 `mx` 满层、覆盖率 1 */
+    traceStacks?: TraceStack[]
+    /** 计算技能（baseName），必须属于该协战角色的技能表 */
+    baseName: string
+    /** 额外精通武器类型（如 "长柄"），空字符串表示未解锁 */
+    extraMastery: string
+    /** 单武器槽（teamNWeapon）的等级 */
+    weaponLevel: number
+    /** 单武器槽（teamNWeapon）的精炼等级 0-5 */
+    weaponRefine: number
+    /** 目标函数表达式 */
+    targetFunction: string
+    /** 自定义变量：`[变量名, 表达式]` */
+    customVariables: [string, string][]
+    /** DOT 频率设置 */
+    dotSettings: DotFrequencySettings
+    /** 是否参与合计（未配置角色时默认不参与） */
+    enabled: boolean
+    /** 中枢魔之楔（光环）id，0 表示未设置 */
+    auraMod: number
+    charMods: ModSlot[]
+    meleeMods: ModSlot[]
+    rangedMods: ModSlot[]
+    skillWeaponMods: ModSlot[]
+    /** 当前激活的 MOD 变体索引（0/1/2 ↔ 配置 A/B/C） */
+    modVariantIndex: number
+    /** 额外 MOD 变体（B/C） */
+    modVariants: ModVariant[]
+    /** 启用的 BUFF：`[名称, 等级, 覆盖率?]`，覆盖率缺省为 1 */
+    buffs: [string, number, number?][]
+    /** 自定义 BUFF：`[属性名, 数值]` */
+    customBuff: [string, number][]
+    /** 是否使用全局背包特效等级（true 时忽略 effectConfig） */
+    useGlobal: boolean
+    /** 构筑本地特效等级配置（key: `m:<modId>` / `w:<weaponId>`） */
+    effectConfig: Record<string, number>
+}
+
+/** 创建协战默认配置；每次返回全新对象与数组，避免多位协战共享引用 */
+export function createDefaultAssistSideSettings(): AssistCharSettings {
+    return {
+        charLevel: 80,
+        charSkillLevel: [CHAR_SKILL_LEVEL_DEFAULT, CHAR_SKILL_LEVEL_DEFAULT, CHAR_SKILL_LEVEL_DEFAULT],
+        traceLevel: TRACE_LEVEL_MAX,
+        // 缺省 undefined：全部激活，由旧溯级迁移（新 UI 翻转后写数组）
+        traceOffRoots: undefined,
+        baseName: "",
+        extraMastery: "",
+        weaponLevel: 80,
+        weaponRefine: 5,
+        targetFunction: "",
+        customVariables: [],
+        dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0, forceOwnAdditionalDamage: false },
+        enabled: true,
+        auraMod: 0,
+        charMods: Array.from({ length: MOD_SLOT_COUNTS.角色 }, () => null),
+        meleeMods: Array.from({ length: MOD_SLOT_COUNTS.近战 }, () => null),
+        rangedMods: Array.from({ length: MOD_SLOT_COUNTS.远程 }, () => null),
+        skillWeaponMods: Array.from({ length: MOD_SLOT_COUNTS.同律 }, () => null),
+        modVariantIndex: 0,
+        modVariants: [],
+        buffs: [],
+        customBuff: [],
+        useGlobal: false,
+        effectConfig: {},
+    }
+}
+
+/**
  * 创建一份新的角色配置默认值，避免数组和对象在多个角色之间共享引用。
  * 传入角色专武时，默认武器直接装备该专武（无专武则回退通用默认武器）。
  * @param signatureWeapon 角色专武（可选）
@@ -237,9 +337,17 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         enemyResistance: 0,
         isRouge: false,
         targetFunction: "",
+        /** 主控目标函数是否参与合计（目标卡上的「启用」，默认参与） */
+        mainTargetEnabled: true,
         customVariables: [] as [string, string][],
         /** 技能等级 `[E, Q, 被动]`：老存档的单个数字载入时展开为三项相同 */
         charSkillLevel: [10, 10, 10] as CharSkillLevels,
+        /** 溯源等级 0..7：缺省取最大（该角色无溯源时不生效）；旧档只用于迁移 */
+        traceLevel: TRACE_LEVEL_MAX,
+        /** 关闭的根源序号（1..该角色最大根源）；缺省（undefined）= 全部激活，由旧溯级迁移 */
+        traceOffRoots: undefined as number[] | undefined,
+        /** 溯源层数 / 覆盖率设置 `[根源, 等级, 覆盖率?]`：缺省空数组 = 全部按 mx 满层、覆盖率 1 */
+        traceStacks: [] as TraceStack[],
         /** 额外精通武器类型（如 "长柄"），空字符串表示未解锁 */
         extraMastery: "",
         meleeWeapon: signatureWeapon?.type === "近战" ? signatureWeapon.id : 10206, //"枯朽",
@@ -285,7 +393,13 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         team2Build: "-",
         /** 2 号协战角色关联的构筑 MOD 变体（A/B/C） */
         team2BuildVariant: "A" as ModVariantLetter,
+        /** 1 号协战角色的完整构筑配置（角色 id 仍以 team1 为真源） */
+        assist1: createDefaultAssistSideSettings(),
+        /** 2 号协战角色的完整构筑配置（角色 id 仍以 team2 为真源） */
+        assist2: createDefaultAssistSideSettings(),
         timelineDPS: false,
+        /** 升华配置（总开关 / 天赋 / 三组装备 / 变体）：默认关闭，由构筑页头部 toggle 启用 */
+        transcend: createDefaultTranscendSettings(),
         /** 是否使用全局背包特效等级（true 时忽略 effectConfig，行为同旧版） */
         useGlobal: false,
         /** 构筑本地特效等级配置（key: `m:<modId>` / `w:<weaponId>`，缺省为最大） */
@@ -307,11 +421,15 @@ export const defaultCharSettings = createDefaultCharSettings()
 export type CharSettings = ReturnType<typeof createDefaultCharSettings>
 
 /**
- * 角色配置输入形状：`actions` 支持为空（缺失/null/局部），载入时由 `normalizeCharSettings` 补齐。
+ * 角色配置输入形状：`actions`、`assist1` / `assist2` 支持为空或局部形状，载入时由 `normalizeCharSettings` 补齐。
  * 序列化时未配置的 actions 会被直接省略，以简化配置文件大小。
  */
-export type CharSettingsInput = Omit<Partial<CharSettings>, "actions"> & {
+export type CharSettingsInput = Omit<Partial<CharSettings>, "actions" | "assist1" | "assist2" | "transcend"> & {
     actions?: Partial<InlineActions> | null
+    assist1?: Partial<AssistCharSettings> | null
+    assist2?: Partial<AssistCharSettings> | null
+    /** 升华配置：支持局部形状，载入时由 `normalizeTranscendSettings` 补齐 */
+    transcend?: Partial<TranscendSettings> | null
 }
 
 /**
@@ -517,6 +635,110 @@ function normalizeModVariants(value: unknown): ModVariant[] {
     })
 }
 
+/** 取整并钳制到区间；非有限数回退 fallback */
+function clampInteger(value: unknown, min: number, max: number, fallback: number): number {
+    if (!Number.isFinite(value)) return fallback
+    return Math.max(min, Math.min(max, Math.round(value as number)))
+}
+
+/** 协战 DOT 频率：负值归零，缺失键沿用默认值 */
+function normalizeAssistDotSettings(value: unknown, defaults: DotFrequencySettings): DotFrequencySettings {
+    const raw = value && typeof value === "object" && !Array.isArray(value) ? (value as Partial<DotFrequencySettings>) : {}
+    const frequency = (input: unknown, fallback: number) => (Number.isFinite(input) ? Math.max(0, input as number) : fallback)
+    return {
+        skill: frequency(raw.skill ?? defaults.skill, defaults.skill),
+        melee: frequency(raw.melee ?? defaults.melee, defaults.melee),
+        ranged: frequency(raw.ranged ?? defaults.ranged, defaults.ranged),
+        skillweapon: frequency(raw.skillweapon ?? defaults.skillweapon, defaults.skillweapon),
+        forceOwnAdditionalDamage:
+            typeof raw.forceOwnAdditionalDamage === "boolean" ? raw.forceOwnAdditionalDamage : defaults.forceOwnAdditionalDamage === true,
+    }
+}
+
+/** 协战 BUFF 列表：只保留合法条目，覆盖率与主控同口径（<1 才写第三项并收敛精度） */
+function normalizeAssistBuffs(value: unknown, defaults: [string, number, number?][]): [string, number, number?][] {
+    if (!Array.isArray(value)) return defaults.map(buff => [...buff] as [string, number, number?])
+    return value
+        .filter((buff): buff is [string, number, number?] => Array.isArray(buff) && typeof buff[0] === "string" && Number.isFinite(buff[1]))
+        .map(([name, level, coverage]) => {
+            if (typeof coverage !== "number" || !Number.isFinite(coverage) || coverage >= 1) {
+                return [name, level]
+            }
+            return [name, level, roundBuffValue(coverage)]
+        })
+}
+
+/** 协战自定义 BUFF：只保留 `[string, number]` 对并收敛浮点尾差 */
+function normalizeAssistCustomBuff(value: unknown, defaults: [string, number][]): [string, number][] {
+    if (!Array.isArray(value)) return defaults.map(([property, amount]) => [property, amount])
+    return value
+        .filter((entry): entry is [string, number] => Array.isArray(entry) && typeof entry[0] === "string" && Number.isFinite(entry[1]))
+        .map(([property, amount]) => [property, roundBuffValue(amount)])
+}
+
+/** 特效等级配置：只保留 `string → 有限数` 的键值对 */
+function normalizeEffectConfig(value: unknown, defaults: Record<string, number>): Record<string, number> {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return { ...defaults }
+    const result: Record<string, number> = {}
+    Object.entries(value as Record<string, unknown>).forEach(([key, level]) => {
+        if (Number.isFinite(level)) result[key] = level as number
+    })
+    return result
+}
+
+/**
+ * 归一化协战角色配置：逐字段校验并钳制，缺失字段按 defaults 补齐。
+ * 协战角色 id / 武器 id 以 `teamN` / `teamNWeapon` 为真源（这里不存 id），
+ * 技能名对不上该角色技能表时回退首个技能，角色无效则为空。
+ */
+export function normalizeAssistSideSettings(value: unknown, teamId: number | "-", defaults: AssistCharSettings): AssistCharSettings {
+    const raw = value && typeof value === "object" && !Array.isArray(value) ? (value as Partial<AssistCharSettings>) : {}
+    const char = typeof teamId === "number" && Number.isFinite(teamId) ? charMap.get(Math.round(teamId)) : undefined
+    const skillNames = (char?.技能 ?? []).map(skill => skill.名称).filter((name): name is string => typeof name === "string")
+    const baseName = (typeof raw.baseName === "string" ? raw.baseName : "").trim()
+    // 关闭的根源：字段缺失时按旧溯级迁移（traceLevel+1..max）；溯级同步为最高激活根源
+    const traceOffRoots = resolveTraceOffRoots(raw.traceOffRoots, raw.traceLevel ?? defaults.traceLevel, char?.id)
+    // 层数 / 覆盖率缺省为空（全部按 mx 满层）：空设置不写键，保持协战 loadout 的紧凑形状
+    const traceStacks = normalizeTraceStacks(raw.traceStacks, char?.id)
+
+    const normalized: AssistCharSettings = {
+        charLevel: clampInteger(raw.charLevel, 1, 80, defaults.charLevel),
+        charSkillLevel: normalizeCharSkillLevels(raw.charSkillLevel ?? defaults.charSkillLevel),
+        // 溯级缺省取该协战角色最大溯级（旧档缺字段 → max），显式 0 表示关闭
+        traceLevel: resolveHighestActiveRoot(traceOffRoots, char?.id),
+        traceOffRoots,
+        ...(traceStacks.length ? { traceStacks } : {}),
+        // 未配置角色时技能名无意义；角色技能表里找不到时回退首个技能，保证计算不会落在未知技能上
+        baseName: char ? (skillNames.includes(baseName) ? baseName : (skillNames[0] ?? "")) : "",
+        extraMastery: typeof raw.extraMastery === "string" ? raw.extraMastery : defaults.extraMastery,
+        weaponLevel: clampInteger(raw.weaponLevel, 1, 80, defaults.weaponLevel),
+        weaponRefine: clampInteger(raw.weaponRefine, 0, 5, defaults.weaponRefine),
+        targetFunction: typeof raw.targetFunction === "string" ? raw.targetFunction : defaults.targetFunction,
+        customVariables: Array.isArray(raw.customVariables)
+            ? raw.customVariables.filter(
+                  (entry): entry is [string, string] => Array.isArray(entry) && typeof entry[0] === "string" && typeof entry[1] === "string"
+              )
+            : defaults.customVariables.map(([name, expression]) => [name, expression]),
+        dotSettings: normalizeAssistDotSettings(raw.dotSettings, defaults.dotSettings),
+        // 旧存档 / 新对象缺失启用位时按是否配置了有效角色推断
+        enabled: typeof raw.enabled === "boolean" ? raw.enabled : Boolean(char),
+        auraMod: Number.isFinite(raw.auraMod) && (raw.auraMod as number) >= 0 ? Math.round(raw.auraMod as number) : 0,
+        charMods: normalizeModSlots(raw.charMods ?? defaults.charMods, MOD_SLOT_COUNTS.角色),
+        meleeMods: normalizeModSlots(raw.meleeMods ?? defaults.meleeMods, MOD_SLOT_COUNTS.近战),
+        rangedMods: normalizeModSlots(raw.rangedMods ?? defaults.rangedMods, MOD_SLOT_COUNTS.远程),
+        skillWeaponMods: normalizeModSlots(raw.skillWeaponMods ?? defaults.skillWeaponMods, MOD_SLOT_COUNTS.同律),
+        modVariantIndex: 0,
+        modVariants: normalizeModVariants(raw.modVariants ?? defaults.modVariants),
+        buffs: normalizeAssistBuffs(raw.buffs, defaults.buffs),
+        customBuff: normalizeAssistCustomBuff(raw.customBuff, defaults.customBuff),
+        useGlobal: typeof raw.useGlobal === "boolean" ? raw.useGlobal : defaults.useGlobal,
+        effectConfig: normalizeEffectConfig(raw.effectConfig, defaults.effectConfig),
+    }
+
+    normalized.modVariantIndex = clampInteger(raw.modVariantIndex ?? defaults.modVariantIndex, 0, normalized.modVariants.length, 0)
+    return normalized
+}
+
 /**
  * 将外部载入的角色配置补齐为当前版本所需结构。
  * @param settings 待补齐的角色配置
@@ -625,11 +847,37 @@ export function normalizeCharSettings(settings?: CharSettingsInput | null): Char
         normalized[key] = normalizeModVariantLetter(settings[key])
     }
 
+    // 主控目标函数启用位：非布尔值（旧存档缺失、脏数据）一律视为启用
+    normalized.mainTargetEnabled = typeof settings.mainTargetEnabled === "boolean" ? settings.mainTargetEnabled : true
+
+    // 协战 loadout 必须显式逐字段归一化：通用浅合并不会校验嵌套数组 / 对象；
+    // team1/team2 已在上面归一化为角色 id，这里据其推断默认技能与启用状态
+    normalized.assist1 = normalizeAssistSideSettings(settings.assist1, normalized.team1, createDefaultAssistSideSettings())
+    normalized.assist2 = normalizeAssistSideSettings(settings.assist2, normalized.team2, createDefaultAssistSideSettings())
+
+    // 升华配置必须显式归一化：通用浅合并会丢失天赋等级 / 装备组 / 变体等嵌套结构，缺失与脏数据一律回到关闭状态
+    normalized.transcend = normalizeTranscendSettings(settings.transcend)
+
     // 归一化内联动作：支持为空（缺失/null/局部），运行时永远补齐为可用结构
     normalized.actions = normalizeInlineActions((settings as CharSettingsInput).actions)
 
     // 归一化技能等级：兼容老格式单个数字（如 12 → [12, 12, 12]）
     normalized.charSkillLevel = normalizeCharSkillLevels(settings.charSkillLevel)
+
+    // 溯源等级：缺省取最大（具体角色的上限在计算期按角色数据钳制），显式 0 表示关闭
+    normalized.traceOffRoots = resolveTraceOffRoots(settings.traceOffRoots, settings.traceLevel, undefined)
+    // 旧溯级与关闭列表保持同一口径：全开时 traceLevel 恒为上限，序列化省略空列表后可安全迁移
+    normalized.traceLevel = resolveHighestActiveRoot(normalized.traceOffRoots, undefined)
+    // 溯源层数 / 覆盖率：主控归一化期不知道角色 id，先按通用上限钳制，收集期再按角色 mx 钳制
+    normalized.traceStacks = normalizeTraceStacks(settings.traceStacks, undefined)
+
+    // 旧 `*溯` 手写 BUFF 迁移：能映射的写入溯级并从 BUFF 列表移除，避免与新溯源区双计。
+    // 显式携带关闭列表（含空数组）一律尊重；迁移激活只对字段缺失的旧档生效
+    migrateLegacyTraceSettings(normalized, {
+        main: Array.isArray(settings.traceOffRoots),
+        assist1: Array.isArray(settings.assist1?.traceOffRoots),
+        assist2: Array.isArray(settings.assist2?.traceOffRoots),
+    })
 
     // 归一化 MOD 变体：补齐槽位结构，并把激活变体索引钳制到已有范围内
     normalized.modVariants = normalizeModVariants(settings.modVariants)
@@ -704,16 +952,104 @@ function migrateLegacyPetBuffs(settings: CharSettings): void {
 }
 
 /**
+ * 旧 `*溯` 迁移出的根源必须立即生效：从关闭列表中移除 1..grade（字段缺失时先按旧档口径补齐）。
+ * @param target 该侧设置
+ * @param grade 迁移出的最高根源
+ */
+function activateMigratedTraceRoots(target: { traceOffRoots?: number[] }, grade: number): void {
+    if (grade <= 0) return
+    target.traceOffRoots = (target.traceOffRoots ?? []).filter(root => !(root >= 1 && root <= grade))
+}
+
+/**
+ * 旧存档迁移：把已迁入结构化溯源表的 `*溯` 手写 BUFF 转成溯级，并从 BUFF 列表移除，
+ * 避免同一效果既由溯源区自动注入、又留在手动列表里被双计。
+ * - `菲娜4溯` / `菲娜6溯` → 主控或对应协战侧溯级；
+ * - `菲娜被动+1溯`（及已删除的 `*旧` 载体）→ 1、2 根源 + `菲娜被动(团队)`
+ *   （P 等级由有效等级解析；45% / 24% 由溯源规则与 1 溯源效果提供）；
+ * - 无法映射的旧条目保留手选并提示一次，不静默丢弃构筑能力。
+ * - 迁移激活只用于旧档：输入显式携带 `traceOffRoots` 时一律尊重用户关闭的根源。
+ * - 迁移结束后按关闭列表重新同步溯级，保证旧字段与生效集合一致。
+ * @param settings 已补齐字段的角色配置（原地修改）
+ * @param explicitOffRoots 各侧输入是否显式携带 `traceOffRoots`（含空数组）
+ */
+function migrateLegacyTraceSettings(settings: CharSettings, explicitOffRoots: { main: boolean; assist1: boolean; assist2: boolean }): void {
+    const unmapped: string[] = []
+    const main = migrateLegacyTraceBuffs(settings.buffs)
+    settings.buffs = main.buffs
+    if (!explicitOffRoots.main) activateMigratedTraceRoots(settings, main.grade)
+    settings.traceLevel = resolveHighestActiveRoot(settings.traceOffRoots ?? [], undefined)
+    unmapped.push(...main.unmapped)
+    for (const key of ["assist1", "assist2"] as const) {
+        const assist = settings[key]
+        if (!assist) continue
+        const teamId = key === "assist1" ? settings.team1 : settings.team2
+        const charId = typeof teamId === "number" ? teamId : undefined
+        const side = migrateLegacyTraceBuffs(assist.buffs, charId)
+        assist.buffs = side.buffs
+        if (!explicitOffRoots[key]) activateMigratedTraceRoots(assist, side.grade)
+        assist.traceLevel = resolveHighestActiveRoot(assist.traceOffRoots ?? [], charId)
+        unmapped.push(...side.unmapped)
+    }
+    if (unmapped.length) warnUnmappedLegacyTraceBuffs([...new Set(unmapped)])
+}
+
+/**
+ * 紧凑输出：主控空的关闭根源 / 层数设置不写入（加载方恢复为全部激活 / 满层）。
+ * 协战侧保持完整字段形状（U88a 存档契约），只在主控省这两项。
+ * @param output 序列化输出（原地修改）
+ */
+function stripEmptyTraceFields(output: Record<string, unknown>): void {
+    if (Array.isArray(output.traceOffRoots) && output.traceOffRoots.length === 0) delete output.traceOffRoots
+    if (Array.isArray(output.traceStacks) && output.traceStacks.length === 0) delete output.traceStacks
+}
+
+/**
  * 将角色配置标准化后序列化，确保覆盖率和自定义 BUFF 数值使用稳定格式。
- * 未配置的 actions（未启用且各列表均为空，含缺失/null）会被直接省略，以简化配置文件大小。
+ * 未配置的 actions（未启用且各列表均为空，含缺失/null）会被直接省略，以简化配置文件大小；
+ * 未使用升华（关闭且无天赋、无装备）时省略 `transcend`，使用时输出 U96 压缩载荷。
  * @param settings 待序列化的角色配置（actions 支持为空）
  * @returns JSON 文本
  */
 export function serializeCharSettings(settings: CharSettingsInput | null | undefined): string {
     const normalized = normalizeCharSettings(settings)
-    if (isEmptyInlineActions(normalized.actions)) {
-        const { actions: _omitted, ...rest } = normalized
-        return JSON.stringify(rest)
-    }
-    return JSON.stringify(normalized)
+    const output = { ...normalized } as unknown as Record<string, unknown>
+    if (isEmptyTranscendSettings(normalized.transcend)) delete output.transcend
+    else output.transcend = encodeTranscendSettings(normalized.transcend)
+    if (isEmptyInlineActions(normalized.actions)) delete output.actions
+    stripEmptyTraceFields(output)
+    return JSON.stringify(output)
+}
+
+/**
+ * 序列化用于分享 / 上传的角色配置：结构与 `serializeCharSettings` 相同（含 U96 压缩），
+ * 但升华装备只保留当前激活变体（不重复写顶层三组），使启用升华后的分享载荷保持紧凑；
+ * 未使用升华时与 `serializeCharSettings` 同口径省略 `transcend` 键（载入方据此保留本地升华）。
+ * 本地存档 / 缓存键请继续使用 `serializeCharSettings`（保留全部变体）。
+ * @param settings 待序列化的角色配置（actions 支持为空）
+ * @returns JSON 文本
+ */
+export function serializeCharSettingsForShare(settings: CharSettingsInput | null | undefined): string {
+    const normalized = normalizeCharSettings(settings)
+    const active = getActiveGearVariant(normalized.transcend)
+    const transcend: TranscendSettings = active
+        ? {
+              ...normalized.transcend,
+              gearVariants: [
+                  {
+                      id: active.id,
+                      mainGear: normalized.transcend.mainGear,
+                      assist1Gear: normalized.transcend.assist1Gear,
+                      assist2Gear: normalized.transcend.assist2Gear,
+                  },
+              ],
+              activeGearVariant: active.id,
+          }
+        : normalized.transcend
+    const output = { ...normalized } as unknown as Record<string, unknown>
+    if (isEmptyTranscendSettings(transcend)) delete output.transcend
+    else output.transcend = encodeTranscendSettings(transcend)
+    if (isEmptyInlineActions(normalized.actions)) delete output.actions
+    stripEmptyTraceFields(output)
+    return JSON.stringify(output)
 }

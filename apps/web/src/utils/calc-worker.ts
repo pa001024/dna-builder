@@ -7,6 +7,7 @@ import type {
     CalcPanelsRequest,
     CalcResponse,
     CalcTargetValuesRequest,
+    CalcTraceIncomeRequest,
     CalcWorkerMessage,
 } from "@/data/Calc.worker"
 import { recordWorkerRequest } from "@/utils/nodeEditorPerf"
@@ -48,11 +49,18 @@ function getWorker(): Worker {
     return worker
 }
 
-export type CalcRequest = CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest | CalcEvaluateRequest | CalcPanelsRequest
+export type CalcRequest =
+    | CalcAutobuildRequest
+    | CalcIncomeRequest
+    | CalcTraceIncomeRequest
+    | CalcTargetValuesRequest
+    | CalcEvaluateRequest
+    | CalcPanelsRequest
 
 type CalcRequestInput =
     | Omit<CalcAutobuildRequest, "id">
     | Omit<CalcIncomeRequest, "id">
+    | Omit<CalcTraceIncomeRequest, "id">
     | Omit<CalcTargetValuesRequest, "id">
     | Omit<CalcEvaluateRequest, "id">
     | Omit<CalcPanelsRequest, "id">
@@ -64,7 +72,8 @@ export interface CalcRequestMeta {
 }
 
 /**
- * 提交一次构筑求值（节点编辑器使用）：走 wasm worker，失败时 worker 内部回退 TS。
+ * 提交一次构筑求值（节点编辑器使用）：走 wasm worker；仅 wasm 模块不可用时 worker 内部走 TS，
+ * 执行失败按错误上报（不回退 TS）。
  * @param payload 角色 id、完整配置与可选目标函数覆盖
  * @param meta 关联节点（性能面板归集用）
  * @returns 属性 / 武器面板 / 目标值 / 伤害明细

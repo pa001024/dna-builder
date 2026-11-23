@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { createBuffSelectContext, isBuffSelectable } from "../buffFilter"
+import { createBuffSelectContext, isBuffSelectable, isModProvidedBuff, unionBuffSelectContexts } from "../buffFilter"
 import { buffMap, charMap } from "../d"
 import type { Buff } from "../data-types"
 
@@ -93,5 +93,40 @@ describe("isBuffSelectable 按助战/助战武器过滤", () => {
         const buff = getBuff("助战50攻") // 无 id
         expect(isBuffSelectable(buff, makeCtx({ charName: "法露茜" }))).toBe(true)
         expect(isBuffSelectable(buff, makeCtx({ charName: "赛琪" }))).toBe(true)
+    })
+})
+
+describe("MOD 提供判定", () => {
+    it("禁用非空即由魔之楔提供（含全盛·振奋）", () => {
+        expect(isModProvidedBuff(getBuff("全盛·振奋"))).toBe(true)
+        expect(isModProvidedBuff(getBuff("菲娜Q"))).toBe(false)
+        expect(isModProvidedBuff({})).toBe(false)
+        expect(isModProvidedBuff({ 禁用: [] })).toBe(false)
+    })
+})
+
+describe("三侧合并上下文", () => {
+    it("任一构筑位可选即合并后可选（协战限定 BUFF 也能出现在列表）", () => {
+        const main = makeCtx({ charName: "法露茜" })
+        const assist = makeCtx({ charName: "黎瑟" })
+        expect(isBuffSelectable(getBuff("黎瑟E"), main)).toBe(false)
+        expect(isBuffSelectable(getBuff("黎瑟E"), unionBuffSelectContexts([main, assist]))).toBe(true)
+    })
+
+    it("限定元素按 context.elements 判定（多构筑位元素集合）", () => {
+        const fire: Buff = { 名称: "测试火", 限定: "火" }
+        const main = createBuffSelectContext({ charElm: "雷", mainIds: [], phantomIds: [] })
+        const assist = createBuffSelectContext({ charElm: "火", mainIds: [], phantomIds: [] })
+        expect(isBuffSelectable(fire, main)).toBe(false)
+        expect(isBuffSelectable(fire, assist)).toBe(true)
+        const union = unionBuffSelectContexts([main, assist])
+        expect(union.elements?.has("火")).toBe(true)
+        expect(isBuffSelectable(fire, union)).toBe(true)
+    })
+
+    it("旧格式角色名限定仍按角色 id 判定", () => {
+        const legacy: Buff = { 名称: "测试角色", 限定: "黎瑟" }
+        expect(isBuffSelectable(legacy, makeCtx({ charName: "黎瑟" }))).toBe(true)
+        expect(isBuffSelectable(legacy, makeCtx({ charName: "法露茜" }))).toBe(false)
     })
 })

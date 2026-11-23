@@ -11,6 +11,7 @@
 
 #[macro_use]
 pub mod prof;
+pub mod additional_damage;
 mod ast_eval;
 mod ast_parser;
 mod attributes;
@@ -32,6 +33,7 @@ pub mod session;
 pub mod tables;
 pub(crate) mod templates;
 pub mod timeline;
+pub mod transcend;
 
 pub use ast_eval::Evaluator;
 pub use autobuild::{AutobuildOptions, AutobuildRequest, AutobuildResult, ModCandidate, autobuild};

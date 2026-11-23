@@ -2,7 +2,7 @@
 import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
-import { charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
+import { CHAR_SKILL_LEVEL_MAX, charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
 import { resourceMap } from "@/data/d"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
 import type { CharExt } from "@/data/d/charext.data"
@@ -41,7 +41,7 @@ function buildBustUrl(bust: string): string {
 // 当前角色等级
 const currentLevel = ref(80) // 默认80级
 // 当前技能等级
-const currentSkillLevel = ref(12)
+const currentSkillLevel = ref(CHAR_SKILL_LEVEL_MAX)
 const activeBottomTab = ref<"profile" | "skin" | "voice" | "source">("skin")
 const currentVoiceId = ref<number | null>(null)
 const isVoicePlaying = ref(false)

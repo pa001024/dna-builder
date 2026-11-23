@@ -10,9 +10,12 @@
 //! - `modVariantIndex` 决定读哪一份 MOD 配置：0 用 `charMods` 等旧字段，
 //!   1/2 从 `modVariants[i-1]` 取（缺失时回落配置 A，保证老存档不丢配置）。
 
+use std::collections::BTreeMap;
+
 use serde_json::Value;
 
 use super::models::AttrMap;
+use super::record::Record;
 
 /// MOD 槽位：`[魔之楔 id, 等级]`；`None` 表示空槽。
 pub type ModSlot = Option<(i64, f64)>;
@@ -20,7 +23,7 @@ pub type ModSlot = Option<(i64, f64)>;
 /// 潜质槽位：`[基础潜质 id, 等级]`；`None` 表示空槽。
 pub type TraitSlot = Option<(i64, f64)>;
 /// 一份 MOD 变体（配置 A/B/C 中的 B/C）。
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ModVariant {
     /// 中枢魔之楔（光环）id；`None` / 0 表示沿用配置 A。
     pub aura: Option<i64>,
@@ -31,13 +34,482 @@ pub struct ModVariant {
 }
 
 /// DOT 频率设置。
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct DotSettings {
     pub skill: f64,
     pub melee: f64,
     pub ranged: f64,
     pub skillweapon: f64,
     pub force_own_additional_damage: bool,
+}
+
+/// 协战位完整 loadout；与 TS `AssistCharSettings` 逐字段对齐（驼峰 JSON）。
+///
+/// **纯 JSON 原始解析**：本结构拿不到 `BuildTables`，因此 TS `normalizeAssistSideSettings`
+/// 中依赖角色表的两项归一化——`baseName` 回退首个技能、`enabled` 的角色存在性——由
+/// peer 构建期统一完成（U89d2：`BuildContext::build_peer_attributes` / `peer_base_name`）。
+/// 本层只保证类型 / 数值钳制与交换格式一致。
+///
+/// 角色 id / 武器 id 不在本结构内：`team1` / `team1Weapon`（或 2）仍是唯一真源。
+#[derive(Debug, Clone, PartialEq)]
+pub struct AssistSettings {
+    /// 角色等级 1-80。
+    pub char_level: f64,
+    /// 技能等级 `[E, Q, 被动]`。
+    pub char_skill_level: [f64; 3],
+    /// 计算技能（`baseName`）；这里只做 trim，技能表回退在 peer 构建期。
+    pub base_name: String,
+    /// 额外精通武器类型（空字符串表示未解锁）。
+    pub extra_mastery: String,
+    /// 单武器槽（`teamNWeapon`）的等级 1-80。
+    pub weapon_level: f64,
+    /// 单武器槽的精炼等级 0-5。
+    pub weapon_refine: f64,
+    pub target_function: String,
+    pub custom_variables: Vec<(String, String)>,
+    pub dot_settings: DotSettings,
+    /// 是否参与合计；缺失时按 `teamN` 是否为非零数字推断（角色存在性由 peer 构建校验）。
+    pub enabled: bool,
+    pub aura_mod: i64,
+    pub char_mods: Vec<ModSlot>,
+    pub melee_mods: Vec<ModSlot>,
+    pub ranged_mods: Vec<ModSlot>,
+    pub skill_mods: Vec<ModSlot>,
+    pub mod_variant_index: usize,
+    pub mod_variants: Vec<ModVariant>,
+    pub buffs: Vec<(String, f64, Option<f64>)>,
+    pub custom_buff: Vec<(String, f64)>,
+    pub use_global: bool,
+    pub effect_config: Vec<(String, f64)>,
+}
+
+impl Default for AssistSettings {
+    /// 与上游 `createDefaultAssistSideSettings()` 一致。
+    fn default() -> Self {
+        Self {
+            char_level: 80.0,
+            char_skill_level: [CHAR_SKILL_LEVEL_DEFAULT; 3],
+            base_name: String::new(),
+            extra_mastery: String::new(),
+            weapon_level: 80.0,
+            weapon_refine: 5.0,
+            target_function: String::new(),
+            custom_variables: Vec::new(),
+            dot_settings: DotSettings::default(),
+            enabled: true,
+            aura_mod: 0,
+            char_mods: vec![None; 8],
+            melee_mods: vec![None; 8],
+            ranged_mods: vec![None; 8],
+            skill_mods: vec![None; 4],
+            mod_variant_index: 0,
+            mod_variants: Vec::new(),
+            buffs: Vec::new(),
+            custom_buff: Vec::new(),
+            use_global: false,
+            effect_config: Vec::new(),
+        }
+    }
+}
+
+impl AssistSettings {
+    /// 解析 `assist1` / `assist2`；缺失或非对象返回 `None`（未配置协战 loadout）。
+    ///
+    /// 纯原始解析：`team` 只用于推断缺失的启用位（`Some(id > 0)`）；角色是否存在、
+    /// `baseName` 是否属于该角色技能表由 peer 构建期校验（U89d2）。
+    pub fn from_json(value: Option<&Value>, team: Option<i64>) -> Option<Self> {
+        let object = value?.as_object()?;
+        let mut settings = Self::default();
+
+        settings.char_level = clamp_integer(object.get("charLevel"), 1.0, 80.0, settings.char_level);
+        settings.char_skill_level =
+            normalize_skill_levels(object.get("charSkillLevel").unwrap_or(&Value::Null));
+        settings.base_name = object
+            .get("baseName")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+        settings.extra_mastery = object
+            .get("extraMastery")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_string();
+        settings.weapon_level =
+            clamp_integer(object.get("weaponLevel"), 1.0, 80.0, settings.weapon_level);
+        settings.weapon_refine =
+            clamp_integer(object.get("weaponRefine"), 0.0, 5.0, settings.weapon_refine);
+        settings.target_function = object
+            .get("targetFunction")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_string();
+        settings.enabled = object
+            .get("enabled")
+            .and_then(Value::as_bool)
+            .unwrap_or_else(|| team.is_some_and(|id| id > 0));
+        settings.use_global = object
+            .get("useGlobal")
+            .and_then(Value::as_bool)
+            .unwrap_or(settings.use_global);
+
+        // 自定义变量：`[[名称, 表达式], …]`，只保留两个元素都是字符串的条目
+        if let Some(items) = object.get("customVariables").and_then(Value::as_array) {
+            settings.custom_variables = items
+                .iter()
+                .filter_map(|item| {
+                    let pair = item.as_array()?;
+                    Some((
+                        pair.first()?.as_str()?.to_string(),
+                        pair.get(1)?.as_str()?.to_string(),
+                    ))
+                })
+                .collect();
+        }
+
+        settings.dot_settings = parse_assist_dot_settings(
+            object.get("dotSettings"),
+            &settings.dot_settings,
+        );
+
+        // 中枢只接受非负 id（`0` 表示未设置）
+        settings.aura_mod = object
+            .get("auraMod")
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite() && *value >= 0.0)
+            .map(|value| value.round() as i64)
+            .unwrap_or(0);
+
+        // MOD 槽位固定长度，缺失 / 非法条目补空槽（协战按 TS 口径接受分数并取整）
+        settings.char_mods = parse_assist_slots(object.get("charMods"), 8);
+        settings.melee_mods = parse_assist_slots(object.get("meleeMods"), 8);
+        settings.ranged_mods = parse_assist_slots(object.get("rangedMods"), 8);
+        settings.skill_mods = parse_assist_slots(object.get("skillWeaponMods"), 4);
+
+        // MOD 变体：上游只保留 B/C 两份，非法条目补空变体
+        settings.mod_variants = parse_assist_mod_variants(object.get("modVariants"));
+        settings.mod_variant_index = clamp_integer(
+            object.get("modVariantIndex"),
+            0.0,
+            settings.mod_variants.len() as f64,
+            0.0,
+        ) as usize;
+
+        // BUFF：覆盖率 >= 1 时按上游口径省略第三项
+        if let Some(items) = object.get("buffs").and_then(Value::as_array) {
+            settings.buffs = items
+                .iter()
+                .filter_map(|item| {
+                    let tuple = item.as_array()?;
+                    let name = tuple.first()?.as_str()?.to_string();
+                    let level = tuple.get(1)?.as_f64()?;
+                    let coverage = tuple
+                        .get(2)
+                        .and_then(Value::as_f64)
+                        .filter(|value| value.is_finite() && *value < 1.0)
+                        .map(round_buff_value);
+                    Some((name, level, coverage))
+                })
+                .collect();
+        }
+
+        if let Some(items) = object.get("customBuff").and_then(Value::as_array) {
+            settings.custom_buff = items
+                .iter()
+                .filter_map(|item| {
+                    let tuple = item.as_array()?;
+                    let property = tuple.first()?.as_str()?.to_string();
+                    let value = round_buff_value(tuple.get(1)?.as_f64()?);
+                    Some((property, value))
+                })
+                .collect();
+        }
+
+        if let Some(map) = object.get("effectConfig").and_then(Value::as_object) {
+            settings.effect_config = map
+                .iter()
+                .filter_map(|(key, value)| Some((key.clone(), value.as_f64()?)))
+                .collect();
+        }
+
+        Some(settings)
+    }
+
+    /// 序列化回 TS `AssistCharSettings` 交换格式（键名与 `from_json` 一一对应）。
+    pub fn to_json_value(&self) -> Value {
+        let slots = |slots: &[ModSlot]| {
+            slots
+                .iter()
+                .map(|slot| {
+                    slot.map(|(id, level)| serde_json::json!([id, level]))
+                        .unwrap_or(Value::Null)
+                })
+                .collect::<Vec<_>>()
+        };
+        serde_json::json!({
+            "charLevel": self.char_level,
+            "charSkillLevel": [self.char_skill_level[0], self.char_skill_level[1], self.char_skill_level[2]],
+            "baseName": self.base_name,
+            "extraMastery": self.extra_mastery,
+            "weaponLevel": self.weapon_level,
+            "weaponRefine": self.weapon_refine,
+            "targetFunction": self.target_function,
+            "customVariables": self.custom_variables.iter().map(|(name, expr)| serde_json::json!([name, expr])).collect::<Vec<_>>(),
+            "dotSettings": {
+                "skill": self.dot_settings.skill,
+                "melee": self.dot_settings.melee,
+                "ranged": self.dot_settings.ranged,
+                "skillweapon": self.dot_settings.skillweapon,
+                "forceOwnAdditionalDamage": self.dot_settings.force_own_additional_damage,
+            },
+            "enabled": self.enabled,
+            "auraMod": self.aura_mod,
+            "charMods": slots(&self.char_mods),
+            "meleeMods": slots(&self.melee_mods),
+            "rangedMods": slots(&self.ranged_mods),
+            "skillWeaponMods": slots(&self.skill_mods),
+            "modVariantIndex": self.mod_variant_index,
+            "modVariants": self.mod_variants.iter().map(|variant| serde_json::json!({
+                "中枢": variant.aura.unwrap_or(0),
+                "角色": slots(&variant.char_mods),
+                "近战": slots(&variant.melee_mods),
+                "远程": slots(&variant.ranged_mods),
+                "同律": slots(&variant.skill_mods),
+            })).collect::<Vec<_>>(),
+            "buffs": self.buffs.iter().map(|(name, level, coverage)| match coverage {
+                Some(coverage) => serde_json::json!([name, level, coverage]),
+                None => serde_json::json!([name, level]),
+            }).collect::<Vec<_>>(),
+            "customBuff": self.custom_buff.iter().map(|(property, value)| serde_json::json!([property, value])).collect::<Vec<_>>(),
+            "useGlobal": self.use_global,
+            "effectConfig": self.effect_config.iter().cloned().collect::<std::collections::BTreeMap<_, _>>(),
+        })
+    }
+}
+
+/// 升华合成 BUFF 载荷：原始记录 + 等级 / 覆盖率（TS `new LeveledBuff(data, 1)` 的入参）。
+#[derive(Debug, Clone, PartialEq)]
+pub struct TranscendBuff {
+    pub data: Record,
+    pub level: f64,
+    pub coverage: Option<f64>,
+}
+
+impl TranscendBuff {
+    /// 解析 `{data, level, coverage?}`；`data` 非对象时视为无效条目。
+    pub fn from_json(value: &Value) -> Option<Self> {
+        let object = value.as_object()?;
+        let data = object.get("data")?.as_object()?;
+        Some(Self {
+            data: Record::from_map(data.clone()),
+            level: object.get("level").and_then(Value::as_f64).unwrap_or(1.0),
+            coverage: object
+                .get("coverage")
+                .and_then(Value::as_f64)
+                .filter(|value| value.is_finite()),
+        })
+    }
+}
+
+/// 升华技能替换载荷：字段语义对齐 TS `TranscendSkillReplacement`。
+///
+/// `保留源字段` 只参与 TS 载荷合并（合并后不含字段改写），应用侧不读取。
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct TranscendSkillReplacement {
+    pub id: Option<i64>,
+    pub name: Option<String>,
+    pub kind: Option<String>,
+    pub description: Option<String>,
+    /// `字段`：整表替换；`None` 时按 `字段改写` / `移除字段` 处理源字段。
+    pub fields: Option<Vec<Value>>,
+    /// `字段改写`：按字段名覆盖；源技能不存在的名字带 `值` 时按新增字段处理。
+    pub field_edits: Vec<(String, serde_json::Map<String, Value>)>,
+    /// `移除字段`：按字段名移除。
+    pub removed_fields: Vec<String>,
+}
+
+impl TranscendSkillReplacement {
+    /// 解析替换载荷；非对象返回 `None`。
+    pub fn from_json(value: &Value) -> Option<Self> {
+        let object = value.as_object()?;
+        let text = |key: &str| object.get(key).and_then(Value::as_str).map(str::to_string);
+        Some(Self {
+            id: object.get("id").and_then(json_id),
+            name: text("名称"),
+            kind: text("类型"),
+            description: text("描述"),
+            fields: object.get("字段").and_then(Value::as_array).cloned(),
+            field_edits: object
+                .get("字段改写")
+                .and_then(Value::as_object)
+                .map(|map| {
+                    map.iter()
+                        .filter_map(|(key, value)| Some((key.clone(), value.as_object()?.clone())))
+                        .collect()
+                })
+                .unwrap_or_default(),
+            removed_fields: object
+                .get("移除字段")
+                .and_then(Value::as_array)
+                .map(|items| items.iter().filter_map(Value::as_str).map(str::to_string).collect())
+                .unwrap_or_default(),
+        })
+    }
+
+    /// 指纹用的规范化 JSON（键集固定，不依赖载荷原始字段顺序）。
+    pub fn to_canonical_value(&self) -> Value {
+        let edits: serde_json::Map<String, Value> = self
+            .field_edits
+            .iter()
+            .map(|(key, patch)| (key.clone(), Value::Object(patch.clone())))
+            .collect();
+        serde_json::json!({
+            "id": self.id,
+            "名称": self.name,
+            "类型": self.kind,
+            "描述": self.description,
+            "字段": self.fields,
+            "字段改写": edits,
+            "移除字段": self.removed_fields,
+        })
+    }
+}
+
+/// 旧版 `skillLevelBonus` 兼容转换出的合成 BUFF 名（新载荷不再携带该字段）。
+pub const LEGACY_SKILL_LEVEL_BUFF_NAME: &str = "旧载荷技能等级加成";
+
+/// 单个构筑位的升华效果集（主控 = 天赋 + 装备；协战 = 本组装备）。
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct TranscendEffectSet {
+    pub buffs: Vec<TranscendBuff>,
+    /// 技能替换（源技能 id → 载荷）；`BTreeMap` 保证遍历顺序确定，指纹稳定。
+    pub skill_replacements: BTreeMap<i64, TranscendSkillReplacement>,
+}
+
+impl TranscendEffectSet {
+    /// 解析效果集；缺省字段按空处理。
+    ///
+    /// 旧载荷的 `skillLevelBonus` 在解析期转为一条带 `E/Q/P技能等级` attr 的合成 BUFF
+    /// 进入标准属性管线（U126b 删除专用通道），不静默丢弃；全零视同未携带。
+    pub fn from_json(value: Option<&Value>) -> Self {
+        let Some(object) = value.and_then(Value::as_object) else {
+            return Self::default();
+        };
+        let mut buffs: Vec<TranscendBuff> = object
+            .get("buffs")
+            .and_then(Value::as_array)
+            .map(|items| items.iter().filter_map(TranscendBuff::from_json).collect())
+            .unwrap_or_default();
+        // 双计防御：新载荷已带三键 BUFF 时忽略旧字段（过渡版本手工混包不应叠加两次）
+        if !buffs.iter().any(buff_has_skill_level_attr)
+            && let Some(legacy) = legacy_skill_level_buff(object.get("skillLevelBonus"))
+        {
+            buffs.push(legacy);
+        }
+        let skill_replacements = object
+            .get("skillReplacements")
+            .and_then(Value::as_object)
+            .map(|map| {
+                map.iter()
+                    .filter_map(|(key, value)| {
+                        Some((key.parse::<i64>().ok()?, TranscendSkillReplacement::from_json(value)?))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        Self {
+            buffs,
+            skill_replacements,
+        }
+    }
+
+    /// 是否为空效果（关闭 / 空配置时指纹必须与未携带载荷一致）。
+    pub fn is_empty(&self) -> bool {
+        self.buffs.is_empty() && self.skill_replacements.is_empty()
+    }
+}
+
+/// 载荷 BUFF 是否已携带 `E/Q/P技能等级` 任一键（含字符串表达式键）。
+fn buff_has_skill_level_attr(buff: &TranscendBuff) -> bool {
+    let Some(attr) = buff.data.obj_ref("attr") else {
+        return false;
+    };
+    ["E技能等级", "Q技能等级", "P技能等级"]
+        .iter()
+        .any(|key| attr.value(key).is_some())
+}
+
+/// 旧载荷 `skillLevelBonus` → 三键合成 BUFF；全零 / 非法 / 未携带时返回 `None`。
+fn legacy_skill_level_buff(value: Option<&Value>) -> Option<TranscendBuff> {
+    let items = value?.as_array()?;
+    let mut attr = serde_json::Map::new();
+    for (slot, key) in ["E技能等级", "Q技能等级", "P技能等级"].iter().enumerate() {
+        let Some(number) = items.get(slot).and_then(Value::as_f64) else {
+            continue;
+        };
+        if number.is_finite() && number != 0.0 {
+            attr.insert((*key).to_string(), serde_json::json!(number));
+        }
+    }
+    if attr.is_empty() {
+        return None;
+    }
+    let mut data = serde_json::Map::new();
+    data.insert(
+        "名称".to_string(),
+        Value::String(LEGACY_SKILL_LEVEL_BUFF_NAME.to_string()),
+    );
+    data.insert("描述".to_string(), Value::String(String::new()));
+    data.insert("attr".to_string(), Value::Object(attr));
+    Some(TranscendBuff {
+        data: Record::from_map(data),
+        level: 1.0,
+        coverage: None,
+    })
+}
+
+/// 与构筑位对应的升华载荷集合；请求始终带 `main`，协战侧可选。
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct TranscendPayload {
+    pub main: TranscendEffectSet,
+    pub assist1: Option<TranscendEffectSet>,
+    pub assist2: Option<TranscendEffectSet>,
+}
+
+impl TranscendPayload {
+    /// 解析 `{main, assist1?, assist2?}`；非对象返回 `None`。
+    pub fn from_json(value: &Value) -> Option<Self> {
+        let object = value.as_object()?;
+        Some(Self {
+            main: TranscendEffectSet::from_json(object.get("main")),
+            assist1: object
+                .get("assist1")
+                .and_then(Value::as_object)
+                .map(|_| TranscendEffectSet::from_json(object.get("assist1"))),
+            assist2: object
+                .get("assist2")
+                .and_then(Value::as_object)
+                .map(|_| TranscendEffectSet::from_json(object.get("assist2"))),
+        })
+    }
+
+    /// 当前构筑位对应的效果集；协战侧未携带时返回 `None`。
+    pub fn for_side(&self, side: TranscendSide) -> Option<&TranscendEffectSet> {
+        match side {
+            TranscendSide::Main => Some(&self.main),
+            TranscendSide::Assist1 => self.assist1.as_ref(),
+            TranscendSide::Assist2 => self.assist2.as_ref(),
+        }
+    }
+}
+
+/// 请求所处的构筑位（`peer_settings` 会把它切到协战侧）。
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TranscendSide {
+    #[default]
+    Main,
+    Assist1,
+    Assist2,
 }
 
 /// 构筑配置；字段命名与上游一致。
@@ -84,11 +556,22 @@ pub struct CharSettings {
     pub team1_weapon: Option<i64>,
     pub team2: Option<i64>,
     pub team2_weapon: Option<i64>,
+    /// 协战一完整 loadout（`assist1`）；`None` 表示存档未携带。
+    pub assist1: Option<AssistSettings>,
+    /// 协战二完整 loadout（`assist2`）。
+    pub assist2: Option<AssistSettings>,
     pub timeline_dps: bool,
     pub use_global: bool,
     /// 特效等级配置（`m:<id>` / `w:<id>` → 等级）。
     pub effect_config: Vec<(String, f64)>,
     pub dot_settings: DotSettings,
+    /// 升华效果载荷（仅 wasm 请求携带；不写入 `to_json_value`，避免自动配装回填时重复叠加）。
+    pub transcend_effects: Option<TranscendPayload>,
+    /// 当前构筑位：主控请求恒 `Main`，`peer_settings` 切到协战侧。
+    pub transcend_side: TranscendSide,
+    /// 原始 `transcend` 配置（Rust 不解析语义，只在 `to_json_value` 原样回填）：
+    /// 自动配装结果要带回用户的天赋 / 装备配置，否则前端预览会丢升华效果。
+    pub transcend_raw: Option<Value>,
 }
 
 impl Default for CharSettings {
@@ -132,10 +615,15 @@ impl Default for CharSettings {
             team1_weapon: None,
             team2: None,
             team2_weapon: None,
+            assist1: None,
+            assist2: None,
             timeline_dps: false,
             use_global: false,
             effect_config: Vec::new(),
             dot_settings: DotSettings::default(),
+            transcend_effects: None,
+            transcend_side: TranscendSide::Main,
+            transcend_raw: None,
         }
     }
 }
@@ -302,6 +790,8 @@ impl CharSettings {
         settings.team1_weapon = optional_id(object.get("team1Weapon"));
         settings.team2 = optional_id(object.get("team2"));
         settings.team2_weapon = optional_id(object.get("team2Weapon"));
+        settings.assist1 = AssistSettings::from_json(object.get("assist1"), settings.team1);
+        settings.assist2 = AssistSettings::from_json(object.get("assist2"), settings.team2);
 
         // 特效等级配置
         if let Some(map) = object.get("effectConfig").and_then(Value::as_object) {
@@ -331,6 +821,18 @@ impl CharSettings {
         // hpPercent 钳制（上游构造时也做一次；`set_num!` 不滤 NaN，
         // NaN 经 `.clamp()` 传播为 NaN——非法输入的诚实口径，有限值与旧链一致）。
         settings.hp_percent = settings.hp_percent.clamp(0.0, 1.0);
+
+        // 升华载荷：仅请求期字段，缺省 = 未携带（空效果）/ 主控侧
+        settings.transcend_side = match object.get("transcendSide").and_then(Value::as_str) {
+            Some("assist1") => TranscendSide::Assist1,
+            Some("assist2") => TranscendSide::Assist2,
+            _ => TranscendSide::Main,
+        };
+        settings.transcend_effects = object
+            .get("transcendEffects")
+            .and_then(TranscendPayload::from_json);
+        // 原样保留 `transcend`：Rust 不解析其语义，仅用于自动配装结果回填
+        settings.transcend_raw = object.get("transcend").cloned();
         settings
     }
 
@@ -354,7 +856,7 @@ impl CharSettings {
             "skillweapon": self.dot_settings.skillweapon,
             "forceOwnAdditionalDamage": self.dot_settings.force_own_additional_damage,
         });
-        serde_json::json!({
+        let mut value = serde_json::json!({
             "charLevel": self.char_level,
             "baseName": self.base_name,
             "hpPercent": self.hp_percent,
@@ -387,7 +889,7 @@ impl CharSettings {
             "rangedMods": slots(&self.ranged_mods),
             "skillWeaponMods": slots(&self.skill_mods),
             "modVariants": self.mod_variants.iter().map(|variant| serde_json::json!({
-                "中枢": variant.aura,
+                "中枢": variant.aura.unwrap_or(0),
                 "角色": slots(&variant.char_mods),
                 "近战": slots(&variant.melee_mods),
                 "远程": slots(&variant.ranged_mods),
@@ -405,7 +907,28 @@ impl CharSettings {
             "team2Weapon": self.team2_weapon.map(|id| serde_json::json!(id)).unwrap_or(serde_json::json!("-")),
             "effectConfig": self.effect_config.iter().cloned().collect::<std::collections::BTreeMap<_, _>>(),
             "dotSettings": dot_settings,
-        })
+        });
+        // 协战 loadout 单独插入：两个大对象会让 `json!` 触发递归上限。
+        let object = value.as_object_mut().expect("JSON 对象字面量");
+        object.insert(
+            "assist1".to_string(),
+            self.assist1
+                .as_ref()
+                .map(AssistSettings::to_json_value)
+                .unwrap_or(Value::Null),
+        );
+        object.insert(
+            "assist2".to_string(),
+            self.assist2
+                .as_ref()
+                .map(AssistSettings::to_json_value)
+                .unwrap_or(Value::Null),
+        );
+        // 升华配置原样回填（未携带时不写键，保持旧输出形状）；请求载荷 / 侧别一律不写
+        if let Some(transcend) = &self.transcend_raw {
+            object.insert("transcend".to_string(), transcend.clone());
+        }
+        value
     }
 
     /// 当前激活变体的角色 MOD 槽位；对应上游 `getModVariantSlots(settings, "角色")`。
@@ -553,40 +1076,137 @@ fn parse_slots(value: Option<&Value>, len: usize) -> Vec<ModSlot> {
     slots
 }
 
-/// JSON 数值 → 整数 id；与 `Record::id` 同口径（`record.rs`）。
-pub(crate) fn json_id(value: &Value) -> Option<i64> {
-    match value {
-        Value::Number(number) => {
-            if let Some(integer) = number.as_i64() {
-                return Some(integer);
-            }
-            if let Some(unsigned) = number.as_u64() {
-                return i64::try_from(unsigned).ok();
-            }
-            let float = number.as_f64()?;
-            if float.is_finite() && float.fract() == 0.0 && float.abs() < 9.007_199_254_740_992e15 {
-                Some(float as i64)
-            } else {
-                None
-            }
+/// 协战 MOD 槽解析：按 TS `normalizeModSlots` 口径接受有限数并取整 id / 等级。
+///
+/// 顶层 `parse_slots` 的 id 走共享 `json_id`（有限浮点按 `Math.round`，字符串不接受），
+/// 等级保持原样；协战这里再对等级取整，保证分数 id / 等级都不再整槽丢弃。
+fn parse_assist_slots(value: Option<&Value>, len: usize) -> Vec<ModSlot> {
+    let mut slots = vec![None; len];
+    let Some(items) = value.and_then(Value::as_array) else {
+        return slots;
+    };
+    let round = |value: Option<&Value>| {
+        value
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite() && value.abs() < 9.007_199_254_740_992e15)
+            .map(f64::round)
+    };
+    for (index, item) in items.iter().enumerate() {
+        if index >= len {
+            break;
         }
-        _ => None,
+        let Some(tuple) = item.as_array() else {
+            continue;
+        };
+        let id = round(tuple.first());
+        let level = round(tuple.get(1));
+        if let (Some(id), Some(level)) = (id, level) {
+            slots[index] = Some((id as i64, level));
+        }
+    }
+    slots
+}
+
+/// 取整并钳制到区间；非有限数（含缺失）回退 `fallback`。
+fn clamp_integer(value: Option<&Value>, min: f64, max: f64, fallback: f64) -> f64 {
+    let Some(number) = value.and_then(Value::as_f64) else {
+        return fallback;
+    };
+    if !number.is_finite() {
+        return fallback;
+    }
+    number.round().clamp(min, max)
+}
+
+/// 浮点尾差归一化（保留 6 位）；对应上游 `roundBuffValue`。
+fn round_buff_value(value: f64) -> f64 {
+    let factor = 1_000_000.0;
+    (value * factor).round() / factor
+}
+
+/// 协战 DOT 频率：负值归零，缺失键沿用默认值。
+fn parse_assist_dot_settings(value: Option<&Value>, defaults: &DotSettings) -> DotSettings {
+    let Some(map) = value.and_then(Value::as_object) else {
+        return defaults.clone();
+    };
+    let frequency = |key: &str, fallback: f64| {
+        map.get(key)
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite())
+            .map(|value| value.max(0.0))
+            .unwrap_or(fallback)
+    };
+    DotSettings {
+        skill: frequency("skill", defaults.skill),
+        melee: frequency("melee", defaults.melee),
+        ranged: frequency("ranged", defaults.ranged),
+        skillweapon: frequency("skillweapon", defaults.skillweapon),
+        force_own_additional_damage: map
+            .get("forceOwnAdditionalDamage")
+            .and_then(Value::as_bool)
+            .unwrap_or(defaults.force_own_additional_damage),
     }
 }
 
-/// 协战 id：数字才算配置，字符串（含 `"-"`）视为未配置。
+/// 协战 MOD 变体：上游只保留 B/C 两份（`MOD_VARIANT_MAX_COUNT - 1`），非法条目补空变体。
+///
+/// 槽位与中枢都按 TS `normalizeModVariants` 取整（中枢保留 `> 0` 判定，序列化时写数字 0）。
+fn parse_assist_mod_variants(value: Option<&Value>) -> Vec<ModVariant> {
+    let Some(items) = value.and_then(Value::as_array) else {
+        return Vec::new();
+    };
+    items
+        .iter()
+        .take(2)
+        .map(|item| {
+            let map = item.as_object();
+            ModVariant {
+                aura: map
+                    .and_then(|map| map.get("中枢"))
+                    .and_then(Value::as_f64)
+                    .filter(|value| value.is_finite() && *value > 0.0)
+                    .map(|value| value.round() as i64),
+                char_mods: parse_assist_slots(map.and_then(|map| map.get("角色")), 8),
+                melee_mods: parse_assist_slots(map.and_then(|map| map.get("近战")), 8),
+                ranged_mods: parse_assist_slots(map.and_then(|map| map.get("远程")), 8),
+                skill_mods: parse_assist_slots(map.and_then(|map| map.get("同律")), 4),
+            }
+        })
+        .collect()
+}
+
+/// JSON 数值 → 整数 id；与 TS `Math.round` 口径一致（接受有限浮点并取整），字符串一律 `None`。
+pub(crate) fn json_id(value: &Value) -> Option<i64> {
+    let Value::Number(number) = value else {
+        return None;
+    };
+    if let Some(integer) = number.as_i64() {
+        return Some(integer);
+    }
+    if let Some(unsigned) = number.as_u64() {
+        return i64::try_from(unsigned).ok();
+    }
+    let float = number.as_f64()?;
+    if float.is_finite() && float.abs() < 9.007_199_254_740_992e15 {
+        Some(float.round() as i64)
+    } else {
+        None
+    }
+}
+
+/// 协战 id：JSON number（有限浮点按 `Math.round`）才算配置；字符串（含 `"-"` / 角色名）视为未配置。
 fn optional_id(value: Option<&Value>) -> Option<i64> {
     value.and_then(json_id)
 }
 
 /// 技能等级下限；对应上游 `CHAR_SKILL_LEVEL_MIN`。
 pub const CHAR_SKILL_LEVEL_MIN: f64 = 1.0;
-/// 技能等级上限；对应上游 `CHAR_SKILL_LEVEL_MAX`。
-pub const CHAR_SKILL_LEVEL_MAX: f64 = 12.0;
+/// 技能等级上限；对应上游 `CHAR_SKILL_LEVEL_MAX`（源数据 `DataConst.MaxSkillLevel`）。
+pub const CHAR_SKILL_LEVEL_MAX: f64 = 30.0;
 /// 技能等级默认值（E/Q/被动均为 10 级）；对应上游 `CHAR_SKILL_LEVEL_DEFAULT`。
 pub const CHAR_SKILL_LEVEL_DEFAULT: f64 = 10.0;
 
-/// 钳制到 1-12 并取整；对应上游 `normalizeCharSkillLevels` 内的 `clamp`。
+/// 钳制到 1-30 并取整；对应上游 `normalizeCharSkillLevels` 内的 `clamp`。
 fn clamp_skill_level(value: f64, fallback: f64) -> f64 {
     if !value.is_finite() {
         return fallback;
@@ -598,7 +1218,7 @@ fn clamp_skill_level(value: f64, fallback: f64) -> f64 {
 
 /// 归一化技能等级为 `[E, Q, 被动]` 三元组；对应上游 `normalizeCharSkillLevels`。
 ///
-/// 兼容老格式：单个数字视为三项相同；数组缺项用首项补齐，各项钳制到 1-12
+/// 兼容老格式：单个数字视为三项相同；数组缺项用首项补齐，各项钳制到 1-30
 /// 并取整（非有限值同样回落首项，首项非法时回落默认值）。
 pub fn normalize_skill_levels(value: &Value) -> [f64; 3] {
     if let Some(number) = value.as_f64() {
@@ -785,10 +1405,15 @@ mod tests {
         // 数组缺项用首项补齐
         assert_eq!(normalize_skill_levels(&json!([12])), [12.0, 12.0, 12.0]);
         assert_eq!(normalize_skill_levels(&json!([12, 10])), [12.0, 10.0, 12.0]);
-        // 钳制到 1-12 并取整
+        // 钳制到 1-30 并取整（13.6 → 14，不再被 12 截断）
         assert_eq!(
             normalize_skill_levels(&json!([0, 13.6, 5.4])),
-            [1.0, 12.0, 5.0]
+            [1.0, 14.0, 5.0]
+        );
+        // 上限 30：31 截断到 30
+        assert_eq!(
+            normalize_skill_levels(&json!([0, 31, 29.4])),
+            [1.0, 30.0, 29.0]
         );
         // 非法值回落（首项非法 → 默认值，其余 → 首项）
         assert_eq!(normalize_skill_levels(&json!(null)), [10.0, 10.0, 10.0]);
@@ -820,5 +1445,84 @@ mod tests {
         assert_eq!(settings.hp_percent, 1.0);
         let settings = CharSettings::from_json(&json!({"hpPercent": -0.5}));
         assert_eq!(settings.hp_percent, 0.0);
+    }
+
+    #[test]
+    fn transcend_payload_missing_keeps_defaults() {
+        let settings = CharSettings::from_json(&json!({}));
+        assert!(settings.transcend_effects.is_none());
+        assert_eq!(settings.transcend_side, TranscendSide::Main);
+        // 脏数据：非对象 / 未知侧别都按缺省处理
+        let settings = CharSettings::from_json(&json!({
+            "transcendEffects": "nope",
+            "transcendSide": "assist9"
+        }));
+        assert!(settings.transcend_effects.is_none());
+        assert_eq!(settings.transcend_side, TranscendSide::Main);
+    }
+
+    #[test]
+    fn transcend_payload_parses_sides_buffs_and_replacements() {
+        let settings = CharSettings::from_json(&json!({
+            "transcendSide": "assist2",
+            "transcendEffects": {
+                "main": {
+                    "buffs": [
+                        {"data": {"名称": "升华天赋·攻击", "attr": {"攻击": 0.3}}, "level": 1},
+                        {"data": {"名称": "覆盖", "attr": {"攻击": 0.2}}, "level": 1, "coverage": 0.5}
+                    ],
+                    "skillLevelBonus": [1, 10, 0],
+                    "skillReplacements": {
+                        "310201": {"id": 310212, "名称": "高温清扫", "字段改写": {"伤害": {"值": 9.03552}}, "移除字段": ["范围"]}
+                    }
+                },
+                "assist1": {"buffs": [{"data": {"名称": "协战一", "attr": {"技能威力": 0.1}}, "level": 1}]}
+            }
+        }));
+        assert_eq!(settings.transcend_side, TranscendSide::Assist2);
+        let payload = settings.transcend_effects.expect("载荷");
+        // 旧字段 `skillLevelBonus` 转为三键合成 BUFF 追加在载荷 BUFF 之后
+        assert_eq!(payload.main.buffs.len(), 3);
+        assert_eq!(payload.main.buffs[1].coverage, Some(0.5));
+        let legacy = &payload.main.buffs[2].data;
+        assert_eq!(legacy.text("名称"), LEGACY_SKILL_LEVEL_BUFF_NAME);
+        assert_eq!(
+            legacy.obj("attr").num("E技能等级"),
+            Some(1.0),
+            "旧载荷 E 等级加成进入标准属性"
+        );
+        assert_eq!(legacy.obj("attr").num("Q技能等级"), Some(10.0));
+        assert_eq!(legacy.obj("attr").num("P技能等级"), None, "零值不生成键");
+        let replacement = &payload.main.skill_replacements[&310201];
+        assert_eq!(replacement.id, Some(310212));
+        assert_eq!(replacement.name.as_deref(), Some("高温清扫"));
+        assert_eq!(replacement.removed_fields, vec!["范围".to_string()]);
+        assert!(replacement.fields.is_none());
+        assert_eq!(payload.assist1.as_ref().map(|set| set.buffs.len()), Some(1));
+        // 未携带的协战二侧：for_side 返回 None（无效果）
+        assert!(payload.for_side(TranscendSide::Assist2).is_none());
+        // 效果集为空判定
+        assert!(TranscendEffectSet::default().is_empty());
+        assert!(!payload.main.is_empty());
+        // 全零旧字段视同未携带（不产生合成 BUFF，指纹与空载荷一致）
+        let zero = TranscendEffectSet::from_json(Some(&json!({"skillLevelBonus": [0, 0, 0]})));
+        assert!(zero.is_empty());
+        // 双计防御：载荷已带三键 BUFF 时忽略旧字段
+        let mixed = TranscendEffectSet::from_json(Some(&json!({
+            "buffs": [{"data": {"名称": "新载荷等级", "attr": {"Q技能等级": 10}}, "level": 1}],
+            "skillLevelBonus": [1, 10, 0]
+        })));
+        assert_eq!(mixed.buffs.len(), 1, "三键 BUFF 已存在时不得再合成旧字段 BUFF");
+    }
+
+    #[test]
+    fn transcend_payload_is_not_serialized() {
+        let settings = CharSettings::from_json(&json!({
+            "transcendSide": "assist1",
+            "transcendEffects": {"main": {"skillLevelBonus": [1, 0, 0]}}
+        }));
+        let value = settings.to_json_value();
+        assert!(value.get("transcendEffects").is_none());
+        assert!(value.get("transcendSide").is_none());
     }
 }

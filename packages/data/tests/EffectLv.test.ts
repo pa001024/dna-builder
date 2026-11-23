@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createCharBuildFromSettings } from "../CharBuildHelper"
+import { createDefaultAssistSideSettings } from "../charSettings"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "../effectLv"
 import { weaponEffectMap, weaponMap } from "../index"
 import { getWBuffLvFromSnapshot, LeveledWeaponHelper } from "../leveled/LeveledHelpers"
@@ -18,6 +19,7 @@ function baseSettings(overrides: Record<string, unknown> = {}) {
         enemyResistance: 0,
         isRouge: false,
         targetFunction: "伤害",
+        mainTargetEnabled: true,
         customVariables: [] as [string, string][],
         charSkillLevel: 10,
         meleeWeapon: 10601,
@@ -40,6 +42,8 @@ function baseSettings(overrides: Record<string, unknown> = {}) {
         team2: "-" as number | "-",
         team2Weapon: "-" as number | "-",
         team2Build: "-",
+        assist1: createDefaultAssistSideSettings(),
+        assist2: createDefaultAssistSideSettings(),
         timelineDPS: false,
         useGlobal: false,
         effectConfig: {} as Record<string, number>,

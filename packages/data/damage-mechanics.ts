@@ -11,6 +11,8 @@
  *   页面是它的逐步拆解视图，两者口径一致。
  */
 
+import { ADDITIONAL_DAMAGE_KEYS, SELF_ADDITIONAL_DAMAGE_KEY } from "./leveled/additionalDamage"
+
 /** 结算模式标识，与页面 URL 的 `?mode=` 取值一致 */
 export type DamageModeId = "weapon" | "skill" | "dot"
 
@@ -97,7 +99,8 @@ const DEFENSE_FIELDS: DamageFieldDoc[] = [
 
 /** 抗性相关参数 */
 const RESISTANCE_FIELDS: DamageFieldDoc[] = [
-    { key: "enemyResistance", label: "敌人抗性", note: "抗性为负（弱点）时 (1 - 抗性) 大于 1，反过来放大伤害" },
+    { key: "enemyResistance", label: "敌人抗性", note: "抗性为负（弱点）时 (1 - 抗性 + 弱点) 大于 1，反过来放大伤害" },
+    { key: "enemyWeakness", label: "敌人弱点", note: "与敌人抗性同区加算（正值放大受到的该元素伤害），不吃物理分量" },
     { key: "penetrationBonus", label: "属性穿透", note: "与抗性同一个乘区，按 (1 + 属性穿透) 放大抗性因子" },
 ]
 
@@ -105,6 +108,12 @@ const RESISTANCE_FIELDS: DamageFieldDoc[] = [
 const IMBALANCE_FIELDS: DamageFieldDoc[] = [
     { key: "imbalanceBonus", label: "失衡易伤", note: "仅在敌人处于失衡状态时生效，与固定值 1.5 加算后作为独立乘区" },
 ]
+
+/** 追伤七分量输入：按游戏内描述写成额外一段可触发额外效果的属性伤害 */
+const ADDITIONAL_DAMAGE_FIELDS: DamageFieldDoc[] = ADDITIONAL_DAMAGE_KEYS.map(key => {
+    const element = key === SELF_ADDITIONAL_DAMAGE_KEY ? "自身" : key.slice(0, 1)
+    return { key, label: key, note: `额外造成一段可触发额外效果的${element}属性伤害。` }
+})
 
 /**
  * 三种结算模式的机制定义。
@@ -116,7 +125,8 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
         label: "武器伤害",
         summary:
             "以角色攻击与武器攻击之和为基数，先算抗性与暴击/触发档位，再乘血量、增伤、充盈乘区，最后过防御乘区；" +
-            "物理分量按触发规则单独结算，元素分量不吃触发。核心结果取「最终期望伤害」，乘上防御乘区得到防御后最终伤害。",
+            "物理分量按触发规则单独结算，元素分量不吃触发。额外造成一段可触发额外效果的属性伤害。" +
+            "核心结果取「最终期望伤害」，乘上防御乘区得到防御后最终伤害。",
         resultStepId: "expectedDamage",
         groups: [
             {
@@ -145,7 +155,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                     { key: "weaponDamageBonus", label: "武器伤害", note: "与增伤同池加算" },
                     { key: "independentBonus", label: "独立增伤", note: "与增伤不同池，独立相乘" },
                     { key: "weaponIndependentBonus", label: "武器独立增伤" },
-                    { key: "additionalDamageBonus", label: "追加伤害", note: "独立乘区，按 (1 + 追加伤害) 相乘" },
+                    ...ADDITIONAL_DAMAGE_FIELDS,
                 ],
             },
             {
@@ -171,7 +181,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 title: "充盈",
                 fields: [
                     { key: "fullnessConversion", label: "充盈转化", note: "把该武器溢出的触发率转换成充盈威力" },
-                    { key: "fullnessModBonus", label: "充盈威力基础(角色MOD+其他武器)" },
+                    { key: "fullnessModBonus", label: "充盈威力基础(100%基础+角色MOD+其他武器)" },
                 ],
                 toggles: [{ key: "fullnessFieldEnabled", label: "视为充盈伤害" }],
             },
@@ -239,7 +249,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "resistance",
                 title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
+                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
                 group: "环境",
             },
             {
@@ -264,7 +274,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "additionalDamage",
                 title: "追加伤害乘区",
-                formula: "追加伤害乘区 = 1 + 追加伤害",
+                formula: "追加伤害乘区 = 1 + Σ 七分量",
                 group: "增伤",
             },
             {
@@ -385,13 +395,13 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "fullnessPower",
                 title: "总充盈威力",
-                formula: "总充盈威力 = 充盈威力基础(角色MOD+其他武器) + 武器转化充盈威力",
+                formula: "总充盈威力 = 充盈威力基础(100%基础+角色MOD+其他武器) + 武器转化充盈威力",
                 group: "充盈",
             },
             {
                 id: "fullnessMultiplier",
                 title: "充盈乘区",
-                formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
+                formula: "充盈乘区 = 视为充盈伤害时总充盈威力（1 起始总倍率），否则为 1",
                 group: "充盈",
             },
             {
@@ -483,7 +493,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "resistancePenetration",
                 title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
+                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
                 group: "环境",
             },
             {
@@ -563,7 +573,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "fullnessMultiplier",
                 title: "充盈乘区",
-                formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
+                formula: "充盈乘区 = 视为充盈伤害时总充盈威力（1 起始总倍率），否则为 1",
                 group: "充盈",
             },
             {
@@ -643,7 +653,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 fields: [
                     { key: "skillFreq", label: "技能来源频率", note: "次/秒，仅角色攻击" },
                     { key: "weaponOwnFreq", label: "武器来源自身属性频率", note: "次/秒，角色攻击 + 武器攻击" },
-                    { key: "otherFreq", label: "其余属性频率", note: "次/秒，角色攻击 + 武器攻击" },
+                    { key: "otherFreq", label: "其余属性频率", note: "次/秒，角色攻击 + 武器攻击；元素种数由追伤分量推导" },
                 ],
             },
             { title: "血量", fields: HP_FIELDS },
@@ -662,7 +672,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 formula: "单跳基础伤害(武器来源) = (角色攻击 + 武器攻击) * 0.2 * 6 * 4（武器来源按此结算）",
                 group: "攻击",
             },
-            { id: "fullnessMultiplier", title: "充盈乘区", formula: "充盈乘区 = 1 + 充盈威力", group: "充盈与增伤" },
+            { id: "fullnessMultiplier", title: "充盈乘区", formula: "充盈乘区 = 充盈威力（1 起始总倍率）", group: "充盈与增伤" },
             { id: "damageIncrease", title: "增伤乘区", formula: "增伤乘区 = 1 + 增伤", group: "充盈与增伤" },
             {
                 id: "boostMultiplier",
@@ -703,7 +713,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "resistancePenetration",
                 title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
+                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
                 group: "环境",
             },
             {
@@ -732,6 +742,11 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
         description: "「增伤」「武器伤害」「技能伤害」在同一个乘区内相加，因此这几项彼此之间是加算而非相乘，堆同一种收益递减。",
     },
     {
+        term: "追加伤害",
+        aliases: ["追伤", "属性追伤", "元素追伤"],
+        description: "额外造成一段可触发额外效果的属性伤害。",
+    },
+    {
         term: "独立增伤",
         description: "与增伤池分开的独立乘区，按 (1 + 独立增伤) 与增伤池相乘，收益不会被同池稀释。",
     },
@@ -752,10 +767,17 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
         description: "触发率超过 100% 的部分不重复计入触发期望，而是按武器的充盈转化转为角色的充盈威力。",
     },
     {
+        term: "DOT 元素种数",
+        aliases: ["元素种数", "其余属性种数"],
+        description:
+            "DOT 挂载的元素种数 = |{角色元素} ∪ {六元素追伤非零项}|；其余属性种数 = 种数 - 1，并按来源各自的武器面板计数。" +
+            "自属性追伤并入角色元素、不新增元素；技能来源固定 0。",
+    },
+    {
         term: "充盈",
         aliases: ["充盈威力", "充盈乘区", "充盈伤害"],
         description:
-            "充盈伤害的独立乘区，按 (1 + 总充盈威力) 相乘。总充盈威力 = 充盈威力基础（角色 MOD 与其他武器转化）+ 该武器由触发溢出转化来的部分。",
+            "充盈伤害的独立乘区，直接按总充盈威力相乘（1 起始总倍率，100% 基准 = 1）。总充盈威力 = 充盈威力基础（100% 基础 + 角色 MOD 与其他武器转化）+ 该武器由触发溢出转化来的部分。",
     },
     {
         term: "昂扬",
@@ -773,8 +795,9 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
     },
     {
         term: "抗性乘区",
-        aliases: ["敌人抗性", "属性穿透", "抗性穿透"],
-        description: "按 (1 - 敌人抗性) × (1 + 属性穿透) 计算并下限为 0；抗性为负（弱点）时该因子大于 1，穿透与抗性同乘区。",
+        aliases: ["敌人抗性", "敌人弱点", "属性穿透", "抗性穿透"],
+        description:
+            "按 (1 - 敌人抗性 + 敌人弱点) × (1 + 属性穿透) 计算并下限为 0；弱点与抗性同区加算，抗性为负（弱点）时该因子大于 1，穿透与抗性同乘区。",
     },
     {
         term: "防御乘区",

@@ -192,11 +192,13 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
 const weaponAttrSourceMap = computed<Record<string, WeaponAttrSource[]>>(() => {
     const sourceMap: Record<string, WeaponAttrSource[]> = {}
     const scope = getWeaponScopePrefix()
+    // 继承型同律武器的 scope 会落到被继承的近战/远程，但面板仍属同律：不读取 普通近战/远程 专属字段
+    const isSkillWeaponPanel = props.wkey === "skill"
     // 先读面板值：attr 型 BUFF 的字段在 calculateWeaponAttributes 内刷新，保证汇总的是最新字段
     const keys = Object.keys(weaponAttrs.value)
 
     for (const key of keys) {
-        sourceMap[key] = collectWeaponAttrSources(props.charBuild, scope, key)
+        sourceMap[key] = collectWeaponAttrSources(props.charBuild, scope, key, { isSkillWeaponPanel })
     }
 
     return sourceMap

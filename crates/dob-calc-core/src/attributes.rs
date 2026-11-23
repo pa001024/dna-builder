@@ -11,6 +11,9 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 
+use super::additional_damage::{
+    LEGACY_KEY as LEGACY_ADDITIONAL_DAMAGE_KEY, SELF_KEY as SELF_ADDITIONAL_DAMAGE_KEY,
+};
 use super::context::{BuildContext, WeaponRef, base_map, prefix_scope, run_dynamic_buff};
 use super::models::{
     AttrMap, BuffFieldConditional, EffectCodeBuff, is_multiplicative_attr, round2, round3,
@@ -63,6 +66,30 @@ fn prefixed<'a>(prefix: &'a str, base: &'static str) -> Cow<'a, str> {
         ("远程", "弹药") => Cow::Borrowed("远程弹药"),
         ("远程", "武器倍率") => Cow::Borrowed("远程武器倍率"),
         ("远程", "独立增伤") => Cow::Borrowed("远程独立增伤"),
+        ("普通近战", "攻击") => Cow::Borrowed("普通近战攻击"),
+        ("普通近战", "暴击") => Cow::Borrowed("普通近战暴击"),
+        ("普通近战", "暴伤") => Cow::Borrowed("普通近战暴伤"),
+        ("普通近战", "触发") => Cow::Borrowed("普通近战触发"),
+        ("普通近战", "攻速") => Cow::Borrowed("普通近战攻速"),
+        ("普通近战", "多重") => Cow::Borrowed("普通近战多重"),
+        ("普通近战", "增伤") => Cow::Borrowed("普通近战增伤"),
+        ("普通近战", "装填") => Cow::Borrowed("普通近战装填"),
+        ("普通近战", "弹匣") => Cow::Borrowed("普通近战弹匣"),
+        ("普通近战", "弹药") => Cow::Borrowed("普通近战弹药"),
+        ("普通近战", "武器倍率") => Cow::Borrowed("普通近战武器倍率"),
+        ("普通近战", "独立增伤") => Cow::Borrowed("普通近战独立增伤"),
+        ("普通远程", "攻击") => Cow::Borrowed("普通远程攻击"),
+        ("普通远程", "暴击") => Cow::Borrowed("普通远程暴击"),
+        ("普通远程", "暴伤") => Cow::Borrowed("普通远程暴伤"),
+        ("普通远程", "触发") => Cow::Borrowed("普通远程触发"),
+        ("普通远程", "攻速") => Cow::Borrowed("普通远程攻速"),
+        ("普通远程", "多重") => Cow::Borrowed("普通远程多重"),
+        ("普通远程", "增伤") => Cow::Borrowed("普通远程增伤"),
+        ("普通远程", "装填") => Cow::Borrowed("普通远程装填"),
+        ("普通远程", "弹匣") => Cow::Borrowed("普通远程弹匣"),
+        ("普通远程", "弹药") => Cow::Borrowed("普通远程弹药"),
+        ("普通远程", "武器倍率") => Cow::Borrowed("普通远程武器倍率"),
+        ("普通远程", "独立增伤") => Cow::Borrowed("普通远程独立增伤"),
         ("同律近战", "攻击") => Cow::Borrowed("同律近战攻击"),
         ("同律近战", "暴击") => Cow::Borrowed("同律近战暴击"),
         ("同律近战", "暴伤") => Cow::Borrowed("同律近战暴伤"),
@@ -166,9 +193,15 @@ impl<'a> BuildContext<'a> {
         if self.apply_conditions(&attrs) {
             return self.base_attributes_cached(attr_applied);
         }
-        // BUFF 动态 attr：首轮命中则整体重算且不再刷新 attr
-        if !attr_applied && self.apply_buff_attr(&attrs) {
-            return self.base_attributes_cached(true);
+        // BUFF 动态 attr：首轮命中则整体重算且不再刷新 attr。
+        // `apply_buff_attr` 取武器面板会重入属性计算：内层可能已应用同一批 attr 并推进版本，
+        // 此时本帧的 `attrs` 是刷新前快照，必须按版本变化重算，不能返回旧值。
+        if !attr_applied {
+            let version_before_buff = self.memo.version;
+            let applied = self.apply_buff_attr(&attrs);
+            if applied || self.memo.version != version_before_buff {
+                return self.base_attributes_cached(true);
+            }
         }
         if self.memo.version == version {
             self.memo.base_attrs[slot] = Some((version, attrs.clone()));
@@ -207,6 +240,23 @@ impl<'a> BuildContext<'a> {
         let mut desperate = self.total_bonus("背水", "角色", true);
         let mut damage_increase = self.total_bonus("增伤", "角色", true);
         let mut element_damage_increase = self.total_bonus("元素增伤", "角色", true);
+        // 六元素独立桶（上游 `characterBonusAttributes` 同序；伤害结算时按角色元素并入元素增伤池）
+        let mut fire_damage_increase = self.total_bonus("火属性增伤", "角色", true);
+        let mut water_damage_increase = self.total_bonus("水属性增伤", "角色", true);
+        let mut thunder_damage_increase = self.total_bonus("雷属性增伤", "角色", true);
+        let mut wind_damage_increase = self.total_bonus("风属性增伤", "角色", true);
+        let mut light_damage_increase = self.total_bonus("光属性增伤", "角色", true);
+        let mut dark_damage_increase = self.total_bonus("暗属性增伤", "角色", true);
+        // 元素弱点（U95）：与敌人抗性同区加算，正值 = 受到该元素伤害提高；六元素 + 全属性均插入，
+        // 保持与 TS `CharAttr` 逐键一致（伤害结算只读取角色元素 + 全属性）
+        let fire_weakness = self.total_bonus("火属性弱点", "角色", true);
+        let water_weakness = self.total_bonus("水属性弱点", "角色", true);
+        let thunder_weakness = self.total_bonus("雷属性弱点", "角色", true);
+        let wind_weakness = self.total_bonus("风属性弱点", "角色", true);
+        let light_weakness = self.total_bonus("光属性弱点", "角色", true);
+        let dark_weakness = self.total_bonus("暗属性弱点", "角色", true);
+        let all_weakness = self.total_bonus("全属性弱点", "角色", true);
+        // 追伤不属于角色属性：武器追伤只在武器面板（`weapon_panel`），技能追伤是角色侧独立乘区
         let mut physical_damage_increase = self.total_bonus("物理增伤", "角色", true);
         let mut weapon_damage = self.total_bonus("武器伤害", "角色", true);
         let mut skill_damage = self.total_bonus("技能伤害", "角色", true);
@@ -215,6 +265,8 @@ impl<'a> BuildContext<'a> {
         // 技能速度（1 起始的倍率）：直接作为攻速/伤害公式的乘区使用，上限 2.8（280%）
         let mut skill_speed = 1.0 + self.total_bonus("技能速度", "角色", true);
         let mut penetration = self.total_bonus("属性穿透", "角色", true);
+        // 赛季增伤（0 起始）：赛季专属伤害率分区，自身累加后作为独立乘区
+        let mut season_damage_increase = self.total_bonus("赛季增伤", "角色", true);
         let mut imbalance_damage = self.total_bonus("失衡易伤", "角色", true);
         // 阵营增伤（角色侧：角色槽 MOD + 全局 BUFF；武器槽部分由武器面板叠加）
         let discrimination_bonus = self.total_bonus("歧视", "角色", true);
@@ -250,9 +302,9 @@ impl<'a> BuildContext<'a> {
         let convert_fullness = self.total_bonus("转充盈", "角色", true);
         let convert_restraint = self.total_bonus("转属克", "角色", true);
         let convert_reverse = self.total_bonus("转属逆", "角色", true);
-        let fullness_bonus = self.total_bonus("充盈威力", "角色", true);
+        // 充盈威力 = 1 起始总倍率（上游 `HyperTriggerRate.DefaultValue = 1`），词条按增量叠加
+        let fullness_bonus = 1.0 + self.total_bonus("充盈威力", "角色", true);
         let skill_trigger = self.total_bonus("技能触发", "角色", true);
-        let anomaly_bonus = self.total_bonus("异常数量", "角色", true);
         let pet_cd_reduce = self.total_bonus("魔灵CD缩减", "角色", true);
         // 神智回复（0 起始，每 3 秒额外回复量，`CharBuild.ts:1392`）
         let mut sanity_regen_bonus = self.total_bonus("神智回复", "角色", true);
@@ -289,13 +341,22 @@ impl<'a> BuildContext<'a> {
             boost += mod_attribute_bonus * weighted("昂扬");
             desperate += mod_attribute_bonus * weighted("背水");
             damage_increase += mod_attribute_bonus * weighted("增伤");
+            // 上游同口径：MOD 属性加权只作用于同名键——通用 `元素增伤` 只吃 `元素增伤`，
+            // 元素限定键只吃各自键；元素键不得并入通用桶
             element_damage_increase += mod_attribute_bonus * weighted("元素增伤");
+            fire_damage_increase += mod_attribute_bonus * weighted("火属性增伤");
+            water_damage_increase += mod_attribute_bonus * weighted("水属性增伤");
+            thunder_damage_increase += mod_attribute_bonus * weighted("雷属性增伤");
+            wind_damage_increase += mod_attribute_bonus * weighted("风属性增伤");
+            light_damage_increase += mod_attribute_bonus * weighted("光属性增伤");
+            dark_damage_increase += mod_attribute_bonus * weighted("暗属性增伤");
             physical_damage_increase += mod_attribute_bonus * weighted("物理增伤");
             weapon_damage += mod_attribute_bonus * weighted("武器伤害");
             skill_damage += mod_attribute_bonus * weighted("技能伤害");
             skill_additional_damage += mod_attribute_bonus * weighted("技能追伤");
             skill_speed += mod_attribute_bonus * weighted("技能速度");
             penetration += mod_attribute_bonus * weighted("属性穿透");
+            season_damage_increase += mod_attribute_bonus * weighted("赛季增伤");
             imbalance_damage += mod_attribute_bonus * weighted("失衡易伤");
             skill_add += mod_attribute_bonus * weighted("技能倍率加数");
             summon_inherit += mod_attribute_bonus * weighted("召唤物属性继承比例");
@@ -351,6 +412,20 @@ impl<'a> BuildContext<'a> {
         attrs.insert("背水", desperate);
         attrs.insert("增伤", damage_increase);
         attrs.insert("元素增伤", element_damage_increase);
+        attrs.insert("火属性增伤", fire_damage_increase);
+        attrs.insert("水属性增伤", water_damage_increase);
+        attrs.insert("雷属性增伤", thunder_damage_increase);
+        attrs.insert("风属性增伤", wind_damage_increase);
+        attrs.insert("光属性增伤", light_damage_increase);
+        attrs.insert("暗属性增伤", dark_damage_increase);
+        // 元素弱点七键（U95）
+        attrs.insert("火属性弱点", fire_weakness);
+        attrs.insert("水属性弱点", water_weakness);
+        attrs.insert("雷属性弱点", thunder_weakness);
+        attrs.insert("风属性弱点", wind_weakness);
+        attrs.insert("光属性弱点", light_weakness);
+        attrs.insert("暗属性弱点", dark_weakness);
+        attrs.insert("全属性弱点", all_weakness);
         attrs.insert("物理增伤", physical_damage_increase);
         attrs.insert("属性攻击", elem_damage_bonus);
         attrs.insert("武器伤害", weapon_damage);
@@ -359,6 +434,7 @@ impl<'a> BuildContext<'a> {
         attrs.insert("独立增伤", independent);
         attrs.insert("技能独立增伤", skill_independent);
         attrs.insert("属性穿透", penetration);
+        attrs.insert("赛季增伤", season_damage_increase);
         attrs.insert("无视防御", ignore_defense);
         attrs.insert("技能无视防御", skill_ignore_defense);
         attrs.insert("技能速度", skill_speed);
@@ -391,13 +467,6 @@ impl<'a> BuildContext<'a> {
         attrs.insert("转属逆", convert_reverse);
         attrs.insert("充盈威力", fullness_bonus);
         attrs.insert("技能触发", skill_trigger);
-        // 异常数量：光暗角色 1 + 追加；其他角色 max(1, 追加)
-        let anomaly = if char.element == "光" || char.element == "暗" {
-            1.0 + anomaly_bonus
-        } else {
-            anomaly_bonus.max(1.0)
-        };
-        attrs.insert("异常数量", anomaly);
         // 魔灵CD：所选魔灵主动技原始冷却 × (1 - 缩减)；未选魔灵时为 0
         let pet_cd_reduce_clamped = pet_cd_reduce.clamp(0.0, 1.0);
         attrs.insert(
@@ -410,6 +479,11 @@ impl<'a> BuildContext<'a> {
             "神智回复",
             sanity_regen_bonus + 2.0 + (sanity / 200.0).floor(),
         );
+        // 技能等级加成（U126b）：属性值 = 标准属性池汇总（BUFF / MOD / 装备 / 溯源），
+        // 不是最终等级；最终等级见 `char_skill_levels`，只用于技能装配，两者不重复相加
+        attrs.insert("E技能等级", self.total_bonus("E技能等级", "角色", true));
+        attrs.insert("Q技能等级", self.total_bonus("Q技能等级", "角色", true));
+        attrs.insert("P技能等级", self.total_bonus("P技能等级", "角色", true));
         attrs
     }
 
@@ -504,9 +578,11 @@ impl<'a> BuildContext<'a> {
         }
         let mod_maps = self.mod_slot_maps_cached();
         let bases = self.code_bases();
-        // 面板只在 code 真的引用 `…WeaponAttr` 时才需要参与沙盒：数据里绝大多数
-        // code 只写裸属性，跳过可省掉 3 个武器面板的整轮重算。
-        let touches_panels = codes.iter().any(|code| code.contains("eaponAttr"));
+        // 面板只在 code 引用 `…WeaponAttr` 或写追伤（裸写需重定向到面板）时才参与沙盒：
+        // 数据里绝大多数 code 只写裸属性，跳过可省掉 3 个武器面板的整轮重算。
+        let touches_panels = codes.iter().any(|code| {
+            code.contains("eaponAttr") || code.contains("属性追伤") || code.contains("追加伤害")
+        });
         let (selected_slot, mut field_attrs): (
             Option<usize>,
             std::sync::Arc<HashMap<String, AttrMap>>,
@@ -620,6 +696,10 @@ impl<'a> BuildContext<'a> {
             );
             let mut props = AttrMap::new();
             for (key, value) in &snapshot {
+                // 聚合由分量派生，字段级增量只回放分量，避免聚合被重复计入
+                if key == LEGACY_ADDITIONAL_DAMAGE_KEY {
+                    continue;
+                }
                 let Some(before) = base_attrs.get(key) else {
                     continue;
                 };
@@ -652,7 +732,10 @@ impl<'a> BuildContext<'a> {
         entries
     }
 
-    /// 「同律武器继承时与被继承武器共享面板」的别名组；对应上游 `getAllWeaponsAttrs` 的引用复用。
+    /// 同律武器槽的面板；对应上游 `getAllWeaponsAttrs` 的逐槽重算。
+    ///
+    /// 继承型同律**不再复用**近战/远程面板：面板来源仍是同律，`普通近战/远程*` 不得经
+    /// `skillWeaponAttr` 泄漏进同律面板（与 U16b `panelSource:"skill"` 同口径）。
     fn all_weapon_attrs(&mut self) -> [Option<AttrMap>; 4] {
         let melee = self
             .calculate_weapon_attributes_raw(Some(WeaponRef::Melee), true, true)
@@ -661,20 +744,8 @@ impl<'a> BuildContext<'a> {
             .calculate_weapon_attributes_raw(Some(WeaponRef::Ranged), true, true)
             .panel;
         let skill = if self.skill_weapon.is_some() {
-            // 继承型同律武器复用被继承武器的面板（上游同样直接复用）
-            match self
-                .skill_weapon
-                .as_ref()
-                .and_then(|weapon| weapon.inherit.clone())
-                .as_deref()
-            {
-                Some("melee") => melee.clone(),
-                Some("ranged") => ranged.clone(),
-                _ => {
-                    self.calculate_weapon_attributes_raw(Some(WeaponRef::Skill), true, true)
-                        .panel
-                }
-            }
+            self.calculate_weapon_attributes_raw(Some(WeaponRef::Skill), true, true)
+                .panel
         } else {
             None
         };
@@ -852,10 +923,12 @@ impl<'a> BuildContext<'a> {
 
         if let Some(target) = self.resolve_weapon_ref(weapon) {
             result.weapon = Some(target);
+            // 面板来源在解析继承前确定：继承型同律仍属同律面板，不读取 `普通*`
+            let ordinary_prefix = self.ordinary_panel_prefix(target);
             let effective = self.inherited_target(target);
             let prefix = self.weapon_prefix_ref(effective);
             if !prefix.is_empty() {
-                result.panel = Some(self.weapon_panel(effective, prefix));
+                result.panel = Some(self.weapon_panel(effective, prefix, ordinary_prefix));
             }
         }
 
@@ -863,13 +936,13 @@ impl<'a> BuildContext<'a> {
             return result;
         }
 
-        // 充盈威力（角色属性）= 角色 MOD 加成 + Σ 各武器溢出触发 × 该武器充盈转化
+        // 充盈威力（角色属性，1 起始总倍率）= 基础 1 + 角色 MOD 加成 + Σ 各武器溢出触发 × 该武器充盈转化
         let mut total_fullness = 0.0;
         for target in self.fullness_weapons() {
             let (trigger_rate, conversion_rate) = self.weapon_fullness(target);
             total_fullness += (trigger_rate - 1.0).max(0.0) * conversion_rate;
         }
-        let current = result.char.get("充盈威力").copied().unwrap_or(0.0);
+        let current = result.char.get("充盈威力").copied().unwrap_or(1.0);
         result.char.insert("充盈威力", current + total_fullness);
 
         // 召唤物攻速 / 范围转化（角色属性）
@@ -920,15 +993,6 @@ impl<'a> BuildContext<'a> {
         need_skill: bool,
     ) -> HashMap<String, AttrMap> {
         crate::prof!("attributes::all_weapon_panels");
-        let inherit = if need_skill && self.skill_weapon.is_some() {
-            self.skill_weapon
-                .as_ref()
-                .and_then(|weapon| weapon.inherit.clone())
-        } else {
-            None
-        };
-        let need_melee = need_melee || inherit.as_deref() == Some("melee");
-        let need_ranged = need_ranged || inherit.as_deref() == Some("ranged");
         let mut map = HashMap::new();
         let melee = if need_melee {
             self.calculate_weapon_attributes_raw(Some(WeaponRef::Melee), true, true)
@@ -951,15 +1015,11 @@ impl<'a> BuildContext<'a> {
             map.insert("ranged".to_string(), panel);
         }
         if need_skill && self.skill_weapon.is_some() {
-            // 继承型同律武器复用被继承武器的面板（被继承槽已在入口标需）
-            let panel = match inherit.as_deref() {
-                Some("melee") => melee,
-                Some("ranged") => ranged,
-                _ => {
-                    self.calculate_weapon_attributes_raw(Some(WeaponRef::Skill), true, true)
-                        .panel
-                }
-            };
+            // 继承型同律也单独计算面板：面板来源仍是同律，不能复用近战/远程面板
+            //（否则 `普通近战/远程` 专属加成会漏进同律面板）
+            let panel = self
+                .calculate_weapon_attributes_raw(Some(WeaponRef::Skill), true, true)
+                .panel;
             if let Some(panel) = panel {
                 map.insert("同律".to_string(), panel.clone());
                 map.insert("skill".to_string(), panel);
@@ -989,36 +1049,35 @@ impl<'a> BuildContext<'a> {
             self.panels_correcting = true;
             let full = self.calculate_weapon_attributes(None);
             self.panels_correcting = false;
+            // 按**槽位来源**回填选中面板：继承型同律会解析到被继承武器实例，但面板仍属同律，
+            // 不能把同律面板回填到近战/远程键（与上游 `weaponsMap.get(key) === selectedWeapon` 同口径）。
             if let (Some(selected), Some(panel)) = (full.weapon, full.panel) {
-            let selected_id = self.weapon_instance_id(selected);
-            if let Some(selected_id) = selected_id {
                 let keys: Vec<String> = map.keys().cloned().collect();
                 for key in keys {
-                    if self.panel_key_weapon_id(&key) == Some(selected_id) {
+                    if self.panel_key_weapon_ref(&key) == Some(selected) {
                         map.insert(key, panel.clone());
                     }
                 }
             }
         }
-        }
         map
     }
 
-    /// 面板键对应的武器实例 id（inherit 已消解；未知键返回 `None`）。
-    fn panel_key_weapon_id(&self, key: &str) -> Option<i64> {
+    /// 面板键对应的武器槽位来源（inherit 未消解；未知键返回 `None`）。
+    fn panel_key_weapon_ref(&self, key: &str) -> Option<WeaponRef> {
         match key {
-            "近战" | "melee" => Some(self.melee_weapon.id),
-            "远程" | "ranged" => Some(self.ranged_weapon.id),
-            "同律" | "skill" => self.skill_weapon_instance_id(),
+            "近战" | "melee" => Some(WeaponRef::Melee),
+            "远程" | "ranged" => Some(WeaponRef::Ranged),
+            "同律" | "skill" => Some(WeaponRef::Skill),
             name => {
                 if self.melee_weapon_skills().iter().any(|s| s.name == name) {
-                    return Some(self.melee_weapon.id);
+                    return Some(WeaponRef::Melee);
                 }
                 if self.ranged_weapon_skills().iter().any(|s| s.name == name) {
-                    return Some(self.ranged_weapon.id);
+                    return Some(WeaponRef::Ranged);
                 }
                 if self.skill_weapon_skills().iter().any(|s| s.name == name) {
-                    return self.skill_weapon_instance_id();
+                    return Some(WeaponRef::Skill);
                 }
                 None
             }
@@ -1105,7 +1164,15 @@ impl<'a> BuildContext<'a> {
     }
 
     /// 武器面板本体；对应上游 `calculateWeaponAttributes` 中 `if (weapon) { … }` 那一段。
-    fn weapon_panel(&self, target: WeaponRef, prefix: &str) -> AttrMap {
+    ///
+    /// `ordinary_prefix`（`普通近战`/`普通远程`）由**面板来源**决定，继承型同律面板传 `None`：
+    /// 继承武器会解析到被继承的普通武器前缀，但面板仍属同律，不得读取 `普通*`。
+    fn weapon_panel(
+        &self,
+        target: WeaponRef,
+        prefix: &str,
+        ordinary_prefix: Option<&'static str>,
+    ) -> AttrMap {
         crate::prof!("attributes::weapon_panel");
         let scope = prefix_scope(prefix);
         let is_skill = prefix.starts_with("同律");
@@ -1114,9 +1181,18 @@ impl<'a> BuildContext<'a> {
         } else {
             String::new()
         };
+        let ordinary_bonus = |base: &'static str| match ordinary_prefix {
+            Some(ordinary) => self.total_bonus(&prefixed(ordinary, base), prefix, true),
+            None => 0.0,
+        };
+        let ordinary_mul = |base: &'static str| match ordinary_prefix {
+            Some(ordinary) => self.total_bonus_mul(&prefixed(ordinary, base), prefix, true),
+            None => 0.0,
+        };
 
         let mut attack_bonus = self.total_bonus(&prefixed(prefix, "攻击"), prefix, true)
-            + self.total_bonus("攻击", prefix, true);
+            + self.total_bonus("攻击", prefix, true)
+            + ordinary_bonus("攻击");
         // 武器物理加成：泛化 `物理`（旧口径兜底）+ 按武器伤害类型匹配的具体口径 `<切割|贯穿|震荡>攻击`；
         // mod.data 已迁移到具体口径（如 切割攻击），限定与伤害类型一致时命中
         let damage_type: String = match target {
@@ -1135,43 +1211,81 @@ impl<'a> BuildContext<'a> {
                 self.total_bonus(format!("{}攻击", damage_type).as_str(), prefix, true)
             };
         let mut crit_bonus = self.total_bonus(&prefixed(prefix, "暴击"), prefix, true)
-            + self.total_bonus("暴击", prefix, true);
+            + self.total_bonus("暴击", prefix, true)
+            + ordinary_bonus("暴击");
         let mut crit_damage_bonus = self.total_bonus(&prefixed(prefix, "暴伤"), prefix, true)
-            + self.total_bonus("暴伤", prefix, true);
+            + self.total_bonus("暴伤", prefix, true)
+            + ordinary_bonus("暴伤");
         let mut trigger_bonus = self.total_bonus(&prefixed(prefix, "触发"), prefix, true)
-            + self.total_bonus("触发", prefix, true);
+            + self.total_bonus("触发", prefix, true)
+            + ordinary_bonus("触发");
         let mut speed_bonus = self.total_bonus(&prefixed(prefix, "攻速"), prefix, true)
-            + self.total_bonus("攻速", prefix, true);
+            + self.total_bonus("攻速", prefix, true)
+            + ordinary_bonus("攻速");
         let mut multi_bonus = self.total_bonus(&prefixed(prefix, "多重"), prefix, true)
-            + self.total_bonus("多重", prefix, true);
+            + self.total_bonus("多重", prefix, true)
+            + ordinary_bonus("多重");
         let mut damage_increase = self.total_bonus(&prefixed(prefix, "增伤"), prefix, true)
-            + self.total_bonus("增伤", prefix, true);
+            + self.total_bonus("增伤", prefix, true)
+            + ordinary_bonus("增伤");
         let mut reload_bonus = self.total_bonus(&prefixed(prefix, "装填"), prefix, true)
-            + self.total_bonus("装填", prefix, true);
+            + self.total_bonus("装填", prefix, true)
+            + ordinary_bonus("装填");
         let mut magazine_bonus = self.total_bonus(&prefixed(prefix, "弹匣"), prefix, true)
-            + self.total_bonus("弹匣", prefix, true);
+            + self.total_bonus("弹匣", prefix, true)
+            + ordinary_bonus("弹匣");
         let mut ammo_bonus = self.total_bonus(&prefixed(prefix, "弹药"), prefix, true)
-            + self.total_bonus("弹药", prefix, true);
-        let mut additional_damage = self.total_bonus("追加伤害", "角色", true);
+            + self.total_bonus("弹药", prefix, true)
+            + ordinary_bonus("弹药");
+        // 追伤七分量：面板分别汇总（含 MOD属性类加成），聚合仅由分量求和产生
+        let mut fire_additional_damage = self.total_bonus("火属性追伤", "角色", true);
+        let mut water_additional_damage = self.total_bonus("水属性追伤", "角色", true);
+        let mut thunder_additional_damage = self.total_bonus("雷属性追伤", "角色", true);
+        let mut wind_additional_damage = self.total_bonus("风属性追伤", "角色", true);
+        let mut light_additional_damage = self.total_bonus("光属性追伤", "角色", true);
+        let mut dark_additional_damage = self.total_bonus("暗属性追伤", "角色", true);
+        let mut self_additional_damage =
+            self.total_bonus(SELF_ADDITIONAL_DAMAGE_KEY, "角色", true);
         let mut weapon_multiplier = self.total_bonus(&prefixed(prefix, "武器倍率"), prefix, true)
-            + self.total_bonus("武器倍率", prefix, true);
-        let mut independent = (1.0
-            + self.total_bonus_mul(&prefixed(prefix, "独立增伤"), prefix, true))
+            + self.total_bonus("武器倍率", prefix, true)
+            + ordinary_bonus("武器倍率");
+        // 独立增伤各自成乘区：`<prefix>独立增伤`、`普通<prefix>独立增伤` 与裸 `独立增伤` 各一个因子，
+        // 不得把普通前缀加性并进前缀因子（(1+a+b) 会把两个独立乘区折叠成一个）。
+        let prefix_independent =
+            self.total_bonus_mul(&prefixed(prefix, "独立增伤"), prefix, true);
+        let mut independent = (1.0 + prefix_independent)
+            * (1.0 + ordinary_mul("独立增伤"))
             * (1.0 + self.total_bonus_mul("独立增伤", prefix, true))
             - 1.0;
 
-        // `属性MOD属性` 对追加伤害的加权
+        // `属性MOD属性` 对追伤七分量的加权（与上游 `getModsBonus` 同口径：只读分量键）
         let mod_attribute_bonus =
             self.total_bonus(&prefixed(self.char.element.as_str(), "MOD属性"), "角色", true);
         if mod_attribute_bonus > 0.0 {
-            let extra: f64 = self
-                .char_mods
-                .iter()
-                .filter(|mod_| ELEMENT_SERIES.contains(&mod_.series.as_str()))
-                .filter_map(|mod_| mod_.props.get("追加伤害").copied())
-                .sum();
-            additional_damage += mod_attribute_bonus * extra;
+            let series_sum = |attribute: &str| -> f64 {
+                self.char_mods
+                    .iter()
+                    .filter(|mod_| ELEMENT_SERIES.contains(&mod_.series.as_str()))
+                    .filter_map(|mod_| mod_.props.get(attribute).copied())
+                    .sum()
+            };
+            fire_additional_damage += mod_attribute_bonus * series_sum("火属性追伤");
+            water_additional_damage += mod_attribute_bonus * series_sum("水属性追伤");
+            thunder_additional_damage += mod_attribute_bonus * series_sum("雷属性追伤");
+            wind_additional_damage += mod_attribute_bonus * series_sum("风属性追伤");
+            light_additional_damage += mod_attribute_bonus * series_sum("光属性追伤");
+            dark_additional_damage += mod_attribute_bonus * series_sum("暗属性追伤");
+            self_additional_damage +=
+                mod_attribute_bonus * series_sum(SELF_ADDITIONAL_DAMAGE_KEY);
         }
+        // 只读聚合：由七分量求和产生，不参与任何加算
+        let additional_damage = fire_additional_damage
+            + water_additional_damage
+            + thunder_additional_damage
+            + wind_additional_damage
+            + light_additional_damage
+            + dark_additional_damage
+            + self_additional_damage;
 
         // 同律武器降级前缀（只对 BUFF / 武器效果生效，MOD 不穿透）
         if is_skill && !lower_prefix.is_empty() {
@@ -1257,7 +1371,14 @@ impl<'a> BuildContext<'a> {
         panel.insert("多重", round2(multi_shot));
         panel.insert("增伤", damage_increase);
         panel.insert("独立增伤", round3(independent));
-        panel.insert("追加伤害", additional_damage);
+        panel.insert("火属性追伤", fire_additional_damage);
+        panel.insert("水属性追伤", water_additional_damage);
+        panel.insert("雷属性追伤", thunder_additional_damage);
+        panel.insert("风属性追伤", wind_additional_damage);
+        panel.insert("光属性追伤", light_additional_damage);
+        panel.insert("暗属性追伤", dark_additional_damage);
+        panel.insert(SELF_ADDITIONAL_DAMAGE_KEY, self_additional_damage);
+        panel.insert(LEGACY_ADDITIONAL_DAMAGE_KEY, additional_damage);
         panel.insert("装填", reload);
         panel.insert("弹匣", magazine);
         panel.insert("弹药", ammo);
@@ -1335,6 +1456,25 @@ impl<'a> BuildContext<'a> {
             Some("melee") => WeaponRef::Melee,
             Some("ranged") => WeaponRef::Ranged,
             _ => WeaponRef::Skill,
+        }
+    }
+
+    /// 普通武器面板的专属前缀；按**面板来源**（解析继承前）判定。
+    ///
+    /// 普通近战/远程武器返回 `普通近战`/`普通远程`，同律武器（含继承型）返回 `None`。
+    fn ordinary_panel_prefix(&self, source: WeaponRef) -> Option<&'static str> {
+        match source {
+            WeaponRef::Melee => Some("普通近战"),
+            WeaponRef::Ranged => Some("普通远程"),
+            _ => None,
+        }
+    }
+
+    /// 普通面板追加的词条（`普通<scope><base>`）；同律面板恒为 0。
+    fn ordinary_panel_bonus(&self, source: WeaponRef, prefix: &str, base: &'static str) -> f64 {
+        match self.ordinary_panel_prefix(source) {
+            Some(ordinary) => self.total_bonus(&prefixed(ordinary, base), prefix, true),
+            None => 0.0,
         }
     }
 
@@ -1424,7 +1564,8 @@ impl<'a> BuildContext<'a> {
             return (0.0, 1.0);
         }
         let mut trigger_bonus = self.total_bonus(&prefixed(prefix, "触发"), prefix, true)
-            + self.total_bonus("触发", prefix, true);
+            + self.total_bonus("触发", prefix, true)
+            + self.ordinary_panel_bonus(target, prefix, "触发");
         if prefix.starts_with("同律") {
             let lower: String = prefix.chars().skip(2).collect();
             trigger_bonus += self.total_bonus(&prefixed(&lower, "触发"), &lower, false);
@@ -1443,7 +1584,8 @@ impl<'a> BuildContext<'a> {
             return (0.0, 0.0);
         }
         let mut speed_bonus = self.total_bonus(&prefixed(prefix, "攻速"), prefix, true)
-            + self.total_bonus("攻速", prefix, true);
+            + self.total_bonus("攻速", prefix, true)
+            + self.ordinary_panel_bonus(target, prefix, "攻速");
         if prefix.starts_with("同律") {
             let lower: String = prefix.chars().skip(2).collect();
             speed_bonus += self.total_bonus(&prefixed(&lower, "攻速"), &lower, false);

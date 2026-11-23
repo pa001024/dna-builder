@@ -1,5 +1,11 @@
 import type { CharAttr, CharBuild, WeaponAttr } from "../CharBuild"
-import type { Buff } from "../data-types"
+import type { Buff, BuffSource } from "../data-types"
+import {
+    LEGACY_ADDITIONAL_DAMAGE_KEY,
+    migrateAggregateAdditionalDamage,
+    redirectCharAdditionalDamage,
+    seedCharAdditionalDamage,
+} from "./additionalDamage"
 import type { LeveledChar } from "./LeveledChar"
 import type { LeveledMonster } from "./LeveledMonster"
 import type { LeveledSkillWeapon } from "./LeveledSkillWeapon"
@@ -65,6 +71,8 @@ export class LeveledBuff implements Buff {
     dx?: number
     lx?: number
     mx?: number
+    /** 技能等级来源：数值由技能字段表达式求值，等级只作展示 / 默认值 */
+    等级来源?: "E" | "Q" | "P"
     code?: string
     技能?: string
     tag?: string[]
@@ -73,6 +81,8 @@ export class LeveledBuff implements Buff {
     /** 来源挂载点（MOD/武器特效挂载时写入） */
     pid?: number
     pt?: string
+    /** 结构化来源（数据层合成 BUFF 时写入，展示名不含 id） */
+    source?: BuffSource
     isMinus?: boolean
     /**
      * 当前数值表：静态等级缩放值与动态 attr 求值结果的合并视图。
@@ -133,6 +143,7 @@ export class LeveledBuff implements Buff {
         this.名称 = buffData.名称
         this.描述 = buffData.描述 ?? ""
         if (buffData.id !== undefined) this.id = buffData.id
+        if (buffData.source !== undefined) this.source = buffData.source
         if (buffData.限定 !== undefined) this.限定 = buffData.限定
         if (buffData.display !== undefined) this.display = buffData.display
         if (buffData.a !== undefined && buffData.a !== 1) this.a = buffData.a
@@ -144,6 +155,7 @@ export class LeveledBuff implements Buff {
             this.mx = buffData.mx
             this.dx = buffData.dx ?? buffData.mx
         }
+        if (buffData.等级来源 !== undefined) this.等级来源 = buffData.等级来源
         if (buffData.code !== undefined) this.code = buffData.code
         if (buffData.技能) this.技能 = buffData.技能
         if (buffData.tag) this.tag = [...buffData.tag]
@@ -234,6 +246,11 @@ export class LeveledBuff implements Buff {
                 })
             })
         }
+        // 角色不持有追伤：沙盒补 0 值键承接旧 code 裸写，执行后重定向到武器面板
+        seedCharAdditionalDamage(sandbox)
+        // 旧 code 直接改写武器面板聚合 `追加伤害`：记录执行前值，执行后把增量迁移到面板分量
+        const weaponAggregateBefore =
+            weaponAttr && typeof weaponAttr[LEGACY_ADDITIONAL_DAMAGE_KEY] === "number" ? weaponAttr[LEGACY_ADDITIONAL_DAMAGE_KEY] : 0
         const func = new Function("attr", `with(attr){${this.code};return attr}`)
         let result = null
         try {
@@ -248,15 +265,24 @@ export class LeveledBuff implements Buff {
                 meleeWeapon,
                 rangedWeapon,
                 skillWeapon,
-                weaponAttr,
+                weaponAttr: resultWeaponAttr,
                 meleeWeaponAttr,
                 rangedWeaponAttr,
                 skillWeaponAttr,
                 enemy,
                 ...attrs
             } = result
-            return { ...attrs, weapon: weaponAttr }
-        } else return { ...attrs, weapon: weaponAttr }
+            if (resultWeaponAttr) {
+                migrateAggregateAdditionalDamage(resultWeaponAttr, weaponAggregateBefore, "动态表达式（武器面板）", this.code)
+            }
+            // 面板迁移之后再重定向，避免同一段 code 的两种写法互相覆盖
+            redirectCharAdditionalDamage(attrs, resultWeaponAttr, `动态表达式「${this.名称}」`)
+            return { ...attrs, weapon: resultWeaponAttr }
+        }
+        const nextAttrs = { ...attrs }
+        if (weaponAttr) migrateAggregateAdditionalDamage(weaponAttr, weaponAggregateBefore, "动态表达式（武器面板）", this.code)
+        redirectCharAdditionalDamage(nextAttrs, weaponAttr, `动态表达式「${this.名称}」`)
+        return { ...nextAttrs, weapon: weaponAttr }
     }
 
     /** 源数值表中是否含动态表达式（string 值），供收益计算区分静态/动态 BUFF */

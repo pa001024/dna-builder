@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useExprDrag } from "@/composables/useExprDrag"
 import type { CharAttr, CharBuild, LeveledSkill, LeveledSkillField, SkillField } from "@/data"
 import { formatSkillProp } from "@/util"
+import { resolveSkillFieldNamespace } from "@/utils/expr-field"
 import { copyExprField } from "@/utils/expr-field-copy"
 
 // 组件属性
@@ -174,12 +175,18 @@ function startFieldDrag(field: LeveledSkillField, event: PointerEvent) {
 /**
  * 技能字段对应的表达式字段文本（如 残光::伤害）。
  * 双击复制与拖拽放置共用，保证两种写法拿到同一片段。
+ * 协战面板必须用技能名命名空间（主控通过 teamResolver 解析到协战构筑）；
+ * 主控面板沿用 e/q/p 别名，其余技能使用表达式标识符。
  * @param field 技能字段。
  * @returns 表达式字段文本。
  */
 function skillFieldExpression(field: LeveledSkillField): string {
     if (!props.skill) return ""
-    return `${props.skill.safeName}::${field.safeName}`
+    const isAssist = !!props.charBuild && props.charBuild.teamRole !== "main"
+    const namespace = isAssist
+        ? props.skill.exprName
+        : resolveSkillFieldNamespace(props.charBuild, field.名称) || props.skill.exprName
+    return `${namespace}::${field.exprName}`
 }
 
 /**

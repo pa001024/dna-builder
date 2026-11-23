@@ -1,3 +1,6 @@
+// worker realm 里必须显式加载 helper：它负责注册 CharBuild.createTeamResolver，
+// 否则快照重建出的构筑解析不了「角色名::属性」，跨角色表达式会静默算成 0。
+import "@/data/CharBuildHelper"
 import { createBuildFromSnapshot } from "@/data/CharBuildSnapshot"
 
 /** 主线程发给沙箱的执行请求附带要暴露的全局对象名（配装 `build` / 节点图 `graph`） */

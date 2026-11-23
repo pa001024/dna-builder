@@ -1,18 +1,32 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue"
+import { computed, ref, watchEffect } from "vue"
 import type { LeveledChar } from "@/data"
+import { CHAR_SKILL_LEVEL_MAX, CHAR_SKILL_LEVEL_MIN } from "@/data/charSettings"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
+import { clampCharSkillLevelView } from "@/utils/skill-level-ui"
 
 const detailTab = ref("溯源")
 const selectedSkill = ref<LeveledSkill | null>(null)
 /** 技能行为（skill.行为）的展开状态，按技能名记录，切换技能时独立保留 */
 const expandedBehavior = ref<Record<string, boolean>>({})
 const selectedSkillLevel = defineModel<number>({
-    default: 12,
+    default: CHAR_SKILL_LEVEL_MAX,
 })
-const props = defineProps<{
-    char: LeveledChar
-}>()
+const props = withDefaults(
+    defineProps<{
+        char: LeveledChar
+        /** 界面可调上限：详情页默认数据层 30，构筑页宿主传 SKILL_LEVEL_UI_MAX */
+        max?: number
+    }>(),
+    { max: CHAR_SKILL_LEVEL_MAX }
+)
+const skillLevelMax = computed(() => clampCharSkillLevelView(props.max))
+const skillLevel = computed({
+    get: () => clampCharSkillLevelView(selectedSkillLevel.value, skillLevelMax.value),
+    set: value => {
+        selectedSkillLevel.value = clampCharSkillLevelView(value, skillLevelMax.value)
+    },
+})
 
 watchEffect(() => {
     let skill = props.char.技能.find(s => s.名称 === detailTab.value)
@@ -20,7 +34,7 @@ watchEffect(() => {
         detailTab.value = props.char.技能[0].名称
         skill = props.char.技能[0]
     }
-    selectedSkill.value = skill.clone(selectedSkillLevel.value)
+    selectedSkill.value = skill.clone(skillLevel.value)
 })
 </script>
 <template>
@@ -29,13 +43,13 @@ watchEffect(() => {
         <SectionHeader no-animate compact kicker="SKILLS" :title="$t('技能')">
             <template #trailing>
                 <div class="flex items-center gap-2">
-                    <span class="font-mono text-[11px] tabular-nums text-base-content/50">Lv.{{ selectedSkillLevel }}</span>
+                    <span class="font-mono text-[11px] tabular-nums text-base-content/50">Lv.{{ skillLevel }}</span>
                     <input
-                        v-model.number="selectedSkillLevel"
+                        v-model.number="skillLevel"
                         type="range"
                         class="range range-primary range-xs w-40 max-w-40"
-                        min="1"
-                        max="12"
+                        :min="CHAR_SKILL_LEVEL_MIN"
+                        :max="skillLevelMax"
                         step="1"
                     />
                 </div>

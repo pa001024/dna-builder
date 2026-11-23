@@ -14,6 +14,7 @@
             "enemyResistance": -4,
             "isRouge": false,
             "targetFunction": "综合DPS",
+            "mainTargetEnabled": true,
             "customVariables": [
                 ["[迸发射击]初始用时", "1.2"],
                 ["[校准]初始用时", "3"],
@@ -115,7 +116,81 @@
             "team2Weapon": 10203,
             "team2Build": "OEH0TIqVkt",
             "team2BuildVariant": "A",
+            "assist1": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "baseName": "提挈浮沉",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
+            "assist2": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "baseName": "玉山崩",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
             "timelineDPS": false,
+            "transcend": {
+                "enabled": false,
+                "talentLevels": [],
+                "mainGear": [],
+                "assist1Gear": [],
+                "assist2Gear": [],
+                "gearVariants": [
+                    {
+                        "id": "A",
+                        "mainGear": [],
+                        "assist1Gear": [],
+                        "assist2Gear": []
+                    }
+                ],
+                "activeGearVariant": "A"
+            },
             "useGlobal": false,
             "effectConfig": {},
             "dotSettings": {
@@ -135,6 +210,6 @@
         }
     },
     "expected": {
-        "calculate": 22606928978.613377
+        "calculate": 6567712170.774387
     }
 }

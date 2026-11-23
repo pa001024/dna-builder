@@ -7,6 +7,13 @@ import { LeveledMod } from "./leveled/LeveledMod"
 import type { Monster } from "./leveled/LeveledMonster"
 import { LeveledMonster } from "./leveled/LeveledMonster"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
+import { normalizeSkillLevelBonus, SKILL_LEVEL_ATTR_KEYS } from "./skillLevels"
+import { normalizeTraceStacks, resolveHighestActiveRoot, resolveTraceOffRoots } from "./traceEffects"
+import { normalizeTranscendSettings } from "./transcendSettings"
+import type { TranscendSkillReplacement } from "./transcendSkills"
+
+/** 旧快照技能等级加成迁移 BUFF 名称（不与数据 BUFF / 用户可选名称冲突） */
+const LEGACY_SKILL_LEVEL_BUFF = "旧快照技能等级加成"
 
 export type ModSnapshot = {
     data: Mod
@@ -29,8 +36,12 @@ export interface CharBuildWorkerSnapshot {
         data: Char
         level: number
     }
-    /** 技能等级 `[E, Q, 被动]`：兼容老快照的单个数字 */
-    skillLevel: CharSkillLevels | number
+    /** 基础技能等级 `[E, Q, 被动]`：兼容老快照的单个数字；缺省时按旧快照反推 */
+    baseSkillLevel?: CharSkillLevels | number
+    /** 有效技能等级 `[E, Q, 被动]`：外部读数兼容（新快照仍写最终值） */
+    skillLevel?: CharSkillLevels | number
+    /** 旧快照的技能等级加成（已废弃）：仅在缺 `baseSkillLevel` 时用于反推基础值 */
+    skillLevelBonus?: CharSkillLevels
     hpPercent: number
     resonanceGain: number
     auraMod?: ModSnapshot
@@ -69,6 +80,8 @@ export interface CharBuildWorkerSnapshot {
     petBaseCd?: number
     /** 生成构筑的原始配置：收益 / 目标值请求据此走 wasm（缺失时回退 TS 快照） */
     settings?: CharSettings
+    /** 升华词条技能替换（原技能 id → 载荷）：收益 worker 重建构筑时必须保留 */
+    skillReplacements?: Record<number, TranscendSkillReplacement>
 }
 
 /**
@@ -118,12 +131,20 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         forgeEffective: weapon.forgeEffective,
     })
 
+    // 关闭的根源随快照带到 worker；旧配置缺字段时按溯级迁移，溯级同步为最高激活根源
+    const traceOffRoots = charBuild.settings
+        ? resolveTraceOffRoots(charBuild.settings.traceOffRoots, charBuild.settings.traceLevel, charBuild.char.id)
+        : undefined
+
     const snapshot: CharBuildWorkerSnapshot = {
         char: {
             data: charBuild.char._originalCharData,
             level: charBuild.char.等级,
         },
-        skillLevel: charBuild.skillLevel,
+        baseSkillLevel: [...charBuild.baseSkillLevel] as CharSkillLevels,
+        // 兼容读数取 getSkillLevel 的有效值（触发二次解析，避免原地改 BUFF 后写出陈旧值）；
+        // 新读取方只用 `baseSkillLevel + buffs` 重建
+        skillLevel: [charBuild.getSkillLevel(0), charBuild.getSkillLevel(1), charBuild.getSkillLevel(2)] as CharSkillLevels,
         hpPercent: charBuild.hpPercent,
         resonanceGain: charBuild.resonanceGain,
         auraMod: createModSnapshot(charBuild.auraMod || null),
@@ -157,13 +178,50 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         extraMastery: charBuild.extraMastery,
         dotSettings: { ...charBuild.dotSettings },
         petBaseCd: charBuild.petBaseCd,
-        // 原始配置随快照带到 worker：收益请求据此走 wasm，技能等级统一为三项数组
+        // 原始配置随快照带到 worker：收益请求据此走 wasm，技能等级统一为三项数组；
+        // 升华配置补齐为完整结构（缺省 = 关闭），wasm 门控与 TS 回退读同一份
         settings: charBuild.settings
-            ? { ...charBuild.settings, charSkillLevel: normalizeCharSkillLevels(charBuild.settings.charSkillLevel) }
+            ? {
+                  ...charBuild.settings,
+                  charSkillLevel: normalizeCharSkillLevels(charBuild.settings.charSkillLevel),
+                  // 溯级同步为最高激活根源；具体角色上限由 `collectTraceEffects` 在装配时钳制
+                  traceLevel: resolveHighestActiveRoot(traceOffRoots ?? [], charBuild.char.id),
+                  // 关闭的根源随快照带到 worker；旧配置缺字段时按溯级迁移
+                  traceOffRoots,
+                  // 溯源层数 / 覆盖率随快照带到 worker：按主控角色上限归一化，收集期再按 mx 钳制
+                  traceStacks: normalizeTraceStacks(charBuild.settings.traceStacks, charBuild.char.id),
+                  transcend: normalizeTranscendSettings(charBuild.settings.transcend),
+              }
             : undefined,
+        // 空表不下发；JSON 洗消后仍是纯数据，worker 据此重建替换后的技能
+        skillReplacements: Object.keys(charBuild.skillReplacements).length > 0 ? charBuild.skillReplacements : undefined,
     }
 
     return toCloneableSnapshot(snapshot)
+}
+
+/**
+ * 旧快照迁移：`skillLevel` 已是最终值、`skillLevelBonus` 是加成，
+ * 反推基础值并补一条三键合成 BUFF，保证等级与面板读数不变。
+ * @param snapshot 旧快照
+ * @returns 基础等级与补齐后的 BUFF 列表
+ */
+function migrateLegacySkillLevel(snapshot: CharBuildWorkerSnapshot): {
+    baseSkillLevel: CharSkillLevels
+    buffs: CharBuildWorkerSnapshot["buffs"]
+} {
+    const final = normalizeCharSkillLevels(snapshot.skillLevel ?? 10)
+    const bonus = normalizeSkillLevelBonus(snapshot.skillLevelBonus)
+    if (!bonus.some(Boolean)) return { baseSkillLevel: final, buffs: snapshot.buffs }
+    const base = final.map((value, index) => value - bonus[index]) as CharSkillLevels
+    const name = snapshot.buffs.some(buff => buff.data.名称 === LEGACY_SKILL_LEVEL_BUFF)
+        ? `${LEGACY_SKILL_LEVEL_BUFF}·迁移`
+        : LEGACY_SKILL_LEVEL_BUFF
+    const attr = Object.fromEntries(SKILL_LEVEL_ATTR_KEYS.map((key, index) => [key, bonus[index]]).filter(([, value]) => value !== 0))
+    return {
+        baseSkillLevel: base,
+        buffs: [...snapshot.buffs, { data: { 名称: name, 描述: "旧快照技能等级加成迁移", attr }, level: 1 }],
+    }
 }
 
 /**
@@ -178,9 +236,14 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         leveled.setForgeEffective(weapon.forgeEffective)
         return leveled
     }
+    // 新快照写基础值；旧快照只有最终值 + 加成，需反推并补合成 BUFF（避免双计 / 掉等级）
+    const restored =
+        snapshot.baseSkillLevel === undefined
+            ? migrateLegacySkillLevel(snapshot)
+            : { baseSkillLevel: normalizeCharSkillLevels(snapshot.baseSkillLevel), buffs: snapshot.buffs }
     const options: CharBuildOptions = {
         char: new LeveledChar(snapshot.char.data, snapshot.char.level),
-        skillLevel: normalizeCharSkillLevels(snapshot.skillLevel),
+        skillLevel: restored.baseSkillLevel,
         hpPercent: snapshot.hpPercent,
         resonanceGain: snapshot.resonanceGain,
         auraMod: createMod(snapshot.auraMod || null) || undefined,
@@ -188,7 +251,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         meleeMods: snapshot.meleeMods.map(createMod),
         rangedMods: snapshot.rangedMods.map(createMod),
         skillMods: snapshot.skillMods.map(createMod),
-        buffs: snapshot.buffs.map(buff => {
+        buffs: restored.buffs.map(buff => {
             const leveled = new LeveledBuff(buff.data, buff.level)
             if (buff.coverage !== undefined) {
                 leveled.coverage = buff.coverage
@@ -211,6 +274,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         dotSettings: snapshot.dotSettings,
         petBaseCd: snapshot.petBaseCd,
         settings: snapshot.settings,
+        skillReplacements: snapshot.skillReplacements,
     }
     return new CharBuild(options)
 }

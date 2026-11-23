@@ -15,6 +15,7 @@ import type { Buff, Mod, Weapon } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { LeveledMod, LeveledModWithCount } from "./leveled/LeveledMod"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
+import { setTraceRootActive } from "./traceEffects"
 
 // 兼容旧引用：快照类型统一由 CharBuildSnapshot 提供
 export type { CharBuildWorkerSnapshot } from "./CharBuildSnapshot"
@@ -69,6 +70,25 @@ export type TargetValueItem = {
     build: CharBuildWorkerSnapshot
     settings?: CharSettings
     charId?: number
+}
+
+/** 溯源卡片收益条目：翻转某侧某根源的激活状态后重算 */
+export type TraceIncomeItem = {
+    key: string
+    side: "main" | "assist1" | "assist2"
+    /** 根源序号 1..该角色最大根源 */
+    root: number
+    /** 卡片当前是否激活（激活卡求关闭它的损失，关闭卡求打开它的收益） */
+    active: boolean
+}
+
+/** 溯源卡片收益请求（TS 口径，不进 wasm）：只带配置与待翻转卡片，worker 按配置重建 */
+export type CalcTraceIncomeRequest = {
+    id: number
+    kind: "traceIncome"
+    charId: number
+    settings: CharSettings
+    items: TraceIncomeItem[]
 }
 
 export type CalcModOption = {
@@ -130,7 +150,7 @@ export type CalcEvaluateRequest = {
     targetFunction?: string
     /** 覆盖 settings.baseName（武器伤害节点切到武器技能口径） */
     baseName?: string
-    /** TS 回退时用于选择伤害口径；wasm 以 targetFunction 求值结果为准 */
+    /** TS（wasm 模块不可用）路径用于选择伤害口径；wasm 以 targetFunction 求值结果为准 */
     damageKind?: "skill" | "weapon"
     /** 附带面板数组：与目标值同一次装配计算，复用请求 */
     panels?: PanelKind[]
@@ -225,13 +245,31 @@ function createWeaponOption(weapon: CalcWeaponOption) {
     return leveled
 }
 
-function wasmReady(request: CalcWasmSource): request is CalcWasmSource & { charId: number; settings: CharSettings } {
+/**
+ * 引擎选择唯一判据（环境）：请求是否携带 `charId` + 完整配置。
+ *
+ * 表达式内容（命名空间 / 技能字段等）不参与引擎选择——Rust 与 TS 必须逐值等价，
+ * 能力缺口只能补 Rust，不允许把整份请求回退 TS。
+ * @param request 自动配装请求
+ * @returns 请求携带 wasm 所需数据时为 true
+ */
+function wasmReady(request: CalcAutobuildRequest): request is CalcAutobuildRequest & { charId: number; settings: CharSettings } {
     return request.charId !== undefined && request.settings !== undefined
 }
 
 /**
+ * wasm 模块不可用（环境）是唯一允许走 TS 的原因；其他异常都是 wasm 执行错误。
+ * 按 `name` 判定：worker 测试会整体 mock `CalcWasm`，不能依赖类绑定存在。
+ * @param error 捕获到的异常
+ * @returns 是否为 wasm 模块不可用
+ */
+function isWasmUnavailable(error: unknown) {
+    return error instanceof Error && error.name === "WasmUnavailableError"
+}
+
+/**
  * 收益请求的 wasm 配置来源：显式配置优先，其次用构筑快照自带的原始配置。
- * 两条路径都覆盖不了时返回 undefined，交由 TS 快照口径计算。
+ * 两条路径都拿不到配置时返回 undefined，交由 TS 快照口径计算（请求缺数据，非能力门控）。
  * @param request 收益请求
  * @returns 角色 id 与配置；不可用时为 undefined
  */
@@ -245,7 +283,7 @@ function incomeWasmSource(request: CalcIncomeRequest): { charId: number; setting
 
 /**
  * 目标值条目的 wasm 配置来源：显式配置优先，其次用构筑快照自带的原始配置。
- * 两条路径都覆盖不了时返回 undefined，交由 TS 快照口径计算。
+ * 两条路径都拿不到配置时返回 undefined，交由 TS 快照口径计算（请求缺数据，非能力门控）。
  * @param item 目标值条目
  * @returns 角色 id 与配置；不可用时为 undefined
  */
@@ -305,10 +343,21 @@ function postResult(response: Omit<CalcResponse, "type" | "elapsedMs">, elapsedM
 }
 
 self.onmessage = (
-    event: MessageEvent<CalcAutobuildRequest | CalcIncomeRequest | CalcTargetValuesRequest | CalcEvaluateRequest | CalcPanelsRequest>
+    event: MessageEvent<
+        | CalcAutobuildRequest
+        | CalcIncomeRequest
+        | CalcTraceIncomeRequest
+        | CalcTargetValuesRequest
+        | CalcEvaluateRequest
+        | CalcPanelsRequest
+    >
 ) => {
     const request = event.data
     requestStartedAt.set(request.id, performance.now())
+    if (request.kind === "traceIncome") {
+        handleTraceIncome(request)
+        return
+    }
     if (request.kind === "evaluate") {
         void handleEvaluate(request)
         return
@@ -338,31 +387,34 @@ self.onmessage = (
 }
 
 /**
- * 节点编辑器求值：优先走 wasm（与界面数值口径一致），不可用时回退 TS 构筑实例。
+ * 节点编辑器求值：走 wasm（与界面数值口径一致）。
+ *
+ * 仅 wasm 模块不可用（环境）时用 TS 构筑实例；wasm 执行错误按 `wasmError` 上报，
+ * 不得静默改由 TS 算出结果掩盖 Rust 缺陷。
  * @param request 求值请求
  */
 async function handleEvaluate(request: CalcEvaluateRequest) {
     const { id } = request
     try {
-        let evaluation: CalcBuildEvaluation
-        let engine: "ts" | "wasm" = "wasm"
-        let elapsedMs: number | undefined
+        let call: Awaited<ReturnType<typeof runWasmEvaluate>>
         try {
-            const call = await runWasmEvaluate({
+            call = await runWasmEvaluate({
                 charId: request.charId,
                 settings: request.settings,
                 targetFunction: request.targetFunction,
                 baseName: request.baseName,
                 panels: request.panels,
             })
-            elapsedMs = call.elapsedMs
-            evaluation = { ...call.value, engine: "wasm" }
         } catch (error) {
-            console.warn("wasm 构筑求值失败，回退 TS", error)
-            evaluation = evaluateTs(request)
-            engine = "ts"
+            if (isWasmUnavailable(error)) {
+                postResult({ id, evaluation: evaluateTs(request), engine: "ts" })
+                return
+            }
+            const reason = error instanceof Error ? error.message : String(error)
+            postResult({ id, error: reason, wasmError: reason })
+            return
         }
-        postResult({ id, evaluation, engine }, elapsedMs)
+        postResult({ id, evaluation: { ...call.value, engine: "wasm" }, engine: "wasm" }, call.elapsedMs)
     } catch (error) {
         postResult({
             id,
@@ -372,7 +424,8 @@ async function handleEvaluate(request: CalcEvaluateRequest) {
 }
 
 /**
- * TS 回退求值：按节点请求的伤害口径现建构筑实例，返回与 wasm 结果同形的扁平数据。
+ * wasm 模块不可用时的 TS 求值（环境回退）：按节点请求的伤害口径现建构筑实例，
+ * 返回与 wasm 结果同形的扁平数据。表达式语义与 Rust 逐值等价，只用于模块不可用的环境。
  * @param request 求值请求
  * @returns 构筑求值结果
  */
@@ -427,24 +480,26 @@ function evaluateTs(request: CalcEvaluateRequest): CalcBuildEvaluation {
 
 /**
  * 武器面板求值：只算面板（同一构筑一次装配批量取多个槽位），不跑目标函数与伤害明细。
+ *
+ * 引擎选择同 `handleEvaluate`：仅 wasm 模块不可用时用 TS，执行错误按 `wasmError` 上报。
  * @param request 面板请求
  */
 async function handlePanels(request: CalcPanelsRequest) {
     const { id } = request
     try {
-        let panels: CalcBuildPanels
-        let engine: "ts" | "wasm" = "wasm"
-        let elapsedMs: number | undefined
+        let call: Awaited<ReturnType<typeof runWasmPanels>>
         try {
-            const call = await runWasmPanels({ charId: request.charId, settings: request.settings, panels: request.panels })
-            elapsedMs = call.elapsedMs
-            panels = call.value.panels
+            call = await runWasmPanels({ charId: request.charId, settings: request.settings, panels: request.panels })
         } catch (error) {
-            console.warn("wasm 面板求值失败，回退 TS", error)
-            panels = evaluatePanelsTs(request)
-            engine = "ts"
+            if (isWasmUnavailable(error)) {
+                postResult({ id, panels: evaluatePanelsTs(request), engine: "ts" })
+                return
+            }
+            const reason = error instanceof Error ? error.message : String(error)
+            postResult({ id, error: reason, wasmError: reason })
+            return
         }
-        postResult({ id, panels, engine }, elapsedMs)
+        postResult({ id, panels: call.value.panels, engine: "wasm" }, call.elapsedMs)
     } catch (error) {
         postResult({
             id,
@@ -454,7 +509,7 @@ async function handlePanels(request: CalcPanelsRequest) {
 }
 
 /**
- * TS 回退的面板计算：角色面板与各武器槽面板。
+ * wasm 模块不可用时的 TS 面板计算：角色面板与各武器槽面板。
  * @param build 构筑实例
  * @param panels 需要的面板类型
  * @returns 面板键 → 属性表
@@ -475,7 +530,7 @@ function computePanelsTs(build: CharBuild, panels: PanelKind[]): CalcBuildPanels
 }
 
 /**
- * TS 回退的面板求值。
+ * wasm 模块不可用时的 TS 面板求值。
  * @param request 面板请求
  * @returns 面板键 → 属性表
  */
@@ -483,7 +538,7 @@ function evaluatePanelsTs(request: CalcPanelsRequest): CalcBuildPanels {
     return computePanelsTs(createCharBuildFromSettings(request.charId, request.settings), request.panels)
 }
 
-function handleAutobuildTs(request: CalcAutobuildRequest, wasmError?: string) {
+function handleAutobuildTs(request: CalcAutobuildRequest) {
     const { id } = request
     try {
         const build = createBuildFromSnapshot(request.build)
@@ -515,7 +570,6 @@ function handleAutobuildTs(request: CalcAutobuildRequest, wasmError?: string) {
             iter,
             incomes,
             engine: "ts",
-            ...(wasmError ? { wasmError } : {}),
         })
     } catch (error) {
         postResult({
@@ -550,9 +604,13 @@ async function handleAutobuildWasm(request: CalcAutobuildRequest & { charId: num
             call.elapsedMs
         )
     } catch (error) {
+        // 模块不可用（环境）才允许走 TS；执行错误原样上报，不得用 TS 结果顶替
+        if (isWasmUnavailable(error)) {
+            handleAutobuildTs(request)
+            return
+        }
         const reason = error instanceof Error ? error.message : String(error)
-        console.warn("wasm 自动配装失败，回退 TS", reason)
-        handleAutobuildTs(request, reason)
+        postResult({ id, error: reason, wasmError: reason, engine: "wasm" })
     }
 }
 
@@ -614,6 +672,60 @@ function handleIncomeTs(request: CalcIncomeRequest) {
     }
 }
 
+/** 协战侧角色 id（`teamN` 为数字时才算配置） */
+function toSideCharId(value: unknown): number | undefined {
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return undefined
+    const rounded = Math.round(value)
+    return rounded > 9999 ? Math.trunc(rounded / 100) : rounded
+}
+
+/**
+ * 溯源卡片收益（TS 口径，不进 wasm）：以当前配置复现的构筑为基线，
+ * 逐个翻转某侧某根源的激活状态后重建重算；激活卡求关闭它的损失，关闭卡求打开它的收益。
+ * 基线失败整体报错；单条失败只记 0 并进入 `failed`，不影响其余卡片。
+ * @param request 溯源收益请求
+ */
+function handleTraceIncome(request: CalcTraceIncomeRequest) {
+    const { charId, settings } = request
+    if (!settings || !charId) {
+        postResult({ id: request.id, error: "溯源收益缺少角色或配置" })
+        return
+    }
+    let baseValue: number
+    try {
+        baseValue = createCharBuildFromSettings(charId, settings).calculate()
+    } catch (error) {
+        postResult({ id: request.id, error: error instanceof Error ? error.message : String(error) })
+        return
+    }
+    const incomes: Record<string, number> = {}
+    const failed: string[] = []
+    for (const item of request.items) {
+        try {
+            const next = JSON.parse(JSON.stringify(settings)) as CharSettings
+            const target = item.side === "main" ? next : next[item.side]
+            if (!target) {
+                incomes[item.key] = 0
+                continue
+            }
+            const sideCharId = item.side === "main" ? charId : toSideCharId(item.side === "assist1" ? next.team1 : next.team2)
+            target.traceOffRoots = setTraceRootActive(target, item.root, !item.active, sideCharId)
+            const value = createCharBuildFromSettings(charId, next).calculate()
+            let income = 0
+            if (item.active) {
+                if (value > 0) income = baseValue / value - 1
+            } else if (baseValue > 0) {
+                income = value / baseValue - 1
+            }
+            incomes[item.key] = Number.isFinite(income) ? income : 0
+        } catch {
+            incomes[item.key] = 0
+            failed.push(item.key)
+        }
+    }
+    postResult({ id: request.id, incomes, ...(failed.length ? { failed } : {}), engine: "ts" })
+}
+
 async function handleIncomeWasm(request: CalcIncomeRequest & { charId: number; settings: CharSettings }) {
     const { id } = request
     try {
@@ -664,8 +776,13 @@ async function handleIncomeWasm(request: CalcIncomeRequest & { charId: number; s
         // 全部收益项（含已装备 BUFF 的移除收益）都由同一次 wasm 调用的基线换算
         postResult({ id, incomes: { ...call.value.values }, engine: "wasm" }, call.elapsedMs)
     } catch (error) {
-        console.warn("wasm 收益计算失败，回退 TS", error)
-        handleIncomeTs(request)
+        // 模块不可用（环境）才允许走 TS；执行错误原样上报，不得用 TS 结果顶替
+        if (isWasmUnavailable(error)) {
+            handleIncomeTs(request)
+            return
+        }
+        const reason = error instanceof Error ? error.message : String(error)
+        postResult({ id, error: reason, wasmError: reason, engine: "wasm" })
     }
 }
 
@@ -702,8 +819,14 @@ async function handleTargetValues(request: CalcTargetValuesRequest) {
             wasmUsed = true
             Object.assign(values, call.value.values)
         } catch (error) {
-            console.warn("wasm 目标值失败，回退 TS", error)
-            tsItems.push(...wasmItems.map(entry => entry.item))
+            // 模块不可用（环境）才整批转 TS；执行错误原样上报，不得用 TS 结果顶替
+            if (isWasmUnavailable(error)) {
+                tsItems.push(...wasmItems.map(entry => entry.item))
+            } else {
+                const reason = error instanceof Error ? error.message : String(error)
+                postResult({ id: request.id, error: reason, wasmError: reason, engine: "wasm" })
+                return
+            }
         }
     }
     const tsStartedAt = performance.now()
@@ -730,7 +853,8 @@ async function handleTargetValues(request: CalcTargetValuesRequest) {
             id: request.id,
             values,
             ...(failed.length > 0 ? { failed } : {}),
-            engine: wasmUsed ? "wasm" : "ts",
+            // 混合批次（部分条目门控回退 TS）不能报 wasm，否则按 engine 归集的统计会把 TS 条目算成 wasm
+            engine: wasmUsed && tsItems.length === 0 ? "wasm" : "ts",
         },
         elapsedMs === undefined ? undefined : elapsedMs + (performance.now() - tsStartedAt)
     )

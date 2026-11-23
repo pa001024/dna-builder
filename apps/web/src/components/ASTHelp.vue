@@ -5,6 +5,7 @@ import { computed, defineComponent, h, nextTick, onMounted, ref, type VNode, wat
 import type { CharBuild, LeveledSkill } from "@/data"
 import { CharBuild as CharBuildClass } from "@/data"
 import { type ASTNode, parseAST } from "@/data/ast"
+import { AST_ATTRIBUTE_GROUP_ITEMS, AST_READONLY_ATTRIBUTES } from "@/utils/astAttributeItems"
 import CodeEditor from "./CodeEditor.vue"
 
 const props = defineProps<{
@@ -157,65 +158,17 @@ const functionInserts: Record<string, string> = {
 const syntaxItems = ["number", "property", "special", "skill", "namespace", "operator", "function", "member", "temporary", "force"]
 
 // 属性修改区：可插入的临时属性，按用途分组。展示原始属性名（即表达式中实际输入的写法）。
-const attributeGroups: { key: string; title: string; items: string[] }[] = [
-    {
-        key: "basic",
-        title: t("ast-help.attrGroups.basic"),
-        items: ["攻击", "固定攻击", "生命", "固定生命", "防御", "护盾", "神智", "神智回复"],
-    },
-    {
-        key: "damage",
-        title: t("ast-help.attrGroups.damage"),
-        items: [
-            "增伤",
-            "独立增伤",
-            "技能独立增伤",
-            "武器伤害",
-            "技能伤害",
-            "技能追伤",
-            "属性穿透",
-            "无视防御",
-            "技能无视防御",
-            "技能威力",
-            "技能速度",
-            "技能范围",
-            "技能倍率加数",
-            "技能倍率乘数",
-            "技能倍率赋值",
-            "失衡易伤",
-            "昂扬",
-            "背水",
-            "减伤",
-            "魔灵CD缩减",
-        ],
-    },
-    {
-        key: "weapon",
-        title: t("ast-help.attrGroups.weapon"),
-        items: [
-            "暴击",
-            "暴伤",
-            "触发",
-            "攻速",
-            "多重",
-            "追加伤害",
-            "武器倍率",
-            "装填",
-            "弹匣",
-            "弹药",
-            "召唤物属性继承比例",
-            "召唤物攻击速度",
-            "召唤物范围",
-            "召唤物伤害",
-            "有效生命",
-        ],
-    },
-    {
-        key: "convert",
-        title: t("ast-help.attrGroups.convert"),
-        items: ["转切割", "转贯穿", "转震荡", "转灾厄", "转充盈", "转属克", "转属逆"],
-    },
-]
+// 条目数据见 `@/utils/astAttributeItems`：追伤只提供七分量，聚合「追加伤害」是只读 Σ。
+const attributeGroupTitles: Record<string, string> = {
+    basic: t("ast-help.attrGroups.basic"),
+    damage: t("ast-help.attrGroups.damage"),
+    weapon: t("ast-help.attrGroups.weapon"),
+    convert: t("ast-help.attrGroups.convert"),
+}
+const attributeGroups = AST_ATTRIBUTE_GROUP_ITEMS.map(group => ({ ...group, title: attributeGroupTitles[group.key] ?? group.key }))
+
+// 只读聚合属性：表达式仍可读取（聚合 = Σ 七分量），但不提供临时属性插入入口，避免把聚合当输入。
+const readonlyAttributes = AST_READONLY_ATTRIBUTES
 
 /**
  * 在光标处插入文本（由 CodeMirror 内部 dispatch 完成，光标自动移到插入文本之后，不丢失位置）。
@@ -691,6 +644,21 @@ const badgeColors: Record<string, string> = {
                                 {{ item }}
                             </button>
                         </div>
+                    </div>
+                    <div class="mt-2.5">
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">
+                            {{ $t("ast-help.readonly_aggregate_title") }}
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span
+                                v-for="item in readonlyAttributes"
+                                :key="item.name"
+                                class="rounded-xs border border-dashed border-base-content/20 px-2 py-1 text-xs text-base-content/55"
+                            >
+                                {{ item.name }} · {{ item.note }}
+                            </span>
+                        </div>
+                        <p class="mt-1 text-[11px] text-base-content/45">{{ $t("ast-help.readonly_aggregate_hint") }}</p>
                     </div>
                 </section>
 

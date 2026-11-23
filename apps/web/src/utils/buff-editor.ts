@@ -1,4 +1,4 @@
-import type { LeveledBuff } from "@/data"
+import type { CharBuild, LeveledBuff } from "@/data"
 import { roundBuffValue } from "@/util"
 import { matchPinyin } from "./pinyin-utils"
 
@@ -27,7 +27,6 @@ const summaryNumKeys = new Set([
     "固定生命",
     "神智回复",
     "单次神智回复",
-    "异常数量",
     "神智消耗",
     "最大耐受",
     "基础装填",
@@ -214,4 +213,24 @@ export function matchBuffOptionQuery(option: BuffEditorOption, query: string): b
     if (option.description && matchPinyin(option.description, normalizedQuery).match) return true
     if (option.value.描述 && matchPinyin(option.value.描述, normalizedQuery).match) return true
     return false
+}
+
+/**
+ * 已选 BUFF 的展示实例：按名称 + 挂载点（`pt` / `pid`）从已选列表取实际生效实例，再按构筑求值。
+ * 已选实例可能带溯源规则的字段覆盖（如 `菲娜被动(团队)` 45%），未选 / 不同挂载点回落到候选实例基础值。
+ * @param label 候选 BUFF 名称（`buffOptions.label`）
+ * @param value 候选 BUFF 实例（数据基础值）
+ * @param selectedBuffs 已选 BUFF 实例（含覆盖后的字段）
+ * @param charBuild 当前构筑（缺省时原样返回）
+ * @returns 展示用 BUFF 实例
+ */
+export function resolveSelectedDisplayBuff(
+    label: string,
+    value: LeveledBuff,
+    selectedBuffs: readonly LeveledBuff[],
+    charBuild: CharBuild | undefined
+): LeveledBuff {
+    const mounted = selectedBuffs.find(buff => buff.名称 === label && buff.pt === value.pt && buff.pid === value.pid)
+    const source = mounted ?? value
+    return charBuild?.prepareBuff(source) || source
 }

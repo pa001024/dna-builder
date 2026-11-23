@@ -1,12 +1,38 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { CharBuild } from "../CharBuild"
-import { createBuffFromSettings, createCharBuildFromSettings } from "../CharBuildHelper"
+import {
+    createBuffFromSettings,
+    createCharBuildFromSettings,
+    createCustomBuff,
+    resolveTranscendEffectsForSettings,
+} from "../CharBuildHelper"
 import { createBuildFromSnapshot, createWorkerSnapshot } from "../CharBuildSnapshot"
-import { buffMap } from "../d"
+import { createDefaultAssistSideSettings, createDefaultCharSettings, normalizeCharSettings } from "../charSettings"
+import { buffMap, charMap } from "../d"
+import type { Mod, Weapon } from "../data-types"
 import { LeveledModHelper, weaponData } from "../index"
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledSkill, type LeveledSkillWeapon, LeveledWeapon } from "../leveled"
+import { ADDITIONAL_DAMAGE_KEYS, LEGACY_ADDITIONAL_DAMAGE_KEY, resetAdditionalDamageWarnings } from "../leveled/additionalDamage"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
+import { isTranscendBuffElementAllowed, resolveGearEffects } from "../transcend"
+import { TRANSCEND_BUFF_MAP } from "../transcendBuffs"
+import { flattenEquippedGear } from "../transcendGear"
+import type { TranscendGearAffixRoll, TranscendGearEntry, TranscendGearItemConfig } from "../transcendSettings"
+import {
+    applyTranscendSkillReplacement,
+    mergeTranscendSkillReplacement,
+    resetSkillReplacementWarnings,
+    TRANSCEND_SKILL_REPLACEMENTS,
+} from "../transcendSkills"
 import { createShardBuild1, shardBuild1 } from "./fixtures/shardBuild1"
+
+const gear = (patch: Partial<TranscendGearEntry> & Pick<TranscendGearEntry, "slotId" | "affixId">): TranscendGearEntry => ({
+    rollLevel: 1,
+    masterworkLevel: 0,
+    ancient: false,
+    finalMasterwork: false,
+    ...patch,
+})
 
 // 线上真实构筑（莉兹贝尔 shardBuild1）已抽出为公共夹具，供本测试与性能基准共用：
 // 见 ./fixtures/shardBuild1.ts
@@ -431,7 +457,7 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
     })
 
-    it("技能命名空间应保留技能上下文并应用召唤物伤害加成", () => {
+    it("技能命名空间按 tag 判定召唤物：字段名含「召唤物」但无召唤物 tag 时不吃召唤物伤害", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({
                 char: new LeveledChar("主角-水"),
@@ -459,6 +485,40 @@ describe("CharBuild类测试", () => {
         const baseDamage = baseBuild.calculateTargetFunction(undefined, "e::召唤物伤害")
         const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "e::召唤物伤害")
 
+        // 斩首行动的「召唤物伤害」字段 tag 为 ["技能","WeitaWater"]，不含「召唤物」，按 tag-only 语义不吃加成
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1, 5)
+    })
+
+    it("技能命名空间：字段 tag 含「召唤物」时应用召唤物伤害加成", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("伊薇"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "乐园构想",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "e::[召唤物·战车]技能伤害",
+            })
+
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([
+            new LeveledBuff({
+                名称: "召唤物伤害测试",
+                描述: "测试用召唤物伤害加成",
+                attr: { 召唤物伤害: 0.5 },
+            }),
+        ])
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "e::[召唤物·战车]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "e::[召唤物·战车]技能伤害")
+
+        // 乐园构想的 [召唤物·战车]技能伤害 字段 tag 含「召唤物」，命中 tag-only 召唤物语义
         expect(baseDamage).toBeGreaterThan(0)
         expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
     })
@@ -2443,18 +2503,19 @@ describe("CharBuild类测试", () => {
             expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
         })
 
-        it("角色限定的MOD：限定为角色id，仅对应角色可入选", () => {
-            // 追踪模式 (150401) 限定=苏乙 id 1504
+        it("角色限定的MOD：限定为角色id，仅对应角色可入选；0 收益候选跳过", () => {
+            // 追踪模式 (150401) 限定=苏乙 id 1504，唯一加成是技能威力 +0.55
             const suyiSettings = {
                 charLevel: 80,
-                baseName: "射击",
+                baseName: "歼星模式",
                 hpPercent: 1,
                 resonanceGain: 3,
                 enemyId: 130,
                 enemyLevel: 80,
                 enemyResistance: 0,
                 isRouge: false,
-                targetFunction: "DPS/0.71*1.71",
+                targetFunction: "[星如雨]伤害",
+                mainTargetEnabled: true,
                 charSkillLevel: 12,
                 meleeWeapon: 10601,
                 meleeWeaponLevel: 80,
@@ -2497,6 +2558,8 @@ describe("CharBuild类测试", () => {
                 team2: "-" as number | "-",
                 team2Weapon: "-" as number | "-",
                 team2Build: "-",
+                assist1: createDefaultAssistSideSettings(),
+                assist2: createDefaultAssistSideSettings(),
                 timelineDPS: false,
                 useGlobal: false,
                 effectConfig: {} as Record<string, number>,
@@ -2513,19 +2576,37 @@ describe("CharBuild类测试", () => {
                 team2BuildVariant: "A" as const,
                 traits: Array(4).fill(null) as ([number, number] | null)[],
             }
+            // 苏乙目标吃技能威力：限定命中且有收益，应入选
             const suyiBuild = createCharBuildFromSettings(1504, suyiSettings)
             const suyiResult = suyiBuild.autoBuild({
                 includeTypes: ["charMods"],
                 preserveTypes: ["charMods"],
                 modOptions: [new LeveledModWithCount(150401, undefined, undefined, 1)],
-                enableLog: false,
+                enableLog: true,
             })
             expect(suyiResult.newBuild.charMods.some(mod => mod?.id === 150401)).toBe(true)
+            expect(suyiResult.log).not.toContain("当前选项MOD无收益")
 
-            // 非限定角色（黎瑟）不应入选
+            // 射击目标不吃技能威力：0 收益候选按既定行为跳过
+            const zeroIncomeBuild = createCharBuildFromSettings(1504, {
+                ...suyiSettings,
+                baseName: "射击",
+                targetFunction: "DPS/0.71*1.71",
+            })
+            const zeroIncomeResult = zeroIncomeBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions: [new LeveledModWithCount(150401, undefined, undefined, 1)],
+                enableLog: true,
+            })
+            expect(zeroIncomeResult.newBuild.charMods.some(mod => mod?.id === 150401)).toBe(false)
+            expect(zeroIncomeResult.log).toContain("当前选项MOD无收益")
+
+            // 非限定角色（黎瑟）该 MOD 有收益，但因限定不入选
             const liseBuild = createCharBuild()
             liseBuild.charMods = []
             liseBuild.buffs = []
+            expect(liseBuild.calcIncome(new LeveledModWithCount(150401, undefined, undefined, 1))).toBeGreaterThan(0)
             const liseResult = liseBuild.autoBuild({
                 includeTypes: ["charMods"],
                 preserveTypes: ["charMods"],
@@ -2612,14 +2693,14 @@ describe("CharBuild类测试", () => {
             dynamicBuild.baseName = "射击"
             dynamicBuild.dynamicBuffs.push(
                 new LeveledBuff({
-                    名称: "测试动态追加伤害",
+                    名称: "测试动态攻击",
                     描述: "测试用动态属性",
-                    code: "weaponAttr.追加伤害 += 100",
+                    code: "weaponAttr.攻击 += 100",
                 })
             )
 
             const dynamicAttrs = dynamicBuild.calculateWeaponAttributes()
-            expect(dynamicAttrs.weapon?.追加伤害).toBe(100)
+            expect(dynamicAttrs.weapon?.攻击).toBeCloseTo(baseBuild.calculateWeaponAttributes().weapon!.攻击 + 100, 9)
             expect(dynamicBuild.calculate()).toBeGreaterThan(baseBuild.calculate())
         })
 
@@ -2731,6 +2812,7 @@ describe("CharBuild类测试", () => {
                 enemyResistance: 0,
                 isRouge: false,
                 targetFunction: "DPS/0.71*1.71",
+                mainTargetEnabled: true,
                 charSkillLevel: 12,
                 meleeWeapon: 10601,
                 meleeWeaponLevel: 80,
@@ -2782,6 +2864,8 @@ describe("CharBuild类测试", () => {
                 team2: "-",
                 team2Weapon: "-",
                 team2Build: "-",
+                assist1: createDefaultAssistSideSettings(),
+                assist2: createDefaultAssistSideSettings(),
                 timelineDPS: false,
                 useGlobal: false,
                 effectConfig: {},
@@ -2969,7 +3053,7 @@ describe("CharBuild类测试", () => {
         })
 
         // 转充盈：独立额外乘区，不参与转换池、不改变物理/元素比例。
-        // 转充盈: X 把 X 比例的伤害视为充盈伤害并享受充盈威力加成，整体乘区 = 1 + X × 充盈威力
+        // 转充盈: X 把 X 比例的伤害视为充盈伤害并享受充盈威力加成，整体乘区 = 1 + X × (充盈威力 - 1)
         describe("转充盈（独立额外乘区）", () => {
             // 护盾木桩：近战切割在护盾木桩下可触发（物理分量>0），便于验证物理/元素比例不变
             function buildConvertField(enemyResistance = 0.5) {
@@ -2989,21 +3073,22 @@ describe("CharBuild类测试", () => {
 
             it("无充盈威力时转充盈不改变伤害", () => {
                 const cb = buildConvertField()
-                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const F = cb.calculateWeaponAttributes().充盈威力
+                expect(F).toBe(1)
                 const base = cb.evaluateAST("[近战]")
                 const converted = cb.evaluateAST("[近战]{转充盈:1}")
-                // 充盈威力为 0 → 乘区 = 1 + 转充盈×F = 1，伤害不变
-                expect(converted).toBeCloseTo(base * (1 + F), 3)
+                // 充盈威力基础 1 → 乘区 = 1 + 转充盈×(F-1) = 1，伤害不变
+                expect(converted).toBeCloseTo(base, 3)
             })
 
-            it("整体乘区 = 1 + 转充盈×充盈威力，作用于所有伤害分量", () => {
+            it("整体乘区 = 1 + 转充盈×(充盈威力-1)，作用于所有伤害分量", () => {
                 const cb = buildConvertField()
-                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const F = cb.calculateWeaponAttributes().充盈威力 ?? 1
                 const base = cb.evaluateAST("[近战]")
                 const full = cb.evaluateAST("[近战]{转充盈:1,充盈威力:1}")
                 const half = cb.evaluateAST("[近战]{转充盈:0.5,充盈威力:1}")
-                expect(full).toBeCloseTo(base * (1 + (F + 1)), 3)
-                expect(half).toBeCloseTo(base * (1 + 0.5 * (F + 1)), 3)
+                expect(full).toBeCloseTo(base * (1 + F), 3)
+                expect(half).toBeCloseTo(base * (1 + 0.5 * F), 3)
             })
 
             it("不改变物理/元素比例：物理、元素分量同倍放大", () => {
@@ -3023,19 +3108,19 @@ describe("CharBuild类测试", () => {
 
             it("不参与转换池：与 转切割 独立叠加", () => {
                 const cb = buildConvertField()
-                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const F = cb.calculateWeaponAttributes().充盈威力 ?? 1
                 const cut = cb.evaluateAST("[近战]{转切割:1}")
                 const cutFull = cb.evaluateAST("[近战]{转切割:1,转充盈:1,充盈威力:1}")
-                // 转充盈 不压缩转换池 → 转切割 100% 转换保持，额外乘区 ×(1+充盈威力)
-                expect(cutFull).toBeCloseTo(cut * (1 + (F + 1)), 3)
+                // 转充盈 不压缩转换池 → 转切割 100% 转换保持，额外乘区 ×充盈威力
+                expect(cutFull).toBeCloseTo(cut * (1 + F), 3)
             })
 
             it("对纯元素同律字段（atk=all）同样生效", () => {
                 const cb = buildFlora(0.5) // [圆舞]路径伤害 为 inherit+atk=all 纯元素
-                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const F = cb.calculateWeaponAttributes().充盈威力 ?? 1
                 const base = cb.evaluateAST("[圆舞]路径伤害")
                 const buffed = cb.evaluateAST("[圆舞]路径伤害{转充盈:1,充盈威力:1}")
-                expect(buffed).toBeCloseTo(base * (1 + (F + 1)), 3)
+                expect(buffed).toBeCloseTo(base * (1 + F), 3)
             })
         })
     })
@@ -3122,6 +3207,77 @@ describe("CharBuild类测试", () => {
             expect(physBuffed).toBeGreaterThan(base)
             // 但物理增伤不改变元素分量本身
             expect(cb.evaluateAST("[近战]{物理增伤:0.5}.元素") / cb.evaluateAST("[近战].元素")).toBeCloseTo(1, 6)
+        })
+
+        it("元素专属伤害率：只吃匹配元素的那一项", () => {
+            const cb = buildField()
+            expect(cb.char.属性).toBe("雷")
+            const elem0 = cb.evaluateAST("[近战].元素")
+            const hit = cb.evaluateAST("[近战]{雷属性增伤:0.5}.元素")
+            const miss = cb.evaluateAST("[近战]{火属性增伤:0.5}.元素")
+            expect(hit).toBeGreaterThan(elem0)
+            expect(miss / elem0).toBeCloseTo(1, 6)
+            // 聚合视角：匹配元素进入独立桶，伤害结算时并入元素增伤池
+            const attrs = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 0,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+                buffs: [new LeveledBuff({ 名称: "雷伤", 描述: "", attr: { 雷属性增伤: 0.5 } })],
+            }).calculateAttributes()
+            expect(attrs.元素增伤).toBeCloseTo(0, 9)
+            expect(attrs.雷属性增伤).toBeCloseTo(0.5, 9)
+            expect(attrs.火属性增伤).toBeCloseTo(0, 9)
+        })
+
+        it("元素限定键不计入通用元素增伤桶（MOD属性加权只落同名键）", () => {
+            const mod = (加成: Record<string, number[]>) =>
+                new LeveledMod({ id: 990001, 名称: "U62测试", 系列: "狮鹫", 品质: "金", 耐受: 0, 类型: "角色", 加成 } satisfies Mod)
+            // MOD属性来源：狮鹫机制对元素系列 MOD 词条加权 50%
+            const modAttrBuff = new LeveledBuff({ 名称: "MOD属性", 描述: "", attr: { 雷MOD属性: 0.5 } })
+            const mk = (加成: Record<string, number[]>) =>
+                new CharBuild({
+                    char: new LeveledChar("黎瑟"),
+                    hpPercent: 0.5,
+                    resonanceGain: 2,
+                    melee: new LeveledWeapon(10302),
+                    ranged: new LeveledWeapon(20601),
+                    baseName: "快速出击",
+                    enemyId: 0,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "[近战]",
+                    charMods: [mod(加成)],
+                    buffs: [modAttrBuff],
+                })
+            const base = mk({})
+            const hit = mk({ 雷属性增伤: [0.3] })
+            const miss = mk({ 火属性增伤: [0.3] })
+            // 硬断言：MOD 提供的雷属性增伤对通用桶贡献为 0，只进同名元素桶（含加权 0.45）
+            expect(hit.calculateAttributes().元素增伤).toBe(0)
+            expect(hit.calculateAttributes().雷属性增伤).toBeCloseTo(0.45, 12)
+            expect(hit.calculateAttributes().火属性增伤).toBe(0)
+            // 匹配元素生效；同一构筑换成不匹配元素键 → 逐位等于基线
+            const elem0 = base.evaluateAST("[近战].元素")
+            expect(hit.evaluateAST("[近战].元素")).toBeGreaterThan(elem0)
+            expect(miss.evaluateAST("[近战].元素")).toBe(elem0)
+            expect(miss.calculateAttributes().元素增伤).toBe(0)
+            expect(miss.calculateAttributes().火属性增伤).toBeCloseTo(0.45, 12)
+            // 叠加：通用桶只含自身（0.2 加权后 0.3），元素桶独立（0.45）
+            const stack = mk({ 元素增伤: [0.2], 雷属性增伤: [0.3] })
+            expect(stack.calculateAttributes().元素增伤).toBeCloseTo(0.3, 12)
+            expect(stack.calculateAttributes().雷属性增伤).toBeCloseTo(0.45, 12)
+            expect(stack.evaluateAST("[近战].元素")).toBeGreaterThan(hit.evaluateAST("[近战].元素"))
+            // 旧路径：仅元素增伤时仍按 MOD属性加权，且不写入元素键
+            const legacy = mk({ 元素增伤: [0.2] })
+            expect(legacy.calculateAttributes().元素增伤).toBeCloseTo(0.3, 12)
+            expect(legacy.calculateAttributes().雷属性增伤).toBe(0)
         })
     })
 })
@@ -3315,6 +3471,417 @@ describe("条件BUFF（技能限定）- 妮弗尔夫人2溯", () => {
     })
 })
 
+describe("条件BUFF（tag 战技限定）- 升华·午后独立（180101）", () => {
+    /** 菲娜真实技能字段取样：0 = 战技 180101「在一个暖和的午后」，1 = 终结技 180102「下午茶开始了！」，2 = 被动 180103 */
+    const feina = charMap.get("菲娜")!
+    /**
+     * 读取菲娜技能字段（取样自 char.data.ts，不臆造字段名）。
+     * @param skillIndex 技能索引（E/Q/P）
+     * @param fieldName 字段名
+     * @returns 技能字段数据
+     */
+    function fieldOf(skillIndex: number, fieldName: string) {
+        const field = feina.技能?.[skillIndex]?.字段?.find(item => item.名称 === fieldName)
+        if (!field) throw new Error(`菲娜技能 ${skillIndex} 缺少字段「${fieldName}」`)
+        return field
+    }
+
+    /**
+     * 构造菲娜构筑：buffs 只来自 180101 的手写映射（不叠加技能等级增量，倍率差异只反映 BUFF 口径）。
+     * @param withAffix 是否装配 180101 专属词条
+     * @returns 构筑实例
+     */
+    function createFeinaBuild(withAffix: boolean) {
+        // 只取手写映射 BUFF：技能等级三键会驱动 E 等级，干扰「只比较条件增伤」的口径
+        const sourced = withAffix
+            ? resolveGearEffects([gear({ slotId: 1, affixId: 180101 })], "main", { charId: 1801 }).buffs.filter(
+                  item => !item.buff.名称.endsWith("技能等级")
+              )
+            : []
+        return new CharBuild({
+            char: new LeveledChar("菲娜"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: sourced.map(item => new LeveledBuff(item.buff, 1)),
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "“在一个暖和的午后”",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "E::伤害",
+        })
+    }
+
+    it("手写 BUFF 按 tag「战技」限定，映射不再声明 Skill1 限定 / 全技能上界", () => {
+        expect(TRANSCEND_BUFF_MAP.get("升华·午后独立")?.tag).toEqual(["战技"])
+        const mapped = resolveGearEffects([gear({ slotId: 1, affixId: 180101 })], "main", { charId: 1801 })
+        expect(mapped.entries[0].excluded).not.toContain("Skill1 限定")
+        expect(mapped.entries[0].note).toContain("仅战技字段")
+        expect(mapped.entries[0].note).not.toMatch(/上界|全技能/)
+        expect(mapped.buffs.find(item => item.buff.名称 === "升华·午后独立")!.buff.tag).toEqual(["战技"])
+    })
+
+    it("条件 BUFF 不参与全局属性汇总，只进入字段级条件列表", () => {
+        const build = createFeinaBuild(true)
+        expect(build.calculateAttributes().技能独立增伤).toBe(0)
+        const conditional = build.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].tag).toEqual(["战技"])
+        expect(conditional[0].props.技能独立增伤).toBeCloseTo(0.3, 6)
+    })
+
+    it("战技字段命中（×1.3）；终结技 / 被动字段不命中", () => {
+        // 真实字段取样：战技伤害字段带 tag ["技能","战技"]，终结技 / 被动字段不带 tag
+        const battle = fieldOf(0, "伤害")
+        const ultimate = fieldOf(1, "持续伤害")
+        const passive = fieldOf(2, "永续追加伤害倍率")
+        expect(battle.tag).toEqual(["技能", "战技"])
+        expect(ultimate.tag).toBeUndefined()
+        expect(passive.tag).toBeUndefined()
+
+        const conditional = createFeinaBuild(true).getConditionalBuffPropsList()
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], battle.名称, battle.tag)).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], ultimate.名称, ultimate.tag)).toBe(false)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], passive.名称, passive.tag)).toBe(false)
+
+        const without = createFeinaBuild(false)
+        const withAffix = createFeinaBuild(true)
+        const ratio = (expr: string) =>
+            withAffix.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+        // 战技（Skill1）伤害字段命中 tag → 技能独立增伤 3% × 10 层 = 30%
+        expect(ratio("E::伤害")).toBeCloseTo(1.3, 6)
+        // 终结技 180102「持续伤害」不命中 tag，保持原值
+        expect(ratio("Q::持续伤害")).toBeCloseTo(1, 6)
+    })
+})
+
+describe("条件BUFF（字段级作用域）- 月猎强化 / 花宴独立 / 切割齿轮（U127）", () => {
+    /**
+     * 构造只装一件专属词条的构筑：剔除技能等级增量，倍率差异只反映词条口径。
+     * @param options 角色 / 词条 / 远程武器与技能命名
+     * @returns 未装配与已装配词条的构筑对
+     */
+    function createPair(options: {
+        charName: string
+        charId: number
+        slotId: number
+        affixId: number
+        rangedId: number
+        baseName: string
+    }) {
+        const make = (withAffix: boolean) => {
+            const sourced = withAffix
+                ? resolveGearEffects([gear({ slotId: options.slotId, affixId: options.affixId })], "main", {
+                      charId: options.charId,
+                  }).buffs.filter(item => !item.buff.名称.endsWith("技能等级"))
+                : []
+            return new CharBuild({
+                char: new LeveledChar(options.charName),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                buffs: sourced.map(item => new LeveledBuff(item.buff, 1)),
+                melee: new LeveledWeapon(10401),
+                ranged: new LeveledWeapon(options.rangedId),
+                baseName: options.baseName,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+            })
+        }
+        return { without: make(false), withAffix: make(true) }
+    }
+
+    /**
+     * 目标函数在「已装配 / 未装配」两次求值间的倍率。
+     * @param without 未装配词条的构筑
+     * @param withAffix 已装配词条的构筑
+     * @param expr 目标函数表达式
+     * @returns 伤害比值
+     */
+    function ratioOf(without: CharBuild, withAffix: CharBuild, expr: string) {
+        return withAffix.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+    }
+
+    it("150203 月猎强化：只命中 [月猎] 字段，[日食] 不命中", () => {
+        const { without, withAffix } = createPair({
+            charName: "妮弗尔夫人",
+            charId: 1502,
+            slotId: 2,
+            affixId: 150203,
+            rangedId: 20601,
+            baseName: "月猎",
+        })
+
+        // 条件 BUFF 不参与全局属性汇总
+        expect(withAffix.calculateAttributes().技能伤害).toBe(0)
+        const conditional = withAffix.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].技能).toBe("月猎")
+        expect(conditional[0].props.技能伤害).toBeCloseTo(1.5, 6)
+
+        // 真实字段取样：月猎 / 日食伤害字段都带 ["技能","战技"]，只有名称区分
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[月猎]伤害", ["技能", "战技", "NifuDark"])).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[日食]伤害", ["技能", "战技", "NifuLight"])).toBe(false)
+
+        // 技能伤害 +150% → ×2.5；日食保持原值
+        expect(ratioOf(without, withAffix, "E::[月猎]伤害")).toBeCloseTo(2.5, 6)
+        expect(ratioOf(without, withAffix, "E::[日食]伤害")).toBeCloseTo(1, 9)
+    })
+
+    it("2030301 花宴独立：只命中武器标签字段，技能字段不命中", () => {
+        const { without, withAffix } = createPair({
+            charName: "希尔妲",
+            charId: 3102,
+            slotId: 6,
+            affixId: 2030301,
+            rangedId: 20302,
+            baseName: "射击",
+        })
+
+        expect(withAffix.calculateAttributes().独立增伤).toBe(0)
+        const conditional = withAffix.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].tag).toEqual(["武器"])
+        expect(conditional[0].props.独立增伤).toBeCloseTo(0.0584488560441114 * withAffix.calculateAttributes().技能威力, 6)
+
+        // 真实字段取样：炽枪的花宴「爆炸伤害」带 ["远程","武器","爆炸"]，希尔妲战技字段带 ["技能","战技"]
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "爆炸伤害", ["远程", "武器", "爆炸"])).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "伤害", ["技能", "战技", "XierSkill1Laser"])).toBe(false)
+
+        // 独立增伤 ×(1 + 5.84%×技能威力)；技能字段保持原值
+        expect(ratioOf(without, withAffix, "射击::爆炸伤害")).toBeCloseTo(
+            1 + 0.0584488560441114 * withAffix.calculateAttributes().技能威力,
+            6
+        )
+        expect(ratioOf(without, withAffix, "E::伤害")).toBeCloseTo(1, 9)
+    })
+
+    it("2040601 切割齿轮：只命中 [子弹伤害] 字段，[射击伤害] 不命中", () => {
+        const { without, withAffix } = createPair({
+            charName: "耶尔与奥利弗",
+            charId: 3103,
+            slotId: 6,
+            affixId: 2040601,
+            rangedId: 20406,
+            baseName: "射击",
+        })
+
+        expect(withAffix.calculateAttributes().武器伤害).toBe(0)
+        const conditional = withAffix.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].技能).toBe("子弹伤害")
+        expect(conditional[0].props.武器伤害).toBeCloseTo(1.2, 6)
+
+        // 切割齿轮两条武器字段名不同、标签相同
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "子弹伤害", ["远程", "武器", "Shotgun20406"])).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "射击伤害", ["远程", "武器", "Shotgun20406"])).toBe(false)
+
+        // 加算武器伤害 1.2 进入武器增伤池；射击伤害保持原值
+        expect(ratioOf(without, withAffix, "射击::子弹伤害")).toBeCloseTo(1.7059, 3)
+        expect(ratioOf(without, withAffix, "射击::射击伤害")).toBeCloseTo(1, 9)
+    })
+})
+
+describe("防御乘区条件属性 - 召唤物破防 / 星河破防（U128）", () => {
+    /**
+     * 构造只装一件专属词条的构筑：剔除技能等级增量，倍率差异只反映词条口径。
+     * @param options 角色 / 元素 / 词条 / 远程武器与技能命名
+     * @returns 未装配与已装配词条的构筑对
+     */
+    function createPair(options: {
+        charName: string
+        charId: number
+        charElement: string
+        slotId: number
+        affixId: number
+        rangedId: number
+        baseName: string
+    }) {
+        const make = (withAffix: boolean) => {
+            const sourced = withAffix
+                ? resolveGearEffects([gear({ slotId: options.slotId, affixId: options.affixId })], "main", {
+                      charId: options.charId,
+                      charElement: options.charElement,
+                  }).buffs.filter(item => !item.buff.名称.endsWith("技能等级"))
+                : []
+            return new CharBuild({
+                char: new LeveledChar(options.charName),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                buffs: sourced.map(item => new LeveledBuff(item.buff, 1)),
+                melee: new LeveledWeapon(10401),
+                ranged: new LeveledWeapon(options.rangedId),
+                baseName: options.baseName,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+            })
+        }
+        return { without: make(false), withAffix: make(true) }
+    }
+
+    /**
+     * 目标函数在「已装配 / 未装配」两次求值间的倍率。
+     * @returns 伤害比值
+     */
+    function ratioOf(without: CharBuild, withAffix: CharBuild, expr: string) {
+        return withAffix.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+    }
+
+    /** 木桩 130：防御 130，角色 80 级，等级差 0 → 基线防御乘区 300 / 430 */
+    const BASE_DEF_FACTOR = 300 / 430
+
+    it("2007 召唤破防：只有 tag 召唤物 字段吃技能无视防御，非召唤字段不吃", () => {
+        const { without, withAffix } = createPair({
+            charName: "伊薇",
+            charId: 2102,
+            charElement: "水",
+            slotId: 7,
+            affixId: 2007,
+            rangedId: 20601,
+            baseName: "乐园构想",
+        })
+
+        // 条件 BUFF 不参与全局属性汇总
+        expect(withAffix.calculateAttributes().技能无视防御).toBe(0)
+        const conditional = withAffix.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].tag).toEqual(["召唤物"])
+        expect(conditional[0].props.技能无视防御).toBeCloseTo(0.175, 6)
+
+        // 真实字段取样：[召唤物·战车]技能伤害 带 ["技能","召唤物"]；普通攻击一段伤害不带召唤物
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[召唤物·战车]技能伤害", ["技能", "召唤物"])).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "一段伤害", ["近战", "武器"])).toBe(false)
+
+        // 召唤字段：防御 130 → 130×(1-0.175)=107.25，乘区 (1-107.25/407.25)/(300/430) ≈ 1.05586
+        const hitRatio = (1 - 107.25 / (300 + 107.25)) / BASE_DEF_FACTOR
+        expect(ratioOf(without, withAffix, "E::[召唤物·战车]技能伤害")).toBeCloseTo(hitRatio, 9)
+        expect(hitRatio).toBeCloseTo(1.0558626, 6)
+        // 非召唤字段：普通攻击不吃（防御乘区与未装配一致）
+        expect(ratioOf(without, withAffix, "普通攻击::一段伤害")).toBeCloseTo(1, 9)
+    })
+
+    it("420101 星河破防：只有 [星河寥落] 下落攻击字段吃无视防御，疑星落 / 奔雷不吃", () => {
+        const { without, withAffix } = createPair({
+            charName: "煜明",
+            charId: 4201,
+            charElement: "雷",
+            slotId: 2,
+            affixId: 420101,
+            rangedId: 20601,
+            baseName: "玉山崩",
+        })
+
+        expect(withAffix.calculateAttributes().无视防御).toBe(0)
+        const conditional = withAffix.getConditionalBuffPropsList()
+        expect(conditional).toHaveLength(1)
+        expect(conditional[0].技能).toBe("星河寥落")
+        expect(conditional[0].tag).toEqual(["下落攻击"])
+        expect(conditional[0].props.无视防御).toBeCloseTo(1, 6)
+
+        // 两条下落字段同名标签：只有技能名命中星河寥落
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[星河寥落]伤害", ["近战", "武器", "下落攻击"])).toBe(true)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[疑星落]伤害", ["近战", "武器", "下落攻击"])).toBe(false)
+        expect(LeveledSkill.matchesFieldConditional(conditional[0], "[奔雷]伤害", ["技能", "战技"])).toBe(false)
+
+        // 星河寥落：无视 100% 防御 → 乘区 1 / (300/430) ≈ 1.43333
+        const hitRatio = 1 / BASE_DEF_FACTOR
+        expect(ratioOf(without, withAffix, "E::[星河寥落]伤害")).toBeCloseTo(hitRatio, 9)
+        expect(hitRatio).toBeCloseTo(1.4333333, 6)
+        expect(ratioOf(without, withAffix, "E::[疑星落]伤害")).toBeCloseTo(1, 9)
+        expect(ratioOf(without, withAffix, "E::[奔雷]伤害")).toBeCloseTo(1, 9)
+    })
+
+    it("defCache 跨字段：命中 / 未命中字段任意求值顺序同值", () => {
+        const { withAffix } = createPair({
+            charName: "煜明",
+            charId: 4201,
+            charElement: "雷",
+            slotId: 2,
+            affixId: 420101,
+            rangedId: 20601,
+            baseName: "玉山崩",
+        })
+        const star = withAffix.calculateTargetFunction(undefined, "E::[星河寥落]伤害")
+        const yi = withAffix.calculateTargetFunction(undefined, "E::[疑星落]伤害")
+        const forward = withAffix.calculateTargetFunction(undefined, "E::[星河寥落]伤害 + E::[疑星落]伤害")
+        const reverse = withAffix.calculateTargetFunction(undefined, "E::[疑星落]伤害 + E::[星河寥落]伤害")
+        // 缓存键仅按 isWeapon 时第二个字段会复用第一个字段的防御乘区，两种顺序的合计不相等
+        expect(forward).toBeCloseTo(star + yi, 6)
+        expect(reverse).toBeCloseTo(star + yi, 6)
+        expect(forward).toBeCloseTo(reverse, 6)
+    })
+
+    it("420101 name-hit / tag-miss：技能名命中但缺少下落攻击 tag 不生效", () => {
+        const { withAffix } = createPair({
+            charName: "煜明",
+            charId: 4201,
+            charElement: "雷",
+            slotId: 2,
+            affixId: 420101,
+            rangedId: 20601,
+            baseName: "玉山崩",
+        })
+        const conditional = withAffix.getConditionalBuffPropsList()[0]
+        // 合成字段：名称含「星河寥落」但 tag 不含「下落攻击」
+        expect(LeveledSkill.matchesFieldConditional(conditional, "[星河寥落]伤害", ["近战", "武器"])).toBe(false)
+    })
+
+    it("临时属性：条件增量叠加，且不污染无临时属性的防御缓存", () => {
+        const { without, withAffix } = createPair({
+            charName: "伊薇",
+            charId: 2102,
+            charElement: "水",
+            slotId: 7,
+            affixId: 2007,
+            rangedId: 20601,
+            baseName: "乐园构想",
+        })
+        const tempExpr = "E::[召唤物·战车]技能伤害{技能无视防御:0.1}"
+        const plainExpr = "E::[召唤物·战车]技能伤害"
+        // 条件 0.175 + 临时 0.1 = 0.275 → 300/394.25；仅临时 0.1 → 300/417
+        expect(withAffix.calculateTargetFunction(undefined, tempExpr) / without.calculateTargetFunction(undefined, tempExpr)).toBeCloseTo(
+            417 / 394.25,
+            9
+        )
+        expect(withAffix.calculateTargetFunction(undefined, plainExpr) / without.calculateTargetFunction(undefined, plainExpr)).toBeCloseTo(
+            430 / 407.25,
+            9
+        )
+        // 同一求值内混合临时 / 无临时两条：各自乘区独立，等于分开求值之和；反序亦然
+        const tempAlone = withAffix.calculateTargetFunction(undefined, tempExpr)
+        const plainAlone = withAffix.calculateTargetFunction(undefined, plainExpr)
+        const forward = withAffix.calculateTargetFunction(undefined, `${tempExpr} + ${plainExpr}`)
+        const reverse = withAffix.calculateTargetFunction(undefined, `${plainExpr} + ${tempExpr}`)
+        expect(forward).toBeCloseTo(tempAlone + plainAlone, 6)
+        expect(reverse).toBeCloseTo(tempAlone + plainAlone, 6)
+    })
+
+    it("2007 非水角色不生效：元素限定在映射层拦截", () => {
+        const resolved = resolveGearEffects([gear({ slotId: 7, affixId: 2007 })], "main", { charId: 4201, charElement: "雷" })
+        expect(resolved.buffs.some(item => item.buff.名称 === "升华·召唤破防")).toBe(false)
+        const build = new CharBuild({
+            char: new LeveledChar("煜明"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: resolved.buffs.map(item => new LeveledBuff(item.buff, 1)),
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "玉山崩",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+        })
+        expect(build.calculateAttributes().技能无视防御).toBe(0)
+        expect(build.getConditionalBuffPropsList()).toHaveLength(0)
+    })
+})
+
 describe("条件BUFF（技能限定）- 琳恩裂伤特性（code类）", () => {
     const linenTraitData = buffMap.get("琳恩裂伤特性")!
 
@@ -3484,5 +4051,1487 @@ describe("条件BUFF（tag限定）- 莉莉蔻2溯(充盈)/4溯", () => {
         expect(addIncome).toBeGreaterThan(0)
         expect(addIncome).toBeCloseTo(minusIncome, 6)
         expect(s2Data.tag).toEqual(["充盈"])
+    })
+})
+
+describe("元素弱点抗性区（U95）", () => {
+    /** 火角色（希尔妲）/ 雷角色（黎瑟）构筑；弱点通过自定义 BUFF 注入 */
+    const createBuild = (options: { charName?: "希尔妲" | "黎瑟"; resistance?: number; buffs?: [string, number][] } = {}) => {
+        const charName = options.charName ?? "希尔妲"
+        return new CharBuild({
+            char: new LeveledChar(charName),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: [],
+            buffs: options.buffs?.length ? [createCustomBuff(options.buffs)] : [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: charName === "希尔妲" ? "高温清扫" : "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: options.resistance ?? 0,
+            targetFunction: "伤害",
+        })
+    }
+
+    const ratio = (resistance: number, buffs: [string, number][], baseBuffs: [string, number][] = []) =>
+        createBuild({ resistance, buffs }).calculate() / createBuild({ resistance, buffs: baseBuffs }).calculate()
+
+    it("属性面板输出七键，未提供的键为零", () => {
+        const attrs = createBuild({ buffs: [["火属性弱点", 0.54]] }).calculateAttributes()
+        expect(attrs.火属性弱点).toBeCloseTo(0.54, 12)
+        expect(attrs.水属性弱点).toBe(0)
+        expect(attrs.雷属性弱点).toBe(0)
+        expect(attrs.风属性弱点).toBe(0)
+        expect(attrs.光属性弱点).toBe(0)
+        expect(attrs.暗属性弱点).toBe(0)
+        expect(attrs.全属性弱点).toBe(0)
+    })
+
+    it("r=0.5 + 火属性弱点 0.54 → ×2.08（与抗性同区加算）", () => {
+        expect(ratio(0.5, [["火属性弱点", 0.54]])).toBeCloseTo(2.08, 9)
+    })
+
+    it("已有 200% 增伤时仍为 ×2.08（不再被增伤池稀释）", () => {
+        expect(
+            ratio(
+                0.5,
+                [
+                    ["火属性弱点", 0.54],
+                    ["增伤", 2],
+                ],
+                [["增伤", 2]]
+            )
+        ).toBeCloseTo(2.08, 9)
+    })
+
+    it("r=0 → ×1.54；r=-4 → ×1.108", () => {
+        expect(ratio(0, [["火属性弱点", 0.54]])).toBeCloseTo(1.54, 9)
+        expect(ratio(-4, [["火属性弱点", 0.54]])).toBeCloseTo(1.108, 9)
+    })
+
+    it("弱点不参与抗性正负判定：r=0.5 + 弱点仍走正抗（转属克）分支", () => {
+        // 若先用 r - 弱点 判号，0.5 抗性会被弱点翻成负抗而错误走转属逆；这里转属克 50% 应按正抗分支混入 -4 翻转
+        const withConvert = createBuild({
+            resistance: 0.5,
+            buffs: [
+                ["火属性弱点", 0.54],
+                ["转属克", 0.5],
+            ],
+        }).calculate()
+        const withoutConvert = createBuild({ resistance: 0.5, buffs: [["火属性弱点", 0.54]] }).calculate()
+        const zone = (r: number, w: number) => Math.max(0, 1 - r + w)
+        expect(withConvert / withoutConvert).toBeCloseTo((0.5 * zone(0.5, 0.54) + 0.5 * zone(-4, 0.54)) / zone(0.5, 0.54), 9)
+    })
+
+    it("物理分量不吃弱点；全属性弱点只作用于六元素分量", () => {
+        const build = createBuild({ resistance: 0.5, buffs: [["全属性弱点", 0.54]] })
+        const baseline = createBuild({ resistance: 0.5 })
+        const attrs = build.calculateWeaponAttributes(build.rangedWeapon)
+        const baseAttrs = baseline.calculateWeaponAttributes(baseline.rangedWeapon)
+        const opts = { isSkillPool: false, fieldTag: ["武器伤害"] }
+        const damage = build.calculateDamage(attrs, build.rangedWeapon, attrs.weapon, opts)
+        const baseDamage = baseline.calculateDamage(baseAttrs, baseline.rangedWeapon, baseAttrs.weapon, opts)
+
+        expect(damage.physicalDamage).toBeCloseTo(baseDamage.physicalDamage!, 9)
+        expect(damage.elementDamage! / baseDamage.elementDamage!).toBeCloseTo(2.08, 9)
+    })
+
+    it("元素不匹配时弱点不生效；全属性弱点对任意元素生效", () => {
+        // 非火角色带火属性弱点：不进入抗性区
+        const nonFire = createBuild({ charName: "黎瑟", resistance: 0.5, buffs: [["火属性弱点", 0.54]] })
+        const nonFireBase = createBuild({ charName: "黎瑟", resistance: 0.5 })
+        expect(nonFire.calculate() / nonFireBase.calculate()).toBeCloseTo(1, 9)
+        // 火角色也不吃水属性弱点
+        const waterWeak = createBuild({ resistance: 0.5, buffs: [["水属性弱点", 0.54]] })
+        expect(waterWeak.calculate() / createBuild({ resistance: 0.5 }).calculate()).toBeCloseTo(1, 9)
+        // 全属性弱点对非火角色同样生效
+        const allWeak = createBuild({ charName: "黎瑟", resistance: 0.5, buffs: [["全属性弱点", 0.54]] })
+        expect(allWeak.calculate() / nonFireBase.calculate()).toBeCloseTo(2.08, 9)
+    })
+
+    it("DOT：ownZone 吃角色元素弱点 + 全属性弱点，otherZone 只吃全属性弱点", () => {
+        const dotWeapon = () =>
+            new LeveledWeapon({
+                id: 99999,
+                名称: "DOT测试武器",
+                类型: ["近战", "长柄"],
+                伤害类型: "切割",
+                攻击: 100,
+                暴击: 0.05,
+                暴伤: 1.5,
+                触发: 1,
+                描述: "",
+                加成: {},
+                熔炼: "",
+                技能: [],
+            } satisfies Weapon)
+        const dotBuild = (buffs: [string, number][]) =>
+            new CharBuild({
+                char: new LeveledChar("希尔妲"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                charMods: [],
+                // 四元素追伤：希尔妲=火，去重后 4 种 → 其余属性 3 种
+                buffs: [
+                    new LeveledBuff({
+                        名称: "四元素追伤",
+                        描述: "",
+                        attr: { 水属性追伤: 0.1, 火属性追伤: 0.1, 雷属性追伤: 0.1, 风属性追伤: 0.1 },
+                    }),
+                    ...(buffs.length ? [createCustomBuff(buffs)] : []),
+                ],
+                melee: dotWeapon(),
+                ranged: dotWeapon(),
+                baseName: "高温清扫",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+                dotSettings: { skill: 0, melee: 1, ranged: 0, skillweapon: 0 },
+            })
+        const zone = (r: number, w: number) => Math.max(0, 1 - r + w)
+        const otherZone = (r: number, w: number, count: number) =>
+            r < 0 ? Math.max(0, 0.5 + w) : (Math.max(0, 5 + w) + zone(r, w) * (count - 1)) / count
+        const base = dotBuild([])
+        const { ownFreq, otherFreq } = base.calculateDotFrequencies()
+        expect(otherFreq).toBeGreaterThan(0)
+        const expectedRatio = (ownW: number, allW: number) =>
+            (ownFreq * zone(0.5, ownW) + otherFreq * otherZone(0.5, allW, 3)) / (ownFreq * zone(0.5, 0) + otherFreq * otherZone(0.5, 0, 3))
+
+        const elementWeak = dotBuild([["火属性弱点", 0.54]])
+        expect(elementWeak.calculateDotDamage() / base.calculateDotDamage()).toBeCloseTo(expectedRatio(0.54, 0), 9)
+        expect(elementWeak.calculateDotDamage() / base.calculateDotDamage()).toBeLessThan(2.08)
+        const allWeak = dotBuild([["全属性弱点", 0.54]])
+        expect(allWeak.calculateDotDamage() / base.calculateDotDamage()).toBeCloseTo(expectedRatio(0.54, 0.54), 9)
+    })
+})
+
+describe("U95-fix 真实 2008 注入链", () => {
+    const gear2008: TranscendGearEntry = {
+        slotId: 8,
+        affixId: 2008,
+        rollLevel: 1,
+        masterworkLevel: 0,
+        ancient: false,
+        finalMasterwork: false,
+    }
+
+    /** 经 `normalizeCharSettings` → `createCharBuildFromSettings` 走完整升华注入链 */
+    const buildFromSettings = (charName: string, gearList: TranscendGearEntry[]) => {
+        const charId = charMap.get(charName)!.id
+        const settings = createDefaultCharSettings()
+        settings.baseName = charMap.get(charId)?.技能?.[0]?.名称 ?? ""
+        settings.charSkillLevel = [10, 10, 10]
+        settings.meleeWeapon = 10302
+        settings.rangedWeapon = 20601
+        settings.enemyResistance = 0.5
+        settings.targetFunction = "伤害"
+        settings.transcend = { ...settings.transcend, enabled: true, mainGear: gearList }
+        return createCharBuildFromSettings(charId, normalizeCharSettings(settings))
+    }
+
+    it("火角色装备 2008：注入 火属性弱点 0.54，r=0.5 时 ×2.08", () => {
+        const withGear = buildFromSettings("希尔妲", [gear2008])
+        const withoutGear = buildFromSettings("希尔妲", [])
+
+        expect(withGear.calculateAttributes().火属性弱点).toBeCloseTo(0.54, 12)
+        expect(withGear.buffs.some(buff => buff.名称 === "升华·火属性弱点")).toBe(true)
+        expect(withGear.calculate() / withoutGear.calculate()).toBeCloseTo(2.08, 9)
+    })
+
+    it("非火角色装备 2008：元素限定过滤，弱点不注入", () => {
+        const withGear = buildFromSettings("黎瑟", [gear2008])
+        const withoutGear = buildFromSettings("黎瑟", [])
+
+        expect(withGear.calculateAttributes().火属性弱点 || 0).toBe(0)
+        expect(withGear.buffs.some(buff => buff.名称 === "升华·火属性弱点")).toBe(false)
+        expect(withGear.calculate() / withoutGear.calculate()).toBeCloseTo(1, 9)
+    })
+})
+
+describe("U136 同 id 随机 + 淬炼双行在计算层双计", () => {
+    const CHAR_ID = charMap.get("希尔妲")!.id
+    /** 一条词条 roll（精锻由 craft 统一写入） */
+    const affixRoll = (affixId: number, rollLevel = 1): TranscendGearAffixRoll => ({
+        affixId,
+        rollLevel,
+        masterworkLevel: 0,
+        ancient: false,
+        finalMasterwork: false,
+    })
+    /**
+     * 手套（槽型 3）物品：基础 101 + 指定词条；`temperingAffixIndex` 指向淬炼行。
+     */
+    const gloveItem = (affixes: TranscendGearAffixRoll[], temperingAffixIndex?: number): TranscendGearItemConfig => ({
+        kind: "normal",
+        slotType: 3,
+        rarityId: 5,
+        equipBaseScore: 50,
+        affixes,
+        ...(temperingAffixIndex === undefined
+            ? {}
+            : { craft: { masterworkLevel: 0, temperingAffixIndex, temperingCount: 1, enchantCount: 0 } }),
+    })
+    /** 经 `normalizeCharSettings` → `createCharBuildFromSettings` 走完整升华注入链 */
+    const settingsFromItem = (item: TranscendGearItemConfig) => {
+        const settings = createDefaultCharSettings()
+        settings.baseName = charMap.get(CHAR_ID)?.技能?.[0]?.名称 ?? ""
+        settings.charSkillLevel = [10, 10, 10]
+        settings.meleeWeapon = 10302
+        settings.rangedWeapon = 20601
+        settings.enemyResistance = 0.5
+        settings.targetFunction = "伤害"
+        settings.transcend = { ...settings.transcend, enabled: true, mainGear: [{ slotId: 3, item }] }
+        return normalizeCharSettings(settings)
+    }
+    const buildFromItem = (item: TranscendGearItemConfig) => createCharBuildFromSettings(CHAR_ID, settingsFromItem(item))!
+
+    it("双行装备的伤害与面板 = 两行各自之和（不是只计一行）", () => {
+        const base = buildFromItem(gloveItem([affixRoll(101)]))
+        const random = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001)]))
+        const tempering = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001)], 1))
+        const twin = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001), affixRoll(1001)], 2))
+
+        const baseAttack = base.calculateAttributes().攻击
+        const randomGain = random.calculateAttributes().攻击 - baseAttack
+        const temperingGain = tempering.calculateAttributes().攻击 - baseAttack
+        const twinGain = twin.calculateAttributes().攻击 - baseAttack
+        expect(randomGain).toBeGreaterThan(0)
+        expect(twinGain).toBeGreaterThan(randomGain)
+        // 面板取整到 0.01：两行之和允许 0.02 的累计取整误差
+        expect(Math.abs(twinGain - (randomGain + temperingGain))).toBeLessThan(0.02)
+
+        const baseDamage = base.calculate()
+        const randomDelta = random.calculate() - baseDamage
+        const temperingDelta = tempering.calculate() - baseDamage
+        const twinDelta = twin.calculate() - baseDamage
+        expect(randomDelta).toBeGreaterThan(0)
+        expect(twinDelta).toBeGreaterThan(randomDelta)
+        expect(Math.abs(twinDelta - (randomDelta + temperingDelta)) / twinDelta).toBeLessThan(1e-4)
+    })
+
+    it("不同档位双行：面板与伤害增量均为两行各自数值之和", () => {
+        const random = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001, 1)]))
+        const tempering = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001, 5)], 1))
+        const twin = buildFromItem(gloveItem([affixRoll(101), affixRoll(1001, 1), affixRoll(1001, 5)], 2))
+
+        const baseAttack = buildFromItem(gloveItem([affixRoll(101)])).calculateAttributes().攻击
+        const randomGain = random.calculateAttributes().攻击 - baseAttack
+        const temperingGain = tempering.calculateAttributes().攻击 - baseAttack
+        const twinGain = twin.calculateAttributes().攻击 - baseAttack
+        // 两行档位不同：增量不同，且双行 = 两行之和（面板取整容差 0.02）
+        expect(randomGain).toBeGreaterThan(0)
+        expect(temperingGain).toBeGreaterThan(randomGain)
+        expect(Math.abs(twinGain - (randomGain + temperingGain))).toBeLessThan(0.02)
+
+        const baseDamage = buildFromItem(gloveItem([affixRoll(101)])).calculate()
+        const randomDelta = random.calculate() - baseDamage
+        const temperingDelta = tempering.calculate() - baseDamage
+        const twinDelta = twin.calculate() - baseDamage
+        expect(Math.abs(twinDelta - (randomDelta + temperingDelta)) / twinDelta).toBeLessThan(1e-4)
+    })
+
+    it("幂等深比较：settings / mainGear / entries / attrs 反复解析均不变", () => {
+        const settings = settingsFromItem(gloveItem([affixRoll(101), affixRoll(1001, 1), affixRoll(1001, 5)], 2))
+        const snapshot = structuredClone(settings)
+        const first = resolveGearEffects(flattenEquippedGear(settings.transcend.mainGear).entries, "main")
+        const firstEntries = structuredClone(first.entries)
+        const firstAttrs = { ...first.attrs }
+        const second = resolveGearEffects(flattenEquippedGear(settings.transcend.mainGear).entries, "main")
+
+        expect(settings).toEqual(snapshot)
+        expect(settings.transcend.mainGear).toEqual(snapshot.transcend.mainGear)
+        expect(first.entries).toEqual(firstEntries)
+        expect(second.entries).toEqual(firstEntries)
+        expect(second.attrs).toEqual(firstAttrs)
+    })
+
+    it("重复解析幂等：每次新建结果，不额外翻倍也不改写源配置", () => {
+        const settings = settingsFromItem(gloveItem([affixRoll(101), affixRoll(1001), affixRoll(1001)], 2))
+        const first = resolveTranscendEffectsForSettings(settings, "main", { charId: CHAR_ID })
+        const second = resolveTranscendEffectsForSettings(settings, "main", { charId: CHAR_ID })
+        const attackBuffs = (buffs: typeof first.buffs) => buffs.filter(buff => buff.名称 === "升华装备·手套·攻击")
+
+        // 基础 101 + 随机 1001 + 淬炼 1001 → 三条同名词条 BUFF
+        expect(attackBuffs(first.buffs)).toHaveLength(3)
+        expect(attackBuffs(second.buffs)).toHaveLength(3)
+        expect(second.buffs.map(buff => buff.名称)).toEqual(first.buffs.map(buff => buff.名称))
+        expect(settings.transcend.mainGear).toHaveLength(1)
+    })
+})
+
+describe("普通近战/远程前缀作用域（U16）", () => {
+    /** 创建测试构筑（近战/远程为普通武器；同律武器来自角色数据） */
+    const createBuild = (charName: string, options: { buffs?: [string, number][]; meleeMods?: LeveledMod[] } = {}) =>
+        new CharBuild({
+            char: new LeveledChar(charName),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: [],
+            meleeMods: options.meleeMods ?? [],
+            buffs: options.buffs?.length ? [createCustomBuff(options.buffs)] : [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+    /** 读取指定武器的面板 */
+    const panelOf = (build: CharBuild, weapon: LeveledWeapon | LeveledSkillWeapon | undefined) =>
+        build.calculateWeaponAttributes(weapon).weapon!
+
+    it("裸「近战」前缀同时作用于普通近战与同律近战面板", () => {
+        const baseline = createBuild("贝蕾妮卡")
+        const buffed = createBuild("贝蕾妮卡", { buffs: [["近战攻击", 0.1]] })
+
+        const baseMelee = panelOf(baseline, baseline.meleeWeapon)
+        const buffedMelee = panelOf(buffed, buffed.meleeWeapon)
+        expect(buffedMelee.攻击 / baseMelee.攻击).toBeCloseTo(1.1, 3)
+
+        expect(baseline.skillWeapon?.inherit).toBeUndefined()
+        const baseSkill = panelOf(baseline, baseline.skillWeapon)
+        const buffedSkill = panelOf(buffed, buffed.skillWeapon)
+        expect(buffedSkill.攻击 / baseSkill.攻击).toBeCloseTo(1.1, 3)
+
+        // 近战前缀不影响远程面板
+        expect(panelOf(buffed, buffed.rangedWeapon).攻击).toBe(panelOf(baseline, baseline.rangedWeapon).攻击)
+    })
+
+    it("「普通近战」只作用于普通近战面板（通用 base），同律近战面板不变", () => {
+        const baseline = createBuild("贝蕾妮卡")
+        const buffed = createBuild("贝蕾妮卡", {
+            buffs: [
+                ["普通近战攻击", 0.1],
+                ["普通近战暴击", 0.1],
+                ["普通近战暴伤", 0.1],
+                ["普通近战触发", 0.1],
+                ["普通近战独立增伤", 0.1],
+                ["普通近战武器倍率", 0.1],
+                ["普通近战攻速", 0.1],
+                ["普通近战多重", 0.1],
+                ["普通近战增伤", 0.1],
+            ],
+        })
+
+        const baseMelee = panelOf(baseline, baseline.meleeWeapon)
+        const buffedMelee = panelOf(buffed, buffed.meleeWeapon)
+        expect(buffedMelee.攻击 / baseMelee.攻击).toBeCloseTo(1.1, 3)
+        expect(buffedMelee.暴击).toBeGreaterThan(baseMelee.暴击)
+        expect(buffedMelee.暴伤).toBeGreaterThan(baseMelee.暴伤)
+        expect(buffedMelee.触发).toBeGreaterThan(baseMelee.触发)
+        expect(buffedMelee.攻速).toBeGreaterThan(baseMelee.攻速)
+        expect(buffedMelee.多重).toBeGreaterThan(baseMelee.多重)
+        expect(buffedMelee.增伤).toBeGreaterThan(baseMelee.增伤)
+        // 乘法属性与武器倍率同样走通用前缀
+        expect(buffedMelee.独立增伤).toBeCloseTo(baseMelee.独立增伤 + 0.1, 6)
+        expect(buffedMelee.武器倍率).toBeCloseTo(baseMelee.武器倍率 + 0.1, 6)
+
+        // 同律面板（非继承）不读取普通近战专属前缀
+        const baseSkill = panelOf(baseline, baseline.skillWeapon)
+        const buffedSkill = panelOf(buffed, buffed.skillWeapon)
+        expect(buffedSkill.攻击).toBe(baseSkill.攻击)
+        expect(buffedSkill.暴击).toBe(baseSkill.暴击)
+        expect(buffedSkill.暴伤).toBe(baseSkill.暴伤)
+        expect(buffedSkill.触发).toBe(baseSkill.触发)
+        expect(buffedSkill.攻速).toBe(baseSkill.攻速)
+        expect(buffedSkill.多重).toBe(baseSkill.多重)
+        expect(buffedSkill.增伤).toBe(baseSkill.增伤)
+        expect(buffedSkill.独立增伤).toBe(baseSkill.独立增伤)
+        expect(buffedSkill.武器倍率).toBe(baseSkill.武器倍率)
+    })
+
+    it("「普通远程」只作用于普通远程面板，同律远程面板不变；裸「远程」两者通吃", () => {
+        const baseline = createBuild("赛琪")
+        const ordinary = createBuild("赛琪", { buffs: [["普通远程攻击", 0.1]] })
+        const bare = createBuild("赛琪", { buffs: [["远程攻击", 0.1]] })
+
+        const baseRanged = panelOf(baseline, baseline.rangedWeapon)
+        expect(panelOf(ordinary, ordinary.rangedWeapon).攻击 / baseRanged.攻击).toBeCloseTo(1.1, 3)
+        // 普通近战/远程互不影响
+        expect(panelOf(ordinary, ordinary.meleeWeapon).攻击).toBe(panelOf(baseline, baseline.meleeWeapon).攻击)
+
+        const baseSkill = panelOf(baseline, baseline.skillWeapon)
+        expect(panelOf(ordinary, ordinary.skillWeapon).攻击).toBe(baseSkill.攻击)
+        expect(panelOf(bare, bare.skillWeapon).攻击 / baseSkill.攻击).toBeCloseTo(1.1, 3)
+    })
+
+    it("继承型同律武器（疑星落）面板不读取「普通近战」", () => {
+        const createInheritBuild = (buffs: [string, number][]) =>
+            new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [],
+                buffs: buffs.length ? [createCustomBuff(buffs)] : [],
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20601),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+
+        const baseline = createInheritBuild([])
+        const ordinary = createInheritBuild([["普通近战攻击", 0.1]])
+        const bare = createInheritBuild([["近战攻击", 0.1]])
+
+        expect(baseline.skillWeapon?.inherit).toBe("melee")
+
+        // 普通面板吃到普通近战攻击
+        expect(panelOf(ordinary, ordinary.meleeWeapon).攻击 / panelOf(baseline, baseline.meleeWeapon).攻击).toBeCloseTo(1.1, 3)
+        // 继承型同律面板（近战面板来源仍属同律）不吃普通近战攻击
+        expect(panelOf(ordinary, ordinary.skillWeapon).攻击).toBe(panelOf(baseline, baseline.skillWeapon).攻击)
+        const baselineSkillAttrs = baseline.getAllWeaponSkillsAttrs().get("同律")!
+        const ordinarySkillAttrs = ordinary.getAllWeaponSkillsAttrs().get("同律")!
+        expect(ordinarySkillAttrs.攻击).toBe(baselineSkillAttrs.攻击)
+        // 裸近战前缀仍按既有降级口径进入继承型同律面板
+        expect(panelOf(bare, bare.skillWeapon).攻击 / panelOf(baseline, baseline.skillWeapon).攻击).toBeCloseTo(1.1, 3)
+    })
+
+    it("近战槽 MOD 仍不穿透同律面板，普通前缀不绕过该规则", () => {
+        const meleeMod = new LeveledMod({
+            id: 999801,
+            icon: "Test01",
+            名称: "测试·普通近战",
+            版本: "1.0",
+            系列: "测试",
+            品质: "金",
+            极性: "A",
+            耐受: 15,
+            类型: "近战",
+            加成: { 近战攻击: 0.1, 普通近战攻击: 0.1 },
+            效果: "测试用普通近战MOD",
+        })
+        const baseline = createBuild("贝蕾妮卡")
+        const modded = createBuild("贝蕾妮卡", { meleeMods: [meleeMod] })
+
+        // 近战面板：带前缀与普通前缀的 MOD 词条都计入
+        expect(panelOf(modded, modded.meleeWeapon).攻击 / panelOf(baseline, baseline.meleeWeapon).攻击).toBeCloseTo(1.2, 3)
+        // 同律面板：近战槽 MOD 不随前缀降级穿透，普通前缀也不会绕过
+        expect(panelOf(modded, modded.skillWeapon).攻击).toBe(panelOf(baseline, baseline.skillWeapon).攻击)
+    })
+})
+
+describe("普通前缀补全（U16b）", () => {
+    /** 读取指定武器面板 */
+    const panelOf = (build: CharBuild, weapon: LeveledWeapon | LeveledSkillWeapon | undefined) =>
+        build.calculateWeaponAttributes(weapon).weapon!
+
+    /** 创建测试构筑：近战 10302（普攻/蓄力/下落/滑行字段齐全）、远程 20201（有装填/弹匣/弹药） */
+    const createBuild = (
+        charName: string,
+        options: { buffs?: [string, number][]; charMods?: LeveledMod[]; baseName?: string; targetFunction?: string } = {}
+    ) =>
+        new CharBuild({
+            char: new LeveledChar(charName),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: options.charMods ?? [],
+            buffs: options.buffs?.length ? [createCustomBuff(options.buffs)] : [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20201),
+            baseName: options.baseName ?? "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: options.targetFunction ?? "伤害",
+        })
+
+    it("攻击细分键：普攻/蓄力/下落/滑行的增伤与独立增伤只在普通近战面板生效", () => {
+        const cases = [
+            { baseName: "普通攻击", attackType: "普攻", targetFunction: "一段伤害" },
+            { baseName: "蓄力攻击", attackType: "蓄力", targetFunction: "蓄力攻击伤害" },
+            { baseName: "下落攻击", attackType: "下落", targetFunction: "下落攻击伤害" },
+            { baseName: "滑行攻击", attackType: "滑行", targetFunction: "滑行攻击伤害" },
+        ]
+        for (const { baseName, attackType, targetFunction } of cases) {
+            const baseline = createBuild("黎瑟", { baseName, targetFunction })
+            const expected = baseline.calculateOneTime()
+            // 普通前缀键与既有作用域键口径一致
+            for (const [suffix, extra] of [
+                ["增伤", 1],
+                ["独立增伤", 3],
+            ] as const) {
+                const ordinary = createBuild("黎瑟", {
+                    baseName,
+                    targetFunction,
+                    buffs: [[`普通近战${attackType}${suffix}`, extra]],
+                })
+                const scoped = createBuild("黎瑟", {
+                    baseName,
+                    targetFunction,
+                    buffs: [[`近战${attackType}${suffix}`, extra]],
+                })
+                expect(ordinary.calculateOneTime(), `${attackType}${suffix}`).toBeGreaterThan(expected)
+                expect(ordinary.calculateOneTime(), `${attackType}${suffix}`).toBeCloseTo(scoped.calculateOneTime(), 6)
+                // 远程前缀不作用于近战字段
+                const crossScope = createBuild("黎瑟", {
+                    baseName,
+                    targetFunction,
+                    buffs: [[`普通远程${attackType}${suffix}`, extra]],
+                })
+                expect(crossScope.calculateOneTime(), `${attackType}${suffix} 跨作用域`).toBe(expected)
+            }
+        }
+    })
+
+    it("攻击细分键：同律近战面板不读取普通近战细分键", () => {
+        const createImyr = (attr?: Record<string, number>) => {
+            const build = new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20201),
+                baseName: "伊弥尔",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "一段伤害",
+            })
+            if (attr) build.buffs = [new LeveledBuff({ 名称: "测试普通前缀", 描述: "测试用", attr })]
+            return build
+        }
+        const baseline = createImyr().calculate()
+        // 对照：同律专属键正常生效，证明字段带攻击细分类型、用例非空洞
+        expect(createImyr({ 同律近战普攻增伤: 1 }).calculate()).toBeGreaterThan(baseline)
+        expect(createImyr({ 普通近战普攻增伤: 1 }).calculate()).toBe(baseline)
+        expect(createImyr({ 普通近战普攻独立增伤: 1 }).calculate()).toBe(baseline)
+        expect(createImyr({ 普通远程普攻增伤: 1 }).calculate()).toBe(baseline)
+    })
+
+    it("攻击细分键：继承型同律（疑星落）面板不读取普通近战细分键", () => {
+        const createYueming = (attr?: Record<string, number>) => {
+            const build = new CharBuild({
+                char: new LeveledChar("煜明"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10303),
+                ranged: new LeveledWeapon(20201),
+                baseName: "疑星落",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+            if (attr) build.buffs = [new LeveledBuff({ 名称: "测试普通前缀", 描述: "测试用", attr })]
+            return build
+        }
+        const baseline = createYueming().calculate()
+        expect(baseline).toBeGreaterThan(0)
+        // 对照：裸下落增伤生效（疑星落「视为: 下落攻击」）
+        expect(createYueming({ 下落增伤: 1 }).calculate()).toBeGreaterThan(baseline)
+        expect(createYueming({ 普通近战下落增伤: 1 }).calculate()).toBe(baseline)
+        expect(createYueming({ 普通近战下落独立增伤: 1 }).calculate()).toBe(baseline)
+    })
+
+    it("普通远程攻击细分键生效（远程字段注入普攻 tag）", () => {
+        const createRangedBuild = (attr?: Record<string, number>) => {
+            const build = createBuild("赛琪")
+            const rangedSkill = build.rangedWeapon.技能!.find(skill => skill.字段?.length)!
+            const field = rangedSkill.字段!.find(item => item.名称.endsWith("伤害"))!
+            // 远程武器字段本身不带攻击类型 tag；显式标注普攻，验证远程细分键的读取路径
+            field.tag = ["远程", "武器", "普攻"]
+            build.baseName = rangedSkill.名称
+            build.targetFunction = field.名称
+            if (attr) build.buffs = [new LeveledBuff({ 名称: "测试普通前缀", 描述: "测试用", attr })]
+            return build
+        }
+        const baseline = createRangedBuild().calculate()
+        const ordinaryDamage = createRangedBuild({ 普通远程普攻增伤: 0.5 }).calculate()
+        const scopedDamage = createRangedBuild({ 远程普攻增伤: 0.5 }).calculate()
+        expect(ordinaryDamage).toBeGreaterThan(baseline)
+        expect(ordinaryDamage).toBeCloseTo(scopedDamage, 6)
+        expect(createRangedBuild({ 普通近战普攻增伤: 0.5 }).calculate()).toBe(baseline)
+        expect(createRangedBuild({ 普通近战普攻独立增伤: 0.5 }).calculate()).toBe(baseline)
+
+        const ordinaryIndependent = createRangedBuild({ 普通远程普攻独立增伤: 0.5 }).calculate()
+        expect(ordinaryIndependent).toBeGreaterThan(baseline)
+        expect(ordinaryIndependent).toBeCloseTo(createRangedBuild({ 远程普攻独立增伤: 0.5 }).calculate(), 6)
+    })
+
+    it("普通远程面板：装填/弹匣/弹药/攻速/多重/增伤生效，同律远程面板不变", () => {
+        const baseline = createBuild("赛琪")
+        const buffed = createBuild("赛琪", {
+            buffs: [
+                ["普通远程装填", 0.1],
+                ["普通远程弹匣", 0.1],
+                ["普通远程弹药", 0.1],
+                ["普通远程攻速", 0.1],
+                ["普通远程多重", 0.1],
+                ["普通远程增伤", 0.1],
+            ],
+        })
+        const baseRanged = panelOf(baseline, baseline.rangedWeapon)
+        const buffedRanged = panelOf(buffed, buffed.rangedWeapon)
+        // 装填为时间，加成越高装填越短
+        expect(buffedRanged.装填).toBeLessThan(baseRanged.装填)
+        expect(buffedRanged.弹匣).toBeGreaterThan(baseRanged.弹匣)
+        expect(buffedRanged.弹药).toBeGreaterThan(baseRanged.弹药)
+        expect(buffedRanged.攻速).toBeGreaterThan(baseRanged.攻速)
+        expect(buffedRanged.多重).toBeGreaterThan(baseRanged.多重)
+        expect(buffedRanged.增伤).toBeGreaterThan(baseRanged.增伤)
+        // 普通远程前缀不影响普通近战面板
+        expect(panelOf(buffed, buffed.meleeWeapon).攻速).toBe(panelOf(baseline, baseline.meleeWeapon).攻速)
+        expect(panelOf(buffed, buffed.meleeWeapon).多重).toBe(panelOf(baseline, baseline.meleeWeapon).多重)
+
+        const baseSkill = panelOf(baseline, baseline.skillWeapon)
+        const buffedSkill = panelOf(buffed, buffed.skillWeapon)
+        expect(buffedSkill.装填).toBe(baseSkill.装填)
+        expect(buffedSkill.弹匣).toBe(baseSkill.弹匣)
+        expect(buffedSkill.弹药).toBe(baseSkill.弹药)
+        expect(buffedSkill.攻速).toBe(baseSkill.攻速)
+        expect(buffedSkill.多重).toBe(baseSkill.多重)
+        expect(buffedSkill.增伤).toBe(baseSkill.增伤)
+    })
+
+    it("普通远程前缀不影响普通近战面板", () => {
+        const baseline = createBuild("黎瑟")
+        const buffed = createBuild("黎瑟", {
+            buffs: [
+                ["普通远程攻击", 0.1],
+                ["普通远程暴击", 0.1],
+                ["普通远程攻速", 0.1],
+                ["普通远程多重", 0.1],
+                ["普通远程增伤", 0.1],
+            ],
+        })
+        const baseMelee = panelOf(baseline, baseline.meleeWeapon)
+        const buffedMelee = panelOf(buffed, buffed.meleeWeapon)
+        expect(buffedMelee.攻击).toBe(baseMelee.攻击)
+        expect(buffedMelee.暴击).toBe(baseMelee.暴击)
+        expect(buffedMelee.攻速).toBe(baseMelee.攻速)
+        expect(buffedMelee.多重).toBe(baseMelee.多重)
+        expect(buffedMelee.增伤).toBe(baseMelee.增伤)
+        // 对照：远程面板确实吃到
+        expect(panelOf(buffed, buffed.rangedWeapon).攻击).toBeGreaterThan(panelOf(baseline, baseline.rangedWeapon).攻击)
+    })
+
+    it("独立增伤按独立乘区：近战独立增伤 × 普通近战独立增伤", () => {
+        const plain = createBuild("贝蕾妮卡", { buffs: [["近战独立增伤", 0.2]] })
+        const both = createBuild("贝蕾妮卡", {
+            buffs: [
+                ["近战独立增伤", 0.2],
+                ["普通近战独立增伤", 0.3],
+            ],
+        })
+        // 独立因子相乘：(1+0.2)×(1+0.3)-1 = 0.56；加性合并会得到 0.5
+        expect(panelOf(both, both.meleeWeapon).独立增伤).toBeCloseTo(0.56, 6)
+        // 同律面板只吃近战独立增伤，不读取普通近战独立增伤
+        expect(panelOf(both, both.skillWeapon).独立增伤).toBe(panelOf(plain, plain.skillWeapon).独立增伤)
+    })
+
+    it("独立增伤按独立乘区：攻击细分键（近战普攻独立增伤 × 普通近战普攻独立增伤）", () => {
+        const plain = createBuild("黎瑟", {
+            baseName: "普通攻击",
+            targetFunction: "一段伤害",
+            buffs: [["近战普攻独立增伤", 0.2]],
+        })
+        const both = createBuild("黎瑟", {
+            baseName: "普通攻击",
+            targetFunction: "一段伤害",
+            buffs: [
+                ["近战普攻独立增伤", 0.2],
+                ["普通近战普攻独立增伤", 0.3],
+            ],
+        })
+        // 加性合并会得到 1.5/1.2 = 1.25
+        expect(both.calculateOneTime() / plain.calculateOneTime()).toBeCloseTo(1.3, 6)
+    })
+
+    it("普通近战触发计入充盈威力，普通近战攻速计入召唤物攻速", () => {
+        const baseline = createBuild("黎瑟", { buffs: [["召唤物攻击速度转化", 0.5]] })
+        const buffed = createBuild("黎瑟", {
+            buffs: [
+                ["普通近战触发", 3],
+                ["普通近战攻速", 0.5],
+                ["召唤物攻击速度转化", 0.5],
+            ],
+        })
+        const basePanel = panelOf(baseline, baseline.meleeWeapon)
+        const buffedPanel = panelOf(buffed, buffed.meleeWeapon)
+        const baseAttrs = baseline.calculateWeaponAttributes(baseline.meleeWeapon)
+        const buffedAttrs = buffed.calculateWeaponAttributes(buffed.meleeWeapon)
+
+        // 触发 → 充盈威力：溢出增量 × 充盈转化（无转化词条时为 1）
+        expect(buffedPanel.触发).toBeGreaterThan(1)
+        const fullnessDelta =
+            Math.max(0, buffedPanel.触发 - 1) * (buffedPanel.充盈转化 ?? 1) - Math.max(0, basePanel.触发 - 1) * (basePanel.充盈转化 ?? 1)
+        expect((buffedAttrs.充盈威力 ?? 1) - (baseAttrs.充盈威力 ?? 1)).toBeCloseTo(fullnessDelta, 6)
+
+        // 攻速 → 召唤物攻速：攻速增量 × 召唤物攻击速度转化（转化词条为 0 时不产生召唤物攻速）
+        expect(buffedPanel.攻速).toBeGreaterThan(basePanel.攻速)
+        const summonConversion = buffed.getTotalBonus("召唤物攻击速度转化", "近战")
+        expect(summonConversion).toBeCloseTo(0.5, 6)
+        expect((buffedAttrs.召唤物攻击速度 ?? 0) - (baseAttrs.召唤物攻击速度 ?? 0)).toBeCloseTo(
+            (buffedPanel.攻速 - basePanel.攻速) * summonConversion,
+            6
+        )
+    })
+
+    it("圆舞/剑非剑/疑星落：继承型同律面板不吃普通近战前缀", () => {
+        for (const [charName, skillWeaponName] of [
+            ["芙罗拉", "圆舞"],
+            ["刻舟", "剑非剑"],
+            ["煜明", "疑星落"],
+        ] as const) {
+            const baseline = createBuild(charName)
+            const buffed = createBuild(charName, { buffs: [["普通近战攻击", 0.1]] })
+            expect(baseline.skillWeapon?.名称, charName).toBe(skillWeaponName)
+            expect(baseline.skillWeapon?.inherit, charName).toBe("melee")
+            // 普通近战面板生效
+            expect(panelOf(buffed, buffed.meleeWeapon).攻击 / panelOf(baseline, baseline.meleeWeapon).攻击, charName).toBeCloseTo(1.1, 3)
+            // 继承型同律面板不变
+            expect(panelOf(buffed, buffed.skillWeapon).攻击, charName).toBe(panelOf(baseline, baseline.skillWeapon).攻击)
+        }
+    })
+
+    it("角色槽 MOD 的普通前缀不进入普通武器面板（按既有槽位作用域惯例）", () => {
+        const charMod = new LeveledMod({
+            id: 999802,
+            icon: "Test01",
+            名称: "测试·角色普通前缀",
+            版本: "1.0",
+            系列: "测试",
+            品质: "金",
+            极性: "A",
+            耐受: 15,
+            类型: "角色",
+            加成: { 普通近战攻击: 0.1, 普通远程攻击: 0.1 },
+            效果: "测试用角色槽普通前缀MOD",
+        })
+        const baseline = createBuild("黎瑟")
+        const modded = createBuild("黎瑟", { charMods: [charMod] })
+        expect(panelOf(modded, modded.meleeWeapon).攻击).toBe(panelOf(baseline, baseline.meleeWeapon).攻击)
+        expect(panelOf(modded, modded.rangedWeapon).攻击).toBe(panelOf(baseline, baseline.rangedWeapon).攻击)
+    })
+})
+
+describe("赛季增伤独立乘区（词条 1030）", () => {
+    /** 构造基线构筑（无 BUFF）；自定义 BUFF 走 attr 表汇总 */
+    const buildWith = (attrs?: Record<string, number>) =>
+        new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: [],
+            buffs: attrs ? [new LeveledBuff({ 名称: "赛季增伤测试", 描述: "u44", attr: attrs })] : [],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+    it("多个来源先累加：0.1 + 0.2 → ×1.3（不是 1.1×1.2）", () => {
+        const baseline = buildWith().calculate()
+        const one = buildWith({ 赛季增伤: 0.1 }).calculate()
+        const two = buildWith({ 赛季增伤: 0.3 }).calculate()
+        // 两个独立 BUFF 各 0.1 / 0.2：汇总为 0.3，等价于单条 0.3
+        const split = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: [],
+            buffs: [
+                new LeveledBuff({ 名称: "赛季增伤A", 描述: "u44", attr: { 赛季增伤: 0.1 } }),
+                new LeveledBuff({ 名称: "赛季增伤B", 描述: "u44", attr: { 赛季增伤: 0.2 } }),
+            ],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+        expect(one / baseline).toBeCloseTo(1.1, 9)
+        expect(two / baseline).toBeCloseTo(1.3, 9)
+        expect(split.calculateAttributes().赛季增伤).toBeCloseTo(0.3, 9)
+        expect(split.calculate() / baseline).toBeCloseTo(1.3, 9)
+    })
+
+    it("与普通增伤分池：1.0 基础增伤下 +0.5 普通增伤 = ×1.25，+0.5 赛季增伤 = ×1.5", () => {
+        const base = buildWith({ 增伤: 1 })
+        const baseline = base.calculate()
+        const normal = buildWith({ 增伤: 1.5 }).calculate()
+        const season = buildWith({ 增伤: 1, 赛季增伤: 0.5 }).calculate()
+        const both = buildWith({ 增伤: 1.5, 赛季增伤: 0.5 }).calculate()
+        expect(normal / baseline).toBeCloseTo(1.25, 9)
+        expect(season / baseline).toBeCloseTo(1.5, 9)
+        // 两个乘区相乘：1.25 × 1.5
+        expect(both / baseline).toBeCloseTo(1.875, 9)
+        expect(season).not.toBeCloseTo(normal, 6)
+    })
+
+    it("1030 装备属性进 赛季增伤，不并入普通增伤池", () => {
+        const result = resolveGearEffects([gear({ slotId: 1, affixId: 1030, rollLevel: 1 })], "main")
+        const attrs = result.attrs as Record<string, number>
+        expect(attrs.赛季增伤).toBeCloseTo(0.0625, 9)
+        expect(attrs.增伤).toBeUndefined()
+
+        // 基线已带 1.0 普通增伤：同数值并入普通池被稀释（×1.03），独立乘区不稀释（×1.0625）
+        const build = buildWith({ 增伤: 1, ...attrs })
+        const merged = buildWith({ 增伤: 1 + attrs.赛季增伤 })
+        expect(build.calculateAttributes().赛季增伤).toBeCloseTo(0.0625, 9)
+        expect(build.calculateAttributes().增伤).toBeCloseTo(1, 9)
+        expect(build.calculate()).toBeCloseTo(buildWith({ 增伤: 1 }).calculate() * (1 + 0.0625), 6)
+        expect(build.calculate()).toBeGreaterThan(merged.calculate())
+    })
+})
+
+describe("追伤分池（U112 §135：武器池 / 技能池不交叉）", () => {
+    /** 无追伤词条的测试武器，隔离武器面板自带的追伤 */
+    function plainWeapon(name: string): LeveledWeapon {
+        const data: Weapon = {
+            id: 99998,
+            名称: name,
+            类型: ["近战", "长柄"],
+            伤害类型: "切割",
+            攻击: 100,
+            暴击: 0.05,
+            暴伤: 1.5,
+            触发: 0.2,
+            描述: "",
+            加成: {},
+            熔炼: "",
+            技能: [],
+        }
+        return new LeveledWeapon(data)
+    }
+
+    /** 雷属性角色（黎瑟）+ 无追伤武器，逐条注入追伤分量 */
+    function chaseBuild(
+        attr: Record<string, number>,
+        enemyLevel = 80,
+        options: { charName?: string; buffs?: LeveledBuff[]; enemyResistance?: number } = {}
+    ) {
+        return new CharBuild({
+            char: new LeveledChar(options.charName ?? "黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            melee: plainWeapon("测试近战"),
+            ranged: plainWeapon("测试远程"),
+            buffs: [new LeveledBuff({ 名称: "追伤测试", 描述: "", attr }), ...(options.buffs ?? [])],
+            baseName: "测试",
+            enemyId: 130,
+            enemyLevel,
+            enemyResistance: options.enemyResistance ?? 0,
+            targetFunction: "伤害",
+        })
+    }
+
+    const weaponResult = (build: CharBuild) =>
+        build.calculateWeaponDamage(build.calculateWeaponAttributes(build.meleeWeapon), build.meleeWeapon)
+    /** 无触发期望值：隔离物理触发倍率 */
+    const weaponDamage = (build: CharBuild) => weaponResult(build).higherCritNoTrigger!
+    const skillDamage = (build: CharBuild) => build.calculateSkillDamage(build.calculateWeaponAttributes()).expectedDamage
+    /** 追伤因子：同一背景下「有 / 无追伤」的伤害比，应恒等于 1 + Σ */
+    const chaseFactor = (chase: Record<string, number>, shared: Record<string, number> = {}, enemyResistance = 0) =>
+        weaponDamage(chaseBuild({ ...shared, ...chase }, 80, { enemyResistance })) /
+        weaponDamage(chaseBuild(shared, 80, { enemyResistance }))
+
+    it("武器池：七分量直接求和为 1+Σ 因子，与角色元素无关", () => {
+        const base = weaponDamage(chaseBuild({}))
+        for (const key of ["火属性追伤", "水属性追伤", "雷属性追伤", "风属性追伤", "光属性追伤", "暗属性追伤", "自属性追伤"]) {
+            expect(weaponDamage(chaseBuild({ [key]: 0.1 })) / base, key).toBeCloseTo(1.1, 9)
+        }
+        const all = Object.fromEntries(
+            ["火属性追伤", "水属性追伤", "雷属性追伤", "风属性追伤", "光属性追伤", "暗属性追伤", "自属性追伤"].map(key => [key, 0.1])
+        )
+        expect(weaponDamage(chaseBuild(all)) / base).toBeCloseTo(1.7, 9)
+        // 负值参与求和
+        expect(weaponDamage(chaseBuild({ 火属性追伤: -0.2 })) / base).toBeCloseTo(0.8, 9)
+        expect(weaponDamage(chaseBuild({ 火属性追伤: 0.5, 水属性追伤: -0.2 })) / base).toBeCloseTo(1.3, 9)
+        // 求和为负时整体非负钳制
+        expect(weaponDamage(chaseBuild({ 火属性追伤: -1.5 }))).toBeCloseTo(0, 9)
+    })
+
+    it("武器池吃武器面板：weaponAttr 动态写入进入伤害，角色属性无追伤键", () => {
+        const base = weaponDamage(chaseBuild({}))
+        const build = chaseBuild({})
+        build.dynamicBuffs.push(new LeveledBuff({ 名称: "面板追伤", 描述: "", code: "weaponAttr.火属性追伤 += 0.5" }))
+        expect(build.calculateWeaponAttributes(build.meleeWeapon).weapon?.追加伤害).toBeCloseTo(0.5, 9)
+        expect(weaponDamage(build) / base).toBeCloseTo(1.5, 9)
+        const attrs = build.calculateAttributes() as unknown as Record<string, unknown>
+        for (const key of [...ADDITIONAL_DAMAGE_KEYS, LEGACY_ADDITIONAL_DAMAGE_KEY]) expect(attrs[key]).toBeUndefined()
+    })
+
+    it("不吃弱点 / 元素增伤 / 抗性 / 转属：因子恒为 1+Σ，抗性区仍只按角色元素", () => {
+        expect(chaseFactor({ 火属性追伤: 0.5 })).toBeCloseTo(1.5, 9)
+        // 火弱点 / 全属性弱点 / 火属性增伤都不作用于追伤
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 火属性弱点: 0.54 })).toBeCloseTo(1.5, 9)
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 全属性弱点: 0.54 })).toBeCloseTo(1.5, 9)
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 火属性增伤: 1 })).toBeCloseTo(1.5, 9)
+        // 敌人抗性与转属克（正抗）/ 转属逆（负抗）/ 转切割都不拆分追伤
+        expect(chaseFactor({ 火属性追伤: 0.5 }, {}, 0.5)).toBeCloseTo(1.5, 9)
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 转属克: 1 }, 0.5)).toBeCloseTo(1.5, 9)
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 转属逆: 1 }, -4)).toBeCloseTo(1.5, 9)
+        expect(chaseFactor({ 火属性追伤: 0.5 }, { 转切割: 1 })).toBeCloseTo(1.5, 9)
+        // 物理 / 元素分量整体同倍率放大（追伤不是独立分量）
+        const plain = weaponResult(chaseBuild({}))
+        const withChase = weaponResult(chaseBuild({ 火属性追伤: 0.5 }))
+        expect(withChase.physicalDamage! / plain.physicalDamage!).toBeCloseTo(1.5, 9)
+        expect(withChase.elementDamage! / plain.elementDamage!).toBeCloseTo(1.5, 9)
+        // 非角色元素弱点完全不生效（雷角色 + 火弱点）
+        expect(chaseFactor({}, { 火属性弱点: 0.54 })).toBeCloseTo(1, 9)
+    })
+
+    it("技能池只吃技能追伤：武器追伤不影响技能伤害，技能追伤不进武器池", () => {
+        const skillBase = skillDamage(chaseBuild({}))
+        expect(skillDamage(chaseBuild({ 火属性追伤: 0.5 })) / skillBase).toBeCloseTo(1, 9)
+        expect(skillDamage(chaseBuild({ 火属性追伤: 0.2, 自属性追伤: 0.3 })) / skillBase).toBeCloseTo(1, 9)
+        expect(skillDamage(chaseBuild({ 技能追伤: 0.4 })) / skillBase).toBeCloseTo(1.4, 9)
+        const weaponBase = weaponDamage(chaseBuild({}))
+        expect(weaponDamage(chaseBuild({ 技能追伤: 0.4 })) / weaponBase).toBeCloseTo(1, 9)
+        // 两池不交叉：同时带武器追伤与技能追伤时各自只吃自己那一份
+        const both = chaseBuild({ 火属性追伤: 0.5, 技能追伤: 0.4 })
+        expect(weaponDamage(both) / weaponBase).toBeCloseTo(1.5, 9)
+        expect(skillDamage(both) / skillBase).toBeCloseTo(1.4, 9)
+        // 技能池因子同样非负钳制
+        expect(skillDamage(chaseBuild({ 技能追伤: -1.5 }))).toBeCloseTo(0, 9)
+    })
+
+    it("光菲娜 + 菲娜Q：四份求和只进武器池，技能池不受影响", () => {
+        const plain = chaseBuild({}, 80, { charName: "菲娜" })
+        const withQ = chaseBuild({}, 80, { charName: "菲娜", buffs: [new LeveledBuff("菲娜Q")] })
+        const panel = withQ.calculateWeaponAttributes(withQ.meleeWeapon).weapon!
+        expect(panel.追加伤害).toBeCloseTo(0.6, 9)
+        expect(weaponDamage(withQ) / weaponDamage(plain)).toBeCloseTo(1.6, 9)
+        expect(skillDamage(withQ) / skillDamage(plain)).toBeCloseTo(1, 9)
+        // 四份不是独立元素分量：物理 / 元素分量整体同倍率放大
+        const plainWeapon = weaponResult(plain)
+        const qWeapon = weaponResult(withQ)
+        expect(qWeapon.physicalDamage! / plainWeapon.physicalDamage!).toBeCloseTo(1.6, 9)
+        expect(qWeapon.elementDamage! / plainWeapon.elementDamage!).toBeCloseTo(1.6, 9)
+    })
+
+    it("非匹配元素分量在面板可见且不再被门限过滤", () => {
+        const build = chaseBuild({ 火属性追伤: 0.4 })
+        const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+        expect(panel.火属性追伤).toBeCloseTo(0.4, 9)
+        expect(panel.雷属性追伤).toBe(0)
+        expect(panel.追加伤害).toBeCloseTo(0.4, 9)
+    })
+
+    it("聚合 = Σ 七分量（武器面板），角色属性不产生追伤键，表达式可按武器命名空间读取", () => {
+        const build = chaseBuild({
+            水属性追伤: 0.1,
+            火属性追伤: 0.2,
+            雷属性追伤: 0.3,
+            风属性追伤: 0.4,
+            光属性追伤: 0.5,
+            暗属性追伤: 0.6,
+            自属性追伤: 0.7,
+        })
+        const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+        expect(attrs.weapon!.追加伤害).toBeCloseTo(2.8, 9)
+        const flat = attrs as unknown as Record<string, unknown>
+        for (const key of [...ADDITIONAL_DAMAGE_KEYS, LEGACY_ADDITIONAL_DAMAGE_KEY]) expect(flat[key]).toBeUndefined()
+        expect(build.evaluateAST("近战::追加伤害", attrs)).toBeCloseTo(2.8, 9)
+    })
+
+    it("字面「追加伤害」输入迁移为自属性追伤并告警（只进武器面板）", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const build = chaseBuild({ 追加伤害: 0.5 })
+            const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            expect(panel.自属性追伤).toBeCloseTo(0.5, 9)
+            expect(panel.追加伤害).toBeCloseTo(0.5, 9)
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("自属性追伤"))
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("旧 code 对聚合的复合赋值按七分量迁移（*= / += / -= / =）", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const panelWith = (code: string) => {
+                const build = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 })
+                build.dynamicBuffs.push(new LeveledBuff({ 名称: "旧聚合写入", 描述: "", code }))
+                return build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            }
+            // *=：七分量同比例缩放，元素匹配口径保持不变
+            const scaled = panelWith("if(weaponAttr)weaponAttr.追加伤害*=0.5")
+            expect(scaled.雷属性追伤).toBeCloseTo(0.2, 9)
+            expect(scaled.自属性追伤).toBeCloseTo(0.1, 9)
+            expect(scaled.追加伤害).toBeCloseTo(0.3, 9)
+            // +=：差值记入自属性追伤
+            const added = panelWith("weaponAttr.追加伤害+=0.1")
+            expect(added.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(added.自属性追伤).toBeCloseTo(0.3, 9)
+            expect(added.追加伤害).toBeCloseTo(0.7, 9)
+            // -=：差值从自属性追伤扣除
+            const subtracted = panelWith("weaponAttr.追加伤害-=0.1")
+            expect(subtracted.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(subtracted.自属性追伤).toBeCloseTo(0.1, 9)
+            expect(subtracted.追加伤害).toBeCloseTo(0.5, 9)
+            // 纯赋值：覆盖为自属性追伤，其余六分量清零
+            const assigned = panelWith("weaponAttr.追加伤害=1")
+            expect(assigned.雷属性追伤).toBe(0)
+            expect(assigned.自属性追伤).toBeCloseTo(1, 9)
+            expect(assigned.追加伤害).toBeCloseTo(1, 9)
+            expect(warn).toHaveBeenCalled()
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("数值锚点：菲娜Q 四分量 / 升华下午茶 / 升华暗追伤 / 10399 自属性", () => {
+        // 菲娜Q 按 Q 技能字段表达式求值：Lv10/12/30 = 0.15/0.172/0.37，四元素同值
+        for (const [qLevel, expected] of [
+            [10, 0.15],
+            [12, 0.172],
+            [30, 0.37],
+        ] as const) {
+            const build = new CharBuild({
+                char: new LeveledChar("菲娜"),
+                skillLevel: [10, qLevel, 10],
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs: [new LeveledBuff("菲娜Q")],
+                melee: plainWeapon("测试近战"),
+                ranged: plainWeapon("测试远程"),
+                baseName: "测试",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "伤害",
+            })
+            const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            for (const key of ["水属性追伤", "火属性追伤", "雷属性追伤", "风属性追伤"] as const) {
+                expect(panel[key], `Q=${qLevel} ${key}`).toBeCloseTo(expected, 9)
+            }
+            expect(panel.追加伤害).toBeCloseTo(expected * 4, 9)
+        }
+
+        const tea = new LeveledBuff(TRANSCEND_BUFF_MAP.get("升华·下午茶追伤")!)
+        for (const key of ["水属性追伤", "火属性追伤", "雷属性追伤", "风属性追伤"]) {
+            expect(tea.getAttrValue(key), key).toBeCloseTo(0.2, 9)
+        }
+
+        const dark = new LeveledBuff(TRANSCEND_BUFF_MAP.get("升华·暗属性追伤")!)
+        expect(dark.getAttrValue("暗属性追伤")).toBeCloseTo(0.64, 9)
+
+        const weapon = new LeveledWeapon(10399)
+        expect(weapon.自属性追伤).toBeCloseTo(0.35, 9)
+        const build = new CharBuild({
+            char: new LeveledChar("莉兹贝尔"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            extraMastery: "重剑",
+            melee: weapon,
+            ranged: plainWeapon("测试远程"),
+            baseName: "测试",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+        const panel = build.calculateWeaponAttributes(weapon).weapon!
+        expect(panel.自属性追伤).toBeCloseTo(0.35, 9)
+        expect(panel.追加伤害).toBeCloseTo(0.35, 9)
+        expect(panel.光属性追伤).toBe(0)
+    })
+
+    it("旧 MOD 字面「追加伤害」装载时归一，MOD属性加权不丢失", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const legacyMod = new LeveledMod({
+                id: 990002,
+                名称: "旧追伤",
+                系列: "百首",
+                品质: "金",
+                耐受: 0,
+                类型: "角色",
+                加成: { 追加伤害: [0.3] },
+            } satisfies Mod)
+            expect(legacyMod.自属性追伤).toBeCloseTo(0.3, 9)
+            expect(legacyMod.追加伤害).toBeUndefined()
+            expect(legacyMod.getAddAttrValue("追加伤害")).toBeUndefined()
+            expect(legacyMod.getAddAttrValue("自属性追伤")).toBeCloseTo(0.3, 9)
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("MOD 990002"))
+
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: plainWeapon("测试近战"),
+                ranged: plainWeapon("测试远程"),
+                charMods: [legacyMod],
+                buffs: [new LeveledBuff({ 名称: "MOD属性", 描述: "", attr: { 雷MOD属性: 0.5 } })],
+                baseName: "测试",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "伤害",
+            })
+            const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            // 0.3 基础 + 0.3 × MOD属性 0.5 加权（面板口径）
+            expect(panel.自属性追伤).toBeCloseTo(0.45, 9)
+            expect(panel.追加伤害).toBeCloseTo(0.45, 9)
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it('getTotalBonus("追加伤害") 按分量求和并遵守 prefix / includeMods / includeBuffs', () => {
+        const meleeMod = new LeveledMod({
+            id: 990003,
+            名称: "近战追伤",
+            系列: "百首",
+            品质: "金",
+            耐受: 0,
+            类型: "近战",
+            加成: { 火属性追伤: [0.1] },
+        } satisfies Mod)
+        const build = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            melee: plainWeapon("测试近战"),
+            ranged: plainWeapon("测试远程"),
+            meleeMods: [meleeMod],
+            buffs: [new LeveledBuff({ 名称: "追伤测试", 描述: "", attr: { 自属性追伤: 0.2 } })],
+            baseName: "测试",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+        expect(build.getTotalBonus("追加伤害")).toBeCloseTo(0.2, 9)
+        expect(build.getTotalBonus("追加伤害", "近战")).toBeCloseTo(0.3, 9)
+        expect(build.getTotalBonus("追加伤害", "远程")).toBeCloseTo(0.2, 9)
+        expect(build.getTotalBonus("追加伤害", "同律近战")).toBeCloseTo(0.2, 9)
+        expect(build.getTotalBonus("追加伤害", "近战", { includeMods: false })).toBeCloseTo(0.2, 9)
+        expect(build.getTotalBonus("追加伤害", "近战", { includeBuffs: false })).toBeCloseTo(0.1, 9)
+    })
+
+    it("追加伤害BUG 按武器面板七分量缩放，武器伤害同比降低", () => {
+        const k = 1 / (1 + (240 - 190) * 0.05)
+        const plain = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 }, 240)
+        const build = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 }, 240)
+        build.dynamicBuffs.push(new LeveledBuff(buffMap.get("追加伤害BUG")!))
+        // code 只改写武器面板：角色侧无追伤键，面板逐分量缩放
+        expect((build.calculateAttributes() as unknown as Record<string, unknown>).雷属性追伤).toBeUndefined()
+        const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+        expect(panel.雷属性追伤).toBeCloseTo(0.4 * k, 9)
+        expect(panel.自属性追伤).toBeCloseTo(0.2 * k, 9)
+        expect(panel.追加伤害).toBeCloseTo(0.6 * k, 9)
+        expect(weaponDamage(build) / weaponDamage(plain)).toBeCloseTo((1 + 0.6 * k) / 1.6, 9)
+    })
+
+    it("旧 code 裸写角色侧聚合：重定向到武器面板（*= / += / -= / =）", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const panelWith = (code: string) => {
+                const build = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 })
+                build.dynamicBuffs.push(new LeveledBuff({ 名称: "旧角色聚合写入", 描述: "", code }))
+                return build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            }
+            // 角色沙盒初值 0：*= 无净变化
+            const scaled = panelWith("追加伤害*=0.5")
+            expect(scaled.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(scaled.自属性追伤).toBeCloseTo(0.2, 9)
+            expect(scaled.追加伤害).toBeCloseTo(0.6, 9)
+            // +=：差值累加到自属性
+            const added = panelWith("追加伤害+=0.1")
+            expect(added.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(added.自属性追伤).toBeCloseTo(0.3, 9)
+            expect(added.追加伤害).toBeCloseTo(0.7, 9)
+            // -=：负差值累加到自属性
+            const subtracted = panelWith("追加伤害-=0.1")
+            expect(subtracted.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(subtracted.自属性追伤).toBeCloseTo(0.1, 9)
+            expect(subtracted.追加伤害).toBeCloseTo(0.5, 9)
+            // 纯赋值：写入值累加到自属性，不覆盖已有来源
+            const assigned = panelWith("追加伤害=1")
+            expect(assigned.雷属性追伤).toBeCloseTo(0.4, 9)
+            expect(assigned.自属性追伤).toBeCloseTo(1.2, 9)
+            expect(assigned.追加伤害).toBeCloseTo(1.6, 9)
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("重定向"))
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("旧 code 裸写角色侧分量：重定向到武器面板对应分量", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const build = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 })
+            build.dynamicBuffs.push(new LeveledBuff({ 名称: "裸分量写入", 描述: "", code: "火属性追伤 += 0.5" }))
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+            expect(attrs.weapon!.火属性追伤).toBeCloseTo(0.5, 9)
+            expect(attrs.weapon!.追加伤害).toBeCloseTo(1.1, 9)
+            expect((attrs as unknown as Record<string, unknown>).火属性追伤).toBeUndefined()
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("重定向"))
+            expect(weaponDamage(build) / weaponDamage(chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 }))).toBeCloseTo(2.1 / 1.6, 9)
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("旧 code 混合写聚合与分量：分量保留显式写入，聚合差值记入自属性", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const build = chaseBuild({ 雷属性追伤: 0.4, 自属性追伤: 0.2 })
+            build.dynamicBuffs.push(
+                new LeveledBuff({ 名称: "混合写入", 描述: "", code: "weaponAttr.追加伤害*=0.5;weaponAttr.雷属性追伤+=1" })
+            )
+            const panel = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            // 显式分量写入保留：0.4 + 1；聚合差值 0.3 - 0.6 记入自属性
+            expect(panel.雷属性追伤).toBeCloseTo(1.4, 9)
+            expect(panel.自属性追伤).toBeCloseTo(-0.1, 9)
+            expect(panel.追加伤害).toBeCloseTo(1.3, 9)
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("分量写入"))
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("条件 BUFF 旧键归一化（角色侧不再重算追伤聚合）", () => {
+        resetAdditionalDamageWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const build = chaseBuild({})
+            build.buffs.push(new LeveledBuff({ 名称: "条件追伤", 描述: "", 技能: "测试技能", attr: { 追加伤害: 0.3 } }))
+            const list = build.getConditionalBuffPropsList()
+            expect(list).toHaveLength(1)
+            expect(list[0].props).toEqual({ 自属性追伤: 0.3 })
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("条件 BUFF"))
+
+            const merged = LeveledSkill.mergeConditionalProps({ 雷属性追伤: 0.4, 自属性追伤: 0.2, 追加伤害: 0.6 }, { 雷属性追伤: 0.1 })
+            expect(merged.雷属性追伤).toBeCloseTo(0.5, 9)
+            expect(merged.自属性追伤).toBeCloseTo(0.2, 9)
+            // 聚合不再由角色侧重算：传入值原样保留
+            expect(merged.追加伤害).toBeCloseTo(0.6, 9)
+        } finally {
+            warn.mockRestore()
+        }
+    })
+})
+
+describe("升华技能替换（U83b）", () => {
+    const fillers = () => ({
+        skillLevel: [10, 10, 10] as [number, number, number],
+        hpPercent: 1,
+        resonanceGain: 0,
+        buffs: [],
+        melee: new LeveledWeapon(10302),
+        ranged: new LeveledWeapon(20201),
+        baseName: "高温清扫",
+    })
+
+    it("角色技能：字段改写生效，未覆盖字段与等级保留", () => {
+        const build = new CharBuild({
+            ...fillers(),
+            char: new LeveledChar("希尔妲"),
+            skillReplacements: { 310201: { id: 310212, 名称: "高温清扫", 类型: "伤害", 字段改写: { 伤害: { 值: 9.03552 } } } },
+        })
+        const skill = build.charSkills.find(item => item.名称 === "高温清扫")!
+        expect(skill.id).toBe(310212)
+        expect(skill.等级).toBe(10)
+        expect(skill.字段.map(field => field.名称)).toEqual(["神智消耗", "每秒神智消耗", "伤害", "[高温祛污焰束]长度"])
+        expect(skill.字段.find(field => field.名称 === "伤害")?.值).toBeCloseTo(9.03552, 9)
+    })
+
+    it("角色技能：仅身份/名称替换时源字段与 E 技能等级保留", () => {
+        const build = new CharBuild({
+            ...fillers(),
+            char: new LeveledChar("菲娜"),
+            skillLevel: [7, 10, 10],
+            baseName: "“在一个暖和的午后”",
+            skillReplacements: { 180101: { id: 180112, 名称: "“在一个暖和的午后”", 类型: "伤害" } },
+        })
+        const skill = build.charSkills[0]
+        expect(skill.id).toBe(180112)
+        expect(skill.等级).toBe(7)
+        expect(skill.字段.map(field => field.名称)).toEqual(["神智消耗", "伤害", "伤害半径", "[喧闹下午茶]内伤害", "移动速度降低持续时间"])
+    })
+
+    it("武器技能：替换保留字段 / 等级 / 武器名（2040601 → 2040603 仅身份）", () => {
+        const build = new CharBuild({
+            ...fillers(),
+            char: new LeveledChar("黎瑟"),
+            baseName: "射击",
+            ranged: new LeveledWeapon("切割齿轮"),
+            skillReplacements: { 2040601: { id: 2040603, 名称: "射击", 类型: "射击" } },
+        })
+        const skill = build.rangedWeaponSkills.find(item => item.id === 2040603)!
+        expect(skill.名称).toBe("射击")
+        expect(skill.武器名).toBe("切割齿轮")
+        expect(skill.等级).toBe(10)
+        expect(skill.字段.map(field => field.名称)).toEqual(["射击伤害", "子弹伤害"])
+        expect(skill.字段[0].值).toBe(0.05)
+    })
+
+    it("MOD 与词条同源时 MOD 优先并告警", () => {
+        resetSkillReplacementWarnings()
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+        try {
+            const build = new CharBuild({
+                ...fillers(),
+                char: new LeveledChar("黎瑟"),
+                meleeMods: [new LeveledMod(203001)],
+                melee: new LeveledWeapon("万古的诀别"),
+                ranged: new LeveledWeapon(20601),
+                baseName: "普通攻击",
+                skillReplacements: { 1030101: { id: 999999, 名称: "普通攻击", 类型: "武器伤害", 字段: [{ 名称: "升华字段", 值: 1 }] } },
+            })
+            const skill = build.meleeWeaponSkills.find(item => item.名称 === "普通攻击")!
+            expect(skill.id).toBe(1030201)
+            expect(skill.字段.some(field => field.名称 === "路径伤害")).toBe(true)
+            expect(skill.字段.some(field => field.名称 === "升华字段")).toBe(false)
+            expect(warn).toHaveBeenCalledWith(expect.stringContaining("MOD 优先"))
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it("clone() 保留替换载荷", () => {
+        const build = new CharBuild({
+            ...fillers(),
+            char: new LeveledChar("希尔妲"),
+            skillReplacements: { 310201: { id: 310212, 名称: "高温清扫", 类型: "伤害", 字段改写: { 伤害: { 值: 9.03552 } } } },
+        })
+        const cloned = build.clone().charSkills.find(item => item.id === 310212)!
+        expect(cloned.字段.find(field => field.名称 === "伤害")?.值).toBeCloseTo(9.03552, 9)
+    })
+
+    it("worker 快照保留替换：重建技能字段与伤害一致", () => {
+        const build = new CharBuild({
+            ...fillers(),
+            char: new LeveledChar("希尔妲"),
+            skillReplacements: { 310201: { id: 310212, 名称: "高温清扫", 类型: "伤害", 字段改写: { 伤害: { 值: 9.03552 } } } },
+        })
+        const snapshot = createWorkerSnapshot(build)
+        expect(snapshot.skillReplacements?.[310201]).toMatchObject({ id: 310212, 字段改写: { 伤害: { 值: 9.03552 } } })
+        const restored = createBuildFromSnapshot(snapshot)
+        expect(restored.charSkills.find(item => item.id === 310212)?.字段.find(field => field.名称 === "伤害")?.值).toBeCloseTo(9.03552, 9)
+        expect(restored.calculate()).toBeCloseTo(build.calculate(), 9)
+    })
+
+    it("元素限定谓词：未限定 / 未提供角色元素时放行", () => {
+        expect(isTranscendBuffElementAllowed("火", "火")).toBe(true)
+        expect(isTranscendBuffElementAllowed("火", "水")).toBe(false)
+        expect(isTranscendBuffElementAllowed("火", undefined)).toBe(true)
+        expect(isTranscendBuffElementAllowed(undefined, "水")).toBe(true)
+    })
+
+    it("元素限定词条的替换与手写 BUFF 同门控", () => {
+        const table = TRANSCEND_SKILL_REPLACEMENTS as Record<number, Record<string, { id: number; 名称: string; 类型: string }>>
+        table[2008] = { "310201": { id: 310212, 名称: "高温清扫", 类型: "伤害" } }
+        try {
+            // 2008 的手写 BUFF 限定「火」：水元素下 BUFF 与替换同时被排除
+            const blocked = resolveGearEffects([gear({ slotId: 8, affixId: 2008 })], "main", { charElement: "水", charId: 3102 })
+            expect(blocked.skillReplacements).toEqual({})
+            expect(blocked.buffs).toHaveLength(0)
+            const allowed = resolveGearEffects([gear({ slotId: 8, affixId: 2008 })], "main", { charElement: "火", charId: 3102 })
+            expect(allowed.skillReplacements[310201]).toMatchObject({ id: 310212 })
+        } finally {
+            delete table[2008]
+        }
+    })
+
+    it("同 source 冲突按 slotId 高者胜，与装备条目数组顺序无关", () => {
+        const affixes = [
+            {
+                id: 990202,
+                plan: 4,
+                minValue: 1,
+                maxValue: 1,
+                totalValueLevel: 1,
+                desc: "",
+                skillReplacements: { "310201": { id: 310213, 名称: "高槽", 类型: "伤害" } },
+            },
+            {
+                id: 990201,
+                plan: 4,
+                minValue: 1,
+                maxValue: 1,
+                totalValueLevel: 1,
+                desc: "",
+                skillReplacements: { "310201": { id: 310212, 名称: "低槽", 类型: "伤害" } },
+            },
+        ]
+        // 高槽条目在数组前、低槽在后：仍按 slotId 裁决
+        const result = resolveGearEffects([gear({ slotId: 2, affixId: 990202 }), gear({ slotId: 1, affixId: 990201 })], "main", {
+            tables: { affixes },
+        })
+        expect(result.skillReplacements[310201]).toMatchObject({ id: 310213, 名称: "高槽" })
+        expect(result.warnings.join()).toContain("被词条 990202 覆盖")
+        expect(result.warnings.join()).toContain("原词条 990201")
+    })
+
+    it("2040601 导出字段被保留源字段抑制（merge 分支）", () => {
+        const merged = mergeTranscendSkillReplacement(2040601, "2040601", {
+            id: 2040603,
+            名称: "射击",
+            类型: "射击",
+            字段: [{ 名称: "射击伤害", 值: 0.06 }],
+        })
+        expect(merged).toMatchObject({ id: 2040603, 名称: "射击" })
+        expect(merged?.字段).toBeUndefined()
+    })
+
+    it("2040601 身份替换不改变伤害（源字段原值镜像）", () => {
+        const make = () => ({
+            ...fillers(),
+            char: new LeveledChar("黎瑟"),
+            baseName: "射击",
+            ranged: new LeveledWeapon("切割齿轮"),
+        })
+        const plain = new CharBuild(make())
+        const replaced = new CharBuild({
+            ...make(),
+            skillReplacements: { 2040601: { id: 2040603, 名称: "射击", 类型: "射击" } },
+        })
+        expect(replaced.calculate()).toBeCloseTo(plain.calculate(), 9)
+    })
+
+    it("310201 目标伤害按 9.03552 结算（10 级原值 8.72）", () => {
+        const make = () => ({ ...fillers(), char: new LeveledChar("希尔妲") })
+        const plain = new CharBuild(make())
+        const replaced = new CharBuild({
+            ...make(),
+            skillReplacements: { 310201: { id: 310212, 名称: "高温清扫", 类型: "伤害", 字段改写: { 伤害: { 值: 9.03552 } } } },
+        })
+        expect(replaced.calculate()).toBeCloseTo(plain.calculate() * (9.03552 / 8.72), 8)
+    })
+
+    it("字段完整替换 / 移除字段 + 字段改写两条路径", () => {
+        const source = new LeveledChar("希尔妲").技能[0].skillData
+        const full = applyTranscendSkillReplacement(source, { 字段: [{ 名称: "新字段", 值: 2 }] })
+        expect(full.字段).toEqual([{ 名称: "新字段", 值: 2 }])
+        const edited = applyTranscendSkillReplacement(source, { 移除字段: ["[高温祛污焰束]长度"], 字段改写: { 伤害: { 值: 1 } } })
+        expect(edited.字段?.map(field => field.名称)).toEqual(["神智消耗", "每秒神智消耗", "伤害"])
+        expect(edited.字段?.find(field => field.名称 === "伤害")?.值).toBe(1)
     })
 })

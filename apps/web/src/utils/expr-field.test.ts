@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { toExprIdentifier } from "@/data/expr-name"
 import {
     expressionReferencesIdentifier,
     findFieldDeleteRange,
@@ -53,6 +54,16 @@ describe("joinExprText", () => {
 describe("resolveCharFieldExpression", () => {
     it("角色属性补 角色:: 并强制按属性解析", () => {
         expect(resolveCharFieldExpression(null, "攻击")).toBe("角色::攻击!")
+    })
+
+    it("指定命名空间时用角色名落地（协战跨角色引用）", () => {
+        expect(resolveCharFieldExpression(null, "攻击", "菲娜")).toBe("菲娜::攻击!")
+    })
+
+    it("词法器不接受的标点从字段名中移除", () => {
+        expect(toExprIdentifier("“在一个暖和的午后”")).toBe("在一个暖和的午后")
+        expect(toExprIdentifier("充盈威力提高（100点以上）")).toBe("充盈威力提高100点以上")
+        expect(resolveCharFieldExpression(null, "充盈威力提高（100点以上）")).toBe("角色::充盈威力提高100点以上!")
     })
 
     it("字段名中的斜杠替换为下划线", () => {

@@ -2,11 +2,13 @@ import { buffData, charData, LeveledModHelper } from "@/data"
 import { type CharBuild, type DotFrequencySettings, defaultDotFrequencySettings } from "@/data/CharBuild"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import {
+    type AssistCharSettings,
     CHAR_SKILL_LEVEL_DEFAULT,
     CHAR_SKILL_LEVEL_MAX,
     CHAR_SKILL_LEVEL_MIN,
     type CharSettings,
     type CharSkillLevels,
+    createDefaultAssistSideSettings,
     createDefaultCharSettings,
     MOD_SLOT_COUNTS,
     MOD_SLOT_TYPES,
@@ -14,6 +16,7 @@ import {
     type ModSlot,
     type ModSlotType,
     type ModVariant,
+    normalizeAssistSideSettings,
     normalizeCharSettings,
     normalizeCharSkillLevels,
     normalizeModVariantLetter,
@@ -746,7 +749,18 @@ const TEAM_DATA_KEYS = [
     "team2Weapon",
     "team2Build",
     "team2BuildVariant",
+    "assist1",
+    "assist2",
 ] as const
+
+/**
+ * 读取节点携带的协战 loadout：按 teamN 归一化后返回，残缺对象（`{}` / 技能等级单数字）不会绕过校验；
+ * 缺失或形状非法时返回 undefined，表示不覆盖基底值。
+ */
+function readNodeAssistSettings(value: unknown, teamId: number | "-"): AssistCharSettings | undefined {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return undefined
+    return normalizeAssistSideSettings(value, teamId, createDefaultAssistSideSettings())
+}
 
 /**
  * 读取 BUFF 节点携带的队友配置；节点没有队友字段时返回 undefined。
@@ -755,15 +769,19 @@ const TEAM_DATA_KEYS = [
  */
 function readNodeTeamSettings(data: Record<string, any>) {
     if (!TEAM_DATA_KEYS.some(key => data[key] !== undefined)) return undefined
+    const team1 = toTeamValue(data.team1, "-")
+    const team2 = toTeamValue(data.team2, "-")
     return {
-        team1: toTeamValue(data.team1, "-"),
+        team1,
         team1Weapon: toTeamValue(data.team1Weapon, "-"),
         team1Build: typeof data.team1Build === "string" ? data.team1Build : "-",
         team1BuildVariant: normalizeModVariantLetter(data.team1BuildVariant),
-        team2: toTeamValue(data.team2, "-"),
+        team2,
         team2Weapon: toTeamValue(data.team2Weapon, "-"),
         team2Build: typeof data.team2Build === "string" ? data.team2Build : "-",
         team2BuildVariant: normalizeModVariantLetter(data.team2BuildVariant),
+        assist1: readNodeAssistSettings(data.assist1, team1),
+        assist2: readNodeAssistSettings(data.assist2, team2),
     }
 }
 
@@ -888,6 +906,9 @@ export function createSettingsFromNodeInputs(
                 base.team2Weapon = team.team2Weapon
                 base.team2Build = team.team2Build
                 base.team2BuildVariant = team.team2BuildVariant
+                // 协战完整 loadout 只在节点携带对象时覆盖；旧节点图缺这两个键时保留基底值
+                if (team.assist1) base.assist1 = team.assist1
+                if (team.assist2) base.assist2 = team.assist2
             }
         })
         // 助战 BUFF 已由节点在队友变化时写入 buffs；旧图的 teamBuffs 派生字段不再作为隐藏覆盖层参与求值

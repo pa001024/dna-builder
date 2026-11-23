@@ -61,6 +61,7 @@ describe("useBuildSummaries", () => {
         await refresh([{ key: "bad", charId, charSettings: "{not json}" }])
 
         expect(summaries.value.bad).toEqual({
+            buildType: "normal",
             targetValue: null,
             baseName: "",
             targetFunction: "",
@@ -114,5 +115,97 @@ describe("useBuildSummaries", () => {
         expect(direct.petBaseCd).toBeGreaterThan(0)
         expect(build.petBaseCd).toBe(direct.petBaseCd)
         expect(createBuildFromSnapshot(build).calculate()).toBeCloseTo(direct.calculate(), 6)
+    })
+
+    it("协战等级读 assistN：主控 60 / assist1 70 分别展示，assist2 缺失时回退主控等级", async () => {
+        const settings = createDefaultCharSettings()
+        settings.charLevel = 60
+        settings.team1 = mateIds[0]
+        settings.team1Weapon = settings.meleeWeapon
+        settings.assist1 = { ...settings.assist1, charLevel: 70, weaponLevel: 70 }
+        // 2 号协战只有 id（旧存档形态：没有 assist2 loadout）
+        settings.team2 = mateIds[1]
+        settings.team2Weapon = settings.rangedWeapon
+        const json = JSON.stringify({ ...settings, assist2: undefined })
+
+        mocks.requestBuildTargetValues.mockResolvedValue({})
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([{ key: "levels", charId, charSettings: json }])
+
+        const team = summaries.value.levels.team
+        expect(team).toHaveLength(2)
+        expect(team[0].id).toBe(mateIds[0])
+        expect(team[0].char.等级).toBe(70)
+        expect(team[0].weapon?.weapon.等级).toBe(70)
+        // 未保存 assist2：沿用列表原有口径回退主控等级
+        expect(team[1].id).toBe(mateIds[1])
+        expect(team[1].char.等级).toBe(60)
+    })
+
+    it("构筑类型优先后端 info（即使本地配置不含升华）", async () => {
+        const { json } = sampleJson()
+        mocks.requestBuildTargetValues.mockResolvedValue({})
+
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([{ key: "typed", charId, charSettings: json, buildType: "transcend" }])
+
+        expect(summaries.value.typed.buildType).toBe("transcend")
+    })
+
+    it("配置解析失败时仍保留后端 buildType", async () => {
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([{ key: "broken", charId, charSettings: "{not json}", buildType: "transcend" }])
+
+        expect(summaries.value.broken.buildType).toBe("transcend")
+        expect(summaries.value.broken.targetValue).toBeNull()
+        expect(mocks.requestBuildTargetValues).not.toHaveBeenCalled()
+    })
+
+    it("后端 normal 优先于本地开启升华的配置", async () => {
+        const settings = createDefaultCharSettings()
+        settings.transcend = { ...settings.transcend, enabled: true }
+        mocks.requestBuildTargetValues.mockResolvedValue({})
+
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([{ key: "stored", charId, charSettings: serializeCharSettings(settings), buildType: "normal" }])
+
+        expect(summaries.value.stored.buildType).toBe("normal")
+    })
+
+    it("旧服务端无 info 时按 charSettings 本地回退（只认 enabled）", async () => {
+        const ascended = createDefaultCharSettings()
+        ascended.transcend = { ...ascended.transcend, enabled: true }
+        // 关闭总开关但保留天赋 / 装备：按 enabled-only 口径是普通（U140-fix §156）
+        const disabled = createDefaultCharSettings()
+        disabled.transcend = { ...disabled.transcend, enabled: false, talentLevels: [[1, 1]] }
+        mocks.requestBuildTargetValues.mockResolvedValue({})
+
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([
+            { key: "ascended", charId, charSettings: serializeCharSettings(ascended) },
+            { key: "disabled", charId, charSettings: serializeCharSettings(disabled) },
+            { key: "plain", charId, charSettings: serializeCharSettings(createDefaultCharSettings()) },
+        ])
+
+        expect(summaries.value.ascended.buildType).toBe("transcend")
+        expect(summaries.value.disabled.buildType).toBe("normal")
+        expect(summaries.value.plain.buildType).toBe("normal")
+    })
+
+    it("assist2 保存了 loadout 时同样读自己的等级", async () => {
+        const settings = createDefaultCharSettings()
+        settings.charLevel = 60
+        settings.team2 = mateIds[1]
+        settings.team2Weapon = settings.rangedWeapon
+        settings.assist2 = { ...settings.assist2, charLevel: 75, weaponLevel: 75 }
+
+        mocks.requestBuildTargetValues.mockResolvedValue({})
+        const { summaries, refresh } = useBuildSummaries()
+        await refresh([{ key: "a2", charId, charSettings: serializeCharSettings(settings) }])
+
+        const second = summaries.value.a2.team[0]
+        expect(second.id).toBe(mateIds[1])
+        expect(second.char.等级).toBe(75)
+        expect(second.weapon?.weapon.等级).toBe(75)
     })
 })

@@ -316,6 +316,16 @@ fn element_bonus_key(el: Sym) -> Sym =
   else if el == sym"风" then sym"风属性增伤"
   else sym"<none>"
 
+// 该元素的追伤分量键（武器/技能池按「匹配元素 + 自属性」结算）
+fn chase_key(el: Sym) -> Sym =
+  if el == sym"光" then sym"光属性追伤"
+  else if el == sym"暗" then sym"暗属性追伤"
+  else if el == sym"水" then sym"水属性追伤"
+  else if el == sym"火" then sym"火属性追伤"
+  else if el == sym"雷" then sym"雷属性追伤"
+  else if el == sym"风" then sym"风属性追伤"
+  else sym"<none>"
+
 // ---------------------------------------------------------------------------------------------
 // 装配：id → 记录，合法性 = 类型匹配 + 同一 mod 只认第一次
 // ---------------------------------------------------------------------------------------------
@@ -580,6 +590,19 @@ fn effect_ratio(refine: Num) -> Num = (clamp(refine, 0.0, 5.0) + 5.0) / 10.0
 fn custom_bonus(entries: List<(Sym, Num)>, key: Sym) -> Num =
   fold(entries, 0.0, |acc, e| if at(e, 0) == key then acc + at(e, 1) else acc)
 
+// 来源表的旧聚合键 → 自属性追伤（对齐 TS `normalizeAdditionalDamageKey`）。
+// `BonusDamage*` 属升华词条解码（`transcend.ts`），不在来源表 / 自定义 BUFF 迁移。
+fn source_chase_alias(v: Value) -> Sym =
+  if str_eq(v, sym"追加伤害") then sym"自属性追伤" else sym"<none>"
+
+// 数据来源（角色/武器/MOD/BUFF/特效）的旧聚合键；自定义 BUFF 由 `custom_chase_bonus` 统一处理。
+fn alias_of_b(c: Config, mt: Record{..open}, btbl: Record{..open}, key: Sym) -> Num =
+  bonus_of_b(c, {}, mt, key, 0.0, btbl) - custom_bonus(c.custom_buff, key)
+
+// 自定义 BUFF 里的旧聚合键（不参与 `<元素>MOD属性` 加权）
+fn custom_chase_bonus(c: Config, key: Sym) -> Num =
+  fold(c.custom_buff, 0.0, |acc, e| acc + if source_chase_alias(at(e, 0)) == key then at(e, 1) else 0.0)
+
 // `<元素>MOD属性`：对元素系列 MOD（狮鹫/百首/契约者/换生灵）的词条加权
 fn mod_attr_boost(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx, key: Sym) -> Num =
   let mt = mod_table_of(mods, ctx) in
@@ -719,6 +742,26 @@ fn panel_ctx(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx) -> Record{..open} 
   let buffs = all_buffs(c) in
   let btbl = buff_table_of(buffs) in
   let series = series_table(mods, ctx) in
+  // 追伤七分量：元素分量只进匹配元素武器池，自属性对任意元素生效。
+  // 旧数据字面 `追加伤害` 迁移为自属性；`BonusDamage*` 不在来源表迁移（TS 只在升华解码处理）。
+  // 迁移键不参与 `<元素>MOD属性` 加权（与 TS `getModsBonus` 只读分量键同口径）。
+  let fire_add = bonus_of_b(c, series, mt, sym"火属性追伤", ratio, btbl)
+               + custom_chase_bonus(c, sym"火属性追伤") in
+  let water_add = bonus_of_b(c, series, mt, sym"水属性追伤", ratio, btbl)
+                + custom_chase_bonus(c, sym"水属性追伤") in
+  let thunder_add = bonus_of_b(c, series, mt, sym"雷属性追伤", ratio, btbl)
+                  + custom_chase_bonus(c, sym"雷属性追伤") in
+  let wind_add = bonus_of_b(c, series, mt, sym"风属性追伤", ratio, btbl)
+               + custom_chase_bonus(c, sym"风属性追伤") in
+  let light_add = bonus_of_b(c, series, mt, sym"光属性追伤", ratio, btbl)
+                + custom_chase_bonus(c, sym"光属性追伤") in
+  let dark_add = bonus_of_b(c, series, mt, sym"暗属性追伤", ratio, btbl)
+               + custom_chase_bonus(c, sym"暗属性追伤") in
+  let self_add = bonus_of_b(c, series, mt, sym"自属性追伤", ratio, btbl)
+               + alias_of_b(c, mt, btbl, sym"追加伤害")
+               + custom_chase_bonus(c, sym"自属性追伤") in
+  // 只读聚合 = Σ 七分量（求和顺序与 TS `additionalDamage.ts` 一致）
+  let total_add = fire_add + water_add + thunder_add + wind_add + light_add + dark_add + self_add in
   {
     攻击: bonus_of_b(c, series, mt, sym"攻击", ratio, btbl),
     固定攻击: bonus_of_b(c, series, mt, sym"固定攻击", ratio, btbl),
@@ -733,7 +776,14 @@ fn panel_ctx(c: Config, mods: List<(Mod, Num)>, ctx: CondCtx) -> Record{..open} 
     技能伤害: bonus_of_b(c, series, mt, sym"技能伤害", ratio, btbl),
     武器伤害: bonus_of_b(c, series, mt, sym"武器伤害", ratio, btbl),
     技能追伤: bonus_of_b(c, series, mt, sym"技能追伤", ratio, btbl),
-    追加伤害: bonus_of_b(c, series, mt, sym"追加伤害", ratio, btbl),
+    追加伤害: total_add,
+    火属性追伤: fire_add,
+    水属性追伤: water_add,
+    雷属性追伤: thunder_add,
+    风属性追伤: wind_add,
+    光属性追伤: light_add,
+    暗属性追伤: dark_add,
+    自属性追伤: self_add,
     独立增伤: bonus_of_b(c, series, mt, sym"独立增伤", ratio, btbl),
     技能独立增伤: bonus_of_b(c, series, mt, sym"技能独立增伤", ratio, btbl),
     属性穿透: bonus_of_b(c, series, mt, sym"属性穿透", ratio, btbl),
@@ -862,12 +912,22 @@ fn buff_scope_ok(key: Sym, scope: Sym) -> Bool =
 fn is_melee_key(k: Sym) -> Bool =
   k == sym"近战攻击" || k == sym"近战暴击" || k == sym"近战暴伤" || k == sym"近战触发"
   || k == sym"近战攻速" || k == sym"近战多重" || k == sym"近战增伤" || k == sym"近战独立增伤"
+  || k == sym"近战装填" || k == sym"近战弹匣" || k == sym"近战弹药" || k == sym"近战武器倍率"
   || k == sym"近战物理"
+  || k == sym"普通近战攻击" || k == sym"普通近战暴击" || k == sym"普通近战暴伤" || k == sym"普通近战触发"
+  || k == sym"普通近战攻速" || k == sym"普通近战多重" || k == sym"普通近战增伤" || k == sym"普通近战独立增伤"
+  || k == sym"普通近战装填" || k == sym"普通近战弹匣" || k == sym"普通近战弹药" || k == sym"普通近战武器倍率"
+  || k == sym"普通近战物理"
 
 fn is_ranged_key(k: Sym) -> Bool =
   k == sym"远程攻击" || k == sym"远程暴击" || k == sym"远程暴伤" || k == sym"远程触发"
   || k == sym"远程攻速" || k == sym"远程多重" || k == sym"远程增伤" || k == sym"远程独立增伤"
+  || k == sym"远程装填" || k == sym"远程弹匣" || k == sym"远程弹药" || k == sym"远程武器倍率"
   || k == sym"远程物理"
+  || k == sym"普通远程攻击" || k == sym"普通远程暴击" || k == sym"普通远程暴伤" || k == sym"普通远程触发"
+  || k == sym"普通远程攻速" || k == sym"普通远程多重" || k == sym"普通远程增伤" || k == sym"普通远程独立增伤"
+  || k == sym"普通远程装填" || k == sym"普通远程弹匣" || k == sym"普通远程弹药" || k == sym"普通远程武器倍率"
+  || k == sym"普通远程物理"
 
 fn is_skill_key(k: Sym) -> Bool = false
 
@@ -883,7 +943,7 @@ fn attr_value(c: Config, key: Sym, scope: Sym) -> Num =
 fn attr_value_p(c: Config, p: Record{..open}, key: Sym, scope: Sym) -> Num =
   if scope == sym"角色" then attr_value_char_p(c, p, key)
   else match weapon_for_scope(c, scope) {
-    some(wp) => if weapon_panel_key(key) then weapon_key_value(c, scope, wp, key)
+    some(wp) => if weapon_panel_key(key) then weapon_key_value(c, p, scope, wp, key)
                 else attr_value_char_p(c, p, key),
     none => attr_value_char_p(c, p, key)
   }
@@ -892,13 +952,16 @@ fn weapon_panel_key(key: Sym) -> Bool =
   key == sym"攻击" || key == sym"暴击" || key == sym"暴伤" || key == sym"触发"
   || key == sym"攻速" || key == sym"多重" || key == sym"增伤" || key == sym"独立增伤"
   || key == sym"追加伤害" || key == sym"充盈转化"
+  || key == sym"火属性追伤" || key == sym"水属性追伤" || key == sym"雷属性追伤"
+  || key == sym"风属性追伤" || key == sym"光属性追伤" || key == sym"暗属性追伤"
+  || key == sym"自属性追伤"
   || key == sym"召唤物攻击速度转化" || key == sym"召唤物范围转化"
 
 // 武器面板（`attributes.rs::weapon_panel`）的**单键**取值。只有武器自身的基础值吃乘法，
 // 其余键是作用域词条（`近战X`）与通用词条之和；公式与整面板逐字一致。
-fn weapon_key_value(c: Config, scope: Sym, wp: Weapon, key: Sym) -> Num =
+fn weapon_key_value(c: Config, p: Record{..open}, scope: Sym, wp: Weapon, key: Sym) -> Num =
   let pre = scope_prefix(scope) in
-  let bonus = |k| prefixed_value(c, scope, pre, k) in
+  let bonus = |k| prefixed_value(c, scope, pre, k) + ordinary_value(c, scope, k) in
   if key == sym"攻击" then
     let physical = prefixed_value(c, scope, pre, sym"物理") + damage_type_bonus(c, wp, scope) in
     let atk_ratio = mastery_ratio(c, wp, scope) in
@@ -909,9 +972,17 @@ fn weapon_key_value(c: Config, scope: Sym, wp: Weapon, key: Sym) -> Num =
   else if key == sym"触发" then round2(wp.触发 * (1.0 + bonus(sym"触发")))
   else if key == sym"攻速" then round2(weapon_speed(wp) * (1.0 + min(2.0, bonus(sym"攻速"))))
   else if key == sym"多重" then round2(1.0 + bonus(sym"多重"))
-  else if key == sym"增伤" then scoped_value(c, scope, sym"增伤")
-  else if key == sym"独立增伤" then scoped_value(c, scope, sym"独立增伤")
-  else if key == sym"追加伤害" then sum_key(active_mods(c), sym"追加伤害", all_context(c))
+  else if key == sym"增伤" then scoped_value(c, scope, sym"增伤") + ordinary_value(c, scope, sym"增伤")
+  else if key == sym"独立增伤" then scoped_value(c, scope, sym"独立增伤") + ordinary_value(c, scope, sym"独立增伤")
+  // 追伤七分量/聚合是角色面板键（引擎 `total_bonus(..., "角色")`），武器作用域不另算
+  else if key == sym"追加伤害" then rec_num(p, sym"追加伤害")
+  else if key == sym"火属性追伤" then rec_num(p, sym"火属性追伤")
+  else if key == sym"水属性追伤" then rec_num(p, sym"水属性追伤")
+  else if key == sym"雷属性追伤" then rec_num(p, sym"雷属性追伤")
+  else if key == sym"风属性追伤" then rec_num(p, sym"风属性追伤")
+  else if key == sym"光属性追伤" then rec_num(p, sym"光属性追伤")
+  else if key == sym"暗属性追伤" then rec_num(p, sym"暗属性追伤")
+  else if key == sym"自属性追伤" then rec_num(p, sym"自属性追伤")
   else if key == sym"充盈转化" then 1.0 + bonus(sym"充盈转化")
   else if key == sym"召唤物攻击速度转化" then bonus(sym"召唤物攻击速度转化")
   else bonus(sym"召唤物范围转化")
@@ -935,6 +1006,47 @@ fn prefixed_value(c: Config, scope: Sym, pre: Sym, key: Sym) -> Num =
 // 武器作用域自身的桶（`shared_pool` 为 false 时 `total_bonus(key)` 的实际来源）
 fn scope_only(c: Config, scope: Sym, key: Sym) -> Num =
   sum_key(scope_mods(c, scope), key, all_context(c))
+
+// 普通武器面板专属前缀（`普通近战*` / `普通远程*`）；同律面板不读取 `普通*`。
+// 与引擎 `getWeaponPanelBonus` 一致：普通面板在 `<prefix><base>` + 裸 `<base>` 之外再追加一项。
+fn ordinary_value(c: Config, scope: Sym, key: Sym) -> Num =
+  let p = ordinary_prefixed_key(scope, key) in
+  if p == key then 0.0 else scoped_value(c, scope, p)
+
+fn ordinary_prefixed_key(scope: Sym, key: Sym) -> Sym =
+  if scope == sym"近战" then melee_ordinary(key)
+  else if scope == sym"远程" then ranged_ordinary(key)
+  else key
+
+fn melee_ordinary(key: Sym) -> Sym =
+  if key == sym"攻击" then sym"普通近战攻击"
+  else if key == sym"暴击" then sym"普通近战暴击"
+  else if key == sym"暴伤" then sym"普通近战暴伤"
+  else if key == sym"触发" then sym"普通近战触发"
+  else if key == sym"攻速" then sym"普通近战攻速"
+  else if key == sym"多重" then sym"普通近战多重"
+  else if key == sym"增伤" then sym"普通近战增伤"
+  else if key == sym"独立增伤" then sym"普通近战独立增伤"
+  else if key == sym"装填" then sym"普通近战装填"
+  else if key == sym"弹匣" then sym"普通近战弹匣"
+  else if key == sym"弹药" then sym"普通近战弹药"
+  else if key == sym"武器倍率" then sym"普通近战武器倍率"
+  else key
+
+fn ranged_ordinary(key: Sym) -> Sym =
+  if key == sym"攻击" then sym"普通远程攻击"
+  else if key == sym"暴击" then sym"普通远程暴击"
+  else if key == sym"暴伤" then sym"普通远程暴伤"
+  else if key == sym"触发" then sym"普通远程触发"
+  else if key == sym"攻速" then sym"普通远程攻速"
+  else if key == sym"多重" then sym"普通远程多重"
+  else if key == sym"增伤" then sym"普通远程增伤"
+  else if key == sym"独立增伤" then sym"普通远程独立增伤"
+  else if key == sym"装填" then sym"普通远程装填"
+  else if key == sym"弹匣" then sym"普通远程弹匣"
+  else if key == sym"弹药" then sym"普通远程弹药"
+  else if key == sym"武器倍率" then sym"普通远程武器倍率"
+  else key
 
 // `<作用域><键>`：如 近战+增伤 → `近战增伤`
 fn scope_prefix_key(scope: Sym, key: Sym) -> Sym =
@@ -1007,6 +1119,7 @@ fn weapon_for_scope(c: Config, scope: Sym) -> Option<Weapon> =
 fn one_based(key: Sym) -> Bool =
   key == sym"技能威力" || key == sym"技能耐久" || key == sym"技能效益" || key == sym"技能范围"
   || key == sym"技能速度" || key == sym"攻速" || key == sym"多重" || key == sym"召唤物属性继承比例"
+  || key == sym"充盈威力"
 
 
 fn attr_value_char_p(c: Config, p: Record{..open}, key: Sym) -> Num =
@@ -1019,7 +1132,7 @@ fn attr_value_char_p(c: Config, p: Record{..open}, key: Sym) -> Num =
   else if key == sym"神智" then round(base_stat(c, sym"基础神智") * (1.0 + b(sym"神智")))
   else if key == sym"技能范围" then min(2.8, 1.0 + b(key))
   else if key == sym"召唤物独立增伤" then summon_indep_of(c, p)
-  else if key == sym"充盈威力" then b(key) + fullness_from_weapons(c)
+  else if key == sym"充盈威力" then 1.0 + b(key) + fullness_from_weapons(c)
   else if key == sym"召唤物攻击速度" then b(key) + summon_speed_from_weapons(c)
   else if one_based(key) then b(key) + 1.0
   else if key == sym"技能耐久" then min(4.0, 1.0 + b(key))
@@ -1031,7 +1144,7 @@ fn attr_value_char_p(c: Config, p: Record{..open}, key: Sym) -> Num =
   else if key == sym"技能无视防御" then clamp(b(key), 0.0, 1.0)
   else b(key)
 
-// 充盈威力：角色 MOD 加成 + Σ 武器(触发率 - 1).max(0) × 该武器充盈转化
+// 充盈威力（1 起始总倍率）：基础 1 + 角色 MOD 加成 + Σ 武器(触发率 - 1).max(0) × 该武器充盈转化
 // 只用 MOD/BUFF 词条（不重建整个武器面板），避免 `weapon_panel → context → values_of` 成环。
 fn fullness_from_weapons(c: Config) -> Num =
   fullness_ctx(c, all_context(c))
@@ -1138,11 +1251,12 @@ fn part_damage_bonus(p: Record{..open}, el: Sym) -> Num =
   if is_physical(el) then rec_num(p, sym"物理增伤") + rec_num(p, element_bonus_key(el))
   else rec_num(p, sym"元素增伤") + rec_num(p, element_bonus_key(el))
 
-// 追加伤害：独立乘区（技能池吃技能追伤）
-fn additional_zone(p: Record{..open}, src: Source) -> Num =
+// 追伤：技能池吃技能追伤；武器池按「匹配角色元素分量 + 自属性分量」结算，
+// 非匹配元素分量在面板可见但不进入因子（与 `<元素>属性增伤` 同口径）
+fn additional_zone(c: Config, p: Record{..open}, src: Source) -> Num =
   if src.kind == sym"skill"
   then 1.0 + rec_num(p, sym"技能追伤")
-  else 1.0 + rec_num(p, sym"追加伤害")
+  else 1.0 + rec_num(p, chase_key(char_element(c.char_id))) + rec_num(p, sym"自属性追伤")
 
 fn independent_zone(p: Record{..open}, src: Source) -> Num =
   if src.kind == sym"skill"
@@ -1209,7 +1323,7 @@ fn damage(c: Config, src: Source) -> Num =
   let p = panel(c) in
   attack_of(c, p, src.element) * src.multiplier
     * damage_pool(p, src, src.element)
-    * additional_zone(p, src)
+    * additional_zone(c, p, src)
     * crit_zone(p, c.crit_mode)
     * independent_zone(p, src)
     * resist_zone(c, p)
@@ -1222,7 +1336,7 @@ fn breakdown(c: Config, src: Source) -> Record{..open} =
     element: src.element,
     attack: attack_of(c, p, src.element),
     damage_pool: damage_pool(p, src, src.element),
-    additional: additional_zone(p, src),
+    additional: additional_zone(c, p, src),
     crit: expected(crit_zone(p, c.crit_mode)),
     independent: independent_zone(p, src),
     resist_zone: resist_zone(c, p),
@@ -1604,6 +1718,8 @@ fn attr_keys() -> List<Sym> = [
   sym"攻击", sym"固定攻击", sym"生命", sym"防御", sym"护盾", sym"神智",
   sym"属性攻击", sym"元素增伤", sym"物理增伤", sym"增伤", sym"技能伤害",
   sym"武器伤害", sym"技能追伤", sym"追加伤害", sym"独立增伤", sym"技能独立增伤",
+  sym"火属性追伤", sym"水属性追伤", sym"雷属性追伤", sym"风属性追伤",
+  sym"光属性追伤", sym"暗属性追伤", sym"自属性追伤",
   sym"属性穿透", sym"无视防御", sym"技能无视防御", sym"暴击", sym"暴伤",
   sym"触发", sym"充盈威力", sym"技能威力", sym"技能耐久", sym"技能效益",
   sym"技能范围", sym"技能速度", sym"昂扬", sym"背水", sym"减伤",
@@ -1745,7 +1861,7 @@ fn weapon_expected(c: Config, p: Record{..open}, damage_type: Sym) -> Num =
                   * clamp(rec_num(p, sym"武器触发"), 0.0, 1.0) in
   let crit = 1.0 + rec_num(p, sym"武器暴击") * (rec_num(p, sym"武器暴伤") - 1.0) in
   let indep = 1.0 + rec_num(p, sym"独立增伤") in
-  let add = 1.0 + rec_num(p, sym"追加伤害") in
+  let add = 1.0 + rec_num(p, chase_key(char_element(c.char_id))) + rec_num(p, sym"自属性追伤") in
   let pen = 1.0 + rec_num(p, sym"属性穿透") in
   pool * trigger * crit * hp_zone(c, p) * indep * add * pen
 
@@ -1823,6 +1939,13 @@ fn key_of(v: Value) -> Sym =
   else if str_eq(v, sym"技能伤害") then sym"技能伤害"
   else if str_eq(v, sym"技能追伤") then sym"技能追伤"
   else if str_eq(v, sym"追加伤害") then sym"追加伤害"
+  else if str_eq(v, sym"火属性追伤") then sym"火属性追伤"
+  else if str_eq(v, sym"水属性追伤") then sym"水属性追伤"
+  else if str_eq(v, sym"雷属性追伤") then sym"雷属性追伤"
+  else if str_eq(v, sym"风属性追伤") then sym"风属性追伤"
+  else if str_eq(v, sym"光属性追伤") then sym"光属性追伤"
+  else if str_eq(v, sym"暗属性追伤") then sym"暗属性追伤"
+  else if str_eq(v, sym"自属性追伤") then sym"自属性追伤"
   else if str_eq(v, sym"独立增伤") then sym"独立增伤"
   else if str_eq(v, sym"技能独立增伤") then sym"技能独立增伤"
   else if str_eq(v, sym"属性穿透") then sym"属性穿透"
@@ -1863,7 +1986,7 @@ fn field_panel(c: Config) -> Record{..open} =
   update(p, {
     召唤物攻击速度: spd,
     召唤物独立增伤: si,
-    充盈威力: rec_num(p, sym"充盈威力") + fullness_ctx(c, ctx),
+    充盈威力: 1.0 + rec_num(p, sym"充盈威力") + fullness_ctx(c, ctx),
     武器面板增伤: rec_num(w, sym"增伤"),
     武器暴击: rec_num(w, sym"暴击"),
     武器暴伤: rec_num(w, sym"暴伤"),
@@ -1882,14 +2005,16 @@ fn weapon_fields_ctx(c: Config, ctx: CondCtx) -> Record{..open} =
 fn build_wf(c: Config, ctx: CondCtx, wp: Weapon) -> Record{..open} =
   let pre = |k| sum_key(scope_mods(c, sym"近战"), k, ctx)
                + effect_scalar_all(c, scope_prefix_key(sym"近战", k)) in
+  // 普通近战面板专属词条（`普通近战<base>`）：同律面板不读取
+  let ord = |k| ordinary_value(c, sym"近战", k) in
   // `total_bonus(k, "近战")`：近战桶 + 穿透类并入的角色槽 + 共享池里的武器特效层
-  let both = |k| pre(k) + sum_key(active_mods(c), k, ctx)
+  let both = |k| pre(k) + ord(k) + sum_key(active_mods(c), k, ctx)
                 + weapon_effect(c.melee_weapon, c.melee_refine, char_element(c.char_id), k)
                 + weapon_effect(c.ranged_weapon, c.ranged_refine, char_element(c.char_id), k) in
   {
     // 引擎 `weapon_panel` 的 `attack_bonus` 只取 `近战攻击` 与近战作用域的 `攻击`，不叠角色槽
     攻击: round2(round2(wp.攻击 * level_multiplier(c.char_level))
-                 * (1.0 + pre(sym"攻击")) * mastery_ratio(c, wp, sym"近战")),
+                 * (1.0 + pre(sym"攻击") + ord(sym"攻击")) * mastery_ratio(c, wp, sym"近战")),
     增伤: both(sym"增伤"),
     暴击: round2(wp.暴击 * (1.0 + both(sym"暴击"))),
     暴伤: round2(wp.暴伤 * (1.0 + both(sym"暴伤"))),

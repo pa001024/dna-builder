@@ -20,10 +20,18 @@ export interface CharSettings {
     isRouge: boolean
     /** 目标函数表达式；空串时按默认口径算 */
     targetFunction: string
+    /** 主控目标函数是否参与合计（目标卡上的「启用」，默认参与） */
+    mainTargetEnabled: boolean
     /** 自定义变量：`[变量名, 表达式]` */
     customVariables: [string, string][]
-    /** 技能等级 `[E, Q, 被动]`，每项 1-12 */
+    /** 技能等级 `[E, Q, 被动]`，每项 1-30 */
     charSkillLevel: [number, number, number]
+    /** 旧字段（1..N 根源生效），缺省取最大；仅用于迁移为 `traceOffRoots` */
+    traceLevel: number
+    /** 关闭的根源序号（1..该角色最大根源）；缺省 = 全部激活 */
+    traceOffRoots?: number[]
+    /** 溯源层数 / 覆盖率设置 `[根源序号, 等级, 覆盖率?]`；缺省 = 该根源按层数上限满层、覆盖率 1 */
+    traceStacks?: [number, number, number?][]
     /** 额外精通武器类型（如 "长柄"），空串表示未解锁 */
     extraMastery: string
     meleeWeapon: number
@@ -69,8 +77,14 @@ export interface CharSettings {
     team2Weapon: number | "-"
     team2Build: string
     team2BuildVariant: VariantLetter
+    /** 1 号协战角色的完整构筑配置（角色 id 仍以 team1 为真源） */
+    assist1: AssistCharSettings
+    /** 2 号协战角色的完整构筑配置（角色 id 仍以 team2 为真源） */
+    assist2: AssistCharSettings
     /** 是否启用时间轴 DPS */
     timelineDPS: boolean
+    /** 升华配置（总开关 / 天赋 / 三组装备 / 变体）：默认关闭，不参与计算 */
+    transcend: TranscendSettings
     /** 是否使用全局背包特效等级（true 时忽略 effectConfig） */
     useGlobal: boolean
     /** 构筑本地特效等级：key 为 `m:<modId>` / `w:<weaponId>` */
@@ -79,6 +93,129 @@ export interface CharSettings {
     dotSettings: DotFrequencySettings
     /** 时间线内联动作；未配置时序列化会直接省略，载入时自动补回默认值 */
     actions?: InlineActions
+}
+
+/**
+ * 升华配置：总开关 + 天赋（仅主控生效）+ 三组装备 + 装备变体。
+ *
+ * 装备对应当前激活变体；`gearVariants` 保存全部变体。关闭时整份配置不参与计算。
+ */
+export interface TranscendSettings {
+    /** 总开关：false 时不参与计算 */
+    enabled: boolean
+    /** 天赋节点等级 `[talentId, level]`（仅主控生效，协战不吃天赋） */
+    talentLevels: [number, number][]
+    /** 主控装备（装备位 1-8） */
+    mainGear: TranscendGearGroup
+    /** 协战一装备（装备位 9-12） */
+    assist1Gear: TranscendGearGroup
+    /** 协战二装备（装备位 13-16） */
+    assist2Gear: TranscendGearGroup
+    /** 全部装备变体 */
+    gearVariants: TranscendGearVariant[]
+    /** 当前激活变体 id（A/B/C） */
+    activeGearVariant: string
+}
+
+/** 一条升华装备词缀 roll（v1 平铺条目去掉装备位） */
+export interface TranscendGearAffixRoll {
+    affixId: number
+    /** 档位（1..词条 totalValueLevel） */
+    rollLevel: number
+    /** 精锻次数（0-10） */
+    masterworkLevel: number
+    ancient: boolean
+    finalMasterwork: boolean
+    /** 词缀来源：base / random / unique / tempering / enchant / unknown */
+    source?: string
+}
+
+/** 一条升华装备词缀（平铺形状）：装备位 1-8 主控 / 9-12 协战一 / 13-16 协战二 */
+export interface TranscendGearEntry extends TranscendGearAffixRoll {
+    slotId: number
+}
+
+/** 一件升华装备（v2 物品形状）：槽位 + 物品配置 */
+export interface TranscendEquippedGear {
+    slotId: number
+    item: {
+        /** 普通 / 暗金 */
+        kind?: string
+        slotType?: number
+        affixes?: TranscendGearAffixRoll[]
+        uniqueAffix?: TranscendGearAffixRoll
+        sockets?: { socketIndex: number; gemId: number }[]
+        socketCount?: number
+        craft?: { masterworkLevel?: number; temperingCount?: number; enchantCount?: number; finalMasterworkAffixIndex?: number }
+        nameSnapshot?: string
+        iconSnapshot?: string
+        uniqueId?: number
+    }
+}
+
+/** 一组升华装备（平铺词缀与完整物品两种形状都可能出现） */
+export type TranscendGearGroup = (TranscendEquippedGear | TranscendGearEntry)[]
+
+/** 一套升华装备变体：只含三组装备 */
+export interface TranscendGearVariant {
+    /** 变体 id（A/B/C） */
+    id: string
+    mainGear: TranscendGearGroup
+    assist1Gear: TranscendGearGroup
+    assist2Gear: TranscendGearGroup
+}
+
+/**
+ * 协战角色配置：协战位也能被完整构筑（等级 / 技能 / 单武器 / MOD / BUFF / 特效）。
+ *
+ * 角色 id 与武器 id 仍以主构筑的 `teamN` / `teamNWeapon` 为唯一真源，这里不重复存 id；
+ * 敌人环境继承主控。
+ */
+export interface AssistCharSettings {
+    /** 角色等级 1-80 */
+    charLevel: number
+    /** 技能等级 `[E, Q, 被动]`，每项 1-30 */
+    charSkillLevel: [number, number, number]
+    /** 旧字段（1..N 根源生效），缺省取最大；仅用于迁移为 `traceOffRoots` */
+    traceLevel: number
+    /** 关闭的根源序号（1..该角色最大根源）；缺省 = 全部激活 */
+    traceOffRoots?: number[]
+    /** 溯源层数 / 覆盖率设置 `[根源序号, 等级, 覆盖率?]`；缺省 = 该根源按层数上限满层、覆盖率 1 */
+    traceStacks?: [number, number, number?][]
+    /** 计算技能（baseName），必须属于该协战角色的技能表 */
+    baseName: string
+    /** 额外精通武器类型（如 "长柄"），空串表示未解锁 */
+    extraMastery: string
+    /** 单武器槽（teamNWeapon）的等级 1-80 */
+    weaponLevel: number
+    /** 单武器槽（teamNWeapon）的精炼等级 0-5 */
+    weaponRefine: number
+    /** 目标函数表达式 */
+    targetFunction: string
+    /** 自定义变量：`[变量名, 表达式]` */
+    customVariables: [string, string][]
+    /** DOT 频率设置 */
+    dotSettings: DotFrequencySettings
+    /** 是否参与合计（未配置角色时默认不参与） */
+    enabled: boolean
+    /** 中枢魔之楔（光环）id，0 表示未设置 */
+    auraMod: number
+    charMods: ModSlot[]
+    meleeMods: ModSlot[]
+    rangedMods: ModSlot[]
+    skillWeaponMods: ModSlot[]
+    /** 当前激活的 MOD 变体索引（0/1/2 ↔ 配置 A/B/C） */
+    modVariantIndex: number
+    /** 额外 MOD 变体（B/C） */
+    modVariants: ModVariant[]
+    /** 启用的 BUFF：`[名称, 等级, 覆盖率?]`，覆盖率缺省为 1 */
+    buffs: [string, number, number?][]
+    /** 自定义 BUFF：`[属性名, 数值]` */
+    customBuff: [string, number][]
+    /** 是否使用全局背包特效等级（true 时忽略 effectConfig） */
+    useGlobal: boolean
+    /** 构筑本地特效等级：key 为 `m:<modId>` / `w:<weaponId>` */
+    effectConfig: Record<string, number>
 }
 
 /** MOD 槽位：`[魔之楔 id, 等级]`，null 表示空槽 */
@@ -235,7 +372,7 @@ export interface BuildState {
     charId: number
     /** 角色等级 1-80 */
     charLevel: number
-    /** 技能等级 `[E, Q, 被动]`，每项 1-12 */
+    /** 技能等级 `[E, Q, 被动]`，每项 1-30 */
     skillLevel: [number, number, number]
     /** 当前血量百分比 0-1（影响背水类收益） */
     hpPercent: number

@@ -3,10 +3,13 @@ import type { Ref } from "vue"
 import type { CharSettings, ModSlot, ModSlotType } from "@/composables/useCharSettings"
 import {
     addModVariant,
+    CHAR_SKILL_LEVEL_MAX,
+    CHAR_SKILL_LEVEL_MIN,
     createDefaultCharSettings,
     getModVariantIndex,
     getModVariantLetter,
     getModVariantSlots,
+    isEmptyInlineActions,
     MOD_SLOT_COUNTS,
     normalizeCharSettings,
     normalizeCharSkillLevels,
@@ -669,9 +672,9 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             if (input.skill !== undefined || input.e !== undefined || input.q !== undefined || input.passive !== undefined) {
                 const current = normalizeCharSkillLevels(settings.charSkillLevel)
                 const next = normalizeCharSkillLevels(input.skill !== undefined ? input.skill : current)
-                if (input.e !== undefined) next[0] = clamp(Math.round(input.e), 1, 12)
-                if (input.q !== undefined) next[1] = clamp(Math.round(input.q), 1, 12)
-                if (input.passive !== undefined) next[2] = clamp(Math.round(input.passive), 1, 12)
+                if (input.e !== undefined) next[0] = clamp(Math.round(input.e), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
+                if (input.q !== undefined) next[1] = clamp(Math.round(input.q), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
+                if (input.passive !== undefined) next[2] = clamp(Math.round(input.passive), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
                 settings.charSkillLevel = next
             }
             record(`等级设为 角色${settings.charLevel} 技能${settings.charSkillLevel}`)
@@ -1225,7 +1228,11 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
         },
 
         async raw() {
-            return JSON.parse(serializeCharSettings(host.charSettings.value)) as CharSettings
+            // 返回完整内存结构（归一化 + 深拷贝），不把 U96 压缩载荷（数组 / 1|0）交给调用方；
+            // 沿用序列化「未配置 actions 时省略」的口径
+            const raw = JSON.parse(JSON.stringify(normalizeCharSettings(host.charSettings.value))) as CharSettings
+            if (isEmptyInlineActions(raw.actions)) delete (raw as Partial<CharSettings>).actions
+            return raw
         },
 
         async current() {

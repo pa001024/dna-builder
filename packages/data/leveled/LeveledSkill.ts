@@ -1,4 +1,5 @@
 import type { CharAttr, WeaponAttr } from "../CharBuild"
+import { toExprIdentifier } from "../expr-name"
 import { isMultiplicativeAttr } from "./minusAttr"
 
 export enum SkillType {
@@ -322,6 +323,8 @@ export interface LeveledSkillField {
     属性?: string
     值2?: number
     safeName: string
+    /** 表达式标识符：去除词法器不接受的标点后可直接写入 `技能::字段` */
+    exprName: string
     /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
     tag?: string[]
 }
@@ -355,6 +358,11 @@ export class LeveledSkill {
 
     get safeName() {
         return this.名称.replace(/\//g, "_")
+    }
+
+    /** 表达式标识符：技能名可能含引号 / 感叹号等词法器不接受的标点 */
+    get exprName() {
+        return toExprIdentifier(this.名称)
     }
 
     /**
@@ -398,8 +406,8 @@ export class LeveledSkill {
     }
 
     set 等级(value: number) {
-        // 确保等级在1到12之间
-        this._level = Math.max(1, Math.min(12, value))
+        // 确保等级在 1 到 30 之间（源数据 DataConst.MaxSkillLevel）
+        this._level = Math.max(1, Math.min(30, value))
 
         // 更新属性
         this.updateProperties()
@@ -428,6 +436,7 @@ export class LeveledSkill {
                 const obj = {
                     ...fo,
                     safeName: key.replace(/\//g, "_"),
+                    exprName: toExprIdentifier(key),
                     值: Array.isArray(fo.值) ? fo.值[this._level - 1] : fo.值,
                 } as LeveledSkillField
                 if (obj.值2) {
@@ -617,7 +626,7 @@ export class LeveledSkill {
                     名称: "召唤物范围",
                     值: sattrs.range,
                 },
-            ].map(v => ({ ...v, safeName: v.名称.replace(/\//g, "_") })) satisfies LeveledSkillField[]
+            ].map(v => ({ ...v, safeName: v.名称.replace(/\//g, "_"), exprName: toExprIdentifier(v.名称) })) satisfies LeveledSkillField[]
         }
         return []
     }

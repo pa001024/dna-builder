@@ -13,7 +13,7 @@
 use std::collections::HashMap;
 
 use super::ast_eval::Evaluator;
-use super::config::CharSettings;
+use super::config::{AssistSettings, CharSettings, TranscendSide};
 use super::context::{BuildContext, WeaponRef};
 use super::damage::DamageResult;
 use super::models::AttrMap;
@@ -172,6 +172,9 @@ fn compute_panels(
     context: &mut BuildContext<'_>,
     selection: &PanelSelection,
 ) -> HashMap<String, AttrMap> {
+    // BUFF attr 表达式可能写追伤等面板属性：先按角色属性刷新一次来源表，
+    // 否则面板请求早于求值时会漏算（与求值附带面板同口径）。
+    context.calculate_weapon_attributes(None);
     let need = |slot: WeaponRef| selection.slots.contains(&slot);
     let panels = context.weapon_panels_for(
         need(WeaponRef::Melee),
@@ -524,8 +527,193 @@ fn fnv1a(mut hash: u64, bytes: &[u8]) -> u64 {
     hash
 }
 
+/// 协战 loadout 指纹：逐字段混入；`None` 与 `Some(默认)` 用首字节区分。
+///
+/// 字符串与集合都带长度前缀，避免相邻字段的字节拼接产生歧义。
+fn fingerprint_assist(hash: &mut u64, assist: &Option<AssistSettings>) {
+    macro_rules! mix {
+        ($bytes:expr) => {
+            *hash = fnv1a(*hash, $bytes)
+        };
+    }
+    macro_rules! num {
+        ($value:expr) => {
+            mix!(&$value.to_bits().to_le_bytes())
+        };
+    }
+    macro_rules! text {
+        ($value:expr) => {{
+            let text: &str = $value;
+            mix!(&(text.len() as u64).to_le_bytes());
+            mix!(text.as_bytes());
+        }};
+    }
+    macro_rules! slots {
+        ($slots:expr) => {{
+            mix!(&($slots.len() as u64).to_le_bytes());
+            for slot in $slots {
+                match slot {
+                    Some((id, level)) => {
+                        mix!(&[1]);
+                        mix!(&id.to_le_bytes());
+                        num!(*level);
+                    }
+                    None => mix!(&[0]),
+                }
+            }
+        }};
+    }
+
+    let Some(assist) = assist else {
+        mix!(&[0]);
+        return;
+    };
+    mix!(&[1]);
+    num!(assist.char_level);
+    for level in assist.char_skill_level {
+        num!(level);
+    }
+    text!(assist.base_name.as_str());
+    text!(assist.extra_mastery.as_str());
+    num!(assist.weapon_level);
+    num!(assist.weapon_refine);
+    text!(assist.target_function.as_str());
+    mix!(&(assist.custom_variables.len() as u64).to_le_bytes());
+    for (name, expression) in &assist.custom_variables {
+        text!(name.as_str());
+        text!(expression.as_str());
+    }
+    num!(assist.dot_settings.skill);
+    num!(assist.dot_settings.melee);
+    num!(assist.dot_settings.ranged);
+    num!(assist.dot_settings.skillweapon);
+    mix!(&[u8::from(assist.dot_settings.force_own_additional_damage)]);
+    mix!(&[u8::from(assist.enabled)]);
+    mix!(&assist.aura_mod.to_le_bytes());
+    for slots in [
+        &assist.char_mods,
+        &assist.melee_mods,
+        &assist.ranged_mods,
+        &assist.skill_mods,
+    ] {
+        slots!(slots);
+    }
+    mix!(&(assist.mod_variant_index as u64).to_le_bytes());
+    mix!(&(assist.mod_variants.len() as u64).to_le_bytes());
+    for variant in &assist.mod_variants {
+        match variant.aura {
+            Some(id) => {
+                mix!(&[1]);
+                mix!(&id.to_le_bytes());
+            }
+            None => mix!(&[0]),
+        }
+        for slots in [
+            &variant.char_mods,
+            &variant.melee_mods,
+            &variant.ranged_mods,
+            &variant.skill_mods,
+        ] {
+            slots!(slots);
+        }
+    }
+    mix!(&(assist.buffs.len() as u64).to_le_bytes());
+    for (name, level, coverage) in &assist.buffs {
+        text!(name.as_str());
+        num!(*level);
+        match coverage {
+            Some(value) => {
+                mix!(&[1]);
+                num!(*value);
+            }
+            None => mix!(&[0]),
+        }
+    }
+    mix!(&(assist.custom_buff.len() as u64).to_le_bytes());
+    for (property, value) in &assist.custom_buff {
+        text!(property.as_str());
+        num!(*value);
+    }
+    mix!(&[u8::from(assist.use_global)]);
+    mix!(&(assist.effect_config.len() as u64).to_le_bytes());
+    for (key, value) in &assist.effect_config {
+        text!(key.as_str());
+        num!(*value);
+    }
+}
+
+/// 升华效果集内容指纹：BUFF 按载荷顺序、技能替换按 `BTreeMap` 键序，字节确定。
+fn fingerprint_transcend_effects(hash: &mut u64, effects: &crate::config::TranscendEffectSet) {
+    let mix = |hash: &mut u64, bytes: &[u8]| *hash = fnv1a(*hash, bytes);
+    mix(hash, &(effects.buffs.len() as u64).to_le_bytes());
+    for buff in &effects.buffs {
+        let text = serde_json::to_string(&serde_json::Value::Object(buff.data.as_map().clone()))
+            .unwrap_or_default();
+        mix(hash, &(text.len() as u64).to_le_bytes());
+        mix(hash, text.as_bytes());
+        mix(hash, &buff.level.to_bits().to_le_bytes());
+        match buff.coverage {
+            Some(coverage) => {
+                mix(hash, &[1]);
+                mix(hash, &coverage.to_bits().to_le_bytes());
+            }
+            None => mix(hash, &[0]),
+        }
+    }
+    mix(hash, &(effects.skill_replacements.len() as u64).to_le_bytes());
+    for (id, replacement) in &effects.skill_replacements {
+        mix(hash, &id.to_le_bytes());
+        let text = replacement.to_canonical_value().to_string();
+        mix(hash, &(text.len() as u64).to_le_bytes());
+        mix(hash, text.as_bytes());
+    }
+}
+
+/// 升华载荷指纹：混入**所有存在**的侧（固定顺序 main → assist1 → assist2）。
+///
+/// `transcend_side` 只决定装配用哪侧，不限制指纹覆盖面：主控表达式可经 `角色名::属性` /
+/// `协战N::` 读取 peer 属性，而 peer 会按自己的侧应用载荷；若只混当前侧，
+/// `CalcSession`（`dobcc_calc_*`）会在协战载荷变化后命中旧缓存。
+/// 三侧全空 / 未携带时完全跳过，保证无升华场景的缓存键与历史逐位一致。
+fn fingerprint_transcend(hash: &mut u64, settings: &CharSettings) {
+    let Some(payload) = settings.transcend_effects.as_ref() else {
+        return;
+    };
+    let sides = [
+        (0u8, Some(&payload.main)),
+        (1u8, payload.assist1.as_ref()),
+        (2u8, payload.assist2.as_ref()),
+    ];
+    if sides
+        .iter()
+        .filter_map(|(_, effects)| *effects)
+        .all(crate::config::TranscendEffectSet::is_empty)
+    {
+        return;
+    }
+    let mix = |hash: &mut u64, bytes: &[u8]| *hash = fnv1a(*hash, bytes);
+    // 侧别仍参与指纹：同一载荷下主控 / 协战装配结果不同
+    mix(
+        hash,
+        &[match settings.transcend_side {
+            TranscendSide::Main => 0u8,
+            TranscendSide::Assist1 => 1,
+            TranscendSide::Assist2 => 2,
+        }],
+    );
+    for (marker, effects) in sides {
+        let Some(effects) = effects else {
+            continue;
+        };
+        mix(hash, &[marker]);
+        fingerprint_transcend_effects(hash, effects);
+    }
+}
+
 /// 配置指纹：`assembly_only` 跳过目标函数、自定义变量与面板选择（它们不影响装配）。
-fn fingerprint_settings(
+///
+/// 协战 loadout 参与装配，因此两种指纹都必须混入（`None` 与空 loadout 必须区分）。
+pub fn fingerprint_settings(
     settings: &CharSettings,
     assembly_only: bool,
     panels: Option<&PanelSelection>,
@@ -677,6 +865,8 @@ fn fingerprint_settings(
             None => mix!(&[0]),
         }
     }
+    fingerprint_assist(&mut hash, &settings.assist1);
+    fingerprint_assist(&mut hash, &settings.assist2);
     mix!(&[u8::from(settings.timeline_dps)]);
     mix!(&[u8::from(settings.use_global)]);
     for (key, value) in &settings.effect_config {
@@ -688,6 +878,7 @@ fn fingerprint_settings(
     num!(settings.dot_settings.ranged);
     num!(settings.dot_settings.skillweapon);
     mix!(&[u8::from(settings.dot_settings.force_own_additional_damage)]);
+    fingerprint_transcend(&mut hash, settings);
     hash
 }
 

@@ -8,6 +8,8 @@ const props = defineProps<{
     selected?: boolean
     income: number
     title?: string
+    /** 展示名（缺省取 `$t(buff.名称)`；溯源卡片传本地化根源名） */
+    displayName?: string
     /** 覆盖率（0-1，仅选中且父级提供时显示覆盖率控件） */
     coverage?: number
     /** 显式描述（特效行传入的国际化熔炼/效果文案，仅在 buff 无自带手写描述时展示） */
@@ -51,7 +53,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                             class="mt-0.5 size-3.5 shrink-0 text-primary"
                         />
                         <span class="wrap-break-word" :class="{ 'line-through decoration-base-content/50': disabled }">
-                            {{ $t(buff.名称) }}
+                            {{ displayName ?? $t(buff.名称) }}
                         </span>
                     </div>
                     <div v-if="income" class="shrink-0 text-right">
@@ -72,8 +74,12 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                 >
                     <div v-if="buff.mx" class="flex items-center gap-1.5">
                         <span class="font-orbitron text-[10px] tracking-wide text-base-content/40">Lv.</span>
+                        <template v-if="buff.等级来源">
+                            <span class="font-orbitron text-xs font-medium text-base-content/70 tabular-nums">{{ lv }}</span>
+                            <span class="font-orbitron text-[10px] tracking-wide text-base-content/40">({{ buff.等级来源 }})</span>
+                        </template>
                         <NumberInput
-                            v-if="selected"
+                            v-else-if="selected"
                             :model-value="lv"
                             :min="buff.lx || 0"
                             :max="buff.mx"

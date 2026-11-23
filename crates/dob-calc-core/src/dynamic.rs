@@ -48,6 +48,24 @@ pub struct CodeEnv<'a> {
     pub mod_attrs: Arc<HashMap<String, AttrMap>>,
     /// 目标怪物（`enemy`），只读。
     pub enemy: AttrMap,
+    /// 同一段 code 内是否显式写入追伤分量（`雷属性追伤 …` 等）。
+    ///
+    /// 聚合与分量同时写入时，聚合写入不得按整段单一模式缩放，
+    /// 回退为「执行前后差值记入 `自属性追伤`」，其余分量保留 code 内的显式结果。
+    pub legacy_aggregate_mixed: bool,
+    /// 本段 code 写过的追伤分量记录（执行后统一重算聚合）。
+    pub(crate) legacy_component_targets: Vec<AggregateTarget>,
+    /// 本段 code 写过的旧聚合记录（执行前后各取一次聚合，统一迁移）。
+    pub(crate) legacy_aggregate_targets: Vec<AggregateTarget>,
+}
+
+/// 追伤聚合所在的属性记录（裸属性 / 武器面板 / 基础值 / MOD 槽位）。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum AggregateTarget {
+    Attrs,
+    Field(String),
+    Base(String),
+    Mod(String),
 }
 
 /// 执行结果。
@@ -90,7 +108,18 @@ pub fn run_code(code: &str, env: &mut CodeEnv<'_>) -> CodeOutcome {
         }
     };
     let mut scope: HashMap<String, f64> = HashMap::new();
-    match exec_statements(statements, env, &mut scope) {
+    // 聚合与分量同段写入的判定只依赖语法树，执行前算一次
+    env.legacy_aggregate_mixed = statements.iter().any(statement_writes_component);
+    env.legacy_component_targets.clear();
+    env.legacy_aggregate_targets.clear();
+    // 角色不持有追伤：沙盒补 0 值键承接旧 code 裸写，执行后重定向到武器面板
+    seed_char_chase(env);
+    // 对齐 TS `LeveledBuff.applyDynamicAttr`：整段 code 执行前后各取一次聚合再统一迁移
+    let snapshot = AggregateSnapshot::capture(env);
+    let result = exec_statements(statements, env, &mut scope);
+    redirect_char_chase(env);
+    apply_legacy_migrations(env, &snapshot, code);
+    match result {
         Ok(()) => CodeOutcome {
             ok: true,
             error: None,
@@ -719,7 +748,7 @@ fn eval(
             let rhs = eval(value, env, scope)?;
             let current = eval(target, env, scope)?;
             let next = apply_operator(operator, current, rhs)?;
-            write_back(target, next, env, scope);
+            write_assignment(target, operator, value, current, next, env, scope);
             Ok(next)
         }
         Expr::Sequence(items) => {
@@ -870,6 +899,375 @@ fn read_member(root: &str, property: &str, env: &CodeEnv<'_>) -> f64 {
     0.0
 }
 
+/// 赋值回写：显式分量 / 旧聚合写入只落原始值，迁移与重算放到整段 code 执行后。
+///
+/// 对齐 TS `LeveledBuff.applyDynamicAttr`：执行前后各取一次聚合，
+/// 由 `migrateAggregateAdditionalDamage` 按整段 code 的写入方式统一迁移；
+/// 中间语句读聚合时看到的是 code 内的原始值，而不是由分量即时重算的值。
+fn write_assignment(
+    target: &Expr,
+    _operator: &str,
+    _value: &Expr,
+    _before: f64,
+    after: f64,
+    env: &mut CodeEnv<'_>,
+    scope: &mut HashMap<String, f64>,
+) {
+    if is_component_target(target) {
+        if let Some(record) = component_target(target, env, scope) {
+            push_target(&mut env.legacy_component_targets, record);
+        }
+        write_back(target, after, env, scope);
+        return;
+    }
+    if is_legacy_aggregate_target(target)
+        && let Some(record) = aggregate_target(target, env, scope)
+    {
+        push_target(&mut env.legacy_aggregate_targets, record);
+    }
+    write_back(target, after, env, scope);
+}
+
+/// 显式分量写入的记录（裸属性 / 武器面板；其余对象不重算聚合）。
+fn component_target(
+    target: &Expr,
+    env: &CodeEnv<'_>,
+    scope: &HashMap<String, f64>,
+) -> Option<AggregateTarget> {
+    match target {
+        Expr::Ident(name) if !scope.contains_key(name) => Some(AggregateTarget::Attrs),
+        Expr::Member(object, _) => {
+            let root = root_ident(object)?;
+            env.field_attrs
+                .contains_key(root)
+                .then(|| AggregateTarget::Field(root.to_string()))
+        }
+        _ => None,
+    }
+}
+
+/// 旧聚合写入的记录。
+fn aggregate_target(
+    target: &Expr,
+    env: &CodeEnv<'_>,
+    scope: &HashMap<String, f64>,
+) -> Option<AggregateTarget> {
+    match target {
+        Expr::Ident(name) if !scope.contains_key(name) => Some(AggregateTarget::Attrs),
+        Expr::Member(object, _) => {
+            let root = root_ident(object)?;
+            if env.field_attrs.contains_key(root) {
+                Some(AggregateTarget::Field(root.to_string()))
+            } else if env.bases.contains_key(root) {
+                Some(AggregateTarget::Base(root.to_string()))
+            } else if env.mod_attrs.contains_key(root) {
+                Some(AggregateTarget::Mod(root.to_string()))
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+fn push_target(list: &mut Vec<AggregateTarget>, target: AggregateTarget) {
+    if !list.contains(&target) {
+        list.push(target);
+    }
+}
+
+/// 动态 code 执行前在角色沙盒写入 0 值追伤键，让旧 code 的裸写落回沙盒。
+fn seed_char_chase(env: &mut CodeEnv<'_>) {
+    for key in crate::additional_damage::KEYS {
+        env.attrs.entry(key).or_insert(0.0);
+    }
+    env.attrs
+        .entry(crate::additional_damage::LEGACY_KEY)
+        .or_insert(0.0);
+}
+
+/// 动态 code 执行后把角色沙盒里的裸追伤写入重定向到武器面板，并移除角色侧键。
+fn redirect_char_chase(env: &mut CodeEnv<'_>) {
+    let mut components: Vec<(&'static str, f64)> = Vec::new();
+    for key in crate::additional_damage::KEYS {
+        let value = env.attrs.get(key).copied().unwrap_or(0.0);
+        if value.is_finite() && value != 0.0 {
+            components.push((key, value));
+        }
+    }
+    let legacy = env
+        .attrs
+        .get(crate::additional_damage::LEGACY_KEY)
+        .copied()
+        .unwrap_or(0.0);
+    let has_aggregate = legacy.is_finite() && legacy != 0.0;
+    if (!components.is_empty() || has_aggregate)
+        && let Some(panel) = Arc::make_mut(&mut env.field_attrs).get_mut("weaponAttr")
+    {
+        for (key, value) in &components {
+            let current = panel.get(key).copied().unwrap_or(0.0);
+            panel.insert(*key, current + value);
+        }
+        if has_aggregate {
+            let current = panel
+                .get(crate::additional_damage::SELF_KEY)
+                .copied()
+                .unwrap_or(0.0);
+            panel.insert(crate::additional_damage::SELF_KEY, current + legacy);
+        }
+        crate::additional_damage::recompute(panel);
+    }
+    for key in crate::additional_damage::KEYS {
+        env.attrs.remove(key);
+    }
+    env.attrs.remove(crate::additional_damage::LEGACY_KEY);
+}
+
+/// code 执行前的追伤聚合快照（逐记录）。
+struct AggregateSnapshot {
+    attrs: f64,
+    fields: HashMap<String, f64>,
+    bases: HashMap<String, f64>,
+    mods: HashMap<String, f64>,
+}
+
+impl AggregateSnapshot {
+    fn capture(env: &CodeEnv<'_>) -> Self {
+        let read = |record: &AttrMap| {
+            record
+                .get(crate::additional_damage::LEGACY_KEY)
+                .copied()
+                .unwrap_or(0.0)
+        };
+        Self {
+            attrs: read(env.attrs),
+            fields: env
+                .field_attrs
+                .iter()
+                .map(|(key, record)| (key.clone(), read(record)))
+                .collect(),
+            bases: env
+                .bases
+                .iter()
+                .map(|(key, record)| (key.clone(), read(record)))
+                .collect(),
+            mods: env
+                .mod_attrs
+                .iter()
+                .map(|(key, record)| (key.clone(), read(record)))
+                .collect(),
+        }
+    }
+
+    fn value(&self, target: &AggregateTarget) -> f64 {
+        match target {
+            AggregateTarget::Attrs => self.attrs,
+            AggregateTarget::Field(root) => self.fields.get(root).copied().unwrap_or(0.0),
+            AggregateTarget::Base(root) => self.bases.get(root).copied().unwrap_or(0.0),
+            AggregateTarget::Mod(root) => self.mods.get(root).copied().unwrap_or(0.0),
+        }
+    }
+}
+
+fn current_aggregate(env: &CodeEnv<'_>, target: &AggregateTarget) -> f64 {
+    let read = |record: &AttrMap| {
+        record
+            .get(crate::additional_damage::LEGACY_KEY)
+            .copied()
+            .unwrap_or(0.0)
+    };
+    match target {
+        AggregateTarget::Attrs => read(env.attrs),
+        AggregateTarget::Field(root) => env.field_attrs.get(root).map(read).unwrap_or(0.0),
+        AggregateTarget::Base(root) => env.bases.get(root).map(read).unwrap_or(0.0),
+        AggregateTarget::Mod(root) => env.mod_attrs.get(root).map(read).unwrap_or(0.0),
+    }
+}
+
+fn apply_migration(
+    env: &mut CodeEnv<'_>,
+    target: &AggregateTarget,
+    mode: crate::additional_damage::AggregateWriteMode,
+    before: f64,
+    after: f64,
+) {
+    match target {
+        AggregateTarget::Attrs => {
+            crate::additional_damage::apply_write(&mut env.attrs, mode, before, after)
+        }
+        AggregateTarget::Field(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.field_attrs).get_mut(root) {
+                crate::additional_damage::apply_write(record, mode, before, after);
+            }
+        }
+        AggregateTarget::Base(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.bases).get_mut(root) {
+                crate::additional_damage::apply_write(record, mode, before, after);
+            }
+        }
+        AggregateTarget::Mod(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.mod_attrs).get_mut(root) {
+                crate::additional_damage::apply_write(record, mode, before, after);
+            }
+        }
+    }
+}
+
+fn recompute_target(env: &mut CodeEnv<'_>, target: &AggregateTarget) {
+    match target {
+        AggregateTarget::Attrs => crate::additional_damage::recompute(&mut env.attrs),
+        AggregateTarget::Field(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.field_attrs).get_mut(root) {
+                crate::additional_damage::recompute(record);
+            }
+        }
+        AggregateTarget::Base(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.bases).get_mut(root) {
+                crate::additional_damage::recompute(record);
+            }
+        }
+        AggregateTarget::Mod(root) => {
+            if let Some(record) = Arc::make_mut(&mut env.mod_attrs).get_mut(root) {
+                crate::additional_damage::recompute(record);
+            }
+        }
+    }
+}
+
+/// 整段 code 执行后的统一迁移。
+fn apply_legacy_migrations(env: &mut CodeEnv<'_>, snapshot: &AggregateSnapshot, code: &str) {
+    use crate::additional_damage::AggregateWriteMode;
+    let mode = if env.legacy_aggregate_mixed {
+        // 同段还写了任一分量：不按整段单一模式缩放，聚合写入一律按差值落 `自属性追伤`
+        AggregateWriteMode::Add
+    } else {
+        classify_aggregate_write_code(code).unwrap_or(AggregateWriteMode::Add)
+    };
+    let aggregate_targets: Vec<AggregateTarget> = env
+        .legacy_aggregate_targets
+        .iter()
+        .filter(|target| **target != AggregateTarget::Attrs)
+        .cloned()
+        .collect();
+    for target in &aggregate_targets {
+        let before = snapshot.value(target);
+        let after = current_aggregate(env, target);
+        if after.is_finite() && after != before {
+            apply_migration(env, target, mode, before, after);
+        } else {
+            // TS 在迁移入口无条件 recompute；分量写入后聚合也在这里刷新。
+            recompute_target(env, target);
+        }
+    }
+    for target in env.legacy_component_targets.clone() {
+        // 角色侧聚合已由 redirect_char_chase 重定向到武器面板
+        if target == AggregateTarget::Attrs || aggregate_targets.contains(&target) {
+            continue;
+        }
+        recompute_target(env, &target);
+    }
+}
+
+/// 赋值目标是否是只读聚合 `追加伤害`（裸标识符或 `xxx.追加伤害`）。
+fn is_legacy_aggregate_target(target: &Expr) -> bool {
+    match target {
+        Expr::Ident(name) => name == crate::additional_damage::LEGACY_KEY,
+        Expr::Member(_, property) => property == crate::additional_damage::LEGACY_KEY,
+        _ => false,
+    }
+}
+
+/// 同一段 code 是否显式写入任一追伤分量（只看赋值目标，不看读取）。
+fn statement_writes_component(statement: &Statement) -> bool {
+    match statement {
+        Statement::Var(items) => items.iter().any(|(_, expr)| expr_writes_component(expr)),
+        Statement::If {
+            condition,
+            then,
+            otherwise,
+        } => {
+            expr_writes_component(condition)
+                || then.iter().any(statement_writes_component)
+                || otherwise.iter().any(statement_writes_component)
+        }
+        Statement::Return(expr) | Statement::Expression(expr) => expr_writes_component(expr),
+    }
+}
+
+fn expr_writes_component(expression: &Expr) -> bool {
+    match expression {
+        Expr::Number(_) | Expr::Ident(_) => false,
+        Expr::Member(object, _) => expr_writes_component(object),
+        Expr::Assign { target, value, .. } => {
+            is_component_target(target)
+                || expr_writes_component(target)
+                || expr_writes_component(value)
+        }
+        Expr::Sequence(items) => items.iter().any(expr_writes_component),
+        Expr::Binary { left, right, .. } => {
+            expr_writes_component(left) || expr_writes_component(right)
+        }
+        Expr::Unary { argument, .. } => expr_writes_component(argument),
+        Expr::Ternary {
+            condition,
+            then,
+            otherwise,
+        } => {
+            expr_writes_component(condition)
+                || expr_writes_component(then)
+                || expr_writes_component(otherwise)
+        }
+        Expr::Call { args, .. } => args.iter().any(expr_writes_component),
+    }
+}
+
+fn is_component_target(target: &Expr) -> bool {
+    let key = match target {
+        Expr::Ident(name) => name.as_str(),
+        Expr::Member(_, property) => property.as_str(),
+        _ => return false,
+    };
+    crate::additional_damage::KEYS.contains(&key)
+}
+
+/// 按整段 code 识别旧聚合写入方式；对齐 TS `additionalDamage.ts#classifyAggregateWrite`。
+///
+/// 返回 `None` 表示 code 没有对聚合赋值（含 `==` 比较）；调用方按差值兜底。
+fn classify_aggregate_write_code(code: &str) -> Option<crate::additional_damage::AggregateWriteMode> {
+    use crate::additional_damage::AggregateWriteMode;
+    let key = crate::additional_damage::LEGACY_KEY;
+    if !code.contains(key) {
+        return None;
+    }
+    let compact: String = code.chars().filter(|ch| !ch.is_whitespace()).collect();
+    if compact.contains(&format!("{key}*=")) || compact.contains(&format!("{key}/=")) {
+        return Some(AggregateWriteMode::Scale);
+    }
+    if compact.contains(&format!("{key}+=")) || compact.contains(&format!("{key}-=")) {
+        return Some(AggregateWriteMode::Add);
+    }
+    let index = compact.find(&format!("{key}="))?;
+    let rhs_start = index + key.len() + 1;
+    // `追加伤害==...` 是比较而非写入
+    if compact.as_bytes().get(rhs_start) == Some(&b'=') {
+        return None;
+    }
+    let rest = &compact[rhs_start..];
+    let end = rest
+        .find(|ch| matches!(ch, ';' | '}' | ','))
+        .unwrap_or(rest.len());
+    let expression = &rest[..end];
+    if expression.contains(key) {
+        if expression.contains('*') || expression.contains('/') {
+            return Some(AggregateWriteMode::Scale);
+        }
+        if expression.contains('+') || expression.contains('-') {
+            return Some(AggregateWriteMode::Add);
+        }
+    }
+    Some(AggregateWriteMode::Assign)
+}
+
 /// 把赋值结果写回：优先面板成员，其次基础值对象，最后角色属性。
 fn write_back(target: &Expr, value: f64, env: &mut CodeEnv<'_>, scope: &mut HashMap<String, f64>) {
     match target {
@@ -937,6 +1335,9 @@ mod tests {
             bases: Arc::new(HashMap::new()),
             mod_attrs: Arc::new(HashMap::new()),
             enemy: AttrMap::new(),
+            legacy_aggregate_mixed: false,
+            legacy_component_targets: Vec::new(),
+            legacy_aggregate_targets: Vec::new(),
         }
     }
 
@@ -1010,12 +1411,17 @@ mod tests {
 
     #[test]
     fn member_write_targets_field_panel() {
-        // 上游「追加伤害BUG」的写法
+        // 上游「追加伤害BUG」的写法：旧 code 直接改写只读聚合
         let mut attrs = AttrMap::new();
         let mut env = env_of(&mut attrs);
         Arc::make_mut(&mut env.field_attrs).insert(
             "weaponAttr".to_string(),
-            [("追加伤害".to_string(), 2.0)].into_iter().collect(),
+            [
+                ("追加伤害".to_string(), 2.0),
+                ("自属性追伤".to_string(), 2.0),
+            ]
+            .into_iter()
+            .collect(),
         );
         env.enemy.insert("等级", 200.0);
         let outcome = run_code(
@@ -1023,14 +1429,261 @@ mod tests {
             &mut env,
         );
         assert!(outcome.ok, "{:?}", outcome.error);
-        let value = env
-            .field_attrs
-            .get("weaponAttr")
-            .unwrap()
-            .get("追加伤害")
-            .copied()
-            .unwrap();
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        let value = panel.get("追加伤害").copied().unwrap();
         assert!((value - 2.0 / 1.5).abs() < 1e-12, "{value}");
+        // 七分量同比例缩放：元素分量为 0 保持 0，自属性分量承载全部旧值
+        assert_eq!(panel.get("火属性追伤").copied(), Some(0.0));
+        let self_value = panel.get("自属性追伤").copied().unwrap();
+        assert!((self_value - 2.0 / 1.5).abs() < 1e-12, "{self_value}");
+    }
+
+    #[test]
+    fn legacy_aggregate_scale_keeps_component_ratio() {
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("weaponAttr.追加伤害*=2", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(2.0));
+        assert_eq!(panel.get("自属性追伤").copied(), Some(6.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(8.0));
+    }
+
+    #[test]
+    fn legacy_aggregate_add_lands_on_self() {
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("weaponAttr.追加伤害+=0.5", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(1.0));
+        assert_eq!(panel.get("自属性追伤").copied(), Some(3.5));
+        assert_eq!(panel.get("追加伤害").copied(), Some(4.5));
+    }
+
+    #[test]
+    fn legacy_aggregate_assign_zeroes_elements() {
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("weaponAttr.追加伤害=1", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(0.0));
+        assert_eq!(panel.get("自属性追伤").copied(), Some(1.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(1.0));
+        assert_eq!(panel.get("水属性追伤").copied(), Some(0.0));
+    }
+
+    #[test]
+    fn legacy_aggregate_expanded_forms() {
+        // `= 追加伤害 * k` 按 scale、`= 追加伤害 + c` 按 add 识别
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        assert!(run_code("weaponAttr.追加伤害=weaponAttr.追加伤害*2", &mut env).ok);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(2.0));
+        assert_eq!(panel.get("自属性追伤").copied(), Some(6.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(8.0));
+
+        assert!(run_code("weaponAttr.追加伤害=weaponAttr.追加伤害+2", &mut env).ok);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(2.0));
+        assert_eq!(panel.get("自属性追伤").copied(), Some(8.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(10.0));
+    }
+
+    #[test]
+    fn bare_chase_writes_redirect_to_panel() {
+        // 角色不持有追伤：裸写按写入值累加到武器面板对应分量，聚合写入落自属性
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 3.0),
+                ("雷属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 2.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("火属性追伤 += 0.5;追加伤害 += 0.1", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        // 角色侧键始终被移除
+        assert_eq!(env.attrs.get("火属性追伤"), None);
+        assert_eq!(env.attrs.get("追加伤害"), None);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("火属性追伤").copied(), Some(0.5));
+        assert!((panel.get("自属性追伤").copied().unwrap() - 2.1).abs() < 1e-12);
+        assert!((panel.get("追加伤害").copied().unwrap() - 3.6).abs() < 1e-12);
+    }
+
+    #[test]
+    fn mixed_aggregate_and_component_writes_fall_back_to_delta() {
+        // 同段既有聚合写入又有分量写入：不得整段按单一模式缩放；
+        // 聚合写入按差值落自属性，分量保留显式结果，最终聚合 = Σ 分量。
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code(
+            "weaponAttr.追加伤害*=2;weaponAttr.火属性追伤=1.5",
+            &mut env,
+        );
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        // 聚合写入差值 +4 落自属性；随后火分量覆盖为 1.5
+        assert_eq!(panel.get("自属性追伤").copied(), Some(7.0));
+        assert_eq!(panel.get("火属性追伤").copied(), Some(1.5));
+        assert_eq!(panel.get("追加伤害").copied(), Some(8.5));
+    }
+
+    #[test]
+    fn component_write_before_aggregate_uses_old_aggregate_value() {
+        // TS 口径：整段 code 执行前后各取一次聚合；分量写入不提前重算聚合，
+        // 后续 `追加伤害=追加伤害*k` 的 RHS 读到执行前的旧聚合值。
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 0.0),
+                ("自属性追伤".to_string(), 4.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code(
+            "weaponAttr.火属性追伤=1;weaponAttr.追加伤害=weaponAttr.追加伤害*2",
+            &mut env,
+        );
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        // 因子 = 8/4 = 2；混合写入按差值 +4 落自属性（4→8），分量保留 1
+        assert_eq!(panel.get("自属性追伤").copied(), Some(8.0));
+        assert_eq!(panel.get("火属性追伤").copied(), Some(1.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(9.0));
+    }
+
+    #[test]
+    fn equality_comparison_is_not_classified_as_aggregate_write() {
+        use crate::additional_damage::AggregateWriteMode;
+        // `追加伤害==...` 是比较；纯比较返回 None（迁移入口按差值兜底）
+        assert_eq!(
+            classify_aggregate_write_code("if(追加伤害==1)攻击+=1"),
+            None
+        );
+        assert_eq!(
+            classify_aggregate_write_code("追加伤害==1;火属性追伤=1"),
+            None
+        );
+        // 同段另有复合聚合写入时，复合写法优先
+        assert_eq!(
+            classify_aggregate_write_code("if(追加伤害==1)攻击+=1;追加伤害+=2"),
+            Some(AggregateWriteMode::Add)
+        );
+        assert_eq!(
+            classify_aggregate_write_code("if(追加伤害==1)追加伤害*=2"),
+            Some(AggregateWriteMode::Scale)
+        );
+        // TS 同口径：首个 `追加伤害=` 是 `==`，即使后面有真实赋值也按 None 兜底
+        assert_eq!(
+            classify_aggregate_write_code("if(追加伤害==1)追加伤害=2"),
+            None
+        );
+    }
+
+    #[test]
+    fn explicit_component_write_refreshes_aggregate() {
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 4.0),
+                ("火属性追伤".to_string(), 1.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("weaponAttr.雷属性追伤+=0.5", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("雷属性追伤").copied(), Some(0.5));
+        assert_eq!(panel.get("追加伤害").copied(), Some(4.5));
+    }
+
+    #[test]
+    fn local_variable_named_like_aggregate_is_not_migrated() {
+        let mut attrs = AttrMap::new();
+        let mut env = env_of(&mut attrs);
+        Arc::make_mut(&mut env.field_attrs).insert(
+            "weaponAttr".to_string(),
+            [
+                ("追加伤害".to_string(), 3.0),
+                ("自属性追伤".to_string(), 3.0),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let outcome = run_code("var 追加伤害=1;追加伤害+=1", &mut env);
+        assert!(outcome.ok, "{:?}", outcome.error);
+        // 局部变量只活在 code 内：角色侧无追伤键，面板不被改写
+        assert_eq!(env.attrs.get("追加伤害"), None);
+        let panel = env.field_attrs.get("weaponAttr").unwrap();
+        assert_eq!(panel.get("自属性追伤").copied(), Some(3.0));
+        assert_eq!(panel.get("追加伤害").copied(), Some(3.0));
     }
 
     #[test]

@@ -32,17 +32,26 @@ describe("武器属性来源", () => {
         })
     }
 
-    it("字段候选包含作用域前缀字段与同律降级字段", () => {
+    it("字段候选包含作用域前缀字段、普通面板专属字段与同律降级字段", () => {
         expect(getWeaponAttrFieldCandidates("触发", "近战")).toEqual([
             { field: "近战触发", scope: "近战", includeMods: true },
             { field: "触发", scope: "近战", includeMods: true },
+            // 普通近战面板额外读取「普通近战」专属字段
+            { field: "普通近战触发", scope: "近战", includeMods: true },
         ])
 
+        // 同律面板不读取普通近战/远程专属字段
         expect(getWeaponAttrFieldCandidates("触发", "同律近战")).toEqual([
             { field: "同律近战触发", scope: "同律近战", includeMods: true },
             { field: "触发", scope: "同律近战", includeMods: true },
             // 前缀降级：同律近战读取近战作用域字段，但不纳入 MOD
             { field: "近战触发", scope: "近战", includeMods: false },
+        ])
+
+        // 继承型同律面板的 scope 会落到近战/远程，但面板来源仍是同律：不追加普通近战字段
+        expect(getWeaponAttrFieldCandidates("触发", "近战", { isSkillWeaponPanel: true })).toEqual([
+            { field: "近战触发", scope: "近战", includeMods: true },
+            { field: "触发", scope: "近战", includeMods: true },
         ])
     })
 
@@ -61,6 +70,24 @@ describe("武器属性来源", () => {
         expect(skillSources).toContainEqual({ name: "自定义BUFF", value: 0.2 })
         expect(skillSources).toContainEqual({ name: "自定义BUFF", value: 0.1 })
         expect(skillSources.some(source => source.value === 0.3)).toBe(false)
+    })
+
+    it("普通近战/远程字段只进普通面板，同律与继承型同律面板都不读取", () => {
+        const build = createBuild({
+            buffs: [createCustomBuff([["普通近战触发", 0.4]]), createCustomBuff([["普通远程触发", 0.5]])],
+        })
+
+        expect(collectWeaponAttrSources(build, "近战", "触发")).toContainEqual({ name: "自定义BUFF", value: 0.4 })
+        expect(collectWeaponAttrSources(build, "远程", "触发")).toContainEqual({ name: "自定义BUFF", value: 0.5 })
+        expect(collectWeaponAttrSources(build, "同律近战", "触发").some(source => source.value === 0.4)).toBe(false)
+        expect(collectWeaponAttrSources(build, "同律远程", "触发").some(source => source.value === 0.5)).toBe(false)
+        // 继承型同律面板 scope 落到近战，但面板来源是同律
+        expect(collectWeaponAttrSources(build, "近战", "触发", { isSkillWeaponPanel: true }).some(source => source.value === 0.4)).toBe(
+            false
+        )
+        expect(collectWeaponAttrSources(build, "远程", "触发", { isSkillWeaponPanel: true }).some(source => source.value === 0.5)).toBe(
+            false
+        )
     })
 
     it("裸「攻击」字段不进武器面板，带前缀的攻击字段正常计入", () => {
@@ -134,12 +161,11 @@ describe("武器属性来源", () => {
         // 与 CharBuild 前缀查询口径一致
         for (const scope of ["近战", "远程", "同律近战", "同律远程"]) {
             const listed = collectWeaponAttrSources(build, scope, "增伤").reduce((sum, source) => sum + source.value, 0)
-            const expected =
-                build.getTotalBonus(`${scope}增伤`, scope) +
-                build.getTotalBonus("增伤", scope) +
-                (scope.startsWith("同律")
-                    ? build.getTotalBonus(`${scope.slice("同律".length)}增伤`, scope.slice("同律".length), { includeMods: false })
-                    : 0)
+            const ordinaryTerm = scope === "近战" || scope === "远程" ? build.getTotalBonus(`普通${scope}增伤`, scope) : 0
+            const downgradeTerm = scope.startsWith("同律")
+                ? build.getTotalBonus(`${scope.slice("同律".length)}增伤`, scope.slice("同律".length), { includeMods: false })
+                : 0
+            const expected = build.getTotalBonus(`${scope}增伤`, scope) + build.getTotalBonus("增伤", scope) + ordinaryTerm + downgradeTerm
 
             expect(listed).toBeCloseTo(expected, 10)
         }
@@ -151,6 +177,7 @@ describe("武器属性来源", () => {
                 createCustomBuff([
                     ["触发", 0.1],
                     ["近战触发", 0.2],
+                    ["普通近战触发", 0.15],
                 ]),
                 createCustomBuff([["同律近战触发", 0.05]]),
             ],
@@ -159,12 +186,11 @@ describe("武器属性来源", () => {
 
         for (const scope of ["近战", "远程", "同律近战", "同律远程"]) {
             const listed = collectWeaponAttrSources(build, scope, "触发").reduce((sum, source) => sum + source.value, 0)
-            const expected =
-                build.getTotalBonus(`${scope}触发`, scope) +
-                build.getTotalBonus("触发", scope) +
-                (scope.startsWith("同律")
-                    ? build.getTotalBonus(`${scope.slice("同律".length)}触发`, scope.slice("同律".length), { includeMods: false })
-                    : 0)
+            const ordinaryTerm = scope === "近战" || scope === "远程" ? build.getTotalBonus(`普通${scope}触发`, scope) : 0
+            const downgradeTerm = scope.startsWith("同律")
+                ? build.getTotalBonus(`${scope.slice("同律".length)}触发`, scope.slice("同律".length), { includeMods: false })
+                : 0
+            const expected = build.getTotalBonus(`${scope}触发`, scope) + build.getTotalBonus("触发", scope) + ordinaryTerm + downgradeTerm
 
             expect(listed).toBeCloseTo(expected, 10)
         }

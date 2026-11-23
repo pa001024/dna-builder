@@ -7,6 +7,7 @@ import type {
     IncomeModItem,
     IncomeReplaceSlot,
     TargetValueItem,
+    TraceIncomeItem,
 } from "@/data/Calc.worker"
 import { type CharBuildWorkerSnapshot, createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import type { CharSettings } from "@/data/charSettings"
@@ -44,6 +45,26 @@ export type SharedTargetValueItem = TargetValueItem
 /** 经全局单例提交一次收益计算，返回 key → 收益映射 */
 export function requestBuildIncomes(payload: SharedIncomePayload): Promise<Record<string, number>> {
     return postCalcRequest({ ...payload, kind: "income" }).then(data => data.incomes ?? {})
+}
+
+/** 溯源卡片收益请求（不含 id，由 composable 补齐；settings 需为普通对象） */
+export interface TraceIncomeRequest {
+    charId: number
+    settings: CharSettings
+    items: TraceIncomeItem[]
+}
+
+/**
+ * 提交一次溯源卡片收益计算：翻转某侧某根源后重建重算，全部在 worker 内完成。
+ * 调用方负责传入纯数据 settings（不能是 Vue proxy）；单条失败由 worker 记 0 并回传 failed。
+ * @param payload 完整配置与待翻转的根源卡片
+ * @returns key（`${side}:${root}`）→ 收益
+ */
+export function requestBuildTraceIncomes(payload: TraceIncomeRequest): Promise<Record<string, number>> {
+    return postCalcRequest({ ...payload, kind: "traceIncome" }).then(data => {
+        if (data.failed?.length) console.warn("部分溯源收益计算失败", data.failed)
+        return data.incomes ?? {}
+    })
 }
 
 /**

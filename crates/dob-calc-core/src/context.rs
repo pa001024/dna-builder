@@ -23,15 +23,22 @@
 //!   唯一曾被怀疑的 `baseValue`（`evaluate_format` `{}`/`{%}` 交替计数）走出现序计数，
 //!   与 map 顺序无关（见 ast_eval.rs `evaluate_format`）。
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use serde_json::Value;
 
-use super::config::{CharSettings, ModSlot, resolve_skill_level};
+use super::additional_damage::{
+    KEYS as ADDITIONAL_DAMAGE_KEYS, LEGACY_KEY as LEGACY_ADDITIONAL_DAMAGE_KEY,
+    normalize_source_key as normalize_additional_damage_key,
+};
+use super::config::{
+    AssistSettings, CharSettings, ModSlot, ModVariant, TranscendSide, TranscendSkillReplacement,
+    resolve_skill_level,
+};
 use super::dynamic::{self, CodeEnv};
 use super::models::{
     AttrMap, BuffFieldConditional, LeveledBuff, LeveledChar, LeveledMod, LeveledMonster,
-    LeveledSkill, LeveledSkillWeapon, LeveledWeapon, is_multiplicative_attr,
+    LeveledSkill, LeveledSkillWeapon, LeveledWeapon, is_multiplicative_attr, to_expr_identifier,
 };
 use super::record::Record;
 use super::tables::BuildTables;
@@ -48,8 +55,27 @@ fn default_enemy_record() -> Record {
     RECORD.clone()
 }
 
+/// 槽位别名：`协战1` / `assist1` 等价（与 TS `teamResolver.ts` 的 `SIDE_ALIASES` 一致）。
+fn is_side_alias(namespace: &str) -> bool {
+    matches!(namespace, "协战1" | "assist1" | "协战2" | "assist2")
+}
+
+/// MOD 槽位取整：TS `normalizeModSlots` / `normalizeModVariants` 对 id 与等级都做 `Math.round`。
+fn round_mod_slots(slots: &[ModSlot]) -> Vec<ModSlot> {
+    slots
+        .iter()
+        .map(|slot| slot.map(|(id, level)| (id, level.round())))
+        .collect()
+}
+
 pub fn prefix_scope(prefix: &str) -> &str {
-    if prefix.starts_with("同律近战") {
+    // `普通近战/普通远程` 是普通武器面板专属前缀：归入近战/远程作用域，
+    // 因此 BUFF 作用域判定不会让它进入同律共享池（同律面板也不主动查询 `普通*`）。
+    if prefix.starts_with("普通近战") {
+        "近战"
+    } else if prefix.starts_with("普通远程") {
+        "远程"
+    } else if prefix.starts_with("同律近战") {
         "同律近战"
     } else if prefix.starts_with("同律远程") {
         "同律远程"
@@ -99,6 +125,22 @@ pub struct BonusSourceTable {
     pub buffs: AttrMap,
 }
 
+/// 协战位（表达式团队命名空间的解析目标）。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AssistSide {
+    Assist1,
+    Assist2,
+}
+
+impl AssistSide {
+    fn index(self) -> usize {
+        match self {
+            Self::Assist1 => 0,
+            Self::Assist2 => 1,
+        }
+    }
+}
+
 /// 构筑实例：一次性装配完成的只读快照。
 ///
 /// `Clone` 供时间轴/收益/自动配装的 `clone().applyBuffs` 等价路径（见 `timeline.rs`）；
@@ -110,6 +152,8 @@ pub struct BuildContext<'a> {
     /// （追加一个候选 MOD），借用调用方的 `settings` 会让状态无法原地更新。
     pub settings: CharSettings,
     pub char: LeveledChar,
+    /// 装配用的最终技能等级 `[E, Q, P]`：基础三元组 + `E/Q/P技能等级` 属性池汇总后二次解析。
+    pub char_skill_levels: [f64; 3],
     pub aura_mod: Option<LeveledMod>,
     pub char_mods: Vec<LeveledMod>,
     pub melee_mods: Vec<LeveledMod>,
@@ -155,6 +199,18 @@ pub struct BuildContext<'a> {
     pub custom_variables: HashMap<String, String>,
     /// 团队武器类别（协战武器）。
     pub team_weapon_categories: Vec<String>,
+    /// 协战 peer 属性惰性缓存：下标 0/1 = assist1/assist2。
+    /// 外层 `None` 表示尚未求值，内层 `None` 表示该侧不可查询（未配置 / 无武器 / 装配失败）。
+    peer_attrs: [Option<Option<AttrMap>>; 2],
+    /// 协战 peer 上下文惰性缓存（与 `peer_attrs` 并列）：技能字段求值需要完整上下文。
+    /// 外层 `None` 表示尚未装配，内层 `None` 表示该侧不可查询。
+    peer_contexts: [Option<Option<Box<BuildContext<'a>>>>; 2],
+    /// 协战技能字段缓存：`(side, namespace, field)` → 值；`None` 表示不可解析（按 0）。
+    peer_skill_values: HashMap<(u8, String, String), Option<f64>>,
+    /// 协战技能命名空间索引（命名空间 → 协战位）：构建一次，表达式求值期零扫描。
+    peer_skill_index: std::sync::OnceLock<HashMap<String, AssistSide>>,
+    /// 当前上下文是否为协战 peer：团队命名空间统一按不可解析处理（自身角色名除外）。
+    pub restricted_namespaces: bool,
     /// 装配期缺失资源信息（下线 MOD/BUFF，TS 严格口径整份失败用）。
     /// `BuildContext::new` 在装配后检查：非空即返回 `None`。
     pub missing_resource: Option<String>,
@@ -292,6 +348,13 @@ impl<'a> BuildContext<'a> {
             .chars
             .get(&lookup_id)
             .or_else(|| tables.chars.get(&char_id))?;
+        // 装配起点只用基础等级：`E/Q/P技能等级` 属性池在 BUFF / MOD 汇总后二次装配
+        // （U126b）。不改 `settings.char_skill_level`（自动配装会把 settings 序列化回填，
+        // 改写会重复叠加）。
+        let transcend_effects = settings
+            .transcend_effects
+            .as_ref()
+            .and_then(|payload| payload.for_side(settings.transcend_side));
         let char_skill_levels = settings.char_skill_level;
         let char_level = settings.char_level;
         let char = tables.templates.char_cached(
@@ -312,6 +375,7 @@ impl<'a> BuildContext<'a> {
             tables,
             settings: settings.clone(),
             char,
+            char_skill_levels,
             aura_mod: None,
             char_mods: Vec::new(),
             melee_mods: Vec::new(),
@@ -338,6 +402,11 @@ impl<'a> BuildContext<'a> {
             panels_correcting: false,
             custom_variables: settings.custom_variables.iter().cloned().collect(),
             team_weapon_categories: Vec::new(),
+            peer_attrs: [None, None],
+            peer_contexts: [None, None],
+            peer_skill_values: HashMap::new(),
+            peer_skill_index: std::sync::OnceLock::new(),
+            restricted_namespaces: false,
             missing_resource: None,
             memo: EvalMemo::default(),
             dot_cache: None,
@@ -346,6 +415,14 @@ impl<'a> BuildContext<'a> {
             skill_lists: std::sync::OnceLock::new(),
             eval_statics: None,
         };
+
+        // 升华词条技能替换先于同律武器派生：同律吃替换后的字段（与 TS `set char` 同顺序）
+        if let Some(effects) = transcend_effects {
+            crate::transcend::apply_skill_replacements(
+                &mut context.char.skills,
+                &effects.skill_replacements,
+            );
+        }
 
         // MOD 特效等级：上游 `getModBuffLvFromSetting`（无配置时取特效 `mx`，无特效时 1）
         // TS 严格口径：下线 MOD 整份失败（spec §6.4(2)），`?` 转为 `None`。
@@ -383,32 +460,8 @@ impl<'a> BuildContext<'a> {
             &context.char,
         )?;
 
-        // 同律武器：从角色记录的 `同律武器[0]` 取。
-        //
-        // 关键：数据包里同律武器**没有** `技能` 字段——它的技能是上游在运行时
-        // 从角色技能里筛出来拼的（`CharBuild.set char`）：
-        // 取 `同律武器.skill`（默认 `[1]`，即下标 1 的角色技能）作为来源技能，
-        // 把其中名称匹配 `同律武器.filter`（默认 `伤害`）且以「伤害」结尾的字段
-        // 汇成一条 `同律武器伤害` 技能。少这一步，同律武器的伤害字段会整体取不到。
-        if let Some(raw) = char_raw.objs("同律武器").into_iter().next() {
-            let mut raw = raw;
-            // 同律技能等级取来源技能的最终等级（无来源时退回被动等级，
-            // 与 Python SDK 口径一致；上游 `resolveCharSkillLevel(this.skillLevel, syncSourceIndex)`）。
-            // 注意：必须在聚合技能写回前读取原始 `skill` 下标（上游同顺序）。
-            let sync_index = skill_sync_source_index(&raw);
-            if raw.value("技能").is_none() {
-                let aggregated = aggregate_skill_weapon_fields(&raw, &context.char);
-                if let Some(skill) = aggregated {
-                    raw.insert("技能", serde_json::json!([skill]));
-                }
-            }
-            context.skill_weapon = Some(LeveledSkillWeapon::build(
-                &raw,
-                Some(resolve_skill_level(&settings.char_skill_level, sync_index)),
-                Some(settings.char_level),
-                &crate::const_tables::COMMON_LEVEL_UP,
-            ));
-        }
+        // 同律武器：从角色记录的 `同律武器[0]` 取（技能等级 = 当前角色技能等级）
+        context.rebuild_skill_weapon();
 
         // MOD 顺序：四槽（角色/近战/远程/同律）→ 中枢；与上游 `mods` 一致
         let mut mods = Vec::new();
@@ -443,6 +496,9 @@ impl<'a> BuildContext<'a> {
         }
         // BUFF 生效标记：MOD 数据先装配，`禁用` 互斥可一次性定下初始状态
         context.refresh_buff_activation();
+        // 技能等级属性化（U126b）：BUFF / MOD / 自定义 BUFF 的 `E/Q/P技能等级`
+        // 汇总后二次装配角色技能与同律武器（此前先用基础等级装配）
+        context.refresh_skill_levels();
         // 怪物（TS 严格口径：未知怪物整份失败，见 spec §6.4(1)）
         context.enemy = build_enemy(tables, settings).ok()?;
 
@@ -472,6 +528,299 @@ impl<'a> BuildContext<'a> {
         self.char.mastery.iter().any(|item| item == category)
             || self.char.mastery.iter().any(|item| item == "全部类型")
             || category == self.settings.extra_mastery
+    }
+
+    /// 命名空间是否为团队命名空间。
+    ///
+    /// 主控只认已配置协战角色名 + 槽位别名（镜像 `createTeamResolver(role="main")`）；
+    /// 协战 peer 认**全部角色名** + 槽位别名（restricted 语义，`attrOf` 恒不可用）。
+    pub fn is_team_namespace(&self, namespace: &str) -> bool {
+        if self.restricted_namespaces {
+            return is_side_alias(namespace)
+                || self
+                    .tables
+                    .chars
+                    .values()
+                    .any(|record| record.str_ref("名称") == Some(namespace));
+        }
+        self.team_side_of(namespace).is_some()
+    }
+
+    /// 团队命名空间对应的协战位；未注册（含未配置任何协战）返回 `None`。
+    ///
+    /// 角色名重名按 assist1 → assist2 取名；槽位别名在任一侧配置了有效角色 id 时全量注册，
+    /// 与 TS `createTeamResolver` 的 `index` 顺序一致。
+    pub fn team_side_of(&self, namespace: &str) -> Option<AssistSide> {
+        let teams = [self.settings.team1, self.settings.team2];
+        if !teams.iter().flatten().any(|id| *id > 0) {
+            return None;
+        }
+        for (index, id) in teams.iter().enumerate() {
+            let Some(id) = id else { continue };
+            if *id > 0 && self.char_name(*id) == Some(namespace) {
+                return Some(if index == 0 {
+                    AssistSide::Assist1
+                } else {
+                    AssistSide::Assist2
+                });
+            }
+        }
+        match namespace {
+            "协战1" | "assist1" => Some(AssistSide::Assist1),
+            "协战2" | "assist2" => Some(AssistSide::Assist2),
+            _ => None,
+        }
+    }
+
+    /// 协战位的最新属性表（惰性装配 + 每侧最多一次）。
+    ///
+    /// `None` 表示该侧不可查询（`teamN` / `teamNWeapon` 未配置、角色或武器查不到）。
+    /// `assistN.enabled` 不参与本函数：停用的协战仍可被 `角色名::属性` 查询。
+    pub fn peer_attributes(&mut self, side: AssistSide) -> Option<&AttrMap> {
+        let index = side.index();
+        if self.peer_attrs[index].is_none() {
+            let attrs = self
+                .peer_context(side)
+                .map(|peer| peer.calculate_attributes(false, false));
+            self.peer_attrs[index] = Some(attrs);
+        }
+        self.peer_attrs[index]
+            .as_ref()
+            .and_then(|value| value.as_ref())
+    }
+
+    /// 读取协战位最终属性中的某个字段；缺失按不可解析返回 `None`。
+    pub fn peer_attribute(&mut self, side: AssistSide, attribute: &str) -> Option<f64> {
+        self.peer_attributes(side)?
+            .get(attribute)
+            .copied()
+    }
+
+    /// 协战技能命名空间对应的协战位（名称 / safeName / 表达式标识符，assist1 优先）。
+    ///
+    /// 与 TS `createTeamResolver` 的 `getSkillIndex` 同口径：只看已配置的 `teamN`，
+    /// 不看该侧能否装配 build（缺武器时命名空间仍注册，求值恒 0）；peer 上下文内无协战。
+    /// 索引按上下文构建一次并缓存（表达式求值的每个命名空间属性都会查询）。
+    pub fn peer_skill_side_of(&self, namespace: &str) -> Option<AssistSide> {
+        if self.restricted_namespaces {
+            return None;
+        }
+        self.peer_skill_index
+            .get_or_init(|| self.build_peer_skill_index())
+            .get(namespace)
+            .copied()
+    }
+
+    /// 命名空间 → 协战位索引：每侧技能的三种写法都注册，先到先得（assist1 → assist2）。
+    fn build_peer_skill_index(&self) -> HashMap<String, AssistSide> {
+        let mut index = HashMap::new();
+        for side in [AssistSide::Assist1, AssistSide::Assist2] {
+            let Some(char_id) = Self::side_char_id(&self.settings, side) else {
+                continue;
+            };
+            let Some(record) = self.tables.chars.get(&char_id) else {
+                continue;
+            };
+            for skill in record.objs_ref("技能") {
+                let Some(name) = skill.str_ref("名称") else {
+                    continue;
+                };
+                if name.is_empty() {
+                    continue;
+                }
+                for key in [name.to_string(), name.replace('/', "_"), to_expr_identifier(name)] {
+                    index.entry(key).or_insert(side);
+                }
+            }
+        }
+        index
+    }
+
+    /// 是否为协战技能命名空间（任一已配置协战侧）。
+    pub fn is_peer_skill_namespace(&self, namespace: &str) -> bool {
+        self.peer_skill_side_of(namespace).is_some()
+    }
+
+    /// 协战技能字段值：在协战 peer 上下文中求值 `${exprName}::${field}.原值`。
+    ///
+    /// 与 TS `teamResolver.skillFieldOf` 同语义：命名空间按名称 / safeName / 表达式标识符消歧后
+    /// 统一用表达式标识符求值；peer 内团队命名空间仍为 0。不可解析返回 `None`（调用方按 0）。
+    pub fn peer_skill_field(&mut self, side: AssistSide, namespace: &str, field: &str) -> Option<f64> {
+        let key = (side.index() as u8, namespace.to_string(), field.to_string());
+        if let Some(cached) = self.peer_skill_values.get(&key) {
+            return *cached;
+        }
+        let value = self
+            .peer_skill_expr_name(side, namespace)
+            .and_then(|name| self.evaluate_peer_skill(side, &format!("{name}::{field}.原值")))
+            .filter(|value| value.is_finite());
+        self.peer_skill_values.insert(key, value);
+        value
+    }
+
+    /// 命名空间 → 技能表达式标识符（peer 静态技能表口径）。
+    fn peer_skill_expr_name(&self, side: AssistSide, namespace: &str) -> Option<String> {
+        let char_id = Self::side_char_id(&self.settings, side)?;
+        let record = self.tables.chars.get(&char_id)?;
+        record.objs_ref("技能").iter().find_map(|skill| {
+            let name = skill.str_ref("名称")?;
+            if name.is_empty() {
+                return None;
+            }
+            (name == namespace
+                || name.replace('/', "_") == namespace
+                || to_expr_identifier(name) == namespace)
+                .then(|| to_expr_identifier(name))
+        })
+    }
+
+    /// 在 peer 求值会话中执行表达式；解析 / 求值失败按不可解析返回 `None`。
+    fn evaluate_peer_skill(&mut self, side: AssistSide, expression: &str) -> Option<f64> {
+        let peer = self.peer_context(side)?;
+        let mut evaluator = crate::ast_eval::Evaluator::new(peer);
+        evaluator.evaluate(expression).ok()
+    }
+
+    /// 协战 peer 上下文（惰性装配 + 每侧最多一次，与 `peer_attrs` 并列复用）。
+    fn peer_context(&mut self, side: AssistSide) -> Option<&mut BuildContext<'a>> {
+        let index = side.index();
+        if self.peer_contexts[index].is_none() {
+            let context = self.build_peer_context(side);
+            self.peer_contexts[index] = Some(context);
+        }
+        self.peer_contexts[index]
+            .as_mut()?
+            .as_mut()
+            .map(|context| context.as_mut())
+    }
+
+    /// 按 `createAssistBuildFromSettings` 口径装配 peer 上下文。
+    fn build_peer_context(&self, side: AssistSide) -> Option<Box<BuildContext<'a>>> {
+        let char_id = Self::side_char_id(&self.settings, side)?;
+        let weapon_id = match side {
+            AssistSide::Assist1 => self.settings.team1_weapon,
+            AssistSide::Assist2 => self.settings.team2_weapon,
+        }
+        .filter(|id| *id > 0)?;
+        // 与 TS `createAssistBuildFromSettings` 的 `if (!assist) return undefined` 一致：
+        // teamN 有效但 assistN 缺失时该侧不可查询（TS 归一化路径总会补默认 loadout）。
+        let assist = match side {
+            AssistSide::Assist1 => self.settings.assist1.as_ref(),
+            AssistSide::Assist2 => self.settings.assist2.as_ref(),
+        }?;
+        let peer_settings = self.peer_settings(side, char_id, weapon_id, assist);
+        let mut peer = BuildContext::new(self.tables, char_id, &peer_settings)?;
+        peer.restricted_namespaces = true;
+        Some(Box::new(peer))
+    }
+
+    /// 协战位角色 id（`teamN` 为正数时有效）。
+    fn side_char_id(settings: &CharSettings, side: AssistSide) -> Option<i64> {
+        match side {
+            AssistSide::Assist1 => settings.team1,
+            AssistSide::Assist2 => settings.team2,
+        }
+        .filter(|id| *id > 0)
+    }
+
+    /// 由主控配置派生 peer 配置：loadout 取 assistN，环境 / 血量 / 共振 / 失衡继承主控。
+    fn peer_settings(
+        &self,
+        side: AssistSide,
+        char_id: i64,
+        weapon_id: i64,
+        assist: &AssistSettings,
+    ) -> CharSettings {
+        let mut peer = self.settings.clone();
+        let is_melee = self
+            .tables
+            .weapons
+            .get(&weapon_id)
+            .is_some_and(|source| source.data.texts("类型").first().map(String::as_str) == Some("近战"));
+
+        peer.char_level = assist.char_level;
+        peer.char_skill_level = assist.char_skill_level;
+        peer.base_name = self.peer_base_name(char_id, &assist.base_name);
+        peer.extra_mastery = assist.extra_mastery.clone();
+        peer.target_function = assist.target_function.clone();
+        peer.custom_variables = assist.custom_variables.clone();
+        peer.dot_settings = assist.dot_settings.clone();
+        peer.aura_mod = assist.aura_mod;
+        peer.char_mods = round_mod_slots(&assist.char_mods);
+        peer.melee_mods = round_mod_slots(&assist.melee_mods);
+        peer.ranged_mods = round_mod_slots(&assist.ranged_mods);
+        peer.skill_mods = round_mod_slots(&assist.skill_mods);
+        peer.mod_variant_index = assist.mod_variant_index;
+        peer.mod_variants = assist
+            .mod_variants
+            .iter()
+            .map(|variant| ModVariant {
+                aura: variant.aura,
+                char_mods: round_mod_slots(&variant.char_mods),
+                melee_mods: round_mod_slots(&variant.melee_mods),
+                ranged_mods: round_mod_slots(&variant.ranged_mods),
+                skill_mods: round_mod_slots(&variant.skill_mods),
+            })
+            .collect();
+        // TS `createCharBuildFromSettings` 对单条 BUFF 构造失败是 catch + 跳过；
+        // 下线/改名的 BUFF 只跳过自身，不能让整个 peer 变成不可查询。
+        peer.buffs = assist
+            .buffs
+            .iter()
+            .filter(|(name, _, _)| name == "自定义BUFF" || self.tables.buffs.contains_key(name))
+            .cloned()
+            .collect();
+        peer.custom_buff = assist.custom_buff.clone();
+        peer.use_global = assist.use_global;
+        peer.effect_config = assist.effect_config.clone();
+        // 单武器按类型落槽，另一槽置空（与 teamBuild 的协战口径一致）
+        peer.melee_weapon = if is_melee { weapon_id } else { 0 };
+        peer.melee_weapon_level = assist.weapon_level;
+        peer.melee_weapon_refine = assist.weapon_refine;
+        peer.ranged_weapon = if is_melee { 0 } else { weapon_id };
+        peer.ranged_weapon_level = assist.weapon_level;
+        peer.ranged_weapon_refine = assist.weapon_refine;
+        // 协战不参与队伍 / 魔灵 / 潜质 / 时间线：清空递归字段，避免 peer 内再构造协战
+        peer.team1 = None;
+        peer.team1_weapon = None;
+        peer.team2 = None;
+        peer.team2_weapon = None;
+        peer.pet_id = 0;
+        peer.pet_level = 0.0;
+        peer.pet_coverage = 1.0;
+        peer.pet_auto_coverage = true;
+        peer.traits = Vec::new();
+        peer.assist1 = None;
+        peer.assist2 = None;
+        // 升华载荷按该协战位选侧：协战不吃天赋由 TS 载荷（assistN 集）保证
+        peer.transcend_side = match side {
+            AssistSide::Assist1 => TranscendSide::Assist1,
+            AssistSide::Assist2 => TranscendSide::Assist2,
+        };
+        peer
+    }
+
+    /// peer 技能名归一化：不在该角色技能表时回退首个技能（镜像 `normalizeAssistSideSettings`）。
+    fn peer_base_name(&self, char_id: i64, base_name: &str) -> String {
+        // 与 TS `charMap.get(Math.round(teamId))` 一致：不做 6 位 id 右移
+        let Some(record) = self.tables.chars.get(&char_id) else {
+            return String::new();
+        };
+        let names: Vec<String> = record
+            .objs("技能")
+            .iter()
+            .filter_map(|skill| skill.str_ref("名称").map(str::to_string))
+            .collect();
+        if names.iter().any(|name| name == base_name) {
+            base_name.to_string()
+        } else {
+            names.first().cloned().unwrap_or_default()
+        }
+    }
+
+    /// 角色名（与 TS `charMap.get(charId)` 一致，不做 6 位 id 右移）。
+    fn char_name(&self, char_id: i64) -> Option<&str> {
+        self.tables.chars.get(&char_id)?.str_ref("名称")
     }
 
     /// 魔灵生效技能等级；对应上游 `getEffectivePetLevel`。
@@ -622,6 +971,107 @@ impl<'a> BuildContext<'a> {
         clamp(duration / cooldown)
     }
 
+    /// 按当前角色技能等级重建同律武器（装配起点与技能等级二次装配共用）。
+    ///
+    /// 关键：数据包里同律武器**没有** `技能` 字段——它的技能是上游在运行时
+    /// 从角色技能里筛出来拼的（`CharBuild.set char`）：
+    /// 取 `同律武器.skill`（默认 `[1]`，即下标 1 的角色技能）作为来源技能，
+    /// 把其中名称匹配 `同律武器.filter`（默认 `伤害`）且以「伤害」结尾的字段
+    /// 汇成一条 `同律武器伤害` 技能。少这一步，同律武器的伤害字段会整体取不到。
+    fn rebuild_skill_weapon(&mut self) {
+        let Some(mut raw) = self.char.raw.objs("同律武器").into_iter().next() else {
+            self.skill_weapon = None;
+            return;
+        };
+        // 同律技能等级取来源技能的最终等级（无来源时退回被动等级，
+        // 与 Python SDK 口径一致；上游 `resolveCharSkillLevel(this.skillLevel, syncSourceIndex)`）。
+        // 注意：必须在聚合技能写回前读取原始 `skill` 下标（上游同顺序）。
+        let sync_index = skill_sync_source_index(&raw);
+        if raw.value("技能").is_none()
+            && let Some(aggregated) = aggregate_skill_weapon_fields(&raw, &self.char)
+        {
+            raw.insert("技能", serde_json::json!([aggregated]));
+        }
+        self.skill_weapon = Some(LeveledSkillWeapon::build(
+            &raw,
+            Some(resolve_skill_level(&self.char_skill_levels, sync_index)),
+            Some(self.settings.char_level),
+            &crate::const_tables::COMMON_LEVEL_UP,
+        ));
+    }
+
+    /// 技能等级属性池 `[E, Q, P]`：=`E/Q/P技能等级` 属性的**静态数值**聚合（不是最终等级）。
+    ///
+    /// 对应 TS `getStaticSkillLevelBonus`：字符串表达式 attr 在 `apply_buff_attr` 求值后
+    /// 会回写 `props`，这里扣掉；被 MOD 禁用 / 条件 BUFF 本就不进来源表，扣减同样跳过。
+    pub fn skill_level_bonus(&mut self) -> [f64; 3] {
+        self.ensure_source_table();
+        let keys = ["E技能等级", "Q技能等级", "P技能等级"];
+        let mut bonus = [0.0; 3];
+        for (slot, key) in keys.iter().enumerate() {
+            bonus[slot] = self.total_bonus(key, "角色", true);
+        }
+        for (index, buff) in self.buffs.iter().enumerate() {
+            if buff.attr_expressions.is_empty()
+                || !self.is_buff_active(index)
+                || !Self::in_plain_slot(buff)
+                || buff.is_field_conditional()
+            {
+                continue;
+            }
+            for (slot, key) in keys.iter().enumerate() {
+                if buff.attr_expressions.iter().any(|(name, _)| name == key) {
+                    bonus[slot] -= buff.props.get(*key).copied().unwrap_or(0.0);
+                }
+            }
+        }
+        bonus
+    }
+
+    /// 按 `E/Q/P技能等级` 属性池二次装配技能等级（U126b）。
+    ///
+    /// 最终等级 = `clamp(round(base + Σ三键), 1..30)`（与 TS `resolveEffectiveSkillLevels`
+    /// 同口径）；等级变化时用 `char_cached` 重建角色技能、重放技能替换、重建同律武器。
+    /// 幂等：属性池不变时重复调用不再重建。
+    pub fn refresh_skill_levels(&mut self) {
+        // 不按「加成为零」提前返回：最后一个三键来源被移除时（MOD 回滚 / BUFF 失效）
+        // 等级必须回到基础值；幂等由「levels 与当前值比较」保证。
+        let bonus = self.skill_level_bonus();
+        let levels = crate::transcend::add_skill_levels(self.settings.char_skill_level, bonus);
+        if levels == self.char_skill_levels {
+            return;
+        }
+        self.char_skill_levels = levels;
+        let lookup_id = {
+            let id = self.char.id;
+            if id > 9999 { id / 100 } else { id }
+        };
+        let char_level = self.settings.char_level;
+        let raw = self.char.raw.clone();
+        let mut char = self.tables.templates.char_cached(
+            lookup_id,
+            Some(char_level),
+            &levels,
+            || {
+                LeveledChar::new(
+                    raw.clone(),
+                    Some(char_level),
+                    &levels,
+                    &crate::const_tables::COMMON_LEVEL_UP,
+                )
+            },
+        );
+        // 技能替换与装配起点同序：替换后的字段供同律武器聚合读取
+        if let Some(effects) = self.transcend_effects() {
+            crate::transcend::apply_skill_replacements(&mut char.skills, &effects.skill_replacements);
+        }
+        self.char = char;
+        self.rebuild_skill_weapon();
+        self.sync_inherited_skill_weapon();
+        // 武器技能列表按等级派生（含 MOD 替换），等级变化后必须重建
+        self.skill_lists = std::sync::OnceLock::new();
+    }
+
     /// 同律武器继承近战/远程时同步伤害类型；对应上游 `syncInheritedSkillWeapon`。
     fn sync_inherited_skill_weapon(&mut self) {
         let Some(skill_weapon) = self.skill_weapon.as_mut() else {
@@ -644,6 +1094,14 @@ impl<'a> BuildContext<'a> {
     /// 该 BUFF 名是否在装配排除集中（收益移除口径用；对应上游按名过滤）。
     fn is_buff_excluded(&self, name: &str) -> bool {
         self.excluded_buffs.iter().any(|excluded| excluded == name)
+    }
+
+    /// 当前构筑位对应的升华效果集；`peer_settings` 会把 `transcend_side` 切到协战侧。
+    fn transcend_effects(&self) -> Option<&crate::config::TranscendEffectSet> {
+        self.settings
+            .transcend_effects
+            .as_ref()?
+            .for_side(self.settings.transcend_side)
     }
 
     /// 装配 BUFF 列表；对应上游构造函数里的 `buffs` / `dynamicBuffs` 划分。
@@ -773,6 +1231,11 @@ impl<'a> BuildContext<'a> {
             }
         }
 
+        // 升华合成 BUFF 追加在最后：与 TS 工厂同序（手动 BUFF → 潜质 → 魔灵 → 升华）
+        if let Some(effects) = self.transcend_effects() {
+            crate::transcend::append_buffs(&mut buffs, &effects.buffs, &self.excluded_buffs);
+        }
+
         // 双槽位语义（上游「同一实例同时位于两个槽位」）：`buffs` 存全部实例，
         // `dynamic_buffs` 只记下标。无深拷贝，复合 BUFF 两槽天然同一份。
         self.buffs = buffs;
@@ -788,6 +1251,13 @@ impl<'a> BuildContext<'a> {
     /// 命中率：取某属性的总加成（加法）；对应上游 `getTotalBonus`。
     pub fn total_bonus(&self, attribute: &str, prefix: &str, include_mods: bool) -> f64 {
         crate::prof!("context::total_bonus");
+        // 聚合只读：`追加伤害` 只由七分量求和产生，不接受任何独立输入
+        if attribute == LEGACY_ADDITIONAL_DAMAGE_KEY {
+            return ADDITIONAL_DAMAGE_KEYS
+                .iter()
+                .map(|key| self.total_bonus(key, prefix, include_mods))
+                .sum();
+        }
         let scope = prefix_scope(prefix);
         let mut bonus = 0.0;
 
@@ -854,6 +1324,97 @@ impl<'a> BuildContext<'a> {
                 .unwrap_or(0.0);
         }
         bonus
+    }
+
+    /// 同 `total_bonus`，但**不含 BUFF 共享池**（BUFF / MOD 效果层 / 武器效果层）。
+    ///
+    /// 攻击细分乘区按来源做精确度短路时，由 `attack_type_buff_bonus` 单独聚合 BUFF，
+    /// 避免同一 BUFF 被多个候选键重复计入（对应上游 `getTotalBonus(..., { includeBuffs: false })`）。
+    pub fn total_bonus_without_buffs(&self, attribute: &str, prefix: &str, include_mods: bool) -> f64 {
+        crate::prof!("context::total_bonus_without_buffs");
+        if attribute == LEGACY_ADDITIONAL_DAMAGE_KEY {
+            return ADDITIONAL_DAMAGE_KEYS
+                .iter()
+                .map(|key| self.total_bonus_without_buffs(key, prefix, include_mods))
+                .sum();
+        }
+        let scope = prefix_scope(prefix);
+        let mut bonus = 0.0;
+
+        if prefix == "角色" || attribute != "攻击" {
+            bonus += self.source_table.char.get(attribute).copied().unwrap_or(0.0);
+        }
+        if (scope == "角色" || (scope == "近战" && attribute != "攻击")) && self.melee_weapon.forge_effective {
+            bonus += self.source_table.melee.get(attribute).copied().unwrap_or(0.0);
+        }
+        if (scope == "角色" || (scope == "远程" && attribute != "攻击")) && self.ranged_weapon.forge_effective {
+            bonus += self.source_table.ranged.get(attribute).copied().unwrap_or(0.0);
+        }
+        bonus += self.sum_mods(attribute, scope, include_mods);
+        bonus
+    }
+
+    /// 同 `total_bonus_mul`，但**不含 BUFF 共享池**（对应上游 `includeBuffs: false`）。
+    pub fn total_bonus_mul_without_buffs(&self, attribute: &str, prefix: &str, include_mods: bool) -> f64 {
+        crate::prof!("context::total_bonus_mul_without_buffs");
+        let scope = prefix_scope(prefix);
+        let mut bonus = 1.0;
+        if let Some(value) = self.char.bonus.num(attribute) {
+            bonus *= 1.0 + value;
+        }
+        if include_mods {
+            bonus *= self.scoped_mods_mul_bonus(attribute, scope);
+        }
+        bonus - 1.0
+    }
+
+    /// BUFF 共享池在攻击细分乘区上的合计：同一来源命中多个候选键时只取最精确的一档（短路），
+    /// 不逐层累加；不同来源之间互不影响。对应上游 `getWeaponAttackTypeBuffBonus`。
+    /// @param keys 候选键（从最精确到最宽泛）
+    /// @param multiplicative 是否按独立乘区 `Π(1+v)` 聚合
+    pub fn attack_type_buff_bonus(&self, keys: &[String], multiplicative: bool) -> f64 {
+        crate::prof!("context::attack_type_buff_bonus");
+        let mut total = if multiplicative { 1.0 } else { 0.0 };
+        for (index, buff) in self.buffs.iter().enumerate() {
+            if !self.is_buff_active(index) {
+                continue;
+            }
+            // 与 `buffs_mul_bonus` / 来源表同口径：code-only 动态 BUFF 不进共享池。
+            if !Self::in_plain_slot(buff) {
+                continue;
+            }
+            if buff.is_field_conditional() {
+                continue;
+            }
+            for key in keys {
+                if let Some(value) = buff.property(key) {
+                    if multiplicative {
+                        total *= 1.0 + value;
+                    } else {
+                        total += value;
+                    }
+                    break;
+                }
+            }
+        }
+        if multiplicative { total - 1.0 } else { total }
+    }
+
+    /// MOD 效果层（`mods_buff_props`）与武器效果层（`weapon_buff_props`）在攻击细分乘区上的合计。
+    /// 与 BUFF 共享池同口径：每层按候选键精确度短路，只取最精确的一档，避免同一效果被多层重复计入。
+    /// 对应上游 `getWeaponAttackTypeEffectBonus`。
+    pub fn attack_type_effect_bonus(&self, keys: &[String]) -> f64 {
+        crate::prof!("context::attack_type_effect_bonus");
+        let mut total = 0.0;
+        for pool in [&self.source_table.mods_buff_props, &self.source_table.weapon_buff_props] {
+            for key in keys {
+                if let Some(value) = pool.get(key) {
+                    total += value;
+                    break;
+                }
+            }
+        }
+        total
     }
 
     /// MOD 词条合计；对应上游 `sumModsFromTable`。
@@ -1124,6 +1685,8 @@ impl<'a> BuildContext<'a> {
                 if *value == 0.0 {
                     continue;
                 }
+                // 条件 BUFF 的旧字面 `追加伤害` 同样迁回 `自属性追伤`
+                let prop = normalize_additional_damage_key(prop);
                 if is_multiplicative_attr(prop) {
                     let current = entry.props.get(prop).copied().unwrap_or(0.0);
                     entry
@@ -1232,10 +1795,15 @@ impl<'a> BuildContext<'a> {
     fn lists(&self) -> &SkillLists {
         self.skill_lists.get_or_init(|| {
             crate::prof!("context::skill_lists");
-            let melee = replace_weapon_skills(&self.melee_weapon.skills, &self.melee_mods);
-            let ranged = replace_weapon_skills(&self.ranged_weapon.skills, &self.ranged_mods);
+            // 升华词条替换与 MOD 同源时 MOD 优先（TS `replaceWeaponSkills` 口径）
+            let affix = self
+                .transcend_effects()
+                .map(|effects| &effects.skill_replacements)
+                .filter(|replacements| !replacements.is_empty());
+            let melee = replace_weapon_skills(&self.melee_weapon.skills, &self.melee_mods, affix);
+            let ranged = replace_weapon_skills(&self.ranged_weapon.skills, &self.ranged_mods, affix);
             let skill = match self.skill_weapon.as_ref() {
-                Some(weapon) => replace_weapon_skills(&weapon.skills, &self.skill_mods),
+                Some(weapon) => replace_weapon_skills(&weapon.skills, &self.skill_mods, affix),
                 None => Vec::new(),
             };
             let mut by_base: HashMap<String, WeaponRef> = HashMap::new();
@@ -1417,6 +1985,7 @@ impl<'a> BuildContext<'a> {
                 changed = true;
             }
         }
+
         if changed {
             // 属性表含 BUFF，需重建
             self.source_table = self.build_source_table();
@@ -1705,25 +2274,40 @@ impl<'a> BuildContext<'a> {
         crate::prof!("context::build_source_table");
         let mut table = BonusSourceTable::default();
         for (key, value) in self.char.bonus.numeric_iter() {
-            *table.char.entry(key).or_insert(0.0) += value;
+            *table
+                .char
+                .entry(normalize_additional_damage_key(key))
+                .or_insert(0.0) += value;
         }
         // 武器：只取 `加成` 缩放后的词条（效果层单独进 weaponBuffProps，与上游遍历
         // 武器实例自有数值键的口径一致，不能把效果层算两遍）
         if self.melee_weapon.forge_effective {
             for (key, value) in &self.melee_weapon.props {
-                *table.melee.entry_static(key).or_insert(0.0) += value;
+                *table
+                    .melee
+                    .entry(normalize_additional_damage_key(key))
+                    .or_insert(0.0) += value;
             }
         }
         if self.ranged_weapon.forge_effective {
             for (key, value) in &self.ranged_weapon.props {
-                *table.ranged.entry_static(key).or_insert(0.0) += value;
+                *table
+                    .ranged
+                    .entry(normalize_additional_damage_key(key))
+                    .or_insert(0.0) += value;
             }
         }
         for (key, value) in &self.melee_weapon.buff_props {
-            *table.weapon_buff_props.entry_static(key).or_insert(0.0) += value;
+            *table
+                .weapon_buff_props
+                .entry(normalize_additional_damage_key(key))
+                .or_insert(0.0) += value;
         }
         for (key, value) in &self.ranged_weapon.buff_props {
-            *table.weapon_buff_props.entry_static(key).or_insert(0.0) += value;
+            *table
+                .weapon_buff_props
+                .entry(normalize_additional_damage_key(key))
+                .or_insert(0.0) += value;
         }
         // MOD
         for mod_ in self.iter_mods() {
@@ -1743,7 +2327,10 @@ impl<'a> BuildContext<'a> {
                 continue;
             }
             for (key, value) in &buff.props {
-                *table.buffs.entry_static(key).or_insert(0.0) += value;
+                *table
+                    .buffs
+                    .entry(normalize_additional_damage_key(key))
+                    .or_insert(0.0) += value;
             }
         }
         table
@@ -1795,6 +2382,10 @@ impl<'a> BuildContext<'a> {
         let source_version = self.memo.source_version;
         let mods_len = self.mods.len();
         let skill_lists = self.skill_lists.get().cloned();
+        // 三键 MOD 可能触发技能等级二次装配：角色 / 同律武器必须与技能列表一起回滚
+        let char = self.char.clone();
+        let char_skill_levels = self.char_skill_levels;
+        let skill_weapon = self.skill_weapon.clone();
         // 变体感知：快照/恢复必须命中激活变体（B/C），否则探针回滚会 corrupt 配置 A。
         let slots = self.settings.active_slots(active_slot_index(key)).clone();
         let effect_len = self.settings.effect_config.len();
@@ -1827,6 +2418,9 @@ impl<'a> BuildContext<'a> {
         self.memo.source_version = source_version;
         self.mods.truncate(mods_len);
         self.buff_active = buff_active;
+        self.char = char;
+        self.char_skill_levels = char_skill_levels;
+        self.skill_weapon = skill_weapon;
         self.skill_lists = std::sync::OnceLock::new();
         if let Some(lists) = skill_lists {
             let _ = self.skill_lists.set(lists);
@@ -1852,6 +2446,10 @@ impl<'a> BuildContext<'a> {
         let source_version = self.memo.source_version;
         let mods_index = self.mods.clone();
         let skill_lists = self.skill_lists.get().cloned();
+        // 同 `with_mod_probe`：三键 MOD 可能触发技能等级二次装配，角色 / 同律武器一并回滚
+        let char = self.char.clone();
+        let char_skill_levels = self.char_skill_levels;
+        let skill_weapon = self.skill_weapon.clone();
         // 变体感知：同 `with_mod_probe`，快照激活变体槽位。
         let slots = self.settings.active_slots(active_slot_index(key)).clone();
         let scoped_flag = self.scoped_code_computing;
@@ -1884,6 +2482,9 @@ impl<'a> BuildContext<'a> {
         self.memo.source_version = source_version;
         self.mods = mods_index;
         self.buff_active = buff_active;
+        self.char = char;
+        self.char_skill_levels = char_skill_levels;
+        self.skill_weapon = skill_weapon;
         self.skill_lists = std::sync::OnceLock::new();
         if let Some(lists) = skill_lists {
             let _ = self.skill_lists.set(lists);
@@ -1984,6 +2585,8 @@ impl<'a> BuildContext<'a> {
         self.source_table = self.build_source_table();
         self.memo.bump_with_source();
         self.invalidate_derived();
+        // 增量路径同样按三键属性二次装配（现状数据无三键 MOD，守卫未来数据）
+        self.refresh_skill_levels();
     }
     fn rebuild_after_mod_change(&mut self, added: &LeveledMod) {
         let mut mods = Vec::new();
@@ -2023,6 +2626,8 @@ impl<'a> BuildContext<'a> {
             }
         }
         self.invalidate_derived();
+        // 增量路径同样按三键属性二次装配（现状数据无三键 MOD，守卫未来数据）
+        self.refresh_skill_levels();
     }
 }
 
@@ -2030,17 +2635,22 @@ impl<'a> BuildContext<'a> {
 fn add_mod_to_source(table: &mut BonusSourceTable, mod_: &LeveledMod) {
     let scope = mod_.attr_type();
     let mut bucket = scope_bucket_index(scope).map(|index| &mut table.mods_by_scope[index]);
+    // 旧字面 `追加伤害` 迁移为 `自属性追伤`（与上游 `accumulate` 同口径）
     for (key, value) in &mod_.props {
-        *table.mods_all.entry_static(key).or_insert(0.0) += value;
+        let key = normalize_additional_damage_key(key);
+        *table.mods_all.entry(key).or_insert(0.0) += value;
         if let Some(bucket) = bucket.as_deref_mut() {
-            *bucket.entry_static(key).or_insert(0.0) += value;
+            *bucket.entry(key).or_insert(0.0) += value;
         }
         if scope == "角色" {
-            *table.mods_char.entry_static(key).or_insert(0.0) += value;
+            *table.mods_char.entry(key).or_insert(0.0) += value;
         }
     }
     for (key, value) in &mod_.buff_props {
-        *table.mods_buff_props.entry_static(key).or_insert(0.0) += value;
+        *table
+            .mods_buff_props
+            .entry(normalize_additional_damage_key(key))
+            .or_insert(0.0) += value;
     }
 }
 
@@ -2072,7 +2682,13 @@ pub enum WeaponRef {
 }
 
 /// 按 MOD 技能替换表替换武器技能；对应上游 `replaceWeaponSkillsByMods`。
-fn replace_weapon_skills(skills: &[LeveledSkill], mods: &[LeveledMod]) -> Vec<LeveledSkill> {
+///
+/// 升华词条替换（`affix`）同源时 MOD 优先：MOD 命中即不再应用词条载荷。
+fn replace_weapon_skills(
+    skills: &[LeveledSkill],
+    mods: &[LeveledMod],
+    affix: Option<&BTreeMap<i64, TranscendSkillReplacement>>,
+) -> Vec<LeveledSkill> {
     let mut replace_map: HashMap<i64, Record> = HashMap::new();
     for mod_ in mods {
         let replace = mod_.raw.obj("技能替换");
@@ -2084,7 +2700,7 @@ fn replace_weapon_skills(skills: &[LeveledSkill], mods: &[LeveledMod]) -> Vec<Le
             }
         }
     }
-    if replace_map.is_empty() {
+    if replace_map.is_empty() && affix.is_none_or(BTreeMap::is_empty) {
         return skills.to_vec();
     }
     skills
@@ -2105,7 +2721,10 @@ fn replace_weapon_skills(skills: &[LeveledSkill], mods: &[LeveledMod]) -> Vec<Le
                     String::new(),
                 )
             }
-            None => skill.clone(),
+            None => match affix.and_then(|replacements| replacements.get(&skill.id)) {
+                Some(replacement) => crate::transcend::apply_replacement(skill, replacement),
+                None => skill.clone(),
+            },
         })
         .collect()
 }
@@ -2424,6 +3043,9 @@ pub fn run_dynamic_buff(
         bases,
         mod_attrs,
         enemy: dynamic::enemy_attr_map(enemy_level),
+        legacy_aggregate_mixed: false,
+        legacy_component_targets: Vec::new(),
+        legacy_aggregate_targets: Vec::new(),
     };
     let outcome = dynamic::run_code(code, &mut env);
     (env.field_attrs, outcome)
@@ -2438,3 +3060,4 @@ mod send_tests {
         assert_send_sync::<super::SkillLists>();
     }
 }
+

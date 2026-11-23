@@ -6,8 +6,8 @@ import { formatProp } from "@/util"
 
 /** 配装页侧边栏页签（角色 / 近战 / 远程 / 同律）的 tooltip 内容 */
 export type BuildTabCard =
-    | { kind: "char"; char: LeveledChar; mastery?: string[] }
-    | { kind: "weapon"; weapon: LeveledWeapon; ineffective: ReadonlySet<string> }
+    | { kind: "char"; char: LeveledChar; mastery?: string[]; title?: string }
+    | { kind: "weapon"; weapon: LeveledWeapon; ineffective: ReadonlySet<string>; title?: string }
     | { kind: "skill"; weapon: LeveledSkillWeapon }
     | { kind: "empty"; title: string; isEmpty?: boolean }
 
@@ -24,10 +24,10 @@ const skillProps = computed(() => skill.value?.getProperties() ?? {})
     <FullTooltip side="bottom">
         <template #tooltip>
             <div v-if="card.kind === 'char'" class="-mx-3.75 -my-2.5">
-                <CharTooltip :char="card.char" :mastery="card.mastery" bare />
+                <CharTooltip :char="card.char" :mastery="card.mastery" :title="card.title" bare />
             </div>
             <div v-else-if="card.kind === 'weapon'" class="-mx-3.75 -my-2.5">
-                <WeaponTooltip :weapon="card.weapon" :ineffective="card.ineffective" bare />
+                <WeaponTooltip :weapon="card.weapon" :ineffective="card.ineffective" :title="card.title" bare />
             </div>
             <div v-else-if="card.kind === 'skill' && skill" class="flex w-64 flex-col gap-2">
                 <div v-if="skillIcon" class="relative -mx-3.75 -mt-2.5 mb-1 h-24 w-64 overflow-hidden">

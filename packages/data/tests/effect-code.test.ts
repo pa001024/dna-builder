@@ -273,6 +273,6 @@ describe("[求索]伤害按角色面板结算（基础: 角色）", () => {
         expect(ratio(mk({ 暴伤: 1 }))).toBeCloseTo(1, 10)
         expect(ratio(mk({ 暴伤: 1 }, "近战"), "melee")).toBeCloseTo(1, 10)
         expect(ratio(mk({ 武器伤害: 1 }))).toBeCloseTo(1, 10)
-        expect(ratio(mk({ 追加伤害: 1 }, "melee"))).toBeCloseTo(1, 10)
+        expect(ratio(mk({ 自属性追伤: 1 }, "melee"))).toBeCloseTo(1, 10)
     })
 })

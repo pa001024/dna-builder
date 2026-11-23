@@ -2,7 +2,7 @@
     "meta": {
         "sourceFile": "packages/data/tests/leveled.test.ts",
         "caseName": "等级公式/取档/钳制锚点",
-        "tsBaseline": "1.5.0",
+        "tsBaseline": "1.5.6",
         "kind": "leveled-values"
     },
     "request": {
@@ -17,6 +17,7 @@
             "enemyResistance": 0,
             "isRouge": false,
             "targetFunction": "",
+            "mainTargetEnabled": true,
             "customVariables": [],
             "charSkillLevel": [10, 10, 10],
             "extraMastery": "",
@@ -49,7 +50,81 @@
             "team2Weapon": "-",
             "team2Build": "-",
             "team2BuildVariant": "A",
+            "assist1": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "baseName": "",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
+            "assist2": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "baseName": "",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
             "timelineDPS": false,
+            "transcend": {
+                "enabled": false,
+                "talentLevels": [],
+                "mainGear": [],
+                "assist1Gear": [],
+                "assist2Gear": [],
+                "gearVariants": [
+                    {
+                        "id": "A",
+                        "mainGear": [],
+                        "assist1Gear": [],
+                        "assist2Gear": []
+                    }
+                ],
+                "activeGearVariant": "A"
+            },
             "useGlobal": false,
             "effectConfig": {},
             "dotSettings": {
@@ -78,7 +153,7 @@
         "减伤单元素0": 0.5,
         "减伤单元素满": 0.5,
         "不存在MOD抛错": true,
-        "法露茜Q默认等级": 12,
+        "法露茜Q默认等级": 30,
         "武器基础攻击": 225.94,
         "武器精炼上限": 5,
         "武器1级下限": 1,

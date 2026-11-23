@@ -1,5 +1,6 @@
 import type { CharAttr } from "../CharBuild"
 import type { Buff, Mod, WeaponSkill } from "../data-types"
+import { normalizeAdditionalDamageKey, warnLegacyAdditionalDamage } from "./additionalDamage"
 import { LeveledBuff } from "./LeveledBuff"
 import { getMinusAttrValue } from "./minusAttr"
 
@@ -313,8 +314,12 @@ export class LeveledMod implements Mod {
             if (maxValue === undefined) continue
             const currentValue = this.calculateBonusValue(prop, maxValue, lv)
             if (currentValue === undefined) continue
-            this[prop] = currentValue
-            this._attrKeys.add(prop)
+            // 旧包 / 旧分享的词条 `追加伤害` 在装载时归一为 `自属性追伤`，
+            // 使 getModsBonus / getAddAttrValue / MOD属性加权读同一键
+            const key = normalizeAdditionalDamageKey(prop)
+            if (key !== prop) warnLegacyAdditionalDamage(`MOD ${this.id}`)
+            this[key] = (this[key] ?? 0) + currentValue
+            this._attrKeys.add(key)
         }
         // 效果层属性与词条基础属性使用相同的等级倍率。
         // 带 `@` 前缀的属性归属 BUFF 层：物化属性时已剥离前缀，这里经 isBuffLayerProperty 判定后写入 buffProps，
@@ -329,8 +334,10 @@ export class LeveledMod implements Mod {
             if (buff.isBuffLayerProperty(prop)) {
                 buffProps[prop] = (buffProps[prop] || 0) + currentValue
             } else {
-                const modProperty = this.resolveEffectProperty(prop)
-                if (!modProperty) return
+                const resolved = this.resolveEffectProperty(prop)
+                if (!resolved) return
+                const modProperty = normalizeAdditionalDamageKey(resolved)
+                if (modProperty !== resolved) warnLegacyAdditionalDamage(`MOD ${this.id} 特效`)
                 this[modProperty] = this[modProperty] ? this[modProperty] + currentValue : currentValue
                 this._attrKeys.add(modProperty)
             }
@@ -519,9 +526,8 @@ export class LeveledMod implements Mod {
             召唤物独立增伤: 0,
             减伤: 0,
             有效生命: 0,
-            充盈威力: 0,
+            充盈威力: 1,
             技能触发: 0,
-            异常数量: 1,
             魔灵CD: 0,
             魔灵CD缩减: 0,
             神智回复: 0,
@@ -556,10 +562,14 @@ export class LeveledMod implements Mod {
         const condition = this.checkCondition(attrs, charMods, conditionValues)
         if (!condition) return false
         let changed = false
-        Object.keys(condition.props).forEach(key => {
+        Object.keys(condition.props).forEach(rawKey => {
+            // 旧包条件属性里的 `追加伤害` 同样归一为 `自属性追伤`
+            const key = normalizeAdditionalDamageKey(rawKey)
+            if (key !== rawKey) warnLegacyAdditionalDamage(`MOD ${this.id} 条件属性`)
+            const propValue = condition.props[rawKey]
             if (condition.isEffective) {
-                if (Array.isArray(condition.props[key])) {
-                    const [v1, v2] = condition.props[key]
+                if (Array.isArray(propValue)) {
+                    const [v1, v2] = propValue
                     const cond = this.生效!.条件![0][0]
                     const baseValue = conditionValues?.[cond] ?? attrs[cond as keyof CharAttr] ?? 0
                     const finalValue = Math.min(baseValue * v1, v2)
@@ -568,8 +578,8 @@ export class LeveledMod implements Mod {
                         this._attrKeys.add(key)
                         changed = true
                     }
-                } else if (this[key] !== condition.props[key]) {
-                    this[key] = condition.props[key]
+                } else if (this[key] !== propValue) {
+                    this[key] = propValue
                     this._attrKeys.add(key)
                     changed = true
                 }
