@@ -20,14 +20,18 @@ import {
     type AfkDropType,
     type AfkLedgerSnapshot,
     type AfkRun,
+    type AfkRunStatus,
     buildDayCells,
     buildSnapshot,
     dayIdOf,
+    dropFingerprint,
     emptySnapshot,
+    normalizeRarity,
     resolveCraftItem,
     runDayCells,
     startOfDay,
 } from "@/utils/afk-ledger"
+import { createRecentDedupe } from "@/utils/recent-dedupe"
 
 class AfkLedgerDatabase extends Dexie {
     runs!: Table<AfkRun, number>
@@ -78,8 +82,17 @@ const BACKUP_VERSION = 1
 
 /** 重开应用时，超过这个时长还没结束的场次视为已中断，按完成收尾（兜底）。 */
 const STALE_RUN_MS = 6 * 3600_000
+/**
+ * 多路输入去重窗口：官方奖励管道与日志分析会重复播报同一条掉落 / 副本完成。
+ * 两路的 receivedAt 都换成真实 epoch 毫秒，窗口内同指纹只落一条。
+ */
+const MULTI_SOURCE_DEDUPE_MS = 5000
 /** 初始化去重：App 与页面可能同时触发 init。 */
 let initPromise: Promise<void> | null = null
+/** 掉落去重表：窗口内同指纹（两路各播一次）只落一条。 */
+const dropDedupe = createRecentDedupe(MULTI_SOURCE_DEDUPE_MS)
+/** 近窗口内创建/结束的场次：两路各发一次 enter/complete 时复用同一场。 */
+const recentRuns = new Map<string, RecentRun>()
 /** 最近一条已处理的完成回调（游戏会重复发同一条）。 */
 let lastComplete: { id: string; at: number } | null = null
 /** 最近完成的一场：重开挑战补场次时用它取副本与结束时刻。 */
@@ -151,6 +164,31 @@ type ActiveRun = {
     startedAt: number
 }
 
+/** 近窗口内的场次状态（含结束时刻）。 */
+type RecentRun = ActiveRun & { endedAt: number | null; status: AfkRunStatus }
+
+/**
+ * 从库里的场次行恢复内存态；没有主键时返回 null。
+ * @param run 场次行
+ * @returns 进行中场次的精简状态
+ */
+function activeRunOf(run: Pick<AfkRun, "id" | "dungeonId" | "dungeonName" | "startedAt">): ActiveRun | null {
+    return run.id === undefined ? null : { id: run.id, dungeonId: run.dungeonId, dungeonName: run.dungeonName, startedAt: run.startedAt }
+}
+
+/**
+ * 记录窗口内创建/结束的场次，供另一路输入的 enter/complete 复用。
+ * @param run 场次状态
+ * @param at 事件时刻（毫秒）
+ */
+function rememberRecentRun(run: RecentRun, at: number) {
+    recentRuns.set(run.dungeonId, run)
+    if (recentRuns.size <= 32) return
+    for (const [dungeonId, recent] of recentRuns) {
+        if (Math.abs(at - recent.startedAt) >= MULTI_SOURCE_DEDUPE_MS) recentRuns.delete(dungeonId)
+    }
+}
+
 export const useAfkLedgerStore = defineStore("afkLedger", {
     state: () => ({
         initialized: false,
@@ -200,12 +238,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                     for (const [index, run] of openRuns.entries()) {
                         if (run.id === undefined) continue
                         if (index === 0 && now - run.startedAt < STALE_RUN_MS) {
-                            this.activeRun = {
-                                id: run.id,
-                                dungeonId: run.dungeonId,
-                                dungeonName: run.dungeonName,
-                                startedAt: run.startedAt,
-                            }
+                            this.activeRun = activeRunOf(run)
                             continue
                         }
                         const endedAt = run.endedAt ?? run.startedAt
@@ -254,24 +287,38 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 })
         },
         /**
-         * 记录一条管道事件（回放事件由调用方过滤）。
-         * @param event 管道事件
+         * 记录一条输入事件（回放事件由调用方过滤）。
+         * @param event 输入事件
          * @param replayed 是否来自连接瞬间的历史回放
          */
         record(event: AfkEvent, replayed: boolean) {
-            if (replayed) return
+            this.recordMany([event], replayed)
+        },
+        /**
+         * 按顺序记录一批输入事件，整批只排一次写入队列。
+         * @param events 输入事件
+         * @param replayed 是否来自连接瞬间的历史回放
+         */
+        recordMany(events: AfkEvent[], replayed: boolean) {
+            if (replayed || !events.length) return
             writeQueue = writeQueue
                 .then(async () => {
                     await this.init()
-                    await this.applyEvent(event)
+                    for (const event of events) {
+                        try {
+                            await this.applyEvent(event)
+                        } catch (error) {
+                            this.error = String(error)
+                        }
+                    }
                 })
                 .catch(error => {
                     this.error = String(error)
                 })
         },
         /**
-         * 把一条事件落库。
-         * @param event 管道事件
+         * 把一条事件落库；跨来源重复播报在此处统一去重。
+         * @param event 输入事件
          */
         async applyEvent(event: AfkEvent) {
             const at = event.receivedAt || Date.now()
@@ -283,19 +330,19 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 // 只有名字没有 id，武器等成品在这里按名反查回填 id，否则展示层拿不到图标与详情链
                 if (event.kind === "craft") {
                     const crafted = resolveCraftItem(event.name)
-                    await ledgerDb().drops.add({
-                        sessionId: this.sessionId ?? 0,
-                        runId: null,
-                        dungeonId: "",
-                        dungeonName: "",
+                    const added = await this.addDropIfNew(
+                        {
+                            kind: "craft",
+                            itemId: crafted.itemId,
+                            itemName: event.name,
+                            itemType: crafted.itemType,
+                            rarity: normalizeRarity(event.rarity),
+                            count: event.count,
+                        },
                         at,
-                        kind: "craft",
-                        itemId: crafted.itemId,
-                        itemName: event.name,
-                        itemType: crafted.itemType,
-                        rarity: event.rarity,
-                        count: event.count,
-                    })
+                        false
+                    )
+                    if (!added) return
                 } else {
                     // 游戏在「同一副本重新挑战」时不会重发开始事件：完成之后没等到 idle
                     // 就又掉落了，说明玩家已经重开，用上一场的结束时刻补一条开始事件，
@@ -306,22 +353,19 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                     }
                     // 有正在进行的场次就直接归给它（开始/结束成对时这是准确归属）；
                     // 没在副本里掉出来的先挂起，作为「错过开始帧」时的兜底
-                    const active = this.activeRun
-                    await ledgerDb().drops.add({
-                        sessionId: this.sessionId ?? 0,
-                        runId: active?.id ?? null,
-                        dungeonId: active?.dungeonId ?? "",
-                        dungeonName: active?.dungeonName ?? "",
+                    const added = await this.addDropIfNew(
+                        {
+                            kind: "reward",
+                            itemId: event.id,
+                            itemName: event.name,
+                            itemType: resolveDropType(event.id, event.name),
+                            rarity: normalizeRarity(event.rarity),
+                            count: event.count,
+                        },
                         at,
-                        kind: "reward",
-                        itemId: event.id,
-                        itemName: event.name,
-                        itemType: resolveDropType(event.id, event.name),
-                        rarity: event.rarity,
-                        count: event.count,
-                    })
-                    // 只有进行中的场次才进动画状态：动画画的永远是「这一场」的掉落
-                    if (active) await publishRunDrops()
+                        true
+                    )
+                    if (!added) return
                 }
             } else if (event.kind === "character") {
                 // idle/death 等非战斗状态说明已经离开副本，重开挑战的补场次不再适用
@@ -334,6 +378,37 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             this.scheduleSnapshot()
         },
         /**
+         * 写入一条掉落；窗口内同指纹（两路重复播报）只落一条。
+         * @param drop 掉落内容
+         * @param at 事件时刻（毫秒）
+         * @param assignToActive 是否归给进行中的场次
+         * @returns 是否写入
+         */
+        async addDropIfNew(
+            drop: Pick<AfkDrop, "kind" | "itemId" | "itemName" | "itemType" | "rarity" | "count">,
+            at: number,
+            assignToActive: boolean
+        ) {
+            if (dropDedupe.duplicate(dropFingerprint(drop), at)) return false
+            const active = assignToActive ? this.activeRun : null
+            await ledgerDb().drops.add({
+                sessionId: this.sessionId ?? 0,
+                runId: active?.id ?? null,
+                dungeonId: active?.dungeonId ?? "",
+                dungeonName: active?.dungeonName ?? "",
+                at,
+                kind: drop.kind,
+                itemId: drop.itemId,
+                itemName: drop.itemName,
+                itemType: drop.itemType,
+                rarity: drop.rarity,
+                count: drop.count,
+            })
+            // 只有进行中的场次才进动画状态：动画画的永远是「这一场」的掉落
+            if (active) await publishRunDrops()
+            return true
+        },
+        /**
          * 处理场次开始。
          * @param dungeonId 副本 ID
          * @param dungeonName 副本名
@@ -341,7 +416,13 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
          */
         async applyEnter(dungeonId: string, dungeonName: string, at: number) {
             const active = this.activeRun
-            if (active && active.dungeonId === dungeonId && at - active.startedAt < 5000) return
+            if (active && active.dungeonId === dungeonId && Math.abs(at - active.startedAt) < MULTI_SOURCE_DEDUPE_MS) return
+            // 两路输入可能各发一次 enter：窗口内已创建过同一副本的场次就复用
+            const recent = dungeonId ? recentRuns.get(dungeonId) : undefined
+            if (recent && Math.abs(at - recent.startedAt) < MULTI_SOURCE_DEDUPE_MS) {
+                if (!active && recent.status === "running") this.activeRun = activeRunOf(recent)
+                return
+            }
             if (active) await this.closeActive(at)
             const id = await ledgerDb().runs.add({
                 sessionId: this.sessionId ?? 0,
@@ -352,6 +433,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 status: "running",
             })
             this.activeRun = { id, dungeonId, dungeonName, startedAt: at }
+            rememberRecentRun({ id, dungeonId, dungeonName, startedAt: at, endedAt: null, status: "running" }, at)
             this.rememberDungeon(dungeonId, dungeonName)
             // 动画只画这一场的掉落：进场先把上一场清空
             await publishRunDrops()
@@ -363,8 +445,9 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
          * @param at 接收时刻
          */
         async applyComplete(dungeonId: string, dungeonName: string, at: number) {
-            // 同一条完成回调会在瞬间重复多次，按「副本 + 3 秒」去重
-            if (lastComplete && lastComplete.id === dungeonId && at - lastComplete.at < 3000) return
+            // 同一条完成回调会在瞬间重复多次（官方管道 40+ 次，日志还会再播一次），
+            // 按「副本 + 去重窗口」只落一条
+            if (lastComplete && lastComplete.id === dungeonId && Math.abs(at - lastComplete.at) < MULTI_SOURCE_DEDUPE_MS) return
             lastComplete = { id: dungeonId, at }
             const active = this.activeRun
             if (active && (!dungeonId || !active.dungeonId || dungeonId === active.dungeonId)) {
@@ -374,6 +457,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 this.runsVersion += 1
                 this.activeRun = null
                 lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: name, endedAt: at }
+                rememberRecentRun({ ...active, dungeonName: name, endedAt: at, status: "done" }, at)
                 awaitingIdle = true
                 await publishRunDrops()
                 await this.attachPending({ ...active, dungeonName: name })
@@ -405,6 +489,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             await this.addRunDayCells({ dungeonId: runDungeonId, dungeonName: runDungeonName, startedAt, endedAt: at })
             this.runsVersion += 1
             lastFinishedRun = { dungeonId: runDungeonId, dungeonName: runDungeonName, endedAt: at }
+            rememberRecentRun({ id, dungeonId: runDungeonId, dungeonName: runDungeonName, startedAt, endedAt: at, status: "done" }, at)
             awaitingIdle = true
             await publishRunDrops()
             await this.attachPending({ id, dungeonId: runDungeonId, dungeonName: runDungeonName })
@@ -438,6 +523,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             this.runsVersion += 1
             this.activeRun = null
             lastFinishedRun = { dungeonId: active.dungeonId, dungeonName: active.dungeonName, endedAt: at }
+            rememberRecentRun({ ...active, endedAt: at, status: "done" }, at)
             await publishRunDrops()
             if (flush) await this.attachPending(active)
         },
@@ -593,8 +679,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
             const result = { runs: 0, drops: 0, skipped: 0 }
 
             const runKey = (run: AfkRun) => `${run.dungeonId}|${run.startedAt}|${run.endedAt ?? ""}|${run.status}`
-            const dropKey = (drop: AfkDrop) =>
-                `${drop.kind}|${drop.itemId ?? ""}|${drop.itemName}|${drop.at}|${drop.count}|${drop.runId ?? ""}`
+            const dropKey = (drop: AfkDrop) => `${dropFingerprint(drop)}|${drop.at}|${drop.runId ?? ""}`
 
             const existingRuns = new Map<string, number>()
             for (const run of await db.runs.toArray()) {
@@ -700,7 +785,7 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 itemId: parsedId ?? fallback?.itemId ?? null,
                 itemName: name,
                 itemType: resolveDropType(parsedId, name),
-                rarity: Math.min(5, Math.max(1, Number(drop.rarity) || 1)),
+                rarity: normalizeRarity(drop.rarity),
                 count,
             }
         },
@@ -716,6 +801,10 @@ export const useAfkLedgerStore = defineStore("afkLedger", {
                 await db.days.clear()
                 this.activeRun = null
                 lastComplete = null
+                lastFinishedRun = null
+                awaitingIdle = false
+                dropDedupe.clear()
+                recentRuns.clear()
                 this.dungeonSeeds = {}
                 this.snapshot = { ...emptySnapshot(), sessionId: this.sessionId }
                 localStorage.setItem(AFK_LEDGER_STORAGE_KEY, JSON.stringify(this.snapshot))

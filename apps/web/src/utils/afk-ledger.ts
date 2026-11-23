@@ -18,6 +18,16 @@ export const AFK_LEDGER_STORAGE_KEY = "dna.afkLedger"
 /** 金色品质阈值（游戏内 1=白 … 5=金）。 */
 export const AFK_GOLD_RARITY = 5
 
+/**
+ * 把各来源的品质值收敛到 1..5；非法值按 1 处理。
+ * @param value 原始品质
+ * @returns 归一化品质
+ */
+export function normalizeRarity(value: unknown): number {
+    const rarity = Math.round(Number(value))
+    return Number.isFinite(rarity) ? Math.min(5, Math.max(1, rarity)) : 1
+}
+
 /** 热力图覆盖的天数：53 周整，与页面筛选无关。 */
 export const AFK_HEATMAP_DAYS = 371
 
@@ -232,6 +242,11 @@ export type AfkDrop = {
     rarity: number
     /** 数量 */
     count: number
+}
+
+/** 掉落去重指纹：多路输入对同一次播报必须得到同一个键。 */
+export function dropFingerprint(drop: Pick<AfkDrop, "kind" | "itemId" | "itemName" | "count">): string {
+    return `${drop.kind}|${drop.itemId ?? ""}|${drop.itemName}|${drop.count}`
 }
 
 /** 计数三元组。 */

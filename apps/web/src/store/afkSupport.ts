@@ -21,8 +21,9 @@ import { notifySystem, useForgeAlarm } from "@/store/forgeAlarm"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { patchAfkAnimState, readAfkAnimState } from "@/utils/afk-anim-state"
-import { afkDungeonName } from "@/utils/afk-ledger"
+import { afkDungeonName, dropFingerprint } from "@/utils/afk-ledger"
 import { dungeonDisplayName } from "@/utils/dungeon-utils"
+import { createRecentDedupe } from "@/utils/recent-dedupe"
 
 /** 最近事件在内存里保留的条数。 */
 const AFK_EVENT_KEEP = 50
@@ -37,8 +38,8 @@ const AFK_REPLAY_WINDOW_MS = 3000
 /** 事件取消监听函数放在模块级，避免进入 pinia 响应式包装。 */
 let unlistenEvent: UnlistenFn | null = null
 let unlistenStatus: UnlistenFn | null = null
-/** 去重表：内容键 → 上次下发时刻，模块级同样避免响应式开销。 */
-const dedupeAt = new Map<string, number>()
+/** 去重表：内容键 + 时间窗口，模块级同样避免响应式开销。 */
+const eventDedupe = createRecentDedupe(AFK_DEDUPE_WINDOW_MS)
 
 /**
  * 事件去重用的内容键：只取会改变展示语义的字段。
@@ -48,7 +49,7 @@ const dedupeAt = new Map<string, number>()
 function dedupeKey(event: AfkEvent): string {
     switch (event.kind) {
         case "reward":
-            return `reward|${event.id ?? ""}|${event.name}|${event.count}`
+            return dropFingerprint({ kind: "reward", itemId: event.id, itemName: event.name, count: event.count })
         case "craft":
             return `craft|${event.name}|${event.count}`
         case "dungeon":
@@ -195,17 +196,8 @@ export const useAfkSupportStore = defineStore("afkSupport", {
          * @param event 协议事件
          */
         handleEvent(event: AfkEvent) {
-            const key = dedupeKey(event)
             const now = Date.now()
-            const last = dedupeAt.get(key)
-            if (last !== undefined && now - last < AFK_DEDUPE_WINDOW_MS) return
-            dedupeAt.set(key, now)
-            // 表会随事件类型/内容增长，定期清理过期项
-            if (dedupeAt.size > 256) {
-                for (const [k, at] of dedupeAt) {
-                    if (now - at >= AFK_DEDUPE_WINDOW_MS) dedupeAt.delete(k)
-                }
-            }
+            if (eventDedupe.duplicate(dedupeKey(event), now)) return
 
             if (event.kind === "character") {
                 this.lastCharacter = event
@@ -278,7 +270,7 @@ export const useAfkSupportStore = defineStore("afkSupport", {
         clearEvents() {
             this.events = []
             this.lastCharacter = null
-            dedupeAt.clear()
+            eventDedupe.clear()
         },
     },
 })

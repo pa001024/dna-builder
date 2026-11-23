@@ -20,6 +20,7 @@ import {
     groupDropsByItem,
     groupStatsByDungeon,
     normalizeAfkSnapshot,
+    normalizeRarity,
     resolveCraftItem,
     runDayCells,
     startOfDay,
@@ -430,5 +431,15 @@ describe("buildDayCells", () => {
             { dayId: dayIdOf(DAY), dungeonId: "64102", dungeonName: "扼守/无尽", durationMs: 3600_000, runs: 1 },
             { dayId: dayIdOf(DAY), dungeonId: "20", dungeonName: "测试场景", durationMs: 1800_000, runs: 1 },
         ])
+    })
+})
+
+describe("normalizeRarity", () => {
+    it("把各来源的品质收敛到 1..5", () => {
+        expect(normalizeRarity(3.4)).toBe(3)
+        expect(normalizeRarity(0)).toBe(1)
+        expect(normalizeRarity(9)).toBe(5)
+        expect(normalizeRarity("2")).toBe(2)
+        expect(normalizeRarity(undefined)).toBe(1)
     })
 })
