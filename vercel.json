@@ -1,0 +1,6 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "pnpm --filter dna-builder-web build:vercel",
+    "outputDirectory": "apps/web/dist",
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

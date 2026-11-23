@@ -11,6 +11,10 @@
  * 与 `imgs-pack` 的差别：模型体积大、按角色精确取用，不做 zip 打包，
  * 每个部件独立成对象，前端按皮肤清单只下载缺的那几个部件。
  * 源模型不进 `public/`，也不随前端打包。
+ *
+ * 增量分两层：本地层按内容哈希跳过重压（省 CPU），上传层按远端清单决定传哪些（防漏传）。
+ * 先 build 后 upload 的两段式跑法下远端一定滞后，所以上传不能看本地清单。
+ * `--check` 只对比本地与远端，不构建不上传。
  */
 
 import fs from "node:fs"
@@ -90,9 +94,73 @@ export function readManifest(): ModelManifest {
     }
 }
 
-/** 判断部件是否需要重新发布。 */
+/** 判断部件是否需要重新发布（本地与远端共用同一口径：哈希或体积变了才传）。 */
 export function needsPublish(entry: Pick<PartManifestEntry, "hash" | "bytes">, existing?: PartManifestEntry): boolean {
     return !existing || existing.hash !== entry.hash || existing.bytes !== entry.bytes
+}
+
+/**
+ * 拉取远端清单（主端 CDN 公开地址）：`--upload` 时以它为准决定传哪些文件。
+ * 本地清单只管省 CPU（跳过重压），不代表远端状态——先 build 后 upload 的两段式跑法下
+ * 远端一定滞后，按本地清单决定上传会漏传。拉取失败返回 null，调用方按全量上传处理。
+ */
+export async function readRemoteManifest(): Promise<ModelManifest | null> {
+    const url = getPublicUrl(`${REMOTE_PREFIX}/manifest.json`)
+    try {
+        const response = await fetch(url, { signal: AbortSignal.timeout(15000) })
+        if (!response.ok) return null
+        const raw = (await response.json()) as ModelManifest
+        if (!Array.isArray(raw?.parts) || !Array.isArray(raw?.skins)) return null
+        return raw
+    } catch {
+        return null
+    }
+}
+
+/**
+ * 算出本地相对远端的待上传差异：部件按内容哈希+体积，动画按文件名+哈希+体积。
+ * 远端缺失（首发或拉取失败）视为全量上传；远端多余的条目不管（只增不减，随清单切换）。
+ */
+export function diffRemote(local: ModelManifest, remote: ModelManifest | null): { parts: string[]; anims: string[] } {
+    const remoteParts = new Map((remote?.parts ?? []).map(part => [part.name, part]))
+    const remoteSkins = new Map((remote?.skins ?? []).map(skin => [skin.id, skin]))
+    const parts: string[] = []
+    for (const part of local.parts) {
+        if (needsPublish(part, remoteParts.get(part.name))) parts.push(part.file)
+    }
+    const anims: string[] = []
+    for (const skin of local.skins) {
+        if (!skin.animation) continue
+        const existing = remoteSkins.get(skin.id)
+        if (
+            existing?.animation !== skin.animation ||
+            existing?.animationHash !== skin.animationHash ||
+            existing?.animationBytes !== skin.animationBytes
+        ) {
+            anims.push(skin.animation)
+        }
+    }
+    return { parts, anims }
+}
+
+/** `--check`：只对比本地清单/源目录与远端清单，不构建不上传。 */
+async function printRemoteDiff(models: { relPath: string }[]): Promise<void> {
+    const local = readManifest()
+    const remote = await readRemoteManifest()
+    if (!remote) console.warn("远端清单拉取失败（首发或网络问题），按远端为空对比")
+    const diff = diffRemote(local, remote)
+    console.log(
+        `本地 ${local.parts.length} 部件 / ${local.skins.length} 皮肤；远端 ${remote?.parts.length ?? 0} 部件 / ${remote?.skins.length ?? 0} 皮肤`
+    )
+    console.log(`待上传部件 ${diff.parts.length} 个${diff.parts.length ? `：${diff.parts.join("、")}` : ""}`)
+    console.log(`待上传动画 ${diff.anims.length} 个${diff.anims.length ? `：${diff.anims.join("、")}` : ""}`)
+    const built = new Set(local.skins.map(skin => skin.id))
+    const unbuilt = models
+        .map(model => path.basename(model.relPath, ".glb"))
+        .filter(id => !built.has(id))
+        .sort()
+    if (unbuilt.length) console.log(`源目录有、本地清单缺（需先 build）：${unbuilt.length} 个：${unbuilt.join("、")}`)
+    if (!diff.parts.length && !diff.anims.length && !unbuilt.length) console.log("远端已是最新，无需同步")
 }
 
 /** 命令行参数：`--key value` 收进 options，裸 `--flag` 收进 flags。 */
@@ -158,7 +226,7 @@ function collectParts(models: { absPath: string; relPath: string }[]): {
             continue
         }
         // 皮肤级元数据每个部件都带同一份，摘出来只留一份，部件里删掉
-        const meta = document.json.extras?.dnaColorize
+        const meta = document.json.extras?.dnaColorize as Record<string, unknown> | undefined
         delete document.json.extras
         // 动画绑定的是骨骼节点，拆分后每个部件只剩自己那套索引，必须单独抽出来
         const animation = extractAnimation(document)
@@ -210,6 +278,16 @@ async function main(): Promise<void> {
     const upload = flags.has("upload")
     const force = flags.has("force")
     if (upload) assertStorageConfig()
+    if (flags.has("check")) {
+        await printRemoteDiff(models)
+        return
+    }
+    // 上传看远端：本地清单新不代表 CDN 上有，两段式跑法下远端一定滞后。
+    // 拉取失败按全量上传处理，宁可多传也不漏传（传完清单才切版本，多传无害）。
+    const remoteManifest = upload ? await readRemoteManifest() : null
+    if (upload && !remoteManifest) console.warn("远端清单拉取失败，本次按全量上传处理")
+    const remoteParts = new Map((remoteManifest?.parts ?? []).map(entry => [entry.name, entry]))
+    const remoteSkins = new Map((remoteManifest?.skins ?? []).map(entry => [entry.id, entry]))
     fs.mkdirSync(mockModelsDir, { recursive: true })
 
     const { skins, parts } = collectParts(models)
@@ -219,8 +297,15 @@ async function main(): Promise<void> {
     const uploads: Promise<void>[] = []
     let published = 0
     let savedBytes = 0
+    let uploadedParts = 0
+    let uploadedAnims = 0
+    const queueUpload = (file: string, localPath: string): void => {
+        const key = `${REMOTE_PREFIX}/${file}`
+        uploads.push(putFile(key, localPath).then(() => console.log(`  已上传 ${key} -> ${getPublicUrl(key)}`)))
+    }
     for (const [name, source] of parts) {
         const previous = existingParts.get(name)
+        const remote = remoteParts.get(name)
         if (only && !skins.some(skin => skin.id === only && skin.parts.includes(name))) {
             if (previous) entries.push(previous)
             continue
@@ -228,10 +313,15 @@ async function main(): Promise<void> {
         const localPath = path.join(mockModelsDir, `${name}.glb`)
         if (!force && previous && fs.existsSync(localPath)) {
             const current = new Uint8Array(fs.readFileSync(localPath))
-            // 部件级增量：内容哈希没变就不用重压（压缩是这条流水线最慢的一步）
+            // 本地增量只省 CPU（压缩是最慢的一步）：内容没变就不重压。
+            // 传不传另看远端，下面补传分支会处理本地新、远端旧的情况。
             if (previous.hash === hashBytes(current) && previous.bytes === current.length) {
                 entries.push(previous)
                 savedBytes += current.length
+                if (upload && (force || needsPublish(previous, remote))) {
+                    queueUpload(previous.file, localPath)
+                    uploadedParts++
+                }
                 continue
             }
         }
@@ -239,11 +329,6 @@ async function main(): Promise<void> {
         const hash = hashBytes(glb)
         const entry: PartManifestEntry = { name, file: `${name}.glb`, bytes: glb.length, hash, builtAt: new Date().toISOString() }
         if (force || needsPublish(entry, previous)) {
-            fs.writeFileSync(localPath, glb)
-            if (upload) {
-                const key = `${REMOTE_PREFIX}/${entry.file}`
-                uploads.push(putFile(key, localPath).then(() => console.log(`  已上传 ${key} -> ${getPublicUrl(key)}`)))
-            }
             published++
             console.log(
                 `  ${name}: ${(report.before / 1048576).toFixed(2)} -> ${(glb.length / 1048576).toFixed(2)} MiB` +
@@ -253,8 +338,17 @@ async function main(): Promise<void> {
         } else {
             console.log(`  ${name}: 未变化，跳过（${(glb.length / 1048576).toFixed(2)} MiB）`)
         }
+        // 本地回填：缺失或过期都写回，保证「清单 entry ↔ 本地文件」一致，
+        // 远端补传时一定有文件可传（旧逻辑未变化时不写，缺文件会传失败）。
+        if (!fs.existsSync(localPath) || hashBytes(new Uint8Array(fs.readFileSync(localPath))) !== hash) {
+            fs.writeFileSync(localPath, glb)
+        }
         savedBytes += glb.length
         entries.push(entry)
+        if (upload && (force || needsPublish(entry, remote))) {
+            queueUpload(entry.file, localPath)
+            uploadedParts++
+        }
     }
 
     // 皮肤清单只记部件名：运行期按这个顺序拼回完整模型
@@ -266,12 +360,23 @@ async function main(): Promise<void> {
         const entry: SkinManifestEntry = { id: skin.id, parts: skin.parts, ...(meta && Object.keys(meta).length ? { meta } : {}) }
         if (skin.animation) {
             const file = `${skin.id}.anim.glb`
-            fs.writeFileSync(path.join(mockModelsDir, file), skin.animation)
+            const animPath = path.join(mockModelsDir, file)
+            fs.writeFileSync(animPath, skin.animation)
+            const animationHash = hashBytes(skin.animation)
             if (upload) {
-                const key = `${REMOTE_PREFIX}/${file}`
-                uploads.push(putFile(key, path.join(mockModelsDir, file)))
+                // 动画同样按远端去重：219 个全量重传约百 MB，没变就不传
+                const remoteSkin = remoteSkins.get(skin.id)
+                const same =
+                    !force &&
+                    remoteSkin?.animation === file &&
+                    remoteSkin?.animationHash === animationHash &&
+                    remoteSkin?.animationBytes === skin.animation.length
+                if (!same) {
+                    queueUpload(file, animPath)
+                    uploadedAnims++
+                }
             }
-            skinEntries.push({ ...entry, animation: file, animationBytes: skin.animation.length, animationHash: hashBytes(skin.animation) })
+            skinEntries.push({ ...entry, animation: file, animationBytes: skin.animation.length, animationHash })
         } else skinEntries.push(entry)
     }
     const next: ModelManifest = { builtAt: new Date().toISOString(), parts: entries, skins: skinEntries }
@@ -279,7 +384,7 @@ async function main(): Promise<void> {
     const naive = skins.reduce((sum, skin) => sum + skin.parts.reduce((inner, name) => inner + (parts.get(name)?.length ?? 0), 0), 0)
     console.log(
         `清单已写入 ${path.relative(rootDir, manifestPath)}（${entries.length} 个部件 / ${skinEntries.length} 个皮肤，` +
-            `本次发布 ${published} 个部件；部件化后 ${(savedBytes / 1048576).toFixed(1)} MiB，` +
+            `本地变更 ${published} 个部件${upload ? `，上传 ${uploadedParts} 个部件 / ${uploadedAnims} 个动画` : ""}；部件化后 ${(savedBytes / 1048576).toFixed(1)} MiB，` +
             `按皮肤各存一份则是 ${(naive / 1048576).toFixed(1)} MiB）`
     )
 

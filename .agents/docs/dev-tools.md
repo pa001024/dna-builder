@@ -192,7 +192,10 @@ bun tools/webp-import.ts --source "F:/test/uasset-1.8/EM/Content/UI/Texture" \
   `bun tools/data-pack.ts backfill` 给本地版本列表回填缺失的 major；缺 major 的老条目按
   `1.6.208.7` 分割线推断（之前为 1，自 MOD 数值挪进 `加成` 起为 2）；
 - `pnpm ip`（`bun tools/imgs-pack.ts build`）— 图片包；
-- `pnpm mp`（`bun tools/models-pack.ts`）— 3D 皮肤模型，参数 `[--force] [--only <id>] [--src <dir>] [--max-size <MiB>] [--texture cutout=0.45:lossless,…] [upload]`。
+- `pnpm mp`（`bun tools/models-pack.ts`）— 3D 皮肤模型，参数 `[--force] [--only <id>] [--src <dir>] [--max-size <MiB>] [--texture cutout=0.45:lossless,…] [--check] [upload]`。
+  上传看远端清单（`--upload` 时先拉 `models/manifest.json` 再决定传哪些），本地清单只管跳过重压；
+  先 build 后 upload 的两段式跑法不会漏传。`--check` 只对比本地与远端、不构建不上传。
+  主端 CDN 的 `manifest.json` 边缘缓存约 1 小时，发版后最多 1 小时全量生效（R2 侧实时）。
   源 GLB 放在 `models-src/`（git 忽略，`tools/skin-model/export-flora.ts` 的默认输出目录），
   压缩后写 `apps/web/mock/models/`，并按 `models/` 前缀上传对象存储。
   **按部件发布，不是按皮肤**：202 个可染色皮肤一共引用 669 个网格，去重后只有 177 个不同网格

@@ -77,6 +77,16 @@ HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description /
 vite.config.ts 注入），`injectRegister: false` 且由 `main.ts` 手工注册。
 `main.ts` 另监听 `vite:preloadError`：懒加载 chunk 404 时整页刷新一次（10 秒内不重复），兜住发版窗口。
 
+## Vercel 部署
+
+仓库根的 `vercel.json` 固定 monorepo 的构建口径：构建命令 `pnpm --filter dna-builder-web build:vercel`，
+输出目录 `apps/web/dist`，其余路径 rewrite 到 `/index.html`（网页版用的是 history 路由，深链需要回退）。
+
+Vercel Standard 构建机只有 8 GB 内存，而 `build` 脚本的 `--max-old-space-size=8192` 会把 V8 堆顶到
+cgroup 上限、被内核 OOM kill——表现是部署日志里先出现 `STATIC_BUILD_NO_OUT_DIR`，下面才附带
+"Out of Memory" 报告，构建实际在 transform 阶段就死了。`build:vercel` 把堆上限降到 6144 MB，
+给非堆内存和 esbuild/Tailwind 的 native 进程留出余量；调整时不要让堆上限超过机器内存的约 75%。
+
 ## 前端构建的数据包改写（动手前必读）
 
 ## 桌面端版本同步（Tauri）

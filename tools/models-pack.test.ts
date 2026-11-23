@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { findDuplicateId, hashBytes, needsPublish, parseMaxBytes, parseTextureBudget } from "./models-pack"
+import { diffRemote, findDuplicateId, hashBytes, needsPublish, parseMaxBytes, parseTextureBudget } from "./models-pack"
 import { DEFAULT_TEXTURE_BUDGET } from "./skin-model/compress"
 
 describe("model manifest hashing", () => {
@@ -39,6 +39,51 @@ describe("duplicate model ids", () => {
     it("reports the same id exported to two different paths", () => {
         const duplicate = findDuplicateId([{ relPath: "110201.glb" }, { relPath: "flora/110201.glb" }])
         expect(duplicate).toEqual({ id: "110201", paths: ["110201.glb", "flora/110201.glb"] })
+    })
+})
+
+describe("remote diff", () => {
+    const partA = { name: "A_SM", file: "A_SM.glb", hash: "aaaa1111", bytes: 100, builtAt: "" }
+    const partB = { name: "B_SM", file: "B_SM.glb", hash: "bbbb2222", bytes: 200, builtAt: "" }
+    const skinA = { id: "1001", parts: ["A_SM"], animation: "1001.anim.glb", animationBytes: 50, animationHash: "cccc3333" }
+
+    it("reports nothing when local matches remote", () => {
+        const manifest = { builtAt: "", parts: [partA], skins: [skinA] }
+        expect(diffRemote(manifest, structuredClone(manifest))).toEqual({ parts: [], anims: [] })
+    })
+
+    it("uploads everything when remote is missing", () => {
+        expect(diffRemote({ builtAt: "", parts: [partA, partB], skins: [skinA] }, null)).toEqual({
+            parts: ["A_SM.glb", "B_SM.glb"],
+            anims: ["1001.anim.glb"],
+        })
+    })
+
+    it("lists parts missing or changed on remote and ignores remote-only parts", () => {
+        const local = { builtAt: "", parts: [partA, partB], skins: [] }
+        const remote = { builtAt: "", parts: [{ ...partA, hash: "deadbeef" }], skins: [] }
+        expect(diffRemote(local, remote)).toEqual({ parts: ["A_SM.glb", "B_SM.glb"], anims: [] })
+        expect(diffRemote({ builtAt: "", parts: [partA], skins: [] }, { builtAt: "", parts: [partA, partB], skins: [] })).toEqual({
+            parts: [],
+            anims: [],
+        })
+    })
+
+    it("lists anims whose filename, hash or size changed", () => {
+        const local = { builtAt: "", parts: [], skins: [skinA] }
+        const variants = [
+            { ...skinA, animationHash: "deadbeef" },
+            { ...skinA, animationBytes: 51 },
+            { ...skinA, animation: "other.anim.glb" },
+        ]
+        for (const skin of variants) {
+            expect(diffRemote(local, { builtAt: "", parts: [], skins: [skin] }).anims).toEqual(["1001.anim.glb"])
+        }
+        expect(diffRemote(local, { builtAt: "", parts: [], skins: [] }).anims).toEqual(["1001.anim.glb"])
+    })
+
+    it("skips skins without animation", () => {
+        expect(diffRemote({ builtAt: "", parts: [], skins: [{ id: "1002", parts: [] }] }, null)).toEqual({ parts: [], anims: [] })
     })
 })
 
