@@ -461,7 +461,7 @@ describe("TranscendGearAffixRow：普通词条单条收益渲染（SSR）", () =
                         "transcend-build": {
                             gear_unknown: "未知词条",
                             gear_roll_short: "档位",
-                            gear_ancient: "太古",
+                            gear_ancient: "升华词缀",
                             gear_mark_unique: "专属",
                             gear_mark_final_masterwork: "最终精锻",
                             gear_source_random: "随机",
