@@ -719,7 +719,7 @@ export function formatPlainRange(minValue: number, maxValue: number): string {
 
 /**
  * 词缀的数值摘要：优先数据属性区间（exact 映射），无属性时回退权威建模数值；多行用 ` · ` 连接。
- * 传入翻译函数时，带 scope 的建模行追加限定范围（列表卡片可见）。
+ * 传入翻译函数时，建模行输出「属性名（含 scope）+ 数值」，列表卡片可直接阅读；缺翻译函数时保持纯数值口径。
  * @param affix 词缀
  * @param translate 可选的界面文案翻译函数（`$t`）
  * @param gameText 可选的游戏原文翻译函数（`gt`）
@@ -740,9 +740,7 @@ export function getAffixValueHint(affix: DnaSeasonAffix, translate?: TranscendTr
                 return value
             }
 
-            const scope = getModeledValueScopeText(item, translate, gameText)
-
-            return scope ? `${value}（${scope}）` : value
+            return `${getModeledValueName(item, translate, gameText)} ${value}`
         })
         .join(" · ")
 }

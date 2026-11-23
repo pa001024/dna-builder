@@ -28,6 +28,7 @@ import {
     modData,
     WeaponAttr,
 } from "@/data"
+import "@/data/CharBuildHelper"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import {
@@ -323,9 +324,14 @@ const baseCharBuilds = computed(() => {
             enemyLevel: settings.enemyLevel,
             enemyResistance: settings.enemyResistance,
             targetFunction: settings.targetFunction,
+            customVariables: settings.customVariables,
             timeline: getTimelineByName(settings.baseName),
             teamWeapons: [settings.team1Weapon, settings.team2Weapon],
+            // 与构筑页同口径：只有角色确实解锁了该额外精通时才生效
+            extraMastery: char.额外精通?.includes(settings.extraMastery) ? settings.extraMastery : "",
             dotSettings: settings.dotSettings,
+            // 保留完整配置：跨角色表达式据此派生协战属性解析器（角色名::属性）
+            settings,
         })
     })
 })
@@ -405,7 +411,8 @@ const charBuilds = computed(() => {
             meleeMods: combinedMeleeMods,
             rangedMods: combinedRangedMods,
             skillMods: combinedSkillWeaponMods,
-            skillLevel: baseBuild.skillLevel,
+            // 复用基础等级：技能等级加成在 buffs 的三键属性里，构造后由引擎二次解析
+            skillLevel: baseBuild.baseSkillLevel,
             buffs: combinedBuffs,
             baseName: baseBuild.baseName,
             imbalance: baseBuild.imbalance,
@@ -415,8 +422,12 @@ const charBuilds = computed(() => {
             enemyLevel: baseBuild.enemyLevel,
             enemyResistance: baseBuild.enemyResistance,
             targetFunction: baseBuild.targetFunction,
+            customVariables: baseBuild.customVariables,
             timeline: baseBuild.timeline,
             teamWeaponCategories: [...baseBuild.teamWeaponCategories],
+            extraMastery: baseBuild.extraMastery,
+            // 附加 MOD/BUFF 的构筑同样沿用项目配置：否则对比结果里的跨角色表达式会算成 0
+            settings: baseBuild.settings,
         })
     })
 })
@@ -515,12 +526,19 @@ const allColumns: { key: ColumnKey; label: string }[] = [
     { key: "昂扬", label: "昂扬" },
     { key: "背水", label: "背水" },
     { key: "增伤", label: "增伤" },
+    { key: "火属性增伤", label: "火属性增伤" },
+    { key: "水属性增伤", label: "水属性增伤" },
+    { key: "雷属性增伤", label: "雷属性增伤" },
+    { key: "风属性增伤", label: "风属性增伤" },
+    { key: "光属性增伤", label: "光属性增伤" },
+    { key: "暗属性增伤", label: "暗属性增伤" },
     { key: "武器伤害", label: "武器伤害" },
     { key: "技能伤害", label: "技能伤害" },
     { key: "技能追伤", label: "技能追伤" },
     { key: "独立增伤", label: "独立增伤" },
     { key: "技能独立增伤", label: "技能独立增伤" },
     { key: "属性穿透", label: "属性穿透" },
+    { key: "赛季增伤", label: "赛季增伤" },
     { key: "无视防御", label: "无视防御" },
     { key: "技能速度", label: "技能速度" },
     { key: "失衡易伤", label: "失衡易伤" },
@@ -537,7 +555,7 @@ const allColumns: { key: ColumnKey; label: string }[] = [
     { key: "武器多重", label: "武器多重" },
     { key: "武器增伤", label: "武器增伤" },
     { key: "武器独立增伤", label: "武器独立增伤" },
-    { key: "武器追加伤害", label: "武器追加伤害" },
+    { key: "武器追加伤害", label: "武器追加伤害（Σ七分量）" },
 ]
 
 // Helper methods for table cell formatting
@@ -556,6 +574,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
 
     const attrKey = colKey.replace("武器", "") as keyof typeof weaponAttr
     const value = weaponAttr[attrKey]
+    if (typeof value !== "number" || !Number.isFinite(value)) return "-"
     const isBaseStat = ["攻击", "攻速", "多重"].includes(attrKey)
     return isBaseStat ? `${+value.toFixed(2)}` : `${+(value * 100).toFixed(2)}%`
 }

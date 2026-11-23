@@ -280,21 +280,75 @@ describe("values 行作用域标注（字段 / 标签限定）", () => {
 
         expect(getModeledValueName(item, translate, gameText)).toBe("技能伤害（FieldLimit(月猎)）")
         expect(getAffixModeledSummary(byId(150203), translate, gameText)).toBe("技能伤害（FieldLimit(月猎)）")
-        expect(getAffixValueHint(byId(150203), translate, gameText)).toBe("+150%（FieldLimit(月猎)）")
-        expect(getAffixValueHint(byId(2030301), translate, gameText)).toBe("0.0584488560441114*技能威力（TagLimit(武器)）")
+        expect(getAffixValueHint(byId(150203), translate, gameText)).toBe("技能伤害（FieldLimit(月猎)） +150%")
+        expect(getAffixValueHint(byId(2030301), translate, gameText)).toBe("独立增伤（TagLimit(武器)） 0.0584488560441114*技能威力")
     })
 
     it("双维 scope（field + tag）组合展示", () => {
         const item = getAffixModeledValues(420101)[0]
 
         expect(getModeledValueName(item, translate, gameText)).toBe("无视防御（FieldLimit(星河寥落) + TagLimit(下落攻击)）")
-        expect(getAffixValueHint(byId(420101), translate, gameText)).toBe("+100%（FieldLimit(星河寥落) + TagLimit(下落攻击)）")
+        expect(getAffixValueHint(byId(420101), translate, gameText)).toBe("无视防御（FieldLimit(星河寥落) + TagLimit(下落攻击)） +100%")
     })
 
     it("不传翻译函数时数值提示保持旧口径（scope 不泄漏中文）", () => {
         expect(getAffixValueHint(byId(150203))).toBe("+150%")
         expect(getAffixValueHint(byId(2030301))).toBe("0.0584488560441114*技能威力")
         expect(getAffixValueHint(byId(420101))).toBe("+100%")
+    })
+})
+
+describe("U139 列表数值提示补属性名（key + value）", () => {
+    const byId = (id: number) => affixes.find(affix => affix.id === id)!
+    /** zh-CN 真实口径的作用域文案：与 translation.json 一致 */
+    const translate = (key: string, options?: Record<string, unknown>) => {
+        if (key === "db-transcendence.gear.modeled_scope_field") return `字段名限定：${options?.value}`
+        if (key === "db-transcendence.gear.modeled_scope_tag") return `字段标签限定：${options?.value}`
+
+        return key
+    }
+    const gameText = (text: string) => text
+
+    it("无 scope：属性名 + 数值（2002）", () => {
+        expect(getAffixValueHint(byId(2002), translate, gameText)).toBe("近战普攻独立增伤 +32%")
+    })
+
+    it("单维 scope：属性名带字段标签限定（180101）", () => {
+        expect(getAffixValueHint(byId(180101), translate, gameText)).toBe("技能独立增伤（字段标签限定：战技） +30%")
+    })
+
+    it("双维 scope：属性名带字段名 + 字段标签限定（420101）", () => {
+        expect(getAffixValueHint(byId(420101), translate, gameText)).toBe(
+            "无视防御（字段名限定：星河寥落 + 字段标签限定：下落攻击） +100%"
+        )
+    })
+
+    it("多项仍用 ` · ` 连接（2015）", () => {
+        expect(getAffixValueHint(byId(2015), translate, gameText)).toBe("昂扬 +430% · 技能速度 +80%")
+    })
+
+    it("labelKey 词条名称走界面文案（320301）", () => {
+        const labelTranslate = (key: string) =>
+            ({
+                "db-transcendence.gear.mode_rapid": "速射模式",
+                "db-transcendence.gear.mode_pierce": "贯穿模式",
+                "db-transcendence.gear.mode_bombard": "轰炸模式",
+            })[key] ?? key
+
+        expect(getAffixValueHint(byId(320301), labelTranslate, gameText)).toBe(
+            "速射模式 +319.3% · 贯穿模式 +408.9% · 轰炸模式 +508.2%"
+        )
+    })
+
+    it("无翻译函数保持旧纯数值口径", () => {
+        expect(getAffixValueHint(byId(2002))).toBe("+32%")
+        expect(getAffixValueHint(byId(180101))).toBe("+30%")
+        expect(getAffixValueHint(byId(420101))).toBe("+100%")
+    })
+
+    it("非对称契约：只给 translate 或只给 gameText 时回退纯数值", () => {
+        expect(getAffixValueHint(byId(420101), translate)).toBe("+100%")
+        expect(getAffixValueHint(byId(420101), undefined, gameText)).toBe("+100%")
     })
 })
 

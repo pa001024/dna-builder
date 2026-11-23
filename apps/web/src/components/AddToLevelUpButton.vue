@@ -180,7 +180,7 @@ const sections = computed(() => {
             <span class="relative inline-flex">
                 <button
                     type="button"
-                    class="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-xs border px-2.5 text-xs transition-all duration-200 active:scale-95"
+                    class="btn btn-xs"
                     :class="buttonClass"
                     :aria-label="$t(labelKey)"
                     @click="handleClick"
@@ -239,7 +239,7 @@ const sections = computed(() => {
 
                 <SRouterLink
                     :to="jumpTo"
-                    class="mt-2.5 flex h-7 items-center justify-center gap-1.5 rounded-xs bg-primary text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/85"
+                    class="mt-2.5 btn btn-xs btn-block btn-primary"
                 >
                     <Icon icon="ri:calculator-line" class="text-sm" />
                     {{ $t("levelup-plan.view_calculator") }}

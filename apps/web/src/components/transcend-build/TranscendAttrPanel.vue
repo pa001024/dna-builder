@@ -1,0 +1,656 @@
+<script setup lang="ts">
+// 升华构筑属性面板：模板与行逻辑对齐 CharAttrShow，但回响获取由页面显式传入，
+// 不调用 useCharSettings（老页面共享组件不得改动，也不能读写老构筑存档）。
+import { t } from "i18next"
+import { computed } from "vue"
+import { useAttrI18n } from "@/composables/useAttrI18n"
+import { useExprDrag } from "@/composables/useExprDrag"
+import { useGameText } from "@/composables/useGameText"
+import { CharAttr, CharBuild, CommonAttr, LeveledChar, LeveledMod } from "@/data"
+import { formatSkillLevelBonus, isAttrValueVisible } from "@/data/skillLevels"
+import { format100r } from "@/util"
+import { resolveCharFieldExpression } from "@/utils/expr-field"
+import { copyExprField } from "@/utils/expr-field-copy"
+
+const props = withDefaults(
+    defineProps<{
+        attributes: CharAttr
+        charBuild: CharBuild
+        /** 回响获取（0-3）：原版 `CharAttrShow` 从老 `CharSettings` 读取，这里显式传入，避免读写老存档 */
+        resonanceGain: number
+        excludeKeys?: string[]
+        includeKeys?: string[]
+    }>(),
+    {
+        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例"],
+    }
+)
+const { getAttrName, getAttrDesc } = useAttrI18n()
+const { gt } = useGameText()
+
+/**
+ * 属性行的展示名（攻击行带角色元素前缀）（火 → 火属性攻击），其余属性原样。
+ * 该名字既是翻译键（可拿到上游成品译名，避免「Pyro」+「ATK」这类拼接在部分语言下缺空格），
+ * 也是上游属性说明（attrDesc）的查找键。
+ * @param key 属性键名
+ * @returns 属性的 zh-CN 展示名
+ */
+function attrName(key: string): string {
+    return getAttrName(key, `${props.charBuild.char.属性}属性`)
+}
+
+/**
+ * 各属性行的上游属性说明（AttrConfig.AttrDesc 导入的文案），仅保留确实配置了说明的属性。
+ */
+const attrDescMap = computed<Record<string, string>>(() => {
+    const map: Record<string, string> = {}
+    for (const key of Object.keys(props.attributes)) {
+        const desc = getAttrDesc(attrName(key))
+        if (desc) {
+            map[key] = desc
+        }
+    }
+    return map
+})
+
+const { startExprDrag } = useExprDrag()
+
+/**
+ * 角色属性行对应的表达式字段文本。
+ * 主控面板用 角色:: 别名；协战面板用自身角色名（如 菲娜::攻击!），
+ * 这样拖到其他构筑位的目标函数 / 变量里也能按 teamResolver 解析到本协战面板。
+ * @param key 属性键名
+ * @returns 表达式字段文本
+ */
+function attrExpression(key: string): string {
+    const namespace = props.charBuild.teamRole === "main" ? undefined : props.charBuild.char.名称
+    return resolveCharFieldExpression(props.charBuild, key, namespace)
+}
+
+/**
+ * 指针按下时抓起属性字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
+ * @param key 属性键名
+ * @param event 指针按下事件
+ */
+function startFieldDrag(key: string, event: PointerEvent) {
+    startExprDrag({ expr: attrExpression(key), label: t(attrName(key)) }, event)
+}
+
+/**
+ * 双击属性行：把该属性的表达式字段复制到剪贴板。
+ * @param key 属性键名
+ */
+function handleFieldDblClick(key: string) {
+    void copyExprField(attrExpression(key))
+}
+
+interface DynamicAttrSource {
+    sourceName: string
+    /** 数据层 BUFF id（有值时展示独立 CopyID chip） */
+    id?: number
+    value: number
+}
+
+/**
+ * 有效生命的输入属性键：单个来源对有效生命的贡献 = 移除该来源的全部相关加成后重算的差值。
+ * 固定攻击不影响承伤，不在移除范围内。
+ */
+const EFFECTIVE_HP_INPUT_KEYS = ["生命", "护盾", "防御", "减伤", "固定生命"] as const
+
+/**
+ * 记录是否含有效生命输入属性（数值非零）。
+ * @param record 来源的属性记录（角色加成 / 武器面板 / MOD 词条 / 效果层）
+ * @returns 是否含任一非零输入属性
+ */
+function hasEffectiveHpInput(record: Record<string, unknown> | undefined | null): boolean {
+    if (!record) return false
+    return EFFECTIVE_HP_INPUT_KEYS.some(key => typeof record[key] === "number" && record[key] !== 0)
+}
+
+interface EffectiveHpSource {
+    type: "resonance" | "char" | "weapon" | "mod" | "buff"
+    name: string
+    /** 相对提升：移除重算的差值 ÷ 移除后的剩余值（装上该来源带来的有效生命提升幅度） */
+    value: number
+}
+
+/**
+ * 有效生命按来源的贡献：逐个移除来源后重算有效生命，差值除以移除后的剩余值即该来源的相对提升。
+ * 与 dynamicAttrSourceMap 同口径（深拷贝构筑后移除重算），覆盖静态来源：
+ * 和鸣增益、角色加成、近战/远程武器、全部 MOD（含中枢）与静态 BUFF；
+ * 动态 BUFF 与特效 code 由既有映射覆盖，不在此重复。
+ * 全量重算单次约 0.5ms，来源数一般十余个，仅在打开有效生命 tooltip 时求值一次并缓存。
+ */
+const effectiveHpSources = computed<EffectiveHpSource[]>(() => {
+    const total = props.attributes.有效生命
+    if (typeof total !== "number") return []
+    const build = props.charBuild
+    const sources: EffectiveHpSource[] = []
+    const epsilon = 1e-9
+
+    const recalcWithout = (mutate: (clone: CharBuild) => void): number | undefined => {
+        try {
+            const clone = build.clone()
+            mutate(clone)
+            const value = clone.calculateWeaponAttributes().有效生命
+            return typeof value === "number" ? value : undefined
+        } catch {
+            return undefined
+        }
+    }
+    const push = (type: EffectiveHpSource["type"], name: string, without: number | undefined) => {
+        if (typeof without !== "number" || without <= epsilon) return
+        const delta = total - without
+        if (Math.abs(delta) < epsilon) return
+        sources.push({ type, name, value: delta / without })
+    }
+    const zeroHpInputs = (record: Record<string, number>): Record<string, number> => {
+        const copy = { ...record }
+        for (const key of EFFECTIVE_HP_INPUT_KEYS) {
+            if (typeof copy[key] === "number") copy[key] = 0
+        }
+        return copy
+    }
+
+    // 和鸣增益：生命/护盾/防御同吃共鸣加成
+    if (build.resonanceGain) {
+        push("resonance", "", recalcWithout(clone => {
+            clone.resonanceGain = 0
+        }))
+    }
+    // 角色加成：只清承伤相关键，进攻加成不影响有效生命
+    if (hasEffectiveHpInput(build.char.加成)) {
+        push(
+            "char",
+            "",
+            recalcWithout(clone => {
+                clone.char.加成 = zeroHpInputs({ ...(clone.char.加成 ?? {}) } as Record<string, number>) as CommonAttr
+            })
+        )
+    }
+    // 近战/远程武器：词条与武器效果层的承伤加成（addAttr 为计算属性，直接清实例字段与效果层）
+    for (const [weapon, select] of [
+        [build.meleeWeapon, (clone: CharBuild) => clone.meleeWeapon],
+        [build.rangedWeapon, (clone: CharBuild) => clone.rangedWeapon],
+    ] as const) {
+        if (!hasEffectiveHpInput(weapon as unknown as Record<string, unknown>) && !hasEffectiveHpInput(weapon.buffProps)) continue
+        push("weapon", weapon.名称, recalcWithout(clone => {
+            const target = select(clone) as unknown as Record<string, unknown>
+            for (const key of EFFECTIVE_HP_INPUT_KEYS) {
+                if (typeof target[key] === "number") target[key] = 0
+            }
+            select(clone).buffProps = zeroHpInputs({ ...select(clone).buffProps })
+        }))
+    }
+    // 中枢 MOD：移除即置空
+    if (build.auraMod && (hasEffectiveHpInput(build.auraMod as unknown as Record<string, unknown>) || hasEffectiveHpInput(build.auraMod.buffProps))) {
+        push("mod", build.auraMod.名称, recalcWithout(clone => {
+            clone.auraMod = undefined
+        }))
+    }
+    // 四槽 MOD：整卡移除（词条 + 效果层 + 条件 + MOD 属性耦合一次算清）
+    const slots = [build.charMods, build.meleeMods, build.rangedMods, build.skillMods]
+    slots.forEach((slot, slotIndex) => {
+        slot.forEach((mod, modIndex) => {
+            if (!mod) return
+            if (!hasEffectiveHpInput(mod as unknown as Record<string, unknown>) && !hasEffectiveHpInput(mod.buffProps)) return
+            push("mod", mod.名称, recalcWithout(clone => {
+                const target = [clone.charMods, clone.meleeMods, clone.rangedMods, clone.skillMods][slotIndex]
+                target[modIndex] = null
+            }))
+        })
+    })
+    // 临时代入的比较 MOD：clone 本就不携带，直接重算即移除后的值
+    if (build.tempMod && (hasEffectiveHpInput(build.tempMod as unknown as Record<string, unknown>) || hasEffectiveHpInput(build.tempMod.buffProps))) {
+        push("mod", build.tempMod.名称, recalcWithout(() => {}))
+    }
+    // 静态 BUFF：整条移除（带 code 的复合 BUFF 的 code 部分由动态映射覆盖）
+    build.buffs.forEach((buff, buffIndex) => {
+        if (!EFFECTIVE_HP_INPUT_KEYS.some(key => buff.getAttrValue(key))) return
+        push("buff", buff.名称, recalcWithout(clone => {
+            clone.buffs = clone.buffs.filter((_, index) => index !== buffIndex)
+        }))
+    })
+    return sources
+})
+
+/**
+ * 通过“移除单个动态BUFF后重算”的方式，得到每个动态来源对角色属性的实际数值贡献。
+ */
+const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
+    const sourceMap: Record<string, DynamicAttrSource[]> = {}
+    const epsilon = 1e-10
+
+    props.charBuild.dynamicBuffs.forEach((buff, buffIndex) => {
+        const buildWithoutBuff = props.charBuild.clone()
+        buildWithoutBuff.dynamicBuffs = props.charBuild.dynamicBuffs.filter((_, index) => index !== buffIndex).map(item => item.clone())
+        // 与 attributes 保持同一武器作用域计算，避免充盈威力/召唤物独立增伤等转化属性产生上下文差异的虚假差值
+        const attrsWithoutBuff = buildWithoutBuff.calculateWeaponAttributes()
+
+        Object.entries(props.attributes).forEach(([attrKey, attrValue]) => {
+            const withoutValue = attrsWithoutBuff[attrKey as keyof CharAttr]
+            if (typeof attrValue !== "number" || typeof withoutValue !== "number") return
+
+            const delta = attrValue - withoutValue
+            if (Math.abs(delta) < epsilon) return
+
+            sourceMap[attrKey] ||= []
+            sourceMap[attrKey].push({
+                sourceName: buff.名称,
+                id: buff.id,
+                value: delta,
+            })
+        })
+    })
+
+    return sourceMap
+})
+
+/**
+ * 特效 code 对角色属性的实际数值贡献：dynamicAttrSourceMap 只覆盖用户勾选的动态 BUFF。
+ * 装备特效自带的 code 按目标逐个关闭后重算，差值即该特效的贡献，静态特效属性另有专属行。
+ */
+const effectCodeSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
+    const sourceMap: Record<string, DynamicAttrSource[]> = {}
+    const epsilon = 1e-10
+
+    collectEffectCodeTargets(props.charBuild).forEach(target => {
+        const buildWithoutEffect = props.charBuild.clone()
+        target.disable(buildWithoutEffect)
+        // 与 attributes 保持同一武器作用域计算，避免上下文差异产生虚假差值
+        const attrsWithoutEffect = buildWithoutEffect.calculateWeaponAttributes()
+
+        Object.entries(props.attributes).forEach(([attrKey, attrValue]) => {
+            const withoutValue = attrsWithoutEffect[attrKey as keyof CharAttr]
+            if (typeof attrValue !== "number" || typeof withoutValue !== "number") return
+
+            const delta = attrValue - withoutValue
+            if (Math.abs(delta) < epsilon) return
+
+            sourceMap[attrKey] ||= []
+            sourceMap[attrKey].push({
+                sourceName: target.label,
+                id: target.id,
+                value: delta,
+            })
+        })
+    })
+
+    return sourceMap
+})
+
+/**
+ * 特效 code 的关闭目标：在克隆构筑上逐个关闭后重算，差值即该特效 code 的实际数值贡献。
+ * 只置空 code 字符串，特效的静态数值属性不受影响（另有专属行展示），与 CharBuild.getEffectCodeBuffs 同口径。
+ */
+interface EffectCodeTarget {
+    label: string
+    /** 特效 BUFF id（有值时展示独立 CopyID chip） */
+    id?: number
+    disable: (build: CharBuild) => void
+}
+
+/**
+ * 收集当前生效的特效 code 目标（动态 BUFF 之外、挂在 MOD/武器实例上的 effect.data code）。
+ * @param charBuild 当前构筑
+ * @returns 各特效的展示名与关闭函数
+ */
+function collectEffectCodeTargets(charBuild: CharBuild): EffectCodeTarget[] {
+    const targets: EffectCodeTarget[] = []
+    const slots = [charBuild.charMods, charBuild.meleeMods, charBuild.rangedMods, charBuild.skillMods]
+    const slotsOf = (build: CharBuild) => [build.charMods, build.meleeMods, build.rangedMods, build.skillMods]
+    slots.forEach((slot, slotIndex) => {
+        slot.forEach((mod, modIndex) => {
+            const buff = mod?.buff
+            if (!buff?.code || buff.等级 <= 0) return
+            targets.push({
+                label: buff.名称,
+                id: buff.id,
+                disable: target => {
+                    const targetBuff = slotsOf(target)[slotIndex][modIndex]?.buff
+                    if (targetBuff) targetBuff.code = ""
+                },
+            })
+        })
+    })
+    const auraBuff = charBuild.auraMod?.buff
+    if (auraBuff?.code && auraBuff.等级 > 0) {
+        targets.push({
+            label: auraBuff.名称,
+            id: auraBuff.id,
+            disable: target => {
+                if (target.auraMod?.buff) target.auraMod.buff.code = ""
+            },
+        })
+    }
+    const weapons = [charBuild.meleeWeapon, charBuild.rangedWeapon] as const
+    weapons.forEach((weapon, weaponIndex) => {
+        const buff = weapon?.buff
+        if (!buff?.code || buff.等级 <= 0 || !weapon.forgeEffective) return
+        targets.push({
+            label: buff.名称,
+            id: buff.id,
+            disable: target => {
+                const targetWeapon = weaponIndex === 0 ? target.meleeWeapon : target.rangedWeapon
+                if (targetWeapon?.buff) targetWeapon.buff.code = ""
+            },
+        })
+    })
+    return targets
+}
+/**
+ * 各武器对角色充盈威力的武器转化来源（武器转化充盈威力），用于充盈威力来源明细。
+ * 与 CharBuild.calculateWeaponAttributes 的汇总逻辑保持一致，仅保留非零贡献的武器。
+ */
+const fullnessWeaponSources = computed(() => props.charBuild.getFullnessWeaponSources().filter(source => Math.abs(source.value) > 1e-10))
+
+const modAttributeBonusSources = computed(() => {
+    const modAttributeBonus = props.charBuild.getTotalBonus(`${props.charBuild.char.属性}MOD属性`)
+
+    if (modAttributeBonus > 0) {
+        const modsBySeries = props.charBuild.charMods.filter(
+            (mod): mod is LeveledMod => mod !== null && CharBuild.elmSeries.includes(mod.系列)
+        )
+        return modsBySeries
+    }
+    return []
+})
+
+/**
+ * 本角色元素对应的属性攻击具体口径（mod.data/buff.data 已从泛化 `属性攻击` 迁移至此，如雷 → 雷属性攻击）。
+ */
+const elementAttackKey = computed(() => `${props.charBuild.char.属性}属性攻击`)
+
+/**
+ * 是否元素属性攻击来源字段（含泛化 `属性攻击` 旧口径兜底）：同属攻击乘区，展示时带 (*) 标识。
+ * @param field 来源字段名
+ */
+function isElementAttackSource(field: string): boolean {
+    return field === "属性攻击" || field === elementAttackKey.value
+}
+
+/**
+ * 角色属性行的实际加成来源字段名：角色「攻击」属性由本角色元素的属性攻击百分比乘区贡献
+ * （角色攻击 = 角色基础攻击 × (1 + 角色攻击加成 + 和鸣增益) × (1 + 属性攻击) + 固定攻击）。
+ * @param key 展示的属性键名
+ * @returns 对应的加成来源字段名
+ */
+function attrSourceKey(key: string): string {
+    return key === "攻击" ? elementAttackKey.value : key
+}
+
+/**
+ * MOD属性加权基数在 `key` 上的合计：攻击行同时计入泛化与具体口径，其余属性即自身。
+ * @param key 展示的属性键名
+ */
+function modAttrWeightedBase(key: string): number {
+    return modAttributeBonusSources.value.reduce((sum, mod) => {
+        sum += mod.addAttr[attrSourceKey(key)] ?? 0
+        if (key === "攻击" && attrSourceKey(key) !== "属性攻击") sum += mod.addAttr["属性攻击"] ?? 0
+        return sum
+    }, 0)
+}
+
+/**
+ * 是否存在 MOD属性加权基数来源：`modAttrWeightedBase` 非零即有。
+ * @param key 展示的属性键名
+ */
+function hasModAttrWeightedBase(key: string): boolean {
+    return modAttributeBonusSources.value.some(
+        mod => mod.addAttr[attrSourceKey(key)] || (key === "攻击" && attrSourceKey(key) !== "属性攻击" && mod.addAttr["属性攻击"])
+    )
+}
+
+/**
+ * 技能等级属性（U99b）：值为等级加成 `+N`，按带符号整数展示，不按百分比。
+ */
+const SKILL_LEVEL_ATTR_KEYS = new Set(["E技能等级", "Q技能等级", "P技能等级"])
+
+/**
+ * 动态来源的展示格式与主属性保持一致：数值型属性（攻击/生命/护盾/防御/神智/有效生命/神智回复）按带符号数值展示，
+ * 其余百分比型属性按带符号百分比展示，避免 flat 差值（如「法露茜Q」将攻击百位转化生命）被误显示为百分比。
+ * 神智回复的「每 3 秒」口径见属性说明（attrDesc.神智回复），数值本身不带单位后缀。
+ * @param key 属性键名
+ * @param value 来源贡献值
+ * @returns 展示字符串
+ */
+function formatDynamicSource(key: string, value: number): string {
+    if (key === "魔灵CD") {
+        return `${value >= 0 ? "+" : ""}${+value.toFixed(1)}s`
+    }
+    if (SKILL_LEVEL_ATTR_KEYS.has(key)) {
+        return formatSkillLevelBonus(value)
+    }
+    if (["神智回复"].includes(key)) {
+        return `${value >= 0 ? "+" : ""}${+value.toFixed(0)}`
+    }
+    return format100r(value)
+}
+
+/**
+ * 角色属性行的附加来源字段：攻击 行额外展示泛化「属性攻击」（旧包）与本角色元素的具体口径
+ * （百分比乘区，均带 (*) 标识）及「固定攻击」（平值），
+ * 生命 行额外展示「固定生命」（平值）。基础字段（攻击/生命等）由既有来源块处理。
+ * @param key 展示的属性键名
+ * @returns 附加来源字段名列表
+ */
+function extraAttrSourceKeys(key: string): string[] {
+    if (key === "攻击") return [...new Set(["属性攻击", elementAttackKey.value, "固定攻击"])]
+    if (key === "生命") return ["固定生命"]
+    return []
+}
+
+/**
+ * 附加来源数值的展示格式：元素属性攻击（含泛化旧口径）为百分比，固定攻击/固定生命 为带符号平值。
+ * @param key 展示的属性键名
+ * @param sourceField 来源字段名
+ * @param value 来源贡献值
+ * @returns 展示字符串
+ */
+function formatExtraSource(key: string, sourceField: string, value: number): string {
+    if (isElementAttackSource(sourceField)) return format100r(value)
+    return formatDynamicSource(key, value)
+}
+</script>
+<template>
+    <FullTooltip
+        v-for="[key, val] in Object.entries(attributes).filter(([k, v]) =>
+            includeKeys ? includeKeys.includes(k) : !excludeKeys.includes(k) && isAttrValueVisible(v)
+        )"
+        :key="key"
+        side="bottom"
+    >
+        <template #tooltip>
+            <div class="flex flex-col gap-2">
+                <div class="text-base-content/50 text-xs">
+                    {{ $t(attrName(key)) }}
+                </div>
+                <div v-if="attrDescMap[key]" class="max-w-75 text-xs text-base-content/60 whitespace-pre-line">
+                    {{ attrDescMap[key] }}
+                </div>
+                <div v-if="key === '有效生命'" class="text-sm text-primary">{{ $t('char-build.effective_hp_formula') }}</div>
+                <ul class="space-y-1">
+                    <li
+                        v-for="(source, index) in key === '有效生命' ? effectiveHpSources : []"
+                        :key="`ehp-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            <template v-if="source.type === 'resonance'">{{ $t("char-build.resonance_gain") }}</template>
+                            <template v-else-if="source.type === 'char'">{{ $t(charBuild.char.名称) }}</template>
+                            <template v-else-if="source.type === 'buff'">{{ gt(source.name) }}</template>
+                            <template v-else>{{ $t(source.name) }}</template>
+                        </div>
+                        {{ format100r(source.value) }}
+                    </li>
+                    <li v-if="'基础' + key in charBuild.char" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
+                        {{ charBuild.char[("基础" + key) as keyof LeveledChar] }}
+                    </li>
+                    <li v-if="key === '神智回复'" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">
+                            {{ $t("char-build.natural_regen") }}
+                        </div>
+                        {{ formatDynamicSource("神智回复", 2 + Math.floor(Math.round(attributes.神智) / 200)) }}
+                    </li>
+                    <li v-if="charBuild.char.加成 && key in charBuild.char.加成" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">{{ $t(charBuild.char.名称) }}</div>
+                        {{ formatDynamicSource(key, charBuild.char.加成[key]!) }}
+                    </li>
+                    <li v-if="['生命', '护盾', '防御', '攻击'].includes(key)" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">{{ $t("char-build.resonance_gain") }}</div>
+                        {{ format100r(resonanceGain) }}
+                    </li>
+                    <li v-if="key in (charBuild.meleeWeapon.addAttr || {})" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">
+                            {{ $t(charBuild.meleeWeapon.名称) }}
+                        </div>
+                        {{ formatDynamicSource(key, charBuild.meleeWeapon.addAttr[key]!) }}
+                    </li>
+                    <li v-if="key in (charBuild.rangedWeapon.addAttr || {})" class="flex justify-between gap-8 text-sm text-primary">
+                        <div class="text-base-content/80">
+                            {{ $t(charBuild.rangedWeapon.名称) }}
+                        </div>
+                        {{ formatDynamicSource(key, charBuild.rangedWeapon.addAttr[key]!) }}
+                    </li>
+                    <li
+                        v-for="(mod, index) in [charBuild.auraMod].filter((m): m is LeveledMod => m && m[key])"
+                        :key="index"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            {{ $t(mod.名称) }}
+                        </div>
+                        {{ formatDynamicSource(key, mod[key]!) }}
+                    </li>
+                    <li
+                        v-for="(mod, index) in charBuild.charMods.filter((m): m is LeveledMod => m && m[key])"
+                        :key="index"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            {{ $t(mod.名称) }}
+                        </div>
+                        {{ formatDynamicSource(key, mod[key]!) }}
+                    </li>
+                    <!-- MOD 效果层属性（特效中以 @ 前缀声明）：与 BUFF 同理仅按属性自身作用域生效，不受 MOD 槽位限制 -->
+                    <li
+                        v-for="(mod, index) in charBuild.mods.filter(m => typeof m.buffProps[key] === 'number' && m.buffProps[key])"
+                        :key="`buff-props-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            {{ $t(mod.名称) }}
+                        </div>
+                        {{ formatDynamicSource(key, mod.buffProps[key]!) }}
+                    </li>
+                    <template v-for="sourceField in extraAttrSourceKeys(key)" :key="sourceField">
+                        <li
+                            v-for="(mod, index) in [
+                                ...[charBuild.auraMod].filter((m): m is LeveledMod => m != null && typeof m[sourceField] === 'number'),
+                                ...charBuild.charMods.filter((m): m is LeveledMod => m != null && typeof m[sourceField] === 'number'),
+                            ]"
+                            :key="`extra-mod-${sourceField}-${index}`"
+                            class="flex justify-between gap-8 text-sm text-primary"
+                        >
+                            <div class="text-base-content/80">
+                                {{ $t(mod.名称) }}
+                            </div>
+                            {{ isElementAttackSource(sourceField) ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, mod[sourceField]!) }}
+                        </li>
+                        <li
+                            v-for="(buff, index) in charBuild.buffs.filter(b => typeof b.getAttrValue(sourceField) === 'number')"
+                            :key="`extra-buff-${sourceField}-${index}`"
+                            class="flex justify-between gap-8 text-sm text-primary"
+                        >
+                            <div class="flex min-w-0 items-center gap-1">
+                                <span class="truncate text-base-content/80">{{ gt(buff.名称) }}</span>
+                                <CopyID v-if="buff.id" :id="buff.id" compact />
+                            </div>
+                            {{ isElementAttackSource(sourceField) ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff.getAttrValue(sourceField)!) }}
+                        </li>
+                    </template>
+                    <li
+                        v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(key))"
+                        :key="index"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="flex min-w-0 items-center gap-1">
+                            <span class="truncate text-base-content/80">{{ gt(buff.名称) }}</span>
+                            <CopyID v-if="buff.id" :id="buff.id" compact />
+                        </div>
+                        {{ formatDynamicSource(key, buff.getAttrValue(key)!) }}
+                    </li>
+                    <li
+                        v-for="(dynamicSource, index) in dynamicAttrSourceMap[key] || []"
+                        :key="`${dynamicSource.sourceName}-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="flex min-w-0 items-center gap-1">
+                            <span class="truncate text-base-content/80">{{ gt(dynamicSource.sourceName) }}</span>
+                            <CopyID v-if="dynamicSource.id" :id="dynamicSource.id" compact />
+                        </div>
+                        {{ formatDynamicSource(key, dynamicSource.value) }}
+                    </li>
+                    <li
+                        v-for="(effectSource, index) in effectCodeSourceMap[key] || []"
+                        :key="`effect-${effectSource.sourceName}-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="flex min-w-0 items-center gap-1">
+                            <span class="truncate text-base-content/80">{{ gt(effectSource.sourceName) }}</span>
+                            <CopyID v-if="effectSource.id" :id="effectSource.id" compact />
+                        </div>
+                        {{ formatDynamicSource(key, effectSource.value) }}
+                    </li>
+                    <li
+                        v-for="(source, index) in key === '充盈威力' ? fullnessWeaponSources : []"
+                        :key="`fullness-weapon-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">{{ gt(source.weapon.名称) }}</div>
+                        {{ format100r(source.value) }}
+                    </li>
+                    <li
+                        v-if="
+                            charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 && hasModAttrWeightedBase(key)
+                        "
+                        v-for="(buff, index) in charBuild.buffs.filter(b => b.getAttrValue(`${charBuild.char.属性}MOD属性`))"
+                        :key="index"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="flex min-w-0 items-center gap-1">
+                            <span class="truncate text-base-content/80">{{ gt(buff.名称) }}</span>
+                            <CopyID v-if="buff.id" :id="buff.id" compact />
+                        </div>
+                        {{
+                            (key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "") +
+                            formatDynamicSource(key, modAttrWeightedBase(key) * buff.getAttrValue(`${charBuild.char.属性}MOD属性`)!)
+                        }}
+                    </li>
+                </ul>
+                <div class="text-xs text-base-content/50">{{ $t("char-build.drag_field_hint") }}</div>
+            </div>
+        </template>
+        <div
+            class="cursor-grab active:cursor-grabbing flex justify-between items-center p-1 px-2 rounded-xs transition-all duration-200 select-none hover:bg-base-100 hover:shadow-sm"
+            :class="{
+                'shadow-md shadow-primary/50 text-shadow-sm outline outline-primary': charBuild
+                    .getIdentifierNames(charBuild.targetFunction)
+                    .includes(key),
+            }"
+            @pointerdown="startFieldDrag(key, $event)"
+            @dblclick="handleFieldDblClick(key)"
+        >
+            <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
+            <div class="text-primary font-bold text-sm font-orbitron">
+                <template v-if="key === '魔灵CD'">{{ +val.toFixed(1) }}s</template>
+                <template v-else-if="SKILL_LEVEL_ATTR_KEYS.has(key)">{{ formatDynamicSource(key, val) }}</template>
+                <template v-else-if="['攻击', '生命', '护盾', '防御', '神智', '有效生命', '神智回复'].includes(key)">
+                    {{ +val.toFixed(key === "攻击" ? 2 : 0) }}
+                </template>
+                <template v-else>{{ +(val * 100).toFixed(2) }}%</template>
+            </div>
+        </div>
+    </FullTooltip>
+</template>

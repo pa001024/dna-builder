@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { type ITourStep, VTour } from "@globalhive/vuejs-tour"
-import { useLocalStorage } from "@vueuse/core"
+import { useLocalStorage, useMediaQuery } from "@vueuse/core"
 import { DNARoleCharsBean, DNARoleShowBean, DNAWeaponBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
-import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
+import { cloneDeep, groupBy } from "lodash-es"
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import BuildTabRows, { type BuildTabRowItem } from "@/components/BuildTabRows.vue"
 import type { BuildTabCard } from "@/components/BuildTabTooltip.vue"
-import { warmIncomeWorker } from "@/composables/useBuildIncomeWorker"
+import CharCalamityWeaponShow from "@/components/CharCalamityWeaponShow.vue"
+import CharAssistPanel from "@/components/char-build/CharAssistPanel.vue"
+import CharAssistWeaponPanel from "@/components/char-build/CharAssistWeaponPanel.vue"
+import CharExtraMasteryPanel from "@/components/char-build/CharExtraMasteryPanel.vue"
+import FloatingTargetCard, { type TargetDock } from "@/components/char-build/FloatingTargetCard.vue"
+import type { TargetSideState } from "@/components/transcend-build/TranscendTargetPanel.vue"
+import { requestBuildTraceIncomes, warmIncomeWorker } from "@/composables/useBuildIncomeWorker"
 import { useCharRemote } from "@/composables/useCharRemote"
 import {
     addModVariant,
@@ -28,11 +35,14 @@ import {
     setModVariantAura,
     useCharSettings,
 } from "@/composables/useCharSettings"
-import { type ExprDragPayload, useExprDrag } from "@/composables/useExprDrag"
+import { useExprDrag } from "@/composables/useExprDrag"
 import { useGameText } from "@/composables/useGameText"
 import {
+    addTranscendGearVariant,
     buffData,
     buffMap,
+    buildTranscendTeamSides,
+    CHAR_SKILL_LEVEL_MIN,
     CharBuild,
     CharBuildTimeline,
     charData,
@@ -48,11 +58,23 @@ import {
     type ModTypeKey,
     modData,
     monsterMap,
+    removeTranscendGearVariant,
+    serializeCharSettingsForShare,
+    switchTranscendGearVariant,
+    syncActiveGearVariant,
+    type TranscendGearGroup,
+    type TranscendSideLoadout,
+    type TranscendSlotGroup,
     weaponData,
+    weaponMap,
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
-import { createBuffFromSettings } from "@/data/CharBuildHelper"
-import { resourceMap } from "@/data/d"
+import {
+    createBuffFromSettings,
+    createBuffLevelResolver,
+    resolveSideEffectiveSkillLevels,
+    resolveTranscendEffectsForSettings,
+} from "@/data/CharBuildHelper"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
@@ -69,6 +91,17 @@ import {
     TRAIT_SLOT_COUNT,
     type TraitSlot,
 } from "@/data/petTrait"
+import type { AssistSide } from "@/data/teamResolver"
+import {
+    applyTraceBuffOverrides,
+    buildTraceRootCards,
+    isHiddenLegacyTraceBuff,
+    isOwnLegacyTraceBuff,
+    resolveTraceOffRoots,
+    setTraceRootActive,
+    setTraceStackCoverage,
+    setTraceStackLevel,
+} from "@/data/traceEffects"
 import { env } from "@/env"
 import { waitForInitialLoad } from "@/i18n"
 import { useInvStore } from "@/store/inv"
@@ -76,45 +109,56 @@ import { useSettingStore } from "@/store/setting"
 import { useTimeline } from "@/store/timeline"
 import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
-import { copyText, formatBigNumber, formatExpressionValue, pasteText, roundBuffValue } from "@/util"
-import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
+import { copyText, formatBigNumber, pasteText, roundBuffValue } from "@/util"
+import {
+    convertTopSettingsToAssist,
+    createAssistPanelBuild,
+    getAssistCharSkills,
+    getAssistFacade,
+    mapAssistPatch,
+    resetAssistForChar,
+} from "@/utils/char-assist"
+import { applyCharTargetPatch, type CharTeamSnapshot, computeCharTeamSnapshot } from "@/utils/char-team"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
-import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { isModAllowedInSlot, type ModLimitContext } from "@/utils/mod-equip"
+import { SKILL_LEVEL_UI_MAX } from "@/utils/skill-level-ui"
+import { getTranscendSideLabelKey, getUnlockAllTalentLevels, toggleAllTalentLevels } from "@/utils/transcend-build"
+import {
+    collectDerivedBuffEntries,
+    createDerivedBuffSourceResolver,
+    createTranscendEditorSettings,
+    createTranscendGainContext,
+    mergeSharedCharSettings,
+    resolveMainTranscendInjection,
+} from "@/utils/transcend-gear/gain-context"
+import { setSideGearGroup } from "@/utils/transcend-gear/settings"
 
-// 首屏外组件异步化：弹窗类与次级章节（05-09）内容不进首屏 chunk。
+// 首屏外组件异步化：弹窗类与次级章节（07-11）内容不进首屏 chunk。
 // DOBBuildShow（模板 ref 调方法）、简洁视图与 01-04 章节组件保持同步引入。
 const loadAutoBuild = () => import("@/components/AutoBuild.vue")
-const loadASTHelp = () => import("@/components/ASTHelp.vue")
 const loadWeaponListView = () => import("@/components/WeaponListView.vue")
 const loadMonsterListView = () => import("@/components/MonsterListView.vue")
-const loadDotConfigDialog = () => import("@/components/DotConfigDialog.vue")
-const loadResourceCostItem = () => import("@/components/ResourceCostItem.vue")
 const loadAIChatDialog = () => import("@/components/AIChatDialog.vue")
-const loadTeamEditor = () => import("@/components/TeamEditor.vue")
-const loadPetEditor = () => import("@/components/PetEditor.vue")
-const loadTraitEditer = () => import("@/components/TraitEditer.vue")
-const loadBuffEditer = () => import("@/components/BuffEditer.vue")
-const loadCustomBuffEditor = () => import("@/components/CustomBuffEditor.vue")
 const loadCharActionEditor = () => import("@/components/CharActionEditor.vue")
+const loadCharAssistImportDialog = () => import("@/components/char-build/CharAssistImportDialog.vue")
 const loadEquipmentPreview = () => import("@/components/EquipmentPreview.vue")
 const loadCommentSection = () => import("@/components/CommentSection.vue")
+const loadTranscendGearSection = () => import("@/components/transcend-build/TranscendGearSection.vue")
+const loadTranscendTalentEditor = () => import("@/components/transcend-build/TranscendTalentEditor.vue")
 const AutoBuild = defineAsyncComponent(loadAutoBuild)
-const ASTHelp = defineAsyncComponent(loadASTHelp)
+// 显式绑定（模板 ref 需要组件实例类型）：运行时仍走同一异步分包
+const DOBBuildShow = defineAsyncComponent(() => import("@/components/DOBBuildShow.vue"))
 const WeaponListView = defineAsyncComponent(loadWeaponListView)
 const MonsterListView = defineAsyncComponent(loadMonsterListView)
-const DotConfigDialog = defineAsyncComponent(loadDotConfigDialog)
-const ResourceCostItem = defineAsyncComponent(loadResourceCostItem)
 const AIChatDialog = defineAsyncComponent(loadAIChatDialog)
-const TeamEditor = defineAsyncComponent(loadTeamEditor)
-const PetEditor = defineAsyncComponent(loadPetEditor)
-const TraitEditer = defineAsyncComponent(loadTraitEditer)
-const BuffEditer = defineAsyncComponent(loadBuffEditer)
-const CustomBuffEditor = defineAsyncComponent(loadCustomBuffEditor)
 const CharActionEditor = defineAsyncComponent(loadCharActionEditor)
+const CharAssistImportDialog = defineAsyncComponent(loadCharAssistImportDialog)
 const EquipmentPreview = defineAsyncComponent(loadEquipmentPreview)
 const CommentSection = defineAsyncComponent(loadCommentSection)
+// 升华两个 section 默认关闭且是重组件（库存 / 做装链）：只在 toggle 打开后才加载 chunk
+const TranscendGearSection = defineAsyncComponent(loadTranscendGearSection)
+const TranscendTalentEditor = defineAsyncComponent(loadTranscendTalentEditor)
 
 //#region 角色
 const inv = useInvStore()
@@ -122,7 +166,7 @@ const setting = useSettingStore()
 const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
-const { t } = useTranslation()
+const { t, i18next } = useTranslation()
 const { gt } = useGameText()
 const dataPackTick = computed(() => dataPackHydrationKey.value)
 const isCharBuildReady = computed(() => {
@@ -236,6 +280,11 @@ const GAME_STYLE_MOD_SLOT_ORDER = [0, 2, 3, 1, 6, 4, 7, 5, 8] as const
 function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
     return GAME_STYLE_MOD_SLOT_ORDER.map(index => modes[index] ?? null)
 }
+/** 主控有效技能等级（基础 + 升华词条）：等级来源 BUFF 的只读等级 */
+const mainSkillLevels = computed(() => resolveSideEffectiveSkillLevels(charSettings.value, "main", selectedCharId.value))
+/** 等级来源 BUFF 的等级解析（表达式引用队友技能时取来源侧等级） */
+const resolveBuffLevel = computed(() => createBuffLevelResolver(charSettings.value, "main", selectedCharId.value, mainSkillLevels.value))
+
 const _buffOptions = reactive(
     buffData.map(buff => ({
         buff,
@@ -264,18 +313,20 @@ const buffOptions = computed(() => {
             // 魔灵相关 BUFF（魔灵潜质 / 魔灵被动物 / 魔灵主动技）由魔灵面板与潜质槽位接管：
             // 从 BUFF 列表中移除，避免同一潜质或同一魔灵技能被重复叠加
             .filter(v => !isPetRelatedBuffName(v.label))
+            // 已由溯源区接管 / 旧存档兼容的 `*溯` 条目从通用选择器隐藏
+            .filter(v => !isHiddenLegacyTraceBuff(v.label))
             .filter(v => isBuffSelectable(v.buff, ctx))
             .map(v => {
                 const b = charSettings.value.buffs.find(b => b[0] === v.label)
-                const lv = b?.[1] ?? v.value.等级
+                const storedLv = b?.[1] ?? v.value.等级
                 const coverage = b?.[2] ?? 1
-                const value = createBuffFromSettings(v.label, lv, charSettings.value.customBuff, coverage)
+                const value = createBuffFromSettings(v.label, storedLv, charSettings.value.customBuff, coverage, resolveBuffLevel.value)
                 return {
                     value,
                     label: v.label,
                     limit: v.limit,
                     description: v.description,
-                    lv,
+                    lv: value.等级,
                     coverage,
                     buff: v.buff,
                 }
@@ -344,10 +395,12 @@ const modVariantCount = computed(() => getModVariantCount(charSettings.value))
 const activeAuraMod = computed(() => getModVariantAura(charSettings.value))
 const selectedBuffs = computed(() => {
     dataPackTick.value
-    return charSettings.value.buffs
+    const buffs = charSettings.value.buffs
+        // 本角色已由溯源区接管的旧 `*溯` 条目不再单列；其他角色的旧条目保留手选能力
+        .filter(([name]) => !isOwnLegacyTraceBuff(name, selectedCharId.value))
         .map(v => {
             try {
-                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff, v[2])
+                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff, v[2], resolveBuffLevel.value)
             } catch (error) {
                 console.error(error)
                 charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
@@ -355,6 +408,14 @@ const selectedBuffs = computed(() => {
             }
         })
         .filter(b => b !== null)
+    // 溯源规则覆盖同名手动 BUFF 的字段：列表展示值与构筑实际计算值保持一致（如 菲娜被动(团队) 45%）。
+    // 与工厂同源走 `resolveTranscendEffectsForSettings`，规则判定 `skillLevel` 条件时同样带上升华增量
+    const overrides = resolveTranscendEffectsForSettings(charSettings.value, "main", {
+        charId: selectedCharId.value,
+        charElement: charMap.get(selectedCharId.value)?.属性,
+        teamSides: buildTranscendTeamSides(charSettings.value, selectedCharId.value),
+    }).buffOverrides
+    return applyTraceBuffOverrides(buffs, overrides)
 })
 
 const team1Options = computed(() => [
@@ -419,6 +480,9 @@ const effectivePetCoverage = computed(() =>
 const petLevelBonus = computed(() => getTraitPetLevelBonus(charSettings.value.traits))
 
 // 创建CharBuild实例
+/** 队友限定升华 BUFF 的三侧上下文：主控 id 取页面角色，协战 id / 启用位取 team1/team2 与 assistN */
+const transcendTeamSides = computed(() => buildTranscendTeamSides(charSettings.value, selectedCharId.value))
+
 const charBuild = computed(() => {
     dataPackTick.value
     if (!isCharBuildReady.value) {
@@ -438,6 +502,16 @@ const charBuild = computed(() => {
             charSettings.value.rangedWeaponLevel,
             getWBuffLv(charSettings.value.rangedWeapon, char.属性)
         )
+        // 主控升华注入：总开关关闭时为空（天赋 + 主控装备）；顺序与工厂同口径
+        const transcendInjection = resolveMainTranscendInjection({
+            transcend: charSettings.value.transcend,
+            charId: selectedCharId.value,
+            charElement: char.属性,
+            charSkillLevel: charSettings.value.charSkillLevel,
+            buffs: [...selectedBuffs.value, ...traitBuffs.value, ...petBuffs.value],
+            teamSides: transcendTeamSides.value,
+            traceSettings: charSettings.value,
+        })
         const b = new CharBuild({
             char,
             auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings.value)),
@@ -445,9 +519,9 @@ const charBuild = computed(() => {
             meleeMods: selectedMeleeMods.value,
             rangedMods: selectedRangedMods.value,
             skillMods: selectedSkillWeaponMods.value,
-            skillLevel: charSettings.value.charSkillLevel,
+            skillLevel: transcendInjection.skillLevel,
             // 魔灵（被动物 / 主动技）与魔灵潜质以 BUFF 形式附加在 BUFF 列表之后，共用加成汇总与来源展示
-            buffs: [...selectedBuffs.value, ...traitBuffs.value, ...petBuffs.value],
+            buffs: transcendInjection.buffs,
             // 角色属性「魔灵CD」按所选魔灵主动技的原始冷却折算成秒
             petBaseCd: getPetBaseCd(charSettings.value.petId),
             melee,
@@ -465,6 +539,8 @@ const charBuild = computed(() => {
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
             extraMastery: char.额外精通?.includes(charSettings.value.extraMastery) ? charSettings.value.extraMastery : "",
             dotSettings: charSettings.value.dotSettings,
+            // 升华词条派生的技能替换：角色技能与同律武器共用
+            skillReplacements: transcendInjection.skillReplacements,
             // 收益计算把它带到 worker：wasm 直接用同一份配置复现构筑
             settings: charSettings.value,
         })
@@ -475,6 +551,173 @@ const charBuild = computed(() => {
         return createEmptyCharBuild()
     }
 })
+
+/** buff 栏只读派生条目（升华装备 / 天赋 / 队友来源）：不写入 settings.buffs，随构筑重建自动增删 */
+const derivedBuffs = computed(() =>
+    collectDerivedBuffEntries(
+        charBuild.value.buffs,
+        charSettings.value.buffs.map(buff => buff[0]),
+        { resolveSourceName: createDerivedBuffSourceResolver(charSettings.value, gt, i18next.language) }
+    )
+)
+
+/** 溯源条目视图：每侧每根源一行（含关闭的根源，点击切换；等级 / 覆盖率与 BUFF 行一致） */
+interface TraceCardView {
+    side: "main" | "assist1" | "assist2"
+    root: number
+    active: boolean
+    charId: number
+    charName: string
+    charIcon: string
+    titleKey: string
+    description: string
+    buff: LeveledBuff
+    income: number
+    mx: number
+    level: number
+    coverage: number
+    hasAttrs: boolean
+}
+
+/** 各构筑位角色 id（协战取 teamN，主控取当前页面角色） */
+const traceSideCharIds = computed(() => ({
+    main: selectedCharId.value,
+    assist1: charMap.get(charSettings.value.team1)?.id ?? 0,
+    assist2: charMap.get(charSettings.value.team2)?.id ?? 0,
+}))
+
+/**
+ * 溯源条目：每侧每个根源一行，数值由 `buildTraceRootCards` 按当前激活集合求值，
+ * 描述取 `char.溯源[n-1]` 游戏原文；收益在下面 worker 请求完成后并入。
+ */
+const traceCardItems = computed<Omit<TraceCardView, "income">[]>(() => {
+    dataPackTick.value
+    const charIds = traceSideCharIds.value
+    const cards: Omit<TraceCardView, "income">[] = []
+    for (const side of ["main", "assist1", "assist2"] as const) {
+        const charId = charIds[side]
+        if (charId <= 0) continue
+        const char = charMap.get(charId)
+        for (const card of buildTraceRootCards(charSettings.value, side, { charId })) {
+            // 技能等级三键已并入 card.attrs（与构筑属性面板同源），不再单独合并
+            const attr: Record<string, number> = { ...card.attrs }
+            cards.push({
+                side,
+                root: card.root,
+                active: card.active,
+                charId,
+                charName: gt(char?.名称 ?? ""),
+                charIcon: char ? LeveledChar.url(char.icon) : "",
+                titleKey: `char-build.root_${card.root}`,
+                description: gt(char?.溯源?.[card.root - 1] ?? ""),
+                buff: new LeveledBuff(
+                    {
+                        名称: `char-build.root_${card.root}`,
+                        描述: "",
+                        attr,
+                        ...(card.mx > 1 ? { mx: card.mx, lx: 1 } : {}),
+                    },
+                    1
+                ),
+                mx: card.mx,
+                level: card.level,
+                coverage: card.coverage,
+                hasAttrs: Object.keys(card.attrs).length > 0,
+            })
+        }
+    }
+    return cards
+})
+
+/** 溯源卡片收益（key = `${side}:${root}`），由 worker 在设置变化后 debounce 计算 */
+const traceIncomes = ref<Record<string, number>>({})
+
+/** 传给 BuffSectionBody 的溯源条目（收益为空时按 0 处理，行内不显示收益） */
+const traceCards = computed<TraceCardView[]>(() =>
+    traceCardItems.value.map(card => ({
+        ...card,
+        income: traceIncomes.value[`${card.side}:${card.root}`] ?? 0,
+    }))
+)
+
+/** 待求收益的卡片条目（不含收益，避免收益回写再次触发 watcher） */
+const traceIncomeItems = computed(() =>
+    traceCardItems.value.map(card => ({ key: `${card.side}:${card.root}`, side: card.side, root: card.root, active: card.active }))
+)
+
+let traceIncomeTimer: ReturnType<typeof setTimeout> | undefined
+let traceIncomeRequestId = 0
+
+/** 设置变化后 debounce 请求溯源收益：每次最多 根源数 × 3 次重建，全部在 worker 内完成 */
+function scheduleTraceIncomes(): void {
+    // 卡片状态 / 设置已变：先清空旧收益，避免显示与当前开关相反的数值（worker 回包后覆盖）
+    traceIncomes.value = {}
+    if (traceIncomeTimer) clearTimeout(traceIncomeTimer)
+    traceIncomeTimer = setTimeout(() => {
+        traceIncomeTimer = undefined
+        const items = traceIncomeItems.value
+        if (!items.length || !isCharBuildReady.value) return
+        const id = ++traceIncomeRequestId
+        requestBuildTraceIncomes({
+            // worker 需要可结构化克隆的纯数据：settings 用 JSON 洗消后下发（不再携带构筑快照）
+            settings: JSON.parse(JSON.stringify(charSettings.value)),
+            charId: selectedCharId.value,
+            items,
+        })
+            .then(result => {
+                if (id !== traceIncomeRequestId) return
+                traceIncomes.value = result
+            })
+            .catch(error => console.error("溯源收益worker计算失败", error))
+    }, 300)
+}
+
+onBeforeUnmount(() => {
+    if (traceIncomeTimer) clearTimeout(traceIncomeTimer)
+})
+
+/**
+ * 切换某构筑位某根源的激活状态：只写 `traceOffRoots`，构筑 computed 随设置变化重算。
+ * @param side 构筑位
+ * @param root 根源序号
+ */
+function toggleTrace(side: "main" | "assist1" | "assist2", root: number): void {
+    const charId = traceSideCharIds.value[side]
+    const target = side === "main" ? charSettings.value : charSettings.value[side]
+    if (!target) return
+    const active = !resolveTraceOffRoots(target.traceOffRoots, target.traceLevel, charId).includes(root)
+    target.traceOffRoots = setTraceRootActive(target, root, !active, charId)
+    // 卡片立即翻转：先清空旧收益，避免 debounce 窗口内显示与开关状态相反的数值
+    traceIncomes.value = {}
+}
+
+/**
+ * 设置某构筑位某根源的生效等级：只写 `traceStacks`，构筑 computed 随设置变化重算。
+ * @param side 构筑位
+ * @param root 根源序号
+ * @param level 生效等级 1..mx
+ */
+function setTraceLevel(side: "main" | "assist1" | "assist2", root: number, level: number): void {
+    const charId = traceSideCharIds.value[side]
+    const target = side === "main" ? charSettings.value : charSettings.value[side]
+    if (!target) return
+    target.traceStacks = setTraceStackLevel(target, root, level, charId)
+    traceIncomes.value = {}
+}
+
+/**
+ * 设置某构筑位某根源的覆盖率：只写 `traceStacks`，构筑 computed 随设置变化重算。
+ * @param side 构筑位
+ * @param root 根源序号
+ * @param coverage 覆盖率 0-1
+ */
+function setTraceCoverage(side: "main" | "assist1" | "assist2", root: number, coverage: number): void {
+    const charId = traceSideCharIds.value[side]
+    const target = side === "main" ? charSettings.value : charSettings.value[side]
+    if (!target) return
+    target.traceStacks = setTraceStackCoverage(target, root, coverage, charId)
+    traceIncomes.value = {}
+}
 
 /**
  * 按槽位过滤 MOD 选项：类型 / 属性 / 限定走 CharBuild.isModSlotCompatible 同一口径。
@@ -506,7 +749,7 @@ const selectedSkillLevelIndex = computed(() => {
 
 /**
  * 当前选中技能的等级：随 SkillTabs 切换跟随显示与编辑，UI 保持单个滑杆不变。
- * 写入时只替换三元组中的对应项并钳制到 1-12，其余两项不受影响。
+ * 写入时只替换三元组中的对应项并钳制到 1-30，其余两项不受影响。
  */
 const currentSkillLevel = computed({
     get: () => {
@@ -517,7 +760,7 @@ const currentSkillLevel = computed({
     set: value => {
         if (selectedSkillLevelIndex.value === -1) return
         const current = Array.isArray(charSettings.value.charSkillLevel) ? [...charSettings.value.charSkillLevel] : [10, 10, 10]
-        current[selectedSkillLevelIndex.value] = Math.max(1, Math.min(12, Math.round(value)))
+        current[selectedSkillLevelIndex.value] = Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(SKILL_LEVEL_UI_MAX, Math.round(value)))
         charSettings.value.charSkillLevel = current as [number, number, number]
     },
 })
@@ -810,7 +1053,6 @@ const loadConfigByIndex = (index: number) => {
     charProject.value.selected = project.name
     charSettings.value = normalizeCharSettings(cloneDeep(project.charSettings))
     charRemoteId.value = ""
-    targetFunction.value = charSettings.value.targetFunction
     updateCharBuild()
 }
 
@@ -859,6 +1101,7 @@ const addProject = () => {
  */
 const copyBuildToClipboard = async () => {
     try {
+        // 本地剪贴板是复制 / 导入（无服务端上限）：保留全部升华变体；对外分享 / 上传才用分享安全序列化
         await copyText(serializeCharSettings(charSettings.value))
         ui.showSuccessMessage(t("char-build.copied_to_clipboard"))
     } catch (error) {
@@ -889,7 +1132,6 @@ const importBuildFromClipboard = async () => {
             return
         }
         charSettings.value = normalizeCharSettings(parsed as CharSettings)
-        targetFunction.value = charSettings.value.targetFunction
         ui.showSuccessMessage(t("char-build.imported_from_clipboard"))
     } catch (error) {
         ui.showErrorMessage(t("char-build.import_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
@@ -975,14 +1217,14 @@ const loadSharedBuild = async (buildId: string) => {
 
 /**
  * 应用外部载入的角色配置，并补齐当前版本缺失字段。
+ * 旧分享不含升华字段时保留本地升华配置（不能因载入他人构筑而清空本地装备 / 天赋）。
  * @param loadedSettings 外部载入的角色配置
  * @param remoteId 来源分享构筑 id（空串表示非分享来源，会清空本地记录）
  * @returns void
  */
 const applyLoadedSettings = (loadedSettings: CharSettings, remoteId = "") => {
-    charSettings.value = normalizeCharSettings(loadedSettings)
+    charSettings.value = mergeSharedCharSettings(loadedSettings, charSettings.value.transcend)
     charRemoteId.value = remoteId
-    targetFunction.value = charSettings.value.targetFunction
     ui.showSuccessMessage(t("char-build.shared_build_loaded"))
 }
 
@@ -1064,7 +1306,9 @@ function getTimelineByName(name: string) {
     if (!raw) return undefined
     return CharBuildTimeline.fromRaw(raw)
 }
-const isTimeline = ref(timelines.value.find(v => v.name === charSettings.value.baseName) !== undefined)
+
+// 溯源收益 watcher 会读取 charBuild（经 getTimelineByName 依赖 timelines），必须注册在时间线初始化之后，避免 setup 期 TDZ
+watch(() => [charBuild.value, traceIncomeItems.value], scheduleTraceIncomes, { immediate: true })
 
 const pselectedChar = useLocalStorage("selectedChar", "赛琪")
 
@@ -1079,15 +1323,7 @@ onMounted(async () => {
         // 弹窗类 chunk 空闲预取：首次打开弹窗不再现场加载
         idle(
             () => {
-                for (const load of [
-                    loadAutoBuild,
-                    loadASTHelp,
-                    loadWeaponListView,
-                    loadMonsterListView,
-                    loadDotConfigDialog,
-                    loadResourceCostItem,
-                    loadAIChatDialog,
-                ]) void load().catch(() => {})
+                for (const load of [loadAutoBuild, loadWeaponListView, loadMonsterListView, loadAIChatDialog]) void load().catch(() => {})
             },
             { timeout: 3000 }
         )
@@ -1218,42 +1454,6 @@ function handlePetChange() {
 }
 //#endregion
 
-//#region DOT计算
-/** DOT 设置弹窗显隐 */
-const dot_model_show = ref(false)
-/** DOT 频率分解（技能/近战/远程），供主界面显示与弹窗配置 */
-const dotFrequencies = computed(() => {
-    // 流程门控：与 attributes 同理，未就绪直接返回空结果
-    if (!isCharBuildReady.value) {
-        return { cap: 0, ownFreq: 0, otherFreq: 0, totalFreq: 0, sources: [] }
-    }
-    return charBuild.value.calculateDotFrequencies()
-})
-/** 每秒 DOT 伤害（全部来源） */
-const dotDamage = computed(() => {
-    if (!isCharBuildReady.value) return 0
-    return charBuild.value.calculateDotDamage()
-})
-//#endregion
-
-/**
- * 计算自定义变量表达式的当前结果（函数定义以示例参数 1,2,3... 代入预览）。
- * @param variable 自定义变量配置
- * @returns 格式化后的计算结果
- */
-function getCustomVariableResult(variable: [string, string]) {
-    if (!isCharBuildReady.value) return "-"
-    if (!variable[0] || !variable[1] || charBuild.value.validateCustomVariable(variable[0], variable[1])) return "-"
-
-    const value = charBuild.value.evaluateCustomVariableDefinition(variable[0], variable[1])
-    if (!Number.isFinite(value)) return "0"
-    const formatted = formatExpressionValue(value)
-    const definition = charBuild.value.parseCustomFunctionDefinition(variable[0])
-    if (!definition) return formatted
-    const sampleArgs = definition.params.map((_, index) => index + 1)
-    return `${definition.name}(${sampleArgs.join(", ")}) = ${formatted}`
-}
-
 //#region Tour
 const tour = ref<typeof VTour>()
 
@@ -1357,32 +1557,38 @@ function dedupeBuffs(buffs: [string, number, number?][]): [string, number, numbe
     return [...uniqueBuffs.entries()].map(([name, [level, coverage]]) => (coverage === undefined ? [name, level] : [name, level, coverage]))
 }
 
-function updateTeamBuff(newValue: string | number, oldValue: string | number) {
-    // 移除旧选择对应的 BUFF：数字=来源 id（角色/武器）精确匹配；字符串=旧格式角色名子串
-    const newBuffs = [
-        ...charSettings.value.buffs.filter(([name]) => {
-            if (typeof oldValue === "number") {
-                if (buffMap.get(name)?.id === oldValue) return false
-            } else if (oldValue !== "-" && name.includes(String(oldValue))) {
-                return false
-            }
-            return true
-        }),
-    ]
-    if (newValue !== "-") {
-        // 助战角色/助战武器均按来源 id 精确匹配；旧格式角色名退化为名称子串
+/** 助战 BUFF 来源：数字=来源 id（角色 / 武器），字符串=旧格式角色名子串 */
+type TeamBuffSource = string | number
+
+/**
+ * 一次性写回多个助战来源变更：先移除全部旧来源，再加入全部新来源，最后只序列化写回一次。
+ * 同一次补丁同时换角色与武器时也只会重算一次 BUFF（避免两次整份写 localStorage）。
+ */
+function applyTeamBuffChanges(changes: readonly [newValue: TeamBuffSource, oldValue: TeamBuffSource][]) {
+    const removals = changes.map(([, oldValue]) => oldValue).filter(value => value !== "-")
+    const additions = changes.map(([newValue]) => newValue).filter(value => value !== "-")
+    const newBuffs = charSettings.value.buffs.filter(([name]) => {
+        const sourceId = buffMap.get(name)?.id
+        return !removals.some(oldValue =>
+            typeof oldValue === "number" ? sourceId === oldValue : name.includes(String(oldValue))
+        )
+    })
+    for (const newValue of additions) {
         const teamBuffs = buffOptions.value.filter(v =>
             typeof newValue === "number" ? v.buff?.id === newValue : v.label.includes(String(newValue))
         )
-        if (teamBuffs.length > 0) {
-            const buffs = teamBuffs
-                .map(v => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
-                .filter(v => v[1] > 0)
-            newBuffs.push(...buffs)
-        }
+        if (teamBuffs.length === 0) continue
+        const buffs = teamBuffs
+            .map(v => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
+            .filter(v => v[1] > 0)
+        newBuffs.push(...buffs)
     }
     charSettings.value.buffs = dedupeBuffs(newBuffs)
     localStorage.setItem(`build.${selectedCharId.value}`, serializeCharSettings(charSettings.value))
+}
+
+function updateTeamBuff(newValue: string | number, oldValue: string | number) {
+    applyTeamBuffChanges([[newValue, oldValue]])
 }
 
 // 外部调用接口
@@ -1427,7 +1633,6 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    commitCustomVariableInputs.flush()
     clearExprDrag()
     ui.title = ""
 })
@@ -1437,6 +1642,8 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     detail: false,
     basic: false,
     mods: false,
+    transcendGear: false,
+    transcendTalent: false,
     effects: false,
     buffs: false,
     preview: false,
@@ -1445,8 +1652,8 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     comments: false,
 })
 
-// 次级章节（05 特效 / 06 BUFF 大列表 / 07 动作 / 08 预览 / 09 评论）是否已补挂：
-// 首渲染只挂 01-04，进页少一次大体量同步挂载；空闲后（或用户开合章节时）再挂载次级内容。
+// 次级章节（07 特效 / 08 BUFF 大列表 / 09 动作 / 10 预览 / 11 评论）是否已补挂：
+// 首渲染只挂 01-04（升华 section 关闭时也不挂），进页少一次大体量同步挂载；空闲后（或用户开合章节时）再挂载次级内容。
 const deferredSectionsMounted = ref(false)
 
 function toggleSection(section: keyof typeof collapsedSections.value) {
@@ -1462,6 +1669,445 @@ const buildCommentCount = ref(0)
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
+//#region 左栏两行页签（主控标准页签 + 额外精通 + 协战角色 / 武器 / 额外精通）
+/** 主控标准页签 key ↔ 旧 charTab 文本（charTab 继续只服务主控面板与 MOD 编辑器） */
+const MAIN_TAB_NAME_BY_KEY: Record<string, string> = {
+    "main:char": "角色",
+    "main:melee": "近战",
+    "main:ranged": "远程",
+    "main:skillweapon": "同律",
+}
+const MAIN_TAB_KEY_BY_NAME: Record<string, string> = {
+    角色: "main:char",
+    近战: "main:melee",
+    远程: "main:ranged",
+    同律: "main:skillweapon",
+}
+/** 主控页签标签：额外精通用武器类型图标，其余沿用 charTabs 的图标与 tooltip */
+const MAIN_TAB_LABEL_KEYS: Record<string, string> = {
+    角色: "char-build.char",
+    近战: "char-build.melee",
+    远程: "char-build.ranged",
+    同律: "char-build.skill",
+}
+
+/** 左栏当前上下文（ASCII key）：第二行与额外精通只切它，不回写 charTab */
+const leftTabKey = ref(MAIN_TAB_KEY_BY_NAME[charTab.value] ?? "main:char")
+
+/** 两个协战位的 facade（由 teamN / teamNWeapon / assistN 投影，纯函数） */
+const assistFacades = computed(() => ({
+    assist1: getAssistFacade(charSettings.value, "assist1"),
+    assist2: getAssistFacade(charSettings.value, "assist2"),
+}))
+
+/** 左栏当前协战位（不在协战面板时为 null） */
+const activeAssistSide = computed<AssistSide | null>(() => {
+    if (leftTabKey.value.startsWith("assist1:")) return "assist1"
+    if (leftTabKey.value.startsWith("assist2:")) return "assist2"
+    return null
+})
+
+/** 左栏当前协战面板类型（char / weapon / extra） */
+const activeAssistPanel = computed(() => leftTabKey.value.split(":")[1] ?? "")
+
+/** 当前协战面板的构筑实例（额外精通面板不需要，避免无谓构造） */
+const activeAssistBuild = computed(() => {
+    const side = activeAssistSide.value
+    if (!side || activeAssistPanel.value === "extra") return null
+    return createAssistPanelBuild(charSettings.value, side, selectedCharId.value)
+})
+
+/** 当前协战面板的角色技能（有构筑时取构筑技能，保留技能替换） */
+const activeAssistSkills = computed(() => {
+    const side = activeAssistSide.value
+    if (!side) return []
+    return activeAssistBuild.value?.charSkills ?? getAssistCharSkills(charSettings.value, side)
+})
+
+/** 当前协战面板的面板属性 */
+const activeAssistAttributes = computed(() => {
+    const build = activeAssistBuild.value
+    return build ? build.calculateWeaponAttributes() : undefined
+})
+
+/**
+ * 主控标准页签 → 两行页签项。
+ * @param tab charTabs 项
+ * @returns 页签项
+ */
+function getMainCharTabItem(tab: (typeof charTabs.value)[number]): BuildTabRowItem {
+    const key = MAIN_TAB_KEY_BY_NAME[tab.name] ?? "main:char"
+    return {
+        key,
+        card: getBuildTabCard(tab),
+        label: tab.name === "角色" ? gt(charBuild.value.char.名称) : t(MAIN_TAB_LABEL_KEYS[tab.name] ?? "char-build.char"),
+        icon: tab.url || null,
+        maskUrl: tab.skillMaskUrl || null,
+        fallbackIcon:
+            tab.name === "角色"
+                ? "kezhou"
+                : tab.name === "同律"
+                  ? "ri:exchange-line"
+                  : tab.name === "近战"
+                    ? "ri:sword-line"
+                    : "ri:crosshair-line",
+        empty: tab.isEmpty,
+    }
+}
+
+/**
+ * 额外精通页签项：有值时用武器类型图标（mask 上色），否则虚线加号。
+ * @param key 页签 key
+ * @param value 当前额外精通武器类型
+ * @param label 可访问名称
+ * @returns 页签项
+ */
+function getExtraMasteryTabItem(key: string, value: string, label: string): BuildTabRowItem {
+    return {
+        key,
+        card: { kind: "empty", title: label },
+        label,
+        maskUrl: value ? LeveledWeapon.typeUrl(value) : null,
+        fallbackIcon: "ri:add-line",
+        empty: !value,
+    }
+}
+
+/**
+ * 协战武器页签的未生效加成：按协战角色精通判定，不构造完整协战构筑。
+ * @param weapon 目标武器
+ * @param char 协战角色（页面内按协战等级构造）
+ * @param extraMastery 协战额外精通武器类型
+ * @returns 未生效的属性名集合
+ */
+function getAssistWeaponIneffective(weapon: LeveledWeapon, char: LeveledChar | undefined, extraMastery: string): ReadonlySet<string> {
+    if (!char || !weapon.hasForge) return new Set<string>()
+    const mastered = char.精通.includes(weapon.类别) || char.精通.includes("全部类型") || weapon.类别 === extraMastery
+    if (mastered) return new Set<string>()
+    return new Set([...weapon.baseProperties, ...Object.keys(weapon._effectiveBuffProps)])
+}
+
+/**
+ * 单个协战位的三个页签项（角色 / 武器 / 额外精通，武器为单槽）。
+ * 角色与武器 tooltip 与主控一致，仅标题注入协战位标签以区分同名页签。
+ * @param side 协战位
+ * @returns 页签项列表
+ */
+function getAssistTabItems(side: AssistSide): BuildTabRowItem[] {
+    const facade = assistFacades.value[side]
+    const sideLabel = t(getTranscendSideLabelKey(side))
+    const charData = facade.charId > 0 ? charMap.get(facade.charId) : undefined
+    const char = charData ? new LeveledChar(charData, facade.charLevel) : undefined
+    const charLabel = `${sideLabel} · ${char ? gt(char.名称) : t("char-build.char")}`
+    const weaponId = facade.meleeWeapon || facade.rangedWeapon
+    const weaponData = weaponId > 0 ? weaponMap.get(weaponId) : undefined
+    const weaponLabel = `${sideLabel} · ${t("char-build.weapon")}`
+    const isMelee = facade.meleeWeapon > 0
+    const weapon = weaponData
+        ? LeveledWeaponHelper.fromId(
+              weaponData.id,
+              isMelee ? facade.meleeWeaponRefine : facade.rangedWeaponRefine,
+              isMelee ? facade.meleeWeaponLevel : facade.rangedWeaponLevel
+          )
+        : undefined
+    return [
+        {
+            key: `${side}:char`,
+            card: char
+                ? {
+                      kind: "char",
+                      char,
+                      mastery: [...(char.精通 ?? []), ...(facade.extraMastery ? [facade.extraMastery] : [])],
+                      title: `${gt(char.名称)} (${sideLabel})`,
+                  }
+                : { kind: "empty", title: charLabel },
+            label: charLabel,
+            icon: charData ? LeveledChar.url(charData.icon) : null,
+            fallbackIcon: "ri:user-line",
+            empty: facade.charId <= 0,
+        },
+        {
+            key: `${side}:weapon`,
+            card: weapon
+                ? {
+                      kind: "weapon",
+                      weapon,
+                      ineffective: getAssistWeaponIneffective(weapon, char, facade.extraMastery),
+                      title: `${gt(weapon.名称)} (${sideLabel})`,
+                  }
+                : { kind: "empty", title: weaponLabel, isEmpty: true },
+            label: weapon ? `${sideLabel} · ${gt(weapon.名称)}` : weaponLabel,
+            icon: weaponData ? LeveledWeapon.url(weaponData.icon) : null,
+            fallbackIcon: "ri:sword-line",
+            empty: weaponId <= 0,
+        },
+        getExtraMasteryTabItem(`${side}:extra`, facade.extraMastery, `${sideLabel} · ${t("UI_Armory_ExtraExcelWeponTitle")}`),
+    ]
+}
+
+/** 两行页签：第一行主控（角色 / 近战 / 远程 / 同律 / 额外精通），第二行两个协战位各 3 个 */
+const charTabRows = computed<BuildTabRowItem[][]>(() => [
+    [
+        ...charTabs.value.map(getMainCharTabItem),
+        getExtraMasteryTabItem(
+            "main:extra",
+            charSettings.value.extraMastery,
+            selectedExtraMastery.value
+                ? `${t("UI_Armory_ExtraExcelWeponTitle")} · ${t(selectedExtraMastery.value.名称)}`
+                : t("UI_Armory_ExtraExcelWeponTitle")
+        ),
+    ],
+    [...getAssistTabItems("assist1"), ...getAssistTabItems("assist2")],
+])
+
+/**
+ * 切换左栏上下文：主控标准页签同步 charTab（MOD 编辑器口径），额外精通 / 协战只切 leftTabKey。
+ * @param key 页签 key
+ */
+function selectLeftTab(key: string): void {
+    leftTabKey.value = key
+    const mainTabName = MAIN_TAB_NAME_BY_KEY[key]
+    if (mainTabName) charTab.value = mainTabName
+}
+
+// charTab 被外部改写（tour / 旧入口）时，仅当左栏仍停在主控标准页签才同步 key，
+// 协战与额外精通面板不被强制切走。
+watch(charTab, value => {
+    if (!MAIN_TAB_NAME_BY_KEY[leftTabKey.value]) return
+    leftTabKey.value = MAIN_TAB_KEY_BY_NAME[value] ?? "main:char"
+})
+
+// 角色没有同律武器时第一行不渲染同律页签：仍停在该页签就回落到角色，避免左栏空白
+watch(
+    () => Boolean(charBuild.value.skillWeapon),
+    hasSkillWeapon => {
+        if (hasSkillWeapon || leftTabKey.value !== "main:skillweapon") return
+        leftTabKey.value = "main:char"
+        charTab.value = "角色"
+    }
+)
+
+/**
+ * 协战角色选择器要排除的角色：主控 + 另一协战。
+ * @param side 当前协战位
+ * @returns 排除的角色 id
+ */
+function getAssistExcludeIds(side: AssistSide): number[] {
+    const other = side === "assist1" ? "assist2" : "assist1"
+    return [charBuild.value.char.id, assistFacades.value[other].charId].filter(id => id > 0)
+}
+
+/**
+ * 把协战面板补丁写回 teamN / teamNWeapon / assistN；换角色时复位技能与启用位。
+ * 角色 / 武器变化与 TeamEditor 同口径：清关联构筑并重算助战 BUFF。
+ * @param side 协战位
+ * @param patch facade 补丁
+ */
+function updateAssistLoadout(side: AssistSide, patch: Partial<TranscendSideLoadout>): void {
+    const teamKey = side === "assist1" ? "team1" : "team2"
+    const weaponKey = side === "assist1" ? "team1Weapon" : "team2Weapon"
+    const buildKey = side === "assist1" ? "team1Build" : "team2Build"
+    const buildVariantKey = side === "assist1" ? "team1BuildVariant" : "team2BuildVariant"
+    const previousCharId = assistFacades.value[side].charId
+    const previousWeaponId = assistFacades.value[side].meleeWeapon || assistFacades.value[side].rangedWeapon
+    const mapping = mapAssistPatch(charSettings.value, side, patch)
+    // 收集本次补丁的角色 / 武器变化，最后只重算一次 BUFF（同补丁改两者也只写一次存档）
+    const buffChanges: [TeamBuffSource, TeamBuffSource][] = []
+
+    if (mapping.teamId !== undefined) {
+        const nextTeamId = mapping.teamId > 0 ? mapping.teamId : "-"
+        const previousValue = previousCharId > 0 ? previousCharId : "-"
+        if (nextTeamId !== previousValue) {
+            charSettings.value[teamKey] = nextTeamId
+            charSettings.value[buildKey] = "-"
+            charSettings.value[buildVariantKey] = "A"
+            buffChanges.push([nextTeamId, previousValue])
+        }
+        Object.assign(charSettings.value[side], mapping.assist)
+        if (nextTeamId !== previousValue) {
+            Object.assign(charSettings.value[side], resetAssistForChar(charSettings.value, side))
+        }
+    } else {
+        Object.assign(charSettings.value[side], mapping.assist)
+    }
+
+    if (mapping.weaponId !== undefined) {
+        const nextWeaponId = mapping.weaponId > 0 ? mapping.weaponId : "-"
+        const previousValue = previousWeaponId > 0 ? previousWeaponId : "-"
+        if (nextWeaponId !== previousValue) {
+            charSettings.value[weaponKey] = nextWeaponId
+            buffChanges.push([nextWeaponId, previousValue])
+        }
+    }
+
+    if (buffChanges.length > 0) applyTeamBuffChanges(buffChanges)
+}
+
+/**
+ * 角色选择器回传：写入 teamN 并复位本位 loadout；选回当前角色时不做任何改动。
+ * @param side 协战位
+ * @param charId 角色 id（0 表示清空）
+ */
+function selectAssistChar(side: AssistSide, charId: number): void {
+    const previousCharId = assistFacades.value[side].charId
+    const nextCharId = charId > 0 ? charId : 0
+    if (nextCharId === previousCharId) return
+    charSettings.value[side === "assist1" ? "team1" : "team2"] = nextCharId > 0 ? nextCharId : "-"
+    charSettings.value[side === "assist1" ? "team1Build" : "team2Build"] = "-"
+    charSettings.value[side === "assist1" ? "team1BuildVariant" : "team2BuildVariant"] = "A"
+    Object.assign(charSettings.value[side], resetAssistForChar(charSettings.value, side))
+    updateTeamBuff(nextCharId > 0 ? nextCharId : "-", previousCharId > 0 ? previousCharId : "-")
+}
+
+//#region 协战构筑导入（顶层 setting → 内嵌 setting）
+/** 正在导入的协战位（null 表示弹窗关闭） */
+const assistImportSide = ref<AssistSide | null>(null)
+
+/** 导入弹窗目标：协战角色 / 单武器 / 关联构筑（分享页签置顶用） */
+const assistImportTarget = computed(() => {
+    const side = assistImportSide.value
+    if (!side) return null
+    const facade = assistFacades.value[side]
+    return {
+        charId: facade.charId,
+        weaponId: facade.meleeWeapon || facade.rangedWeapon,
+        linkedBuildId: charSettings.value[side === "assist1" ? "team1Build" : "team2Build"] ?? "-",
+    }
+})
+
+/**
+ * 打开协战导入弹窗：未选角色时提示先选人。
+ * @param side 协战位
+ */
+function openAssistImport(side: AssistSide): void {
+    if (assistFacades.value[side].charId <= 0) {
+        ui.showErrorMessage(t("char-build.assist_import_require_char"))
+        return
+    }
+    assistImportSide.value = side
+}
+
+/**
+ * 应用协战导入：源构筑转换为内嵌 setting 写回 assistN；空武器时按来源推荐填入 teamNWeapon 并重算助战 BUFF。
+ * @param payload 源构筑与展示名
+ */
+function applyAssistImport(payload: { source: CharSettings; label: string }): void {
+    const side = assistImportSide.value
+    if (!side) return
+    const weaponKey = side === "assist1" ? "team1Weapon" : "team2Weapon"
+    const teamWeaponId = charSettings.value[weaponKey]
+    const { assist, weaponId, baseNameFallback } = convertTopSettingsToAssist(
+        payload.source,
+        charSettings.value[side === "assist1" ? "team1" : "team2"],
+        teamWeaponId,
+        charSettings.value[side].enabled
+    )
+    Object.assign(charSettings.value[side], assist)
+    const weaponFilled = weaponId > 0 && !(typeof teamWeaponId === "number" && teamWeaponId > 0)
+    if (weaponFilled) {
+        charSettings.value[weaponKey] = weaponId
+        applyTeamBuffChanges([[weaponId, "-"]])
+    }
+    assistImportSide.value = null
+    ui.showSuccessMessage(t("char-build.assist_import_success", { label: payload.label || t("char-build.assist_import") }))
+    if (weaponFilled) {
+        const weapon = weaponMap.get(weaponId)
+        ui.showSuccessMessage(t("char-build.assist_import_weapon_filled", { name: weapon ? gt(weapon.名称) : `#${weaponId}` }))
+    }
+    if (baseNameFallback) ui.showErrorMessage(t("char-build.assist_import_basename_fallback"))
+}
+//#endregion
+//#endregion
+
+//#region 升华装备 / 升华天赋（唯一开关 = charSettings.transcend.enabled）
+/** 「包含未开放阶段（理论值）」：只影响首次开启 / 全部解锁的天赋默认值 */
+const includeUnreleasedStages = useLocalStorage("transcendBuild.includeUnreleasedStages", false)
+
+/** 升华模块开关：开启 = 显示两个 section 并参与计算；关闭 = 隐藏且停用 */
+const transcendEnabled = computed(() => charSettings.value.transcend.enabled)
+
+/**
+ * 头部 toggle：打开时若尚无天赋投入，按独立页旧默认（可达阶段满级）填充；写操作由 useLocalStorage 自动持久化。
+ */
+function toggleTranscend(): void {
+    const transcend = charSettings.value.transcend
+    const next = !transcend.enabled
+    if (next && transcend.talentLevels.length === 0) {
+        transcend.talentLevels = getUnlockAllTalentLevels([], includeUnreleasedStages.value)
+    }
+    transcend.enabled = next
+}
+
+/** 装备 / 天赋编辑器的宿主 facade：角色与队伍取当前页面，emit 只写 `charSettings.transcend` */
+const transcendEditorSettings = computed(() => createTranscendEditorSettings(charSettings.value, selectedCharId.value))
+
+/**
+ * 写回某侧装备组（只替换 `transcend`，不写 facade 的 loadout 字段）。
+ * @param side 构筑位
+ * @param group 新装备组
+ */
+function onTranscendUpdateGear(side: TranscendSlotGroup, group: TranscendGearGroup): void {
+    setSideGearGroup(charSettings.value.transcend, side, group)
+}
+
+/** 装备短码导入：三组一起替换并同步激活变体 */
+function onTranscendReplaceGear(mainGear: TranscendGearGroup, assist1Gear: TranscendGearGroup, assist2Gear: TranscendGearGroup): void {
+    const transcend = charSettings.value.transcend
+    transcend.mainGear = mainGear
+    transcend.assist1Gear = assist1Gear
+    transcend.assist2Gear = assist2Gear
+    syncActiveGearVariant(transcend)
+}
+
+/**
+ * 切换装备变体（A/B/C）。
+ * @param id 变体 id
+ */
+function onTranscendSelectGearVariant(id: string): void {
+    switchTranscendGearVariant(charSettings.value.transcend, id)
+}
+
+/** 以当前装备为模板追加一份变体 */
+function onTranscendAddGearVariant(): void {
+    addTranscendGearVariant(charSettings.value.transcend)
+}
+
+/**
+ * 删除装备变体。
+ * @param id 变体 id
+ */
+function onTranscendRemoveGearVariant(id: string): void {
+    removeTranscendGearVariant(charSettings.value.transcend, id)
+}
+
+/**
+ * 写入天赋等级表。
+ * @param levels 节点等级 `[talentId, level]`
+ */
+function onTranscendTalentLevels(levels: [number, number][]): void {
+    charSettings.value.transcend.talentLevels = levels
+}
+
+/** 天赋全部开关：未满级补满目标口径，已满级清空所有等级（含目标外阶段）；是否启用只由头部 toggle 决定 */
+function onTranscendUnlockAll(): void {
+    charSettings.value.transcend.talentLevels = toggleAllTalentLevels(
+        charSettings.value.transcend.talentLevels,
+        includeUnreleasedStages.value
+    )
+}
+
+/** 宿主完整构筑快照：装备相对收益按 MOD / BUFF / 时间轴合并后的口径计算 */
+const transcendGainContext = computed(() =>
+    createTranscendGainContext({
+        settings: charSettings.value,
+        charId: selectedCharId.value,
+        inv,
+        timeline: charSettings.value.actions?.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
+        dataPackKey: dataPackHydrationKey.value,
+    })
+)
+//#endregion
+
 /**
  * 构筑页展示模式：
  * - simple：简洁模式（全屏 HUD 装配总览，只读，见 CharBuildSimpleView）
@@ -1471,101 +2117,17 @@ const charTab = ref(charBuild.value.selectedSkillType)
 const buildViewMode = useLocalStorage<"simple" | "pro">("char-build-view-mode", "simple")
 
 //#region 表达式字段拖拽 / 放置
-/** 表达式字段拖拽状态：属性、技能行抓起字段，表达式与自定义变量输入框作为放置目标 */
+/** 拖拽状态：放置目标（目标函数卡 / 自定义变量）由 `TranscendTargetPanel` 自行注册，本页只渲染浮动标签与提示条 */
 const {
     payload: exprDragPayload,
     floatingPayload: exprFloatingPayload,
     dragging: exprDragging,
     ghostPosition: exprGhostPosition,
-    hoveredDropKey,
-    dropReady: exprDropReady,
     clearExprDrag,
-    registerExprDropHandler,
 } = useExprDrag()
-
-/** 表达式输入控件（基于 CodeMirror 的单行表达式编辑器）实例的对外能力 */
-type ExprInputInstance = { getCursor: () => number; insertAtCursor: (text: string) => number }
-/** 表达式编辑器的宏高亮表（词法阶段会被替换，与 ASTHelp 编辑器一致） */
-const exprMacros = new Set(Object.keys(CharBuild.macros))
-/** 目标函数表达式输入控件 */
-const targetFunctionInputRef = ref<ExprInputInstance | null>(null)
-/** 自定义变量行表达式输入控件：key 为行下标（ref 回调在每次渲染后刷新，行增删时自动更新） */
-const customVariableInputRefs = ref<Record<number, ExprInputInstance>>({})
-
-/**
- * 按放置目标 key 取对应的表达式输入控件。
- * @param targetKey 放置目标 key（data-expr-drop 的取值）
- * @returns 控件实例；不存在时返回 null
- */
-function getExprInput(targetKey: string): ExprInputInstance | null {
-    if (targetKey === "target-function") return targetFunctionInputRef.value
-    if (!targetKey.startsWith("custom-variable:")) return null
-    return customVariableInputRefs.value[Number(targetKey.slice("custom-variable:".length))] ?? null
-}
-
-/**
- * 记录 / 移除自定义变量行的表达式输入控件引用（ref 回调在组件卸载时会传 null）。
- * @param index 变量行下标
- * @param instance 控件实例；卸载时为 null
- * @returns void
- */
-function setCustomVariableInputRef(index: number, instance: ExprInputInstance | null) {
-    if (instance) customVariableInputRefs.value[index] = instance
-    else delete customVariableInputRefs.value[index]
-}
-
-/**
- * 把抓起的字段写入目标表达式输入框（鼠标拖动放置与触控点击放置共用）。
- * 按编辑器当前光标位置插入：编辑器持有光标，未聚焦时即文本末尾，与原生输入框行为一致。
- * @param targetKey 放置目标 key（data-expr-drop 的取值）
- * @param field 抓起的字段
- * @param input 触发放置的表达式编辑器（触控点击时有值，用于读取光标位置）
- * @returns void
- */
-function applyExprDrop(targetKey: string, field: ExprDragPayload, input?: ExprInputInstance | null) {
-    const caret = input?.getCursor()
-    if (targetKey === "target-function") {
-        targetFunction.value = joinExprText(targetFunction.value, field.expr, caret)
-        return
-    }
-    if (!targetKey.startsWith("custom-variable:")) return
-    const index = Number(targetKey.slice("custom-variable:".length))
-    const variable = customVariableInputs.value[index]
-    if (!variable) return
-    variable[1] = joinExprText(variable[1], field.expr, caret)
-}
-
-/**
- * 触控点击放置：已抓起字段时点击表达式输入框即写入字段并结束抓起状态。
- * @param targetKey 放置目标 key
- * @returns void
- */
-function handleExprDropClick(targetKey: string) {
-    const field = exprDragPayload.value
-    if (!field || exprDragging.value) return
-    applyExprDrop(targetKey, field, getExprInput(targetKey))
-    clearExprDrag()
-}
-
-/**
- * 表达式输入框在抓起 / 拖动状态下的高亮样式。
- * 使用 ring（box-shadow）而非 outline，避免与输入框自身的 outline-none 相互覆盖。
- * @param targetKey 放置目标 key
- * @returns 需要追加的 class
- */
-function dropTargetClass(targetKey: string) {
-    if (hoveredDropKey.value === targetKey) return "ring-2 ring-primary"
-    if (exprDropReady.value) return "ring-1 ring-primary/50"
-    return ""
-}
-
-registerExprDropHandler((targetKey, field) => applyExprDrop(targetKey, field))
 //#endregion
 
 //#region 额外精通武器
-const extraMasteryModalShow = ref(false)
-const pendingExtraMastery = ref("")
-
 /** 可选的额外精通武器类型：仅匹配角色「额外精通」字段。 */
 const extraMasteryOptions = computed(() => {
     dataPackTick.value
@@ -1576,195 +2138,90 @@ const extraMasteryOptions = computed(() => {
  * 当前已选择的额外精通武器条目。
  */
 const selectedExtraMastery = computed(() => extraMasteryOptions.value.find(item => item.名称 === charSettings.value.extraMastery) || null)
+//#endregion
 
-/** 当前弹窗临时选择的额外精通武器条目。 */
-const pendingExtraMasteryItem = computed(() => extraMasteryOptions.value.find(item => item.名称 === pendingExtraMastery.value) || null)
+//#region 目标函数卡（左栏 / 浮动 / 吸附右侧三态）
+/** 目标函数卡停靠状态：默认停左栏底部，可浮动或吸附为右侧第三栏 */
+const targetDock = ref<TargetDock>("left")
 
-/** 打开额外精通弹窗并初始化临时选择。 */
-function openExtraMasteryModal() {
-    pendingExtraMastery.value = selectedExtraMastery.value?.名称 || ""
-    extraMasteryModalShow.value = true
-}
+/** 主控表达式草稿非法（不写回）：结果行对应旧提交值，需抑制显示 */
+const targetDraftInvalid = ref(false)
+
+/** 三人目标快照 memo：序列化设置与主控构筑实例都相同才复用，避免无关刷新重建协战构筑 */
+let targetSnapshotCache: { key: string; mainBuild: CharBuild | null; snapshot: CharTeamSnapshot } | null = null
+
+/** 三人目标快照：主控用页面构筑，协战由 `assistN` 重建；结果与表达式校验共用同一份 */
+const charTeamSnapshot = computed(() => {
+    if (!isCharBuildReady.value) return null
+    const key = `${selectedCharId.value}|${serializeCharSettings(charSettings.value)}`
+    const mainBuild = charBuild.value
+    if (targetSnapshotCache?.key === key && targetSnapshotCache.mainBuild === mainBuild) return targetSnapshotCache.snapshot
+    const snapshot = computeCharTeamSnapshot({
+        settings: charSettings.value,
+        charId: selectedCharId.value,
+        mainBuild,
+    })
+    targetSnapshotCache = { key, mainBuild, snapshot }
+    return snapshot
+})
+
+/** 目标面板三侧状态（未就绪时给空状态，模板门后不会渲染） */
+const targetSides = computed(() => charTeamSnapshot.value?.settings ?? null)
+/** 三侧构筑实例（表达式校验 / 预览） */
+const targetSideBuilds = computed(() => charTeamSnapshot.value?.builds ?? null)
+
+/** 目标面板初始构筑位：只跟随左栏当前上下文初始化，不建立双向联动 */
+const targetInitialSide = computed<TranscendSlotGroup>(() => {
+    const prefix = leftTabKey.value.split(":")[0]
+    if (prefix === "assist1" || prefix === "assist2") return prefix
+    return "main"
+})
 
 /**
- * 选择额外精通武器类型，仅更新弹窗内的临时选择。
- * @param type 武器类型中文名
- * @returns void
+ * 目标面板写回：主控表达式先经主控构筑校验，非法时不写回（保持原版口径）并标记草稿非法；
+ * 其余字段直接落到 `CharSettings`（localStorage 深监听自动持久化）。
+ * @param side 构筑位
+ * @param patch 面板补丁
  */
-function selectExtraMastery(type: string) {
-    pendingExtraMastery.value = type
-}
-
-/**
- * 清除弹窗内临时选择，提交后才会更新构筑。
- * @returns void
- */
-function clearExtraMastery() {
-    pendingExtraMastery.value = ""
-}
-
-/** 确认弹窗内的额外精通选择并刷新构筑。 */
-function confirmExtraMastery() {
-    charSettings.value.extraMastery = pendingExtraMastery.value
-    extraMasteryModalShow.value = false
+function onTargetPatch(side: TranscendSlotGroup, patch: Partial<TargetSideState>): void {
+    if (side === "main" && patch.targetFunction !== undefined) {
+        if (isCharBuildReady.value && charBuild.value.validateAST(patch.targetFunction)) {
+            targetDraftInvalid.value = true
+            return
+        }
+        targetDraftInvalid.value = false
+    }
+    applyCharTargetPatch(charSettings.value, side, patch)
     updateCharBuild()
 }
 
-/** 关闭额外精通弹窗并丢弃临时选择。 */
-function closeExtraMasteryModal() {
-    extraMasteryModalShow.value = false
+/** 召回目标卡：浮动 / 吸附态回到左栏底部 */
+function recallTargetCard(): void {
+    targetDock.value = "left"
 }
 
-/**
- * 按资源 ID 取资源名，缺失时回退到原始 ID。
- * @param id 资源 ID
- * @returns 资源展示名
- */
-function getExtraMasteryResourceName(id: number): string {
-    return resourceMap.get(id)?.name || String(id)
-}
-//#endregion
-
-/**
- * 添加一行自定义表达式变量。
- * @returns void
- */
-function addCustomVariable() {
-    customVariableInputs.value.push(["", ""])
-}
-
-/**
- * 删除指定自定义表达式变量。
- * @param index 变量索引
- * @returns void
- */
-function removeCustomVariable(index: number) {
-    customVariableInputs.value.splice(index, 1)
-}
-
-/**
- * 将当前自定义变量复制到剪贴板。
- * @returns void
- */
-async function copyCustomVariables() {
-    try {
-        await copyText(formatCustomVariablesClipboardText(customVariableInputs.value))
-        ui.showSuccessMessage("已复制自定义变量")
-    } catch (error) {
-        ui.showErrorMessage("复制自定义变量失败", error instanceof Error ? error.message : String(error))
-    }
-}
-
-/**
- * 从剪贴板读取自定义变量并替换当前列表。
- * @returns void
- */
-async function pasteCustomVariables() {
-    try {
-        const variables = parseCustomVariablesClipboardText(await pasteText())
-        if (!variables.length) {
-            ui.showErrorMessage("未识别到可粘贴的自定义变量")
-            return
-        }
-        commitCustomVariableInputs.cancel()
-        customVariableInputs.value = variables
-        charSettings.value.customVariables = variables.map(variable => [...variable])
-        updateCharBuild()
-        ui.showSuccessMessage("已粘贴自定义变量")
-    } catch (error) {
-        ui.showErrorMessage("粘贴自定义变量失败", error instanceof Error ? error.message : String(error))
-    }
-}
-
-const customVariableInputs = ref<[string, string][]>(charSettings.value.customVariables.map(variable => [...variable]))
-
-/**
- * 防抖提交整组自定义变量，避免输入期间反复重建构筑。
- * @param variables 自定义变量输入值
- * @returns void
- */
-const commitCustomVariableInputs = debounce((variables: [string, string][]) => {
-    if (isEqual(charSettings.value.customVariables, variables)) return
-    charSettings.value.customVariables = variables.map(variable => [...variable])
-}, 500)
-
-watch(
-    customVariableInputs,
-    variables => {
-        commitCustomVariableInputs(variables.map(variable => [...variable]))
-    },
-    { deep: true }
-)
-
-watch(
-    () => charSettings.value.customVariables,
-    variables => {
-        if (isEqual(customVariableInputs.value, variables)) return
-        commitCustomVariableInputs.cancel()
-        customVariableInputs.value = variables.map(variable => [...variable])
-    }
-)
-
-const targetFunction = ref(charSettings.value.targetFunction)
-watch(
-    targetFunction,
-    debounce(newValue => {
-        // 未就绪时不校验：占位对象没有可用的 AST 上下文
-        if (!isCharBuildReady.value) return
-        const error = charBuild.value.validateAST(newValue)
-        if (error) {
-            return
-        }
-        charSettings.value.targetFunction = newValue
-    }, 500)
-)
-
-//#region 自定义变量引用高亮
-/** 当前聚焦的自定义变量行下标（-1 表示未聚焦任何变量名） */
-const focusedVariableIndex = ref(-1)
-
-/**
- * 聚焦变量对应的待匹配标识符：函数定义（如 fn(x)）以函数名 + 调用形式匹配，普通变量按裸标识符匹配。
- * 变量名输入框未聚焦、或该行为空名时返回 null（此时不做任何高亮）。
- */
-const focusedVariableSymbol = computed(() => {
-    if (!isCharBuildReady.value) return null
-    const name = customVariableInputs.value[focusedVariableIndex.value]?.[0]?.trim()
-    if (!name) return null
-    const definition = charBuild.value.parseCustomFunctionDefinition(name)
-    if (definition) return { identifier: definition.name, callOnly: true }
-    return { identifier: name, callOnly: false }
+/** 吸附三栏只在 lg 以上成立（与卡片内的 canDockRight 一致）；缩窄后自动召回，避免三栏挤压缩放主栏 */
+const canDockRight = useMediaQuery("(min-width: 1024px)")
+watch(canDockRight, value => {
+    if (!value && targetDock.value === "right") recallTargetCard()
 })
 
-/** 引用了聚焦变量的表达式输入框 key 集合（自定义变量各行 + 目标函数） */
-const referencedExprKeys = computed(() => {
-    const symbol = focusedVariableSymbol.value
-    const keys = new Set<string>()
-    if (!symbol) return keys
-    customVariableInputs.value.forEach((variable, index) => {
-        if (expressionReferencesIdentifier(variable[1], symbol.identifier, symbol.callOnly)) {
-            keys.add(`custom-variable:${index}`)
-        }
-    })
-    if (expressionReferencesIdentifier(targetFunction.value, symbol.identifier, symbol.callOnly)) {
-        keys.add("target-function")
-    }
-    return keys
+/** 切换角色后草稿标记失效（新角色从自己的提交值重建） */
+watch(selectedCharId, () => {
+    targetDraftInvalid.value = false
 })
 
-/**
- * 被聚焦变量引用的表达式输入框高亮样式（与拖放 ring 同色，但二者不会同时出现：拖放时变量名输入框已失焦）。
- * @param targetKey 表达式输入框 key
- * @returns 需要追加的 class
- */
-function referenceHighlightClass(targetKey: string) {
-    return referencedExprKeys.value.has(targetKey) ? "ring-1 ring-primary/60 bg-primary/5" : ""
-}
+/** 切停靠态会重挂载目标面板并丢弃未提交草稿，非法标记随之失效 */
+watch(targetDock, () => {
+    targetDraftInvalid.value = false
+})
+
+/** 吸附态三栏轨道：左右最小宽度按可用宽度 clamp（25%），1024–1359px 下中栏仍恒为可用宽度的一半 */
+const TARGET_GRID_COLUMNS = "minmax(min(340px, 25%), 1fr) minmax(0, 2fr) minmax(min(340px, 25%), 1fr)"
+const targetGridStyle = computed(() => (targetDock.value === "right" ? { gridTemplateColumns: TARGET_GRID_COLUMNS } : undefined))
 //#endregion
 
 const charDetailExpend = ref(true)
-/** 自定义变量区域折叠状态（默认展开，折叠交互同「词条」charattr） */
-const customVariableExpend = ref(true)
 const weapon_select_model_show = ref(false)
 const weaponDefaultTab = ref("近战")
 const monster_select_model_show = ref(false)
@@ -1776,6 +2233,12 @@ const newWeaponSelection = ref({ melee: 0, ranged: 0 })
  */
 const meleeWeaponEmpty = computed(() => charBuild.value.meleeWeapon?.isEmpty ?? true)
 const rangedWeaponEmpty = computed(() => charBuild.value.rangedWeapon?.isEmpty ?? true)
+
+/**
+ * 角色详情「灾厄武器」子区的数据源：当前构筑的近战 / 远程武器。
+ * 同律武器（LeveledSkillWeapon）没有熔炉字段，inherit 型复用同一把物理武器，故不入列。
+ */
+const calamityWeaponCandidates = computed(() => [charBuild.value.meleeWeapon, charBuild.value.rangedWeapon])
 
 /**
  * 同律武器是否为 inherit 型且其继承槽位未装备（此时同律面板无属性可展示）。
@@ -1862,52 +2325,10 @@ function selectEnemy(id: number) {
     monster_select_model_show.value = false
 }
 
-const ast_help_model_show = ref(false)
-/** ASTHelp 关联的外部编辑框 key（target-function 或 custom-variable:index），确认时一次性写回该框 */
-const astHelpTargetKey = ref("target-function")
-/** 打开 ASTHelp 时一次性快照的外部表达式（打开后与外部脱钩，直接关闭不写回） */
-const astHelpInitialExpression = ref("")
-/** 上一次聚焦的外部表达式编辑框，打开 ASTHelp 时默认关联它 */
-const lastFocusedExprKey = ref("target-function")
-
-/**
- * 打开 ASTHelp：把编辑框关联到上一次聚焦的外部编辑框，打开时读一次外部值。
- * 自定义变量行被删除后 key 失效时回退到目标函数。
- * @returns void
- */
-function openAstHelp() {
-    let targetKey = lastFocusedExprKey.value
-    if (targetKey.startsWith("custom-variable:")) {
-        const index = Number(targetKey.slice("custom-variable:".length))
-        if (!customVariableInputs.value[index]) targetKey = "target-function"
-    } else if (targetKey !== "target-function") {
-        targetKey = "target-function"
-    }
-    astHelpTargetKey.value = targetKey
-    astHelpInitialExpression.value =
-        targetKey === "target-function"
-            ? targetFunction.value
-            : (customVariableInputs.value[Number(targetKey.slice("custom-variable:".length))]?.[1] ?? "")
-    ast_help_model_show.value = true
-}
-
-/**
- * ASTHelp 确认后写一次：把编辑结果一次性写回打开时关联的外部编辑框。
- * @param expression 确认的表达式
- * @returns void
- */
-function onAstHelpSelect(expression: string) {
-    if (astHelpTargetKey.value === "target-function") {
-        targetFunction.value = expression
-        return
-    }
-    const index = Number(astHelpTargetKey.value.slice("custom-variable:".length))
-    if (customVariableInputs.value[index]) customVariableInputs.value[index][1] = expression
-}
-
 async function shareCharBuild(title: string, desc: string = "") {
     try {
-        const settingsString = serializeCharSettings(charSettings.value)
+        // 分享 / 上传用分享安全序列化（只带当前激活装备变体），满足服务端 20,000 上限
+        const settingsString = serializeCharSettingsForShare(charSettings.value)
         const result = await createBuildMutation({
             input: {
                 title,
@@ -2125,19 +2546,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             </div>
             <div class="modal-backdrop" @click="autobuild_model_show = false" />
         </dialog>
-        <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
-            <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
-                <ASTHelp
-                    v-if="ast_help_model_show"
-                    v-model="ast_help_model_show"
-                    :char-build="charBuild"
-                    :skill="charBuild.selectedSkill"
-                    :initial-expression="astHelpInitialExpression"
-                    @select="onAstHelpSelect"
-                />
-            </div>
-            <div class="modal-backdrop" @click="ast_help_model_show = false" />
-        </dialog>
         <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
             <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
                 <WeaponListView
@@ -2177,78 +2585,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             </div>
             <div class="modal-backdrop" @click="monster_select_model_show = false" />
         </dialog>
-        <!-- DOT设置详情弹窗 -->
-        <dialog class="modal" :class="{ 'modal-open': dot_model_show }">
-            <DotConfigDialog
-                v-if="dot_model_show"
-                :char-build="charBuild"
-                :dot-settings="charSettings.dotSettings"
-                @close="dot_model_show = false"
-            />
-            <div class="modal-backdrop" @click="dot_model_show = false" />
-        </dialog>
-
-        <!-- 额外精通武器选择弹窗 -->
-        <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
-            <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
-            <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
-            <!-- 卡片网格：auto-fit 让空轨道塌陷，条目少时整组居中；轨道上限 128px 避免卡片被拉伸 -->
-            <div class="grid grid-cols-[repeat(auto-fit,minmax(96px,128px))] justify-center gap-2">
-                <button
-                    v-for="item in extraMasteryOptions"
-                    :key="item.id"
-                    type="button"
-                    class="flex flex-col items-center justify-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
-                    :class="
-                    pendingExtraMastery === item.名称
-                        ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                        : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
-                "
-                    @click="selectExtraMastery(item.名称)"
-                >
-                    <!-- 图标走 mask 上色：原图是白色字形，直接显示在浅色主题下不可见；mask 取 currentColor 随选中态变化 -->
-                    <div
-                        :alt="$t('char-build.extra_mastery_weapon_icon')"
-                        class="size-9 shrink-0 bg-current"
-                        :style="{ mask: `url(${LeveledWeapon.typeUrl(item.名称)}) no-repeat center/contain` }"
-                    />
-                    <span class="text-xs">{{ $t(item.名称) }}</span>
-                </button>
-            </div>
-            <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-                <div class="flex items-center justify-between gap-2 mb-1">
-                    <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
-                    <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
-                        {{ pendingExtraMasteryItem.id }}
-                    </div>
-                </div>
-                <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
-                <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-                    <ResourceCostItem
-                        v-for="[ resourceId, count ] in Object.entries(pendingExtraMasteryItem.消耗)"
-                        :key="resourceId"
-                        :name="getExtraMasteryResourceName(Number(resourceId))"
-                        :value="count"
-                    />
-                </div>
-            </div>
-            <template #action>
-                <div class="flex w-full justify-between gap-2">
-                    <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
-                        <Icon icon="ri:delete-bin-line" class="size-4" />
-                        {{ $t("char-build.extra_mastery_clear") }}
-                    </button>
-                    <div class="ml-auto" />
-                    <button type="button" class="btn btn-sm" @click="closeExtraMasteryModal">
-                        {{ $t("取消") }}
-                    </button>
-                    <button type="button" class="btn btn-sm btn-primary" @click="confirmExtraMastery">
-                        {{ $t("确定") }}
-                    </button>
-                </div>
-            </template>
-        </DialogModel>
-
         <!-- 配装分享弹窗 -->
         <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
             <div class="space-y-4">
@@ -2301,103 +2637,121 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 backgroundPosition: 'center',
             }"
             />
-            <!-- 顶栏 data-agent-exclude -->
-            <div
+            <!-- 顶栏（layout 级，无外边距） data-agent-exclude -->
+            <header
                 data-tour="top-actions"
                 data-agent-exclude="chrome"
-                class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-1.5 shadow-lg backdrop-blur-sm sm:p-3"
+                class="relative z-10 flex-none border-b border-base-content/15 bg-base-100/40 backdrop-blur-sm"
             >
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
-                    <div class="flex min-w-0 items-center gap-2.5 px-1">
-                        <h1 class="font-orbitron text-base font-bold leading-tight tracking-tight text-base-content truncate sm:text-lg">
+                <div class="flex min-w-0 items-center gap-2 px-2 py-1.5 sm:px-3">
+                    <div class="flex min-w-0 flex-1 items-center gap-1.5">
+                        <img
+                            v-if="charBuild.char.属性"
+                            :src="LeveledChar.elementUrl(charBuild.char.属性)"
+                            :alt="$t(charBuild.char.属性 + '属性')"
+                            class="h-6 w-3 shrink-0 object-cover"
+                        />
+                        <ImageFallback :src="charBuild.char.url" :alt="gt(selectedChar)" class="size-7 shrink-0 rounded-xs object-cover">
+                            <Icon icon="ri:user-line" class="size-7 opacity-40" />
+                        </ImageFallback>
+                        <h1 class="min-w-0 flex-1 truncate text-sm font-bold leading-none">
                             {{ $t(selectedChar) || $t("char-build.title") }}
-                            <span class="text-primary">Build</span>
                         </h1>
-                        <span v-if="charBuild.char.属性" class="h-4 w-px shrink-0 bg-base-content/40" aria-hidden="true" />
-                        <span v-if="charBuild.char.属性" class="shrink-0 text-xs text-base-content/60 sm:text-sm">
-                            {{ $t(charBuild.char.属性 + "属性") }}
+                        <span class="shrink-0 border border-base-content/20 px-1 py-0 font-mono text-[9px] leading-4 tracking-wider text-base-content/50">
+                            LV. <span class="font-orbitron">{{ charSettings.charLevel }}</span>
                         </span>
-                        <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
                     </div>
-                    <!-- 移动端：按钮等宽铺满整行（flex-1 平分整行宽度，不换行、超宽可横向滚动），避免保存/重置独占整行 -->
+                    <!-- xs：工具栏限宽 + 横向滚动；sm+：按内容换行。按钮统一方形 icon-only，名称走 title -->
                     <div
-                        class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible"
+                        class="flex min-w-0 max-w-[60%] shrink-0 flex-nowrap items-center gap-1 overflow-x-auto sm:max-w-none sm:flex-wrap sm:overflow-visible"
                     >
                         <button
-                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            data-agent="toggle-transcend"
+                            data-agent-allow
+                            class="btn btn-xs btn-square shrink-0"
+                            :class="transcendEnabled ? 'btn-primary' : 'btn-ghost'"
+                            :title="$t('transcend-build.enabled')"
+                            :aria-pressed="transcendEnabled"
+                            @click="toggleTranscend"
+                        >
+                            <Icon icon="ri:sparkling-line" class="size-3.5" />
+                        </button>
+                        <button
+                            class="btn btn-xs btn-square btn-ghost shrink-0"
                             :title="$t('char-build.switch_to_simple')"
                             @click="buildViewMode = 'simple'"
                         >
-                            <Icon icon="ri:focus-3-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.simple_mode") }}</span>
+                            <Icon icon="ri:focus-3-line" class="size-3.5" />
                         </button>
                         <button
-                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            class="btn btn-xs btn-square btn-ghost shrink-0"
                             data-tour="tour-button"
+                            :title="$t('char-build.tour')"
                             @click="tour?.startTour()"
                         >
-                            <Icon icon="ri:question-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
+                            <Icon icon="ri:question-line" class="size-3.5" />
                         </button>
-                        <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="openShareModal">
-                            <Icon icon="ri:share-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
+                        <button class="btn btn-xs btn-square btn-ghost shrink-0" :title="$t('char-build.share')" @click="openShareModal">
+                            <Icon icon="ri:share-line" class="size-3.5" />
                         </button>
                         <OpenInAppButton
                             kind="build"
                             :id="route.params.buildId"
-                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
-                            icon-class="size-5 sm:size-4"
+                            class="btn btn-xs btn-square btn-ghost shrink-0"
+                            icon-class="size-3.5"
                         >
-                            <span class="hidden sm:inline">{{ $t("deep-link.open_in_app") }}</span>
+                            <span class="sr-only">{{ $t("deep-link.open_in_app") }}</span>
                         </OpenInAppButton>
                         <button
                             v-if="['黎瑟', '赛琪'].includes(selectedChar)"
-                            class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            class="btn btn-xs btn-square btn-ghost shrink-0"
+                            :title="$t('char-build.simulator')"
                             @click="simulator_model_show = true"
                         >
-                            <Icon icon="ri:game-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
+                            <Icon icon="ri:game-line" class="size-3.5" />
                         </button>
                         <button
                             data-agent="open-auto-build"
                             data-agent-allow
-                            class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            class="btn btn-xs btn-square btn-secondary shrink-0"
+                            :title="$t('char-build.auto_build')"
                             @click="autobuild_model_show = true"
                         >
-                            <Icon icon="ri:robot-2-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
+                            <Icon icon="ri:robot-2-line" class="size-3.5" />
                         </button>
                         <button
-                            class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                            class="btn btn-xs btn-square btn-success shrink-0"
+                            :title="$t('build-compare.title')"
                             @click="$router.push('/char-build-compare')"
                         >
-                            <Icon icon="ri:bar-chart-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
+                            <Icon icon="ri:bar-chart-line" class="size-3.5" />
                         </button>
-                        <div class="dropdown dropdown-end flex-1 min-w-0 sm:flex-none">
+                        <div class="dropdown dropdown-end shrink-0">
                             <div
                                 tabindex="0"
                                 role="button"
-                                class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3"
+                                class="btn btn-xs btn-square btn-primary shrink-0"
+                                :title="$t('char-build.save_project')"
                             >
-                                <Icon icon="ri:save-fill" class="size-5 sm:size-4" />
-                                <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
+                                <Icon icon="ri:save-fill" class="size-3.5" />
                             </div>
-                            <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 sm:w-96 shadow-sm">
-                                <div class="card-body space-y-2">
+                            <div
+                                tabindex="0"
+                                class="dropdown-content z-1 w-80 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md sm:w-96"
+                            >
+                                <div class="space-y-2">
                                     <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
                                         <li
                                             v-for="(project, index) in charProject.projects"
                                             :key="project.name"
-                                            class="p-2 flex items-center gap-2 rounded-md"
-                                            :class="{ 'bg-base-300': project.name === charProject.selected }"
+                                            class="flex items-center gap-2 rounded-xs p-2 transition-colors duration-150"
+                                            :class="{ 'bg-primary/10': project.name === charProject.selected }"
                                         >
                                             <input
                                                 v-if="editingProjectIndex === index"
                                                 :id="`char-project-name-input-${index}`"
                                                 v-model="editProjectName"
-                                                class="bg-base-200 px-2 py-0.5 text-sm w-24 sm:w-36"
+                                                class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-0.5 text-sm outline-none transition-colors duration-150 focus:border-primary sm:w-36"
                                                 @blur="finishEditProjectName"
                                                 @keyup.enter="finishEditProjectName"
                                                 @keyup.escape="editingProjectIndex = -1"
@@ -2450,100 +2804,33 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="resetConfig">
-                            <Icon icon="ri:refresh-line" class="size-5 sm:size-4" />
-                            <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
+                        <button class="btn btn-xs btn-square btn-ghost shrink-0" :title="$t('char-build.reset_config')" @click="resetConfig">
+                            <Icon icon="ri:refresh-line" class="size-3.5" />
                         </button>
                     </div>
                 </div>
-            </div>
-            <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
+            </header>
+            <div
+                class="flex-1 flex flex-col overflow-y-auto sm:overflow-hidden"
+                :class="targetDock === 'right' ? 'lg:grid lg:grid-rows-[minmax(0,1fr)]' : 'sm:flex-row'"
+                :style="targetGridStyle"
+                :data-char-layout="targetDock === 'right' ? 'three-column' : 'two-column'"
+            >
                 <!-- 侧边栏 -->
-                <ScrollArea id="char-build-scroll1" data-agent-scope="sidebar" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
-                    <div class="flex flex-col gap-4">
-                        <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
-                            <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
-                                <BuildTabTooltip :card="getBuildTabCard(tab)">
-                                    <div
-                                        class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
-                                        :class="[
-                                        { 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name },
-                                        tab.isEmpty && charTab !== tab.name ? 'border-dashed opacity-80' : '',
-                                    ]"
-                                        @click="charTab = tab.name"
-                                    >
-                                        <template v-if="!tab.skillMaskUrl">
-                                            <ImageFallback
-                                                v-if="!tab.isEmpty"
-                                                :src="tab.url"
-                                                alt="角色头像"
-                                                class="w-full h-full object-cover object-top"
-                                            >
-                                                <Icon icon="kezhou" class="w-full h-full" />
-                                            </ImageFallback>
-                                            <div
-                                                v-else
-                                                class="flex h-full w-full items-center justify-center bg-base-100/50 text-base-content/40"
-                                            >
-                                                <Icon
-                                                    :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'"
-                                                    class="size-4 sm:size-5"
-                                                />
-                                            </div>
-                                        </template>
-                                        <div
-                                            v-else
-                                            alt="技能图标"
-                                            class="flex h-full w-full items-center justify-center bg-base-content"
-                                            :style="{ mask: `url(${tab.skillMaskUrl}) no-repeat center/68%` }"
-                                        />
-                                        <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
-                                    </div>
-                                </BuildTabTooltip>
-                            </div>
-                            <!-- 额外精通武器：虚线加号框，点击选择额外精通的武器类型 -->
-                            <div v-if="extraMasteryOptions.length > 0 || selectedExtraMastery" class="flex items-center gap-2 shrink-0">
-                                <FullTooltip side="bottom">
-                                    <template #tooltip>
-                                        <div class="flex flex-col gap-1 max-w-60">
-                                            <div class="text-sm font-bold">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</div>
-                                            <div class="text-xs text-base-content/70">
-                                                {{
-                                                    selectedExtraMastery
-                                                        ? $t(selectedExtraMastery.名称)
-                                                        : $t("char-build.extra_mastery_hint")
-                                                }}
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <button
-                                        type="button"
-                                        class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-dashed aspect-square flex items-center justify-center transition-colors duration-150"
-                                        :class="
-                                        selectedExtraMastery
-                                            ? 'border-primary/60 text-primary hover:border-primary hover:shadow-lg hover:shadow-primary/40'
-                                            : 'border-base-100 text-base-content/50 hover:border-primary/60 hover:text-primary'
-                                    "
-                                        @click="openExtraMasteryModal"
-                                    >
-                                        <!-- 图标走 mask 上色，与同律页签的技能图标一致；居中自适应容器尺寸 -->
-                                        <div
-                                            v-if="selectedExtraMastery"
-                                            :alt="$t('char-build.extra_mastery_weapon_icon')"
-                                            class="flex h-full w-full items-center justify-center bg-current"
-                                            :style="{
-                                            mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain`,
-                                        }"
-                                        />
-                                        <Icon v-else icon="ri:add-line" class="size-5" />
-                                        <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
-                                    </button>
-                                </FullTooltip>
-                            </div>
-                        </div>
+                <ScrollArea
+                    id="char-build-scroll1"
+                    data-agent-scope="sidebar"
+                    data-char-column="left"
+                    class="flex-none"
+                    :class="targetDock === 'right' ? 'lg:w-auto min-w-0' : 'sm:w-92'"
+                >
+                    <div class="m-2 flex flex-col gap-4">
+                        <!-- 两行页签：主控 5 个（角色 / 近战 / 远程 / 同律 / 额外精通），协战各 3 个 -->
+                        <BuildTabRows data-tour="char-tabs" :rows="charTabRows" :active-key="leftTabKey" @select="selectLeftTab" />
                         <!-- 角色 -->
                         <div
-                            v-if="charTab === '角色'"
+                            v-if="leftTabKey === 'main:char'"
+                            data-char-tab-panel="main-char"
                             class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
                         >
                             <SectionHeader :title="$t(selectedChar) || $t('char-build.title')" no-animate compact>
@@ -2591,8 +2878,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         v-model.number="currentSkillLevel"
                                         type="range"
                                         class="range range-primary range-xs w-full"
-                                        min="1"
-                                        max="12"
+                                        :min="CHAR_SKILL_LEVEL_MIN"
+                                        :max="SKILL_LEVEL_UI_MAX"
                                         step="1"
                                     />
                                 </div>
@@ -2608,7 +2895,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                         <!-- 武器 -->
                         <WeaponTab
-                            v-if="charTab === '近战' && !meleeWeaponEmpty"
+                            v-if="leftTabKey === 'main:melee' && !meleeWeaponEmpty"
+                            data-char-tab-panel="main-melee"
                             v-model:model-show="weapon_select_model_show"
                             @open-weapon-select="weaponDefaultTab = '近战'"
                             wkey="melee"
@@ -2617,7 +2905,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         />
                         <!-- 近战武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
                         <div
-                            v-else-if="charTab === '近战'"
+                            v-else-if="leftTabKey === 'main:melee'"
+                            data-char-tab-panel="main-melee"
                             class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
                         >
                             <SectionHeader no-animate compact>
@@ -2635,7 +2924,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
                         </div>
                         <WeaponTab
-                            v-if="charTab === '远程' && !rangedWeaponEmpty"
+                            v-if="leftTabKey === 'main:ranged' && !rangedWeaponEmpty"
+                            data-char-tab-panel="main-ranged"
                             v-model:model-show="weapon_select_model_show"
                             @open-weapon-select="weaponDefaultTab = '远程'"
                             wkey="ranged"
@@ -2644,7 +2934,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         />
                         <!-- 远程武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
                         <div
-                            v-else-if="charTab === '远程'"
+                            v-else-if="leftTabKey === 'main:ranged'"
+                            data-char-tab-panel="main-ranged"
                             class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
                         >
                             <SectionHeader no-animate compact>
@@ -2662,14 +2953,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
                         </div>
                         <WeaponTab
-                            v-if="charTab === '同律' && !skillWeaponInheritBaseEmpty"
+                            v-if="leftTabKey === 'main:skillweapon' && !skillWeaponInheritBaseEmpty"
+                            data-char-tab-panel="main-skillweapon"
                             wkey="skill"
                             :char-build="charBuild"
                             :attributes="attributes"
                         />
                         <!-- 同律武器继承槽位为空：保持同卡片头部点击切换继承武器 -->
                         <div
-                            v-else-if="charTab === '同律'"
+                            v-else-if="leftTabKey === 'main:skillweapon'"
+                            data-char-tab-panel="main-skillweapon"
                             class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
                         >
                             <SectionHeader no-animate compact>
@@ -2701,215 +2994,114 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <p class="text-xs text-base-content/50">{{ $t("char-build.skill_weapon_empty_desc") }}</p>
                         </div>
 
-                        <!-- 目标函数 -->
-                        <div
+                        <!-- 主控额外精通（替代页签行尾的加号圆钮） -->
+                        <CharExtraMasteryPanel
+                            v-if="leftTabKey === 'main:extra'"
+                            :char-id="charBuild.char.id"
+                            :value="charSettings.extraMastery"
+                            @update:value="charSettings.extraMastery = $event"
+                        />
+
+                        <!-- 协战一：角色 / 武器 / 额外精通 -->
+                        <CharAssistPanel
+                            v-if="leftTabKey === 'assist1:char'"
+                            side="assist1"
+                            :loadout="assistFacades.assist1"
+                            :char-skills="activeAssistSkills"
+                            :char-build="activeAssistBuild"
+                            :attributes="activeAssistAttributes"
+                            :resonance-gain="charSettings.resonanceGain"
+                            :exclude-ids="getAssistExcludeIds('assist1')"
+                            @update="updateAssistLoadout('assist1', $event)"
+                            @select-char="selectAssistChar('assist1', $event)"
+                            @import="openAssistImport('assist1')"
+                        />
+                        <CharAssistWeaponPanel
+                            v-else-if="leftTabKey === 'assist1:weapon'"
+                            :loadout="assistFacades.assist1"
+                            :char-build="activeAssistBuild"
+                            :attributes="activeAssistAttributes"
+                            :resonance-gain="charSettings.resonanceGain"
+                            @update="updateAssistLoadout('assist1', $event)"
+                        />
+                        <CharExtraMasteryPanel
+                            v-else-if="leftTabKey === 'assist1:extra'"
+                            :char-id="assistFacades.assist1.charId"
+                            :value="assistFacades.assist1.extraMastery"
+                            @update:value="updateAssistLoadout('assist1', { extraMastery: $event })"
+                        />
+
+                        <!-- 协战二：角色 / 武器 / 额外精通 -->
+                        <CharAssistPanel
+                            v-if="leftTabKey === 'assist2:char'"
+                            side="assist2"
+                            :loadout="assistFacades.assist2"
+                            :char-skills="activeAssistSkills"
+                            :char-build="activeAssistBuild"
+                            :attributes="activeAssistAttributes"
+                            :resonance-gain="charSettings.resonanceGain"
+                            :exclude-ids="getAssistExcludeIds('assist2')"
+                            @update="updateAssistLoadout('assist2', $event)"
+                            @select-char="selectAssistChar('assist2', $event)"
+                            @import="openAssistImport('assist2')"
+                        />
+                        <CharAssistWeaponPanel
+                            v-else-if="leftTabKey === 'assist2:weapon'"
+                            :loadout="assistFacades.assist2"
+                            :char-build="activeAssistBuild"
+                            :attributes="activeAssistAttributes"
+                            :resonance-gain="charSettings.resonanceGain"
+                            @update="updateAssistLoadout('assist2', $event)"
+                        />
+                        <CharExtraMasteryPanel
+                            v-else-if="leftTabKey === 'assist2:extra'"
+                            :char-id="assistFacades.assist2.charId"
+                            :value="assistFacades.assist2.extraMastery"
+                            @update:value="updateAssistLoadout('assist2', { extraMastery: $event })"
+                        />
+
+                        <!-- 目标函数卡：停靠左栏 / 浮动 / 吸附右侧第三栏三态，内容由 FloatingTargetCard 提供 -->
+                        <FloatingTargetCard
+                            v-if="targetDock === 'left' && targetSides && targetSideBuilds && charTeamSnapshot"
+                            :sides="targetSides"
+                            :side-builds="targetSideBuilds"
+                            :snapshot="charTeamSnapshot"
+                            :dock="targetDock"
+                            :initial-side="targetInitialSide"
+                            :draft-invalid="targetDraftInvalid"
+                            @update:dock="targetDock = $event"
+                            @update-loadout="onTargetPatch"
+                            @recall="recallTargetCard"
+                        />
+                        <!-- 目标卡已浮动 / 已吸附：左栏留一行占位，点击召回 -->
+                        <button
+                            v-else-if="targetDock !== 'left'"
+                            type="button"
+                            data-target-recall-placeholder
                             data-tour="target-function"
-                            class="rounded-xs border border-base-content/10 bg-base-100/70 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                            data-agent="target-function"
+                            :data-target-dock="targetDock"
+                            class="flex w-full cursor-pointer items-center justify-between rounded-xs border border-dashed border-base-content/25 bg-base-100/40 px-3 py-2 text-left text-sm text-base-content/60 transition-colors duration-150 hover:border-primary/40 hover:text-primary"
+                            @click="recallTargetCard"
                         >
-                            <SectionHeader :title="isTimeline ? $t('时间线') : $t('目标函数')" no-animate compact>
-                                <template #trailing>
-                                    <div class="flex items-center gap-1">
-                                        <div class="btn btn-xs btn-ghost btn-circle" @click="openAstHelp">
-                                            <Icon icon="ri:question-line" />
-                                        </div>
-                                        <input v-model="isTimeline" type="checkbox" class="toggle toggle-secondary toggle-sm" />
-                                    </div>
-                                </template>
-                            </SectionHeader>
-                            <div class="space-y-2 p-1">
-                                <!-- 目标函数模式：自定义变量（折叠同词条 charattr）+ DOT 伤害 + 表达式输入 -->
-                                <div v-if="!isTimeline" class="space-y-2">
-                                    <!-- 自定义变量：折叠交互同「词条」charattr -->
-                                    <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
-                                        <div class="space-y-1.5 collapse-content px-0 py-1">
-                                            <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
-                                            <div
-                                                v-for="(variable, index) in customVariableInputs"
-                                                :key="index"
-                                                class="flex items-center gap-2"
-                                            >
-                                                <input
-                                                    v-model="variable[0]"
-                                                    type="text"
-                                                    class="w-20 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                                    placeholder="变量名"
-                                                    @focus="focusedVariableIndex = index"
-                                                    @blur="focusedVariableIndex = -1"
-                                                />
-                                                <span class="flex-none select-none text-[11px] text-base-content/35">=</span>
-                                                <FullTooltip side="top">
-                                                    <template #tooltip>
-                                                        <div class="space-y-1">
-                                                            <div class="max-w-60 break-all text-xs text-base-content/80">
-                                                                {{ variable[0] }} = {{ variable[1] }}
-                                                            </div>
-                                                            <div class="text-xs text-primary tabular-nums">
-                                                                {{ getCustomVariableResult(variable) }}
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                    <ExprInput
-                                                        :ref="el => setCustomVariableInputRef(index, el as ExprInputInstance | null)"
-                                                        v-model="variable[1]"
-                                                        class="min-w-0 flex-1"
-                                                        variant="underline"
-                                                        font-size="13px"
-                                                        line-height="19.5px"
-                                                        :macros="exprMacros"
-                                                        placeholder="表达式"
-                                                        :data-expr-drop="`custom-variable:${index}`"
-                                                        :class="[
-                                                        dropTargetClass(`custom-variable:${index}`),
-                                                        referenceHighlightClass(`custom-variable:${index}`),
-                                                    ]"
-                                                        @click="handleExprDropClick(`custom-variable:${index}`)"
-                                                        @focus="lastFocusedExprKey = `custom-variable:${index}`"
-                                                    />
-                                                </FullTooltip>
-                                                <button
-                                                    type="button"
-                                                    class="grid size-6 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/40 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.95]"
-                                                    :title="$t('common.delete')"
-                                                    @click="removeCustomVariable(index)"
-                                                >
-                                                    <Icon icon="codicon:chrome-close" class="size-3.5" />
-                                                </button>
-                                            </div>
-                                            <!-- 变量操作：添加 / 复制 / 粘贴（无边框 tint 芯片） -->
-                                            <div class="flex items-center gap-1.5 pt-0.5">
-                                                <button
-                                                    type="button"
-                                                    class="flex h-7 flex-1 cursor-pointer items-center justify-center gap-1 rounded-xs bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/15 active:scale-[0.97]"
-                                                    @click="addCustomVariable"
-                                                >
-                                                    <Icon icon="ri:add-line" class="size-3.5" />
-                                                    变量
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
-                                                    title="复制自定义变量"
-                                                    @click="copyCustomVariables"
-                                                >
-                                                    <Icon icon="ri:file-copy-line" class="size-3.5" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
-                                                    title="粘贴自定义变量"
-                                                    @click="pasteCustomVariables"
-                                                >
-                                                    <Icon icon="ri:clipboard-line" class="size-3.5" />
-                                                </button>
-                                            </div>
-                                            <!-- 变量校验错误 -->
-                                            <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
-                                                <div
-                                                    v-if="
-                                                    variable[0] || variable[1]
-                                                        ? charBuild.validateCustomVariable(variable[0], variable[1])
-                                                        : false
-                                                "
-                                                    class="flex text-xs items-center text-red-500"
-                                                >
-                                                    {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                    <!-- 折叠开关（同「词条」charattr） -->
-                                    <div
-                                        class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
-                                        @click="customVariableExpend = !customVariableExpend"
-                                    >
-                                        <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': customVariableExpend }" />
-                                    </div>
-                                    <!-- DOT伤害：显示每秒DOT伤害（样式保持原样，仅移到表达式输入框之前），点击打开详情弹窗 -->
-                                    <div
-                                        class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
-                                        title="DOT伤害计算设置"
-                                        @click="dot_model_show = true"
-                                    >
-                                        <div class="flex items-center gap-1 text-sm text-base-content/80">
-                                            每秒DOT伤害
-                                            <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
-                                                {{ +dotFrequencies.totalFreq.toFixed(2) }}
-                                                次/秒
-                                            </span>
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <DamageShow :value="dotDamage" />
-                                            <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
-                                        :class="[dropTargetClass('target-function'), referenceHighlightClass('target-function')]"
-                                    >
-                                        <ExprInput
-                                            ref="targetFunctionInputRef"
-                                            v-model="targetFunction"
-                                            class="grow"
-                                            font-size="14px"
-                                            line-height="20px"
-                                            :macros="exprMacros"
-                                            :placeholder="$t('char-build.damage')"
-                                            data-expr-drop="target-function"
-                                            data-agent="target-function"
-                                            @click="handleExprDropClick('target-function')"
-                                            @focus="lastFocusedExprKey = 'target-function'"
-                                        />
-                                        <div
-                                            v-if="targetFunction"
-                                            class="flex items-center cursor-pointer hover:text-primary"
-                                            @click="targetFunction = ''"
-                                        >
-                                            <Icon icon="codicon:chrome-close" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- 时间线 -->
-                                <template v-else>
-                                    <Select
-                                        :value="charSettings.baseName"
-                                        class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                        :placeholder="$t('char-build.select_timeline')"
-                                        @change="charSettings.baseName = $event"
-                                    >
-                                        <SelectItem v-for="timeline in timelines" :key="timeline.name" :value="timeline.name">
-                                            {{ timeline.name }}
-                                        </SelectItem>
-                                    </Select>
-                                    <div class="flex justify-between items-center gap-8">
-                                        <button class="btn grow btn-sm btn-primary" @click="$router.push('/timeline')">
-                                            <Icon icon="ri:add-line" />
-                                            新建
-                                        </button>
-                                        <label class="label cursor-pointer">
-                                            <span class="text-sm text-base-content/80">DPS</span>
-                                            <input v-model="charSettings.timelineDPS" type="checkbox" class="toggle toggle-secondary" />
-                                        </label>
-                                    </div>
-                                </template>
-                                <!-- 错误信息 -->
-                                <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
-                                    {{ charBuild.validateAST(targetFunction) }}
-                                </div>
-                                <div
-                                    v-else
-                                    data-tour="damage-result"
-                                    data-agent="damage-result"
-                                    class="flex justify-between items-center p-1"
-                                >
-                                    <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
-                                    <DamageShow :value="charBuild.calculate()" />
-                                </div>
-                            </div>
-                        </div>
+                            <span class="truncate">
+                                {{ targetDock === "right" ? $t("char-build.target_docked_hint") : $t("char-build.target_floating_hint") }}
+                            </span>
+                            <span class="flex shrink-0 items-center gap-1 text-xs">
+                                <Icon icon="ri:arrow-left-line" class="size-3.5" />
+                                {{ $t("char-build.target_recall") }}
+                            </span>
+                        </button>
                     </div>
                 </ScrollArea>
                 <!-- 正文 -->
-                <ScrollArea id="char-build-scroll2" data-agent-scope="main" class="sm:flex-1 flex-none">
+                <ScrollArea
+                    id="char-build-scroll2"
+                    data-agent-scope="main"
+                    data-char-column="main"
+                    class="flex-none min-w-0"
+                    :class="targetDock === 'right' ? '' : 'sm:flex-1'"
+                >
                     <div class="p-2 space-y-4">
                         <!-- 配装分享 -->
                         <CollapsibleSection
@@ -2937,7 +3129,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         >
                             <div class="space-y-2">
                                 <CharTraceShow :char="charBuild.char" />
-                                <CharSkillShow :char="charBuild.char" />
+                                <CharSkillShow :char="charBuild.char" :model-value="SKILL_LEVEL_UI_MAX" :max="SKILL_LEVEL_UI_MAX" />
+                                <CharCalamityWeaponShow :weapons="calamityWeaponCandidates" />
                             </div>
                         </CollapsibleSection>
                         <!-- 基本设置卡片 -->
@@ -3108,7 +3301,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
                                     @level-change="setModLevel('角色', $event[0], $event[1])"
                                     @select-aura-mod="setActiveAuraMod($event)"
-                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
+                                    @swap-mods="(index1: number, index2: number) => swapMods(index1, index2, '角色')"
                                     @variant-select="selectModVariant"
                                     @variant-add="appendModVariant"
                                     @variant-remove="dropModVariant"
@@ -3131,7 +3324,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     @remove-mod="removeMod($event, '近战')"
                                     @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
                                     @level-change="setModLevel('近战', $event[0], $event[1])"
-                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
+                                    @swap-mods="(index1: number, index2: number) => swapMods(index1, index2, '近战')"
                                     @variant-select="selectModVariant"
                                     @variant-add="appendModVariant"
                                     @variant-remove="dropModVariant"
@@ -3154,7 +3347,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     @remove-mod="removeMod($event, '远程')"
                                     @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
                                     @level-change="setModLevel('远程', $event[0], $event[1])"
-                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
+                                    @swap-mods="(index1: number, index2: number) => swapMods(index1, index2, '远程')"
                                     @variant-select="selectModVariant"
                                     @variant-add="appendModVariant"
                                     @variant-remove="dropModVariant"
@@ -3174,7 +3367,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     @remove-mod="removeMod($event, '同律')"
                                     @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
                                     @level-change="setModLevel('同律', $event[0], $event[1])"
-                                    @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                    @swap-mods="(index1: number, index2: number) => swapMods(index1, index2, '同律')"
                                     @variant-select="selectModVariant"
                                     @variant-add="appendModVariant"
                                     @variant-remove="dropModVariant"
@@ -3202,10 +3395,56 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                         </CollapsibleSection>
 
+                        <!-- 升华装备（头部 toggle 开启时才渲染；关闭即隐藏且不参与计算） -->
+                        <CollapsibleSection
+                            v-if="transcendEnabled"
+                            data-transcend-section="gear"
+                            number="05"
+                            kicker="GEAR"
+                            :title="$t('transcend-build.section_gear')"
+                            :is-open="!collapsedSections.transcendGear"
+                            lazy
+                            @toggle="toggleSection('transcendGear')"
+                        >
+                            <div class="mt-2">
+                                <TranscendGearSection
+                                    :settings="transcendEditorSettings"
+                                    :gain-context="transcendGainContext"
+                                    @update-gear="onTranscendUpdateGear"
+                                    @replace-gear="onTranscendReplaceGear"
+                                    @select-gear-variant="onTranscendSelectGearVariant"
+                                    @add-gear-variant="onTranscendAddGearVariant"
+                                    @remove-gear-variant="onTranscendRemoveGearVariant"
+                                />
+                            </div>
+                        </CollapsibleSection>
+
+                        <!-- 升华天赋（仅主控生效） -->
+                        <CollapsibleSection
+                            v-if="transcendEnabled"
+                            data-transcend-section="talent"
+                            number="06"
+                            kicker="TALENT"
+                            :title="$t('transcend-build.section_talent')"
+                            :is-open="!collapsedSections.transcendTalent"
+                            lazy
+                            @toggle="toggleSection('transcendTalent')"
+                        >
+                            <div class="mt-2">
+                                <TranscendTalentEditor
+                                    :settings="transcendEditorSettings"
+                                    :include-unreleased-stages="includeUnreleasedStages"
+                                    @update-talent-levels="onTranscendTalentLevels"
+                                    @update-include-unreleased-stages="includeUnreleasedStages = $event"
+                                    @toggle-all="onTranscendUnlockAll"
+                                />
+                            </div>
+                        </CollapsibleSection>
+
                         <!-- MODBUFF列表 -->
                         <CollapsibleSection
                             v-if="charBuild.modsWithWeapons.some(v => v.buff)"
-                            number="05"
+                            number="07"
                             kicker="EFFECTS"
                             :title="$t('char-build.special_effect_config')"
                             :badge="charBuild.modsWithWeapons.filter(v => v.buff).length"
@@ -3228,7 +3467,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                         <!-- BUFF列表 -->
                         <CollapsibleSection
-                            number="06"
+                            number="08"
                             kicker="BUFFS"
                             :title="$t('char-build.buff_list')"
                             :badge="selectedBuffs.length"
@@ -3237,66 +3476,39 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             @toggle="toggleSection('buffs')"
                         >
                             <template v-if="deferredSectionsMounted">
-                            <!-- 协战选择：图标化展示队友/队友武器，并可关联该角色的服务器构筑（简洁模式据此弹窗查看其魔之楔） -->
-                            <div class="my-2">
-                                <TeamEditor
-                                    :char-settings="charSettings"
-                                    :team1-options="groupedTeam1Options"
-                                    :team2-options="groupedTeam2Options"
-                                    :weapon-options="groupedTeamWeaponOptions"
-                                    @team-change="updateTeamBuff"
-                                />
-                            </div>
-                            <!-- 魔灵：选择活力魔灵，展示被动/主动收益与冷却，并按魔灵CD给出实际冷却 -->
-                            <div class="my-2">
-                                <PetEditor
-                                    :char-settings="charSettings"
-                                    :char-build="charBuild"
-                                    :pet-cd="attributes.魔灵CD"
-                                    :pet-cd-reduce="attributes.魔灵CD缩减"
-                                    :pet-level="effectivePetLevel"
-                                    :pet-level-bonus="petLevelBonus"
-                                    @pet-change="handlePetChange"
-                                />
-                            </div>
-                            <!-- 魔灵潜质：4 个互不相同的潜质槽位，可更换/拖动互换/移除，并显示收益 -->
-                            <div class="my-2">
-                                <TraitEditer
-                                    :traits="charSettings.traits"
-                                    :char-build="charBuild"
-                                    :pet-level="charSettings.petLevel"
-                                    :pet-id="charSettings.petId"
-                                    :pet-coverage="charSettings.petCoverage"
-                                    :pet-auto-coverage="charSettings.petAutoCoverage"
-                                    @select-trait="selectTrait"
-                                    @remove-trait="removeTrait"
-                                    @swap-traits="swapTraits"
-                                />
-                            </div>
-                            <BuffEditer
+                            <!-- 与原构筑页共用同一份 buff 区（队伍 → 魔灵 → 潜质 → BUFF → 自定义 BUFF） -->
+                            <BuffSectionBody
+                                :char-settings="charSettings"
+                                :char-build="charBuild"
+                                :team1-options="groupedTeam1Options"
+                                :team2-options="groupedTeam2Options"
+                                :weapon-options="groupedTeamWeaponOptions"
                                 :buff-options="buffOptions"
                                 :selected-buffs="selectedBuffs"
-                                :char-build="charBuild"
+                                :derived-buffs="derivedBuffs"
+                                :trace-cards="traceCards"
+                                :pet-cd="attributes.魔灵CD"
+                                :pet-cd-reduce="attributes.魔灵CD缩减"
+                                :pet-level="effectivePetLevel"
+                                :pet-level-bonus="petLevelBonus"
                                 @toggle-buff="toggleBuff"
                                 @set-buff-lv="setBuffLv"
                                 @set-buff-coverage="setBuffCoverage"
+                                @toggle-trace="toggleTrace"
+                                @set-trace-level="setTraceLevel"
+                                @set-trace-coverage="setTraceCoverage"
+                                @team-change="updateTeamBuff"
+                                @pet-change="handlePetChange"
+                                @select-trait="selectTrait"
+                                @remove-trait="removeTrait"
+                                @swap-traits="swapTraits"
                             />
-                            <!-- 自定义BUFF：选中该 BUFF 后才出现的编辑区，跟随 BUFF 章节一起折叠 -->
-                            <template v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')">
-                                <div class="mt-4 mb-2 flex items-center gap-3">
-                                    <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
-                                        {{ $t("char-build.custom_buff") }}
-                                    </span>
-                                    <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
-                                </div>
-                                <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
-                            </template>
                             </template>
                         </CollapsibleSection>
 
                         <!-- 动作序列 -->
                         <CollapsibleSection
-                            number="07"
+                            number="09"
                             kicker="ACTIONS"
                             :title="$t('char-build.actions')"
                             :is-open="!collapsedSections.actions"
@@ -3310,7 +3522,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                         <!-- 装配预览 -->
                         <CollapsibleSection
-                            number="08"
+                            number="10"
                             kicker="LOADOUT"
                             :title="$t('char-build.equipment_preview')"
                             :is-open="!collapsedSections.preview"
@@ -3329,7 +3541,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                         <!-- 评论 -->
                         <CollapsibleSection
-                            number="09"
+                            number="11"
                             kicker="COMMENTS"
                             :title="$t('comment-section.comment')"
                             :badge="buildCommentCount"
@@ -3345,11 +3557,59 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         </CollapsibleSection>
                     </div>
                 </ScrollArea>
+                <!-- 第三栏：吸附右侧的目标函数卡（1:2:1 的右侧 1 份） -->
+                <ScrollArea
+                    v-if="targetDock === 'right'"
+                    data-agent-scope="target"
+                    data-char-column="target"
+                    class="flex-none min-w-0 border-base-content/10 lg:border-l"
+                >
+                    <div class="p-2">
+                        <FloatingTargetCard
+                            v-if="targetSides && targetSideBuilds && charTeamSnapshot"
+                            :sides="targetSides"
+                            :side-builds="targetSideBuilds"
+                            :snapshot="charTeamSnapshot"
+                            :dock="targetDock"
+                            :initial-side="targetInitialSide"
+                            :draft-invalid="targetDraftInvalid"
+                            @update:dock="targetDock = $event"
+                            @update-loadout="onTargetPatch"
+                            @recall="recallTargetCard"
+                        />
+                    </div>
+                </ScrollArea>
             </div>
         </div>
 
+        <!-- 浮动态：窗口自身 Teleport 到 body，卡片位置 / 拖动由 FloatingWindow 负责 -->
+        <FloatingTargetCard
+            v-if="targetDock === 'floating' && targetSides && targetSideBuilds && charTeamSnapshot"
+            :sides="targetSides"
+            :side-builds="targetSideBuilds"
+            :snapshot="charTeamSnapshot"
+            :dock="targetDock"
+            :initial-side="targetInitialSide"
+            :draft-invalid="targetDraftInvalid"
+            @update:dock="targetDock = $event"
+            @update-loadout="onTargetPatch"
+            @recall="recallTargetCard"
+        />
+
         <!-- AI对话助手 -->
         <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" />
+
+        <!-- 协战构筑导入（顶层 setting → 内嵌 setting） -->
+        <CharAssistImportDialog
+            v-if="assistImportSide && assistImportTarget"
+            :open="!!assistImportSide"
+            :side="assistImportSide"
+            :char-id="assistImportTarget.charId"
+            :weapon-id="assistImportTarget.weaponId"
+            :linked-build-id="assistImportTarget.linkedBuildId"
+            @update:open="assistImportSide = $event ? assistImportSide : null"
+            @import="applyAssistImport"
+        />
     </template>
 </template>
 

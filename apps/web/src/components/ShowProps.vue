@@ -4,9 +4,24 @@ import type { ModCardSource } from "@/components/ModTooltip.vue"
 import { useGameText } from "@/composables/useGameText"
 import type { LeveledChar, LeveledWeapon } from "@/data"
 import type { ParamText } from "@/data/data-types"
+import { formatSkillLevelBonus } from "@/data/skillLevels"
 import { formatProp } from "@/util"
 import { getParamTemplate, splitByPolarity } from "@/utils/param-text"
 import { getRaritySwatchClass } from "@/utils/rarity-utils"
+
+/** 技能等级三键：按 `+N` 展示（与角色 / 装备 / 升华属性面板同口径） */
+const SKILL_LEVEL_PROP_KEYS = new Set(["E技能等级", "Q技能等级", "P技能等级"])
+
+/**
+ * 属性数值展示：技能等级加成走带符号整数，其余沿用通用格式化。
+ * @param prop 属性名
+ * @param val 属性值
+ * @returns 展示文本
+ */
+function formatPropValue(prop: string, val: unknown): string {
+    if (SKILL_LEVEL_PROP_KEYS.has(prop) && typeof val === "number") return formatSkillLevelBonus(val)
+    return formatProp(prop, val)
+}
 
 const componentProps = withDefaults(
     defineProps<{
@@ -134,7 +149,7 @@ function formatDesc(): string[] {
                     </div>
                     <div class="flex flex-col items-end">
                         <div class="font-medium text-primary">
-                            {{ formatProp(prop, val) }}
+                            {{ formatPropValue(prop, val) }}
                         </div>
                         <div v-if="attr?.[prop]" class="text-[11px] text-neutral-500">
                             {{ attr[prop] }}
@@ -151,7 +166,7 @@ function formatDesc(): string[] {
                         {{ $t(prop) }}
                     </div>
                     <div class="font-medium text-primary">
-                        {{ formatProp(prop, val) }}
+                        {{ formatPropValue(prop, val) }}
                     </div>
                 </div>
                 <div v-if="effectText" class="text-xs text-neutral-500">

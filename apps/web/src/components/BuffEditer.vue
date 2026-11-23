@@ -11,6 +11,7 @@ import {
     matchBuffOptionQuery,
     parseBuffClipboardText,
     parseCustomBuffSummary,
+    resolveSelectedDisplayBuff,
     splitBuffClipboardTokens,
 } from "@/utils/buff-editor"
 
@@ -234,6 +235,16 @@ function getDisabledBy(buff: LeveledBuff) {
 function getDisplayBuff(buff: LeveledBuff) {
     return props.charBuild?.prepareBuff(buff) || buff
 }
+
+/**
+ * 已选 BUFF 的展示实例：取已选列表里同名同挂载点（pt/pid）的实例（可能带溯源字段覆盖）再求值，
+ * 使悬停数值与收益角标一致；未选列表仍走 `getDisplayBuff` 的基础值。
+ * @param buff 候选 BUFF（buffOptions）
+ * @returns 展示用BUFF实例
+ */
+function getSelectedDisplayBuff(buff: BuffOption) {
+    return resolveSelectedDisplayBuff(buff.label, buff.value, props.selectedBuffs, props.charBuild)
+}
 </script>
 <template>
     <div class="space-y-3">
@@ -259,7 +270,7 @@ function getDisplayBuff(buff: LeveledBuff) {
                     v-for="buff in selectedBuffItems"
                     :key="buff.label"
                     :title="buff.label"
-                    :buff="getDisplayBuff(buff.value)"
+                    :buff="getSelectedDisplayBuff(buff)"
                     :lv="buff.lv"
                     :description="buff.description"
                     selected

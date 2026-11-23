@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref } from "vue"
+import { fetchBuildsWithCount, supportsBuildTypeFilter } from "@/api/builds-compat"
 import {
     Build,
     buildQuery,
-    buildsWithCountQuery,
     deleteBuildMutation,
     likeBuildMutation,
     recommendBuildMutation,
@@ -34,6 +34,11 @@ const { t } = useTranslation()
 // 搜索和筛选
 const searchKeyword = ref("")
 const sortBy = ref<"latest" | "views">("latest")
+/** 构筑类型筛选：空串 = 全部；旧服务端降级后会被清空 */
+const buildTypeFilter = ref<"" | "normal" | "transcend">("")
+const buildTypeSupported = ref(supportsBuildTypeFilter())
+/** Select 不接受空字符串 value，展示层用 all 占位 */
+const buildTypeSelectValue = computed(() => buildTypeFilter.value || "all")
 const loading = ref(false)
 const loadingBuild = ref<string | null>(null)
 const builds = ref<Build[]>([])
@@ -65,7 +70,7 @@ const { summaries: buildSummaries, refresh: refreshSummaries } = useBuildSummari
  * @returns 概要来源数组
  */
 function toSummarySources(list: Build[]) {
-    return list.map(build => ({ key: build.id, charId: build.charId, charSettings: build.charSettings }))
+    return list.map(build => ({ key: build.id, charId: build.charId, charSettings: build.charSettings, buildType: build.info?.buildType }))
 }
 
 /**
@@ -152,23 +157,22 @@ function formatDate(timestamp: number): string {
 async function fetchBuilds(offset = 0) {
     loading.value = true
     try {
-        const result = await buildsWithCountQuery(
-            {
-                limit: LIMIT,
-                offset,
-                search: searchKeyword.value || undefined,
-                charId: props.charId,
-                sortBy: sortBy.value,
-            },
-            { requestPolicy: "cache-and-network" }
-        )
+        const result = await fetchBuildsWithCount({
+            limit: LIMIT,
+            offset,
+            search: searchKeyword.value || undefined,
+            charId: props.charId,
+            sortBy: sortBy.value,
+            buildType: buildTypeFilter.value || undefined,
+        })
+        // 旧服务端会降级为不筛选的旧查询：同步能力位并清空筛选，避免状态与结果不一致
+        buildTypeSupported.value = supportsBuildTypeFilter()
+        if (!buildTypeSupported.value) buildTypeFilter.value = ""
 
-        if (result) {
-            builds.value = result.builds
-            totalCount.value = result.buildsCount
-            expandedBuildIds.value = {}
-            void refreshSummaries(toSummarySources(result.builds))
-        }
+        builds.value = result.builds
+        totalCount.value = result.buildsCount
+        expandedBuildIds.value = {}
+        void refreshSummaries(toSummarySources(result.builds))
     } catch (error) {
         ui.showErrorMessage("加载构筑列表失败:", error instanceof Error ? error.message : "未知错误")
     } finally {
@@ -195,6 +199,15 @@ function handleSortChange() {
 function handleSortSelect(value: string) {
     sortBy.value = value as "latest" | "views"
     handleSortChange()
+}
+
+/**
+ * 切换构筑类型筛选：重置分页并重新查询（计数随同过滤）。
+ * @param value Select 回传的值（all / normal / transcend）
+ */
+function handleBuildTypeSelect(value: string) {
+    buildTypeFilter.value = value === "normal" || value === "transcend" ? value : ""
+    fetchBuilds(0)
 }
 
 const emits = defineEmits<{
@@ -385,21 +398,19 @@ async function loadMore() {
         const offset = builds.value.length
         loading.value = true
         try {
-            const result = await buildsWithCountQuery(
-                {
-                    limit: LIMIT,
-                    offset,
-                    search: searchKeyword.value || undefined,
-                    charId: props.charId,
-                    sortBy: sortBy.value,
-                },
-                { requestPolicy: "cache-and-network" }
-            )
+            const result = await fetchBuildsWithCount({
+                limit: LIMIT,
+                offset,
+                search: searchKeyword.value || undefined,
+                charId: props.charId,
+                sortBy: sortBy.value,
+                buildType: buildTypeFilter.value || undefined,
+            })
+            buildTypeSupported.value = supportsBuildTypeFilter()
+            if (!buildTypeSupported.value) buildTypeFilter.value = ""
 
-            if (result) {
-                builds.value.push(...result.builds)
-                void refreshSummaries(toSummarySources(result.builds))
-            }
+            builds.value.push(...result.builds)
+            void refreshSummaries(toSummarySources(result.builds))
         } catch (error) {
             ui.showErrorMessage("加载更多失败:", error instanceof Error ? error.message : "未知错误")
         } finally {
@@ -436,6 +447,17 @@ defineExpose({
                 >
                     <SelectItem value="latest">{{ $t("dob-build-show.recently_modified") }}</SelectItem>
                     <SelectItem value="views">{{ $t("dob-build-show.most_viewed") }}</SelectItem>
+                </Select>
+                <Select
+                    :model-value="buildTypeSelectValue"
+                    :disabled="!buildTypeSupported"
+                    class="w-28 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    data-build-type-filter
+                    @update:model-value="handleBuildTypeSelect"
+                >
+                    <SelectItem value="all">{{ $t("build-info.filter_all") }}</SelectItem>
+                    <SelectItem value="normal">{{ $t("build-info.type_normal") }}</SelectItem>
+                    <SelectItem value="transcend">{{ $t("build-info.type_transcend") }}</SelectItem>
                 </Select>
                 <button class="btn btn-primary btn-sm" @click="handleSearch">
                     <Icon icon="ri:search-line" class="w-4 h-4" />
@@ -476,6 +498,7 @@ defineExpose({
                                 {{ build.title }}
                             </a>
                             <div class="flex gap-1 ml-2">
+                                <BuildTypeBadge :build-type="buildSummary(build.id)?.buildType" />
                                 <div v-if="remoteId === build.id" class="badge badge-success badge-sm gap-1">
                                     <Icon icon="ri:check-line" class="w-3 h-3" />
                                     {{ $t("dob-build-show.in_use") }}

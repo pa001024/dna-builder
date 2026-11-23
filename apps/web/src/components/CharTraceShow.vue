@@ -25,7 +25,7 @@ function getTraceOrdinal(index: number): string {
         <div class="space-y-3">
             <div v-for="(trace, index) in char.溯源" :key="index" class="flex items-start gap-2.5">
                 <span
-                    class="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-xs bg-primary/10 px-1.5 font-orbitron text-[11px] font-semibold text-primary"
+                    class="inline-flex h-6 min-w-8 shrink-0 items-center justify-center rounded-xs bg-primary/10 px-1.5 font-orbitron text-[11px] font-semibold text-primary"
                     >{{
                         String(index + 1).padStart(2, "0")
                     }}</span
