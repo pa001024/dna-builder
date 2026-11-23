@@ -39,6 +39,7 @@ export {
     resolveAgentContextWindow,
     resolveModelContextWindow,
 } from "./context-usage"
+export { resolveAgentFetch } from "./desktop-fetch"
 export type {
     AgentCallbacks,
     AgentContextInfo,
@@ -51,6 +52,14 @@ export type {
 } from "./kernel"
 export { AgentKernel, toWireMessages } from "./kernel"
 export { createMessagesTransport } from "./messages-transport"
+export { type AiModelInfo, type AiModelListParams, isChatCapableModelId, listAiModels, normalizeModelList } from "./models"
+export {
+    AI_PROVIDER_PRESETS,
+    type AiProviderGroup,
+    type AiProviderPreset,
+    findAiProviderPreset,
+    resolveAiProviderByBaseUrl,
+} from "./providers"
 export { ensureAgentSkillsReady, getAgentSkillRegistry } from "./skills/registry"
 export { type AiTestConnectionParams, type AiTestConnectionResult, aiTestConnection } from "./test-connection"
 export type { AgentTool, AgentToolContext, AgentToolOutput, AgentToolSuspendOutput, AgentToolTextOutput } from "./tool"
@@ -69,8 +78,12 @@ export {
     type AgentTransport,
     type AgentTransportOptions,
     type AgentWireMessage,
+    ANTHROPIC_API_VERSION,
+    isAnthropicUpstream,
+    isLocalGatewayBaseUrl,
     parseToolArguments,
     resolveAgentProtocol,
     resolveChatEndpoint,
     resolveMessagesEndpoint,
+    resolveModelsEndpoint,
 } from "./wire"

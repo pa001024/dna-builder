@@ -102,6 +102,19 @@ describe("createMessagesTransport 序列化", () => {
         })
     })
 
+    it("推理强度写进 output_config.effort；none 改为关闭 thinking", async () => {
+        const calls = mockFetch(() => sseResponse([{ type: "message_start", message: { id: "m" } }, { type: "message_stop" }]))
+        const transport = createMessagesTransport(OPTIONS)
+
+        await transport.runRound(makeRequest({ reasoningEffort: "high" }))
+        expect(calls[0].body.output_config).toEqual({ effort: "high" })
+        expect(calls[0].body.thinking).toEqual({ type: "enabled" })
+
+        await transport.runRound(makeRequest({ reasoningEffort: "none" }))
+        expect(calls[1].body.thinking).toEqual({ type: "disabled" })
+        expect(calls[1].body.output_config).toBeUndefined()
+    })
+
     it("缓存字段并入 usage：inputTokens 为总量（含缓存读 / 写），cacheReadTokens 单独记录", async () => {
         mockFetch(() =>
             sseResponse([
@@ -324,6 +337,18 @@ describe("createMessagesTransport 鉴权头", () => {
 
         expect(calls[0].url).toBe("https://api.deepseek.com/anthropic/v1/messages")
         expect(calls[0].headers["x-api-key"]).toBe("sk-test")
+        expect(calls[0].headers.Authorization).toBeUndefined()
+    })
+
+    it("直连 Anthropic 官方时补版本头与浏览器直连声明", async () => {
+        const calls = mockFetch(() => sseResponse([{ type: "message_start", message: { id: "m" } }, { type: "message_stop" }]))
+
+        await createMessagesTransport({ ...OPTIONS, baseUrl: "https://api.anthropic.com" }).runRound(makeRequest())
+
+        expect(calls[0].url).toBe("https://api.anthropic.com/v1/messages")
+        expect(calls[0].headers["x-api-key"]).toBe("sk-test")
+        expect(calls[0].headers["anthropic-version"]).toBe("2023-06-01")
+        expect(calls[0].headers["anthropic-dangerous-direct-browser-access"]).toBe("true")
         expect(calls[0].headers.Authorization).toBeUndefined()
     })
 

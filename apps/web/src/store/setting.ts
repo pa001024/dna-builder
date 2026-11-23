@@ -118,6 +118,12 @@ export const useSettingStore = defineStore("setting", {
             aiModelName: useLocalStorage("ai_model_name", "", { writeDefaults: false }),
             aiMaxTokens: useLocalStorage<number | string | null>("ai_max_tokens", null, { writeDefaults: false }),
             aiContextWindow: useLocalStorage<number | string | null>(AI_CONTEXT_WINDOW_STORAGE_KEY, null, { writeDefaults: false }),
+            // 上游 /models 返回的模型元数据，作为「用户配置 > 模型配置 > 默认值」的中间层
+            aiModelMaxTokens: useLocalStorage<number | null>("ai_model_max_tokens", null, { writeDefaults: false }),
+            aiModelContextWindow: useLocalStorage<number | null>("ai_model_context_window", null, { writeDefaults: false }),
+            aiModelReasoningLevels: useLocalStorage<string[] | null>("ai_model_reasoning_levels", null, { writeDefaults: false }),
+            // 推理强度手填覆盖；空串表示不显式下发，交给上游 / Magpie 默认
+            aiReasoningEffort: useLocalStorage("ai_reasoning_effort", "", { writeDefaults: false }),
             aiCustomModel: useLocalStorage("ai_custom_model", false, { writeDefaults: false }),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0, { writeDefaults: false }),
@@ -383,8 +389,9 @@ export const useSettingStore = defineStore("setting", {
                 api_key: this.aiApiKey,
                 base_url: this.aiBaseUrl,
                 default_model: this.aiModelName,
-                default_max_tokens: resolveAiMaxTokens(this.aiMaxTokens),
-                default_context_window: resolveAiContextWindow(this.aiContextWindow),
+                default_max_tokens: resolveAiMaxTokens(this.aiMaxTokens, this.aiModelMaxTokens),
+                default_context_window: resolveAiContextWindow(this.aiContextWindow, this.aiModelContextWindow),
+                default_reasoning_effort: this.aiReasoningEffort?.trim() || null,
             }
         },
         setAiBaseUrl(baseUrl: string) {
@@ -408,6 +415,10 @@ export const useSettingStore = defineStore("setting", {
             this.aiModelName = ""
             this.aiMaxTokens = null
             this.aiContextWindow = null
+            this.aiModelMaxTokens = null
+            this.aiModelContextWindow = null
+            this.aiModelReasoningLevels = null
+            this.aiReasoningEffort = ""
         },
         async getCurrentUser() {
             const user = await db.dnaUsers.get(this.dnaUserId)

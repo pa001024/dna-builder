@@ -68,21 +68,69 @@ export function parseTokenCount(value: unknown): number | null {
 }
 
 /**
+ * @description 把 token 数格式化成设置页展示用的短单位（256K / 1M）。
+ *
+ * 优先用整数刻度：100 万整数倍用 M，1000 整数倍用 K；否则再试 1024 刻度
+ * （262144 → 256K、32768 → 32K），都不整除时按十进制四舍五入。
+ * @param value token 数（数字或 256K / 1M 这类字符串）
+ * @returns 短单位文本；非法或非正数返回空串
+ */
+export function formatTokenCount(value: unknown): string {
+    const tokens = parseTokenCount(value)
+
+    if (tokens == null) {
+        return ""
+    }
+
+    if (tokens >= 1_000_000) {
+        const decimalM = tokens / 1_000_000
+        if (Number.isInteger(decimalM)) {
+            return `${decimalM}M`
+        }
+        const binaryM = tokens / 1_048_576
+        if (Number.isInteger(binaryM)) {
+            return `${binaryM}M`
+        }
+        return `${Number(decimalM.toFixed(1))}M`
+    }
+
+    if (tokens >= 1000) {
+        const decimalK = tokens / 1000
+        if (Number.isInteger(decimalK)) {
+            return `${decimalK}K`
+        }
+        const binaryK = tokens / 1024
+        if (Number.isInteger(binaryK)) {
+            return `${binaryK}K`
+        }
+        return `${Math.round(decimalK)}K`
+    }
+
+    return String(tokens)
+}
+
+/**
  * @description 把用户填写的输出上限归一化为空缺时回落默认值。
+ *
+ * 优先级：用户配置 > 模型元数据（如 magpie `/models` 的 `max_output_tokens`）> 应用默认值。
  * @param value 设置页的原始值（空字符串 / null / 非法数字一律视为未填）
+ * @param modelValue 上游模型声明的输出上限
  * @returns 有效的输出上限
  */
-export function resolveAiMaxTokens(value: unknown): number {
-    return parseTokenCount(value) ?? DEFAULT_AI_MAX_TOKENS
+export function resolveAiMaxTokens(value: unknown, modelValue?: unknown): number {
+    return parseTokenCount(value) ?? parseTokenCount(modelValue) ?? DEFAULT_AI_MAX_TOKENS
 }
 
 /**
  * @description 把用户填写的上下文窗口归一化为空缺时回落默认值。
+ *
+ * 优先级：用户配置 > 模型元数据（如 magpie `/models` 的 `context_window`）> 应用默认值。
  * @param value 设置页的原始值（空字符串 / null / 非法数字一律视为未填）
+ * @param modelValue 上游模型声明的上下文窗口
  * @returns 有效的上下文窗口
  */
-export function resolveAiContextWindow(value: unknown): number {
-    return parseTokenCount(value) ?? DEFAULT_AI_CONTEXT_WINDOW
+export function resolveAiContextWindow(value: unknown, modelValue?: unknown): number {
+    return parseTokenCount(value) ?? parseTokenCount(modelValue) ?? DEFAULT_AI_CONTEXT_WINDOW
 }
 
 /**

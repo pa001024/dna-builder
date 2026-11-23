@@ -132,6 +132,8 @@ export interface AgentRoundRequest {
     temperature: number
     /** 输出 tokens 上限 */
     maxTokens: number
+    /** 推理强度（low / medium / high / max 等）；缺省时由上游默认值决定 */
+    reasoningEffort?: string | null
     /** 流式增量回调 */
     handlers?: AgentStreamHandlers
     /** 中断判据：返回 true 时尽快停止读取流并返回已产出的内容 */
@@ -187,6 +189,9 @@ export interface AgentTransportOptions {
 /** DeepSeek 官方 Anthropic 兼容入口的路径（官方文档给定的 base_url 是 `<origin>/anthropic`）。 */
 const DEEPSEEK_ANTHROPIC_PATH = "/anthropic/v1/messages"
 
+/** Anthropic Messages 协议要求的版本头取值。 */
+export const ANTHROPIC_API_VERSION = "2023-06-01"
+
 /** 自家代理的显式会话 id 请求头：代理把它作为日志的会话归并依据。 */
 export const AI_PROXY_SESSION_HEADER = "x-ai-session-id"
 
@@ -234,10 +239,44 @@ function isDeepSeekHost(url: URL): boolean {
 }
 
 /**
+ * @description 判断基址是否指向 Anthropic 官方入口。
+ * @param baseUrl 上游基址
+ * @returns 是否指向 Anthropic 官方
+ */
+export function isAnthropicUpstream(baseUrl: string): boolean {
+    const url = parseBaseUrl(baseUrl)
+    return url?.hostname.toLowerCase() === "api.anthropic.com"
+}
+
+/**
+ * @description 判断基址是否指向本机网关（magpie / Ollama / LM Studio 等）。
+ *
+ * 这些网关通常不校验密钥，桌面端还要改走 Rust 代理请求才能绕开 WebView 的 CORS。
+ * @param baseUrl 上游基址
+ * @returns 是否为本机回环地址
+ */
+export function isLocalGatewayBaseUrl(baseUrl: string): boolean {
+    const url = parseBaseUrl(baseUrl)
+
+    if (!url) {
+        return false
+    }
+
+    const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "")
+
+    if (host === "localhost" || host.endsWith(".localhost")) {
+        return true
+    }
+
+    return host === "::1" || host === "0.0.0.0" || host.startsWith("127.")
+}
+
+/**
  * @description 判定某个基址该走哪条协议。
  *
  * 判据是**端点能力**而不是模型名：
  * - DeepSeek 官方：Anthropic 兼容入口与 OpenAI 兼容入口同源，直接用 Messages；
+ * - Anthropic 官方：只有 Messages 入口；
  * - 自家代理（基址以 `/api/v1` 结尾）：同时提供 `/messages`，用 Messages；
  * - 其余网关（智谱等，只有 OpenAI 兼容入口）：退回 Chat Completions。
  *
@@ -252,7 +291,7 @@ export function resolveAgentProtocol(baseUrl: string): AgentProtocol {
         return "chat"
     }
 
-    if (isDeepSeekHost(url)) {
+    if (isDeepSeekHost(url) || isAnthropicUpstream(baseUrl)) {
         return "messages"
     }
 
@@ -274,6 +313,11 @@ export function resolveMessagesEndpoint(baseUrl: string): string | null {
         return null
     }
 
+    if (isAnthropicUpstream(baseUrl)) {
+        const path = trimTrailingSlash(url.pathname)
+        return path.endsWith("/v1") ? `${url.origin}${path}/messages` : `${url.origin}/v1/messages`
+    }
+
     if (!isDeepSeekHost(url)) {
         return `${trimTrailingSlash(baseUrl)}${PROXY_MESSAGES_PATH}`
     }
@@ -289,6 +333,33 @@ export function resolveMessagesEndpoint(baseUrl: string): string | null {
     }
 
     return `${url.origin}${DEEPSEEK_ANTHROPIC_PATH}`
+}
+
+/**
+ * @description 求模型列表端点。
+ *
+ * OpenAI 兼容约定是 `<base>/models`；Anthropic 官方在 `/v1/models`，
+ * DeepSeek 官方的列表入口在站点根 `/models`（与其 `/anthropic` 入口不同源）。
+ * @param baseUrl 上游基址
+ * @returns 模型列表端点绝对 URL；基址非法时返回 null
+ */
+export function resolveModelsEndpoint(baseUrl: string): string | null {
+    const url = parseBaseUrl(baseUrl)
+
+    if (!url) {
+        return null
+    }
+
+    if (isAnthropicUpstream(baseUrl)) {
+        const path = trimTrailingSlash(url.pathname)
+        return path.endsWith("/v1") ? `${url.origin}${path}/models` : `${url.origin}/v1/models`
+    }
+
+    if (isDeepSeekHost(url)) {
+        return `${url.origin}/models`
+    }
+
+    return `${trimTrailingSlash(baseUrl)}/models`
 }
 
 /**

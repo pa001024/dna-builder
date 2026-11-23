@@ -499,6 +499,7 @@ export class AgentKernel<TPayload> {
             temperature: this.config.default_temperature,
             // 摘要不需要整份输出预算，压到专用上限即可
             maxTokens: Math.min(this.config.default_max_tokens, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS),
+            reasoningEffort: this.config.default_reasoning_effort,
             messages: toWireMessages(history),
             sessionId: this.sessionId ?? undefined,
         })
@@ -678,6 +679,7 @@ export class AgentKernel<TPayload> {
                 tools: toolDefinitions,
                 temperature: this.config.default_temperature,
                 maxTokens: Math.min(this.config.default_max_tokens, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS),
+                reasoningEffort: this.config.default_reasoning_effort,
                 messages: state.messages,
                 sessionId: this.sessionId ?? undefined,
             })
@@ -832,6 +834,7 @@ export class AgentKernel<TPayload> {
                     tools: toolDefinitions,
                     temperature: this.config.default_temperature,
                     maxTokens: this.config.default_max_tokens,
+                    reasoningEffort: this.config.default_reasoning_effort,
                     sessionId: this.sessionId ?? undefined,
                     handlers: {
                         onText: text => callbacks.onDelta?.(text, "content"),

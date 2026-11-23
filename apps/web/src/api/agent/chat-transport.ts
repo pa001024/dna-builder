@@ -11,7 +11,9 @@
 
 import OpenAI from "openai"
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs"
+import type { ReasoningEffort } from "openai/resources/shared"
 import { isPeakPricing } from "@/utils/ai-pricing"
+import { resolveAgentFetch } from "./desktop-fetch"
 import type {
     AgentFinishReason,
     AgentRoundRequest,
@@ -172,12 +174,15 @@ function normalizeFinishReason(raw: string | null | undefined): AgentFinishReaso
  * @returns 传输实现
  */
 export function createChatTransport(options: AgentTransportOptions): AgentTransport {
+    // 桌面端统一走 Tauri HTTP 插件：支持流式响应，且不受 WebView CORS 限制
+    const requestFetch = resolveAgentFetch()
     const client = new OpenAI({
         apiKey: options.apiKey || "missing-api-key",
         baseURL: options.baseUrl,
         timeout: options.timeout,
         maxRetries: options.maxRetries,
         dangerouslyAllowBrowser: true,
+        ...(requestFetch ? { fetch: requestFetch } : {}),
     })
 
     /**
@@ -206,6 +211,8 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
             messages: [{ role: "system", content: request.system }, ...serializeChatMessages(request.messages)],
             temperature: request.temperature,
             max_tokens: request.maxTokens,
+            // 推理强度按 Magpie / OpenAI 兼容字段下发；上游不支持时由网关自行处理
+            ...(request.reasoningEffort ? { reasoning_effort: request.reasoningEffort as ReasoningEffort } : {}),
             stream: true,
             // 显式要求回传用量：不传时多数网关在流式模式下不给 usage，上下文统计就没有真实值可校准
             stream_options: { include_usage: true },

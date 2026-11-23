@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { parseToolArguments, resolveAgentProtocol, resolveChatEndpoint, resolveMessagesEndpoint } from "@/api/agent/wire"
+import {
+    isLocalGatewayBaseUrl,
+    parseToolArguments,
+    resolveAgentProtocol,
+    resolveChatEndpoint,
+    resolveMessagesEndpoint,
+    resolveModelsEndpoint,
+} from "@/api/agent/wire"
 
 /**
  * 线协议选择的单元测试。
@@ -17,6 +24,11 @@ describe("resolveAgentProtocol", () => {
     it("自家代理（基址以 /api/v1 结尾）走 Messages", () => {
         expect(resolveAgentProtocol("https://api.example.com/api/v1")).toBe("messages")
         expect(resolveAgentProtocol("https://api.example.com/api/v1/")).toBe("messages")
+    })
+
+    it("Anthropic 官方只有 Messages 入口", () => {
+        expect(resolveAgentProtocol("https://api.anthropic.com")).toBe("messages")
+        expect(resolveAgentProtocol("https://api.anthropic.com/v1")).toBe("messages")
     })
 
     it("其余网关退回 Chat Completions", () => {
@@ -47,9 +59,51 @@ describe("resolveMessagesEndpoint", () => {
         expect(resolveMessagesEndpoint("https://api.example.com/api/v1/")).toBe("https://api.example.com/api/v1/messages")
     })
 
+    it("Anthropic 官方补出 /v1/messages", () => {
+        expect(resolveMessagesEndpoint("https://api.anthropic.com")).toBe("https://api.anthropic.com/v1/messages")
+        expect(resolveMessagesEndpoint("https://api.anthropic.com/")).toBe("https://api.anthropic.com/v1/messages")
+        expect(resolveMessagesEndpoint("https://api.anthropic.com/v1")).toBe("https://api.anthropic.com/v1/messages")
+    })
+
     it("基址非法时返回 null", () => {
         expect(resolveMessagesEndpoint("")).toBeNull()
         expect(resolveMessagesEndpoint("not a url")).toBeNull()
+    })
+})
+
+describe("resolveModelsEndpoint", () => {
+    it("OpenAI 兼容网关续接 /models", () => {
+        expect(resolveModelsEndpoint("https://api.openai.com/v1")).toBe("https://api.openai.com/v1/models")
+        expect(resolveModelsEndpoint("http://127.0.0.1:3425/v1/")).toBe("http://127.0.0.1:3425/v1/models")
+    })
+
+    it("DeepSeek 官方用站点根的 /models", () => {
+        expect(resolveModelsEndpoint("https://api.deepseek.com")).toBe("https://api.deepseek.com/models")
+        expect(resolveModelsEndpoint("https://api.deepseek.com/anthropic")).toBe("https://api.deepseek.com/models")
+    })
+
+    it("Anthropic 官方用 /v1/models", () => {
+        expect(resolveModelsEndpoint("https://api.anthropic.com")).toBe("https://api.anthropic.com/v1/models")
+        expect(resolveModelsEndpoint("https://api.anthropic.com/v1")).toBe("https://api.anthropic.com/v1/models")
+    })
+
+    it("基址非法时返回 null", () => {
+        expect(resolveModelsEndpoint("")).toBeNull()
+        expect(resolveModelsEndpoint("not a url")).toBeNull()
+    })
+})
+
+describe("isLocalGatewayBaseUrl", () => {
+    it("回环地址判定为本机网关", () => {
+        expect(isLocalGatewayBaseUrl("http://127.0.0.1:3425/v1")).toBe(true)
+        expect(isLocalGatewayBaseUrl("http://localhost:11434/v1")).toBe(true)
+        expect(isLocalGatewayBaseUrl("http://[::1]:1234/v1")).toBe(true)
+    })
+
+    it("远程地址与非法基址不算本机网关", () => {
+        expect(isLocalGatewayBaseUrl("https://api.openai.com/v1")).toBe(false)
+        expect(isLocalGatewayBaseUrl("http://192.168.1.8:3425/v1")).toBe(false)
+        expect(isLocalGatewayBaseUrl("")).toBe(false)
     })
 })
 

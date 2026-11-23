@@ -153,6 +153,8 @@ export interface WireCompactionInput {
     temperature: number
     /** 摘要生成的输出上限（tokens） */
     maxTokens: number
+    /** 推理强度；null 表示交给上游默认值 */
+    reasoningEffort?: string | null
     /** 待压缩的完整消息序列 */
     messages: readonly AgentWireMessage[]
     /** 显式会话 id（走自家代理时随请求头，日志按它归会话） */
@@ -259,6 +261,7 @@ async function requestCompactionSummary(
         tools: input.tools,
         temperature: input.temperature,
         maxTokens: input.maxTokens,
+        reasoningEffort: input.reasoningEffort,
         ...(input.sessionId ? { sessionId: input.sessionId } : {}),
     })
 

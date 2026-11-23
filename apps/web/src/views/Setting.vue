@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { type AiModelInfo, listAiModels } from "@/api/agent/models"
+import { AI_PROVIDER_PRESETS, type AiProviderPreset, findAiProviderPreset, resolveAiProviderByBaseUrl } from "@/api/agent/providers"
 import { aiTestConnection } from "@/api/agent/test-connection"
 import type { FloatWindowConfig } from "@/api/app"
 import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
@@ -22,6 +24,7 @@ import {
     useSettingStore,
 } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { DEFAULT_AI_CONTEXT_WINDOW, DEFAULT_AI_MAX_TOKENS, formatTokenCount } from "@/utils/ai-config"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import {
     clearAllDataPackStorage,
@@ -631,6 +634,8 @@ async function openResetConfirmDialog() {
 
 /** 测试连接按钮的忙态：探测期间禁用按钮并转菊花，避免重复点击 */
 const aiTestBusy = ref(false)
+/** API Key 是否明文显示：password 输入框没有标准的显隐按钮，由页面自己提供 */
+const aiApiKeyVisible = ref(false)
 
 /**
  * 用当前填写的自定义模型配置跑一轮连通性探测。
@@ -657,6 +662,169 @@ async function testAiConnection() {
         aiTestBusy.value = false
     }
 }
+
+/** 从上游 `/models` 取回的候选模型：仅内存态，不落库 */
+const aiModels = ref<AiModelInfo[]>([])
+/** 模型列表请求进行中 */
+const aiModelsBusy = ref(false)
+
+/** 供应商预设按分组归并；标签随语言切换刷新 */
+const aiProviderGroups = computed<{ key: string; label: string; presets: AiProviderPreset[] }[]>(() => [
+    {
+        key: "official",
+        label: t("setting.aiProviderOfficial"),
+        presets: AI_PROVIDER_PRESETS.filter(preset => preset.group === "official"),
+    },
+    {
+        key: "aggregator",
+        label: t("setting.aiProviderAggregator"),
+        presets: AI_PROVIDER_PRESETS.filter(preset => preset.group === "aggregator"),
+    },
+    {
+        key: "local",
+        label: t("setting.aiProviderLocal"),
+        presets: AI_PROVIDER_PRESETS.filter(preset => preset.group === "local"),
+    },
+])
+
+/** 当前基址命中的预设：用于下拉回显与本地网关提示 */
+const matchedAiProvider = computed(() => resolveAiProviderByBaseUrl(setting.aiBaseUrl))
+
+/** 预设把模型列表放在站点根时（magpie 的 /models）解析成绝对地址 */
+const aiModelsEndpoint = computed(() => {
+    const path = matchedAiProvider.value?.modelsPath
+
+    if (!path) {
+        return undefined
+    }
+
+    try {
+        return new URL(path, setting.aiBaseUrl).toString()
+    } catch {
+        return undefined
+    }
+})
+
+/** 供应商下拉的双向绑定：外部手改基址时回显「自定义」，选中预设时写入预设值 */
+const selectedAiProviderId = computed({
+    get: () => matchedAiProvider.value?.id ?? "",
+    set: (id: string) => applyAiProviderPreset(id),
+})
+
+/** 模型列表状态文案：加载中 / 已加载数量 / 未获取提示 */
+const aiModelsStatus = computed(() => {
+    if (aiModelsBusy.value) {
+        return t("setting.aiFetchModelsBusy")
+    }
+
+    return aiModels.value.length
+        ? t("setting.aiModelsLoaded", { count: aiModels.value.length })
+        : t("setting.aiFetchModelsHint")
+})
+
+/** 上下文窗口占位：用户未填时依次展示模型元数据与应用默认值 */
+const aiContextWindowPlaceholder = computed(() =>
+    formatTokenCount(setting.aiModelContextWindow ?? DEFAULT_AI_CONTEXT_WINDOW)
+)
+
+/** 输出上限占位：用户未填时依次展示模型元数据与应用默认值 */
+const aiMaxTokensPlaceholder = computed(() => formatTokenCount(setting.aiModelMaxTokens ?? DEFAULT_AI_MAX_TOKENS))
+
+/** 推理强度候选：取当前模型从 Magpie `/models` 拿到的 reasoning_levels */
+const aiReasoningEffortOptions = computed(() => setting.aiModelReasoningLevels ?? [])
+
+/**
+ * 把选中模型的上下文 / 输出上限 / 推理强度候选同步到设置。
+ * @param modelId 当前模型 id
+ */
+function syncAiModelMetadata(modelId: string) {
+    const info = aiModels.value.find(model => model.id === modelId.trim())
+    setting.aiModelContextWindow = info?.contextWindow ?? null
+    setting.aiModelMaxTokens = info?.maxOutputTokens ?? null
+    setting.aiModelReasoningLevels = info?.reasoningLevels ?? null
+}
+
+/**
+ * 套用供应商预设：地址与密钥一次填好；换供应商时清掉旧模型名与旧列表。
+ * @param id 预设 id
+ */
+function applyAiProviderPreset(id: string) {
+    const preset = findAiProviderPreset(id)
+
+    if (!preset) {
+        return
+    }
+
+    const baseChanged = setting.aiBaseUrl.trim().replace(/\/+$/, "").toLowerCase() !== preset.baseUrl.toLowerCase()
+
+    if (!baseChanged) {
+        // 重复选中当前供应商只补本地网关的固定口令，不清掉用户自己填的密钥
+        if (preset.apiKey && !setting.aiApiKey.trim()) {
+            setting.aiApiKey = preset.apiKey
+        }
+        return
+    }
+
+    setting.aiBaseUrl = preset.baseUrl
+    setting.aiApiKey = preset.apiKey ?? ""
+    setting.aiModelName = ""
+}
+
+/**
+ * 从当前基址读取模型列表；首次拿到结果且模型名为空时自动选中第一个。
+ */
+async function refreshAiModels() {
+    if (aiModelsBusy.value) {
+        return
+    }
+
+    if (!setting.aiBaseUrl.trim()) {
+        ui.showErrorMessage(t("setting.aiFetchModelsNoBaseUrl"))
+        return
+    }
+
+    aiModelsBusy.value = true
+    try {
+        const models = await listAiModels({
+            baseUrl: setting.aiBaseUrl,
+            apiKey: setting.aiApiKey,
+            modelsEndpoint: aiModelsEndpoint.value,
+        })
+        aiModels.value = models
+
+        if (!models.length) {
+            ui.showErrorMessage(t("setting.aiFetchModelsEmpty"))
+            return
+        }
+
+        if (!setting.aiModelName.trim()) {
+            setting.aiModelName = models[0].id
+        }
+        syncAiModelMetadata(setting.aiModelName)
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        ui.showErrorMessage(`${t("setting.aiFetchModelsFailed")}：${message}`)
+    } finally {
+        aiModelsBusy.value = false
+    }
+}
+
+// 手动改基址后旧列表不再可信，清掉避免选到别的供应商的模型
+watch(
+    () => setting.aiBaseUrl,
+    () => {
+        aiModels.value = []
+        setting.aiModelContextWindow = null
+        setting.aiModelMaxTokens = null
+        setting.aiModelReasoningLevels = null
+    }
+)
+
+// 切换模型时同步该模型的上下文 / 输出上限；不在列表里的模型按未知处理
+watch(
+    () => setting.aiModelName,
+    modelId => syncAiModelMetadata(modelId)
+)
 
 async function updateLaunchAtStartup(enabled: boolean) {
     isUpdatingLaunchAtStartup.value = true
@@ -1967,6 +2135,35 @@ onUnmounted(() => {
                             <div
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
+                                <span class="label-text">
+                                    {{ $t("setting.aiProvider") }}
+                                    <div class="text-xs text-base-content/50">{{ $t("setting.aiProviderTip") }}</div>
+                                </span>
+                                <Select
+                                    v-model="selectedAiProviderId"
+                                    :placeholder="$t('setting.aiProviderPlaceholder')"
+                                    class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                >
+                                    <template v-for="(group, index) in aiProviderGroups" :key="group.key">
+                                        <SelectSeparator v-if="index > 0" />
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ group.label }}</SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem v-for="preset in group.presets" :key="preset.id" :value="preset.id">
+                                                {{ preset.name }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                            </div>
+                            <div
+                                v-if="matchedAiProvider?.local"
+                                class="rounded-xs border border-primary/20 bg-primary/5 px-2.5 py-2 text-xs leading-relaxed text-base-content/60"
+                            >
+                                {{ $t("setting.aiLocalGatewayTip") }}
+                            </div>
+                            <div
+                                class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
                                 <span class="label-text">{{ $t("setting.aiBaseUrl") }}</span>
                                 <input
                                     v-model="setting.aiBaseUrl"
@@ -1979,23 +2176,69 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.aiApiKey") }}</span>
-                                <input
-                                    v-model="setting.aiApiKey"
-                                    type="password"
-                                    autocomplete="off"
-                                    class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    placeholder="sk-xxxxxxxxxxxxxxxx"
-                                />
+                                <div class="flex w-64 items-center gap-1">
+                                    <input
+                                        v-model="setting.aiApiKey"
+                                        :type="aiApiKeyVisible ? 'text' : 'password'"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                        class="min-w-0 grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        placeholder="sk-xxxxxxxxxxxxxxxx"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 shrink-0 p-0 text-base-content/50"
+                                        :title="$t('setting.aiApiKeyToggle')"
+                                        :aria-label="$t('setting.aiApiKeyToggle')"
+                                        @click="aiApiKeyVisible = !aiApiKeyVisible"
+                                    >
+                                        <Icon
+                                            :icon="aiApiKeyVisible ? 'ri:eye-off-line' : 'ri:eye-line'"
+                                            class="size-3.5"
+                                        />
+                                    </button>
+                                </div>
                             </div>
                             <div
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.aiModelName") }}</span>
-                                <input
+                                <AiModelPicker
                                     v-model="setting.aiModelName"
-                                    type="text"
-                                    class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    placeholder="deepseek-flash"
+                                    :models="aiModels"
+                                    :loading="aiModelsBusy"
+                                    :placeholder="$t('setting.aiModelPlaceholder')"
+                                    class="w-64"
+                                    @refresh="refreshAiModels"
+                                />
+                            </div>
+                            <div class="flex items-center justify-between gap-2 px-1 text-xs text-base-content/45">
+                                <span>{{ aiModelsStatus }}</span>
+                                <button
+                                    type="button"
+                                    class="btn btn-ghost btn-xs h-6 min-h-0 gap-1 px-1.5 text-[11px]"
+                                    :disabled="aiModelsBusy"
+                                    @click="refreshAiModels"
+                                >
+                                    <Icon
+                                        icon="ri:refresh-line"
+                                        class="size-3.5"
+                                        :class="aiModelsBusy ? 'animate-spin' : ''"
+                                    />
+                                    {{ $t("setting.aiFetchModels") }}
+                                </button>
+                            </div>
+                            <div
+                                class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">{{ $t("setting.aiReasoningEffort") }}</span>
+                                <AiOptionPicker
+                                    v-model="setting.aiReasoningEffort"
+                                    :options="aiReasoningEffortOptions"
+                                    :placeholder="$t('setting.aiReasoningEffortDefault')"
+                                    :empty-text="$t('setting.aiReasoningEffortEmpty')"
+                                    :default-label="$t('setting.aiReasoningEffortDefault')"
+                                    class="w-64"
                                 />
                             </div>
                             <div
@@ -2008,7 +2251,7 @@ onUnmounted(() => {
                                     spellcheck="false"
                                     autocomplete="off"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-orbitron text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    placeholder="256K"
+                                    :placeholder="aiContextWindowPlaceholder"
                                 />
                             </div>
                             <div
@@ -2021,7 +2264,7 @@ onUnmounted(() => {
                                     spellcheck="false"
                                     autocomplete="off"
                                     class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-orbitron text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    placeholder="32K"
+                                    :placeholder="aiMaxTokensPlaceholder"
                                 />
                             </div>
                             <div

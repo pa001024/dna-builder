@@ -40,7 +40,7 @@
         "notification:default",
         {
             "identifier": "http:default",
-            "allow": [{ "url": "https://dnabbs-api.yingxiong.com" }]
+            "allow": [{ "url": "http://*:*" }, { "url": "https://*:*" }]
         },
         "global-shortcut:default",
         "global-shortcut:allow-is-registered",

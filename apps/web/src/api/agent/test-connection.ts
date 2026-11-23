@@ -8,7 +8,7 @@
  */
 
 import { createAgentTransport, normalizeAgentUpstreamConfig } from "./config"
-import type { AgentProtocol, AgentRoundUsage } from "./wire"
+import { type AgentProtocol, type AgentRoundUsage, isLocalGatewayBaseUrl } from "./wire"
 
 /** 测试连接的入参（直接取自设置页自定义模型区的填写值）。 */
 export interface AiTestConnectionParams {
@@ -38,15 +38,15 @@ const TEST_MAX_TOKENS = 16
 /**
  * @description 用给定配置跑一轮极小请求验证连通性。
  * @param params 基址 / 密钥 / 模型（允许首尾空白，内部统一 trim）
- * @returns 实际协议与模型回文；基址非法、缺密钥、鉴权失败时抛出
+ * @returns 实际协议与模型回文；基址非法、非本机网关缺密钥、鉴权失败时抛出
  */
 export async function aiTestConnection(params: AiTestConnectionParams): Promise<AiTestConnectionResult> {
     const baseUrl = params.baseUrl.trim()
     const apiKey = params.apiKey.trim()
     const model = params.model.trim()
 
-    if (!baseUrl || !apiKey || !model) {
-        throw new Error("请先填写基础URL、API密钥和模型名称")
+    if (!baseUrl || !model || (!apiKey && !isLocalGatewayBaseUrl(baseUrl))) {
+        throw new Error("请先填写基础URL和模型名称；非本机网关还需填写API密钥")
     }
 
     const config = normalizeAgentUpstreamConfig({
@@ -65,6 +65,7 @@ export async function aiTestConnection(params: AiTestConnectionParams): Promise<
         messages: [{ role: "user", text: "just reply ok" }],
         temperature: config.default_temperature,
         maxTokens: TEST_MAX_TOKENS,
+        reasoningEffort: config.default_reasoning_effort,
         isInterrupted: () => false,
     })
 

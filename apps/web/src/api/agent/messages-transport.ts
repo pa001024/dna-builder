@@ -16,6 +16,7 @@
  */
 
 import { isPeakPricing } from "@/utils/ai-pricing"
+import { resolveAgentFetch } from "./desktop-fetch"
 import {
     AGENT_PROXY_BASE_URL_SUFFIX,
     type AgentFinishReason,
@@ -28,6 +29,8 @@ import {
     type AgentTransportOptions,
     type AgentWireMessage,
     AI_PROXY_SESSION_HEADER,
+    ANTHROPIC_API_VERSION,
+    isAnthropicUpstream,
     parseToolArguments,
     resolveMessagesEndpoint,
 } from "./wire"
@@ -164,14 +167,20 @@ function normalizeFinishReason(raw: unknown): AgentFinishReason {
  * @returns 请求体对象
  */
 function buildRequestBody(request: AgentRoundRequest): Record<string, unknown> {
+    const effort = request.reasoningEffort?.trim() || ""
+    const thinkingOff = effort.toLowerCase() === "none"
+
     return {
         model: request.model,
         stream: true,
         max_tokens: request.maxTokens,
         system: request.system,
         messages: serializeMessages(request.messages),
-        // 显式开启思考：不传时由上游默认值决定，界面上的思考分段会出现时有时无的情况
-        thinking: { type: "enabled" },
+        // 显式开启思考：不传时由上游默认值决定，界面上的思考分段会出现时有时无的情况；
+        // 用户把强度选成 none 时改为关闭，避免仍走思考预算
+        thinking: thinkingOff ? { type: "disabled" } : { type: "enabled" },
+        // Magpie / Anthropic 新接口用 output_config.effort 表达推理强度；空值交给上游默认
+        ...(effort && !thinkingOff ? { output_config: { effort } } : {}),
         ...(Number.isFinite(request.temperature) ? { temperature: request.temperature } : {}),
         ...(request.tools?.length
             ? {
@@ -320,8 +329,11 @@ type AttemptOutcome = { ok: true; result: AgentRoundResult } | { ok: false; erro
  */
 export function createMessagesTransport(options: AgentTransportOptions): AgentTransport {
     const endpoint = resolveMessagesEndpoint(options.baseUrl)
-    /** 是否直连 DeepSeek 官方入口（决定鉴权头形态：官方认 `x-api-key`，自建代理认 `Authorization`）。 */
+    const requestFetch = resolveAgentFetch() ?? fetch
+    /** 是否直连上游入口（决定鉴权头形态：官方认 `x-api-key`，自建代理认 `Authorization`）。 */
     const isDirectUpstream = !options.baseUrl.endsWith(AGENT_PROXY_BASE_URL_SUFFIX)
+    /** Anthropic 官方入口还需要版本头与浏览器直连声明。 */
+    const isAnthropicDirect = isDirectUpstream && isAnthropicUpstream(options.baseUrl)
 
     /**
      * 消费一段 SSE 缓冲区，逐行取出其中的事件。
@@ -593,15 +605,23 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
         const peak = isPeakPricing(new Date())
 
         try {
-            const response = await fetch(endpoint!, {
+            const response = await requestFetch(endpoint!, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "text/event-stream",
-                    // 直连 DeepSeek 官方 Anthropic 入口用 x-api-key；
+                    // 直连上游入口用 x-api-key（Anthropic 官方只认它，DeepSeek 亦然）；
                     // 走自建代理时凭证是登录令牌，与其它接口一样放 Authorization。
                     ...(isDirectUpstream
-                        ? { "x-api-key": options.apiKey }
+                        ? {
+                              "x-api-key": options.apiKey,
+                              ...(isAnthropicDirect
+                                  ? {
+                                        "anthropic-version": ANTHROPIC_API_VERSION,
+                                        "anthropic-dangerous-direct-browser-access": "true",
+                                    }
+                                  : {}),
+                          }
                         : {
                               Authorization: `Bearer ${options.apiKey}`,
                               // 自家代理带会话 id，服务端日志按它归会话；直连上游不发（无意义且会触发预检）

@@ -238,7 +238,8 @@ const selectedItemText = computed(() => {
     if (text && text.trim()) {
         return text
     }
-    return ""
+    // 无选中项时把 placeholder 作为触发器文案；SelectValue 的默认插槽会覆盖它自己的占位回退
+    return props.placeholder ?? ""
 })
 watch(
     () => props.modelValue,

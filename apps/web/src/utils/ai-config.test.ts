@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
     DEFAULT_AI_CONTEXT_WINDOW,
     DEFAULT_AI_MAX_TOKENS,
+    formatTokenCount,
     parseTokenCount,
     resolveAiContextWindow,
     resolveAiMaxTokens,
@@ -44,6 +45,27 @@ describe("parseTokenCount", () => {
     })
 })
 
+describe("formatTokenCount", () => {
+    it("优先整数刻度：十进制 K/M 与二进制 K", () => {
+        expect(formatTokenCount(262144)).toBe("256K")
+        expect(formatTokenCount(32768)).toBe("32K")
+        expect(formatTokenCount(131072)).toBe("128K")
+        expect(formatTokenCount(128000)).toBe("128K")
+        expect(formatTokenCount(200000)).toBe("200K")
+        expect(formatTokenCount(1_000_000)).toBe("1M")
+        expect(formatTokenCount(1_048_576)).toBe("1M")
+        expect(formatTokenCount(1_500_000)).toBe("1.5M")
+    })
+
+    it("兼容字符串并拒绝非法值", () => {
+        expect(formatTokenCount("256K")).toBe("256K")
+        expect(formatTokenCount("1M")).toBe("1M")
+        expect(formatTokenCount(null)).toBe("")
+        expect(formatTokenCount(0)).toBe("")
+        expect(formatTokenCount("乱填")).toBe("")
+    })
+})
+
 describe("resolveAiMaxTokens / resolveAiContextWindow", () => {
     it("可解析值直通，空缺回落各自默认值", () => {
         expect(resolveAiMaxTokens("32K")).toBe(32_000)
@@ -53,5 +75,14 @@ describe("resolveAiMaxTokens / resolveAiContextWindow", () => {
         expect(resolveAiContextWindow("1M")).toBe(1_000_000)
         expect(resolveAiContextWindow("")).toBe(DEFAULT_AI_CONTEXT_WINDOW)
         expect(resolveAiContextWindow(undefined)).toBe(DEFAULT_AI_CONTEXT_WINDOW)
+    })
+
+    it("优先级：用户配置 > 模型元数据 > 默认值", () => {
+        expect(resolveAiContextWindow("400K", 1_000_000)).toBe(400_000)
+        expect(resolveAiContextWindow("", 1_000_000)).toBe(1_000_000)
+        expect(resolveAiContextWindow(null, null)).toBe(DEFAULT_AI_CONTEXT_WINDOW)
+        expect(resolveAiMaxTokens("16K", 65_536)).toBe(16_000)
+        expect(resolveAiMaxTokens(null, 65_536)).toBe(65_536)
+        expect(resolveAiMaxTokens(undefined, undefined)).toBe(DEFAULT_AI_MAX_TOKENS)
     })
 })
