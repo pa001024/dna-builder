@@ -17,15 +17,18 @@ import {
     LoopRepeat,
     Mesh,
     MeshBasicMaterial,
+    MeshDepthMaterial,
     MeshPhysicalMaterial,
     MeshStandardMaterial,
     NoColorSpace,
     type Object3D,
     OrthographicCamera,
+    PCFShadowMap,
     PerspectiveCamera,
     PlaneGeometry,
     PMREMGenerator,
     RepeatWrapping,
+    RGBADepthPacking,
     Scene,
     ShaderMaterial,
     type Skeleton,
@@ -45,6 +48,7 @@ import { type GLTF, GLTFLoader } from "three/addons/loaders/GLTFLoader.js"
 import {
     eyeUvChannelFromParent,
     type LinearRgb,
+    normalizeSkinMaterial,
     resolveHairModelDye,
     resolveSkinModelColor,
     resolveSkinModelFresnel,
@@ -54,6 +58,7 @@ import {
     validateSkinModelMetadata,
 } from "./skin-model"
 import { SKIN_TOON_RAMP_PNG } from "./skin-toon-ramp"
+import { createWaterWaveMaterial, WATER_WAVE_TEXTURES } from "./skin-water-material"
 
 /** 数据包里的色板表，转成渲染器要的索引表；发布包与本地 GLB 都不再内嵌色板。 */
 async function dyeSwatches(): Promise<Record<string, { linear: LinearRgb; fresnel?: number }>> {
@@ -129,8 +134,8 @@ float effNoise(vec2 p) {
 }
 `
 
-function isSkinMaterial(data: SkinMaterialMetadata): boolean {
-    if (isHairMaterial(data)) return false
+function isSkinMaterial(data: SkinMaterialMetadata, meshName = ""): boolean {
+    if (isHairMaterial(data, meshName)) return false
     return data.kind === "stocking" || data.kind === "base"
 }
 
@@ -210,6 +215,18 @@ uniform float dnaEmissionStrength;
 uniform vec3 dnaEmission2;
 uniform vec3 dnaEmission3;
 uniform float dnaHasEmission;
+uniform float dnaWaterTailOpacity;
+uniform float dnaWaterTime;
+uniform sampler2D dnaTailMask;
+uniform sampler2D dnaTailRipple;
+uniform sampler2D dnaTailGlow;
+uniform sampler2D dnaTailStars;
+uniform vec4 dnaTailGlowUv;
+uniform vec3 dnaTailTint;
+uniform float dnaTailGlowWidth;
+uniform float dnaTailGlowGain;
+uniform float dnaTailNormalTiling;
+uniform float dnaTailNormalStrength;
 uniform float dnaQuantize;
 uniform float dnaNormalStrength;
 uniform float dnaWingDye;
@@ -229,10 +246,15 @@ uniform float dnaToneScale;
 uniform vec3 dnaToonSky;
 uniform float dnaRampRow;
 uniform float dnaToonSkin;
+uniform float dnaSkinShadow;
 uniform float dnaToonSpec;
 uniform sampler2D dnaToonRamp;
 uniform vec3 dnaToonLightDir;
 uniform float dnaHairSaturation;
+uniform float dnaHairColorPow;
+uniform vec2 dnaHairAoRange;
+uniform vec3 dnaHairAoTint;
+uniform float dnaHairLightGain;
 varying vec2 vDnaUv;
 varying vec2 vDnaUv1;
 varying vec2 vDnaEyeUv;
@@ -366,6 +388,7 @@ export class SkinModelRenderer {
     private sceneTextures = new Set<Texture>()
     /** 染色贴图按 GLB 索引克隆一份缓存：多张材质引同一张图时只上传一份到 GPU */
     private textureClones = new Map<number, Promise<Texture>>()
+    private waterTextureClones = new Map<string, Promise<Texture>>()
     private request = 0
     /** 特效拖尾的流动时间（秒）：有拖尾材质时渲染循环会一直跑 */
     private effectTime = { value: 0 }
@@ -396,6 +419,7 @@ export class SkinModelRenderer {
     private canvasHeight = 1
     /** 卡通光照的主光方向（世界空间，指向光源）。 */
     private toonLightDir = new Vector3(-3, 5, 4).normalize()
+    private toonKey = new DirectionalLight(0xfff2e2, 4)
     /** 卡通 ramp 图集，全局复用一份；按行号取该材质的明暗曲线。 */
     private ramp?: Texture
 
@@ -404,6 +428,8 @@ export class SkinModelRenderer {
         this.msaa = this.renderer.getContext().getContextAttributes()?.antialias === true
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         this.renderer.outputColorSpace = SRGBColorSpace
+        this.renderer.shadowMap.enabled = true
+        this.renderer.shadowMap.type = PCFShadowMap
         // 卡通光照下大量表面被推到 ramp 亮带。游戏实测皮肤 88% 的像素 R 通道贴顶（254），
         // 说明它几乎不做高光压缩，所以用线性 tonemap 而不是 ACES（ACES 会压暗、降饱和）。
         this.renderer.toneMapping = LinearToneMapping
@@ -418,9 +444,11 @@ export class SkinModelRenderer {
         // 环境光只留一点点：游戏是延迟卡通光照，间接光占比极低（实测受光面 36~45% → 目标 <18%）。
         // 天空色保持中性偏冷、地面色改暖，让暗部不再是灰蓝。
         this.scene.add(new HemisphereLight(0xdfe6f2, 0x6b4a3a, 0.45))
-        const key = new DirectionalLight(0xfff2e2, 4)
+        const key = this.toonKey
         key.position.set(-3, 5, 4)
-        this.scene.add(key)
+        key.castShadow = true
+        key.shadow.mapSize.set(2048, 2048)
+        this.scene.add(key, key.target)
         // 卡通光照的主光方向（世界空间，指向光源）：取 key 的位置方向。
         this.toonLightDir.set(-3, 5, 4).normalize()
         const rim = new DirectionalLight(0xbfd4f0, 0.8)
@@ -711,6 +739,31 @@ export class SkinModelRenderer {
                     if (material instanceof MeshStandardMaterial) this.expandBillboard(material, card, mesh)
                 }
             mesh.material = Array.isArray(mesh.material) ? converted : converted[0]
+            mesh.receiveShadow = true
+            const surface = converted[0]
+            const data = surface.userData.dnaColorize as SkinMaterialMetadata | undefined
+            if (
+                converted.length === 1 &&
+                surface instanceof MeshStandardMaterial &&
+                !surface.transparent &&
+                data &&
+                data.kind !== "eye" &&
+                data.kind !== "shadow" &&
+                !isExpressionOverlay(data) &&
+                !card
+            ) {
+                const depth = new MeshDepthMaterial({
+                    depthPacking: RGBADepthPacking,
+                    map: surface.map,
+                    alphaTest: surface.alphaTest,
+                    side: surface.side,
+                })
+                // 深度 pass 复用相同的染色/剪影代码，羽片和镂空衣料不能投成完整卡片。
+                depth.onBeforeCompile = (shader, renderer) => surface.onBeforeCompile(shader, renderer)
+                depth.customProgramCacheKey = () => `depth-${surface.customProgramCacheKey()}`
+                mesh.customDepthMaterial = depth
+                mesh.castShadow = true
+            }
             let parent: Object3D | null = mesh
             while (parent && !parent.userData.dnaRole) parent = parent.parent
             mesh.userData.dnaRole = parent?.userData.dnaRole ?? "character"
@@ -806,6 +859,16 @@ export class SkinModelRenderer {
         this.camera.near = Math.max(radius / 1000, 0.001)
         this.camera.far = radius * 40
         this.camera.updateProjectionMatrix()
+        const shadow = this.toonKey.shadow
+        this.toonKey.position.copy(this.center).addScaledVector(this.toonLightDir, radius * 3)
+        this.toonKey.target.position.copy(this.center)
+        shadow.camera.left = shadow.camera.bottom = -radius * 1.15
+        shadow.camera.right = shadow.camera.top = radius * 1.15
+        shadow.camera.near = radius * 0.1
+        shadow.camera.far = radius * 6
+        shadow.normalBias = radius * 0.001
+        shadow.bias = -0.0001
+        shadow.camera.updateProjectionMatrix()
         // 描边宽度按模型尺度给：参考图实测带宽约为角色高度的 0.15%（1360px 高的角色上 2px），
         // 换算成世界宽度后与相机距离无关，拉远时自然缩小到亚像素并消失。
         if (this.outlineMaterial) this.outlineMaterial.uniforms.uWorldWidth.value = radius * 0.003
@@ -1031,6 +1094,32 @@ export class SkinModelRenderer {
         return cached
     }
 
+    private waterTexture(name: string): Promise<Texture> {
+        let texture = this.waterTextureClones.get(name)
+        if (!texture) {
+            texture = import("./skin-water-textures").then(
+                ({ SKIN_WATER_TEXTURES }) =>
+                    new Promise<Texture>((resolve, reject) => {
+                        const image = new Image()
+                        image.onload = () => {
+                            const texture = new Texture(image)
+                            texture.colorSpace = NoColorSpace
+                            texture.flipY = false
+                            texture.wrapS = RepeatWrapping
+                            texture.wrapT = RepeatWrapping
+                            texture.needsUpdate = true
+                            this.sceneTextures.add(texture)
+                            resolve(texture)
+                        }
+                        image.onerror = () => reject(new Error(`Water texture could not be decoded: ${name}`))
+                        image.src = SKIN_WATER_TEXTURES[name]
+                    })
+            )
+            this.waterTextureClones.set(name, texture)
+        }
+        return texture
+    }
+
     private rampTexture(): Texture {
         if (this.ramp) return this.ramp
         const image = new Image()
@@ -1112,6 +1201,21 @@ ${shader.fragmentShader}`.replace(
         meshName: string,
         overlayUv: 0 | 1 | undefined = undefined
     ): Promise<MeshStandardMaterial | MeshBasicMaterial> {
+        data = normalizeSkinMaterial(data)
+        if (data.kind === "waterWave") {
+            this.hasEffect = true
+            const textures = Object.fromEntries(
+                await Promise.all(
+                    Object.entries(WATER_WAVE_TEXTURES).map(async ([slot, name]) => [
+                        slot,
+                        data.textures[slot] === undefined ? await this.waterTexture(name) : await this.dataTexture(data.textures[slot]),
+                    ])
+                )
+            )
+            const material = createWaterWaveMaterial(data, this.effectTime, textures, hasUv1)
+            material.name = source.name
+            return material
+        }
         if (data.kind === "shadow") {
             const shadow = source.clone()
             shadow.depthWrite = false
@@ -1218,11 +1322,41 @@ ${shader.fragmentShader}`.replace(
             // 缺少自发光贴图时必须彻底关掉该分支：退回用 base 会把整片 albedo 当自发光，
             // 配合 15+ 的强度会把羽片、袖纱压成发白的方块。
             dnaHasEmission: { value: emitIndex === undefined ? 0 : 1 },
+            dnaWaterTailOpacity: { value: data.scalars.透明度 ?? 0.3 },
             dnaQuantize: { value: data.scalars.使用UV1 ?? 0 },
             dnaNormalStrength: { value: data.scalars.法线强度 ?? 1 },
-            dnaHairSaturation: { value: 1.35 },
+            dnaHairSaturation: { value: data.scalars.FresnelAO_ColorPow === undefined ? 1.35 : 1.08 },
+            // Hair_V10 基色的幂次来自材质，缺省 1 保持旧模型与染色遮罩兼容。
+            dnaHairColorPow: { value: Math.max(0.01, data.scalars.FresnelAO_ColorPow ?? 1) },
+            dnaHairAoRange: { value: new Vector2(data.scalars.FresnelAO_Smooth ?? 0, data.scalars.FresnelAO_Width ?? 1) },
+            dnaHairAoTint: { value: vector("Fresnel_TintColor") },
+            // 前向管线没有游戏的逐发簇间接光，用统一受光增益补偿，仍受 toon clamp 约束。
+            dnaHairLightGain: { value: data.kind === "hair" || (data.parent ?? "").includes("M_Player_Hair") ? 1.6 : 1 },
             dnaDyeMap: { value: dyeMap },
             dnaWingDye: { value: wingDye ? 1 : 0 },
+        }
+        if (data.kind === "waterTail") {
+            this.hasEffect = true
+            const [mask, ripple, glow, stars] = await Promise.all([
+                this.waterTexture("T_Baiheng_SP01_TailMask"),
+                this.waterTexture("T_Water_N"),
+                this.waterTexture("T_TranGlow"),
+                this.waterTexture("T_Noise03"),
+            ])
+            const glowUv = data.vectors.LiquidGlowUV ?? [5, -6, 0]
+            Object.assign(uniforms, {
+                dnaWaterTime: this.effectTime,
+                dnaTailMask: { value: mask },
+                dnaTailRipple: { value: ripple },
+                dnaTailGlow: { value: glow },
+                dnaTailStars: { value: stars },
+                dnaTailGlowUv: { value: new Vector4(glowUv[0], glowUv[1], glowUv[2], 0.3) },
+                dnaTailTint: { value: vector("尾巴染色", [3.0208333, 3.7237515, 4]) },
+                dnaTailGlowWidth: { value: data.scalars.流光寬度 ?? 1 },
+                dnaTailGlowGain: { value: data.scalars.流光颜色亮度 ?? 1 },
+                dnaTailNormalTiling: { value: data.scalars.叠加法线Till ?? 2 },
+                dnaTailNormalStrength: { value: data.scalars.LiquidNormalRG_Strength ?? 0.2 },
+            })
         }
         // 卡通光照（P1）：游戏是延迟光照里按 ramp 图集把 albedo 乘成亮/暗两带。
         // - 行号来自材质 `RampRow` 标量；`SV_Target_2.x` 的材质默认值就是它（皮肤 6.5/256、
@@ -1230,7 +1364,8 @@ ${shader.fragmentShader}`.replace(
         // - 横轴 = min(halfLambert(N·L), halfLambert(N·V))，见 specs/skin-toon-render.md §5.2。
         // - 眼睛是 unlit（shading model id 12），不参与；shadow 在上面已提前返回。
         const hairMaterial = isHairMaterial(data, meshName)
-        const toon = data.kind !== "eye"
+        const waterTail = data.kind === "waterTail"
+        const toon = data.kind !== "eye" && !waterTail
         // 行号即 V 坐标：游戏直接拿 `GBufferB.x` 当 V 采样（`(RampRow + 0.5) / 256` 正好是行中心）。
         // 但材质自带的 RampRow 可能指向图集里的装饰行（头发 27 就是），那种行不是明暗曲线，
         // 用了会把整片头发压成黑色，所以只有落在有效行上才采用。
@@ -1267,9 +1402,10 @@ ${shader.fragmentShader}`.replace(
             uniforms.dnaToonSky = { value: new Vector3(0.085, 0.085, 0.085) }
             uniforms.dnaToonOn = { value: 1 }
             // 皮肤次表面：暗部补一层暖色散射，见 §5.2 末尾的 SSS 近似
-            uniforms.dnaToonSkin = { value: isSkinMaterial(data) ? 1 : 0 }
-            // 高光保留比例：皮肤保留一点点（游戏皮肤的高光是窄条光斑），头发/布料全保留
-            uniforms.dnaToonSpec = { value: isSkinMaterial(data) ? 0.35 : 1 }
+            uniforms.dnaToonSkin = { value: isSkinMaterial(data, meshName) ? 1 : 0 }
+            uniforms.dnaSkinShadow = { value: data.kind === "stocking" || (data.parent ?? "").includes("M_Player_Skin") ? 1 : 0 }
+            // 布料收尾曲线已含高光，头发使用固定 ramp；叠加 GGX 会冲淡染色与暗部。
+            uniforms.dnaToonSpec = { value: isSkinMaterial(data, meshName) || hairMaterial || isClothToneMaterial(data) ? 0 : 1 }
             uniforms.dnaToonLightDir = { value: this.toonLightDir }
         }
         const eye = data.kind === "eye"
@@ -1309,11 +1445,12 @@ ${shader.fragmentShader}`.replace(
             vertexColors: false,
             metalness: data.scalars.金属度 ?? 0,
             // 薄纱走灰度 alpha 混合：保留 alphaTest 会把墨迹、纱网硬切成洞。
-            alphaTest: silkTran || expression ? 0 : energyCutout ? 0.33 : source.alphaTest,
+            alphaTest: silkTran || expression || waterTail ? 0 : energyCutout ? 0.33 : source.alphaTest,
             // 皮肤网格的躯干/上臂三角形绕序与腿部相反，单面剔除会把胸口、上臂整片裁掉。
             side: data.kind === "stocking" ? DoubleSide : source.side,
-            transparent: source.transparent || silkTran,
-            depthWrite: !silkTran,
+            transparent: source.transparent || silkTran || waterTail,
+            forceSinglePass: waterTail || source.forceSinglePass,
+            depthWrite: !silkTran && !waterTail,
             // 能量层/薄纱整体只比皮肤高零点几毫米，远景深度精度不足时会和皮肤互相遮挡闪成噪点；
             // 用多边形偏移把整层朝相机提一点，稳定压住皮肤。
             polygonOffset: energyCutout || silkTran,
@@ -1360,7 +1497,7 @@ ${shader.vertexShader}`.replace(
                 "#include <uv_vertex>",
                 // 顶点色是游戏里的分区遮罩（G=丝袜覆盖），不是 albedo 相乘项；用平滑过渡避免 UV 岛边界硬边。
                 `#include <uv_vertex>
-vDnaUv = uv * dnaUvScale; vDnaUv1 = uv1; vDnaEyeUv = dnaEyeUv; vDnaStocking = smoothstep(0.15, 0.85, dnaMask.g);
+vDnaUv = uv * dnaUvScale; vDnaUv1 = ${waterTail && !hasUv1 ? "uv" : "uv1"}; vDnaEyeUv = dnaEyeUv; vDnaStocking = smoothstep(0.15, 0.85, dnaMask.g);
 vDnaVertexAlpha = dnaMask.a;`
             )
             let map =
@@ -1392,16 +1529,18 @@ vDnaVertexAlpha = dnaMask.a;`
                 map =
                     "vec4 dnaSample = texture2D(dnaBase, vDnaUv); vec4 dnaMaskSample = texture2D(dnaMaskMap, vDnaUv); diffuseColor *= vec4(dnaWeapon(dnaSample.rgb, vec3(dnaMaskSample.g)), dnaSample.a);"
             if (data.kind === "hair")
-                // 底图是红色 ramp 索引，不是 albedo；混进红色会把头发染成橙色。
-                // 参考图的头发比我们饱和得多（实测 0.67 vs 0.40）：底图三项相加会把颜色往灰里拉，
-                // 这里按 HSV 饱和度线性外扩一次，把差值补回来。
+                // 底图是染色权重，不是 albedo；颜色修正在所有头发分支汇合后只做一次。
                 map = `vec4 dnaSample = texture2D(dnaBase, vDnaUv);
                 vec3 dnaHair = dnaSample.r * dnaColors[0] + dnaSample.g * dnaColors[1] + dnaSample.b * dnaColors[2];
-                float dnaHairLum = dot(dnaHair, vec3(0.2126, 0.7152, 0.0722));
-                dnaHair = max(mix(vec3(dnaHairLum), dnaHair, dnaHairSaturation), 0.0);
                 diffuseColor *= vec4(dnaHair, dnaSample.a);`
             if (data.kind === "hairPart")
                 map = "vec4 dnaSample = texture2D(dnaBase, vDnaUv); diffuseColor *= vec4(dnaPart(dnaSample.rgb), dnaSample.a);"
+            if (waterTail)
+                // WaterTail 主 PS（78592_f3）：固定六段色带 × R，法线 B 混合，随后做 1.1/-0.05 对比度修正。
+                map = `vec4 dnaSample = texture2D(dnaBase, vDnaUv);
+                float dnaTailWeight = dnaNormalWeight(texture2D(dnaNormal, vDnaUv).rgb);
+                diffuseColor.rgb = clamp(dnaPacked(dnaSample.rgb, dnaTailWeight) * 1.1 - 0.05, 0.0, 1.0);
+                diffuseColor.a = mix(1.0, dnaSample.b, dnaTailWeight) * dnaWaterTailOpacity;`
             if (eye)
                 // 眼球是一颗球：底图 UV0 只覆盖巩膜，虹膜花纹在 UV1 上（游戏 PS 用 TEXCOORD.zw 采样）。
                 // 旧导出包没有 UV1 时用 eyeUv() 按仿射补出的 dnaEyeUv。
@@ -1415,8 +1554,7 @@ vDnaVertexAlpha = dnaMask.a;`
             if (hairMaterial && !expression)
                 map += `
                 diffuseColor.a = texture2D(dnaMaskMap, vDnaUv).r;`
-            // 头发的饱和补偿放在 map 之后统一做：这作的头发材质被判成 base/hairPart，
-            // 不是 kind==="hair"，只加在 hair 分支里落不到实处（实测数值一点没变）。
+            // base / hair / hairPart 共用颜色修正，避免染色头发重复增加饱和度。
             if (hairMaterial && !expression)
                 map += `
                 float dnaHairLum2 = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
@@ -1430,6 +1568,12 @@ vDnaVertexAlpha = dnaMask.a;`
                     vec2 dnaXY = dnaNormalSample.rg * 2.0 - 1.0;
                     dnaXY *= dnaNormalStrength;
                     vec3 dnaN = normalize(vec3(dnaXY, sqrt(max(0.0, 1.0 - dot(dnaXY, dnaXY)))));
+                    ${
+                        waterTail
+                            ? `vec2 dnaRippleXY = texture2D(dnaTailRipple, vDnaUv * dnaTailNormalTiling + vec2(0.0, dnaWaterTime * -0.1)).rg * 2.0 - 1.0;
+                    dnaN = normalize(dnaN + vec3(dnaRippleXY * dnaTailNormalStrength, 0.0));`
+                            : ""
+                    }
                     normal = normalize(tbn * dnaN);
                 `
                 )
@@ -1481,6 +1625,28 @@ vDnaVertexAlpha = dnaMask.a;`
                         "vec3 outgoingLight = totalDiffuse + totalSpecular + totalEmissiveRadiance;",
                         "vec3 outgoingLight = totalEmissiveRadiance;"
                     )
+            } else if (waterTail) {
+                shader.fragmentShader = shader.fragmentShader
+                    .replace(
+                        "#include <emissivemap_fragment>",
+                        `
+                    vec3 dnaWaterMask = texture2D(dnaTailMask, vDnaUv).rgb;
+                    float dnaWaterRim = smoothstep(0.0, 1.2, 1.0 - abs(dot(normal, normalize(vViewPosition))));
+                    vec2 dnaFlowUv = vDnaUv * dnaTailGlowUv.xy + dnaWaterTime * dnaTailGlowUv.zw + dnaRippleXY * dnaTailNormalStrength;
+                    vec3 dnaFlowNoise = texture2D(dnaTailGlow, dnaFlowUv).rgb;
+                    float dnaFlowBand = pow(max(dnaFlowNoise.r, 0.0), dnaTailGlowWidth);
+                    vec3 dnaFlow = dnaFlowBand * vec3(0.24305533, 0.40509185, 0.72916669) * dnaTailGlowGain * (1.0 + dnaFlowNoise.g);
+                    vec3 dnaStars = dnaLinear(texture2D(dnaTailStars, vDnaUv1 * 7.0 + vec2(0.0, dnaWaterTime * 0.1)).rgb);
+                    totalEmissiveRadiance = diffuseColor.rgb + dnaWaterMask.g * 3.0
+                        + (1.0 - dnaWaterMask.b) * dnaWaterRim * dnaTailTint
+                        + dnaFlow * (0.2 + 0.8 * max(dot(normal, normalize((viewMatrix * vec4(-3.0, 5.0, 4.0, 0.0)).xyz)), 0.0)) * 2.0
+                        + dnaWaterMask.r * dnaStars * 50.0;
+                    `
+                    )
+                    .replace(
+                        "vec3 outgoingLight = totalDiffuse + totalSpecular + totalEmissiveRadiance;",
+                        "vec3 outgoingLight = totalEmissiveRadiance;"
+                    )
             } else
                 shader.fragmentShader = shader.fragmentShader.replace(
                     "#include <emissivemap_fragment>",
@@ -1502,13 +1668,14 @@ vDnaVertexAlpha = dnaMask.a;`
                 // 卡通光照：把 PBR 的四个光照分量整个换掉。
                 // 游戏的 albedo 是「未光照基色」，而 three 的 diffuseColor 在 map_fragment 之后正好是它，
                 // 所以这里只用 diffuseColor，不再叠加任何间接光（否则等于把环境光算两遍）。
-                // 插在 lights_fragment_end 之后：阴影、AO、tonemapping 都在后面，照常工作。
+                // 几何阴影在这里显式合成；AO 和 tonemapping 保留原通路。
                 //
                 // 原版：01701_f3 的 case 14 收尾（布料）、case 13 直通（头发）、case 12 unlit（眼睛）。
                 shader.fragmentShader = shader.fragmentShader.replace(
                     "#include <lights_fragment_end>",
                     `#include <lights_fragment_end>
                     if (dnaToonOn > 0.5) {
+                        float dnaShadow = getShadowMask();
                         vec3 dnaToonV = normalize(vViewPosition);
                         vec3 dnaToonL = normalize((viewMatrix * vec4(dnaToonLightDir, 0.0)).xyz);
                         float dnaHalfL = dot(normal, dnaToonL) * 0.5 + 0.5;
@@ -1518,7 +1685,14 @@ vDnaVertexAlpha = dnaMask.a;`
                         float dnaRampX = dnaBand;
                         if (dnaHairRamp > 0.5) dnaRampX = 0.5;
                         vec3 dnaRampRgb = texture2D(dnaToonRamp, vec2(dnaRampX, dnaRampRow)).rgb;
-                        vec3 dnaA = min(diffuseColor.rgb * dnaRampRgb, vec3(dnaToonClamp));
+                        vec3 dnaSurface = diffuseColor.rgb;
+                        if (dnaHairRamp > 0.5) {
+                            float dnaHairFacing = clamp((dot(normal, dnaToonV) - dnaHairAoRange.x) / max(dnaHairAoRange.y - dnaHairAoRange.x, 1e-4), 0.0, 1.0);
+                            dnaHairFacing = dnaHairFacing * dnaHairFacing * (3.0 - 2.0 * dnaHairFacing) * texture2D(dnaBase, vDnaUv).a;
+                            vec3 dnaHairAo = pow(max(dnaSurface, vec3(0.0)), vec3(dnaHairColorPow)) * dnaHairAoTint;
+                            dnaSurface = mix(dnaHairAo, dnaSurface, dnaHairFacing);
+                        }
+                        vec3 dnaA = min(dnaSurface * dnaRampRgb * (dnaHairRamp > 0.5 ? dnaHairLightGain : 1.0), vec3(dnaToonClamp));
                         vec3 dnaToon = dnaA;
                         if (dnaClothTone > 0.5) {
                             float dnaLuma = max(dot(dnaA, vec3(0.299, 0.587, 0.114)), 1e-4);
@@ -1532,17 +1706,41 @@ vDnaVertexAlpha = dnaMask.a;`
                         if (dnaClothTone > 0.5) dnaToon += dnaToonSky * dnaBand;
                         if (dnaHairRamp > 0.5) {
                             float dnaHairMask = smoothstep(0.42, 0.58, dnaBand);
-                            dnaToon *= mix(0.42, 1.35, dnaHairMask);
+                            dnaToon *= mix(0.6, 1.35, dnaHairMask);
+                            // Kajiya-Kay 窄高光：切空间副切线沿发丝，底图 alpha × 混合图 B 控制强度。
+                            vec3 dnaHairHalf = normalize(dnaToonL + dnaToonV);
+                            float dnaHairTH = dot(normalize(tbn[1]), dnaHairHalf);
+                            float dnaHairSheen = pow(max(1.0 - dnaHairTH * dnaHairTH, 0.0), 48.0);
+                            float dnaHairSpecMask = texture2D(dnaBase, vDnaUv).a * texture2D(dnaMaskMap, vDnaUv).b;
+                            dnaToon += mix(dnaSurface, vec3(1.0), 0.35) * dnaHairSheen * dnaHairSpecMask * 0.22 * dnaShadow;
                         }
                         if (dnaToonSkin > 0.5) {
                             float dnaSssWrap = clamp((dot(normal, dnaToonL) + 0.35) / 1.35, 0.0, 1.0);
                             dnaToon += diffuseColor.rgb * vec3(1.0, 0.55, 0.42) * (1.0 - dnaSssWrap) * 0.35;
                         }
+                        if (dnaSkinShadow > 0.5) {
+                            // ramp 已含暖色，实机暗/亮比只作补偿目标，避免重复压暗。
+                            float dnaSkinShadowWeight = 0.22 * (1.0 - smoothstep(0.45, 0.75, dnaBand));
+                            dnaToon *= mix(vec3(1.0), vec3(0.97, 0.42, 0.36), dnaSkinShadowWeight);
+                            dnaToon.r *= 1.08;
+                        }
+                        vec3 dnaShadowTint = vec3(0.55, 0.5, 0.58);
+                        if (dnaToonSkin > 0.5) dnaShadowTint = dnaSkinShadow > 0.5 ? vec3(0.99, 0.88, 0.82) : vec3(1.0);
+                        if (dnaHairRamp > 0.5) {
+                            float dnaHairMax = max(max(dnaSurface.r, dnaSurface.g), max(dnaSurface.b, 1e-4));
+                            dnaShadowTint = mix(vec3(0.35), pow(clamp(dnaSurface / dnaHairMax, 0.0, 1.0), vec3(1.5)), 0.7);
+                        }
+                        dnaToon *= mix(dnaShadowTint, vec3(1.0), dnaShadow);
                         reflectedLight.directDiffuse = dnaToon;
                         reflectedLight.indirectDiffuse = vec3(0.0);
                         reflectedLight.directSpecular *= dnaToonSpec;
                         reflectedLight.indirectSpecular *= dnaToonSpec;
                     }`
+                )
+            if (toon)
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    "#include <shadowmap_pars_fragment>",
+                    "#include <shadowmap_pars_fragment>\n#include <shadowmask_pars_fragment>"
                 )
         }
         // 剪裁开关会进着色器源码，同一份材质元数据在帽子与身体上必须编译成两个程序。
@@ -1634,6 +1832,7 @@ vDnaVertexAlpha = dnaMask.a;`
             if (object instanceof SkinnedMesh) skeletons.add(object.skeleton)
             if (!(object instanceof Mesh)) return
             object.geometry.dispose()
+            object.customDepthMaterial?.dispose()
             for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
                 for (const value of Object.values(material)) if (value instanceof Texture) this.textures.add(value)
                 material.dispose()
@@ -1657,6 +1856,7 @@ vDnaVertexAlpha = dnaMask.a;`
         if (this.model) this.disposeModel(this.model)
         for (const texture of this.sceneTextures) texture.dispose()
         this.sceneTextures.clear()
+        this.waterTextureClones.clear()
         this.ramp = undefined
         this.outlineTarget?.dispose()
         this.outlineMaterial?.dispose()
@@ -1667,6 +1867,7 @@ vDnaVertexAlpha = dnaMask.a;`
         this.outlineMaterial = undefined
         this.outlineScene = undefined
         this.renderer.dispose()
+        this.toonKey.shadow.dispose()
         this.renderer.domElement.remove()
         this.dyeMaterials = []
         this.effectMaterials = []

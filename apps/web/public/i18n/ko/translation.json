@@ -299,6 +299,9 @@
         "theater_desc": "공연에 참여하여 의뢰장을 획득!",
         "title": "활동 달력"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "관리자"
     },
@@ -909,6 +912,33 @@
         "paste_buff": "BUFF 붙여넣기",
         "search_placeholder": "BUFF 검색"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "추가 BUFF 목록",
         "additional_mod_list": "추가 MOD 목록",
@@ -927,6 +957,7 @@
         "tip": "참고: 이 페이지의 데이터는 자동으로 저장되지 않습니다!",
         "title": "빌드 비교"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "액션 목록",
         "action_n": "액션 {{n}}:",
@@ -2105,6 +2136,20 @@
         "owner_count": "명의 보유 캐릭터",
         "search_placeholder": "특성 이름/설명/태그 검색(병음 지원)...",
         "trait_count": "개의 특성"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "최소 1회 황금 확률",
@@ -3497,6 +3542,7 @@
     "local-qq": {
         "fill_qq_hint": "클릭하여 QQ 빠르게 입력"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "로그인으로 돌아가기",
         "code_send_failed": "인증 코드 전송에 실패했습니다. 잠시 후 다시 시도하세요",
@@ -4544,6 +4590,9 @@
         "stopRequested": "중지 요청을 보냈습니다",
         "stopScript": "스크립트 중지"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "계정",
         "ai": "생성형 AI",
@@ -4822,15 +4871,20 @@
         "desc": "캐릭터 스킨 염색 미리보기 및 공유",
         "desc_placeholder": "추가 설명(선택)",
         "model_character": "캐릭터 보기",
+        "model_collapse": "미리보기 접기",
         "model_downloading": "모델 다운로드 중",
-        "model_error": "모델을 불러올 수 없습니다. 내보내기 도구를 실행하거나 출력된 GLB를 여세요.",
+        "model_error": "모델을 불러오지 못했습니다. 잠시 후 다시 시도하세요.",
+        "model_expand": "미리보기 펼치기",
+        "model_fullscreen": "전체 화면 미리보기",
+        "model_fullscreen_exit": "전체 화면 종료",
         "model_notice": "드래그로 회전, 휠로 확대합니다. 1–6: 의상, 7: 발광, 8: 스타킹. 게임 캡처로 조명과 효과를 보정하지 않았으며 픽셀 단위로 일치하지 않습니다.",
-        "model_open": "GLB 열기",
         "model_parsing": "모델 분석 중",
         "model_reset": "시점 초기화",
+        "model_scope_all": "전체 영역으로 전환",
+        "model_scope_main": "메인 영역으로 전환",
         "model_size": "모델 크기",
         "model_title": "3D 염색 미리보기",
-        "model_unsupported": "이 스킨에는 아직 사용 가능한 3D 모델이 없습니다. 로컬 GLB를 열어 미리 볼 수 있습니다.",
+        "model_unsupported": "이 스킨에는 아직 사용 가능한 3D 모델이 없습니다.",
         "model_weapon": "무기 보기",
         "model_weapon_removed": "3D 미리보기에 무기는 포함되지 않습니다",
         "no_data": "캐릭터 염색 데이터가 없습니다",
@@ -5076,6 +5130,7 @@
     "trait-list": {
         "title": "특성 목록"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "해제 소모 재료",
     "UI_Armory_ExtraExcelWeponTitle": "추가 마스터리 무기",
     "UI_FORGING_BLUEPRINT": "설계도: ",

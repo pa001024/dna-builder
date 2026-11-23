@@ -335,6 +335,9 @@
         "theater_desc": "参演热映剧目，领取{{charName}}委托密函！",
         "title": "活动日历"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "后台"
     },
@@ -947,6 +950,33 @@
         "paste_buff": "粘贴BUFF",
         "search_placeholder": "搜索BUFF"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "额外BUFF列表",
         "additional_mod_list": "额外MOD列表",
@@ -965,6 +995,7 @@
         "tip": "注意: 此页面数据不会自动保存!",
         "title": "构筑对比"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "动作列表",
         "action_n": "动作 {{n}}:",
@@ -2154,6 +2185,20 @@
         "owner_count": "名角色拥有",
         "search_placeholder": "搜索特质名称/说明/标签（支持拼音）...",
         "trait_count": "个特质"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "至少一次出金概率",
@@ -3544,6 +3589,7 @@
     "local-qq": {
         "fill_qq_hint": "点击快速填写QQ"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "返回登录",
         "code_send_failed": "发送验证码失败，请稍后重试",
@@ -4591,6 +4637,9 @@
         "stopRequested": "已发送停止请求",
         "stopScript": "停止脚本"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "账号",
         "ai": "生成式AI",
@@ -4869,15 +4918,20 @@
         "desc": "预览和分享角色皮肤染色",
         "desc_placeholder": "补充描述（可选）",
         "model_character": "角色预览",
+        "model_collapse": "收起预览",
         "model_downloading": "正在下载模型",
-        "model_error": "模型加载失败。请运行模型导出工具，或打开工具导出的 GLB。",
+        "model_error": "模型加载失败，请稍后重试。",
+        "model_expand": "展开预览",
+        "model_fullscreen": "全屏预览",
+        "model_fullscreen_exit": "退出全屏",
         "model_notice": "拖动旋转，滚轮缩放。1–6：服装；7：自发光；8：丝袜。灯光与特效尚未通过游戏截帧标定，此预览不代表像素级一致。",
-        "model_open": "打开 GLB",
         "model_parsing": "正在解析模型",
         "model_reset": "重置视角",
+        "model_scope_all": "切换到全部区域",
+        "model_scope_main": "切换到主内容区域",
         "model_size": "模型大小",
         "model_title": "模型染色预览",
-        "model_unsupported": "该皮肤暂无可用的 3D 模型，可打开本地 GLB 预览。",
+        "model_unsupported": "该皮肤暂无可用的 3D 模型。",
         "model_weapon": "武器预览",
         "model_weapon_removed": "3D 预览不含武器",
         "no_data": "暂无角色染色数据",
@@ -5123,6 +5177,7 @@
     "trait-list": {
         "title": "特质列表"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "解锁消耗材料",
     "UI_Armory_ExtraExcelWeponTitle": "额外精通武器",
     "UI_FORGING_BLUEPRINT": "设计稿:",

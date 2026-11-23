@@ -55,6 +55,10 @@ const activeHairPartId = ref(1)
 const skinFinderShow = ref(false)
 /** 发色染剂相似色查询弹窗开关。 */
 const hairFinderShow = ref(false)
+/** 悬停预览的色板 ID：0 表示未悬停，此时 3D 预览使用已选颜色。 */
+const hoverColorId = ref(0)
+/** 发型部件的悬停预览色板 ID。 */
+const hoverHairColorId = ref(0)
 
 /** 当前预览图：用户上传的图片（blob URL）或分享方案携带的远程图片。 */
 const previewImage = ref("")
@@ -113,6 +117,52 @@ const selectedSkin = computed(() => characterSkins.value.find(skin => skin.id ==
 
 /** 当前编辑中的部件对象。 */
 const activePart = computed(() => skinColorizeParts.find(part => part.id === activePartId.value))
+
+/** 3D 预览用的色板列表：悬停时把该色临时替换进当前部件，移开后恢复已选颜色。 */
+const previewColorIds = computed(() => {
+    const hoverId = hoverColorId.value
+    if (!hoverId) return selectedColorIds.value
+    return selectedColorIds.value.map((colorId, index) => (index + 1 === activePartId.value ? hoverId : colorId))
+})
+
+/** 3D 预览用的发型色板列表（同上，作用于当前发型色位）。 */
+const previewHairColorIds = computed(() => {
+    const hoverId = hoverHairColorId.value
+    if (!hoverId) return hairColorIds.value
+    return hairColorIds.value.map((colorId, index) => (index + 1 === activeHairPartId.value ? hoverId : colorId))
+})
+
+/** 3D 预览全屏：渲染层挂到内容区域的浮层上，主内容区域模式只铺到右侧面板左边。 */
+const viewRoot = ref<HTMLElement>()
+const modelPreviewLayer = ref<HTMLElement>()
+const settingsPanel = ref<HTMLElement>()
+const modelPreviewFullscreen = ref(false)
+const modelPreviewFullscreenAll = ref(false)
+/** 浮层右侧留出的距离（像素）：主内容区域模式避开右侧面板。 */
+const modelPreviewRight = ref(0)
+/** 右侧面板与主内容并排（lg 断点）时两种全屏范围才有区别。 */
+const modelPreviewSideBySide = ref(false)
+let viewSizeObserver: ResizeObserver | undefined
+let sideBySideQuery: MediaQueryList | undefined
+
+/** 按右列位置量出全屏浮层的右边界；全部区域或堆叠布局时铺满整个内容区域。 */
+function measureModelPreview() {
+    const root = viewRoot.value
+    if (!root) return
+    const panel = settingsPanel.value
+    if (!panel || modelPreviewFullscreenAll.value || !modelPreviewSideBySide.value) {
+        modelPreviewRight.value = 0
+        return
+    }
+    const rootRect = root.getBoundingClientRect()
+    const panelRect = panel.getBoundingClientRect()
+    modelPreviewRight.value = Math.max(0, Math.round(rootRect.right - panelRect.left + 8))
+}
+
+function onSideBySideChange(event: MediaQueryListEvent) {
+    modelPreviewSideBySide.value = event.matches
+    measureModelPreview()
+}
 
 /** 按染剂（ResourceID）聚合的色板分组，一行一个染剂。 */
 const dyeGroups = computed(() => {
@@ -301,6 +351,16 @@ function applyHairColorToActivePart(swatch: SkinColorizeSwatch) {
 function resetActiveHairPartColor() {
     if (!editable.value) return
     selectHairColor(activeHairPartId.value, 0)
+}
+
+/** 悬停色板：临时把该色套用到当前部件做 3D 预览；不可用于该部位的色板不预览。 */
+function previewSwatch(swatch?: SkinColorizeSwatch) {
+    hoverColorId.value = swatch && isSwatchValidForActivePart(swatch) ? swatch.id : 0
+}
+
+/** 悬停发色色板：临时套用到当前发型色位做 3D 预览。 */
+function previewHairSwatch(swatch?: SkinColorizeSwatch) {
+    hoverHairColorId.value = swatch?.id ?? 0
 }
 
 /** 校验并应用一张用户选择的图片作为预览图。 */
@@ -733,6 +793,12 @@ function onWindowPaste(event: ClipboardEvent) {
 
 onMounted(async () => {
     window.addEventListener("paste", onWindowPaste)
+    sideBySideQuery = window.matchMedia("(min-width: 1024px)")
+    modelPreviewSideBySide.value = sideBySideQuery.matches
+    sideBySideQuery.addEventListener("change", onSideBySideChange)
+    viewSizeObserver = new ResizeObserver(() => measureModelPreview())
+    if (viewRoot.value) viewSizeObserver.observe(viewRoot.value)
+    measureModelPreview()
     resetSelection()
     applyCreateFilters()
     if (sharePlanId.value) await loadDyePlan(sharePlanId.value)
@@ -747,14 +813,25 @@ watch(
     }
 )
 
+// 切换部位或退出编辑时丢弃悬停预览，避免把别的部件的临时颜色留在模型上
+watch([activePartId, activeHairPartId, editable, includeHair], () => {
+    hoverColorId.value = 0
+    hoverHairColorId.value = 0
+})
+
+// 进入 / 退出全屏或切换范围时重新量右列位置（浮层贴着右列左缘）
+watch([modelPreviewFullscreen, modelPreviewFullscreenAll], measureModelPreview, { flush: "post" })
+
 onBeforeUnmount(() => {
     window.removeEventListener("paste", onWindowPaste)
+    viewSizeObserver?.disconnect()
+    sideBySideQuery?.removeEventListener("change", onSideBySideChange)
     if (previewImage.value.startsWith("blob:")) URL.revokeObjectURL(previewImage.value)
 })
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 w-full flex-col">
+    <div ref="viewRoot" class="relative flex h-full min-h-0 w-full flex-col">
         <div class="min-h-0 flex-1 overflow-y-auto p-4 lg:@container-size">
             <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm text-base-content/50">
                 {{ $t("skin-colorize.no_data") }}
@@ -943,9 +1020,13 @@ onBeforeUnmount(() => {
                     </section>
 
                     <SkinColorizeModelPreview
+                        v-model:fullscreen="modelPreviewFullscreen"
+                        v-model:fullscreen-all="modelPreviewFullscreenAll"
+                        :fullscreen-target="modelPreviewLayer"
+                        :fullscreen-scope-toggle="modelPreviewSideBySide"
                         :skin-id="selectedSkinId"
-                        :color-ids="selectedColorIds"
-                        :hair-color-ids="includeHair ? hairColorIds : undefined"
+                        :color-ids="previewColorIds"
+                        :hair-color-ids="includeHair ? previewHairColorIds : undefined"
                     />
                     
                     <!-- 染色码：皮肤码 / 发型码（可选） -->
@@ -1104,7 +1185,10 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- 右列：调色浮层，桌面端吸附固定 + 独立内部滚动 -->
-                <aside class="min-w-0 space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100cqh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1">
+                <aside
+                    ref="settingsPanel"
+                    class="min-w-0 space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100cqh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:pr-1"
+                >
                     <!-- 颜色选择器 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PALETTE" title="颜色选择器">
@@ -1189,7 +1273,7 @@ onBeforeUnmount(() => {
                                 :key="group.resourceId"
                                 class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5 transition-colors duration-150 hover:border-primary/30"
                             >
-                                <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" mini class="w-9 shrink-0" />
+                                <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" icon-only class="w-9 shrink-0" />
                                 <span class="h-6 w-px shrink-0 bg-base-content/10" aria-hidden="true" />
                                 <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
                                     <button
@@ -1209,6 +1293,8 @@ onBeforeUnmount(() => {
                                         type="button"
                                         :title="`${swatch.name} #${swatch.id}`"
                                         @click="applyColorToActivePart(swatch)"
+                                        @mouseenter="previewSwatch(swatch)"
+                                        @mouseleave="previewSwatch()"
                                     />
                                 </div>
                             </div>
@@ -1280,7 +1366,7 @@ onBeforeUnmount(() => {
                                     <ResourceCostItem
                                         :name="group.name"
                                         :value="[1, group.resourceId, 'Resource']"
-                                        mini
+                                        icon-only
                                         class="w-9 shrink-0"
                                     />
                                     <span class="h-6 w-px shrink-0 bg-base-content/10" aria-hidden="true" />
@@ -1299,6 +1385,8 @@ onBeforeUnmount(() => {
                                             type="button"
                                             :title="`${swatch.name} #${swatch.id}`"
                                             @click="applyHairColorToActivePart(swatch)"
+                                            @mouseenter="previewHairSwatch(swatch)"
+                                            @mouseleave="previewHairSwatch()"
                                         />
                                     </div>
                                 </div>
@@ -1380,6 +1468,13 @@ onBeforeUnmount(() => {
                 </aside>
             </div>
         </div>
+
+        <!-- 3D 预览全屏：渲染层挂到这里；主内容区域模式只铺到右侧面板左边 -->
+        <div
+            ref="modelPreviewLayer"
+            class="pointer-events-none absolute inset-y-0 left-0 z-30"
+            :style="{ right: `${modelPreviewRight}px` }"
+        />
 
         <DialogModel
             v-model="shareShow"

@@ -297,6 +297,9 @@
         "theater_desc": "參演熱映劇目，領取委託密函！",
         "title": "活動日曆"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "後台"
     },
@@ -907,6 +910,33 @@
         "paste_buff": "貼上 BUFF",
         "search_placeholder": "搜尋 BUFF"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "額外BUFF列表",
         "additional_mod_list": "額外MOD列表",
@@ -925,6 +955,7 @@
         "tip": "注意: 此頁面數據不會自動保存!",
         "title": "構築對比"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "動作列表",
         "action_n": "動作 {{n}}:",
@@ -2103,6 +2134,20 @@
         "owner_count": "名角色擁有",
         "search_placeholder": "搜尋特質名稱/說明/標籤（支援拼音）...",
         "trait_count": "個特質"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "至少一次出金機率",
@@ -3494,6 +3539,7 @@
     "local-qq": {
         "fill_qq_hint": "點擊快速填寫 QQ"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "返回登入",
         "code_send_failed": "驗證碼寄送失敗，請稍後再試",
@@ -4541,6 +4587,9 @@
         "stopRequested": "已發送停止請求",
         "stopScript": "停止腳本"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "帳號",
         "ai": "生成式AI",
@@ -4819,15 +4868,20 @@
         "desc": "預覽及分享角色皮膚染色",
         "desc_placeholder": "補充描述（選填）",
         "model_character": "角色預覽",
+        "model_collapse": "收起預覽",
         "model_downloading": "正在下載模型",
-        "model_error": "模型載入失敗。請執行模型匯出工具，或開啟工具匯出的 GLB。",
+        "model_error": "模型載入失敗，請稍後再試。",
+        "model_expand": "展開預覽",
+        "model_fullscreen": "全螢幕預覽",
+        "model_fullscreen_exit": "退出全螢幕",
         "model_notice": "拖曳旋轉，滾輪縮放。1–6：服裝；7：自發光；8：絲襪。燈光與特效尚未透過遊戲截幀校準，此預覽不代表像素級一致。",
-        "model_open": "開啟 GLB",
         "model_parsing": "正在解析模型",
         "model_reset": "重設視角",
+        "model_scope_all": "切換到全部區域",
+        "model_scope_main": "切換到主內容區域",
         "model_size": "模型大小",
         "model_title": "模型染色預覽",
-        "model_unsupported": "此皮膚暫無可用的 3D 模型，可開啟本機 GLB 預覽。",
+        "model_unsupported": "此皮膚暫無可用的 3D 模型。",
         "model_weapon": "武器預覽",
         "model_weapon_removed": "3D 預覽不含武器",
         "no_data": "暫無角色染色資料",
@@ -5073,6 +5127,7 @@
     "trait-list": {
         "title": "特質列表"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "解鎖消耗材料",
     "UI_Armory_ExtraExcelWeponTitle": "額外精通武器",
     "UI_FORGING_BLUEPRINT": "設計稿：",

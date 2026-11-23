@@ -299,6 +299,9 @@
         "theater_desc": "Participez aux performances et obtenez des lettres de commission !",
         "title": "Calendrier d'activités"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "Administration"
     },
@@ -909,6 +912,33 @@
         "paste_buff": "Coller le BUFF",
         "search_placeholder": "Rechercher un BUFF"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "Liste de BUFF supplémentaires",
         "additional_mod_list": "Liste de MOD supplémentaires",
@@ -928,6 +958,7 @@
         "tip": "Remarque : Les données de cette page ne seront pas sauvegardées automatiquement !",
         "title": "Comparaison de constructions"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "Liste des actions",
         "action_n": "Action {{n}} :",
@@ -2143,6 +2174,20 @@
         "owner_count": "porteurs",
         "search_placeholder": "Rechercher nom/description/tag (pinyin pris en charge)...",
         "trait_count": "traits"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "Probabilité d'au moins un doré",
@@ -3535,6 +3580,7 @@
     "local-qq": {
         "fill_qq_hint": "Cliquez pour remplir rapidement le QQ"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "Retour à la connexion",
         "code_send_failed": "Échec de l'envoi du code de vérification, veuillez réessayer plus tard",
@@ -4582,6 +4628,9 @@
         "stopRequested": "Demande d'arret envoyee",
         "stopScript": "Arreter le script"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "Compte",
         "ai": "IA générative",
@@ -4860,15 +4909,20 @@
         "desc": "Previsualiser et partager les teintures de skin",
         "desc_placeholder": "Description complémentaire (facultatif)",
         "model_character": "Afficher personnage",
+        "model_collapse": "Réduire l'aperçu",
         "model_downloading": "Téléchargement du modèle",
-        "model_error": "Impossible de charger le modèle. Lancez le programme pour exporter le modèle ou ouvrez le GLB obtenu.",
+        "model_error": "Impossible de charger le modèle. Réessayez plus tard.",
+        "model_expand": "Développer l'aperçu",
+        "model_fullscreen": "Aperçu plein écran",
+        "model_fullscreen_exit": "Quitter le plein écran",
         "model_notice": "Glissez pour tourner, défilez pour zoomer. 1–6 : tenue ; 7 : émission ; 8 : bas. Éclairage et effets non calibrés sur une capture du jeu : cet aperçu ne garantit pas une correspondance exacte.",
-        "model_open": "Ouvrir un GLB",
         "model_parsing": "Analyse du modèle",
         "model_reset": "Réinitialiser la vue",
+        "model_scope_all": "Passer à la zone complète",
+        "model_scope_main": "Passer à la zone principale",
         "model_size": "Taille du modèle",
         "model_title": "Aperçu 3D de la teinture",
-        "model_unsupported": "Aucun modèle 3D n'est encore disponible pour cette tenue. Vous pouvez ouvrir un GLB local pour l'aperçu.",
+        "model_unsupported": "Aucun modèle 3D n'est encore disponible pour cette tenue.",
         "model_weapon": "Afficher arme",
         "model_weapon_removed": "L'aperçu 3D n'inclut pas l'arme",
         "no_data": "Aucune donnée de coloration de personnage",
@@ -5120,6 +5174,7 @@
     "trait-list": {
         "title": "Liste des traits"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "Matériaux requis",
     "UI_Armory_ExtraExcelWeponTitle": "Arme supplémentaire",
     "UI_FORGING_BLUEPRINT": "Plan de fabrication : ",

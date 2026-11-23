@@ -377,19 +377,22 @@ interface SkinExportInput {
  */
 async function resolveMeshPaths(path: string, entry: SkinCatalogEntry): Promise<string[]> {
     const name = path.split("/").at(-1) ?? ""
-    const found = await searchAsset(`**/${name}.*`, characterDirectory(entry)?.split("/").at(-1))
+    const folder = characterDirectory(entry)?.split("/").at(-1)
+    const found = await searchAsset(`**/${name}.*`, folder)
     if (found) return [found]
     // 名字形如 `QNF_SP17_Body_SM`：退到同前缀的 `QNF_SP17_Part*_SM`
     const prefix = name.replace(/Body_SM$/, "")
-    if (prefix === name) return [path]
-    const { stdout, code } = await runCli(["search", `**/${prefix}Part*_SM.uasset`, "50"])
-    if (code) return [path]
-    const result = JSON.parse(decodeOutput(stdout).trim().split("\n").at(-1) ?? "{}")
-    const folder = characterDirectory(entry)?.split("/").at(-1)
-    const matches = (result.matches ?? [])
-        .filter((item: string) => item.endsWith(".uasset") && (!folder || item.includes(`/${folder}/`)))
-        .map((item: string) => `/${item.replace(/^EM\/Content\//, "Game/").replace(/\.uasset$/, "")}`)
-    return matches.length ? matches : [path]
+    if (prefix !== name) {
+        const { stdout, code } = await runCli(["search", `**/${prefix}Part*_SM.uasset`, "50"])
+        if (!code) {
+            const result = JSON.parse(decodeOutput(stdout).trim().split("\n").at(-1) ?? "{}")
+            const matches = (result.matches ?? [])
+                .filter((item: string) => item.endsWith(".uasset") && (!folder || item.includes(`/${folder}/`)))
+                .map((item: string) => `/${item.replace(/^EM\/Content\//, "Game/").replace(/\.uasset$/, "")}`)
+            if (matches.length) return matches
+        }
+    }
+    return [path]
 }
 
 /** 导出单个皮肤。返回写出的路径。 */
@@ -632,17 +635,18 @@ async function exportSkin({ entry, output, shopskinTint, hairTint }: SkinExportI
         const parent = inspected.parent ?? ""
         // 眼睛（M_Player_Eye_V*）单独一类：虹膜底图按 UV1 采样、自发光/高光是另一套参数，
         // 混进 base 会按 UV0 采样底图，只能得到一圈灰蓝色的巩膜。
-        const kind = parent.includes("ShopSkin")
-            ? "packed"
-            : parent.includes("M_Player_Skin")
-              ? "stocking"
-              : parent.includes("Hair_Tint")
-                ? "hair"
-                : parent.includes("HairPart")
-                  ? "hairPart"
-                  : parent.includes("M_Player_Eye")
-                    ? "eye"
-                    : "base"
+        const kind =
+            parent.includes("ShopSkin") || /\/M_Char_Tint6(?:_[^/.]+)?(?:\.\d+)?$/.test(parent)
+                ? "packed"
+                : parent.includes("M_Player_Skin")
+                  ? "stocking"
+                  : parent.includes("Hair_Tint")
+                    ? "hair"
+                    : parent.includes("HairPart")
+                      ? "hairPart"
+                      : parent.includes("M_Player_Eye")
+                        ? "eye"
+                        : "base"
         // 默认染色：材质实例自己的参数就是游戏里的默认外观，**优先保留**；
         // 数据表只补材质没写的槽（如 `暗部颜色`、部分 `自发光颜色`）。
         // 反过来用表覆盖会把材质精心调过的颜色冲掉，整只皮肤配色失真。

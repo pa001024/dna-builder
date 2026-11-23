@@ -298,6 +298,9 @@
         "theater_desc": "上演に参加して、依頼状を入手！",
         "title": "アクティビティカレンダー"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "管理画面"
     },
@@ -908,6 +911,33 @@
         "paste_buff": "BUFF を貼り付け",
         "search_placeholder": "BUFF を検索"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "追加BUFFリスト",
         "additional_mod_list": "追加MODリスト",
@@ -926,6 +956,7 @@
         "tip": "注: このページのデータは自動的には保存されません。",
         "title": "ビルド比較"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "アクション一覧",
         "action_n": "アクション {{n}}:",
@@ -2104,6 +2135,20 @@
         "owner_count": "名の所持キャラ",
         "search_placeholder": "特性名・説明・タグを検索（ピンイン対応）...",
         "trait_count": "件の特性"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "少なくとも1回金が出る確率",
@@ -3496,6 +3541,7 @@
     "local-qq": {
         "fill_qq_hint": "クリックで QQ をすばやく入力"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "ログインに戻る",
         "code_send_failed": "認証コードの送信に失敗しました。しばらくしてから再試行してください",
@@ -4543,6 +4589,9 @@
         "stopRequested": "停止リクエストを送信しました",
         "stopScript": "スクリプトを停止"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "アカウント",
         "ai": "生成AI",
@@ -4821,15 +4870,20 @@
         "desc": "キャラクタースキンの染色をプレビューして共有",
         "desc_placeholder": "補足説明（任意）",
         "model_character": "キャラクターを表示",
+        "model_collapse": "プレビューを閉じる",
         "model_downloading": "モデルをダウンロード中",
-        "model_error": "モデルを読み込めません。エクスポートツールを実行するか、出力されたGLBを開いてください。",
+        "model_error": "モデルを読み込めませんでした。しばらくしてからもう一度お試しください。",
+        "model_expand": "プレビューを展開",
+        "model_fullscreen": "全画面プレビュー",
+        "model_fullscreen_exit": "全画面を終了",
         "model_notice": "ドラッグで回転、ホイールでズーム。1–6：衣装、7：発光、8：ストッキング。ゲームのキャプチャによる照明・エフェクトの校正は未完了です。ピクセル単位の一致は保証しません。",
-        "model_open": "GLBを開く",
         "model_parsing": "モデルを解析中",
         "model_reset": "視点をリセット",
+        "model_scope_all": "全体エリアに切り替え",
+        "model_scope_main": "メインエリアに切り替え",
         "model_size": "モデルサイズ",
         "model_title": "3D染色プレビュー",
-        "model_unsupported": "このスキンには利用可能な 3D モデルがまだありません。ローカルの GLB を開いてプレビューできます。",
+        "model_unsupported": "このスキンにはまだ利用可能な 3D モデルがありません。",
         "model_weapon": "武器を表示",
         "model_weapon_removed": "3Dプレビューに武器は含まれません",
         "no_data": "キャラのカラーリングデータがありません",
@@ -5075,6 +5129,7 @@
     "trait-list": {
         "title": "特性一覧"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "アンロック消費素材",
     "UI_Armory_ExtraExcelWeponTitle": "追加熟練武器",
     "UI_FORGING_BLUEPRINT": "設計図：",

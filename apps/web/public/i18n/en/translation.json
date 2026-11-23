@@ -301,6 +301,9 @@
         "theater_desc": "Participate in performances and get commission letters!",
         "title": "Activity Calendar"
     },
+    "admin-bug-jobs": {},
+    "admin-bug-sync": {},
+    "admin-bugs": {},
     "admin-home": {
         "title": "Admin"
     },
@@ -913,6 +916,33 @@
         "paste_buff": "Paste BUFF",
         "search_placeholder": "Search BUFF"
     },
+    "bug": {
+        "category": {},
+        "env": {
+            "frequency": {},
+            "region": {}
+        },
+        "event": {},
+        "filter": {},
+        "publication": {},
+        "relation": {},
+        "reproduction": {},
+        "severity": {},
+        "sort": {},
+        "status": {},
+        "submission_state": {},
+        "submission_state_hint": {},
+        "tag": {
+            "fix": {}
+        }
+    },
+    "bug-detail": {},
+    "bug-list": {
+        "col": {}
+    },
+    "bug-mine": {},
+    "bug-new": {},
+    "bug-submission": {},
     "build-compare": {
         "additional_buff_list": "Additional BUFF List",
         "additional_mod_list": "Additional MOD List",
@@ -931,6 +961,7 @@
         "tip": "Note: The data on this page will not be automatically saved!",
         "title": "Build Compare"
     },
+    "build-info": {},
     "char-action-editor": {
         "action_list": "Action List",
         "action_n": "Action {{n}}:",
@@ -2128,6 +2159,20 @@
         "owner_count": "owners",
         "search_placeholder": "Search trait name/description/tag (pinyin supported)...",
         "trait_count": "traits"
+    },
+    "db-transcendence": {
+        "common": {},
+        "craft": {},
+        "detail": {},
+        "gear": {
+            "coverage": {}
+        },
+        "journey": {},
+        "nest": {},
+        "overview": {},
+        "rift": {},
+        "tab": {},
+        "talent": {}
     },
     "db-walnut-detail": {
         "col_at_least_once": "Chance of at Least One Gold",
@@ -3518,6 +3563,7 @@
     "local-qq": {
         "fill_qq_hint": "Click to quickly fill in QQ"
     },
+    "log-analysis": {},
     "login-dialog": {
         "back_to_login": "Back to login",
         "code_send_failed": "Failed to send the verification code, please try again later",
@@ -4565,6 +4611,9 @@
         "stopRequested": "Stop request sent",
         "stopScript": "Stop script"
     },
+    "search": {
+        "transcendence": {}
+    },
     "setting": {
         "account": "Account",
         "ai": "Generative AI",
@@ -4843,15 +4892,20 @@
         "desc": "Preview and share character skin dyes",
         "desc_placeholder": "Additional description (optional)",
         "model_character": "Show Character",
+        "model_collapse": "Collapse preview",
         "model_downloading": "Downloading model",
-        "model_error": "Could not load the model. Run the exporter or open its exported GLB.",
+        "model_error": "Could not load the model. Please try again later.",
+        "model_expand": "Expand preview",
+        "model_fullscreen": "Fullscreen preview",
+        "model_fullscreen_exit": "Exit fullscreen",
         "model_notice": "Drag to orbit, scroll to zoom. 1–6: clothing; 7: emission; 8: stockings. Lighting and effects have not been calibrated against a game capture; this is not a pixel-exact preview.",
-        "model_open": "Open GLB",
         "model_parsing": "Parsing model",
         "model_reset": "Reset View",
+        "model_scope_all": "Switch to the whole area",
+        "model_scope_main": "Switch to the main area",
         "model_size": "Model size",
         "model_title": "3D Dye Preview",
-        "model_unsupported": "No 3D model is available for this skin yet. You can open a local GLB to preview.",
+        "model_unsupported": "No 3D model is available for this skin yet.",
         "model_weapon": "Show Weapon",
         "model_weapon_removed": "3D preview excludes the weapon",
         "no_data": "No character color data",
@@ -5103,6 +5157,7 @@
     "trait-list": {
         "title": "Trait List"
     },
+    "transcend-build": {},
     "UI_Armory_ExtraExcelResource": "Materials required to unlock",
     "UI_Armory_ExtraExcelWeponTitle": "Additional Weapon Proficiency",
     "UI_FORGING_BLUEPRINT": "Blueprint: ",

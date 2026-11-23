@@ -41,7 +41,7 @@ export function eyeUvChannelFromParent(parent: string | undefined): 0 | 1 {
 
 export interface SkinMaterialMetadata {
     version: 1
-    kind: "packed" | "stocking" | "hair" | "hairPart" | "weapon" | "base" | "shadow" | "eye"
+    kind: "packed" | "stocking" | "hair" | "hairPart" | "weapon" | "base" | "shadow" | "eye" | "waterTail" | "waterWave"
     role: "character" | "weapon"
     parent: string
     vectors: Record<string, LinearRgb>
@@ -55,6 +55,36 @@ export interface SkinHairDye {
     hair: [LinearRgb, LinearRgb, LinearRgb]
     hairPart: [LinearRgb, LinearRgb, LinearRgb]
     hairPartEmission: LinearRgb
+}
+
+/** 兼容已发布模型的材质分类与缺省参数：WaterTail 使用原着色器的固定色带，Tint6 补齐新版发光色。 */
+export function normalizeSkinMaterial(data: SkinMaterialMetadata): SkinMaterialMetadata {
+    if (/\/M_Baiheng_WaterWave(?:\.\d+)?$/.test(data.parent)) return { ...data, kind: "waterWave" }
+    if (/\/M_Player_Part_WaterTail(?:\.\d+)?$/.test(data.parent)) {
+        return {
+            ...data,
+            kind: "waterTail",
+            vectors: {
+                染色1: [0, 0, 0],
+                染色2: [0.19798213, 0.23551302, 0.38020834],
+                染色3: [0.17029703, 0.165625, 0.2],
+                染色4: [0.06911901, 0.12149695, 0.25520799],
+                染色5: [0, 0, 0],
+                染色6: [0, 0, 0],
+                ...data.vectors,
+            },
+        }
+    }
+    if (!/\/M_Char_Tint6(?:_[^/.]+)?(?:\.\d+)?$/.test(data.parent)) return data
+    return {
+        ...data,
+        kind: "packed",
+        vectors: {
+            ...data.vectors,
+            自发光颜色02: data.vectors.自发光颜色2 ?? [0, 0, 0],
+            突破自发光: data.vectors.自发光颜色3 ?? [0, 0, 0],
+        },
+    }
 }
 
 export function validateSkinModelMetadata(value: unknown): SkinModelMetadata {
