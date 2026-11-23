@@ -13,6 +13,11 @@ AGENTS.md 只列命令，这里是每个脚本的用途、输入输出与注意�
   缺语言时输出 `⚠ warning`（只改一门译文、文件本就齐全时不误报）。
 - `bun i18n get <key> [--lang cn,en] [--json]` — 读取某键各语言的值（默认全部 6 种）。
 - `bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]`（`search` 同义）— 按译文反查 key，默认 6 语言大小写不敏感子串匹配。
+- `bun i18n ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]`（`reference` 同义）—
+  查上游官方文本表 TextMap：先按 TextMapId 直查，未命中再按任意语言原文检索，展示原始翻译 ID 与
+  cn/en/jp/kr/fr/tc 官方译文。数据源 `Script/Datas/TextMap_I18n.lua` + `TextMap_ContentXX.lua`
+  （分片优先，同上游 `src/i18n/TextMap.ts`）；上游路径取 `.env` 的 `DNA_UPSTREAM`，首次读取约 10 秒。
+  取数复用 `tools/import-i18n-data.ts` 的 luaLoader（`readLuaTableRaw`，不深排序）。
 - `bun i18n rm <key>` — 删除某键（所有语言）。
 - `bun i18n export|import` — 导出缺失翻译到 `tools/i18n-diff.json`、导入后删除该文件。
 - `bun i18n check [--json] [--locale-gap]` — 扫描代码中静态引用（`t("x")` 系列）但 zh-CN 未配置的键。
@@ -27,8 +32,17 @@ bun i18n add setting.generative_ai \
 
 ## 图标
 
-`bun tools/icon-tool.ts add|check|clean|list` — 管理 `apps/web/src/components/Icon.vue` 里的图标；
+`bun tools/icon-tool.ts add|import|check|clean|list` — 管理 `apps/web/src/components/Icon.vue` 里的图标；
 lint 报「icon not found」时用它。
+
+```bash
+bun icon import apps/web/public/imgs/webp/T_Tab_Season_Craft_FinalForge.webp gi:final-forge
+```
+
+`import` 接受仓库根目录相对路径或绝对路径，支持 WebP、PNG、JPEG 等 Bun 可解码的位图。
+有透明背景时描摹 alpha，否则按明暗描摹（用四角推断背景是深色还是浅色）。曲边拟合为三次贝塞尔曲线，保留明显的尖角、直边、镂空与长宽比。
+图标写入 `Icon.vue` 的 `24×24` viewBox，使用 `currentColor` 着色，不保留源图颜色。默认不覆盖同名图标，追加 `--force` 可重新生成。
+导入后可用 `<Icon icon="gi:final-forge" />`。
 
 ## API 生成
 
@@ -36,8 +50,12 @@ lint 报「icon not found」时用它。
 
 ## 称号框（title frames）
 
-`pnpm itf`（`bun tools/import-title-frame.ts`）— 通过 fmodel-cli 读取游戏 pak，重新生成称号框渲染数据：
+`pnpm itf`（`bun tools/import-title-frame.ts`）— 重新生成称号框渲染数据：
 
+- 资产**优先从 FModel 导出目录里的本地 .uasset 解码**（fmodel-cli 的 `read-file` /
+  `inspect-file` / `export-tex-file`），本地没有该包时才回退到 pak（`read` / `inspect` / `export-tex`）。
+  导出根目录默认 `D:/dev/dna-unpack/Fmodel/Output/Exports`，可用 `TITLE_FRAME_EXPORTS`
+  （或 `DNA_UNPACK_EXPORTS`）覆盖；
 - 产物：`apps/web/src/utils/title-frame/title-frame.generated.ts`、
   `apps/web/src/utils/title-frame/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）、
   `public/imgs/titleframe/*.webp`；
@@ -47,27 +65,70 @@ lint 报「icon not found」时用它。
 basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单，按包路径补齐这些贴图，
 因此 `bun tools/webp-import.ts` 也能覆盖它们，不会误报缺失。
 
-新客户端资源滞后（补充包）：`TitleFrame.lua` 先行、本地游戏 pak 还没有对应 WBP（如 15_x）时：
+新客户端资源滞后（本地 pak 还没有对应 WBP，如 16_x）：直接用 FModel 把资产导出到
+`D:/dev/dna-unpack/Fmodel/Output/Exports/`（保持 `EM/Content/...` 原结构，`.uasset/.uexp/.ubulk`
+齐全即可），然后跑 `pnpm itf`——脚本会直接从这些 .uasset 解码，**不需要再打补充包**。
+**不要用 `--frames`**，它会按选中子集重写生成文件并删掉其余贴图。
 
-1. 用 FModel 把缺的资产导出到 `D:/dev/dna-unpack/Fmodel/Output/Exports/`；
-2. 收集 `.uasset/.uexp`（及 `.ubulk`）按 `EM/Content/...` 原结构打补充包：
-   `repak pack <暂存目录> -q` 后改名 `*_P.pak` 放进 `D:/dev/dna-unpack/SupplementPaks/`
-   （如 `Title15_P.pak`；fmodel-cli 配置的 `PatchPaksDirs` 已含该目录）；
-3. 直接跑全量 `pnpm itf`（**不要用 `--frames`，它会按选中子集重写生成文件并删掉其余贴图**）。
-
-脚本侧对新客户端做了两处兼容（`tools/import-title-frame.ts`）：
+脚本侧对新客户端的兼容（`tools/import-title-frame.ts`）：
 
 - 引用路径归一：新资产内部用 `/Game/` 挂载前缀，`objectPathToPackage` 统一改写回 `EM/Content/`；
 - 烘焙 PNG 兜底：某贴图缺 `.uasset`、只有 FModel 烘焙 PNG 时，`exportTexture` 改用
   `status.outputDir` 下同名 PNG（宽高从 IHDR 头读取），不再直接抛错中断。
 
+> fmodel-cli 的 `read-file` / `inspect-file` 与带外置 `.ubulk` 的 `export-tex-file`
+> 是为这条路径补的子命令（源码在 `D:/dev/fmodel-mcp/Cli`，`dotnet publish` 到 `bin/publish`）。
+
 ## 图片（webp）
 
-`bun tools/webp-import.ts` — 把 FModel 导出的纹理 PNG 转成 WebP 落到 `public/imgs/`（增量，`--force` 重转、`--dry-run` 只统计）。
+`bun tools/webp-import.ts` — 把纹理解码成 WebP 落到 `public/imgs/`（增量，`--force` 重转、`--dry-run` 只统计、`--filter <正则>` 只处理匹配目标路径的资源）。
+
+**源是本地 1.8 客户端 uasset 树，默认不读 pak**：目标名按导出根下的 `.uasset` 索引反推包路径，
+`fmodel-cli export-tex-file <本地 .uasset>` 直接解码成 PNG（`.uasset` 与 `.uexp` 必须齐全），
+结果落在导出目录（与 FModel 界面导出同布局）。优先于同名 PNG 现货；没有 `.uasset` 才用 PNG。
+
+- `--source <dir>`：指向 `.../EM/Content/UI/Texture`（保留 `EM/Content` 层级，导出根由此反推）。
+  默认候选只有同级 `dna-unpack/uasset-1.8/EM/Content/UI/Texture`，找不到会要求显式传 `--source`。
+- `--allow-pak`：仅兜底用。开启后才允许 `export-tex` 直读 pak 与全 pak `search`；
+  默认两者都关闭，本地无 `.uasset` 的引用只进缺失清单，不会静默读旧 pak。
+- `--no-uasset-first`：回退旧行为（同名 PNG 现货优先），排查用。
+- `--no-uasset`：完全不调 fmodel-cli，只报缺失。`--jobs N` 并发解码数（默认 4）。
 
 引用来源为两者合并：`src/{data,components,utils,views}` 里的 `/imgs/**` 字面量扫描，以及 `evaluateDataUrls()` 的数据评估。
-**数据里不含 `/imgs/` 前缀的字段（如线索板 / 剧情回顾的 `pic1` / `pic2`、百科条目的 `img` 与页签 `icon`、活动拍照 `photoView`）
+**数据里不含 `/imgs/` 前缀的字段（如线索板 / 剧情回顾的 `pic1` / `pic2`、百科条目的 `img` 与页签 `icon`、活动拍照 `photoView`、
+升华（DNASeason）的赛季主图 / 委托图 / 掉落加成图标 / 唯一装与基础名图标 / 天赋节点图标）
 必须在 `evaluateDataUrls()` 里枚举**，否则整批贴图不会被导入，只会静默缺失。
+
+`pnpm wi:dnaseason` 覆盖的类别：`res/` 与 `webp/` 下的 `T_Season_*`（赛季主图、委托图、掉落加成、唯一装、基础名、挑战）
+以及 `webp/T_Rouge_Talent_*`（升华阶段 / 天赋节点；该前缀与 Rouge 玩法共用，均已存在的图标只会跳过）。
+
+尺寸规则：`res/T_Season_*` 保持源分辨率（`FULL_SIZE_RULES`，游戏原图 256×256）；
+`webp/T_Rouge_Talent_*` 固定 128×128（`FIXED_SIZE_RULES`），源优先 `Dynamic/Image/RougeLike` 512 整图、
+Image 缺失才回退 `Dynamic/Atlas/RougeLike` 图集——图集版本字形只占画布约 40%，直接用会让图标位里字形偏小。
+
+从新客户端重建源树（不读 pak 全量解包，按需只取 UI 贴图）：
+
+```bash
+# 主 pak 解出 UI 贴图（约 7 万文件 / 10 GB / 3 分钟）
+repak -a <AES key> unpack "<...>/pakchunk0-WindowsNoEditor.pak" -o "F:/test/uasset-1.8" \
+  -i "EM/Content/UI/Texture" -i "EM/Content/UI/WBP" -f
+# 按 110001..110008 顺序覆盖补丁包（同 include 过滤）
+for v in 110001 110002 110003 110004 110005 110006 110007 110008; do
+  for p in "<...>/Patch/$v"/*.pak; do
+    repak -a <AES key> unpack "$p" -o "F:/test/uasset-1.8" -i "EM/Content/UI/Texture" -i "EM/Content/UI/WBP" -f
+  done
+done
+
+# 重导（--filter 收口，--force 全量重做）
+bun tools/webp-import.ts --source "F:/test/uasset-1.8/EM/Content/UI/Texture" \
+  --filter "^(res|webp)/(T_Season_|T_Tab_Season_|T_Rouge_Talent_)" --force
+```
+
+旧版本的 FModel 导出目录 / `PaksDir` 已废弃：`F:/test/EM` 这类混合树里 PNG 现货可能是历史烘焙，
+只有 `.uasset/.uexp` 可信；同名覆盖后 CDN / PWA / 桌面 OPFS 按路径缓存不会自动刷新，见 `U67b`。
+
+桌面端（Tauri）的 `/imgs` 由 OPFS 提供，预缓存集合来自数据包的 `imgs.json`。本流程只保证 Web 端验收通过；
+新图片要等下一次 `pnpm dp -v <version>` 重建数据包并部署后，桌面端才会挂载。
 
 ## 属性 i18n
 

@@ -36,8 +36,8 @@
         "prebuild": "node ./scripts/gen-mcp-type-definition-map.mjs",
         "prepack": "pnpm run build",
         "release": "npm run build && npm publish --access public --registry https://registry.npmjs.org/",
-        "test": "vitest run",
-        "test:coverage": "vitest run --coverage",
+        "test": "node ../../tools/vitest-run.mjs",
+        "test:coverage": "node ../../tools/vitest-run.mjs --coverage",
         "test:watch": "vitest",
         "test:ui": "vitest --ui"
     },

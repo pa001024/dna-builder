@@ -257,7 +257,7 @@ function skipAppUpdate(): void {
 // ---------- 数据包 ----------
 async function checkDataPack(): Promise<void> {
     // hideUpdateInfo=1 时整体禁用弹窗（含更新日志）：
-    // 无头冒烟测试（bun-webview-test）等场景没有数据包，弹窗会挡住页面导致无法断言 DOM。
+    // 浏览器冒烟测试（ego-browser-test / Playwright）等场景没有数据包，弹窗会挡住页面导致无法断言 DOM。
     if (hideUpdateInfo) {
         dataPackChecked.value = true
         return

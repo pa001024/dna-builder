@@ -62,7 +62,7 @@
 
 ### 端到端
 
-`.tmp/verify-*.ts`（bun-webview-test，指向跑着的 dev server）验过：活动详情页渲染出内嵌的永恒梦魇整块（Boss 列表、两种模式、逐档掉落、强力增益、敌人面板）、`click` 能切到另一个 Boss 与高难模式；
+`.tmp/verify-*.ts`（浏览器 e2e，指向跑着的 dev server；当时用 bun-webview-test，现由 ego-browser-test 取代）验过：活动详情页渲染出内嵌的永恒梦魇整块（Boss 列表、两种模式、逐档掉落、强力增益、敌人面板）、`click` 能切到另一个 Boss 与高难模式；
 净化产物无 `class=` / `style=` / `<script>` / `<img>` / `<svg>` / `data-`；主界面 DOM 与 `document.title` 无副作用，离屏容器无残留。
 
 > 没测过的：模型通过真实对话调用工具（需要 AI 配置与登录），以及生产构建（规则不允许跑 `pnpm build`）。
@@ -104,6 +104,6 @@ DB 页面里唯一会起 Worker 的是背包拼图求解（`BackpackPuzzle.worke
 - 结果里的 `errors` 非空说明有区块渲染失败，`note` 会说明「对应区块不完整，不代表资料库没有这些数据」。
 - 工具没有标 `concurrentSafe`：渲染是重活，串行执行。
 - 单测（`apps/web/src/utils/page-html-snapshot.test.ts`）只覆盖纯逻辑的路径收敛；渲染链路依赖真实浏览器，
-  验证走 `.agents/skills/bun-webview-test`（在页面里 `await import("/src/utils/page-html-snapshot.ts")` 直接调用）。
+  验证走 `.agents/skills/ego-browser-test`（在页面里 `await import("/src/utils/page-html-snapshot.ts")` 直接调用）。
 - **改了本功能的模块后，如果浏览器里仍看到旧行为，先确认 dev server 的模块图已经失效重编**
   （实测长时间运行的 vite 偶尔会继续吐旧的 transform 结果，重启 dev server 即恢复）。

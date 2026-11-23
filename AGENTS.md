@@ -16,6 +16,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 后台管理（/admin）页面的设计约定、共享配方与加页流程 | [admin-ui.md](.agents/docs/admin-ui.md) |
+| 自动化测试流程（Vitest / Playwright / ego-browser 真实浏览器） | [testing.md](.agents/docs/testing.md) |
 |Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具）|[agent-skills.md](.agents/docs/agent-skills.md)|
 |dob-ui 组件库（daisyUI fork、db-style 覆写层、类名无前缀）|[dob-ui.md](.agents/docs/dob-ui.md)|
 |深链（`dobapp://` 协议注册、解析口径、中转页、平台差异）|[deep-link.md](.agents/docs/deep-link.md)|
@@ -37,6 +38,8 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 pnpm dev                              # Development server (http://localhost:1420/)
 pnpm lint                             # 增量 lint：Biome + vue-tsc 只处理改动过的文件
 pnpm test                             # Run all tests (vitest run)
+pnpm test:browser                     # 真实浏览器冒烟（ego lite，需桌面应用 + localhost:1420）
+pnpm --filter dna-builder-web test -- src/utils/tests/foo.test.ts   # Run single web test file
 pnpm --filter dna-builder-data test -- tests/foo.test.ts  # Run single data test file
 pnpm format                           # Format with Biome
 ```
@@ -49,6 +52,7 @@ bun i18n add setting.generative_ai \
   -cn "生成式AI" -tw "生成式AI" -en "Generative AI" -jp "生成AI" -kr "생성형 AI" -fr "IA générative"
 
 bun i18n get <key> [--lang cn,en]          # 读取各语言的值（默认全部 6 种）
+bun i18n ref <文本> [--lang cn,en]         # 查上游 TextMap：原始翻译 ID + 官方各语言译文（需 DNA_UPSTREAM）
 bun i18n rm <key>                          # 删除某键（所有语言）
 bun i18n export/import                     # 导出/导入缺失翻译（tools/i18n-diff.json）
 bun i18n check [--json] [--locale-gap]     # 扫描代码引用但翻译文件缺失的键

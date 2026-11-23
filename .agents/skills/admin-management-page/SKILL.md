@@ -62,7 +62,7 @@ agent_created: true
 2. 布局必须**量出来**，不靠肉眼：探针脚本放 `.tmp/*.mjs`，读 `getBoundingClientRect` / `getComputedStyle`，
    断言 `table.getBoundingClientRect().width <= document.documentElement.clientWidth`（无横向溢出）。
    - 脚本用 `import { chromium } from "@playwright/test"` —— 仓库里**没有**裸 `playwright` 包。
-   - ⚠️ **提交进仓库的 e2e 用 `bun-webview-test`（`.agents/skills/bun-webview-test`），Playwright 只用于 `.tmp` 里的临时探针。**
+   - ⚠️ **提交进仓库的浏览器 e2e 分两类**：需要 route mock / 多上下文 / CI 的用 Playwright（`apps/web/tests/e2e`，`pnpm test:e2e`）；真实浏览器冒烟用 `ego-browser-test`（`apps/web/tests/browser`，`pnpm test:browser`）。`.tmp` 里的临时探针仍可用 Playwright。
    - 后端在**生产域**（`env.apiEndpoint`）时，本地页面发不出可用的真实请求 →
      用 `page.route("**/api/v1/<...>/**", …)` 拦截并喂 fixture，别去请求真接口。
    - 点击前先清遮挡层：`document.querySelectorAll("dialog").forEach(n => n.remove())` + 移除 `.modal-backdrop`。

@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translation.json）。当需要新增/覆盖/删除某条界面文案的翻译、按语言批量插键、查询某个 i18n 键在各语言下的值、按译文反查 key、导出与导入缺失翻译、或扫描代码里引用了但翻译文件缺失的键时使用本技能。触发场景：新增界面文案要补多语言、报「键名泄漏/界面还是中文」、i18n 检查、语言包漏翻、给某个 key 加 jp/kr/fr 译文、看到一句文案想找到它对应的 key。
+description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translation.json）。当需要新增/覆盖/删除某条界面文案的翻译、按语言批量插键、查询某个 i18n 键在各语言下的值、按译文反查 key、查上游官方文本表（ref：原始 TextMapId + 官方各语言译名）、导出与导入缺失翻译、或扫描代码里引用了但翻译文件缺失的键时使用本技能。触发场景：新增界面文案要补多语言、报「键名泄漏/界面还是中文」、i18n 检查、语言包漏翻、给某个 key 加 jp/kr/fr 译文、看到一句文案想找到它对应的 key。
 ---
 
 # dna-builder i18n 工具
@@ -18,6 +18,7 @@ description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translati
 - 新增界面文案，需要为多个语言补译文 / 覆盖已有译文（**默认补齐全部 6 语言、各语言书写**）。
 - 查询某个 i18n 键在 6 种语言下现有值（确认是否已翻、值是否对）；可用 `--lang cn,en` 只看部分。
 - 按译文反查 key（看到界面上一句文案，想找到它对应的键再改）：`bun i18n find <文本>`。
+- 补术语 / 界面文案前查上游官方译名：`bun i18n ref <文本>` 显示原始 TextMapId 与官方六语译文。
 - 删除某个废弃键。
 - 导出缺失翻译表格交给翻译、翻好后导回。
 - 排查「代码里 `t("x")` 引用了但文件里没有」的漏配键。
@@ -54,12 +55,22 @@ bun i18n get <key> [--lang cn,en] [--json]
 bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]
                                  # 按译文反查 key（find/search 同义）：默认 6 语言大小写不敏感子串匹配；
                                  # --lang 限定语言，--exact 全字相等，--limit 最多展示数（默认 20）
+bun i18n ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]
+                                 # 查上游官方文本表 TextMap（ref/reference 同义）：先按 TextMapId 直查，
+                                 # 未命中再按任意语言原文检索；展示原始翻译 ID 与官方 cn/en/jp/kr/fr/tc 译文。
+                                 # 数据源 TextMap_I18n + TextMap_ContentXX 分片（分片优先，同上游 TextMap.get），
+                                 # --no-shard 只读主索引；上游路径取 .env 的 DNA_UPSTREAM，首次读取约 10 秒
 bun i18n rm <key...>             # 从所有语言删除一个或多个键（会清理因此变空的父命名空间）
 bun i18n langs                   # 列出语言目录与全部别名
 bun i18n export                  # 导出「zh-CN 有值、其它语言缺值」的键 → tools/i18n-diff.json
 bun i18n import                  # 把 tools/i18n-diff.json 的译文写回并删除该文件
 bun i18n check [--json] [--locale-gap]   # 扫描代码静态引用但 zh-CN 未配置的键
 ```
+
+写命令（`add` / `rm` / `import` / `export`）自带跨进程文件锁（`.tmp/i18n.lock`，默认 60s 超时）与
+「同目录临时文件 + rename」原子写，多个进程可并发调用；读命令（`get` / `find` / `ref` / `langs` / `check`）不加锁。
+无锁读只保证单个文件「整旧或整新」：多文件提交期间，可能读到不同 locale 的新旧混合快照。
+该锁只覆盖 `bun i18n`；其它直接写 `translation.json` 的工具（如 `tools/import-attr-i18n.ts`）暂不参与（后续项）。
 
 ## 键的两种形式（决定 add 怎么写）
 
@@ -145,3 +156,17 @@ bun i18n find "生成式AI" --exact      # 全字相等（子串命中太多时�
 bun i18n find "Generator" --lang en   # 只在英文里查（看到英文文案找键时用）
 bun i18n find "生成" --limit 5 --json  # 命中多时只看前 5 个 / 输出结构化结果
 ```
+
+**补术语前查上游官方译名**（拿到原始 TextMapId + 官方六语，直接抄进 `add`）
+
+```bash
+bun i18n ref 暴击率                  # 按中文原文检索，每条带 TextMapId 与 cn/en/jp/kr/fr/tc
+bun i18n ref Attr_CRI_Name           # 已知 TextMapId 时直查
+bun i18n ref "CRIT" --lang en        # 按英文原文反查 ID 与其它语言
+bun i18n ref 攻击 --exact --json     # 只要全字相等 / 输出结构化结果
+```
+
+`ref` 读的是上游 `Script/Datas/TextMap_I18n.lua` 与 `TextMap_ContentXX.lua`（分片优先，
+同上游 `src/i18n/TextMap.ts` 的取数口径），上游仓库路径取 `.env` 的 `DNA_UPSTREAM`。
+**不要**把 `ref` 的输出整段塞进 `public/i18n`：游戏数据术语仍走数据包，`ref` 只用来确认
+官方措辞与 ID（例如给 `SUPPLEMENTAL_TEXT_MAP_IDS` / `TRANSLATION_ALIASES` 选 ID）。

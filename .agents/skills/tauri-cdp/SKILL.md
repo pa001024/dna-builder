@@ -1,6 +1,6 @@
 ---
 name: tauri-cdp
-description: 通过 WebView2 DevTools 协议（CDP）连接并操作 Tauri 桌面应用（Windows）。当 bun-webview-test 无法覆盖桌面端特有功能（Tauri IPC/命令、窗口材质、托盘、深链、更新器、浮窗、系统集成）时使用；也可用于对真实桌面 WebView2 做点击、输入、求值、截图与控制台断言。应用生命周期归用户（不启动、不结束进程）；agent 负责 HKLM CDP 策略的诊断、配置与清理。
+description: 通过 WebView2 DevTools 协议（CDP）连接并操作 Tauri 桌面应用（Windows）。当 ego-browser-test 无法覆盖桌面端特有功能（Tauri IPC/命令、窗口材质、托盘、深链、更新器、浮窗、系统集成）时使用；也可用于对真实桌面 WebView2 做点击、输入、求值、截图与控制台断言。应用生命周期归用户（不启动、不结束进程）；agent 负责 HKLM CDP 策略的诊断、配置与清理。
 ---
 
 # Tauri 桌面端 CDP 调试
@@ -265,13 +265,13 @@ reg delete "HKLM\Software\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArgu
 
 **执行时机**：本轮桌面端测试完成，或用户明确要求关闭调试时。不要留着长期开放调试端口。
 
-## 与 bun-webview-test 的分工
+## 与 ego-browser-test / Playwright 的分工
 
 | 场景 | 用哪个 |
 |---|---|
-| 纯前端页面、`localhost:1420`、无桌面依赖 | `bun-webview-test`（无头、可并行、隔离） |
+| 纯前端页面、`localhost:1420`、无桌面依赖 | `ego-browser-test`（真实浏览器、TaskSpace 隔离、复用登录态） |
+| 需要 route 拦截 / 多用户 context / CI | Playwright（`apps/web/tests/e2e`） |
 | 需要真实 Tauri IPC / 窗口 / 托盘 / 深链 / 更新器 / 系统命令 | **本技能**（连接用户已启动的桌面应用） |
-| 需要可重复 CI、无用户桌面会话 | `bun-webview-test` |
 | 需要截取真实桌面窗口内的渲染结果 | 本技能 |
 | 需要测试应用启动参数、单实例、退出行为 | 用户手动启动 + 本技能观察；agent 不管理进程 |
 

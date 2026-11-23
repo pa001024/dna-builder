@@ -13,14 +13,14 @@ End-to-end isolated PR workflow: requirements gathering → specification → wo
 When you are launched as an **independent implementation session** by `.agents/skills/orchestrated-delivery` (not the main session), follow these overrides:
 
 - **Requirements/Spec**: Use `PLAN.md` + `TASKS/<unit>.md` as source of truth; skip steps 1-2 interactive confirmation; do NOT call `/grill-with-docs`.
-- **Worktree**: Already created by launcher via `t3_thread_launch` `workspaceStrategy`; **skip step 3**, do NOT execute `git worktree add`.
+- **Workspace**: Already provided by the launcher via `t3_thread_launch` `workspaceStrategy` (a prepared worktree, or the main checkout in `root` mode); **skip step 3**, do NOT execute `git worktree add`.
 - **Implementation**: Implement directly per task spec; proceed without `/implement-spec` if unavailable.
 - **Testing**: Execute step 5 commands; include results in final report.
 - **Review**: Execute step 6; if `/code-review` unavailable, use read-only subagent for equivalent review.
-- **PR Creation**: Execute step 7 only if task spec requires it; otherwise commit to branch and report.
+- **Git**: Follow the task spec's git policy. `none`: leave the changes uncommitted and run no git writes. `commit`: commit to the unit's branch, no push. `pr`: execute step 7; the task spec records the user's push/PR authorization.
 - **Cleanup**: **Skip step 8**; do NOT remove worktree, leave it to orchestrator.
 - **Communication**: Do NOT ask user directly; write issues/risks into final report or use pending requests.
-- **Final Report** must include: branch name, commit SHA, PR URL (if created), verification commands & results, review conclusion, open questions.
+- **Final Report**: Write it to the report path named in the task spec (`REPORT-<unit>.md`) and reply with a short summary. It must include: changed files, verification commands & results, review conclusion, open questions, plus branch name, commit SHA and PR URL when the git policy produced them.
 
 ## Workflow Steps
 

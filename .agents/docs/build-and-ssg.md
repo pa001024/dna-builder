@@ -96,15 +96,13 @@ Rust crate 的 major/minor 一致（见 `apps/web/src-tauri/Cargo.lock`），`^`
 - **Worker 里不能 import 数据模块**：Worker 有独立模块图，拿不到主线程水合出来的值（见 `docs/rag.md`）。
 - **桌面端/网页端都要能"无数据"降级**：新功能不要在模块求值期就假设数据非空。
 
-## e2e 与数据包（bun-webview-test）
+## e2e 与数据包（ego-browser-test）
 
-无头 profile 是全新的，而 dev server 的数据模块同样走水合：没有数据包时页面数据为空。
-两种应对方式，按需选：
+ego lite 用真实浏览器 profile，TaskSpace 之间共享同一 profile 的 localhost:1420 存储（localStorage / IndexedDB）。没有数据包时页面数据为空，数据页会停在加载态。两种应对方式，按需选：
 
-- **装一次、反复用**：`new WebView({ dataStore: { directory: "./profile" } })` 传持久 profile
-  （路径要绝对路径或相对 cwd 的目录对象），首次运行时在页面内
-  `const pack = await import("/src/utils/data-pack/data-pack.ts"); await pack.downloadDataPack()`，
-  之后重新导航即有水合后的数据；dev 的包基址是 `/mock/data-pack`，不联网也能装。
+- **装一次、反复用**：在页面内 `const pack = await import("/src/utils/data-pack/data-pack.ts"); await pack.downloadDataPack()`。
+  dev 的包基址是 `/mock/data-pack`，不联网也能装；写进 ego lite 当前 profile 的 localhost:1420 存储，之后重新导航即有水合后的数据。
+  这会改用户 ego lite profile 的本地开发域存储，只在明确的本地测试环境执行。
 - **页面内直接调用应用模块**：`await import("/src/utils/xxx.ts")` —— Vite 按解析后的 URL 去重模块实例，
   拿到的是应用正在用的同一份单例。**不要为了测试往产品代码里加 `window.__debug` 之类的钩子。**
 

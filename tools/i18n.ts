@@ -7,6 +7,8 @@
  *   bun i18n get <key> [--lang cn,en]                         # 读取某键各语言的值（默认全部）
  *   bun i18n find <文本> [--lang cn] [--exact] [--limit N] [--json]
  *                                                           # 按译文反查 key（默认全部语言、大小写不敏感的子串匹配）
+ *   bun i18n ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]
+ *                                                           # 查上游官方文本表 TextMap：原始翻译 ID + 官方各语言译文
  *   bun i18n rm  <key>                                        # 删除某键（所有语言）
  *   bun i18n langs                                            # 列出可用语言与别名
  *   bun i18n export                                           # 导出缺失翻译到 tools/i18n-diff.json
@@ -29,9 +31,10 @@
  *   静态键仅匹配字符串字面量，模板字符串与变量计入 dynamic 计数后跳过。
  */
 
-import { readdir, readFile, unlink, writeFile } from "node:fs/promises"
+import { readdir, readFile, unlink } from "node:fs/promises"
 import { dirname, extname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
+import { type FileLockOptions, withFileLock, writeFileAtomic } from "./i18n-io"
 
 /** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
@@ -41,6 +44,14 @@ const I18N_DIR = join(WEB_DIR, "public", "i18n")
 const DIFF_FILE = join(REPO_ROOT, "tools", "i18n-diff.json")
 const SRC_DIRS = [join(WEB_DIR, "src"), join(REPO_ROOT, "packages", "data")]
 const REPORT_FILE = join(REPO_ROOT, "tools", "i18n-check-report.json")
+/** 写命令的跨进程互斥锁（`.tmp/` 已被 gitignore） */
+const LOCK_FILE = join(REPO_ROOT, ".tmp", "i18n.lock")
+
+/** 锁参数：命令描述 + 测试可注入的超时（`I18N_LOCK_TIMEOUT_MS`，默认仍 60s） */
+function lockOptions(command: string): FileLockOptions {
+    const timeoutMs = Number.parseInt(process.env.I18N_LOCK_TIMEOUT_MS ?? "", 10)
+    return Number.isFinite(timeoutMs) && timeoutMs > 0 ? { command, timeoutMs } : { command }
+}
 
 const LOCALES = ["en", "fr", "ja", "ko", "zh-CN", "zh-TW"]
 const SOURCE_LOCALE = "zh-CN"
@@ -268,6 +279,12 @@ const HELP = `bun i18n <command> [options]
                         --lang 限定只查某几门语言，--exact 改为全字相等匹配，
                         --limit N 最多展示 N 个结果（默认 20），--json 输出结构化结果。
                         find/search 同义。
+  ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]
+                        查上游官方文本表 TextMap：先按 TextMapId 直查，未命中再按任意语言
+                        原文检索；展示原始翻译 ID 与官方各语言（cn/en/jp/kr/fr/tc）译文。
+                        数据源 TextMap_I18n + TextMap_ContentXX 分片（分片优先，同上游
+                        TextMap.get）；--no-shard 只读主索引。需 .env 的 DNA_UPSTREAM
+                        指向 DuetNightAbyssData2 仓库根；首次读取约需 10 秒。
   rm  <key...>          删除一个或多个键（所有语言）
   langs                 列出可用语言与别名
   export                导出缺失翻译到 tools/i18n-diff.json
@@ -311,61 +328,72 @@ async function cmdAdd(args: string[]): Promise<void> {
         throw new Error("至少需要提供一个语言值，例如：bun i18n add common.new_key -cn 新键 -en New key")
     }
 
-    const { files } = await readAllLocales()
-    const missingLocales = [...values.keys()].filter(locale => !files.has(locale))
-    if (missingLocales.length > 0) {
-        throw new Error(`翻译目录不存在：${missingLocales.join(", ")}`)
-    }
-
-    const changes: Array<{ locale: string; status: "added" | "updated" | "unchanged"; value: string }> = []
-    for (const [locale, value] of values) {
-        const file = files.get(locale)!
-        const existing = lookupKey(file, key)
-        const status = existing === undefined ? "added" : existing === value ? "unchanged" : "updated"
-        if (status !== "unchanged") {
-            assignKey(file, key, value, flat)
+    const apply = async (assertOwned?: () => Promise<void>): Promise<void> => {
+        const { files } = await readAllLocales()
+        const missingLocales = [...values.keys()].filter(locale => !files.has(locale))
+        if (missingLocales.length > 0) {
+            throw new Error(`翻译目录不存在：${missingLocales.join(", ")}`)
         }
-        changes.push({ locale, status, value })
-    }
 
-    console.log(`${dryRun ? "[dry-run] " : ""}${key}${flat ? "  (--flat)" : ""}`)
-    for (const change of changes) {
-        const label = change.status === "added" ? "新增" : change.status === "updated" ? "覆盖" : "未变化"
-        console.log(`  ${change.locale.padEnd(6)} ${label}  ${change.value}`)
-    }
-
-    // 输入侧护栏：单花括号占位符不会被 i18next 插值（正确写法是 {{name}}），只警告不阻断
-    for (const [locale, value] of values) {
-        const suspects = findSuspiciousPlaceholders(value)
-
-        if (suspects.length > 0) {
-            console.warn(`\n⚠ warning: ${locale} 文案含疑似单花括号占位符 ${suspects.join("、")}`)
-            console.warn("  i18next 插值的正确写法是双花括号（如 {{name}}）；单花括号不会被替换，会原样展示给用户。")
-        }
-    }
-
-    if (dryRun) {
-        console.log("（dry-run 未写文件，以下按预期结果检查完整性）")
-    } else {
-        const dirty = changes.filter(change => change.status !== "unchanged").map(change => change.locale)
-        if (dirty.length === 0) {
-            console.log("所有目标语言值均未变化，未写文件")
-        } else {
-            for (const locale of dirty) {
-                await writeFile(localeFile(locale), serialize(files.get(locale)!), "utf-8")
+        const changes: Array<{ locale: string; status: "added" | "updated" | "unchanged"; value: string }> = []
+        for (const [locale, value] of values) {
+            const file = files.get(locale)!
+            const existing = lookupKey(file, key)
+            const status = existing === undefined ? "added" : existing === value ? "unchanged" : "updated"
+            if (status !== "unchanged") {
+                assignKey(file, key, value, flat)
             }
-            console.log(`已更新 ${dirty.length} 个文件：${dirty.join(", ")}`)
+            changes.push({ locale, status, value })
+        }
+
+        console.log(`${dryRun ? "[dry-run] " : ""}${key}${flat ? "  (--flat)" : ""}`)
+        for (const change of changes) {
+            const label = change.status === "added" ? "新增" : change.status === "updated" ? "覆盖" : "未变化"
+            console.log(`  ${change.locale.padEnd(6)} ${label}  ${change.value}`)
+        }
+
+        // 输入侧护栏：单花括号占位符不会被 i18next 插值（正确写法是 {{name}}），只警告不阻断
+        for (const [locale, value] of values) {
+            const suspects = findSuspiciousPlaceholders(value)
+
+            if (suspects.length > 0) {
+                console.warn(`\n⚠ warning: ${locale} 文案含疑似单花括号占位符 ${suspects.join("、")}`)
+                console.warn("  i18next 插值的正确写法是双花括号（如 {{name}}）；单花括号不会被替换，会原样展示给用户。")
+            }
+        }
+
+        if (dryRun) {
+            console.log("（dry-run 未写文件，以下按预期结果检查完整性）")
+        } else {
+            const dirty = changes.filter(change => change.status !== "unchanged").map(change => change.locale)
+            if (dirty.length === 0) {
+                console.log("所有目标语言值均未变化，未写文件")
+            } else {
+                // 提交前复核锁仍归本进程所有；被接管则中止，一个文件都不写
+                await assertOwned?.()
+                for (const locale of dirty) {
+                    await writeFileAtomic(localeFile(locale), serialize(files.get(locale)!))
+                }
+                console.log(`已更新 ${dirty.length} 个文件：${dirty.join(", ")}`)
+            }
+        }
+
+        // 按实际文件内容判断：该键是否 6 种语言齐全。仅改一种语言的译文但文件本就齐全时不告警
+        const incomplete = LOCALES.filter(locale => {
+            const file = files.get(locale)
+            return !file || lookupKey(file, key) === undefined
+        })
+        if (incomplete.length > 0) {
+            console.warn(`\n⚠ warning: 键「${key}」缺少 ${incomplete.length} 种语言的译文：${incomplete.join(", ")}`)
+            console.warn(`  该键在运行期会回落到 ${SOURCE_LOCALE}；如需补全，请对上述语言各加一个语言参数。`)
         }
     }
 
-    // 按实际文件内容判断：该键是否 6 种语言齐全。仅改一种语言的译文但文件本就齐全时不告警
-    const incomplete = LOCALES.filter(locale => {
-        const file = files.get(locale)
-        return !file || lookupKey(file, key) === undefined
-    })
-    if (incomplete.length > 0) {
-        console.warn(`\n⚠ warning: 键「${key}」缺少 ${incomplete.length} 种语言的译文：${incomplete.join(", ")}`)
-        console.warn(`  该键在运行期会回落到 ${SOURCE_LOCALE}；如需补全，请对上述语言各加一个语言参数。`)
+    // --dry-run 不建锁、不写文件；其余情况整个「读 → 改 → 落盘」在跨进程锁内完成
+    if (dryRun) {
+        await apply()
+    } else {
+        await withFileLock(LOCK_FILE, ({ assertOwned }) => apply(assertOwned), lockOptions(`add ${key}`))
     }
 }
 
@@ -476,7 +504,257 @@ async function cmdFind(query: string, opts: { exact: boolean; json: boolean; lim
     }
 }
 
-async function cmdRemove(key: string, dryRun: boolean): Promise<void> {
+/** 上游官方文本表 TextMap 的语言字段（与上游 src/i18n/TextMap.ts 的 LANG_FIELD_MAP 一致） */
+const TEXT_MAP_LANGS = ["cn", "en", "jp", "kr", "fr", "tc"] as const
+type TextMapLang = (typeof TEXT_MAP_LANGS)[number]
+
+/** 各语言在 TextMap_I18n 条目里的字段名 */
+const TEXT_MAP_FIELD: Record<TextMapLang, string> = {
+    cn: "TextMapContent",
+    en: "ContentEN",
+    jp: "ContentJP",
+    kr: "ContentKR",
+    fr: "ContentFR",
+    tc: "ContentTC",
+}
+
+/** 各语言对应的分片表名（cn 的分片是历史遗留命名 TextMap_TextMapContent） */
+const TEXT_MAP_SHARD: Record<TextMapLang, string> = {
+    cn: "TextMap_TextMapContent",
+    en: "TextMap_ContentEN",
+    jp: "TextMap_ContentJP",
+    kr: "TextMap_ContentKR",
+    fr: "TextMap_ContentFR",
+    tc: "TextMap_ContentTC",
+}
+
+/** 本工具的语言目录 → TextMap 语言 */
+const LOCALE_TO_TEXT_MAP_LANG: Record<string, TextMapLang> = {
+    "zh-CN": "cn",
+    en: "en",
+    ja: "jp",
+    ko: "kr",
+    fr: "fr",
+    "zh-TW": "tc",
+}
+
+type TextMapRow = Record<string, string | undefined>
+type TextMapValues = Record<TextMapLang, string>
+
+/** `ref` 的一条检索结果 */
+export type TextMapMatch = {
+    id: string
+    values: TextMapValues
+    /** 命中的语言（仅 ID 命中时为空） */
+    hits: TextMapLang[]
+    /** 匹配强度分层，越小越靠前（0=ID 全字，1=中文全字，2=其它语言全字 …） */
+    rank: number
+}
+
+/**
+ * 合并 TextMap_I18n 主索引与 TextMap_ContentXX 分片。
+ *
+ * 上游 TextMap.get 是「分片优先、缺 key 回退主索引」，且分片比主索引更新
+ * （个别条目只在新分片里修过文案），因此分片值覆盖主索引，分片独有的 ID 一并并入。
+ * @param i18n TextMap_I18n 表（id → 各语言字段）
+ * @param shards 各语言分片表；--no-shard 或测试时可缺省
+ * @returns id → 六语言官方文本（缺失字段为空串）
+ */
+export function buildTextMapIndex(
+    i18n: Record<string, TextMapRow>,
+    shards: Partial<Record<TextMapLang, Record<string, TextMapRow>>> = {}
+): Map<string, TextMapValues> {
+    const index = new Map<string, TextMapValues>()
+    const ensure = (id: string): TextMapValues => {
+        let values = index.get(id)
+        if (!values) {
+            values = { cn: "", en: "", jp: "", kr: "", fr: "", tc: "" }
+            index.set(id, values)
+        }
+        return values
+    }
+    for (const [id, row] of Object.entries(i18n)) {
+        const values = ensure(id)
+        for (const lang of TEXT_MAP_LANGS) {
+            values[lang] = row[TEXT_MAP_FIELD[lang]] ?? ""
+        }
+    }
+    for (const lang of TEXT_MAP_LANGS) {
+        const shard = shards[lang]
+        if (!shard) {
+            continue
+        }
+        const field = TEXT_MAP_FIELD[lang]
+        for (const [id, row] of Object.entries(shard)) {
+            const value = row[field]
+            if (value) {
+                ensure(id)[lang] = value
+            }
+        }
+    }
+    return index
+}
+
+/**
+ * 在合并后的 TextMap 索引里检索官方文本。
+ *
+ * 排序按匹配强度分层：ID 全字 > 中文全字 > 其它语言全字 > 中文前缀 > 其它语言前缀 >
+ * ID 子串 > 译文子串；同层按中文长度升序（更接近术语本身），再按 ID 字典序。
+ * @param index buildTextMapIndex 的产物
+ * @param needle 查询串（默认大小写不敏感子串匹配）
+ * @param options.exact 只认全字相等（ID 仍按全字匹配）
+ * @param options.langs 参与匹配的语言（默认六门全查）
+ * @returns 命中条目（含命中语言），已按相关度排序
+ */
+export function searchTextMap(
+    index: Map<string, TextMapValues>,
+    needle: string,
+    options: { exact?: boolean; langs?: readonly TextMapLang[] } = {}
+): TextMapMatch[] {
+    const query = needle.trim()
+    if (!query) {
+        return []
+    }
+    const exact = options.exact ?? false
+    const langs = options.langs && options.langs.length > 0 ? options.langs : TEXT_MAP_LANGS
+    const queryLower = query.toLowerCase()
+    const matches: TextMapMatch[] = []
+    for (const [id, values] of index) {
+        const hits: TextMapLang[] = []
+        let rank = Number.POSITIVE_INFINITY
+        const idLower = id.toLowerCase()
+        if (id === query) {
+            rank = 0
+        } else if (!exact && idLower.startsWith(queryLower)) {
+            rank = 5
+        } else if (!exact && idLower.includes(queryLower)) {
+            rank = 6
+        }
+        for (const lang of langs) {
+            const value = values[lang]
+            if (!value) {
+                continue
+            }
+            const valueLower = value.toLowerCase()
+            if (valueLower === queryLower) {
+                hits.push(lang)
+                rank = Math.min(rank, lang === "cn" ? 1 : 2)
+            } else if (!exact && valueLower.startsWith(queryLower)) {
+                hits.push(lang)
+                rank = Math.min(rank, lang === "cn" ? 3 : 4)
+            } else if (!exact && valueLower.includes(queryLower)) {
+                hits.push(lang)
+                rank = Math.min(rank, 6)
+            }
+        }
+        if (rank === Number.POSITIVE_INFINITY) {
+            continue
+        }
+        matches.push({ id, values, hits, rank })
+    }
+    matches.sort(
+        (left, right) => left.rank - right.rank || left.values.cn.length - right.values.cn.length || compareKeys(left.id, right.id)
+    )
+    return matches
+}
+
+/**
+ * 读取上游 TextMap（TextMap_I18n 主索引 + 可选 TextMap_ContentXX 分片）并合并。
+ *
+ * 取数复用 tools/import-i18n-data.ts 的 luaLoader（readLuaTableRaw），上游路径由
+ * .env 的 DNA_UPSTREAM 决定。动态 import 是为了不让 typescript 拖慢其它 i18n 子命令。
+ * @param withShards 是否叠加分片（分片优先，见 buildTextMapIndex）
+ */
+async function loadTextMapIndex(withShards: boolean): Promise<Map<string, TextMapValues>> {
+    const { readLuaTableRaw } = await import("./import-i18n-data")
+    console.error("正在读取上游文本表 TextMap_I18n…（大表首次读取约需数秒）")
+    const i18n = (await readLuaTableRaw("TextMap_I18n")) as Record<string, TextMapRow>
+    console.error(`  TextMap_I18n：${Object.keys(i18n).length} 条`)
+    const shards: Partial<Record<TextMapLang, Record<string, TextMapRow>>> = {}
+    if (withShards) {
+        for (const lang of TEXT_MAP_LANGS) {
+            shards[lang] = (await readLuaTableRaw(TEXT_MAP_SHARD[lang])) as Record<string, TextMapRow>
+        }
+        console.error(`  TextMap_ContentXX：${TEXT_MAP_LANGS.length} 张分片已读取`)
+    }
+    return buildTextMapIndex(i18n, shards)
+}
+
+type RefOptions = {
+    exact: boolean
+    json: boolean
+    limit: number
+    langFilter?: string
+    withShards: boolean
+}
+
+function printRefValues(values: TextMapValues, indent: string): void {
+    for (const lang of TEXT_MAP_LANGS) {
+        console.log(`${indent}${lang.padEnd(4)}${values[lang] || "（缺失）"}`)
+    }
+}
+
+async function cmdRef(query: string, opts: RefOptions): Promise<void> {
+    const needle = query.trim()
+    if (!needle) {
+        throw new Error("用法：bun i18n ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]")
+    }
+    if (!Number.isInteger(opts.limit) || opts.limit <= 0) {
+        throw new Error("--limit 必须是正整数")
+    }
+    const requestedLangs = new Set(parseLangFilter(opts.langFilter).map(locale => LOCALE_TO_TEXT_MAP_LANG[locale]))
+    const searchLangs = TEXT_MAP_LANGS.filter(lang => requestedLangs.has(lang))
+    const index = await loadTextMapIndex(opts.withShards)
+
+    // 先按 TextMapId 直查（大小写不敏感兜底），未命中再做文本检索
+    const directId = index.has(needle) ? needle : [...index.keys()].find(id => id.toLowerCase() === needle.toLowerCase())
+    const mode: "id" | "search" = directId ? "id" : "search"
+    const matches: TextMapMatch[] = directId
+        ? [{ id: directId, values: index.get(directId)!, hits: [], rank: 0 }]
+        : searchTextMap(index, needle, { exact: opts.exact, langs: searchLangs })
+    const shown = matches.slice(0, opts.limit)
+    const sourceLabel = opts.withShards ? "TextMap_I18n + TextMap_ContentXX 分片（分片优先）" : "TextMap_I18n（--no-shard）"
+
+    if (opts.json) {
+        const payload = {
+            query: needle,
+            mode,
+            exact: opts.exact,
+            searchLangs,
+            source: opts.withShards ? ["TextMap_I18n", "TextMap_ContentXX"] : ["TextMap_I18n"],
+            total: matches.length,
+            limit: opts.limit,
+            results: shown.map(match => ({ id: match.id, hits: match.hits, values: match.values })),
+        }
+        console.log(JSON.stringify(payload, null, 4))
+        return
+    }
+
+    if (mode === "id") {
+        console.log(`TextMapId: ${directId}`)
+        console.log(`  来源：${sourceLabel}`)
+        printRefValues(matches[0].values, "  ")
+        return
+    }
+
+    const modeLabel = opts.exact ? "全字匹配" : "子串匹配（大小写不敏感）"
+    console.log(`查询「${needle}」（${modeLabel}，搜索范围：${searchLangs.join(", ")}；数据源：${sourceLabel}）`)
+    if (matches.length === 0) {
+        console.log("  未命中：可换 --lang 查其它语言、去掉 --exact，或检查 .env 的 DNA_UPSTREAM 是否指向上游仓库。")
+        return
+    }
+    console.log(`命中 ${matches.length} 个，展示前 ${shown.length} 个：\n`)
+    for (const match of shown) {
+        const hitLabel = match.hits.length > 0 ? `（命中：${match.hits.join(", ")}）` : "（ID 命中）"
+        console.log(`  • ${match.id}  ${hitLabel}`)
+        printRefValues(match.values, "      ")
+    }
+    if (matches.length > shown.length) {
+        console.log(`\n  …还有 ${matches.length - shown.length} 个未展示，用 --limit ${matches.length} 查看全部`)
+    }
+}
+
+async function cmdRemove(key: string, dryRun: boolean, assertOwned?: () => Promise<void>): Promise<void> {
     const { files } = await readAllLocales()
     const hit: string[] = []
     for (const [locale, file] of files) {
@@ -492,8 +770,10 @@ async function cmdRemove(key: string, dryRun: boolean): Promise<void> {
     if (dryRun) {
         return
     }
+    // 每个 key 的落盘批次前复核锁所有权
+    await assertOwned?.()
     for (const locale of hit) {
-        await writeFile(localeFile(locale), serialize(files.get(locale)!), "utf-8")
+        await writeFileAtomic(localeFile(locale), serialize(files.get(locale)!))
     }
 }
 
@@ -509,74 +789,87 @@ function cmdLangs(): void {
 
 async function cmdExport(): Promise<void> {
     console.log("导出缺失翻译…")
-    const { files } = await readAllLocales()
+    await withFileLock(
+        LOCK_FILE,
+        async ({ assertOwned }) => {
+            const { files } = await readAllLocales()
 
-    const allKeys = new Set<string>()
-    const localeKeysMap = new Map<string, Map<string, string>>()
-    for (const [locale, translations] of files) {
-        const keys = flattenKeys(translations)
-        localeKeysMap.set(locale, keys)
-        for (const key of keys.keys()) {
-            allKeys.add(key)
-        }
-    }
-
-    const diff: Record<string, Record<string, string>> = {}
-    for (const key of allKeys) {
-        const zhCNValue = localeKeysMap.get(SOURCE_LOCALE)?.get(key) ?? ""
-        if (!zhCNValue) {
-            continue
-        }
-        const keyData: Record<string, string> = {}
-        let hasMissing = false
-        for (const locale of LOCALES) {
-            const keys = localeKeysMap.get(locale)
-            if (!keys) {
-                continue
+            const allKeys = new Set<string>()
+            const localeKeysMap = new Map<string, Map<string, string>>()
+            for (const [locale, translations] of files) {
+                const keys = flattenKeys(translations)
+                localeKeysMap.set(locale, keys)
+                for (const key of keys.keys()) {
+                    allKeys.add(key)
+                }
             }
-            const value = keys.get(key) ?? ""
-            keyData[locale] = value
-            if (locale !== SOURCE_LOCALE && !value) {
-                hasMissing = true
-            }
-        }
-        if (hasMissing) {
-            diff[key] = keyData
-        }
-    }
 
-    await writeFile(DIFF_FILE, serialize(diff), "utf-8")
-    console.log(`差异已写入 ${relative(ROOT, DIFF_FILE)}`)
-    console.log(`共 ${Object.keys(diff).length} 个键存在缺失翻译`)
+            const diff: Record<string, Record<string, string>> = {}
+            for (const key of allKeys) {
+                const zhCNValue = localeKeysMap.get(SOURCE_LOCALE)?.get(key) ?? ""
+                if (!zhCNValue) {
+                    continue
+                }
+                const keyData: Record<string, string> = {}
+                let hasMissing = false
+                for (const locale of LOCALES) {
+                    const keys = localeKeysMap.get(locale)
+                    if (!keys) {
+                        continue
+                    }
+                    const value = keys.get(key) ?? ""
+                    keyData[locale] = value
+                    if (locale !== SOURCE_LOCALE && !value) {
+                        hasMissing = true
+                    }
+                }
+                if (hasMissing) {
+                    diff[key] = keyData
+                }
+            }
+
+            await assertOwned()
+            await writeFileAtomic(DIFF_FILE, serialize(diff))
+            console.log(`差异已写入 ${relative(ROOT, DIFF_FILE)}`)
+            console.log(`共 ${Object.keys(diff).length} 个键存在缺失翻译`)
+        },
+        lockOptions("export")
+    )
 }
 
 async function cmdImport(): Promise<void> {
     console.log("导入缺失翻译…")
-    let diff: Record<string, Record<string, string>>
-    try {
-        diff = JSON.parse(await readFile(DIFF_FILE, "utf-8")) as Record<string, Record<string, string>>
-    } catch (error) {
-        console.error(`无法读取 ${relative(ROOT, DIFF_FILE)}：${(error as Error).message}`)
-        process.exit(1)
-    }
-
-    const { files } = await readAllLocales()
-    const dirty = new Set<string>()
-    for (const [key, translations] of Object.entries(diff)) {
-        for (const [locale, value] of Object.entries(translations)) {
-            if (value && files.has(locale)) {
-                setNestedValue(files.get(locale)!, key, value)
-                dirty.add(locale)
+    await withFileLock(
+        LOCK_FILE,
+        async ({ assertOwned }) => {
+            let diff: Record<string, Record<string, string>>
+            try {
+                diff = JSON.parse(await readFile(DIFF_FILE, "utf-8")) as Record<string, Record<string, string>>
+            } catch (error) {
+                throw new Error(`无法读取 ${relative(ROOT, DIFF_FILE)}：${(error as Error).message}`)
             }
-        }
-    }
 
-    for (const locale of dirty) {
-        await writeFile(localeFile(locale), serialize(files.get(locale)!), "utf-8")
-    }
-    await unlink(DIFF_FILE)
-    console.log(`已导入，更新 ${dirty.size} 个文件`)
-    console.log(`${relative(ROOT, DIFF_FILE)} 已删除`)
+            const { files } = await readAllLocales()
+            const dirty = new Set<string>()
+            for (const [key, translations] of Object.entries(diff)) {
+                for (const [locale, value] of Object.entries(translations)) {
+                    if (value && files.has(locale)) {
+                        setNestedValue(files.get(locale)!, key, value)
+                        dirty.add(locale)
+                    }
+                }
+            }
+
+            await assertOwned()
+            for (const locale of dirty) {
+                await writeFileAtomic(localeFile(locale), serialize(files.get(locale)!))
+            }
+            await unlink(DIFF_FILE)
+            console.log(`已导入，更新 ${dirty.size} 个文件`)
+            console.log(`${relative(ROOT, DIFF_FILE)} 已删除`)
+        },
+        lockOptions("import")
+    )
 }
 
 const SCAN_EXTS = new Set([".vue", ".ts", ".tsx", ".js", ".jsx"])
@@ -735,7 +1028,7 @@ async function cmdCheck(wantJson: boolean, wantLocaleGap: boolean): Promise<void
     }
 
     if (wantJson) {
-        await writeFile(REPORT_FILE, `${JSON.stringify(report, null, 4)}\n`, "utf-8")
+        await writeFileAtomic(REPORT_FILE, `${JSON.stringify(report, null, 4)}\n`)
         console.log(`\n报告已写入: ${relative(ROOT, REPORT_FILE) || REPORT_FILE}`)
     }
 }
@@ -804,6 +1097,46 @@ async function main(): Promise<void> {
             await cmdFind(query, { exact: rest.includes("--exact"), json: rest.includes("--json"), limit, langFilter: langValue })
             break
         }
+        case "ref":
+        case "reference": {
+            const langIdx = rest.findIndex(a => a === "--lang" || a.startsWith("--lang="))
+            let langValue: string | undefined
+            const limitIdx = rest.findIndex(a => a === "--limit" || a.startsWith("--limit="))
+            let limitValue = "10"
+            const skip = new Set<number>()
+            if (langIdx >= 0) {
+                const arg = rest[langIdx]
+                if (arg.includes("=")) {
+                    langValue = arg.slice(arg.indexOf("=") + 1)
+                } else {
+                    langValue = rest[langIdx + 1]
+                    skip.add(langIdx + 1)
+                }
+            }
+            if (limitIdx >= 0) {
+                const arg = rest[limitIdx]
+                if (arg.includes("=")) {
+                    limitValue = arg.slice(arg.indexOf("=") + 1)
+                } else {
+                    limitValue = rest[limitIdx + 1] ?? limitValue
+                    skip.add(limitIdx + 1)
+                }
+            }
+            skip.add(langIdx)
+            skip.add(limitIdx)
+            const query = rest.filter((a, i) => !skip.has(i) && !a.startsWith("-")).join(" ")
+            if (!query) {
+                throw new Error("用法：bun i18n ref <查询> [--lang cn,en] [--exact] [--limit N] [--json] [--no-shard]")
+            }
+            await cmdRef(query, {
+                exact: rest.includes("--exact"),
+                json: rest.includes("--json"),
+                limit: Number.parseInt(limitValue, 10),
+                langFilter: langValue,
+                withShards: !rest.includes("--no-shard"),
+            })
+            break
+        }
         case "rm":
         case "remove":
         case "del": {
@@ -811,7 +1144,18 @@ async function main(): Promise<void> {
             if (keys.length === 0) {
                 throw new Error("用法：bun i18n rm <key...> [--dry-run]")
             }
-            for (const key of keys) await cmdRemove(key, rest.includes("--dry-run"))
+            if (rest.includes("--dry-run")) {
+                for (const key of keys) await cmdRemove(key, true)
+            } else {
+                // 多个 key 的删除算一次事务：整轮读 → 改 → 落盘都在同一把锁内
+                await withFileLock(
+                    LOCK_FILE,
+                    async ({ assertOwned }) => {
+                        for (const key of keys) await cmdRemove(key, false, assertOwned)
+                    },
+                    lockOptions(`rm ${keys.join(" ")}`)
+                )
+            }
             break
         }
         case "langs":
@@ -840,7 +1184,10 @@ async function main(): Promise<void> {
     }
 }
 
-main().catch(error => {
-    console.error(error instanceof Error ? error.message : error)
-    process.exit(1)
-})
+// 直接执行时才跑 CLI；被测试 import 时只取纯函数（buildTextMapIndex / searchTextMap）。
+if (import.meta.main) {
+    main().catch(error => {
+        console.error(error instanceof Error ? error.message : error)
+        process.exit(1)
+    })
+}

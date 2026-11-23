@@ -1,243 +1,286 @@
 ---
 name: orchestrated-delivery
-description: Multi-agent delivery workflow - main agent only handles docs, task breakdown, and orchestration; research delegated to subagents, implementation to isolated T3 top-level sessions; single-unit work (implementation + testing + review + PR) follows wt-review-pr orchestrated mode. Use when user explicitly requests orchestration (e.g., "you coordinate, don't write code yourself", "research with subagents, implement in separate sessions", "split into parallel sessions") or task requires research + multi-file changes + isolated worktree implementation. Do NOT use for one-line fixes or simple changes.
+description: Project-level multi-agent delivery where the main agent plans and coordinates and never edits code - implementation runs in separate T3 top-level sessions, review and verification in fresh subagents, and research goes to subagents only when the main agent cannot locate the code by reading. Use when the user asks for orchestration ("you coordinate, don't write code yourself", "research with subagents, implement in separate sessions", "split into parallel sessions", "你来编排/调度，别自己写代码", "拆成多个会话做") or when a task needs planning and several implementation units. Do NOT use for one-line fixes, pure Q&A, or a single small change.
 agent_created: true
 ---
 
-# Orchestrated Agent Delivery (Main Agent as Coordinator)
+# Orchestrated Delivery (Main Agent as Coordinator)
 
-## 0. Role Contract (Hard Rules)
+You coordinate; other agents do the work. Your context has to hold the plan, the board and every unit's
+outcome for the whole project, so code bodies, diffs and logs stay in other agents' contexts and reach you
+as reports with `path:line` evidence.
 
-| Role | Who | Only Does | Absolutely Does NOT |
-|---|---|---|---|
-| **Main Agent (You)** | Current session | Read/write Markdown docs, break down tasks, orchestrate, confirm with user | Read source code, edit code, run build/test/lint/git, resolve conflicts |
-| **Research Subagent** | `Agent(Explore)` | Read-only research of code/docs/web, return findings + `path:line` | Edit code |
-| **Implementation Session** | T3 top-level thread (`t3_thread_launch` / `t3 thread start`) | Edit code in own worktree/branch, run commands, commit | Create new top-level sessions (unless main agent explicitly requests) |
-| **Review Subagent** | `Agent(Explore)` | Read diff, check against spec for issues | Edit code |
-| **Verification Subagent** | `Agent(general-purpose)` | Run lint/test/build in worktree, report raw output | Edit code |
+## 1. Roles
 
-### Main Agent Violation Signals
+| Role | Runs as | Does |
+|---|---|---|
+| **Main agent (you)** | This session | Intake, locating, planning, task specs, dispatch, steering, user decisions; owns the docs in `.docs/<slug>/` |
+| **Implementation session** | T3 top-level thread, one per unit | Edits code, runs the unit's checks, self-reviews, writes `REPORT-<unit>.md` |
+| **Research subagent** (optional) | Read-only subagent | Investigates a question, writes `RESEARCH-<topic>.md` |
+| **Review subagent** | Fresh read-only subagent | Checks a unit's diff against its spec, writes `REVIEW-<unit>.md` |
+| **Verification subagent** | Subagent that can run commands | Runs check commands, writes `VERIFY-<scope>.md` |
 
-Stop and reassign when you have these thoughts:
+A subagent is your harness's native subagent tool (Claude Code `Agent`: `Explore` for read-only work,
+`general-purpose` to run commands; Codex `spawn_agent`). Use T3 `delegate_task` (`mode:"wait"`) when the
+harness has none or the subagent needs another provider's model. A subagent writes one file: its own report.
 
-- "Let me read this file" → Dispatch research subagent
-- "Let me grep/glob the source" → Dispatch research subagent
-- "This change is small, I'll do it directly" → Launch implementation session (tasks can be smaller, but don't do it yourself)
-- "Let me run tests to confirm" → Dispatch verification subagent
-- "Let me `git diff` to check" → Dispatch review subagent
-- "Let me fix this conflict" → Launch integration session
+### What the main agent does itself
 
-Main agent's `Bash` tool is only allowed for documentation directory operations (`mkdir` / `ls` / `cat *.md`);
-Any code, build, test, or git commands must be delegated to subagents.
+- **Reads to locate**: open files, search, list directories, read-only git (`git status`, `git log`,
+  `git diff --stat`), within the budget in section 2.
+- **Writes Markdown** under `.docs/<slug>/`, plus `specs/` for designs worth keeping.
 
-**Allowed reads**: `AGENTS.md`, `README*`, `specs/`, `.agents/docs/`, Markdown under `.tmp/<slug>/`.
-**Write scope**: `.tmp/<slug>/`, `specs/`, necessary Markdown documentation; do NOT edit source code, configs, or scripts.
+Everything else is routed:
 
-## Workflow Overview
+| Work | Goes to |
+|---|---|
+| Any change to source, config or scripts, however small | Implementation session (a small change is a small unit) |
+| Build, test, lint, browser checks | The unit's implementation session; an independent run goes to a verification subagent |
+| Reading a whole diff, judging code quality | Review subagent |
+| Open-ended or wide investigation | Research subagent |
+| Git writes, merges, conflict resolution, PRs | Implementation or integration session |
 
-```text
-User Requirements
-  → BRIEF.md
-  → Research subagents × N  →  RESEARCH.md
-  → PLAN.md (user confirmation)
-  → Implementation sessions × N (worktree/branch)  →  BOARD.md
-  → Review subagents  →  REVIEW-<unit>.md
-  → Verification subagents  →  VERIFY-<unit>.md
-  → Integration session (merge/resolve conflicts/PR)
-  → FINAL.md
-```
+A change you make yourself has no task spec, no report and no independent review, which is why even a
+one-line edit becomes a unit.
 
-## Division of Work with wt-review-pr
+## 2. Locate or delegate
 
-- **`wt-review-pr`** = Single unit execution workflow: implementation → self-test → self-review → commit/push/PR.
-- **This skill** = Project-level orchestration: requirements → research → planning → break into units → dispatch → independent review/verification → integration.
-- Main agent **does NOT directly execute `wt-review-pr`**; it delegates this skill to implementation sessions and requires "orchestrated mode" execution.
-- Implementation session task specs must state: `Follow "Orchestrated Mode" in .agents/skills/wt-review-pr/SKILL.md`.
-- Orchestrated mode overrides (corresponding section in `wt-review-pr`):
-  - Requirements/spec from `PLAN.md` + `TASKS/<unit>.md`, skip interactive requirements gathering.
-  - Worktree already created by `t3_thread_launch`, skip `git worktree add`.
-  - On completion, **do NOT clean up worktree**; integration session/main agent decides.
-  - Report issues to main agent, do NOT directly ask user.
-- **PR strategy specified in task spec**:
-  - Single unit / single PR: Implementation session creates PR per `wt-review-pr` step 7.
-  - Multiple units / single PR: Implementation sessions only commit to branch, no PR; integration session creates unified PR.
-  - Multiple units / multiple PRs: Each implementation session creates own PR.
-- **Dual review gates**:
-  - `wt-review-pr` self-test/self-review is the first gate.
-  - This skill's review/verification subagents are the second gate; low-risk units can be spot-checked, high-risk/cross-unit must be reviewed.
+Research subagents are optional. Choose per question:
 
-## 1. Artifacts (Single Source of Truth)
+**Locate it yourself** when you can name what you are looking for (a symbol, file, route, config key, error
+string) and expect to pin it down in about 10 read/search calls. Read the relevant ranges rather than whole
+large files, and record what you find in `PLAN.md` as `path:line — current behavior`. You have located
+enough once the task spec can name the files and symbols the unit touches; working out how to make the
+change belongs to the implementation session.
 
-All working documents in **main checkout** `.tmp/<slug>/` (gitignored); copy to `specs/` when long-term preservation needed.
+**Delegate to research subagents** when any of these holds:
 
-> Implementation sessions in isolated worktrees won't have untracked `.tmp` copied over. When handing off, provide **absolute path in main checkout**
-> (e.g., `E:/dev/dna-builder/.tmp/<slug>/PLAN.md`), not worktree-relative paths.
+- The question is open-ended: how a subsystem works end to end, every caller of something, why a behavior happens.
+- It spans several subsystems, upstream or external sources, or the web.
+- There are several independent questions: dispatch them in parallel, one subagent each (usually 1-3).
+- Answering means running code or reading long output (logs, data dumps, generated files).
+- You spent the locating budget without an answer. Hand over what you found as the starting point.
 
-```text
-.tmp/<slug>/
-├── BRIEF.md            Requirements, constraints, acceptance criteria, non-goals
-├── RESEARCH-BRIEF.md   Question list for research subagents
-├── RESEARCH.md         Research findings (main agent summary)
-├── PLAN.md             Solution, task breakdown, interfaces, test strategy
-├── BOARD.md            Task board (status/thread/branch/artifacts)
-├── TASKS/<unit>.md     Task spec for each implementation session
-├── REVIEW-<unit>.md    Review conclusion
-├── VERIFY-<unit>.md    Verification record
-└── FINAL.md            Final delivery report
-```
+**Skip both** when the user already gave the locations.
 
-All decisions go into documents; every handoff provides document paths, not relying on chat context.
-
-`BOARD.md` task board template:
+The research brief is the subagent's prompt: the questions, the directories or modules to stay within,
+read-only, the report path, and this report format:
 
 ```markdown
-| Unit | Goal | Session/Link | Branch/Worktree | Status | Artifacts |
-|---|---|---|---|---|---|
-| u1 | ... | `t3-thread://...` | `<slug>/u1` | running | TASKS/u1.md |
-```
-
-Status: `planned` / `running` / `waiting` / `review` / `verify` / `done` / `blocked`.
-
-## 2. Workflow Phases
-
-### Phase 0: Intake (Main Agent)
-
-1. Confirm with user: goals, acceptance criteria, non-goals, constraints, priority.
-2. Write `BRIEF.md`.
-3. Determine if this workflow applies: one-line fix / pure Q&A → skip orchestration, explain and end.
-4. **Do NOT read source code at this phase.**
-
-### Phase 1: Research (Subagents)
-
-1. Write `RESEARCH-BRIEF.md`: questions to answer, scope, prohibitions, return format.
-2. Use `Agent(subagent_type:"Explore")` to dispatch 1-3 research subagents in parallel; only parallelize truly independent questions.
-3. Main agent only reads their returned reports, summarizes into `RESEARCH.md`; **do NOT read source code**.
-4. If findings contradict, dispatch additional research subagent to arbitrate; do NOT check code yourself.
-
-Research subagent return format:
-
-```markdown
-## Conclusion
-## Key Locations
-- path:line — current state/behavior
+## Conclusion            (answer first)
+## Key Locations         (path:line — current state/behavior)
 ## Constraints & Gotchas
 ## Recommendations
 ## Open Questions
 ```
 
-### Phase 2: Planning (Main Agent + Optional Plan Review)
+The subagent writes `RESEARCH-<topic>.md` and replies with a summary of at most 10 lines; open the file for
+the parts you need. When two reports contradict each other, read the disputed `path:line` yourself, or
+dispatch one more subagent if that exceeds the locating budget.
 
-1. Write `PLAN.md`:
-   - Solution and tradeoffs
-   - Task breakdown (each unit's goals, allowed files, dependencies)
-   - Interface/data structure changes
-   - Testing and verification commands
-   - Risks and rollback strategy
-2. Optional: Dispatch read-only subagent to review `PLAN.md`, return gaps and omissions.
-3. **User confirmation point**: Major changes/architectural changes must get user approval of `PLAN.md` first.
+## 3. Sizing
 
-### Phase 3: Dispatch (Main Agent → Independent Sessions)
+Pick the smallest process that fits and record it at the top of `PLAN.md`. Move from Light to Full as soon
+as units multiply or locating turns into research.
 
-For each unit:
+| | Light | Full |
+|---|---|---|
+| Fits | 1-2 units, code located by reading, low risk | 3+ units, unfamiliar territory, cross-module interfaces, or parallel sessions |
+| Research | Main agent locates | Research subagents where section 2 calls for them |
+| Docs | `PLAN.md` (board kept inside it), `TASKS/`, `REPORT-*` | The full set in section 4 |
+| Plan approval | Summarize the plan in chat and proceed | User approves `PLAN.md` before dispatch |
+| Review | Review subagent unless the change is mechanical; then the session's self-review stands | Review subagent for every unit |
+| Verification | The session's reported command output stands | Baseline run before the first unit, independent run for high-risk units and at the end |
 
-1. Write `TASKS/<unit>.md` (template in section 3).
-2. Choose isolation and backend:
-   - Multiple units in parallel → each unit gets one worktree/branch.
-   - Single unit → root or worktree both acceptable.
-   - Worktree created from `baseRef`, **uncommitted changes won't carry over**; use root when needing current working directory.
-   - Provider/model selected by task difficulty; use `orchestrator_capabilities` to check accurate values.
-3. Launch independent session:
-   - With T3 MCP tools: `t3_thread_launch` (`projectId`/`scratch`, `title`, `message`,
-     `modelSelection`, `workspaceStrategy`, `clientRequestId`).
-   - Shell only: `t3 thread start ...`.
+Changes to architecture or public interfaces need user approval of `PLAN.md` at either size.
+
+## 4. Docs (single source of truth)
+
+All working docs live in the **main checkout** at `.docs/<slug>/` (gitignored, per AGENTS.md rule 12;
+`.tmp/` gets cleaned by other tools and has already lost a project's docs). Decisions go into these files,
+and every handoff passes file paths rather than chat context. Hand them off as **absolute paths**
+(`E:/dev/dna-builder/.docs/<slug>/PLAN.md`): a worktree does not contain the main checkout's untracked files.
+
+```text
+.docs/<slug>/
+├── PLAN.md              Goal, acceptance criteria, non-goals, sizing, workspace mode + git policy, model,
+│                        findings (path:line), units (goal, files, dependencies, order), verification
+│                        commands, risks
+├── BOARD.md             One row per unit, then a dated list of decisions and standing rules
+├── FEEDBACK.md          User feedback and rulings, append-only, numbered §1, §2, ...
+├── TASKS/<unit>.md      Task spec (section 6); fix rounds are TASKS/<unit>-fix.md, -fix2.md
+├── REPORT-<unit>.md     Written by the implementation session
+├── RESEARCH-<topic>.md  Written by a research subagent
+├── REVIEW-<unit>.md     Written by a review subagent
+├── VERIFY-<scope>.md    Written by a verification subagent (baseline, a unit, final)
+├── <unit>/              Evidence: screenshots, logs, one-off check scripts
+└── FINAL.md             Delivery report
+```
+
+`BOARD.md`:
+
+```markdown
+| Unit | Goal | Session | Branch | Status | Artifacts |
+|---|---|---|---|---|---|
+| u1 | ... | `t3-thread://...` | `<slug>/u1` or root | running | TASKS/u1.md |
+```
+
+Status is `planned` / `running` / `waiting` / `review` / `verify` / `done` / `blocked`, followed by at most
+one short clause. Test counts and findings stay in the report the row links to, so the board remains
+readable after dozens of units.
+
+`FEEDBACK.md`: log each piece of user feedback as the next `§N` with its date; task specs cite `§N` instead
+of restating it. When a ruling overturns an earlier conclusion, mark the affected board rows and reports as
+superseded in the same turn.
+
+## 5. Workflow
+
+```text
+Intake → Locate / Research → PLAN.md → Dispatch → Monitor → Review → Verify → Integrate → FINAL.md
+```
+
+### Step 1: Intake
+
+State the goal, acceptance criteria, non-goals and constraints in `PLAN.md`. Ask the user only what the
+request, AGENTS.md and locating leave open. If the task turns out to be a one-line fix or pure Q&A, say so
+and handle it without this workflow.
+
+### Step 2: Locate / Research
+
+Per section 2. Findings land in `PLAN.md` (located) or `RESEARCH-<topic>.md` (delegated).
+
+### Step 3: Plan
+
+Write `PLAN.md` and cut the work into units. A unit has one goal, a file set it owns, its dependencies and
+its acceptance criteria. Then choose the workspace mode:
+
+| | `root` | `worktree` |
+|---|---|---|
+| Use when | Default: the user has not asked for branches, commits or PRs | The user asked for branches or PRs, or units must run in parallel on overlapping files |
+| Where | Main checkout, current working tree | One worktree + branch per unit, created by `t3_thread_launch`; uncommitted changes in the main checkout do not carry over |
+| Git policy | `none`: no git writes | `commit` (an integration session opens one PR) or `pr` (the unit opens its own) |
+| Parallelism | Serial by default; parallel only for disjoint file sets | Parallel for units that share no files or interfaces; dependent units run serially or stacked |
+| A unit's diff | `git diff -- <files listed in its report>` | `git diff <base>...<branch>` |
+
+Shared registries and generated artifacts (i18n JSON, router, data packs, wasm builds) count as overlap in
+either mode: serialize the units that write them.
+
+`git push` and PR creation change the remote. Get the user's explicit go-ahead and record it in the task
+spec, because an implementation session cannot ask the user.
+
+### Step 4: Dispatch
+
+For each unit, write `TASKS/<unit>.md`, then launch a top-level session:
 
 ```jsonc
 t3_thread_launch {
-  "projectId": "<projectId>",
   "title": "[<slug>] <unit>",
-  "message": "Read <main-checkout>/.tmp/<slug>/PLAN.md and <main-checkout>/.tmp/<slug>/TASKS/<unit>.md first. Implement only this unit. Run the verification commands listed there. Report changed files, commands/results, and open questions. Do not touch files outside the unit, do not create new top-level sessions.",
-  "modelSelection": { "instanceId": "claudeAgent", "model": "claude-sonnet-5-5" },
-  "workspaceStrategy": { "type": "worktree", "baseRef": "master", "branch": "<slug>/<unit>" },
+  "message": "Read <docs>/PLAN.md and <docs>/TASKS/<unit>.md first. Implement only this unit, run its verification commands, write <docs>/REPORT-<unit>.md, then reply with a summary of at most 5 lines.",
+  "workspaceStrategy": { "type": "root" },
+  // worktree mode: { "type": "worktree", "baseRef": "origin/master", "startFromOrigin": true, "branch": "<slug>/<unit>" }
+  // unit stacked on unpublished commits: "baseRef": "<that local branch>", "startFromOrigin": false
   "clientRequestId": "<slug>:<unit>"
 }
 ```
 
-4. Record `threadId`, `link`, `runId`, branch/worktree to `BOARD.md`.
-5. Do NOT paste entire plan in prompt; let child session read `PLAN.md` + `TASKS/<unit>.md` itself.
+- `<docs>` is the absolute docs path. The message points at the docs; the plan itself stays in the files.
+- Omit `projectId`, `modelSelection` and the mode fields to inherit yours. Pass `modelSelection` when the user
+  named a model or a unit's difficulty calls for a different one: take the exact ids from
+  `orchestrator_capabilities`, record the choice in `PLAN.md`, and pass it on every later launch and subagent.
+- Retrying a launch whose response was lost reuses the same `clientRequestId`; a new session for the same
+  unit (a fix round) gets a new one.
+- Record `link`, `threadId`, `runId` and branch on the board.
 
-### Phase 4: Monitor & Steer (Main Agent)
+### Step 5: Monitor and steer
 
-- `t3_thread_wait`: Give sufficient timeout at once, **do NOT poll with sleep**.
-- `t3_thread_read`: `view:"messages"` or `"activity"`, low `limit`.
-- `pendingRequestCount > 0` → `t3_pending_request` list/read/respond; ask user for product decisions.
-- Going off track → `t3_thread_send` (`mode:"steer"` or `"queue"`).
-- Update `BOARD.md` status.
-- Unit failure: Read error → fix task spec → resend/relaunch session; **do NOT edit code yourself**.
+- Wait with `t3_thread_wait` and a generous timeout (10 minutes or more); on timeout, wait again.
+- When the run ends, read `REPORT-<unit>.md`. Use `t3_thread_read` (`view:"messages"`, low `limit`) only
+  when the report is missing or unclear.
+- `pendingRequestCount > 0`: handle it with `t3_pending_request`. Answer from `PLAN.md` and `FEEDBACK.md`
+  where they already decide the matter; take product decisions to the user.
+- Off track: `t3_thread_send` with `mode:"steer"` (now) or `"queue"` (after the current turn).
+- Failed unit: read the error, correct the task spec, then resend or relaunch.
+- Update the board on every state change.
 
-### Phase 5: Review (Subagents)
+### Step 6: Review
 
-1. After implementation session reports completion, dispatch review subagent: give it `PLAN.md`, `TASKS/<unit>.md`, diff range
-   (`base...branch`).
-2. Review subagent read-only, returns:
+Where the sizing table calls for a review, dispatch a fresh review subagent per round, so the review does
+not inherit earlier conclusions. Its prompt carries the absolute paths of `PLAN.md`, `TASKS/<unit>.md` and
+`REPORT-<unit>.md`, the working directory, the diff command for the unit (step 3 table), read-only, and the
+focus: acceptance criteria met, correctness and edge cases, tests on critical paths, files changed outside
+the unit. It writes `REVIEW-<unit>.md`:
 
 ```markdown
+## Verdict               (pass / pass-with-fixes / fail)
 ## Findings
 - [P0/P1/P2] path:line — issue — why — suggested fix
 ## Spec Gaps
 ## Missing Tests
 ```
 
-3. Main agent writes `REVIEW-<unit>.md`, sends issue list to implementation session (`t3_thread_send`) or launches fix session.
-4. After fixes, re-review (new subagent, don't reuse old conclusions).
+and replies with the verdict and the finding counts. Then:
 
-### Phase 6: Verification (Subagents)
+- **P0/P1**: write `TASKS/<unit>-fix.md` citing the findings and send it to the unit's session
+  (`t3_thread_send`), or launch a new session if that one is gone. Re-review the fix diff against the
+  original findings.
+- **P2**: fold into that fix task when cheap; otherwise list them as follow-ups in `FINAL.md`. A round
+  that fixes only P2s closes on the session's own checks, without another review.
+- **Still P0/P1 after two fix rounds**: the unit is cut wrong or under-researched. Revisit its spec and
+  the plan, or take it to the user, before launching a third round.
 
-1. Dispatch verification subagent to run commands from `PLAN.md` in target worktree (lint/test/build).
-2. Returns commands, exit codes, failure log excerpts; main agent writes `VERIFY-<unit>.md`.
-3. Failure → send back to implementation session; pass → proceed to integration.
+### Step 7: Verify
 
-### Phase 7: Integration / PR (Integration Session)
+Where the sizing table calls for an independent run, a verification subagent runs the commands from
+`PLAN.md` in the unit's working directory and writes `VERIFY-<scope>.md`: each command with its exit code
+and pass/fail, plus trimmed log excerpts for failures. It changes no files; failures go back to the
+implementation session.
 
-- Multiple worktrees: Launch separate integration session, give it branch list and `PLAN.md`, let it merge/resolve conflicts/run final checks/create PR;
-  after merge completion, it cleans up merged worktrees.
-- Single worktree: Can let original implementation session commit and create PR (pre-specify in task spec).
-- Main agent only records PR link and result; **does NOT execute git**.
+At Full size, run the same commands once before the first unit (`VERIFY-baseline.md`), so later runs can
+separate regressions from failures that were already there.
 
-### Phase 8: Final (Main Agent)
+### Step 8: Integrate (`worktree` mode)
 
-1. Write `FINAL.md`: what changed, why, verification evidence, risks, thread/PR links.
-2. Archive completed sessions (`t3_thread_organize`).
-3. Copy designs needing long-term preservation to `specs/`.
+- Several branches: launch one integration session with the branch list and `PLAN.md`. It merges,
+  resolves conflicts, runs the final checks, opens the PR if authorized, and removes the merged worktrees.
+- One branch with git policy `pr`: the implementation session opens the PR itself.
+- Record PR links and results on the board.
 
-## 3. Task Spec Template (`TASKS/<unit>.md`)
+`root` mode has nothing to integrate; the changes stay uncommitted in the working tree for the user.
+
+### Step 9: Final
+
+1. Write `FINAL.md`: what changed and why, verification evidence, known risks, follow-ups, thread and PR links.
+2. Archive finished sessions with `t3_thread_organize`.
+3. Copy designs worth keeping to `specs/`.
+
+## 6. Task spec template (`TASKS/<unit>.md`)
 
 ````markdown
 # Unit: <id> — <title>
 
 ## Goal
-<one sentence>
+<one sentence; cite FEEDBACK.md §N where the unit answers user feedback>
 
 ## Required Reading
-- <main-checkout>/.tmp/<slug>/PLAN.md
-- <main-checkout>/.tmp/<slug>/TASKS/<unit>.md
-(Use absolute paths; worktree doesn't have main checkout's untracked .tmp)
+- <docs>/PLAN.md
+- <other reports this unit builds on, absolute paths>
+- <path:line or path + symbol> — <what is there now>
 
 ## Execution Mode
 - Follow "Orchestrated Mode" in `.agents/skills/wt-review-pr/SKILL.md`.
-- Requirements/spec from this task spec + PLAN.md; worktree already provided, skip creation/cleanup.
-- PR strategy: <this unit creates own PR / only commit to branch, integration session creates unified PR / no PR>
-- Do NOT ask user directly; write questions into final report.
+- Workspace: <root | worktree, already provided>
+- Git policy: <none | commit | pr>; push/PR authorized by the user: <yes | no>
+- Questions go into the report; the user is reached only through the main agent.
 
 ## Allowed Modifications
 - <files/directories>
+- <docs>/REPORT-<unit>.md and <docs>/<unit>/
 
-## Prohibitions
-- Do NOT modify <out-of-scope files>
-- Do NOT create new top-level sessions
-- Do NOT push / create PR (unless explicitly required by this task)
+## Out of Scope
+- <files and behaviors this unit leaves alone>
+- Creating top-level sessions
 
 ## Acceptance Criteria
-- [ ] ...
 - [ ] ...
 
 ## Verification Commands
@@ -245,115 +288,35 @@ t3_thread_launch {
 ...
 ```
 
-## Deliverables
-- Which files changed
-- Which commands run + results
-- Open questions/risks
+## Report (`<docs>/REPORT-<unit>.md`)
+- Files changed, and why
+- Commands run with results
+- Branch and commit SHA, PR URL (when the git policy produced them)
+- Self-review conclusion, open questions, risks
 ````
 
-## 4. Research Brief Template
+## 7. Rules
 
-```markdown
-# Research brief: <slug>
+- **One unit, one implementation session.** Fix rounds for a unit return to its session.
+- **Implementation runs only in top-level T3 sessions**, never in subagents or `delegate_task`: a top-level
+  thread is visible to the user, steerable, and outlives your turn.
+- Implementation sessions may use subagents for their own local research; launching top-level sessions
+  stays with the main agent.
+- **wt-review-pr** is the single-unit workflow each implementation session runs (implement, self-test,
+  self-review, optional commit/PR). Its "Orchestrated Mode" section defines the overrides; the task spec
+  supplies what that mode needs (workspace, git policy, report path). The session's self-review is the
+  first gate and this skill's review and verification subagents are the second.
+- **User confirmation points**: `PLAN.md` approval (section 3), scope changes, push / PR / merge,
+  destructive operations.
+- **Cross-environment** (`environmentId` on another machine): that machine cannot read this checkout's
+  `.docs/`. Put the task spec in `message`, or place a copy of the docs there.
 
-## Questions to Answer
-1. ...
-2. ...
+## 8. T3 tools
 
-## Scope
-- Only examine <directories/modules>; do NOT look at unrelated subsystems
-- Do NOT modify any files
+Session tools used above: `t3_thread_launch` (`create_threads` for a batch), `t3_thread_send`,
+`t3_thread_wait`, `t3_thread_read`, `t3_pending_request`, `t3_thread_configure` (change model),
+`t3_thread_interrupt`, `t3_thread_organize`.
 
-## Return Format
-- Conclusion (answer first)
-- Key locations: path:line — current state/behavior
-- Constraints & gotchas
-- Recommendations
-- Open questions
-```
-
-## 5. Review Brief Template
-
-```markdown
-# Review brief: <unit>
-
-## Required Reading
-- <main-checkout>/.tmp/<slug>/PLAN.md
-- <main-checkout>/.tmp/<slug>/TASKS/<unit>.md
-
-## Diff
-- Execute in <worktree>: git diff <base>...<branch>
-- Read-only; do NOT modify any files
-
-## Focus Areas
-- Compliance with PLAN and acceptance criteria
-- Correctness, edge cases, error handling
-- Test coverage of critical paths
-- Any out-of-scope file modifications
-
-## Return Format
-- [P0/P1/P2] path:line — issue — why — suggested fix
-- Spec gaps
-- Missing tests
-```
-
-## 6. Verification Brief Template
-
-````markdown
-# Verify brief: <unit>
-
-## Working Directory
-<worktree absolute path>
-
-## Commands to Execute
-```bash
-...
-```
-
-## Rules
-- Read-only; do NOT modify files
-- Execute each command and preserve exit codes
-- On failure, preserve key logs (truncate to necessary length)
-
-## Return Format
-- Each command: command, exit code, pass/fail
-- Failure summary and relevant logs
-````
-
-## 7. Orchestration Rules
-
-- **Parallelization boundary**: Only parallelize when worktrees don't overlap; units sharing files/interfaces must be serial.
-- **One unit one implementation session**; do NOT let one session modify multiple units.
-- **Implementation only in independent T3 sessions**: Do NOT use `Agent(general-purpose)` or other subagents to edit code.
-- **Implementation sessions must NOT create top-level sessions**; may use subagents within own scope for local research.
-- When current harness lacks `Agent` tool, research subagents can use T3's `delegate_task` (`mode:"wait"` to get results)
-  instead; implementation still only uses top-level sessions.
-- Update `BOARD.md` on every state change.
-- User confirmation points: `PLAN.md` approval, scope changes, merge/PR, destructive operations.
-- Main agent's context only holds documents and reports, not source code/long logs.
-- Main agent only interacts with agents through documents and T3 tools; does NOT directly manipulate code.
-- **Cross-environment** (`environmentId` pointing to another machine): main checkout's `.tmp` unreadable there; write task spec
-  content directly into `message`, or drop a copy of docs in target environment.
-
-## 8. Session Tool Quick Reference
-
-| Purpose | MCP Tool | CLI |
-|---|---|---|
-| Create independent session | `t3_thread_launch` / `create_threads` | `t3 thread start` |
-| Send message | `t3_thread_send` | `t3 thread send` |
-| Wait | `t3_thread_wait` | `--wait` |
-| Read session | `t3_thread_read` | `t3 thread show` |
-| Change backend/model | `t3_thread_configure` | None (use MCP) |
-| Interrupt | `t3_thread_interrupt` | None |
-| Archive | `t3_thread_organize` | None |
-| Answer questions | `t3_pending_request` | None |
-
-- Backend/model selection, protocol details, raw RPC: see `references/t3-agent-rpc.md`.
-- Independent sessions must be top-level threads, do NOT impersonate with `delegate_task` / subagents.
-
-## 9. Applicable / Not Applicable
-
-**Applicable**: Multi-file features, refactoring, complex bugs, tasks requiring research before implementation, tasks needing parallel agents.
-
-**Not applicable**: One-line fixes, pure Q&A, urgent hotfixes, questions answerable by reading docs alone—do it directly, don't orchestrate.
-
+- T3 tools can be deferred: look one up by name with your tool search before concluding it is absent.
+- Read `references/t3-agent-rpc.md` when you choose a backend or model, when a T3 call returns an error,
+  or when the MCP tools are unavailable and you need the `t3 thread ...` CLI.
