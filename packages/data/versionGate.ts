@@ -1,5 +1,5 @@
 export const DNA_CURRENT_VERSION_GLOBAL_KEY = "__DNA_CURRENT_VERSION__"
-export const DNA_SAFE_VERSION_LIMIT = 1.7
+export const DNA_SAFE_VERSION_LIMIT = 1.8
 
 export type VersionedItem = {
     版本?: string
@@ -87,6 +87,20 @@ export function isVersionAllowed(item: VersionedItem, ver?: number): boolean {
     }
     const version = ver || getCurrentVersionLimit()
     return parsedVersion <= version
+}
+
+/**
+ * 按版本门限整体返回一份非记录型数据（数组 / 键表 / 标量表）。
+ *
+ * `applyVersionGate` 只能过滤逐条带 `版本` 的对象数组；裸 id 列表与常量对象没有逐条版本字段，
+ * 用该工具按同一个门限返回空值，避免安全模式下仍暴露新版本数据。
+ * @param value 原始数据。
+ * @param empty 门限未达到时返回的空值（应与原始值保持同一形态）。
+ * @param version 数据所属版本，如 `"1.8"`。
+ * @returns 当前门限允许时返回原值，否则返回空值。
+ */
+export function applyVersionGateToValue<T>(value: T, empty: T, version: string): T {
+    return isVersionAllowed({ 版本: version }) ? value : empty
 }
 
 /**

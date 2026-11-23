@@ -17,9 +17,11 @@ export interface Dungeon {
     /** AsyncCombat */
     ac?: AsyncCombat[]
     desc?: string
-    m: number[]
+    /** 副本内怪物 UnitId；上游对螺旋迷境副本（24001/24002）省略 */
+    m?: number[]
     r?: number[]
-    win: number
+    /** 通关次数/胜利条件；上游对螺旋迷境副本（24001/24002）省略 */
+    win?: number
     sm?: number[]
     sr?: number[]
     spawn?: SpawnInfo[][]
@@ -139,7 +141,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -174,7 +176,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -265,7 +267,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -300,7 +302,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -391,7 +393,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -426,7 +428,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -517,7 +519,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -552,7 +554,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -643,7 +645,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -678,7 +680,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -769,7 +771,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -804,7 +806,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -895,7 +897,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -930,7 +932,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1021,7 +1023,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1056,7 +1058,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1147,7 +1149,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1182,7 +1184,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1273,7 +1275,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1308,7 +1310,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1399,7 +1401,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1434,7 +1436,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1525,7 +1527,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1560,7 +1562,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1651,7 +1653,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1686,7 +1688,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1721,7 +1723,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1777,7 +1779,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1812,7 +1814,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1847,7 +1849,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1903,7 +1905,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1938,7 +1940,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -1973,7 +1975,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2029,7 +2031,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2064,7 +2066,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2099,7 +2101,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2155,7 +2157,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2190,7 +2192,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2225,7 +2227,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2281,7 +2283,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2316,7 +2318,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2351,7 +2353,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -2407,7 +2409,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2442,7 +2444,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2533,7 +2535,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2568,7 +2570,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2659,7 +2661,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2694,7 +2696,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2785,7 +2787,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2820,7 +2822,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2911,7 +2913,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -2946,7 +2948,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3037,7 +3039,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3072,7 +3074,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3163,7 +3165,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3198,7 +3200,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3289,7 +3291,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3324,7 +3326,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3415,7 +3417,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3450,7 +3452,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3541,7 +3543,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3576,7 +3578,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3667,7 +3669,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3702,7 +3704,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3793,7 +3795,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3828,7 +3830,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3919,7 +3921,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -3954,7 +3956,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -4045,7 +4047,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -4080,7 +4082,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -4842,7 +4844,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -4877,7 +4879,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -4912,7 +4914,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -4976,7 +4978,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -5011,7 +5013,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -5110,7 +5112,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -5145,7 +5147,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -5180,7 +5182,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -5235,7 +5237,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -5270,7 +5272,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [400, 2400],
@@ -5360,7 +5362,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6012601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -5395,7 +5397,7 @@ export const dungeonsData: Dungeon[] = [
                                     id: 6013601,
                                 },
                                 {
-                                    id: 6003601,
+                                    id: 6013601,
                                 },
                             ],
                             gr: [600, 2400],
@@ -5535,6 +5537,1308 @@ export const dungeonsData: Dungeon[] = [
         win: 2,
     },
     {
+        id: 21801,
+        n: "分组赛",
+        t: "SoloRaid",
+        lv: 65,
+        rd: 1,
+        sm: [6001702, 6002702],
+        m: [6004001, 6014001, 6001001, 6011001, 6002001, 6012001, 6013001],
+        spawn: [
+            [
+                {
+                    id: 60501,
+                    mg: [
+                        {
+                            id: 6050,
+                            num: 2,
+                            w: 3,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6004601,
+                                },
+                                {
+                                    id: 6001601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6051,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6052,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        win: 2,
+    },
+    {
+        id: 21802,
+        n: "分组赛",
+        t: "SoloRaid",
+        lv: 65,
+        rd: 1,
+        sm: [8523702],
+        m: [8523702],
+        win: 2,
+    },
+    {
+        id: 21803,
+        n: "分组赛",
+        t: "SoloRaid",
+        lv: 65,
+        rd: 0,
+        sm: [9001703, 9002703],
+        m: [9001001, 9002001, 9007001, 6004601, 6014601, 6001601, 6011601, 6002601, 6012601, 6013601],
+        spawn: [
+            [
+                {
+                    id: 90501,
+                    mg: [
+                        {
+                            id: 6050,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6004601,
+                                },
+                                {
+                                    id: 6001601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6052,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 9050,
+                            num: 2,
+                            w: 2,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 9001601,
+                                },
+                                {
+                                    id: 9001601,
+                                },
+                                {
+                                    id: 9002601,
+                                },
+                                {
+                                    id: 9002601,
+                                },
+                                {
+                                    id: 9007601,
+                                },
+                                {
+                                    id: 9007601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 30,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 40,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        win: 2,
+    },
+    {
+        id: 21804,
+        n: "分组赛",
+        t: "SoloRaid",
+        lv: 65,
+        rd: 1,
+        sm: [8514702],
+        m: [8514702],
+        win: 2,
+    },
+    {
+        id: 21811,
+        n: "巅峰排名",
+        t: "SoloRaid",
+        lv: 75,
+        rd: 1,
+        sm: [8518702, 9001703, 9002703],
+        m: [8518702, 9001001, 9002001, 9007001, 6004601, 6014601, 6001601, 6011601, 6002601, 6012601, 6013601],
+        spawn: [
+            [
+                {
+                    id: 90502,
+                    mg: [
+                        {
+                            id: 6050,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6004601,
+                                },
+                                {
+                                    id: 6001601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6052,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 9050,
+                            num: 2,
+                            w: 2,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 9001601,
+                                },
+                                {
+                                    id: 9001601,
+                                },
+                                {
+                                    id: 9002601,
+                                },
+                                {
+                                    id: 9002601,
+                                },
+                                {
+                                    id: 9007601,
+                                },
+                                {
+                                    id: 9007601,
+                                },
+                            ],
+                            gr: [600, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [300325],
+        win: 2,
+    },
+    {
+        id: 21812,
+        n: "巅峰排名",
+        t: "SoloRaid",
+        lv: 75,
+        rd: 1,
+        sm: [8516702, 7018702, 7019702],
+        m: [8516702, 7009601, 7010601, 7001601, 7011601, 7002601, 7012601, 7003601, 7013601, 7004601, 7014601],
+        spawn: [
+            [
+                {
+                    id: 70502,
+                    mg: [
+                        {
+                            id: 7052,
+                            num: 2,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 7009601,
+                                },
+                                {
+                                    id: 7003601,
+                                },
+                                {
+                                    id: 7013601,
+                                },
+                                {
+                                    id: 7002601,
+                                },
+                                {
+                                    id: 7012601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 7054,
+                            num: 2,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 7010601,
+                                },
+                                {
+                                    id: 7001601,
+                                },
+                                {
+                                    id: 7011601,
+                                },
+                                {
+                                    id: 7004601,
+                                },
+                                {
+                                    id: 7014601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [300326],
+        win: 2,
+    },
+    {
+        id: 21813,
+        n: "巅峰排名",
+        t: "SoloRaid",
+        lv: 75,
+        rd: 0,
+        sm: [8522702, 6001702, 6002702],
+        m: [8522702, 6004001, 6014001, 6001001, 6011001, 6002001, 6012001, 6013001],
+        spawn: [
+            [
+                {
+                    id: 60502,
+                    mg: [
+                        {
+                            id: 6050,
+                            num: 2,
+                            w: 3,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6004601,
+                                },
+                                {
+                                    id: 6001601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6051,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6052,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [300327],
+        win: 2,
+    },
+    {
+        id: 21814,
+        n: "巅峰排名",
+        t: "SoloRaid",
+        lv: 75,
+        rd: 1,
+        sm: [8513702, 8002705, 8003705],
+        m: [8513702, 8002601, 8001601, 8003601, 6004601, 6014601, 6001601, 6011601, 6002601, 6012601, 6013601],
+        spawn: [
+            [
+                {
+                    id: 80502,
+                    mg: [
+                        {
+                            id: 6050,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6004601,
+                                },
+                                {
+                                    id: 6001601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6002601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 6052,
+                            num: 1,
+                            w: 1,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 6014601,
+                                },
+                                {
+                                    id: 6011601,
+                                },
+                                {
+                                    id: 6012601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                                {
+                                    id: 6013601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                        {
+                            id: 8050,
+                            num: 2,
+                            w: 2,
+                            lv: 0,
+                            m: [
+                                {
+                                    id: 8002601,
+                                },
+                                {
+                                    id: 8002601,
+                                },
+                                {
+                                    id: 8001601,
+                                },
+                                {
+                                    id: 8001601,
+                                },
+                                {
+                                    id: 8003601,
+                                },
+                                {
+                                    id: 8003601,
+                                },
+                            ],
+                            gr: [400, 2400],
+                            gth: 25,
+                            gri: 1,
+                            gir: [600, 2000],
+                            gdt: 1,
+                            gt: 0.5,
+                            gl: 30,
+                            gar: 500,
+                            gz: 1500,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [300327],
+        win: 2,
+    },
+    {
+        id: 24001,
+        n: "螺旋迷境",
+        t: "Rift",
+        lv: 0,
+        rd: 1,
+    },
+    {
+        id: 24002,
+        n: "螺旋迷境",
+        t: "Rift",
+        lv: 0,
+        rd: 1,
+    },
+    {
+        id: 24101,
+        n: "探险/更多升华经验",
+        t: "SurvivalMini",
+        ts: "探险·无尽·二",
+        lv: 0,
+        rd: 1,
+        desc: "获取血清，坚持探查",
+        m: [6013001, 7009001, 7014001, 7015001, 9002001, 10001001],
+        spawn: [
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88803001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 10001001,
+                            num: 31,
+                        },
+                        {
+                            id: 6013001,
+                            num: 5,
+                        },
+                        {
+                            id: 7015001,
+                            num: 5,
+                        },
+                        {
+                            id: 9002001,
+                            num: 4,
+                        },
+                        {
+                            id: 7009001,
+                            num: 3,
+                        },
+                        {
+                            id: 7014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [
+            52131, 52132, 52133, 52134, 52135, 52135, 52135, 52135, 52135, 52166, 52166, 52166, 52166, 52166, 52167, 52167, 52167, 52167,
+            52167, 52168, 52168, 52168, 52168, 52168, 52169, 52169, 52169, 52169, 52169, 52170, 52170, 52170, 52170, 52170, 52170, 52170,
+            52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170,
+            52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170,
+            52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170,
+            52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170, 52170,
+        ],
+        win: 1,
+    },
+    {
+        id: 24102,
+        n: "扼守/更多迷境古币",
+        t: "Defence",
+        ts: "扼守·无尽·一",
+        lv: 0,
+        rd: 1,
+        waves: 1,
+        desc: "保护探险家皎皎，击败敌人",
+        m: [6001001, 6004001, 6017001, 7009001, 7011001, 7013001],
+        spawn: [
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88804001,
+                    time: 15,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 6001001,
+                            num: 16,
+                        },
+                        {
+                            id: 6017001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 7011001,
+                            num: 6,
+                        },
+                        {
+                            id: 6004001,
+                            num: 3,
+                        },
+                        {
+                            id: 7009001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [
+            51818, 51819, 51820, 51820, 51820, 51820, 51820, 51851, 51851, 51851, 51851, 51851, 51852, 51852, 51852, 51852, 51852, 51853,
+            51853, 51853, 51853, 51853, 51854, 51854, 51854, 51854, 51854, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855,
+            51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855,
+            51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855,
+            51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855,
+            51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855, 51855,
+        ],
+        win: 1,
+    },
+    {
+        id: 24103,
+        n: "驱离/更多升华装备",
+        t: "ExtermPro",
+        ts: "驱离",
+        lv: 0,
+        rd: 1,
+        desc: "击败敌人，完成驱离",
+        m: [6004001, 6014001, 6015001, 7003001, 9001001, 10005001],
+        spawn: [
+            [
+                {
+                    id: 88805001,
+                    time: 14,
+                    th: 5,
+                    radius: [1000, 3000, 1000, 3000],
+                    m: [
+                        {
+                            id: 9001001,
+                            num: 16,
+                        },
+                        {
+                            id: 10005001,
+                            num: 15,
+                        },
+                        {
+                            id: 7003001,
+                            num: 7,
+                        },
+                        {
+                            id: 6015001,
+                            num: 7,
+                        },
+                        {
+                            id: 6014001,
+                            num: 3,
+                        },
+                        {
+                            id: 6004001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [51513],
+        win: 2,
+    },
+    {
+        id: 24104,
+        n: "避险/更多精锻材料",
+        t: "SurvivalMiniPro",
+        ts: "避险·一",
+        lv: 0,
+        rd: 1,
+        desc: "制作血清，完成委托",
+        m: [6004013, 6014001, 6016001, 7002001, 7004001, 7013001, 7018001],
+        spawn: [
+            [
+                {
+                    id: 88806001,
+                    time: 13,
+                    th: 5,
+                    radius: [1000, 2000, 1000, 2000],
+                    m: [
+                        {
+                            id: 7018001,
+                            num: 16,
+                        },
+                        {
+                            id: 7002001,
+                            num: 16,
+                        },
+                        {
+                            id: 7013001,
+                            num: 7,
+                        },
+                        {
+                            id: 6016001,
+                            num: 6,
+                        },
+                        {
+                            id: 7004001,
+                            num: 3,
+                        },
+                        {
+                            id: 6014001,
+                            num: 2,
+                        },
+                    ],
+                },
+            ],
+            [
+                {
+                    id: 88806003,
+                    time: 1,
+                    th: 1,
+                    radius: [1000, 2000, 1000, 2000],
+                    m: [
+                        {
+                            id: 6004013,
+                            num: 1,
+                        },
+                    ],
+                },
+            ],
+        ],
+        r: [50030, 50031, 50032, 50033, 50034],
+        win: 2,
+    },
+    {
         id: 28001,
         n: "永恒梦魇·西比尔",
         t: "HardBossEvent",
@@ -5642,6 +6946,66 @@ export const dungeonsData: Dungeon[] = [
         desc: "乐园真正的主人，乐园噩梦的缔造者。\n推荐选用具备<H>无视防御能力</>的角色出战。",
         m: [8520801],
         r: [2801002],
+        win: 2,
+    },
+    {
+        id: 28101,
+        n: "梦魇迷境·西比尔",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "海伯利亚帝国第十三军团军团长。那一日在净界岛，她的出现，让我们的命运永远地偏离了曾经的轨道。",
+        m: [8500802],
+        win: 2,
+    },
+    {
+        id: 28102,
+        n: "梦魇迷境·羽化者",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "冻土中的种子，错过了温和地走入夜幕的契机。",
+        m: [8502802],
+        win: 2,
+    },
+    {
+        id: 28103,
+        n: "梦魇迷境·炼火的典狱长",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "帝国皇家军监狱典狱长，她的锁链将会惩戒罪恶，她的火焰将会坚守正义。",
+        m: [8505802],
+        win: 2,
+    },
+    {
+        id: 28104,
+        n: "梦魇迷境·神秘怪物",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "鲜红的帷幕之下，寒风奏响了雪国的哀歌。\n推荐选用具备<H>无视防御能力</>的角色出战。",
+        m: [8509802],
+        win: 2,
+    },
+    {
+        id: 28105,
+        n: "梦魇迷境·雪国的野兽",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "那是肆虐在雪国的野兽，摧毁了孩子们的故乡，融化了妖精的碎梦。",
+        m: [8512802],
+        win: 2,
+    },
+    {
+        id: 28106,
+        n: "梦魇迷境·「审判」兔妈妈",
+        t: "NestBoss",
+        lv: 80,
+        rd: 1,
+        desc: "乐园真正的主人，乐园噩梦的缔造者。\n推荐选用具备<H>无视防御能力</>的角色出战。",
+        m: [8520802],
         win: 2,
     },
     {

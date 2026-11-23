@@ -821,7 +821,7 @@ const t: Walnut[] = [
     {
         id: 1017,
         名称: "密函：煜明",
-        获取途径: ["沉浸式戏剧"],
+        获取途径: ["委托密函商店", "沉浸式戏剧"],
         奖励: [
             {
                 id: 1004201,
@@ -1351,6 +1351,53 @@ const t: Walnut[] = [
                 type: "Resource",
                 count: 2,
                 name: "思绪片段·黎瑟·浴火",
+            },
+            {
+                id: 30001,
+                type: "Resource",
+                count: 1,
+                name: "生物萃取物",
+            },
+            {
+                id: 2012,
+                type: "Resource",
+                count: 1,
+                name: "战斗旋律·二",
+            },
+            {
+                id: 2008,
+                type: "Resource",
+                count: 1,
+                name: "武器说明书·二",
+            },
+            {
+                id: 211,
+                type: "Resource",
+                count: 1,
+                name: "委托密函线索",
+            },
+        ],
+        稀有度: 5,
+        模式: "SequenceCeiling",
+        参数: [1, 7, 10, 13, 13, 13],
+        类型: 1,
+    },
+    {
+        id: 1029,
+        名称: "密函：卡嘉",
+        获取途径: ["沉浸式戏剧"],
+        奖励: [
+            {
+                id: 1003203,
+                type: "Resource",
+                count: 10,
+                name: "思绪片段·卡嘉",
+            },
+            {
+                id: 1003203,
+                type: "Resource",
+                count: 2,
+                name: "思绪片段·卡嘉",
             },
             {
                 id: 30001,
@@ -3497,7 +3544,7 @@ const t: Walnut[] = [
     {
         id: 2045,
         名称: "密函：罪愆的逆鳞",
-        获取途径: [],
+        获取途径: ["委托密函商店"],
         奖励: [
             {
                 id: 10203,
@@ -3833,7 +3880,7 @@ const t: Walnut[] = [
     {
         id: 2052,
         名称: "密函：雀舞云屏",
-        获取途径: [],
+        获取途径: ["委托密函商店"],
         奖励: [
             {
                 id: 20506,
@@ -3977,7 +4024,7 @@ const t: Walnut[] = [
     {
         id: 2055,
         名称: "密函：孤雏的羽迹",
-        获取途径: ["梦魇残声"],
+        获取途径: [],
         奖励: [
             {
                 id: 20407,
@@ -4601,7 +4648,7 @@ const t: Walnut[] = [
     {
         id: 2068,
         名称: "密函：活着的重量",
-        获取途径: ["观剧纪念"],
+        获取途径: [],
         奖励: [
             {
                 id: 20306,
@@ -4633,6 +4680,102 @@ const t: Walnut[] = [
                 type: "Resource",
                 count: 1,
                 name: "活着的重量的枪管",
+            },
+            {
+                id: 211,
+                type: "Resource",
+                count: 1,
+                name: "委托密函线索",
+            },
+        ],
+        稀有度: 5,
+        模式: "SequenceCeiling",
+        参数: [1, 7, 10, 13, 13, 13],
+        类型: 2,
+    },
+    {
+        id: 2069,
+        名称: "密函：天才的狂想",
+        获取途径: ["梦魇残声"],
+        奖励: [
+            {
+                id: 20105,
+                type: "Weapon",
+                count: 1,
+                name: "天才的狂想",
+                d: 1,
+            },
+            {
+                id: 12181,
+                type: "Resource",
+                count: 1,
+                name: "天才的狂想的枪机",
+            },
+            {
+                id: 30002,
+                type: "Resource",
+                count: 1,
+                name: "精工磁石",
+            },
+            {
+                id: 12182,
+                type: "Resource",
+                count: 1,
+                name: "天才的狂想的枪身",
+            },
+            {
+                id: 12183,
+                type: "Resource",
+                count: 1,
+                name: "天才的狂想的枪管",
+            },
+            {
+                id: 211,
+                type: "Resource",
+                count: 1,
+                name: "委托密函线索",
+            },
+        ],
+        稀有度: 5,
+        模式: "SequenceCeiling",
+        参数: [1, 7, 10, 13, 13, 13],
+        类型: 2,
+    },
+    {
+        id: 2070,
+        名称: "密函：融火于铁",
+        获取途径: [],
+        奖励: [
+            {
+                id: 20307,
+                type: "Weapon",
+                count: 1,
+                name: "融火于铁",
+                d: 1,
+            },
+            {
+                id: 12184,
+                type: "Resource",
+                count: 1,
+                name: "融火于铁的枪机",
+            },
+            {
+                id: 30002,
+                type: "Resource",
+                count: 1,
+                name: "精工磁石",
+            },
+            {
+                id: 12185,
+                type: "Resource",
+                count: 1,
+                name: "融火于铁的枪身",
+            },
+            {
+                id: 12186,
+                type: "Resource",
+                count: 1,
+                name: "融火于铁的枪管",
             },
             {
                 id: 211,
@@ -7796,6 +7939,53 @@ const t: Walnut[] = [
         类型: 3,
     },
     {
+        id: 151739,
+        名称: "密函：契约者之炽灼·精炼",
+        获取途径: ["委托密函商店"],
+        奖励: [
+            {
+                id: 51739,
+                type: "Mod",
+                count: 1,
+            },
+            {
+                id: 51739,
+                type: "Mod",
+                count: 1,
+                name: "炽灼·精炼",
+                d: 1,
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 100,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 50,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 30,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 20,
+                name: "深红凝珠",
+            },
+        ],
+        稀有度: 5,
+        模式: "SequenceCeiling",
+        参数: [1, 5, 36, 36, 36, 36],
+        类型: 3,
+    },
+    {
         id: 151741,
         名称: "密函：契约者之炽灼·涅槃",
         获取途径: ["委托密函商店"],
@@ -8924,6 +9114,53 @@ const t: Walnut[] = [
         类型: 3,
     },
     {
+        id: 151769,
+        名称: "密函：契约者之炽灼·攻势",
+        获取途径: ["委托密函商店"],
+        奖励: [
+            {
+                id: 51769,
+                type: "Mod",
+                count: 1,
+            },
+            {
+                id: 51769,
+                type: "Mod",
+                count: 1,
+                name: "炽灼·攻势",
+                d: 1,
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 100,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 50,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 30,
+                name: "深红凝珠",
+            },
+            {
+                id: 102,
+                type: "Resource",
+                count: 20,
+                name: "深红凝珠",
+            },
+        ],
+        稀有度: 5,
+        模式: "SequenceCeiling",
+        参数: [1, 5, 36, 36, 36, 36],
+        类型: 3,
+    },
+    {
         id: 151911,
         名称: "密函：审判者之虚妄献祭",
         获取途径: ["委托密函商店"],
@@ -9583,7 +9820,7 @@ const t: Walnut[] = [
     },
     {
         id: 152802,
-        名称: "密函：囚狼之缠缚·瓦解",
+        名称: "密函：囚狼之瓦解",
         获取途径: ["委托密函商店"],
         奖励: [
             {

@@ -5410,6 +5410,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "提前解锁任务功能条件",
     },
+    "6029": {
+        id: 6029,
+        logic: "AND",
+        map: {
+            InSeasonDungeon: [1],
+        },
+        remark: "在赛季副本中",
+    },
     "7000": {
         id: 7000,
         logic: "AND",
@@ -5773,6 +5781,330 @@ export const conditionsMap: Record<number, ConditionItem> = {
             DungeonComplete: [[28009, 1, 1]],
         },
         remark: "完成1.7梦魇活动高难",
+    },
+    "29001": {
+        id: 29001,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [5],
+            RiftRankLayers: [5],
+        },
+        remark: "通关任意螺旋迷镜5层",
+    },
+    "29002": {
+        id: 29002,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [30],
+            RiftRankLayers: [30],
+        },
+        remark: "通关任意螺旋迷镜30层",
+    },
+    "29003": {
+        id: 29003,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [45],
+            RiftRankLayers: [45],
+        },
+        remark: "通关任意螺旋迷镜45层",
+    },
+    "29004": {
+        id: 29004,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [60],
+            RiftRankLayers: [60],
+        },
+        remark: "通关任意螺旋迷镜60层",
+    },
+    "29005": {
+        id: 29005,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [80],
+            RiftRankLayers: [80],
+        },
+        remark: "通关任意螺旋迷镜80层",
+    },
+    "29006": {
+        id: 29006,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [100],
+            RiftRankLayers: [100],
+        },
+        remark: "通关任意螺旋迷镜100层",
+    },
+    "29007": {
+        id: 29007,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [104],
+            RiftRankLayers: [104],
+        },
+        remark: "通关任意螺旋迷镜104层",
+    },
+    "29008": {
+        id: 29008,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [108],
+            RiftRankLayers: [108],
+        },
+        remark: "通关任意螺旋迷镜108层",
+    },
+    "29009": {
+        id: 29009,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [112],
+            RiftRankLayers: [112],
+        },
+        remark: "通关任意螺旋迷镜112层",
+    },
+    "29010": {
+        id: 29010,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [116],
+            RiftRankLayers: [116],
+        },
+        remark: "通关任意螺旋迷镜116层",
+    },
+    "29011": {
+        id: 29011,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [120],
+            RiftRankLayers: [120],
+        },
+        remark: "通关任意螺旋迷镜120层",
+    },
+    "29012": {
+        id: 29012,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [124],
+            RiftRankLayers: [124],
+        },
+        remark: "通关任意螺旋迷镜124层",
+    },
+    "29013": {
+        id: 29013,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [128],
+            RiftRankLayers: [128],
+        },
+        remark: "通关任意螺旋迷镜128层",
+    },
+    "29014": {
+        id: 29014,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [132],
+            RiftRankLayers: [132],
+        },
+        remark: "通关任意螺旋迷镜132层",
+    },
+    "29015": {
+        id: 29015,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [136],
+            RiftRankLayers: [136],
+        },
+        remark: "通关任意螺旋迷镜136层",
+    },
+    "30001": {
+        id: 30001,
+        logic: "OR",
+        map: {
+            RiftNormalLayers: [30],
+            RiftRankLayers: [30],
+        },
+        remark: "解锁普通难度1（通关任意螺旋迷镜30层）",
+    },
+    "31065": {
+        id: 31065,
+        logic: "OR",
+        map: {
+            DNASeasonEquipRarityCount: [
+                [4, 5],
+                [5, 5],
+            ],
+        },
+        remark: "同时装备5件及以上金色的装备",
+    },
+    "31066": {
+        id: 31066,
+        logic: "OR",
+        map: {
+            DNASeasonEquipRarityCount: [
+                [2, 4],
+                [3, 4],
+            ],
+        },
+        remark: "同时装备4件及以上蓝色的装备",
+    },
+    "31067": {
+        id: 31067,
+        logic: "OR",
+        map: {
+            DNASeasonEquipRarityCount: [
+                [2, 7],
+                [3, 7],
+            ],
+        },
+        remark: "同时装备7件及以上蓝色的装备",
+    },
+    "31068": {
+        id: 31068,
+        logic: "OR",
+        map: {
+            DNASeasonEquipRarityCount: [
+                [4, 7],
+                [5, 7],
+            ],
+        },
+        remark: "同时装备7件及以上金色的装备",
+    },
+    "31069": {
+        id: 31069,
+        logic: "OR",
+        map: {
+            DNASeasonEquipRarityCount: [[10, 1]],
+        },
+        remark: "同时装备1件及以上暗金的装备",
+    },
+    "32001": {
+        id: 32001,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度1及以上",
+    },
+    "32002": {
+        id: 32002,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度2及以上",
+    },
+    "32003": {
+        id: 32003,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度3及以上",
+    },
+    "32004": {
+        id: 32004,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度4及以上",
+    },
+    "32005": {
+        id: 32005,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度5及以上",
+    },
+    "32006": {
+        id: 32006,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度6及以上",
+    },
+    "32007": {
+        id: 32007,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度7及以上",
+    },
+    "32008": {
+        id: 32008,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [8, 9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度8及以上",
+    },
+    "32009": {
+        id: 32009,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [9, 10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度9及以上",
+    },
+    "32010": {
+        id: 32010,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [10, 11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度10及以上",
+    },
+    "32011": {
+        id: 32011,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [11, 12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度11及以上",
+    },
+    "32012": {
+        id: 32012,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [12, 13, 14, 15, 16],
+        },
+        remark: "赛季难度12及以上",
+    },
+    "32013": {
+        id: 32013,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [13, 14, 15, 16],
+        },
+        remark: "赛季难度13及以上",
+    },
+    "32014": {
+        id: 32014,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [14, 15, 16],
+        },
+        remark: "赛季难度14及以上",
+    },
+    "32015": {
+        id: 32015,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [15, 16],
+        },
+        remark: "赛季难度15及以上",
+    },
+    "32016": {
+        id: 32016,
+        logic: "OR",
+        map: {
+            DNASeasonDifficulty: [16],
+        },
+        remark: "赛季难度16及以上",
     },
     "70000": {
         id: 70000,
@@ -8236,6 +8568,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "预热签到1.7完成",
     },
+    "101022": {
+        id: 101022,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101022],
+        },
+        remark: "签到活动（1.8卡嘉）完成",
+    },
+    "101023": {
+        id: 101023,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101023],
+        },
+        remark: "预热签到1.8完成",
+    },
     "101103": {
         id: 101103,
         logic: "AND",
@@ -8741,6 +9089,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [120705],
         },
         remark: "黎瑟活动6-完成活动5",
+    },
+    "120706": {
+        id: 120706,
+        logic: "AND",
+        map: {
+            QuestChain: [120706],
+        },
+        remark: "黎瑟活动6-完成活动6",
     },
     "120801": {
         id: 120801,
@@ -10352,6 +10708,30 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "获得SP黎瑟皮肤",
     },
+    "4030059": {
+        id: 4030059,
+        logic: "AND",
+        map: {
+            GachaCount: [[9010, 60]],
+        },
+        remark: "卡嘉抽卡60次",
+    },
+    "4030060": {
+        id: 4030060,
+        logic: "AND",
+        map: {
+            GachaCount: [[9010, 120]],
+        },
+        remark: "卡嘉抽卡120次",
+    },
+    "4030061": {
+        id: 4030061,
+        logic: "AND",
+        map: {
+            GachaCount: [[9010, 180]],
+        },
+        remark: "卡嘉抽卡180次",
+    },
     "4040001": {
         id: 4040001,
         logic: "AND",
@@ -10399,6 +10779,54 @@ export const conditionsMap: Record<number, ConditionItem> = {
             RaidFloorMin: [[1007, 2, 60]],
         },
         remark: "1.7公会战层数条件-6",
+    },
+    "4040011": {
+        id: 4040011,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 1]],
+        },
+        remark: "1.8公会战层数条件-1",
+    },
+    "4040012": {
+        id: 4040012,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 5]],
+        },
+        remark: "1.8公会战层数条件-2",
+    },
+    "4040013": {
+        id: 4040013,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 10]],
+        },
+        remark: "1.8公会战层数条件-3",
+    },
+    "4040014": {
+        id: 4040014,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 15]],
+        },
+        remark: "1.8公会战层数条件-4",
+    },
+    "4040015": {
+        id: 4040015,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 30]],
+        },
+        remark: "1.8公会战层数条件-5",
+    },
+    "4040016": {
+        id: 4040016,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1008, 2, 60]],
+        },
+        remark: "1.8公会战层数条件-6",
     },
     "7072038": {
         id: 7072038,
@@ -12172,6 +12600,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "卡嘉（追加3）",
     },
+    "20101505": {
+        id: 20101505,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [12082021],
+        },
+        remark: "卡嘉（追加4）",
+    },
     "20101601": {
         id: 20101601,
         logic: "OR",
@@ -12512,6 +12948,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [120706],
         },
         remark: "蕾伊",
+    },
+    "20103801": {
+        id: 20103801,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [12081830],
+        },
+        remark: "克拉拉",
+    },
+    "20103901": {
+        id: 20103901,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [12081723],
+        },
+        remark: "卡诺",
     },
     "20300101": {
         id: 20300101,
@@ -13658,6 +14110,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "列车主炮",
     },
+    "40301501": {
+        id: 40301501,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [12081825],
+        },
+        remark: "外骨骼采矿装置",
+    },
     "40400101": {
         id: 40400101,
         logic: "OR",
@@ -14545,6 +15005,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "行于破晓",
     },
+    "40901101": {
+        id: 40901101,
+        logic: "OR",
+        map: {
+            QuestChain: [120801],
+        },
+        remark: "汽笛为谁而鸣",
+    },
     "51001601": {
         id: 51001601,
         logic: "AND",
@@ -14615,6 +15083,17 @@ export const conditionsMap: Record<number, ConditionItem> = {
             ],
         },
         remark: "有限奖池活动1.7的结束条件",
+    },
+    "103021006": {
+        id: 103021006,
+        logic: "AND",
+        map: {
+            HaveItem: [
+                ["Skin", 240102, 1],
+                ["Skin", 310202, 1],
+            ],
+        },
+        remark: "摘星祈月（有限池-九尾狐）",
     },
     "105101018": {
         id: 105101018,
@@ -14719,6 +15198,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             TrialEventFinish: [105102026],
         },
         remark: "Sp黎瑟皮肤试玩完成",
+    },
+    "105102027": {
+        id: 105102027,
+        logic: "AND",
+        map: {
+            TrialEventFinish: [105102027],
+        },
+        remark: "卡嘉皮肤试玩完成",
     },
     "110201024": {
         id: 110201024,

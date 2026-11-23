@@ -1,5 +1,6 @@
 import Fuse from "fuse.js"
 import { t } from "i18next"
+import { translateGameText } from "@/composables/useGameText"
 import { charMap, hardBossMap, regionMap, subRegionMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
 import { charAccessoryData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
@@ -7,6 +8,8 @@ import achievementData from "@/data/d/achievement.data"
 import { archiveData } from "@/data/d/archive.data"
 import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
+import { affixes as dnaSeasonAffixes, uniqueEquips as dnaSeasonUniqueEquips } from "@/data/d/dnaseasonequip.data"
+import { talents as dnaSeasonTalents } from "@/data/d/dnaseasonprogress.data"
 import draftData from "@/data/d/draft.data"
 import dungeonData from "@/data/d/dungeon.data"
 import dynQuestData from "@/data/d/dynquest.data"
@@ -48,6 +51,16 @@ import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonR
 import { formatModLimit } from "@/utils/mod-limit"
 import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
+import { cleanGameMarkup, getTalentKindLabelKey } from "@/utils/transcendence-display"
+import {
+    getAffixEffectText,
+    getAffixSearchText,
+    getAffixSummary,
+    getAffixSummaryParts,
+    getPlanLabelKey,
+    getPoolLabelKey,
+    getSlotName,
+} from "@/utils/transcendence-gear"
 
 /** 纯数字查询的判定式：命中后才走 ID 精确/包含检索 */
 const ID_QUERY_PATTERN = /^\d+$/
@@ -1018,6 +1031,82 @@ export class GlobalSearchService {
                     [difficulty.id]
                 )
             )
+        )
+
+        // 升华（DNASeason）：天赋 / 词缀 / 唯一装三组条目，跳转到各自独立详情路由
+        const transcendenceTalentLabel = t("search.transcendence.talent")
+        entries.push(
+            ...dnaSeasonTalents.map(talent =>
+                this.buildSearchEntry(
+                    {
+                        id: `transcendence-talent:${talent.id}`,
+                        title: t(talent.name),
+                        subtitle: `${transcendenceTalentLabel} ID: ${talent.id} | ${t(getTalentKindLabelKey(talent.kind))} | Lv.${talent.maxLevel}`,
+                        typeLabel: transcendenceTalentLabel,
+                        path: `/db/transcendence/talent/${talent.id}`,
+                    },
+                    [talent.id, talent.name, talent.desc, ...talent.effects.map(effect => effect.attr)]
+                )
+            )
+        )
+
+        const transcendenceAffixLabel = t("search.transcendence.affix")
+        entries.push(
+            ...dnaSeasonAffixes.map(affix => {
+                const effect = getAffixEffectText(affix, text => translateGameText(t, text))
+                const parts = getAffixSummaryParts(affix)
+                    .map(part => translateGameText(t, part))
+                    .join(" · ")
+                const summary = cleanGameMarkup(effect ? `${t("common.effect_label")}${effect}` : parts)
+                // 效果词条的标题是 desc，手写建模名（如「元素增伤」）不在可见字段里，
+                // 必须单独进检索词；原文与译文都收，任意语言提问都能召回。
+                const modeled = getAffixSummary(affix)
+
+                return this.buildSearchEntry(
+                    {
+                        id: `transcendence-affix:${affix.id}`,
+                        title: summary || `#${affix.id}`,
+                        subtitle: `${transcendenceAffixLabel} ID: ${affix.id} | ${t(getPlanLabelKey(affix.plan))}${affix.pool ? ` | ${t(getPoolLabelKey(affix.pool))}` : ""}`,
+                        typeLabel: transcendenceAffixLabel,
+                        path: `/db/transcendence/gear/affix?id=${affix.id}`,
+                    },
+                    [
+                        affix.id,
+                        affix.desc,
+                        affix.poolName,
+                        modeled,
+                        translateGameText(t, modeled),
+                        getAffixSearchText(affix),
+                        ...(affix.addAttrs ?? []).map(attr => attr.attr),
+                    ]
+                )
+            })
+        )
+
+        const transcendenceUniqueLabel = t("search.transcendence.unique")
+        const affixById = new Map(dnaSeasonAffixes.map(affix => [affix.id, affix]))
+        entries.push(
+            ...dnaSeasonUniqueEquips.map(equip => {
+                const affix = affixById.get(equip.affixId)
+
+                return this.buildSearchEntry(
+                    {
+                        id: `transcendence-unique:${equip.id}`,
+                        title: t(equip.name),
+                        subtitle: `${transcendenceUniqueLabel} ID: ${equip.id} | ${t(getSlotName(equip.slot))}`,
+                        typeLabel: transcendenceUniqueLabel,
+                        path: `/db/transcendence/gear/unique?id=${equip.id}`,
+                    },
+                    [
+                        equip.id,
+                        equip.name,
+                        getSlotName(equip.slot),
+                        affix?.desc,
+                        affix ? getAffixSummary(affix) : undefined,
+                        affix ? getAffixSearchText(affix) : undefined,
+                    ]
+                )
+            })
         )
 
         return entries

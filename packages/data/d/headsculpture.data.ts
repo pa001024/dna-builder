@@ -199,6 +199,12 @@ export const headSculptureData: HeadSculpture[] = [
         icon: "T_Head_Falu",
     },
     {
+        id: 10034,
+        name: "狂想工程师的肖像",
+        desc: "可将头像更换为卡嘉的形象。",
+        icon: "T_Head_Kajia",
+    },
+    {
         id: 20001,
         name: "播种之人的肖像·仲夏",
         desc: '可将头像更换为"梦中的舞会"的形象。',
@@ -293,6 +299,24 @@ export const headSculptureData: HeadSculpture[] = [
         name: "谋爱之人的肖像·誓约",
         desc: "适用于头像。",
         icon: "T_Head_Shuimu02",
+    },
+    {
+        id: 20017,
+        name: "狂想工程师的肖像·天使",
+        desc: "适用于头像。",
+        icon: "T_Head_Kajia01",
+    },
+    {
+        id: 20018,
+        name: "华胥药师的肖像·月华",
+        desc: "适用于头像。",
+        icon: "T_Head_Baiheng02",
+    },
+    {
+        id: 20019,
+        name: "完美女仆的肖像·月华",
+        desc: "适用于头像。",
+        icon: "T_Head_Xier02",
     },
     {
         id: 30001,
@@ -1439,6 +1463,12 @@ export const headSculptureData: HeadSculpture[] = [
         name: "逐灯者的肖像·夜行",
         desc: "适用于头像。",
         icon: "T_Head_SPLise01",
+    },
+    {
+        id: 30192,
+        name: "粉红猫猫头",
+        desc: "适用于头像。",
+        icon: "T_Head_Art_0044",
     },
     {
         id: 40001,

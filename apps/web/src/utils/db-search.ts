@@ -26,6 +26,8 @@ import { getCachedCharExtData, resolveCharExtLocaleBySetting } from "@/data/d/ch
 import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import type { ConditionItem } from "@/data/d/condition.data"
 import { conditionsMap } from "@/data/d/condition.data"
+import { affixes as dnaSeasonAffixes, uniqueEquips as dnaSeasonUniqueEquips } from "@/data/d/dnaseasonequip.data"
+import { talents as dnaSeasonTalents } from "@/data/d/dnaseasonprogress.data"
 import dungeonsData from "@/data/d/dungeon.data"
 import { eventData } from "@/data/d/event.data"
 import { fishs } from "@/data/d/fish.data"
@@ -83,6 +85,8 @@ import {
 } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "@/utils/story-text"
+import { cleanGameMarkup } from "@/utils/transcendence-display"
+import { getAffixSearchText, getAffixSummary, getSlotName, isEffectOnlyAffix } from "@/utils/transcendence-gear"
 import { collectWeaponSources, formatWeaponSourceTimeRange } from "@/utils/weapon-source"
 
 /**
@@ -132,6 +136,13 @@ export interface DBEntrySummary {
      * 同时避免这些字段把列表结果的体积撑大。取详情字段请用 readEntry。
      */
     searchText?: string
+    /**
+     * 名称里是否含上游样式标签（`<H>` / `<Highlight>` 等）。
+     *
+     * 置 true 时先在「本地化之后」剥掉标签再返回：翻译表以带标签的原文为键，
+     * 先剥后翻会永远查不到译文。
+     */
+    cleanMarkup?: boolean
     /**
      * 该条目在各筛选项上的取值（key 为筛选项 id，value 为该条目命中的取值集合）。
      *
@@ -318,7 +329,8 @@ function toEntrySummary(entry: DBEntrySummary, lang: DBAgentLang): DBEntrySummar
 
     return {
         id: localized.id,
-        name: localized.name,
+        // 先本地化再剥样式标签：翻译表以「带标签的原文」为键，顺序反了会永远查不到译文
+        name: localized.cleanMarkup ? cleanGameMarkup(localized.name) : localized.name,
         subtitle: localized.subtitle,
         version: localized.version,
         path: localized.path,
@@ -360,9 +372,20 @@ function facetValue(value: string | number): string {
     return `${FACET_PREFIX}${value}`
 }
 
+/** 机器可读 facet 取值 → 展示名：取值保持 exact / handwritten，展示走 i18n 键 */
+const FACET_VALUE_KEYS: Record<string, string> = {
+    exact: "db-transcendence.gear.mapping_exact",
+    handwritten: "db-transcendence.gear.mapping_handwritten",
+}
+
 /** 模块级 facet 取值的展示名：游戏内文案多为硬编码中文，能查到词条时给出对应语言 */
 function facetLabel(value: string | number, lang: DBAgentLang = "zh"): string {
     const text = `${value}`.trim()
+    const key = FACET_VALUE_KEYS[text]
+
+    if (key) {
+        return i18next.t(key, { lng: toI18nLanguage(lang), defaultValue: text })
+    }
 
     return translateDBAgentText(text, lang) ?? text
 }
@@ -871,6 +894,99 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
             { id: "kind", label: "内容类型", kind: "enum", values: [] },
         ],
         list: () => buildDamageEntries(),
+    },
+    {
+        id: "transcendence-talent",
+        labelKey: "search.transcendence.talent",
+        path: "/db/transcendence/talent",
+        versioned: false,
+        /** 与天赋分页一致：升华阶段（树） / 节点类型 */
+        facets: [
+            { id: "stage", label: "升华阶段", kind: "enum", values: [] },
+            { id: "kind", label: "节点类型", kind: "enum", values: [] },
+        ],
+        list: () =>
+            dnaSeasonTalents.map(item => ({
+                id: item.id,
+                name: item.name,
+                subtitle: joinParts([`阶段 ${item.stageId}`, `Lv.${item.maxLevel}`, `效果 ${item.effects.length} 条`]),
+                path: `/db/transcendence/talent/${item.id}`,
+                // 效果属性名与描述只在详情页出现，放进隐藏检索词以支持「哪些天赋加暴击」这类问法
+                searchText: joinParts([item.desc, ...item.effects.map(effect => effect.attr)]),
+                facets: {
+                    stage: [facetValue(item.stageId)],
+                    kind: [facetValue(item.kind)],
+                },
+            })),
+    },
+    {
+        id: "transcendence-affix",
+        labelKey: "search.transcendence.affix",
+        path: "/db/transcendence/gear/affix",
+        versioned: false,
+        /** 全局检索专用；列表页已移除建模状态筛选 */
+        facets: [
+            { id: "plan", label: "词缀分类（本地）", kind: "enum", values: [] },
+            { id: "pool", label: "淬炼池", kind: "enum", values: [] },
+            { id: "mapping", label: "属性建模", kind: "enum", values: [] },
+        ],
+        list: lang =>
+            dnaSeasonAffixes.map(item => ({
+                id: item.id,
+                // 专属 desc-only 用效果原文作标题（保留样式标签，localizeEntry 先翻译再 cleanMarkup）
+                name: (isEffectOnlyAffix(item) ? item.desc : getAffixSummary(item)) || `#${item.id}`,
+                cleanMarkup: true,
+                subtitle: joinParts([
+                    `分类 ${item.plan}`,
+                    item.pool ? `池 ${item.pool}` : undefined,
+                    item.mappingStatus ? facetLabel(item.mappingStatus, lang ?? "zh") : undefined,
+                ]),
+                path: `/db/transcendence/gear/affix?id=${item.id}`,
+                // 效果词条标题是 desc，手写建模名（如「元素增伤」）只在摘要里，追加进检索词保证按建模名可召回
+                searchText: joinParts([
+                    item.desc,
+                    item.poolName,
+                    getAffixSummary(item),
+                    getAffixSearchText(item),
+                    ...(item.addAttrs ?? []).map(attr => attr.attr),
+                ]),
+                facets: {
+                    plan: [facetValue(item.plan)],
+                    pool: item.pool === undefined ? [] : [facetValue(item.pool)],
+                    mapping: item.mappingStatus ? [facetValue(item.mappingStatus)] : [],
+                },
+            })),
+    },
+    {
+        id: "transcendence-unique",
+        labelKey: "search.transcendence.unique",
+        path: "/db/transcendence/gear/unique",
+        versioned: false,
+        /** 与唯一装分页一致：槽型 */
+        facets: [{ id: "slot", label: "部位", kind: "enum", values: [] }],
+        list: () => {
+            const affixById = new Map(dnaSeasonAffixes.map(affix => [affix.id, affix]))
+
+            return dnaSeasonUniqueEquips.map(item => {
+                const affix = affixById.get(item.affixId)
+
+                return {
+                    id: item.id,
+                    name: item.name,
+                    subtitle: joinParts([getSlotName(item.slot), `词缀 ${item.affixId}`]),
+                    path: `/db/transcendence/gear/unique?id=${item.id}`,
+                    // 唯一装页搜索同时覆盖装备名与词条正文（属性 / 效果），这里补齐检索词
+                    searchText: joinParts([
+                        affix?.desc,
+                        affix ? getAffixSummary(affix) : undefined,
+                        affix ? getAffixSearchText(affix) : undefined,
+                    ]),
+                    facets: {
+                        slot: [facetValue(item.slot)],
+                    },
+                }
+            })
+        },
     },
 ]
 
@@ -2207,7 +2323,7 @@ const SKILL_FIELD_ABSOLUTE_VALUE_PROP = /神智消耗|神智回复$/
 /**
  * 技能字段数组型取值的展示档位。
  *
- * 数据里角色技能的字段值是 12 级数组（`值[等级 - 1]`），全量展开有 12 个数字、
+ * 数据里角色技能的字段值是 30 级数组（`值[等级 - 1]`），全量展开有 30 个数字、
  * 且模型真正需要的是满级值与 1 级值（判断成长幅度），因此只给首尾两档。
  */
 const SKILL_FIELD_ARRAY_HEAD_LEVELS = 2

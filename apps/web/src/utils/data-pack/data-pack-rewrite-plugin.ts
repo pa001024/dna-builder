@@ -38,6 +38,10 @@ const DATA_PACK_MODULES = new Set([
     "dungeon.data.ts",
     "event.data.ts",
     "abyss.data.ts",
+    "dnaseason.data.ts",
+    "dnaseasonequip.data.ts",
+    "dnaseasonprogress.data.ts",
+    "dnaseasonrift.data.ts",
     "fish.data.ts",
     "forge.data.ts",
     "headsculpture.data.ts",
@@ -63,6 +67,7 @@ const DATA_PACK_MODULES = new Set([
     "subregion.data.ts",
     "title.data.ts",
     "titleframe.data.ts",
+    "transcendbuff.data.ts",
     "translations.data.ts",
     "pet.data.ts",
     "monstertag.data.ts",
@@ -79,6 +84,29 @@ const DATA_PACK_MODULES = new Set([
 type ExportFallback = {
     code: string
     kind: "array" | "object" | "map" | "undefined"
+    /** `applyVersionGateToValue(value, empty, "1.8")` 的整体门限版本 */
+    version?: string
+}
+
+/** 解析字符串字面量或指向字符串字面量的标识符（生成数据的 `VERSION` 常量）。 */
+function resolveStringLiteral(
+    expression: ts.Expression | undefined,
+    declarations: Map<string, ts.VariableDeclaration>
+): string | undefined {
+    if (!expression) {
+        return undefined
+    }
+    if (ts.isStringLiteral(expression)) {
+        return expression.text
+    }
+    if (ts.isParenthesizedExpression(expression) || ts.isAsExpression(expression) || ts.isTypeAssertionExpression(expression)) {
+        return resolveStringLiteral(expression.expression, declarations)
+    }
+    if (ts.isIdentifier(expression)) {
+        const initializer = declarations.get(expression.text)?.initializer
+        return initializer && ts.isStringLiteral(initializer) ? initializer.text : undefined
+    }
+    return undefined
 }
 
 /**
@@ -125,6 +153,13 @@ function getFallbackFromExpression(
     }
 
     if (ts.isCallExpression(expression)) {
+        // 非记录型导出的整体门限：`applyVersionGateToValue(raw, empty, "1.8")`
+        if (ts.isIdentifier(expression.expression) && expression.expression.text === "applyVersionGateToValue") {
+            const nested = getFallbackFromExpression(expression.arguments[0], declarations)
+            const version = resolveStringLiteral(expression.arguments[2], declarations)
+            return version ? { ...nested, version } : nested
+        }
+
         if (ts.isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "map") {
             return { code: "[]", kind: "array" }
         }
@@ -230,16 +265,18 @@ export function rewriteDataPackModule(sourcePath: string): string | null {
     for (const exportName of exportNames) {
         if (exportName === "default") {
             const fallback = fallbacks.get("default") ?? { code: "undefined", kind: "undefined" }
+            const versionArg = fallback.version ? `, ${JSON.stringify(fallback.version)}` : ""
             lines.push(`export let defaultExport = ${fallback.code}`)
             lines.push(
-                `registerDataPackBinding(${JSON.stringify(moduleKey)}, "default", ${JSON.stringify(fallback.kind)}, value => { defaultExport = value as typeof defaultExport })`
+                `registerDataPackBinding(${JSON.stringify(moduleKey)}, "default", ${JSON.stringify(fallback.kind)}, value => { defaultExport = value as typeof defaultExport }${versionArg})`
             )
             continue
         }
         const fallback = fallbacks.get(exportName) ?? { code: "undefined", kind: "undefined" }
+        const versionArg = fallback.version ? `, ${JSON.stringify(fallback.version)}` : ""
         lines.push(`export let ${exportName} = ${fallback.code}`)
         lines.push(
-            `registerDataPackBinding(${JSON.stringify(moduleKey)}, ${JSON.stringify(exportName)}, ${JSON.stringify(fallback.kind)}, value => { ${exportName} = value as typeof ${exportName} })`
+            `registerDataPackBinding(${JSON.stringify(moduleKey)}, ${JSON.stringify(exportName)}, ${JSON.stringify(fallback.kind)}, value => { ${exportName} = value as typeof ${exportName} }${versionArg})`
         )
     }
 

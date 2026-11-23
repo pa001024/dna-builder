@@ -6,6 +6,7 @@ import { type DBLatestItem } from "@/components/DBLatestItemCard.vue"
 import { useDBChat } from "@/composables/useDBChat"
 import { useSearchParam } from "@/composables/useSearchParam"
 import charData from "@/data/d/char.data"
+import { seasons } from "@/data/d/dnaseason.data"
 import modData from "@/data/d/mod.data"
 import weaponData from "@/data/d/weapon.data"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
@@ -288,6 +289,7 @@ const databaseItems = [
     { name: "database.ironTicket", path: "/db/iron-ticket", desc: "database.ironTicket_desc", icon: "ri:compass-3-line" },
     { name: "database.mod", path: "/db/mod", desc: "database.mod_desc", icon: "ri:puzzle-line" },
     { name: "database.damage", path: "/db/damage", desc: "database.damage_desc", icon: "ri:bar-chart-grouped-line" },
+    { name: "database.transcendence", path: "/db/transcendence", desc: "database.transcendence_desc", icon: "ri:arrow-up-fill" },
     { name: "database.draft", path: "/db/draft", desc: "database.draft_desc", icon: "ri:clipboard-line" },
     { name: "database.pet", path: "/db/pet", desc: "database.pet_desc", icon: "ri:sparkling-line" },
     { name: "database.dungeon", path: "/db/dungeon", desc: "database.dungeon_desc", icon: "ri:gamepad-line" },
@@ -352,7 +354,7 @@ const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/qu
 const databaseSectionMeta = [
     {
         id: "build",
-        paths: ["/db/char", "/db/trait", "/db/weapon", "/db/mod", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
+        paths: ["/db/char", "/db/trait", "/db/weapon", "/db/mod", "/db/damage", "/db/transcendence", "/db/pet", "/db/draft", "/db/resource"],
     },
     { id: "explore", paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"] },
     {
@@ -390,6 +392,15 @@ const databaseSectionConfigs = computed<DatabaseSectionConfig[]>(() => {
 
 const databaseItemMap = new Map<string, DatabaseItem>(databaseItems.map(item => [item.path, item]))
 
+/**
+ * 升华入口的可见性：安全模式或旧数据包下赛季主表为空，入口会指向空页面，此时不展示。
+ * @param path 模块路径
+ * @returns 是否展示该模块入口
+ */
+function isVisibleDatabasePath(path: string): boolean {
+    return path !== "/db/transcendence" || seasons.length > 0
+}
+
 const selectedSearchSectionIds = ref<string[]>(databaseSectionMeta.map(section => section.id))
 
 /**
@@ -399,7 +410,7 @@ const selectedSearchSectionIds = ref<string[]>(databaseSectionMeta.map(section =
 const moduleCards = computed<DatabaseItem[]>(() => {
     const featuredSet = new Set(featuredPaths)
     const featured = featuredPaths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined)
-    const ordered = [...featured, ...databaseItems.filter(item => !featuredSet.has(item.path))]
+    const ordered = [...featured, ...databaseItems.filter(item => !featuredSet.has(item.path) && isVisibleDatabasePath(item.path))]
 
     if (!selectedSearchPaths.value) {
         return ordered
@@ -512,8 +523,8 @@ const moduleChips = computed(() => {
         ...scope,
         count:
             scope.id === "all"
-                ? databaseItems.length
-                : (databaseSectionConfigs.value.find(section => section.id === scope.id)?.paths.length ?? 0),
+                ? databaseItems.filter(item => isVisibleDatabasePath(item.path)).length
+                : (databaseSectionConfigs.value.find(section => section.id === scope.id)?.paths.filter(isVisibleDatabasePath).length ?? 0),
     }))
 })
 
@@ -1263,7 +1274,7 @@ onBeforeUnmount(() => {
 
 .db-ask-result-path {
     flex-shrink: 0;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-family: "CaskaydiaCove", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     font-size: 0.625rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -1279,7 +1290,7 @@ onBeforeUnmount(() => {
 .db-ask-more {
     border-top: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
     padding: 0.5rem 0.25rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-family: "CaskaydiaCove", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     font-size: 0.625rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;

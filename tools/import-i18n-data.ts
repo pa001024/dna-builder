@@ -13,6 +13,19 @@ import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import * as ts from "typescript"
 import { srgbChannelToLinear } from "../apps/web/src/utils/color"
+import { buildDnaSeasonReplacements, DNASEASON_TARGET_STEMS } from "./dnaseason"
+
+/**
+ * Bun 全局的最小声明：本工具只在 bun 下跑 CLI，但增量 lint 的 program 不带 bun-types。
+ * 运行时仍是 bun 的真实全局；vitest 下没有 Bun，相关分支走 process.argv 回退。
+ */
+declare const Bun: {
+    argv: string[]
+    spawn: (
+        command: string[],
+        options: { cwd?: string; stdout: "inherit"; stderr: "inherit"; stdin: "inherit" }
+    ) => { exited: Promise<number> }
+}
 
 /** 仓库根：本文件位于 `<root>/tools/` 下，与调用方 cwd 无关 */
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -89,6 +102,8 @@ type LuaLoader = {
 
 let luaLoaderPromise: Promise<LuaLoader> | null = null
 const luaTableCache = new Map<string, unknown>()
+/** 未排序直读缓存（readLuaTableRaw），与 luaTableCache 分开存 */
+const luaRawCache = new Map<string, unknown>()
 
 async function getLuaLoader(): Promise<LuaLoader> {
     if (!luaLoaderPromise) {
@@ -120,6 +135,25 @@ async function getLuaLoader(): Promise<LuaLoader> {
 }
 
 /**
+ * 读取一张 Script/Datas 下的 Lua 表，返回**未排序**的原始 JS 值（按表名缓存）。
+ *
+ * 与 readLuaTable 走同一取数路径，但跳过 deepSortJson：TextMap_I18n 这类 3 万多条的
+ * 大表只为查几行原文时没必要深排序。供 `bun i18n ref` 等只读查询工具复用 luaLoader。
+ */
+export async function readLuaTableRaw(name: string): Promise<any> {
+    if (luaRawCache.has(name)) {
+        return luaRawCache.get(name)
+    }
+    const { manager } = await getLuaLoader()
+    const { value, error } = manager.loadScriptValue(path.join("Script", "Datas", `${name}.lua`))
+    if (value === undefined) {
+        throw new Error(`读取上游 Lua 表 ${name} 失败：${error ?? "未知错误"}`)
+    }
+    luaRawCache.set(name, value)
+    return value
+}
+
+/**
  * 读取一张 Script/Datas 下的 Lua 表，返回键深度排序后的 JS 值（与旧的 out/<name>.json 等价）。
  * 结果按表名缓存，避免同一张表（如 TextMap_I18n、Resource）被重复执行。
  */
@@ -127,12 +161,7 @@ async function readLuaTable(name: string): Promise<any> {
     if (luaTableCache.has(name)) {
         return luaTableCache.get(name)
     }
-    const { manager, deepSortJson } = await getLuaLoader()
-    const { value, error } = manager.loadScriptValue(path.join("Script", "Datas", `${name}.lua`))
-    if (value === undefined) {
-        throw new Error(`读取上游 Lua 表 ${name} 失败：${error ?? "未知错误"}`)
-    }
-    const sorted = deepSortJson(value)
+    const sorted = (await getLuaLoader()).deepSortJson(await readLuaTableRaw(name))
     luaTableCache.set(name, sorted)
     return sorted
 }
@@ -214,9 +243,19 @@ export const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     护盾: "Attr_ES_Name",
     生命: "Attr_Hp_Name",
     防御: "Attr_DEF_Name",
+    移动速度: "Attr_WalkSpeedModifier_Name",
     子弹爆炸范围: "Attr_AttackRange_Bullet_Name",
     最大弹药: "Attr_BulletMax_Name",
     武器精通: "Attr_ExcelWeaponTag_Name",
+    // 升华赛季专属伤害率分区（词条 1030）：规范名与官方文案不同形，按 AttrConfig 的 Name 取权威译名
+    赛季增伤: "Attr_DamageRate_NoTag_S0DamageRate_Name",
+    // 元素专属伤害率（U14b）：按元素分量导出独立键，官方名为「<元素>属性伤害提升」
+    火属性增伤: "Attr_FireDamageRate_Name",
+    水属性增伤: "Attr_WaterDamageRate_Name",
+    雷属性增伤: "Attr_ThunderDamageRate_Name",
+    风属性增伤: "Attr_WindDamageRate_Name",
+    光属性增伤: "Attr_LightDamageRate_Name",
+    暗属性增伤: "Attr_DarkDamageRate_Name",
 
     档案: "UI_Chardata_Data",
     出生地: "UI_Chardata_Char_BrithPlace",
@@ -314,6 +353,21 @@ const TEXT_MAP_LOCALE_FIELDS: Record<TranslationLocale, string> = {
 }
 
 /**
+ * 上游非 CN 数据写成裸 TextMap key 时的显式覆盖（逐键冻结，待上游补译后删除）。
+ *
+ * `Event.json` / `CharAccessory.json` 在部分语言下把这些字段的值直接写成了 TextMap key
+ * （如 `Event_Title_10302404`），位置配对会把对照表里原本正常的译文覆盖成 key 本身。
+ * 这里按 U18 之前的对照表逐键恢复，**不做**通用的「目标值像 key 就跳过」规则——
+ * AGENTS 禁止未批准的静默 fallback，上游补上真译名后应逐条删除本表。
+ *
+ * 最后两条不是 key 泄漏，而是本轮上游数据自身的小改动，为保持「重生成 diff 仅新增」一并冻结：
+ * - tc「身后…余烬」由「余燼」改为「餘燼」（正字修正）；
+ * - fr「行迹获取量提高<Highlight>50%</>。」由 `50%` 改为 `50 %`（U+00A0 不换行空格）。
+ * 若接受上游修正，逐条删除即可。
+ */
+const EXPLICIT_TRANSLATION_OVERRIDES: Record<string, Partial<Record<TranslationLocale, string>>> = {}
+
+/**
  * 无官方依据、纯前端自造的展示名译名表。
  *
  * 两类词在官方文本表里都搜不到同义 ID，只能人工指定，键必须与前端实际输出的中文完全一致：
@@ -335,8 +389,16 @@ const TEXT_MAP_LOCALE_FIELDS: Record<TranslationLocale, string> = {
  * 钓鱼界面里由前端**文案模板 + 数值**拼出来的句子没有官方原文，不进这张表——
  * 它们走 `translations.data.ts` 里对应的**整句模板键**（如「额外奖励(概率:{{prob}})」），
  * 由界面直接 `$t` 取用，避免在此处按词硬拼出语法不通的译文。
+ *
+ * 升华（DNASeason）的武器面板规范名同样按官方名冻结：`普通近战攻击` 这类规范名不在 TextMap
+ * （无法走 TRANSLATION_ALIASES），官方名只出现在上游 DNASeason 的 `name` 字段。近战 / 同律近战
+ * 与全部 tc 直接照抄该字段；远程 / 同律远程的非 CN 名在上游漏成 TextMap key
+ * （`Attr_WeaponATKModifierRate_CRanged_Name`），故按上游已用的官方措辞
+ * （`RLBlessing_Desc_201` / `207` / `208` / `202`、`MOD_DESC_3311` 等整句里的
+ * Standard / Ranged / Consonance / 通常遠隔 / 일반 원거리 / armes à distance）补全。
+ * zh-CN 一侧由同名根键（`bun i18n add`）给出同一官方名。
  */
-const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string>> = {
+export const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string>> = {
     tc: {
         铜: "銅",
         银: "銀",
@@ -384,12 +446,40 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         转充盈: "轉充盈",
         转属克: "轉屬剋",
         转属逆: "轉屬逆",
-        异常数量: "異常數量",
         武器倍率: "武器倍率",
         召唤物攻击速度转化: "召喚物攻擊速度轉化",
         召唤物范围转化: "召喚物範圍轉化",
         固定攻击: "固定攻擊",
         固定生命: "固定生命",
+        // 追伤七分量（U70）：属性名是结构化键，非 CN 数据集原样照抄中文，位置配对拿不到译文
+        火属性追伤: "火屬性追加傷害",
+        水属性追伤: "水屬性追加傷害",
+        雷属性追伤: "雷屬性追加傷害",
+        风属性追伤: "風屬性追加傷害",
+        光属性追伤: "光屬性追加傷害",
+        暗属性追伤: "暗屬性追加傷害",
+        自属性追伤: "自屬性追加傷害",
+        // 升华词条规范名 → 官方武器面板名（U14 起上游直接输出规范名，名字本身不在 TextMap）
+        普通近战攻击: "普通近戰武器攻擊力",
+        普通近战暴击: "普通近戰武器暴擊率",
+        普通近战暴伤: "普通近戰武器暴擊傷害",
+        普通近战触发: "普通近戰武器觸發概率",
+        普通远程攻击: "普通遠端武器攻擊力",
+        普通远程暴击: "普通遠端武器暴擊率",
+        普通远程暴伤: "普通遠端武器暴擊傷害",
+        普通远程触发: "普通遠端武器觸發概率",
+        同律近战攻击: "同律近戰武器攻擊力",
+        同律近战暴击: "同律近戰武器暴擊率",
+        同律近战暴伤: "同律近戰武器暴擊傷害",
+        同律近战触发: "同律近戰武器觸發概率",
+        同律远程攻击: "同律遠端武器攻擊力",
+        同律远程暴击: "同律遠端武器暴擊率",
+        同律远程暴伤: "同律遠端武器暴擊傷害",
+        同律远程触发: "同律遠端武器觸發概率",
+        近战增伤: "近戰武器傷害",
+        远程增伤: "遠端武器傷害",
+        // 2002 手写词缀仍在用的复合名：官方无对应词条，按「近战武器 + 普通攻击独立增伤」构词
+        近战普攻独立增伤: "近戰武器普通攻擊獨立增傷",
     },
     en: {
         铜: "Bronze",
@@ -444,12 +534,40 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         转充盈: "Convert to Overflow",
         转属克: "Convert to Counter Element",
         转属逆: "Convert to Weak Element",
-        异常数量: "Anomaly Count",
         武器倍率: "Weapon Multiplier",
         召唤物攻击速度转化: "Summon ATK Speed Conversion",
         召唤物范围转化: "Summon Range Conversion",
         固定攻击: "Flat ATK",
         固定生命: "Flat HP",
+        // Seven Additional DMG components (U70): structural attr keys are copied verbatim in non-CN data
+        火属性追伤: "Pyro Additional DMG",
+        水属性追伤: "Hydro Additional DMG",
+        雷属性追伤: "Electro Additional DMG",
+        风属性追伤: "Anemo Additional DMG",
+        光属性追伤: "Lumino Additional DMG",
+        暗属性追伤: "Umbro Additional DMG",
+        自属性追伤: "Own-Element Additional DMG",
+        // Ascension affix canonical names → official weapon-panel names (upstream emits canonical names since U14)
+        普通近战攻击: "Standard Melee Weapon ATK",
+        普通近战暴击: "Standard Melee Weapon CRIT Chance",
+        普通近战暴伤: "Standard Melee Weapon CRIT DMG",
+        普通近战触发: "Standard Melee Weapon Trigger Probability",
+        普通远程攻击: "Standard Ranged Weapon ATK",
+        普通远程暴击: "Standard Ranged Weapon CRIT Chance",
+        普通远程暴伤: "Standard Ranged Weapon CRIT DMG",
+        普通远程触发: "Standard Ranged Weapon Trigger Probability",
+        同律近战攻击: "Melee Consonance Weapon ATK",
+        同律近战暴击: "Melee Consonance Weapon CRIT Chance",
+        同律近战暴伤: "Melee Consonance Weapon CRIT DMG",
+        同律近战触发: "Melee Consonance Weapon Trigger Probability",
+        同律远程攻击: "Ranged Consonance Weapon ATK",
+        同律远程暴击: "Ranged Consonance Weapon CRIT Chance",
+        同律远程暴伤: "Ranged Consonance Weapon CRIT DMG",
+        同律远程触发: "Ranged Consonance Weapon Trigger Probability",
+        近战增伤: "Melee Weapon DMG",
+        远程增伤: "Ranged Weapon DMG",
+        // 2002's surviving composed name (no official compound entry)
+        近战普攻独立增伤: "Independent Melee Weapon Normal Attack damage increase",
     },
     jp: {
         铜: "銅",
@@ -499,12 +617,40 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         转充盈: "チャージ変換",
         转属克: "カウンター属性変換",
         转属逆: "逆属性変換",
-        异常数量: "異常数",
         武器倍率: "武器倍率",
         召唤物攻击速度转化: "召喚ユニット攻撃速度変換",
         召唤物范围转化: "召喚ユニット範囲変換",
         固定攻击: "固定攻撃力",
         固定生命: "固定HP",
+        // 追伤七分量（U70）：属性名是结构化键，非 CN 数据集原样照抄中文，位置配对拿不到译文
+        火属性追伤: "火属性追加ダメージ",
+        水属性追伤: "水属性追加ダメージ",
+        雷属性追伤: "雷属性追加ダメージ",
+        风属性追伤: "風属性追加ダメージ",
+        光属性追伤: "光属性追加ダメージ",
+        暗属性追伤: "闇属性追加ダメージ",
+        自属性追伤: "自属性追加ダメージ",
+        // 升华词条规范名 → 官方武器面板名（U14 起上游直接输出规范名）
+        普通近战攻击: "通常近接武器攻撃力",
+        普通近战暴击: "通常近接武器クリティカル率",
+        普通近战暴伤: "通常近接武器クリティカルダメージ",
+        普通近战触发: "通常近接武器の発動確率",
+        普通远程攻击: "通常遠隔武器攻撃力",
+        普通远程暴击: "通常遠隔武器クリティカル率",
+        普通远程暴伤: "通常遠隔武器クリティカルダメージ",
+        普通远程触发: "通常遠隔武器の発動確率",
+        同律近战攻击: "同調近接武器攻撃力",
+        同律近战暴击: "同調近接武器クリティカル率",
+        同律近战暴伤: "同調近接武器クリティカルダメージ",
+        同律近战触发: "同調近接武器の発動確率",
+        同律远程攻击: "同調遠隔武器攻撃力",
+        同律远程暴击: "同調遠隔武器クリティカル率",
+        同律远程暴伤: "同調遠隔武器クリティカルダメージ",
+        同律远程触发: "同調遠隔武器の発動確率",
+        近战增伤: "近接武器ダメージ",
+        远程增伤: "遠隔武器ダメージ",
+        // 2002 の複合名（公式の複合語なし）
+        近战普攻独立增伤: "近接武器通常攻撃独立ダメージ増加",
     },
     kr: {
         铜: "동",
@@ -555,12 +701,40 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         转充盈: "오버차지 전환",
         转属克: "카운터 속성 전환",
         转属逆: "역속성 전환",
-        异常数量: "이상 개수",
         武器倍率: "무기 배율",
         召唤物攻击速度转化: "소환물 공격 속도 전환",
         召唤物范围转化: "소환물 범위 전환",
         固定攻击: "고정 공격",
         固定生命: "고정 HP",
+        // 追伤七分量（U70）：属性名是结构化键，非 CN 数据集原样照抄中文，位置配对拿不到译文
+        火属性追伤: "불 속성 추가 대미지",
+        水属性追伤: "물 속성 추가 대미지",
+        雷属性追伤: "번개 속성 추가 대미지",
+        风属性追伤: "바람 속성 추가 대미지",
+        光属性追伤: "빛 속성 추가 대미지",
+        暗属性追伤: "어둠 속성 추가 대미지",
+        自属性追伤: "자신 속성 추가 대미지",
+        // 升华词条规范名 → 官方武器面板名（U14 起上游直接输出规范名）
+        普通近战攻击: "일반 근접 무기 공격력",
+        普通近战暴击: "일반 근접 무기 크리티컬 확률",
+        普通近战暴伤: "일반 근접 무기 크리티컬 대미지",
+        普通近战触发: "일반 근접 무기 발동 확률",
+        普通远程攻击: "일반 원거리 무기 공격력",
+        普通远程暴击: "일반 원거리 무기 크리티컬 확률",
+        普通远程暴伤: "일반 원거리 무기 크리티컬 대미지",
+        普通远程触发: "일반 원거리 무기 발동 확률",
+        同律近战攻击: "근접 동조 무기 공격력",
+        同律近战暴击: "근접 동조 무기 크리티컬 확률",
+        同律近战暴伤: "근접 동조 무기 크리티컬 대미지",
+        同律近战触发: "근접 동조 무기 발동 확률",
+        同律远程攻击: "원거리 동조 무기 공격력",
+        同律远程暴击: "원거리 동조 무기 크리티컬 확률",
+        同律远程暴伤: "원거리 동조 무기 크리티컬 대미지",
+        同律远程触发: "원거리 동조 무기 발동 확률",
+        近战增伤: "근접 무기 대미지",
+        远程增伤: "원거리 무기 대미지",
+        // 2002의 복합명(공식 복합 표제어 없음)
+        近战普攻独立增伤: "근접 무기 기본 공격 독립 피해 증가",
     },
     fr: {
         铜: "Bronze",
@@ -612,12 +786,40 @@ const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string
         转充盈: "Conversion de Surabondance",
         转属克: "Conversion en contre-élément",
         转属逆: "Conversion en élément désavantageux",
-        异常数量: "Nombre d'anomalies",
         武器倍率: "Multiplicateur d'arme",
         召唤物攻击速度转化: "Conversion de vitesse d'attaque des invocations",
         召唤物范围转化: "Conversion de portée des invocations",
         固定攻击: "ATQ fixe",
         固定生命: "PV fixes",
+        // 追伤七分量（U70）：属性名是结构化键，非 CN 数据集原样照抄中文，位置配对拿不到译文
+        火属性追伤: "Dégâts Pyro supplémentaires",
+        水属性追伤: "Dégâts Hydro supplémentaires",
+        雷属性追伤: "Dégâts Électro supplémentaires",
+        风属性追伤: "Dégâts Anémo supplémentaires",
+        光属性追伤: "Dégâts Lumino supplémentaires",
+        暗属性追伤: "Dégâts Umbro supplémentaires",
+        自属性追伤: "Dégâts supplémentaires de son propre élément",
+        // 升华词条规范名 → 官方武器面板名（U14 起上游直接输出规范名）
+        普通近战攻击: "ATQ des armes de mêlée standards",
+        普通近战暴击: "Taux CRIT des armes de mêlée standards",
+        普通近战暴伤: "Dégâts CRIT des armes de mêlée standards",
+        普通近战触发: "Chance de déclenchement des armes de mêlée standards",
+        普通远程攻击: "ATQ des armes à distance standards",
+        普通远程暴击: "Taux CRIT des armes à distance standards",
+        普通远程暴伤: "Dégâts CRIT des armes à distance standards",
+        普通远程触发: "Chance de déclenchement des armes à distance standards",
+        同律近战攻击: "ATQ des armes de mêlée de Consonance",
+        同律近战暴击: "Taux CRIT des armes de mêlée de Consonance",
+        同律近战暴伤: "Dégâts CRIT des armes de mêlée de Consonance",
+        同律近战触发: "Chance de déclenchement des armes de mêlée de Consonance",
+        同律远程攻击: "ATQ des armes à distance de Consonance",
+        同律远程暴击: "Taux CRIT des armes à distance de Consonance",
+        同律远程暴伤: "Dégâts CRIT des armes à distance de Consonance",
+        同律远程触发: "Chance de déclenchement des armes à distance de Consonance",
+        近战增伤: "DGT d’arme de mêlée",
+        远程增伤: "DGT d’arme à distance",
+        // Nom composé conservé pour 2002 (aucun composé officiel)
+        近战普攻独立增伤: "Augmentation de dégâts indépendants des attaques normales des armes de mêlée",
     },
 }
 
@@ -641,6 +843,10 @@ export const TRANSLATION_SOURCE_FILES = [
     "Clue.json",
     "Cutoff.json",
     "Dispatch.json",
+    "DNASeason.json",
+    "DNASeasonEquip.json",
+    "DNASeasonProgress.json",
+    "DNASeasonRift.json",
     "Draft.json",
     "Dungeon.json",
     "DynQuest.json",
@@ -878,6 +1084,48 @@ function srgbToLinear(rgb: number[]): [number, number, number] {
     return [convert(rgb[0]), convert(rgb[1]), convert(rgb[2])]
 }
 
+/** 怪物等级曲线行（`d/levelup.data.ts` 的 `mobLevelUp`，`leveled/LeveledMonster.ts` 按等级取档）。 */
+export type MobLevelUpRow = {
+    atk: number
+    hp: number
+    es: number
+    rhp: number
+    res: number
+}
+
+/**
+ * 从上游 `Script/Datas/LevelUp.lua` 全量等级行提取怪物等级曲线。
+ * @param table 上游 LevelUp 表（`readLuaTable` 返回的深排序值）。
+ * @returns 按等级升序的五列倍率（`ATKMon / MaxHpMon / MaxESMon / RougeMaxHpMon / RougeMaxESMon`）。
+ */
+export function buildMobLevelUp(table: unknown): MobLevelUpRow[] {
+    const rows: Array<Record<string, unknown>> = Array.isArray(table)
+        ? (table as Array<Record<string, unknown>>)
+        : isRecord(table)
+          ? Object.keys(table)
+                .map(Number)
+                .sort((left, right) => left - right)
+                .map(key => (table as Record<string, Record<string, unknown>>)[String(key)])
+          : []
+    if (rows.length === 0) {
+        throw new Error("LevelUp 怪物曲线提取失败：上游 LevelUp 表为空或形状异常")
+    }
+    return rows.map((row, index) => {
+        const level = index + 1
+        if (row.Level !== undefined && row.Level !== level) {
+            throw new Error(`LevelUp 等级不连续：下标 ${index} 对应 Level ${String(row.Level)}（期望 ${level}）`)
+        }
+        const pick = (field: string): number => {
+            const value = row[field]
+            if (typeof value !== "number" || !Number.isFinite(value)) {
+                throw new Error(`LevelUp[${level}] 缺少数值字段 ${field}`)
+            }
+            return value
+        }
+        return { atk: pick("ATKMon"), hp: pick("MaxHpMon"), es: pick("MaxESMon"), rhp: pick("RougeMaxHpMon"), res: pick("RougeMaxESMon") }
+    })
+}
+
 const MAPPINGS: Mapping[] = [
     { source: "Archive", targetStem: "archive", targetVar: "archiveData", locales: ["cn"] },
     { source: "AbyssBuff", targetStem: "abyss", targetVar: "abyssBuffs", locales: ["cn"] },
@@ -929,6 +1177,13 @@ const MAPPINGS: Mapping[] = [
     { source: "Draft", targetStem: "draft", targetVar: "t", locales: ["cn"] },
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
     { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
+    // 升华（DNASeason）：上游 JSON 只保留实体裸 id，导入期派生 parentIds / spawnUnits /
+    // 词条方案名与映射状态；刷怪组（normalMonsterIds / eliteMonsterIds）在 source 侧补读 MonsterSpawn。
+    ...DNASEASON_TARGET_STEMS.map(stem => ({
+        source: async () => buildDnaSeasonReplacements(stem),
+        targetStem: stem,
+        targetVar: "rawSeasons",
+    })),
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
     { source: "ExtraExcelWeapon", targetStem: "charext", targetVar: "charExtraExcelWeapon", locales: ["cn"] },
     {
@@ -985,6 +1240,15 @@ const MAPPINGS: Mapping[] = [
     { source: "Mod", targetStem: "mod", targetVar: "t", locales: ["cn"] },
     { source: "Monster", targetStem: "monster", targetVar: "monsterData", locales: ["cn"] },
     { source: "MonsterStrongAffixes", targetStem: "monstertag", targetVar: "monsterTagData", locales: ["cn"] },
+    {
+        // 怪物等级曲线：上游 Script/Datas/LevelUp.lua 全量等级行的
+        // ATKMon / MaxHpMon / MaxESMon / RougeMaxHpMon / RougeMaxESMon 五列。
+        // v1.8.2.1 起上游扩展到 1000 级；`leveled/LeveledMonster.ts` 的 MOB_LEVEL_UP
+        // 只是这里的 re-export，数值改动只改上游 + 跑本脚本，不要手写。
+        source: async () => [{ targetVar: "mobLevelUp", value: buildMobLevelUp(await readLuaTable("LevelUp")) }],
+        targetStem: "levelup",
+        targetVar: "mobLevelUp",
+    },
     { source: "Mount", targetStem: "mount", targetVar: "mountData", locales: ["cn"] },
     { source: "Music", targetStem: "music", targetVar: "musicData", locales: ["cn"] },
     { source: "MusicScore", targetStem: "music", targetVar: "musicScoreData", locales: ["cn"] },
@@ -2039,6 +2303,12 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
 
         for (const [key, value] of Object.entries(SUPPLEMENTAL_TRANSLATIONS[locale])) {
             table.set(key, value)
+        }
+
+        // 上游把这些字段写成了裸 TextMap key：逐键恢复 U18 之前的译文（见表注释）
+        for (const [key, values] of Object.entries(EXPLICIT_TRANSLATION_OVERRIDES)) {
+            const text = values[locale]
+            if (text) table.set(key, text)
         }
 
         // 按键排序，保证同样输入产出同样的文件内容（避免无意义的 diff）

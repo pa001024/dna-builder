@@ -77,9 +77,10 @@ export const monsterTagData: MonsterTag[] = [
     },
     {
         id: "Mon.Strong.Empower",
-        name: "Mon_Guide_Title_Strong_Empower",
-        desc: "",
+        name: "征伐 号令者",
+        desc: "“号令者”是敌人中拥有号令者能力的强大个体。\n征伐 号令者每隔一段时间为自身附加持续5秒的[强化光环]，令范围内的友方单位获得[狂暴]：造成和受到伤害增加，移动和攻击速度提升。",
         vars: {
+            间隔时间: 10,
             BUFF持续: 5,
             加成: {
                 移动速度: 0.5,
@@ -143,7 +144,6 @@ export const monsterTagData: MonsterTag[] = [
             伤害倍率: 0.65,
             伤害类型: ["PhantomAvoid"],
             受击类型: "LightHit",
-            削韧值: 200,
         },
     },
     {
@@ -270,9 +270,10 @@ export const monsterTagData: MonsterTag[] = [
     },
     {
         id: "Mon.Strong.Shred",
-        name: "Mon_Guide_Title_Strong_Shred",
-        desc: "",
+        name: "涡流 号令者",
+        desc: "“号令者”是敌人中拥有号令者能力的强大个体。\n涡流 号令者每隔一段时间在敌对目标脚下生成[黑洞]：持续牵引范围内的目标，持续5秒后爆炸，对范围内的敌对目标造成伤害和击飞效果，并使目标之后一段时间内受到伤害增加。",
         vars: {
+            间隔时间: 10,
             飞行速度: 0,
             持续时间: 5,
         },

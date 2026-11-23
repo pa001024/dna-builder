@@ -1,6 +1,7 @@
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window"
-import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router"
+import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw, type Router } from "vue-router"
 import { env } from "./env"
+import { resolveLegacyTranscendenceRoute } from "./utils/transcendence-routes"
 
 const AchievementList = () => import("./views/AchievementList.vue")
 const CharBuildCompare = () => import("./views/CharBuildCompare.vue")
@@ -367,6 +368,183 @@ export const routes: readonly RouteRecordRaw[] = [
                 path: "damage",
                 component: () => import("./views/DBDamageView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+            },
+            // 升华（DNASeason）资料库：layout 内切换大区（不播整页动画），实体详情仍为顶层整页路由
+            {
+                path: "transcendence",
+                component: () => import("./views/DBTranscendenceLayout.vue"),
+                // 旧 ?tab= 归一化在全局 beforeEach（需要覆盖 query-only 导航），这里只管窗口最小尺寸
+                beforeEnter: async () => {
+                    await setMinSize(320, 360)
+                },
+                meta: { title: "database.transcendence", transitionKey: "/db/transcendence" },
+                // 子路由不各自设 beforeEnter：父级 beforeEnter 在首次进入时已执行 setMinSize，
+                // 子路由之间切换沿用同一窗口尺寸，不需要重复声明（评审 waiver）
+                children: [
+                    {
+                        name: "transcendence",
+                        path: "",
+                        component: () => import("./views/DBTranscendenceView.vue"),
+                        meta: { title: "database.transcendence" },
+                    },
+                    {
+                        name: "transcendence-talent-list",
+                        path: "talent",
+                        component: () => import("./views/DBTranscendenceTalentView.vue"),
+                        meta: { title: "db-transcendence.tab.talents" },
+                    },
+                    {
+                        name: "transcendence-gear",
+                        path: "gear",
+                        redirect: to => ({ path: "/db/transcendence/gear/affix", query: to.query, hash: to.hash }),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-gear-affix-list",
+                        path: "gear/affix",
+                        component: () => import("./views/DBTranscendenceGearAffixView.vue"),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-gear-unique-list",
+                        path: "gear/unique",
+                        component: () => import("./views/DBTranscendenceGearUniqueView.vue"),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-gear-base",
+                        path: "gear/base",
+                        component: () => import("./views/DBTranscendenceGearBaseView.vue"),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-gear-inlay",
+                        path: "gear/inlay",
+                        component: () => import("./views/DBTranscendenceGearInlayView.vue"),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-gear-craft",
+                        path: "gear/craft",
+                        component: () => import("./views/DBTranscendenceGearCraftView.vue"),
+                        meta: { title: "db-transcendence.tab.gear" },
+                    },
+                    {
+                        name: "transcendence-rift-list",
+                        path: "rift",
+                        component: () => import("./views/DBTranscendenceRiftView.vue"),
+                        meta: { title: "db-transcendence.tab.rift" },
+                    },
+                    {
+                        name: "transcendence-rift-elite",
+                        path: "rift/elite",
+                        component: () => import("./views/DBTranscendenceRiftView.vue"),
+                        meta: { title: "db-transcendence.tab.rift" },
+                    },
+                    {
+                        name: "transcendence-rift-rules",
+                        path: "rift/rules",
+                        component: () => import("./views/DBTranscendenceRiftView.vue"),
+                        meta: { title: "db-transcendence.tab.rift" },
+                    },
+                    {
+                        name: "transcendence-nest-list",
+                        path: "nest",
+                        component: () => import("./views/DBTranscendenceNestView.vue"),
+                        meta: { title: "db-transcendence.tab.nest" },
+                    },
+                    {
+                        name: "transcendence-commission-list",
+                        path: "commission",
+                        component: () => import("./views/DBTranscendenceCommissionView.vue"),
+                        meta: { title: "db-transcendence.overview.commissions" },
+                    },
+                    {
+                        name: "transcendence-journey-list",
+                        path: "journey",
+                        component: () => import("./views/DBTranscendenceJourneyView.vue"),
+                        meta: { title: "db-transcendence.tab.journey" },
+                    },
+                    {
+                        // 旧委托子页已并入独立「委托」页，保留路由名兼容旧链接
+                        name: "transcendence-journey-commissions",
+                        path: "journey/commissions",
+                        redirect: to => ({ path: "/db/transcendence/commission", query: to.query, hash: to.hash }),
+                        meta: { title: "db-transcendence.overview.commissions" },
+                    },
+                    {
+                        name: "transcendence-journey-buffs",
+                        path: "journey/buffs",
+                        component: () => import("./views/DBTranscendenceJourneyView.vue"),
+                        meta: { title: "db-transcendence.tab.journey" },
+                    },
+                ],
+            },
+            // 实体详情：顶层整页路由，列表 → 详情仍走外层切换动画
+            {
+                name: "transcendence-talent-detail",
+                path: "transcendence/talent/:id(\\d+)",
+                component: () => import("./views/DBTranscendenceTalentDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "db-transcendence.tab.talents" },
+            },
+            // 旧实体详情入口：列表已改页内 SplitView，这里保留兼容重定向（必须在 catch-all 之前）
+            {
+                name: "transcendence-gear-affix-detail",
+                path: "transcendence/gear/affix/:id(\\d+)",
+                redirect: to => ({ path: "/db/transcendence/gear/affix", query: { ...to.query, id: String(to.params.id) }, hash: to.hash }),
+                meta: { title: "db-transcendence.tab.gear" },
+            },
+            {
+                name: "transcendence-gear-unique-detail",
+                path: "transcendence/gear/unique/:id(\\d+)",
+                redirect: to => ({
+                    path: "/db/transcendence/gear/unique",
+                    query: { ...to.query, id: String(to.params.id) },
+                    hash: to.hash,
+                }),
+                meta: { title: "db-transcendence.tab.gear" },
+            },
+            {
+                name: "transcendence-gear-base-detail",
+                path: "transcendence/gear/base/:id(\\d+)",
+                redirect: to => ({ path: "/db/transcendence/gear/base", query: { ...to.query, id: String(to.params.id) }, hash: to.hash }),
+                meta: { title: "db-transcendence.tab.gear" },
+            },
+            {
+                // 螺旋楼层详情已并入列表页右侧，旧独立详情路由改为页内 `?id=` 选择
+                name: "transcendence-rift-detail",
+                path: "transcendence/rift/:id(\\d+)",
+                redirect: to => ({ path: "/db/transcendence/rift", query: { ...to.query, id: String(to.params.id) }, hash: to.hash }),
+                meta: { title: "db-transcendence.tab.rift" },
+            },
+            {
+                name: "transcendence-nest-detail",
+                path: "transcendence/nest/:dungeonId(\\d+)",
+                component: () => import("./views/DBTranscendenceNestDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "db-transcendence.tab.nest" },
+            },
+            {
+                name: "transcendence-commission-detail",
+                path: "transcendence/commission/:dungeonId(\\d+)",
+                component: () => import("./views/DBTranscendenceCommissionDetailView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "db-transcendence.overview.commissions" },
+            },
+            {
+                name: "transcendence-journey-quest-detail",
+                path: "transcendence/journey/quest/:id(\\d+)",
+                component: () => import("./views/DBTranscendenceJourneyQuestView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "db-transcendence.tab.journey" },
+            },
+            {
+                name: "transcendence-not-found",
+                path: "transcendence/:pathMatch(.*)*",
+                component: () => import("./views/DBTranscendenceNotFoundView.vue"),
+                beforeEnter: () => setMinSize(320, 360),
+                meta: { title: "database.transcendence" },
             },
             {
                 name: "walnut-list",
@@ -893,3 +1071,22 @@ export const router = createRouter({
     history: env.isApp ? createWebHashHistory() : typeof window === "undefined" ? createMemoryHistory() : createWebHistory(),
     routes,
 })
+
+/**
+ * 旧升华 `?tab=&id=` 链接的兜底归一化。
+ * layout 的 beforeEnter 只在首次进入父记录时触发，query-only 导航（如从子路由回到总览）不会经过它，
+ * 因此收口到全局守卫：仅总览路由承接，子路由带 `tab` 时路径优先直接放行。
+ * SSG 预渲染自行建 router，不注册本守卫；预渲染不携带 query，无影响。
+ * @param target 要安装守卫的 router 实例
+ */
+export function installTranscendenceLegacyGuard(target: Router): void {
+    target.beforeEach(to => {
+        if (to.name !== "transcendence" || !("tab" in to.query)) {
+            return true
+        }
+
+        return resolveLegacyTranscendenceRoute(to) ?? true
+    })
+}
+
+installTranscendenceLegacyGuard(router)

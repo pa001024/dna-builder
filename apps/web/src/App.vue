@@ -44,6 +44,12 @@ const { syncWindowWithSetting: syncAfkWidgetWindow } = useAfkWidget()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const vueRouter = useRouter()
+/** 外层 transition 的 key：带 meta.transitionKey 的页面（如升华大区的 layout）在子路由间切换时复用同一容器，不播整页动画 */
+const transitionKey = computed(() => {
+    const key = route.meta.transitionKey
+
+    return typeof key === "string" ? key : route.path
+})
 const user = useUserStore()
 /** 深链监听的取消函数（桌面端 `dobapp://` 协议，见 `utils/deep-link.ts`） */
 let deepLinkUnlisten: (() => void) | null = null
@@ -508,7 +514,7 @@ onBeforeUnmount(() => {
                             </template>
                         </Suspense>
                     </KeepAlive>
-                    <div v-else :key="$route.path" class="w-full h-full overflow-hidden">
+                    <div v-else :key="transitionKey" class="w-full h-full overflow-hidden">
                         <Suspense>
                             <ErrorBoundary>
                                 <component :is="Component" />

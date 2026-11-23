@@ -7,6 +7,10 @@ describe("数据包模块清单", () => {
         expect(isDataPackModule("partytopic.data")).toBe(true)
     })
 
+    it("升华手写词条数据模块纳入数据包加载", () => {
+        expect(isDataPackModule("transcendbuff.data")).toBe(true)
+    })
+
     it("分语言文件已合并进中文结构，不再是独立数据包模块", () => {
         // quest / partytopic / charvoice / charext 的译文已压成同文件内的 id→文本大表
         expect(isDataPackModule("quest.tc.data")).toBe(false)

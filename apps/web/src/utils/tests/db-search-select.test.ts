@@ -109,7 +109,7 @@ describe("select 投影：任意结构的原始字段", () => {
         const grown = first.字段.find(field => Array.isArray(field.值))
 
         expect(grown).toBeDefined()
-        expect((grown!.值 as number[]).length).toBe(12)
+        expect((grown!.值 as number[]).length).toBe(30)
     })
 
     it("给了 select 就不再返回 fields 文本，避免同一份数据两套口径", () => {

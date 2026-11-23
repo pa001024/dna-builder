@@ -55,6 +55,7 @@
         "iattr": "bun tools/import-attr-i18n.ts",
         "imgs-upload": "bun tools/imgs-upload.ts",
         "wi": "bun tools/webp-import.ts",
+        "wi:dnaseason": "bun tools/webp-import.ts --filter \"^(res|webp)/(T_Season_|T_Tab_Season_|T_Rouge_Talent_)\"",
         "itf": "bun tools/import-title-frame.ts",
         "ihf": "bun tools/import-head-frame.ts",
         "loc": "bun run tools/count-effective-loc.ts",

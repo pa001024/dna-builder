@@ -531,7 +531,7 @@ export const appearanceTutorial: Tutorial = {
                             {
                                 label: L("版本门控", "版本門檻", "Version gate", "バージョン制限", "버전 제한", "Seuil de version"),
                                 control: "select",
-                                value: L("> 1.7", "> 1.7", "> 1.7", "> 1.7", "> 1.7", "> 1.7"),
+                                value: L("> 1.8", "> 1.8", "> 1.8", "> 1.8", "> 1.8", "> 1.8"),
                             },
                             {
                                 label: L("关闭方式", "關閉方式", "Unlock method", "解除方法", "해제 방식", "Déverrouillage"),
@@ -564,12 +564,12 @@ export const appearanceTutorial: Tutorial = {
                 {
                     at: 5.0,
                     text: L(
-                        "安全模式默认开启：隐藏解包，过滤 1.7 以上的数据。",
-                        "安全模式預設開啟：隱藏解包，過濾 1.7 以上的資料。",
-                        "Safe mode is on by default: it hides unpack and filters data above 1.7.",
-                        "セーフモードは既定で有効。解包を隠し、1.7 超のデータを除外します。",
-                        "안전 모드는 기본으로 켜져 있으며 언팩을 숨기고 1.7 초과 데이터를 거릅니다.",
-                        "Mode sûr actif par défaut : masque unpack et filtre les données > 1.7."
+                        "安全模式默认开启：隐藏解包，过滤 1.8 以上的数据。",
+                        "安全模式預設開啟：隱藏解包，過濾 1.8 以上的資料。",
+                        "Safe mode is on by default: it hides unpack and filters data above 1.8.",
+                        "セーフモードは既定で有効。解包を隠し、1.8 超のデータを除外します。",
+                        "안전 모드는 기본으로 켜져 있으며 언팩을 숨기고 1.8 초과 데이터를 거릅니다.",
+                        "Mode sûr actif par défaut : masque unpack et filtre les données > 1.8."
                     ),
                 },
             ],

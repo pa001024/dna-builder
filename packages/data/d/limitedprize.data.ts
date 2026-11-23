@@ -124,6 +124,22 @@ export const limitedPrizeItems: Record<number, LimitedPrizeItem> = {
         Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
         Type: [2, 4, 4, 4, 7, 8, 6, 6],
     },
+    "1011": {
+        CostRuleId: 1001,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[310202, 240102], [13065, 13066], [20118, 20117], [10171, 10170], [10055, 10056], [20019, 20018], [30112], [208]],
+        LimitedPrizePoolId: 1011,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
+    "1012": {
+        CostRuleId: 1002,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[310202, 240102], [13065, 13066], [20118, 20117], [10171, 10170], [10055, 10056], [20019, 20018], [30112], [208]],
+        LimitedPrizePoolId: 1012,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
 }
 
 /** 限时奖池活动映射表，由 importdata 从 out 自动写入。 */
@@ -141,6 +157,12 @@ export const limitedPrizePools: Record<number, LimitedPrizePool> = {
     "10302101": {
         EventId: 10302101,
         LimitedPrizePoolId: [1003, 1004],
+        ExtraItem: {
+            "1": [9, 1008, 1],
+            "2": [4, 21022, 1],
+            "3": [4, 13038, 1],
+            "4": [4, 20085, 1],
+        },
     },
     "10302102": {
         EventId: 10302102,
@@ -163,6 +185,16 @@ export const limitedPrizePools: Record<number, LimitedPrizePool> = {
             "2": [4, 21016, 1],
             "3": [4, 40096, 1],
             "4": [4, 20112, 1],
+        },
+    },
+    "10302105": {
+        EventId: 10302105,
+        LimitedPrizePoolId: [1011, 1012],
+        ExtraItem: {
+            "1": [9, 1007, 1],
+            "2": [4, 13064, 1],
+            "3": [4, 20119, 1],
+            "4": [4, 10172, 1],
         },
     },
 }

@@ -1,5 +1,34 @@
 import type { Buff, Char, Draft, Dungeon, Mod, OptReward, Reward, RewardChild, Weapon } from "../data-types"
+import { rebuildTranscendBuffIndex } from "../transcendBuffs"
 import { type AbyssBuff, type AbyssDungeon, abyssBuffs, abyssDungeons } from "./abyss.data"
+
+// 升华（DNASeason）：4 个模块都带大量具名导出；螺旋的 seasons 与赛季主表同名，按 riftSeasons 暴露。
+export * from "./dnaseason.data"
+export * from "./dnaseasonequip.data"
+export * from "./dnaseasonprogress.data"
+export {
+    challenges,
+    type DnaSeasonChallenge,
+    type DnaSeasonChallengeDropBonus,
+    type DnaSeasonMonsterScore,
+    type DnaSeasonRankConfig,
+    type DnaSeasonRankReward,
+    type DnaSeasonRankRole,
+    type DnaSeasonRiftFloor,
+    type DnaSeasonRiftGlobals,
+    type DnaSeasonRiftJump,
+    type DnaSeasonRiftSeason,
+    eliteMonsterIds,
+    floors,
+    globals,
+    monsterScores,
+    rankConfigs,
+    rankRewards,
+    rankRoles,
+    seasons as riftSeasons,
+    spawnUnits,
+} from "./dnaseasonrift.data"
+
 import buffData from "./buff.data"
 import charData from "./char.data"
 import cutoffData from "./cutoff.data"
@@ -474,6 +503,9 @@ export function rebuildStaticIndexes(): void {
 
     // 商店来源索引依赖上面的 modMap 与 walnutMap，必须放在它们之后重建
     rebuildShopSourceIndexes()
+
+    // 升华手写词条索引由数据包模块 `transcendbuff.data` 的绑定推导
+    rebuildTranscendBuffIndex()
 }
 
 /**

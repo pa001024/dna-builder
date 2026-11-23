@@ -1,5 +1,5 @@
 import { ref } from "vue"
-import { applyVersionGate, type VersionedItem } from "@/data/versionGate"
+import { applyVersionGate, applyVersionGateToValue, type VersionedItem } from "@/data/versionGate"
 import type { DataPackModuleRecord } from "./data-pack"
 
 type DataPackFallbackKind = "array" | "object" | "map" | "undefined"
@@ -8,6 +8,8 @@ type DataPackBindingSetter = (value: unknown) => void
 
 type DataPackBindingEntry = {
     fallbackKind: DataPackFallbackKind
+    /** 非记录型数据的整体版本门限（如升华的裸 id / 常量表） */
+    version?: string
     setter: DataPackBindingSetter
 }
 
@@ -29,18 +31,20 @@ function createFallbackValue(fallbackKind: DataPackFallbackKind): unknown {
 /**
  * 数据包水合时重放版本门限 rebuildStaticIndexes
  */
-function applyVersionGateToPackedValue(value: unknown): unknown {
-    if (Array.isArray(value)) {
-        return applyVersionGate(value as VersionedItem[])
+function applyVersionGateToPackedValue(value: unknown, entry: DataPackBindingEntry): unknown {
+    const gated = Array.isArray(value) ? applyVersionGate(value as VersionedItem[]) : value
+    if (entry.version) {
+        return applyVersionGateToValue(gated, createFallbackValue(entry.fallbackKind), entry.version)
     }
-    return value
+    return gated
 }
 
 export function registerDataPackBinding(
     moduleKey: string,
     exportName: string,
     fallbackKind: DataPackFallbackKind,
-    setter: DataPackBindingSetter
+    setter: DataPackBindingSetter,
+    version?: string
 ): void {
     let moduleBindings = bindingRegistry.get(moduleKey)
     if (!moduleBindings) {
@@ -50,6 +54,7 @@ export function registerDataPackBinding(
 
     moduleBindings.set(exportName, {
         fallbackKind,
+        version,
         setter,
     })
 }
@@ -62,7 +67,7 @@ export function hydrateRegisteredDataPackBindings(moduleKey: string, moduleRecor
 
     for (const [exportName, entry] of moduleBindings) {
         if (Object.hasOwn(moduleRecord, exportName)) {
-            entry.setter(applyVersionGateToPackedValue(moduleRecord[exportName]))
+            entry.setter(applyVersionGateToPackedValue(moduleRecord[exportName], entry))
         } else {
             entry.setter(createFallbackValue(entry.fallbackKind))
         }

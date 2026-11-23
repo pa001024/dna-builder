@@ -13,4 +13,16 @@ describe("dataPackRewritePlugin", () => {
         expect(rewritten).toContain('await syncDataPackModuleBindings("char.data")')
         expect(rewritten).not.toContain("const t: Char[]")
     })
+
+    it("升华手写词条模块进数据包并按导出名注册绑定", () => {
+        const here = path.dirname(fileURLToPath(import.meta.url))
+        const sourcePath = path.resolve(here, "..", "..", "..", "..", "..", "packages", "data", "d", "transcendbuff.data.ts")
+
+        const rewritten = rewriteDataPackModule(sourcePath)
+
+        expect(rewritten).toContain('await syncDataPackModuleBindings("transcendbuff.data")')
+        expect(rewritten).toContain('registerDataPackBinding("transcendbuff.data", "TRANSCEND_BUFFS", "array"')
+        expect(rewritten).toContain('registerDataPackBinding("transcendbuff.data", "UNIQUE_AFFIX_MAP", "object"')
+        expect(rewritten).not.toContain("升华·螺旋跃击")
+    })
 })

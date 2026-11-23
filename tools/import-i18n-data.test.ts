@@ -1,6 +1,13 @@
 import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
-import { applyTranslationAliases, collectTitlePairs, collectTranslationPairs, parseVersion, TRANSLATION_ALIASES } from "./import-i18n-data"
+import {
+    applyTranslationAliases,
+    buildMobLevelUp,
+    collectTitlePairs,
+    collectTranslationPairs,
+    parseVersion,
+    TRANSLATION_ALIASES,
+} from "./import-i18n-data"
 
 const TEXT_MAP = JSON.parse(readFileSync("E:/dev/DuetNightAbyssData2/out/TextMap_I18n.json", "utf8")) as Record<
     string,
@@ -150,5 +157,36 @@ describe("-v 历史版本参数", () => {
         expect(() => parseVersion(["bun", "x", "-v"])).toThrow("-v 需要一个版本号")
         expect(() => parseVersion(["bun", "x", "-v", "-f"])).toThrow("-v 需要一个版本号")
         expect(() => parseVersion(["bun", "x", "--version="])).toThrow("-v 需要一个版本号")
+    })
+})
+
+describe("buildMobLevelUp：上游 LevelUp.lua → 怪物等级曲线", () => {
+    const row = (level: number, atk = level, hp = level * 10) => ({
+        Level: level,
+        ATKMon: atk,
+        MaxHpMon: hp,
+        MaxESMon: hp,
+        RougeMaxHpMon: level,
+        RougeMaxESMon: level,
+    })
+
+    it("按下标取五列并校验等级连续", () => {
+        expect(buildMobLevelUp([row(1, 0.1, 0.4), row(2, 0.2, 0.5)])).toEqual([
+            { atk: 0.1, hp: 0.4, es: 0.4, rhp: 1, res: 1 },
+            { atk: 0.2, hp: 0.5, es: 0.5, rhp: 2, res: 2 },
+        ])
+    })
+
+    it("对象形状按等级键排序", () => {
+        expect(buildMobLevelUp({ 2: row(2), 1: row(1) })).toEqual([
+            { atk: 1, hp: 10, es: 10, rhp: 1, res: 1 },
+            { atk: 2, hp: 20, es: 20, rhp: 2, res: 2 },
+        ])
+    })
+
+    it("空表 / 缺字段 / 等级错位时抛错", () => {
+        expect(() => buildMobLevelUp([])).toThrow("为空或形状异常")
+        expect(() => buildMobLevelUp([{}])).toThrow("缺少数值字段 ATKMon")
+        expect(() => buildMobLevelUp([row(1), row(3)])).toThrow("等级不连续")
     })
 })

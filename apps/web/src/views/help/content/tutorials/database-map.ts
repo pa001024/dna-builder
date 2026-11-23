@@ -781,12 +781,12 @@ export const databaseMapTutorial: Tutorial = {
                     {
                         icon: "ri:shield-line",
                         text: L(
-                            "安全模式把版本上限锁在 1.7",
-                            "安全模式把版本上限鎖在 1.7",
-                            "Safe mode caps the version at 1.7",
-                            "セーフモードはバージョン上限を1.7に固定",
-                            "안전 모드는 버전 상한을 1.7로 고정합니다",
-                            "Le mode sûr plafonne la version à 1.7"
+                            "安全模式把版本上限锁在 1.8",
+                            "安全模式把版本上限鎖在 1.8",
+                            "Safe mode caps the version at 1.8",
+                            "セーフモードはバージョン上限を1.8に固定",
+                            "안전 모드는 버전 상한을 1.8로 고정합니다",
+                            "Le mode sûr plafonne la version à 1.8"
                         ),
                     },
                     {
@@ -825,12 +825,12 @@ export const databaseMapTutorial: Tutorial = {
                 {
                     at: 5.0,
                     text: L(
-                        "安全模式把版本锁在 1.7；超版本条目会被过滤，搜索也会提示。",
-                        "安全模式把版本鎖在 1.7；超版本條目會被過濾，搜尋也會提示。",
-                        "Safe mode locks the version at 1.7; newer entries are filtered and search warns you.",
-                        "セーフモードは1.7で固定。上限超えは除外され、検索にも表示されます。",
-                        "안전 모드는 버전을 1.7로 고정하며, 초과 항목은 제외되고 검색에도 안내됩니다.",
-                        "Le mode sûr bloque la version à 1.7 ; les entrées plus récentes sont filtrées et la recherche prévient."
+                        "安全模式把版本锁在 1.8；超版本条目会被过滤，搜索也会提示。",
+                        "安全模式把版本鎖在 1.8；超版本條目會被過濾，搜尋也會提示。",
+                        "Safe mode locks the version at 1.8; newer entries are filtered and search warns you.",
+                        "セーフモードは1.8で固定。上限超えは除外され、検索にも表示されます。",
+                        "안전 모드는 버전을 1.8로 고정하며, 초과 항목은 제외되고 검색에도 안내됩니다.",
+                        "Le mode sûr bloque la version à 1.8 ; les entrées plus récentes sont filtrées et la recherche prévient."
                     ),
                 },
             ],

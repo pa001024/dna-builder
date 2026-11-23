@@ -208,6 +208,30 @@ export const DATA_MODULES: DataModuleEntry[] = [
     { id: "const", label: "数值常量", file: "packages/data/d/const.data.ts", load: () => import("dna-builder-data/d/const.data") },
     { id: "convert", label: "魔之楔转化", file: "packages/data/d/convert.data.ts", load: () => import("dna-builder-data/d/convert.data") },
     { id: "cutoff", label: "限时售卖", file: "packages/data/d/cutoff.data.ts", load: () => import("dna-builder-data/d/cutoff.data") },
+    {
+        id: "dnaseason",
+        label: "升华",
+        file: "packages/data/d/dnaseason.data.ts",
+        load: () => import("dna-builder-data/d/dnaseason.data"),
+    },
+    {
+        id: "dnaseasonequip",
+        label: "升华装备",
+        file: "packages/data/d/dnaseasonequip.data.ts",
+        load: () => import("dna-builder-data/d/dnaseasonequip.data"),
+    },
+    {
+        id: "dnaseasonprogress",
+        label: "升华天赋",
+        file: "packages/data/d/dnaseasonprogress.data.ts",
+        load: () => import("dna-builder-data/d/dnaseasonprogress.data"),
+    },
+    {
+        id: "dnaseasonrift",
+        label: "升华螺旋",
+        file: "packages/data/d/dnaseasonrift.data.ts",
+        load: () => import("dna-builder-data/d/dnaseasonrift.data"),
+    },
     { id: "draft", label: "设计稿", file: "packages/data/d/draft.data.ts", load: () => import("dna-builder-data/d/draft.data") },
     { id: "dungeon", label: "副本", file: "packages/data/d/dungeon.data.ts", load: () => import("dna-builder-data/d/dungeon.data") },
     { id: "dynquest", label: "动态委托", file: "packages/data/d/dynquest.data.ts", load: () => import("dna-builder-data/d/dynquest.data") },
@@ -403,6 +427,12 @@ export const DATA_MODULES: DataModuleEntry[] = [
         label: "称号框",
         file: "packages/data/d/titleframe.data.ts",
         load: () => import("dna-builder-data/d/titleframe.data"),
+    },
+    {
+        id: "transcendbuff",
+        label: "升华手写词条",
+        file: "packages/data/d/transcendbuff.data.ts",
+        load: () => import("dna-builder-data/d/transcendbuff.data"),
     },
     {
         id: "translations",

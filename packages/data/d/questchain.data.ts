@@ -5492,6 +5492,93 @@ const questChainDataRaw: QuestChain[] = [
         ],
     },
     {
+        id: 120801,
+        name: "汽笛为谁而鸣",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "汽笛为谁而鸣",
+        type: 6,
+        reward: [50671],
+        unlock: 120801,
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12080100,
+                sr: 106301,
+                next: {
+                    Success: 12080101,
+                },
+            },
+            {
+                id: 12080101,
+                sr: 106301,
+                next: {
+                    Success: 12080102,
+                },
+            },
+            {
+                id: 12080102,
+                sr: 106001,
+                next: {
+                    Success: 12080103,
+                },
+            },
+            {
+                id: 12080103,
+                sr: 106301,
+                next: {
+                    Success: 12080108,
+                },
+            },
+            {
+                id: 12080108,
+                sr: 103201,
+                next: {
+                    Success: 12080104,
+                },
+            },
+            {
+                id: 12080104,
+                sr: 106301,
+                next: {
+                    Success: 12080105,
+                },
+            },
+            {
+                id: 12080105,
+                sr: 106001,
+                next: {
+                    Success: 12080109,
+                },
+            },
+            {
+                id: 12080109,
+                sr: 103201,
+                next: {
+                    Success: 12080110,
+                },
+            },
+            {
+                id: 12080110,
+                sr: 106001,
+                next: {
+                    Success: 12080106,
+                },
+            },
+            {
+                id: 12080106,
+                sr: 106001,
+                next: {
+                    Success: 12080107,
+                },
+            },
+            {
+                id: 12080107,
+                sr: 106101,
+            },
+        ],
+    },
+    {
         id: 200101,
         name: "流浪的皎皎",
         chapterName: "夜航篇",

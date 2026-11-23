@@ -3,6 +3,8 @@
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
+import { additivePng } from "./ui-frame-alpha"
+import { collectDnaSeasonImageUrls, compileFilter, matchesFilter, resolveFilterRaw, type SeasonImageSource } from "./webp-import-lib"
 
 /**
  * webp-import
@@ -19,25 +21,40 @@ import { fileURLToPath, pathToFileURL } from "node:url"
  * 必须在 evaluateDataUrls 中枚举对应数据源；遗漏时脚本会按目录告警，不会静默跳过。
  *
  * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库。
+ * 源优先用导出目录里的本地 .uasset（fmodel-cli `export-tex-file` 直读文件，不读 pak）：
+ * 包路径按同名 .uasset 索引反推，产物落回导出目录（与 FModel 界面导出同布局），复跑即命中 PNG 现货。
+ * 本地没有 .uasset 时才用同名 PNG 现货；两者都没有按缺失报告。
+ * 旧 pak 路径（export-tex 直读、全 pak search）只在显式 `--allow-pak` 时启用，
+ * 避免旧版本客户端的 pak 覆盖新客户端资产。
  * 编码规则：输出分辨率宽高均 <=256（即 256x256 以内）时用无损压缩，
  * 其余用有损编码（默认质量 90）；例外：bust/ 缩略图强制有损 q90（与现存一致）。
  * 缩放规则：
  *   bust/ 与 fashion/ 目录固定缩成 128x128 缩略图（视图只做 thumb-url，全图走 CDN）；
  *   res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
+ *   命中 FULL_SIZE_RULES（按目标贴图名匹配）的 res/ 图片保持源分辨率，不参与 maxHeight 降采样，
+ *   如升华装备图 T_Season_*（游戏原图 256x256，压到 128 会明显模糊）。
  *   命中 SCALE_RULES（按目标贴图名匹配）的图片按规则里的 scale 等比缩小、不放大，
  *   如拍照活动大图 T_Activity_PhotoEvent_* 按 50% 缩放。
+ *   命中 FIXED_SIZE_RULES（按目标相对路径匹配）的图片固定缩到规则边长，
+ *   如升华天赋图标 webp/T_Rouge_Talent_* 一律 128x128（源取 Dynamic/Image/RougeLike 512 整图）。
  *
  * 用法:
  *   bun tools/webp-import.ts                 # 增量导入缺失的 WebP
  *   bun tools/webp-import.ts --force         # 强制重新转换（覆盖已有 WebP）
  *   bun tools/webp-import.ts --dry-run       # 只统计不落盘
+ *   bun tools/webp-import.ts --no-uasset     # 缺 PNG 时不调 fmodel-cli，只报缺失（旧行为）
+ *   bun tools/webp-import.ts --allow-pak     # 允许 export-tex 直读 pak 与全 pak search（默认关闭）
+ *   bun tools/webp-import.ts --no-uasset-first  # 回退旧行为：同名 PNG 现货优先于本地 .uasset
+ *   bun tools/webp-import.ts --jobs 8        # uasset 并发导出数（默认 4）
  *   bun tools/webp-import.ts --data <dir>    # 覆盖文本扫描目录（默认 packages/data）
- *   bun tools/webp-import.ts --source <dir>  # 覆盖 FModel 纹理导出目录
+ *   bun tools/webp-import.ts --source <dir>  # 覆盖纹理导出目录（1.8 客户端 uasset 树，如 F:/test/EM/Content/UI/Texture）
  *   bun tools/webp-import.ts --out <dir>     # 覆盖输出目录（默认 public/imgs）
  *   bun tools/webp-import.ts --quality 90    # 覆盖 WebP 质量（默认 90）
  *   bun tools/webp-import.ts --res-max-height 128   # res 目录图片最大高度，超出等比缩小（默认 128）
+ *   bun tools/webp-import.ts --filter '^res/T_Season_'   # 只处理目标相对路径匹配该正则的资源（数据源版本领先于本地 pak 时按类别导入）
  *
  * 环境变量同样生效: WEBP_IMPORT_DATA_DIR / WEBP_IMPORT_SOURCE / WEBP_IMPORT_OUT / WEBP_IMPORT_QUALITY / WEBP_IMPORT_RES_MAX_HEIGHT
+ *   WEBP_IMPORT_FILTER / FMODEL_CLI / WEBP_IMPORT_JOBS
  */
 
 type ImageRef = {
@@ -71,6 +88,17 @@ type ConvertTask = {
     sourceAbsPath: string
     /** 源 PNG 相对导出目录的路径，用于日志 */
     sourceRelPath: string
+    /** 引用了它的位置（首处） */
+    referencedFrom: string
+}
+
+type UassetTask = {
+    /** 目标相对路径（相对 public/imgs） */
+    targetRelPath: string
+    /** 游戏内包路径（不含扩展名），如 "EM/Content/UI/Texture/.../T_XXX"，供 export-tex 用 */
+    uassetPkg: string
+    /** 本地 .uasset 绝对路径（本地索引命中时给出；缺失时只能走 --allow-pak 的 pak 路径） */
+    uassetAbsPath?: string
     /** 引用了它的位置（首处） */
     referencedFrom: string
 }
@@ -119,6 +147,12 @@ const DRY_RUN = args.includes("--dry-run")
 const QUALITY = Number(getArgValue("--quality") ?? process.env.WEBP_IMPORT_QUALITY ?? "90")
 /** res 目录图片的最大高度：超出时等比缩小，不放大（默认 128） */
 const RES_MAX_HEIGHT = Number(getArgValue("--res-max-height") ?? process.env.WEBP_IMPORT_RES_MAX_HEIGHT ?? "128")
+/**
+ * 目标相对路径过滤器（正则）：只处理匹配的资源。
+ * 数据源版本领先于本地 pak 时，全量跑会为大量尚未落地的资源做无谓的 pak 搜索，按类别导入用它收口。
+ */
+const FILTER = resolveFilterRaw(getArgValue("--filter"), process.env.WEBP_IMPORT_FILTER)
+const { regex: FILTER_REGEX, error: FILTER_ERROR } = compileFilter(FILTER)
 
 /**
  * 无损压缩阈值：输出分辨率宽和高均 <= 该值时用无损 WebP（小图标经不起有损压缩的 ringing）。
@@ -142,9 +176,42 @@ function isThumb(targetRelPath: string): boolean {
  */
 const SCALE_RULES: { pattern: RegExp; scale: number }[] = [{ pattern: /^T_Activity_PhotoEvent_\d+$/i, scale: 0.5 }]
 
+/**
+ * 固定尺寸目标（按目标相对路径匹配）：命中者一律缩到指定边长，与源分辨率无关。
+ * 升华天赋图标在游戏里是 128px 图集贴图：Dynamic/Image/RougeLike 是 512 整图（字形占满画布），
+ * 直接用 512 会让 24~64px 的图标位里字形偏小，必须缩到 128。
+ */
+const FIXED_SIZE_RULES: { pattern: RegExp; size: number; reason: string }[] = [
+    { pattern: /^webp\/T_Rouge_Talent_/i, size: THUMB_SIZE, reason: "rouge天赋图标" },
+]
+
+/**
+ * 升华天赋图标的源优先级（按包路径片段匹配，越靠前越优先）。
+ * 游戏内图标取 Dynamic/Image/RougeLike 的 512 整图；Dynamic/Atlas/RougeLike 是 128 图集版本，
+ * 字形只占画布约 40% 且内容与整图不同，只在 Image 缺失时兜底。
+ */
+const ROUGE_TALENT_SOURCE_ORDER = ["/dynamic/image/rougelike/", "/dynamic/atlas/rougelike/"]
+
+/**
+ * res/ 下的全尺寸例外（按目标贴图名匹配）：保持源分辨率，不参与 RES_MAX_HEIGHT 降采样。
+ * 升华装备图 T_Season_* 的游戏原始贴图为 256x256，缩到 128 会明显模糊；
+ * 256 仍落在无损阈值内，全尺寸导入不会增加有损风险。
+ */
+const FULL_SIZE_RULES: RegExp[] = [/^T_Season_/i]
+
 const dataDir = getArgValue("--data") ?? process.env.WEBP_IMPORT_DATA_DIR ?? path.join(rootDir, "packages", "data")
 const publicImgsDir = getArgValue("--out") ?? process.env.WEBP_IMPORT_OUT ?? path.join(rootDir, "apps", "web", "public", "imgs")
 const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP_IMPORT_SOURCE)
+/** fmodel-cli 路径：本地 .uasset 解码（export-tex-file）用 */
+const FMODEL_CLI = process.env.FMODEL_CLI ?? "D:/dev/fmodel-mcp/Cli/bin/publish/fmodel-cli.exe"
+/** 缺 PNG 时不调 fmodel-cli，只报缺失 */
+const NO_UASSET = args.includes("--no-uasset")
+/** 允许读 pak：export-tex 直读与全 pak search 只在显式开启时使用（默认的本地 .uasset 解码不读 pak） */
+const ALLOW_PAK = args.includes("--allow-pak")
+/** 本地 .uasset 优先于同名 PNG 现货；--no-uasset-first 回退旧的 PNG 优先行为 */
+const UASSET_FIRST = !args.includes("--no-uasset-first")
+/** uasset 并发导出数：batch 会话是串行的，开多个会话并行 */
+const JOBS = Math.max(1, Number(getArgValue("--jobs") ?? process.env.WEBP_IMPORT_JOBS ?? "4") || 4)
 /**
  * 称号框贴图清单（webp 文件名 → 游戏内包路径），由 tools/import-title-frame.ts 生成。
  *
@@ -186,8 +253,9 @@ function collectProjectRootAliases(realRoot: string): string[] {
 }
 
 /**
- * 探测 FModel 纹理导出目录：按项目根的所有路径别名（junction 解析前后的形式）逐一
- * 尝试同级 dna-unpack，兼顾用户给定路径与常见拼写变体。
+ * 探测纹理源目录：优先用户显式指定的 1.8 客户端 uasset 树，其次按项目根的所有路径别名
+ * （junction 解析前后的形式）找同级 dna-unpack 下的 1.8 解包目录。
+ * 旧的 `Fmodel/Output/Exports` 导出目录已废弃，不再作为候选。
  * @param override 用户显式指定的目录
  * @returns 存在的源目录
  */
@@ -195,11 +263,7 @@ function resolveSourceRoot(override?: string): string {
     const unpackRoots = collectProjectRootAliases(rootDir).map(alias => path.join(alias, ".."))
     const candidates = [
         override,
-        ...unpackRoots.flatMap(unpackRoot => [
-            path.join(unpackRoot, "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "UI", "Texture"),
-            path.join(unpackRoot, "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "Texture"),
-            path.join(unpackRoot, "Fmodel", "Output", "Exports", "EM", "Conten", "U", "Texture"),
-        ]),
+        ...unpackRoots.map(unpackRoot => path.join(unpackRoot, "dna-unpack", "uasset-1.8", "EM", "Content", "UI", "Texture")),
     ]
 
     const existing = candidates.filter((value): value is string => Boolean(value)).find(value => fs.existsSync(value))
@@ -207,7 +271,9 @@ function resolveSourceRoot(override?: string): string {
         return existing
     }
 
-    throw new Error(`未找到 FModel 纹理导出目录，请用 --source 指定。已尝试:\n${candidates.map(value => `  - ${value}`).join("\n")}`)
+    throw new Error(
+        `未找到 1.8 客户端 uasset 纹理目录，请用 --source 指定（如 F:/test/EM/Content/UI/Texture）。已尝试:\n${candidates.map(value => `  - ${value}`).join("\n")}`
+    )
 }
 
 /**
@@ -374,7 +440,7 @@ function collectIconValues(value: unknown, out: Set<string>): void {
  */
 async function evaluateDataUrls(): Promise<Set<string>> {
     const urls = new Set<string>()
-    const appDataDir = path.join(rootDir, "src", "data")
+    const appDataDir = path.join(rootDir, "packages", "data")
     const loadModule = <T>(rel: string): Promise<T> => import(pathToFileURL(path.join(appDataDir, rel)).href) as Promise<T>
 
     const { default: charData } = await loadModule<{ default: CharLike[] }>("d/char.data.ts")
@@ -704,6 +770,35 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         }
     }
 
+    // 升华（DNASeason）资料库: DBTranscendence* 与升华构筑直接按 `/imgs/webp|res/${icon}.webp` 引用，
+    // 这四张表不在上面的通用数据枚举里，文本扫描只能看到 `${icon}` 模板，必须在此枚举。
+    //   赛季主图 / 委托图、掉落加成主图标与迷你图标、螺旋挑战图标 → /imgs/webp
+    //   装备基础名 / 唯一装 / 生成组 → /imgs/res
+    //   进度阶段 / 天赋节点 → /imgs/webp
+    const { seasons: seasonList, buffTypes: seasonBuffTypes } =
+        await loadModule<Pick<SeasonImageSource, "seasons" | "buffTypes">>("d/dnaseason.data.ts")
+    const {
+        baseNames: seasonBaseNames,
+        uniqueEquips: seasonUniqueEquips,
+        generateGroups: seasonGenerateGroups,
+    } = await loadModule<Pick<SeasonImageSource, "baseNames" | "uniqueEquips" | "generateGroups">>("d/dnaseasonequip.data.ts")
+    const { stages: seasonStages, talents: seasonTalents } =
+        await loadModule<Pick<SeasonImageSource, "stages" | "talents">>("d/dnaseasonprogress.data.ts")
+    const { challenges: seasonChallenges } = await loadModule<Pick<SeasonImageSource, "challenges">>("d/dnaseasonrift.data.ts")
+
+    for (const url of collectDnaSeasonImageUrls({
+        seasons: seasonList,
+        buffTypes: seasonBuffTypes,
+        baseNames: seasonBaseNames,
+        uniqueEquips: seasonUniqueEquips,
+        generateGroups: seasonGenerateGroups,
+        stages: seasonStages,
+        talents: seasonTalents,
+        challenges: seasonChallenges,
+    })) {
+        urls.add(url)
+    }
+
     // 过滤异常插值（数据缺陷导致的 undefined 等）
     for (const url of [...urls]) {
         if (url.includes("undefined") || url.includes("[object")) {
@@ -765,12 +860,12 @@ function resolveExportRoot(sourceRoot: string): string {
  * 读取称号框贴图清单（webp 文件名 → 游戏内包路径）；文件不存在时返回空表。
  * @returns 文件名 → 包路径
  */
-function loadTitleFrameManifest(): Record<string, string> {
-    if (!fs.existsSync(TITLE_FRAME_MANIFEST)) {
+function loadTitleFrameManifest(manifestPath = TITLE_FRAME_MANIFEST): Record<string, string> {
+    if (!fs.existsSync(manifestPath)) {
         return {}
     }
     try {
-        return JSON.parse(fs.readFileSync(TITLE_FRAME_MANIFEST, "utf8")) as Record<string, string>
+        return JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<string, string>
     } catch (error) {
         console.warn(`⚠️  读取称号框贴图清单失败: ${error instanceof Error ? error.message : String(error)}`)
         return {}
@@ -797,7 +892,96 @@ function pickSource(entries: SourceFile[]): SourceFile | null {
 }
 
 /**
+ * 递归扫描导出根目录，建立贴图 basename（小写）到游戏内包路径的索引。
+ * 导出目录结构与包路径一一对应（相对路径即包路径），.uasset 在包就在，
+ * 之后 export-tex 可直接读 pak 烘焙，无需 FModel 界面导出。
+ * @param exportRoot 导出根目录（其下应有 EM/Content/…）
+ * @returns basename → 包路径列表（不含扩展名）
+ */
+function buildUassetIndex(exportRoot: string): Map<string, string[]> {
+    const index = new Map<string, string[]>()
+    const contentDir = path.join(exportRoot, "EM", "Content")
+    const scanRoot = fs.existsSync(contentDir) ? contentDir : exportRoot
+    for (const absPath of walkFiles(scanRoot, [".uasset"])) {
+        const relPath = toPosix(path.relative(exportRoot, absPath))
+        // 只有 EM/ 开头的相对路径才能还原成合法包路径，--source 指向别处时跳过
+        if (!relPath.toLowerCase().startsWith("em/")) {
+            continue
+        }
+        const pkg = stripExtension(relPath)
+        const key = path.posix.basename(pkg).toLowerCase()
+        const list = index.get(key) ?? []
+        list.push(pkg)
+        index.set(key, list)
+    }
+    return index
+}
+
+/**
+ * 从同名包路径里挑选最优者：规则与 pickSource 一致（层级最浅、字典序优先）。
+ * @param pkgs 同名包路径列表
+ * @returns 选中的包路径；列表为空时返回 null
+ */
+function pickUasset(pkgs: string[]): string | null {
+    if (!pkgs.length) {
+        return null
+    }
+    return pkgs.reduce((best, current) => {
+        const bestDepth = best.split("/").length
+        const currentDepth = current.split("/").length
+        if (currentDepth < bestDepth || (currentDepth === bestDepth && current < best)) {
+            return current
+        }
+        return best
+    })
+}
+
+/**
+ * 按目标类别挑选包路径：升华天赋图标按 ROUGE_TALENT_SOURCE_ORDER 优先整图，其次图集；
+ * 其余目标沿用 pickUasset 的「层级最浅、字典序优先」。
+ * @param targetRelPath 目标相对路径（相对 public/imgs）
+ * @param pkgs 同名包路径候选
+ * @returns 选中的包路径；无候选返回 null
+ */
+function pickPackageForTarget(targetRelPath: string, pkgs: string[]): string | null {
+    if (!pkgs.length) {
+        return null
+    }
+    if (/^webp\/T_Rouge_Talent_/i.test(targetRelPath)) {
+        for (const marker of ROUGE_TALENT_SOURCE_ORDER) {
+            const matched = pkgs.filter(pkg => pkg.toLowerCase().includes(marker))
+            if (matched.length) {
+                return pickUasset(matched)
+            }
+        }
+    }
+    return pickUasset(pkgs)
+}
+
+/**
+ * 本地 .uasset 的可解码性：CUE4Parse 解码贴图需要 `.uasset` 与 `.uexp` 同时存在。
+ * @param exportRoot 导出根目录
+ * @param pkg 游戏内包路径（不含扩展名）
+ * @returns 可用时返回 .uasset 绝对路径，否则给出缺失的文件种类
+ */
+function resolveLocalUasset(exportRoot: string, pkg: string): { absPath: string } | { reason: "uasset" | "uexp" } {
+    const base = path.join(exportRoot, ...pkg.split("/"))
+    const absPath = `${base}.uasset`
+    if (!fs.existsSync(absPath)) {
+        return { reason: "uasset" }
+    }
+    if (!fs.existsSync(`${base}.uexp`)) {
+        return { reason: "uexp" }
+    }
+    return { absPath }
+}
+
+/**
  * 根据精确引用与评估出的 URL 集合构建转换任务。
+ *
+ * 解析顺序（uasset 优先）：本地 `.uasset/.uexp` 齐全 → uasset 任务；否则同名 PNG 现货 → PNG 任务；
+ * 都没有 → unresolved（默认只报缺失，`--allow-pak` 才做全 pak 搜索）。
+ * `--no-uasset-first` 回退旧的 PNG 优先顺序。
  * @param refs 精确引用列表
  * @param urls 数据评估产生的完整 URL 集合
  * @param index basename 源索引
@@ -808,17 +992,56 @@ function buildTasks(
     urls: Set<string>,
     index: Map<string, SourceFile[]>,
     titleFrameTextures: Record<string, string>,
-    exportRoot: string
-): { tasks: ConvertTask[]; missing: ImageRef[] } {
+    exportRoot: string,
+    uassetIndex: Map<string, string[]> | null
+): { tasks: ConvertTask[]; uassetTasks: UassetTask[]; unresolved: ImageRef[]; missing: ImageRef[] } {
     const tasksByTarget = new Map<string, ConvertTask>()
+    const uassetByTarget = new Map<string, UassetTask>()
+    const unresolved: ImageRef[] = []
     const missing: ImageRef[] = []
+
+    const resolveUasset = (dir: string, name: string, referencedFrom: string, pkg: string, absPath?: string): void => {
+        const targetRelPath = path.posix.join(dir, `${name}.webp`)
+        if (!tasksByTarget.has(targetRelPath) && !uassetByTarget.has(targetRelPath)) {
+            uassetByTarget.set(targetRelPath, { targetRelPath, uassetPkg: pkg, uassetAbsPath: absPath, referencedFrom })
+        }
+    }
 
     const resolveTask = (dir: string, name: string, referencedFrom: string): void => {
         const targetRelPath = path.posix.join(dir, `${name}.webp`)
         // 称号框贴图名可能带父目录前缀（同名冲突改写），basename 对不上源 PNG，
         // 改用手里的清单按「包路径后缀」在候选里挑：导出目录 = 包路径去掉 Content 前缀，
         // 所以相对路径一定是包路径的后缀。
-        const mappedPackage = dir === "titleframe" ? titleFrameTextures[`${name}.webp`] : undefined
+        const mappedPackage = titleFrameTextures[targetRelPath]
+        const pkgCandidates = uassetIndex
+            ? (mappedPackage ?? pickPackageForTarget(targetRelPath, uassetIndex.get(name.toLowerCase()) ?? []))
+            : null
+
+        /** 本地 .uasset 可解码时建 uasset 任务；缺 .uexp 且也没有 PNG 时按缺失报出 */
+        const tryLocalUasset = (): boolean => {
+            if (!pkgCandidates) {
+                return false
+            }
+            const local = resolveLocalUasset(exportRoot, pkgCandidates)
+            if ("absPath" in local) {
+                resolveUasset(dir, name, referencedFrom, pkgCandidates, local.absPath)
+                return true
+            }
+            if (local.reason === "uexp") {
+                console.warn(`⚠️  本地 .uasset 缺 .uexp，无法解码: ${pkgCandidates}`)
+                const pngSpot = pickSource(index.get(name.toLowerCase()) ?? [])
+                if (!pngSpot) {
+                    missing.push({ dir, name, source: `${referencedFrom}（本地 .uasset 缺 .uexp: ${pkgCandidates}）` })
+                    return true
+                }
+            }
+            return false
+        }
+
+        if (UASSET_FIRST && tryLocalUasset()) {
+            return
+        }
+
         let source: SourceFile | null
         if (mappedPackage) {
             // 先按「导出根 + 包路径」直接定位（能覆盖 sourceRoot 之外的 WBP 贴图），
@@ -836,7 +1059,19 @@ function buildTasks(
             source = pickSource(index.get(name.toLowerCase()) ?? [])
         }
         if (!source) {
-            missing.push({ dir, name, source: referencedFrom })
+            if (!UASSET_FIRST && tryLocalUasset()) {
+                return
+            }
+            // 目标 WebP 已存在且非 --force：无需再烘焙，避免把「已有成品、只是缺源」误报为缺失
+            if (!FORCE && fs.existsSync(path.join(publicImgsDir, targetRelPath))) {
+                return
+            }
+            // 本地无 PNG、也无本地 .uasset：默认报缺失；--allow-pak 时留给全 pak 搜索兜底
+            if (pkgCandidates) {
+                resolveUasset(dir, name, referencedFrom, pkgCandidates)
+            } else {
+                unresolved.push({ dir, name, source: referencedFrom })
+            }
             return
         }
         if (!tasksByTarget.has(targetRelPath)) {
@@ -866,15 +1101,358 @@ function buildTasks(
         }
     }
 
-    return { tasks: [...tasksByTarget.values()], missing }
+    return { tasks: [...tasksByTarget.values()], uassetTasks: [...uassetByTarget.values()], unresolved, missing }
+}
+
+/** 单次 fmodel-cli 调用的超时（毫秒）：Oodle 解压偶尔卡住，必须有兜底 */
+const CLI_TIMEOUT_MS = 180_000
+
+/**
+ * 把 CLI 输出解码成字符串：正常是 UTF-8，个别环境是 GBK，按严格模式依次试。
+ */
+function decodeCliOutput(bytes: Uint8Array): string {
+    try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+    } catch {
+        return new TextDecoder("gbk", { fatal: false }).decode(bytes)
+    }
+}
+
+/**
+ * 一次性 fmodel-cli 调用（非 batch）：export-tex 在 batch 会话里不稳定
+ * （成功一次后会话即死，部分新贴图直接让进程崩溃、无任何输出），
+ * 改走独立进程隔离，单个崩溃不影响其他任务。
+ * @returns 解析后的 JSON（取最后一个 { 开头的行，容忍日志掺杂）
+ */
+async function runCliOneShot(commandArgs: string[]): Promise<Record<string, any>> {
+    const child = Bun.spawn([FMODEL_CLI, ...commandArgs], { stdout: "pipe", stderr: "pipe" })
+    const timer = setTimeout(() => {
+        try {
+            child.kill()
+        } catch {}
+    }, CLI_TIMEOUT_MS)
+    try {
+        const [stdout, stderr, exitCode] = await Promise.all([
+            new Response(child.stdout).arrayBuffer(),
+            new Response(child.stderr).text(),
+            child.exited,
+        ])
+        const text = decodeCliOutput(new Uint8Array(stdout)).trim()
+        const line = text
+            .split("\n")
+            .map(item => item.trim())
+            .filter(item => item.startsWith("{"))
+            .at(-1)
+        if (exitCode !== 0 && !line) {
+            throw new Error(`exit ${exitCode}: ${stderr.trim().slice(0, 200) || text.slice(0, 200)}`)
+        }
+        if (!line) throw new Error(`无 JSON 输出: ${text.slice(0, 200)}`)
+        const parsed = JSON.parse(line) as Record<string, any>
+        if (parsed.ok !== true) throw new Error(String(parsed.error ?? line).slice(0, 300))
+        return parsed
+    } finally {
+        clearTimeout(timer)
+        try {
+            child.kill()
+        } catch {}
+    }
+}
+
+/**
+ * 常驻 CLI 会话：`fmodel-cli batch` 一次建好 pak 索引，之后 stdin 逐行收命令、stdout 逐行回 JSON。
+ * 会话内串行（batch 下 stdout 一行一结果，并发写会错位），并行靠开多个会话。
+ */
+class CliSession {
+    private child: ReturnType<typeof Bun.spawn> | undefined
+    private buffer = ""
+    private busy = false
+    private waiter: { resolve: (line: string) => void; reject: (error: Error) => void } | undefined
+    private lastStderr = ""
+    private exitCode: number | null = null
+
+    /** 排空 stderr：既防管道写满卡死子进程，也留作死亡诊断 */
+    private drainStderr(child: ReturnType<typeof Bun.spawn>): void {
+        void (async () => {
+            const reader = (child.stderr as ReadableStream<Uint8Array>).getReader()
+            const decoder = new TextDecoder()
+            for (;;) {
+                const { done, value } = await reader.read()
+                if (done) break
+                this.lastStderr = (this.lastStderr + decoder.decode(value, { stream: true })).slice(-2000)
+            }
+        })().catch(() => {})
+    }
+
+    private ensure(): ReturnType<typeof Bun.spawn> {
+        if (!this.child) {
+            const child = Bun.spawn([FMODEL_CLI, "batch"], { stdin: "pipe", stdout: "pipe", stderr: "pipe" })
+            this.child = child
+            this.buffer = ""
+            this.lastStderr = ""
+            this.exitCode = null
+            this.drainStderr(child)
+            void child.exited.then(code => {
+                if (this.child === child) {
+                    this.child = undefined
+                    this.exitCode = code
+                }
+            })
+            void (async () => {
+                try {
+                    const reader = (child.stdout as ReadableStream<Uint8Array>).getReader()
+                    const decoder = new TextDecoder()
+                    for (;;) {
+                        const { done, value } = await reader.read()
+                        if (done) break
+                        this.buffer += decoder.decode(value, { stream: true })
+                        let index: number
+                        while ((index = this.buffer.indexOf("\n")) >= 0) {
+                            const line = this.buffer.slice(0, index).trim()
+                            this.buffer = this.buffer.slice(index + 1)
+                            if (!line) continue
+                            // CLI 偶尔往 stdout 掺日志行：只收 JSON 响应，别的丢弃
+                            if (!line.startsWith("{")) continue
+                            this.waiter?.resolve(line)
+                            this.waiter = undefined
+                        }
+                    }
+                } finally {
+                    if (this.child === child) this.child = undefined
+                    this.waiter?.reject(
+                        new Error(
+                            `fmodel-cli batch 会话已结束(exit ${this.exitCode ?? "?"})${this.lastStderr ? ` stderr: ${this.lastStderr.slice(-300)}` : ""}`
+                        )
+                    )
+                    this.waiter = undefined
+                }
+            })().catch(() => {})
+        }
+        return this.child
+    }
+
+    /** 跑一条命令，返回解析后的 JSON；超时或崩溃时重建会话并重试一次 */
+    async run(commandArgs: string[]): Promise<Record<string, any>> {
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const child = this.ensure()
+            while (this.busy) await new Promise(resolve => setTimeout(resolve, 5))
+            this.busy = true
+            let timer: ReturnType<typeof setTimeout> | undefined
+            const startTime = Date.now()
+            try {
+                const line = await new Promise<string>((resolve, reject) => {
+                    this.waiter = { resolve, reject }
+                    void (child.stdin as { write: (text: string) => void }).write(`${commandArgs.join(" ")}\n`)
+                    timer = setTimeout(() => {
+                        // 超时后迟到响应不能再要，否则整个会话错位：直接杀掉重建
+                        if (this.child === child) {
+                            try {
+                                child.kill()
+                            } catch {}
+                            this.child = undefined
+                        }
+                        if (this.waiter) {
+                            this.waiter = undefined
+                            reject(new Error(`fmodel-cli batch 超时: ${commandArgs[0]}`))
+                        }
+                    }, CLI_TIMEOUT_MS)
+                })
+                const parsed = JSON.parse(line) as Record<string, any>
+                if (parsed.ok !== true) throw new Error(String(parsed.error ?? line).slice(0, 300))
+                const elapsed = Date.now() - startTime
+                if (elapsed > 60_000) console.warn(`  ~ 慢命令 ${commandArgs.join(" ")} 用时 ${(elapsed / 1000).toFixed(0)}s`)
+                return parsed
+            } catch (error) {
+                if (this.child) {
+                    try {
+                        this.child.kill()
+                    } catch {}
+                    this.child = undefined
+                }
+                if (attempt === 1) throw error
+            } finally {
+                clearTimeout(timer)
+                // 定时器必须清掉：Bun 会等未到期的 timer 走完才退出进程
+                this.busy = false
+            }
+        }
+        throw new Error("unreachable")
+    }
+
+    close(): void {
+        try {
+            this.child?.kill()
+        } catch {}
+        this.child = undefined
+    }
+}
+
+/**
+ * 并发跑一批 CLI 任务：按 JOBS 开会话分片，失败的任务记入 errors（不中断整批）。
+ */
+async function runCliPool<T, R>(
+    items: T[],
+    worker: (session: CliSession, item: T, index: number) => Promise<R>,
+    onProgress?: (done: number, total: number) => void
+): Promise<{ results: R[]; errors: { item: T; error: string }[] }> {
+    const sessions = Array.from({ length: Math.min(JOBS, items.length) }, () => new CliSession())
+    const results: R[] = []
+    const errors: { item: T; error: string }[] = []
+    let done = 0
+    try {
+        await Promise.all(
+            sessions.map((session, shard) =>
+                (async () => {
+                    for (let i = shard; i < items.length; i += sessions.length) {
+                        try {
+                            results.push(await worker(session, items[i], i))
+                        } catch (error) {
+                            errors.push({ item: items[i], error: error instanceof Error ? error.message : String(error) })
+                        }
+                        done += 1
+                        onProgress?.(done, items.length)
+                    }
+                })()
+            )
+        )
+    } finally {
+        for (const session of sessions) session.close()
+    }
+    return { results, errors }
+}
+
+/**
+ * search 兜底：本地 .uasset 索引没命中的名字，全 pak 按 basename 搜，优先 UI/ 下的结果。
+ * 只在 `--allow-pak` 下启用：默认以本地 1.8 uasset 为唯一源，不读 pak。
+ * @returns 新增的 uasset 任务与仍无解的引用
+ */
+async function resolveViaSearch(unresolved: ImageRef[]): Promise<{ uassetTasks: UassetTask[]; stillMissing: ImageRef[] }> {
+    const seen = new Map<string, ImageRef>()
+    for (const ref of unresolved) {
+        const key = `${ref.dir}/${ref.name ?? ""}`
+        if (ref.name && !seen.has(key)) seen.set(key, ref)
+    }
+    const deduped = [...seen.values()]
+    if (!deduped.length) return { uassetTasks: [], stillMissing: [] }
+
+    console.log(`本地无 .uasset 映射 ${deduped.length} 个，全 pak 搜索中…`)
+    const uassetTasks: UassetTask[] = []
+    const stillMissing: ImageRef[] = []
+    const { results, errors } = await runCliPool(
+        deduped,
+        async (session, ref) => {
+            const parsed = await session.run(["search", `**/${ref.name}.uasset`, "20"])
+            return { ref, matches: (parsed.matches as string[] | undefined) ?? [] }
+        },
+        (done, total) => {
+            if (done % 50 === 0 || done === total) console.log(`  搜索进度 ${done}/${total}`)
+        }
+    )
+    for (const { ref, matches } of results) {
+        const pkgs = matches.filter(m => m.endsWith(".uasset")).map(m => stripExtension(m))
+        // 同名资产散落各处时优先 UI/ 贴图，其次层级最浅
+        pkgs.sort((a, b) => {
+            const aUI = a.includes("/UI/") ? 0 : 1
+            const bUI = b.includes("/UI/") ? 0 : 1
+            if (aUI !== bUI) return aUI - bUI
+            const depth = a.split("/").length - b.split("/").length
+            return depth !== 0 ? depth : a.localeCompare(b)
+        })
+        const pkg = pkgs.find(p => p.toLowerCase().startsWith("em/"))
+        if (pkg && ref.name) {
+            uassetTasks.push({ targetRelPath: path.posix.join(ref.dir, `${ref.name}.webp`), uassetPkg: pkg, referencedFrom: ref.source })
+        } else {
+            stillMissing.push(ref)
+        }
+    }
+    for (const { item, error } of errors) {
+        console.warn(`  ~ 搜索失败 ${item.dir}/${item.name}: ${error}`)
+        stillMissing.push(item)
+    }
+    return { uassetTasks, stillMissing }
+}
+
+/**
+ * 取本地 .uasset 绝对路径；缺 `.uasset` / `.uexp` 时抛出点名缺失文件的错误（不静默改读 pak）。
+ * @param exportRoot 导出根目录
+ * @param task uasset 任务（可带已解析好的绝对路径）
+ * @returns .uasset 绝对路径
+ */
+function requireLocalUasset(exportRoot: string, task: UassetTask): string {
+    const base = task.uassetAbsPath ? task.uassetAbsPath.replace(/\.uasset$/i, "") : path.join(exportRoot, ...task.uassetPkg.split("/"))
+    if (!fs.existsSync(`${base}.uasset`)) {
+        throw new Error(`本地 .uasset 缺失: ${base}.uasset${ALLOW_PAK ? "" : "（未开启 --allow-pak，不读 pak）"}`)
+    }
+    if (!fs.existsSync(`${base}.uexp`)) {
+        throw new Error(`本地 .uexp 缺失: ${base}.uexp`)
+    }
+    return `${base}.uasset`
+}
+
+/**
+ * 把 uasset 任务烘焙成 PNG。
+ * 默认只解码本地 .uasset（`export-tex-file`，不读 pak）；
+ * `--allow-pak` 时才先 `export-tex` 直读 pak，pak 里没有该资产再回退本地文件。
+ * 烘焙产物落在导出目录（FModel 界面导出同布局），复跑即命中 PNG 现货。
+ * @returns 烘焙成功转成的 ConvertTask 与失败的缺失引用
+ */
+async function exportUassetTextures(uassetTasks: UassetTask[], exportRoot: string): Promise<{ tasks: ConvertTask[]; failed: ImageRef[] }> {
+    console.log(
+        `uasset 烘焙 ${uassetTasks.length} 个（${JOBS} 并发独立进程，${ALLOW_PAK ? "允许读 pak：先 export-tex" : "仅本地 uasset：export-tex-file，不读 pak"}）…`
+    )
+    const tasks: ConvertTask[] = []
+    const failed: ImageRef[] = []
+    const { results, errors } = await runCliPool(
+        uassetTasks,
+        // 注意：故意不用 batch 会话（见 runCliOneShot），session 形参闲置
+        async (_session, task) => {
+            const finish = (parsed: Record<string, any>): { task: UassetTask; pngPath: string } => {
+                const pngPath = String(parsed.outputPath ?? "").replaceAll("\\", "/")
+                if (!pngPath || !fs.existsSync(pngPath)) throw new Error(`产物不存在: ${parsed.outputPath ?? "(空)"}`)
+                return { task, pngPath }
+            }
+            if (ALLOW_PAK) {
+                try {
+                    return finish(await runCliOneShot(["export-tex", task.uassetPkg]))
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error)
+                    // 本地 pak 没有该资产但导出目录有 .uasset：直接解本地文件
+                    if (!message.includes("no game file")) throw error
+                    return finish(await runCliOneShot(["export-tex-file", requireLocalUasset(exportRoot, task)]))
+                }
+            }
+            return finish(await runCliOneShot(["export-tex-file", requireLocalUasset(exportRoot, task)]))
+        },
+        (done, total) => {
+            if (done % 100 === 0 || done === total) console.log(`  烘焙进度 ${done}/${total}`)
+        }
+    )
+    for (const { task, pngPath } of results) {
+        tasks.push({
+            targetRelPath: task.targetRelPath,
+            sourceAbsPath: pngPath,
+            sourceRelPath: `uasset:${task.uassetPkg}`,
+            referencedFrom: task.referencedFrom,
+        })
+    }
+    for (const { item, error } of errors) {
+        console.warn(`  ~ 烘焙失败 ${item.targetRelPath} <- ${item.uassetPkg}: ${error}`)
+        const slash = item.targetRelPath.lastIndexOf("/")
+        failed.push({
+            dir: item.targetRelPath.slice(0, slash),
+            name: item.targetRelPath.slice(slash + 1, -`.webp`.length),
+            source: `${item.referencedFrom}（uasset-cli 导出失败）`,
+        })
+    }
+    return { tasks, failed }
 }
 
 /**
  * 计算图片的等比缩小目标尺寸（不放大，缩略图除外——固定缩到 128x128）：
  *   0. bust/、fashion/ 目录 → 固定缩略图尺寸（THUMB_SIZE）；
  *   1. 命中 SCALE_RULES（按贴图名匹配）→ 按规则 scale 缩小；
- *   2. res/ 目录 → maxHeight 限制（RES_MAX_HEIGHT）；
- *   3. 都不命中 → 不缩小。
+ *   2. 命中 FIXED_SIZE_RULES（按目标相对路径匹配）→ 固定缩到规则边长；
+ *   3. res/ 目录 → maxHeight 限制（RES_MAX_HEIGHT），命中 FULL_SIZE_RULES 的除外（保持源分辨率）；
+ *   4. 都不命中 → 不缩小。
  * @param sourceAbsPath 源 PNG 路径
  * @param targetRelPath 目标相对路径（相对 public/imgs）
  * @returns 缩小信息；无需缩小返回 null
@@ -912,7 +1490,28 @@ async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Prom
         return null
     }
 
+    // 固定尺寸目标（升华天赋图标等）：不看目录与源尺寸，一律缩到规则边长（不放大）
+    const fixedRule = FIXED_SIZE_RULES.find(rule => rule.pattern.test(targetRelPath))
+    if (fixedRule) {
+        const meta = await new Bun.Image(sourceAbsPath).metadata()
+        if (meta.width <= fixedRule.size && meta.height <= fixedRule.size) {
+            return null
+        }
+        return {
+            originalWidth: meta.width,
+            originalHeight: meta.height,
+            width: fixedRule.size,
+            height: fixedRule.size,
+            reason: fixedRule.reason,
+        }
+    }
+
     if (!targetRelPath.startsWith("res/")) {
+        return null
+    }
+
+    // res/ 全尺寸例外（升华装备图 T_Season_*）：保持源分辨率，其余 res/ 图片仍按 RES_MAX_HEIGHT 缩小
+    if (FULL_SIZE_RULES.some(pattern => pattern.test(name))) {
         return null
     }
 
@@ -982,7 +1581,8 @@ async function convertWithBunImage(
     }
     const lossless = !forceLossy && shouldUseLossless(outputWidth, outputHeight)
 
-    const image = new Bun.Image(sourceAbsPath)
+    const additive = destAbsPath.replaceAll("\\", "/").includes("/headframe/dynamic/") && destAbsPath.endsWith("_additive.webp")
+    const image = new Bun.Image(additive ? additivePng(fs.readFileSync(sourceAbsPath)) : sourceAbsPath)
     const webp = resizeInfo
         ? image.resize(resizeInfo.width, resizeInfo.height).webp(lossless ? { lossless: true } : { quality, lossless: false })
         : image.webp(lossless ? { lossless: true } : { quality, lossless: false })
@@ -1036,24 +1636,23 @@ async function isLosslessOutput(sourceAbsPath: string, resizeInfo: ResizeInfo | 
  * 主流程。
  */
 async function main(): Promise<void> {
+    if (FILTER_ERROR) {
+        throw new Error(`--filter 正则无效: ${FILTER}\n${FILTER_ERROR}`)
+    }
     if (!Number.isFinite(QUALITY) || QUALITY < 1 || QUALITY > 100) {
         throw new Error(`无效的 WebP 质量: ${QUALITY}`)
     }
 
     console.log(`扫描数据目录: ${dataDir}`)
     console.log(`纹理导出目录: ${sourceRoot}`)
-    console.log(`输出目录: ${publicImgsDir}`)
+    console.log(`输出目录: ${publicImgsDir}${FORCE ? "（--force 全量重做）" : ""}`)
 
-    // 文本扫描: 默认覆盖整个 src（data/components/utils/views），静态字面量引用（如
-    // /imgs/webp/T_Icon_Random_Title.webp、/imgs/tp/T_Gp_MainMission.webp）都在视图层；
-    // 传 --data 时仅扫描指定目录
-    const defaultScanDirs = [
-        path.join(rootDir, "src", "data"),
-        path.join(rootDir, "src", "components"),
-        path.join(rootDir, "src", "utils"),
-        path.join(rootDir, "src", "views"),
-    ]
-    const refs = (dataDir !== path.join(rootDir, "src", "data") ? [dataDir] : defaultScanDirs).flatMap(dir => collectRefs(dir))
+    // 文本扫描: 默认覆盖数据包 + 前端 src（数据/组件/工具/视图里的静态字面量引用，如
+    // /imgs/webp/T_Icon_Random_Title.webp、/imgs/tp/T_Gp_MainMission.webp）；
+    // 传 --data（或 WEBP_IMPORT_DATA_DIR）时仅扫描指定目录
+    const dataDirOverridden = getArgValue("--data") !== undefined || process.env.WEBP_IMPORT_DATA_DIR !== undefined
+    const defaultScanDirs = [path.join(rootDir, "packages", "data"), path.join(rootDir, "apps", "web", "src")]
+    const refs = (dataDirOverridden ? [dataDir] : defaultScanDirs).flatMap(dir => collectRefs(dir))
     const exactRefs = refs.filter(ref => Boolean(ref.name))
     const templateRefs = refs.filter(ref => Boolean(ref.pattern))
     const wildcardRefs = refs.filter(ref => ref.wildcard)
@@ -1062,51 +1661,174 @@ async function main(): Promise<void> {
     const urls = await evaluateDataUrls()
     console.log(`数据评估引用 ${urls.size} 个 URL`)
 
-    // 校验模板是否都被数据评估覆盖（发现新模板但枚举不到时提醒）
-    for (const ref of templateRefs) {
-        const matched = [...urls].some(url => {
-            const lastSlash = url.lastIndexOf("/")
-            return ref.pattern?.test(url.slice(lastSlash + 1, url.length - ".webp".length)) ?? false
-        })
-        if (!matched) {
-            console.warn(`⚠️  模板 ${ref.dir}/${ref.pattern?.source} 未在数据评估中产生任何引用，可能枚举不完整 (${ref.source})`)
+    // 校验模板是否都被数据评估覆盖（发现新模板但枚举不到时提醒）。
+    // --filter 只跑局部类别，模板/通配校验是全局口径，跳过避免无关告警。
+    if (FILTER_REGEX) {
+        console.log("已设置 --filter，跳过全局模板/通配校验")
+    } else {
+        for (const ref of templateRefs) {
+            const matched = [...urls].some(url => {
+                const lastSlash = url.lastIndexOf("/")
+                return ref.pattern?.test(url.slice(lastSlash + 1, url.length - ".webp".length)) ?? false
+            })
+            if (!matched) {
+                console.warn(`⚠️  模板 ${ref.dir}/${ref.pattern?.source} 未在数据评估中产生任何引用，可能枚举不完整 (${ref.source})`)
+            }
+        }
+
+        // 校验全通配模板所在目录是否被数据评估覆盖。
+        // 这类引用（如 /imgs/music/${icon}.webp 乐谱封面）无法从文本推导 basename，
+        // 一旦 evaluateDataUrls 漏枚举对应数据源，就会完全没有任务且毫无提示，因此按目录校验。
+        const coveredDirs = new Set<string>()
+        for (const url of urls) {
+            coveredDirs.add(url.slice("/imgs/".length, url.lastIndexOf("/")))
+        }
+        const warnedWildcardDirs = new Set<string>()
+        for (const ref of wildcardRefs) {
+            // 目录名本身含 ${...}（如 `/imgs/${targetDir}/${icon}.webp`）时无法确定真实目录，跳过校验
+            if (ref.dir.includes("${")) {
+                continue
+            }
+            if (!coveredDirs.has(ref.dir) && !warnedWildcardDirs.has(ref.dir)) {
+                warnedWildcardDirs.add(ref.dir)
+                console.warn(`⚠️  目录 ${ref.dir}/ 只有全通配模板引用，但数据评估未产生该目录下任何 URL，可能漏了对应数据源 (${ref.source})`)
+            }
         }
     }
 
-    // 校验全通配模板所在目录是否被数据评估覆盖。
-    // 这类引用（如 /imgs/music/${icon}.webp 乐谱封面）无法从文本推导 basename，
-    // 一旦 evaluateDataUrls 漏枚举对应数据源，就会完全没有任务且毫无提示，因此按目录校验。
-    const coveredDirs = new Set<string>()
-    for (const url of urls) {
-        coveredDirs.add(url.slice("/imgs/".length, url.lastIndexOf("/")))
-    }
-    const warnedWildcardDirs = new Set<string>()
-    for (const ref of wildcardRefs) {
-        // 目录名本身含 ${...}（如 `/imgs/${targetDir}/${icon}.webp`）时无法确定真实目录，跳过校验
-        if (ref.dir.includes("${")) {
-            continue
-        }
-        if (!coveredDirs.has(ref.dir) && !warnedWildcardDirs.has(ref.dir)) {
-            warnedWildcardDirs.add(ref.dir)
-            console.warn(`⚠️  目录 ${ref.dir}/ 只有全通配模板引用，但数据评估未产生该目录下任何 URL，可能漏了对应数据源 (${ref.source})`)
-        }
-    }
-
+    const exportRoot = resolveExportRoot(sourceRoot)
     const index = buildSourceIndex(sourceRoot)
     console.log(`索引到源 PNG ${index.size} 个`)
 
-    const titleFrameTextures = loadTitleFrameManifest()
+    const headFrameManifest = path.join(rootDir, "apps", "web", "src", "utils", "head-frame", "head-frame-textures.json")
+    const titleFrameTextures = Object.fromEntries([
+        ...Object.entries(loadTitleFrameManifest()).map(([name, pkg]) => [`titleframe/${name}`, pkg]),
+        ...Object.entries(loadTitleFrameManifest(headFrameManifest)).map(([name, pkg]) => [`headframe/dynamic/${name}`, pkg]),
+    ])
+    for (const target of Object.keys(titleFrameTextures)) urls.add(`/imgs/${target}`)
     if (Object.keys(titleFrameTextures).length) {
-        console.log(`称号框贴图清单 ${Object.keys(titleFrameTextures).length} 条`)
+        console.log(`动态框贴图清单 ${Object.keys(titleFrameTextures).length} 条`)
     }
 
-    const { tasks, missing } = buildTasks(refs, urls, index, titleFrameTextures, resolveExportRoot(sourceRoot))
-    console.log(`待处理任务 ${tasks.length} 个`)
+    // 缺 PNG 时走 uasset-cli 烘焙：先按导出目录里的 .uasset 反推包路径
+    const cliAvailable = !NO_UASSET && fs.existsSync(FMODEL_CLI)
+    if (NO_UASSET) {
+        console.log("已指定 --no-uasset：缺 PNG 时只报缺失，不调 fmodel-cli")
+    } else if (!cliAvailable) {
+        console.warn(`⚠️  未找到 fmodel-cli（${FMODEL_CLI}），缺 PNG 时只报缺失`)
+    } else {
+        console.log(
+            `uasset 解析：${UASSET_FIRST ? "本地 .uasset 优先" : "PNG 现货优先（--no-uasset-first）"}；` +
+                `${ALLOW_PAK ? "允许读 pak（export-tex / 全 pak 搜索）" : "不读 pak（仅 export-tex-file 解本地文件）"}`
+        )
+    }
+    let uassetIndex: Map<string, string[]> | null = null
+    if (cliAvailable) {
+        uassetIndex = buildUassetIndex(exportRoot)
+        console.log(`索引到 .uasset 包路径 ${[...uassetIndex.values()].reduce((sum, list) => sum + list.length, 0)} 个`)
+    }
 
-    if (missing.length) {
-        console.warn(`\n⚠️  有 ${missing.length} 个引用未在导出目录中找到 PNG:`)
+    const {
+        tasks: rawTasks,
+        uassetTasks: rawUassetTasks,
+        unresolved: rawUnresolved,
+        missing: rawMissing,
+    } = buildTasks(refs, urls, index, titleFrameTextures, exportRoot, uassetIndex)
+    // --filter 只保留匹配目标相对路径的资源；数据评估与 pak 搜索仍可能命中其它类别，在这里统一切掉
+    const tasks = rawTasks.filter(task => matchesFilter(FILTER_REGEX, task.targetRelPath))
+    const uassetTasks = rawUassetTasks.filter(task => matchesFilter(FILTER_REGEX, task.targetRelPath))
+    const unresolved = rawUnresolved.filter(ref => !ref.name || matchesFilter(FILTER_REGEX, path.posix.join(ref.dir, `${ref.name}.webp`)))
+    const missing = rawMissing.filter(ref => !ref.name || matchesFilter(FILTER_REGEX, path.posix.join(ref.dir, `${ref.name}.webp`)))
+    if (FILTER_REGEX) {
+        console.log(`过滤器 ${FILTER} 命中 ${tasks.length} 个 PNG 现货任务 / ${uassetTasks.length} 个 uasset 任务`)
+        if (!tasks.length && !uassetTasks.length && !unresolved.length) {
+            console.warn(`⚠️  过滤器 ${FILTER} 未命中任何资源，请检查正则或类别是否写错`)
+        }
+    }
+    const allUassetTasks = [...uassetTasks]
+    const allMissing = [...missing]
+
+    // 本地推不出包路径的，只有 --allow-pak 才做全 pak 搜索；默认不读 pak，按缺失报告
+    if (!ALLOW_PAK) {
+        allMissing.push(...unresolved)
+        if (unresolved.length) {
+            console.log(`本地无 .uasset 映射 ${unresolved.length} 个：未开启 --allow-pak，跳过全 pak 搜索，按缺失报告`)
+        }
+    } else if (cliAvailable && unresolved.length) {
+        const { uassetTasks: searched, stillMissing } = await resolveViaSearch(unresolved)
+        allUassetTasks.push(...searched)
+        allMissing.push(...stillMissing)
+    } else {
+        allMissing.push(...unresolved)
+    }
+    console.log(`待处理任务 ${tasks.length} 个（PNG 现货） + ${allUassetTasks.length} 个（uasset 解码）`)
+
+    let converted = 0
+    let skipped = 0
+    let dryRunCount = 0
+    /** 转换一批任务：单张失败只记缺失，不中断整批 */
+    const convertAndReport = async (batch: ConvertTask[]): Promise<void> => {
+        for (const task of batch) {
+            let status: string
+            let resizeInfo: ResizeInfo | null = null
+            let lossless: boolean | null = null
+            try {
+                ;({ status, resizeInfo, lossless } = await convertTask(task))
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error)
+                console.warn(`  ~ 转换失败 ${task.targetRelPath} <- ${task.sourceRelPath}: ${message}`)
+                const slash = task.targetRelPath.lastIndexOf("/")
+                allMissing.push({
+                    dir: task.targetRelPath.slice(0, slash),
+                    name: task.targetRelPath.slice(slash + 1, -`.webp`.length),
+                    source: `${task.referencedFrom}（WebP 转换失败）`,
+                })
+                continue
+            }
+            const note = formatResizeNote(resizeInfo) + (lossless ? "  [无损]" : "")
+            if (status === "converted") {
+                converted += 1
+                console.log(`  ✅ ${task.targetRelPath}  <- ${task.sourceRelPath}${note}`)
+            } else if (status === "skipped") {
+                skipped += 1
+            } else {
+                dryRunCount += 1
+                console.log(`  [dry-run] ${task.targetRelPath}  <- ${task.sourceRelPath}${note}`)
+            }
+        }
+    }
+
+    // 目标 WebP 已存在的无需烘焙（--force 时全量重做）
+    const pendingUasset = FORCE
+        ? allUassetTasks
+        : allUassetTasks.filter(task => !fs.existsSync(path.join(publicImgsDir, task.targetRelPath)))
+    console.log(`其中目标已存在、跳过烘焙 ${allUassetTasks.length - pendingUasset.length} 个`)
+
+    if (DRY_RUN) {
+        for (const task of pendingUasset) {
+            const localPath = task.uassetAbsPath ?? path.join(exportRoot, ...task.uassetPkg.split("/"))
+            console.log(
+                `  [dry-run uasset] ${task.targetRelPath}  <- ${ALLOW_PAK ? `export-tex ${task.uassetPkg}` : `export-tex-file ${localPath}`}`
+            )
+        }
+        await convertAndReport(tasks)
+    } else {
+        // 烘焙完一块就转一块：public/imgs 里持续落盘，中断也不白跑
+        const CHUNK_SIZE = 100
+        await convertAndReport(tasks)
+        for (let begin = 0; begin < pendingUasset.length; begin += CHUNK_SIZE) {
+            const chunk = pendingUasset.slice(begin, begin + CHUNK_SIZE)
+            console.log(`\n--- 烘焙 ${begin + 1}-${begin + chunk.length}/${pendingUasset.length} ---`)
+            const { tasks: baked, failed } = await exportUassetTextures(chunk, exportRoot)
+            allMissing.push(...failed)
+            await convertAndReport(baked)
+        }
+    }
+
+    if (allMissing.length) {
+        console.warn(`\n⚠️  有 ${allMissing.length} 个引用既无可用本地 uasset 也无 PNG 现货:`)
         const seen = new Set<string>()
-        for (const ref of missing) {
+        for (const ref of allMissing) {
             const key = `${ref.dir}/${ref.name ?? ""}`
             if (seen.has(key)) {
                 continue
@@ -1116,30 +1838,13 @@ async function main(): Promise<void> {
         }
     }
 
-    if (!tasks.length) {
+    if (!tasks.length && !allUassetTasks.length) {
         console.log("没有需要转换的图片")
         return
     }
 
-    let converted = 0
-    let skipped = 0
-    let dryRun = 0
-    for (const task of tasks) {
-        const { status, resizeInfo, lossless } = await convertTask(task)
-        const note = formatResizeNote(resizeInfo) + (lossless ? "  [无损]" : "")
-        if (status === "converted") {
-            converted += 1
-            console.log(`  ✅ ${task.targetRelPath}  <- ${task.sourceRelPath}${note}`)
-        } else if (status === "skipped") {
-            skipped += 1
-        } else {
-            dryRun += 1
-            console.log(`  [dry-run] ${task.targetRelPath}  <- ${task.sourceRelPath}${note}`)
-        }
-    }
-
     if (DRY_RUN) {
-        console.log(`\n演练完成: 将转换 ${dryRun} 个, 已存在 ${skipped} 个`)
+        console.log(`\n演练完成: 将转换 ${dryRunCount} 个（PNG 现货） + ${pendingUasset.length} 个（uasset 烘焙）, 已存在 ${skipped} 个`)
     } else {
         console.log(`\n完成: 转换 ${converted} 个, 已存在跳过 ${skipped} 个`)
     }

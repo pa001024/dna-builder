@@ -4272,6 +4272,259 @@ export const npcData: NPC[] = [
         ],
     },
     {
+        id: 83203,
+        name: "卡嘉",
+        camp: "NPC",
+        charId: 3203,
+        type: "Show",
+        srId: 102102,
+        pos: [938, 7185],
+        talks: [
+            {
+                id: 90500001,
+                content: "欢迎回来，我亲爱的共犯！这么美好的一天，想不想和我一起制造一场盛大的“烟花”助助兴？",
+                voice: "char/Kajia/vo_welcome",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500004,
+                        content: "你为什么这么喜欢摆弄机械？",
+                        next: 90500005,
+                    },
+                    {
+                        id: 90500011,
+                        content: "你为什么这么恨海伯利亚帝国？",
+                        next: 90500012,
+                    },
+                    {
+                        id: 90500018,
+                        content: "你小时候的生活是什么样的？",
+                        next: 90500019,
+                    },
+                    {
+                        id: 90500024,
+                        content: "我听说你在工程炼金院时有一位老师。",
+                        next: 90500025,
+                    },
+                ],
+            },
+            {
+                id: 90500005,
+                content: "怎么？吃醋啦？",
+                voice: "char/Kajia/vo_topic_01_1",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500006,
+                        content: "……你不愿意回答就算了。",
+                        next: 90500007,
+                    },
+                ],
+            },
+            {
+                id: 90500012,
+                content: "你这样概括有点狭隘了哦～要说爱恨交加才对嘛，这才符合我们成年人复杂的心境！",
+                voice: "char/Kajia/vo_topic_02_1",
+                npc: 83203,
+                next: 90500013,
+            },
+            {
+                id: 90500019,
+                content: "哎呀，打听淑女的过去可是很失礼的。",
+                voice: "char/Kajia/vo_topic_03_1",
+                npc: 83203,
+                next: 90500020,
+            },
+            {
+                id: 90500025,
+                content: "嗯？你难不成说的是……老太婆？算是吧，人特烦，天天唠叨，但……还不算坏吧。",
+                voice: "char/Kajia/vo_topic_04_1",
+                npc: 83203,
+                next: 90500026,
+            },
+            {
+                id: 90500007,
+                content: "哎，别走别走，人家正无聊呢。",
+                voice: "char/Kajia/vo_topic_01_2",
+                npc: 83203,
+                next: 90500008,
+            },
+            {
+                id: 90500013,
+                content: "还有爱的部分？",
+                npc: 100001,
+                next: 90500014,
+            },
+            {
+                id: 90500020,
+                content: "不过……如果你真的想知道，我倒是可以编一个又感人又悲惨的故事给你听，保证让你哭出来哦！",
+                voice: "char/Kajia/vo_topic_03_2",
+                npc: 83203,
+                next: 90500021,
+            },
+            {
+                id: 90500026,
+                content: "她教过我一些东西，包括怎么画机械图纸，怎么拆解月髓装置的核心结构……怎么突然问这个？",
+                voice: "char/Kajia/vo_topic_04_2",
+                npc: 83203,
+                next: 90500027,
+            },
+            {
+                id: 90500008,
+                content:
+                    "你知道吗？机械比人类可爱多了。人类会撒谎，会背叛，会出卖自己的亲朋好友，但机械不会。你给它一颗螺丝，它的动力心脏就永远为你转动。",
+                voice: "char/Kajia/vo_topic_01_3",
+                npc: 83203,
+                next: 90500009,
+            },
+            {
+                id: 90500014,
+                content: "当然是……爱它无奇不有，让人家大开眼界啦！",
+                voice: "char/Kajia/vo_topic_02_2",
+                npc: 83203,
+                next: 90500015,
+            },
+            {
+                id: 90500021,
+                content:
+                    "比如说……很久很久以前，有一个衣衫褴褛的小女孩，她每天拖着快冻僵的双脚徘徊在贫民窟里，只能靠卖火柴来挣取一点可怜的面包钱……",
+                voice: "char/Kajia/vo_topic_03_3",
+                npc: 83203,
+                next: 90500022,
+            },
+            {
+                id: 90500027,
+                content: "听起来是个很不错的人。她现在在哪里？",
+                npc: 100001,
+                next: 90500028,
+            },
+            {
+                id: 90500009,
+                content: "只可惜——再可爱再无害的机械，也会被你们这些家伙改造成杀人的工具啊。",
+                voice: "char/Kajia/vo_topic_01_4",
+                npc: 83203,
+                next: 90500010,
+            },
+            {
+                id: 90500015,
+                content:
+                    "你知道卡戎的孩子在街边乞讨时，路过的那些大人们会怎么做吗？他们会让你在地上咚咚地磕头，直到逗到他们哈哈大笑，才愿意扔给你一枚铜板。",
+                voice: "char/Kajia/vo_topic_02_3",
+                npc: 83203,
+                next: 90500016,
+            },
+            {
+                id: 90500022,
+                content: "不用了，我不想听编出来的故事。",
+                npc: 100001,
+                next: 90500023,
+            },
+            {
+                id: 90500028,
+                content: "……死啦。服药过度走了。走的时候嘴唇都紫了，涎水流了一脸，很不体面。",
+                voice: "char/Kajia/vo_topic_04_3",
+                npc: 83203,
+                next: 90500029,
+            },
+            {
+                id: 90500010,
+                content: "所以我只好亲自动手，让它们变回“纯洁”的样子了——比如，轰地一下！",
+                voice: "char/Kajia/vo_topic_01_5",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500002,
+                        content: "聊点别的",
+                        next: 90500001,
+                    },
+                    {
+                        id: 90500003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90500016,
+                content: "仅仅是手里多了一枚铜板，这些大人就以为自己有了天大的权力，可以随便践踏别人的尊严……这就是海伯利亚，有意思吗？",
+                voice: "char/Kajia/vo_topic_02_4",
+                npc: 83203,
+                next: 90500017,
+            },
+            {
+                id: 90500023,
+                content: "呜呜，这么没耐心，可是得不到女孩子的心的哦！",
+                voice: "char/Kajia/vo_topic_03_4",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500002,
+                        content: "聊点别的",
+                        next: 90500001,
+                    },
+                    {
+                        id: 90500003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90500029,
+                content: "抱歉，我不该提的。",
+                npc: 100001,
+                next: 90500030,
+            },
+            {
+                id: 90500017,
+                content:
+                    "至于恨，当然是恨这样一个地方居然到现在还没被我挫骨扬灰，燃成灰烬！等到火光烧遍帝国的那一天，你一定会欣赏我制造出来的绝美的景象，对吗？",
+                voice: "char/Kajia/vo_topic_02_5",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500002,
+                        content: "聊点别的",
+                        next: 90500001,
+                    },
+                    {
+                        id: 90500003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90500030,
+                content:
+                    "没关系呀，你道歉什么？她又不是你害死的。那个老太婆是被自己相信的东西害死的，她相信技术能改变世界，相信人性的善意能压倒恶意，你说傻不傻？",
+                voice: "char/Kajia/vo_topic_04_4",
+                npc: 83203,
+                next: 90500031,
+            },
+            {
+                id: 90500031,
+                content: "那你呢，你相信什么？",
+                npc: 100001,
+                next: 90500032,
+            },
+            {
+                id: 90500032,
+                content: "我？我相信……一场绚烂的爆炸后，这个世界可以变得简单很多。",
+                voice: "char/Kajia/vo_topic_04_5",
+                npc: 83203,
+                options: [
+                    {
+                        id: 90500002,
+                        content: "聊点别的",
+                        next: 90500001,
+                    },
+                    {
+                        id: 90500003,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
+    },
+    {
         id: 83301,
         name: "玛尔洁",
         camp: "NPC",
@@ -15817,133 +16070,334 @@ export const npcData: NPC[] = [
     },
     {
         id: 250037,
+        name: "华丽的少女",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250038,
+        name: "阿尔西娅",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250039,
+        name: "愤怒的青年",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250040,
+        name: "无奈的青年",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250041,
+        name: "凯兰",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250042,
+        name: "列维",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250043,
+        name: "托兰",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250044,
+        name: "失望的青年",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250045,
+        name: "讥笑的女性",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250046,
+        name: "沉思的商人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250047,
+        name: "狂热的抗议者",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250048,
+        name: "玛吉",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250049,
+        name: "罗连特",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250050,
+        name: "正在休息的工人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250051,
+        name: "在闲聊的工人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250052,
+        name: "无精打采的工人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250053,
+        name: "突然精神的工人",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250054,
+        name: "车站警卫",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250055,
+        name: "玛吉的声音",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250056,
+        name: "罗连特的声音",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250057,
+        name: "车站警卫的声音",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250058,
+        name: "柯尼",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250059,
+        name: "罗文",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250060,
+        name: "克罗格",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250061,
+        name: "忙碌的医生",
         camp: "NPC",
         type: "Normal",
     },
     {
         id: 250062,
+        name: "艾森巴恩",
         camp: "NPC",
         type: "Normal",
+    },
+    {
+        id: 250063,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250064,
+        name: "卡米拉",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250065,
+        name: "UI_Npc_Name_250065",
+    },
+    {
+        id: 250066,
+        name: "UI_Npc_Name_250066",
+    },
+    {
+        id: 250067,
+        name: "UI_Npc_Name_250067",
+    },
+    {
+        id: 250068,
+        name: "UI_Npc_Name_250068",
+    },
+    {
+        id: 250069,
+        name: "UI_Npc_Name_250069",
+    },
+    {
+        id: 250070,
+        name: "UI_Npc_Name_250070",
+    },
+    {
+        id: 250071,
+        name: "UI_Npc_Name_250071",
+    },
+    {
+        id: 250072,
+        name: "UI_Npc_Name_250072",
+    },
+    {
+        id: 250073,
+        name: "UI_Npc_Name_250073",
+    },
+    {
+        id: 250074,
+        name: "UI_Npc_Name_250074",
+    },
+    {
+        id: 250075,
+        name: "UI_Npc_Name_250075",
+    },
+    {
+        id: 250076,
+        name: "UI_Npc_Name_250076",
+    },
+    {
+        id: 250077,
+        name: "UI_Npc_Name_250077",
+    },
+    {
+        id: 250078,
+        name: "UI_Npc_Name_250078",
+    },
+    {
+        id: 250079,
+        name: "UI_Npc_Name_250079",
+    },
+    {
+        id: 250080,
+        name: "UI_Npc_Name_250080",
+    },
+    {
+        id: 250081,
+        name: "UI_Npc_Name_250081",
+    },
+    {
+        id: 250082,
+        name: "UI_Npc_Name_250082",
+    },
+    {
+        id: 250083,
+        name: "UI_Npc_Name_250083",
+    },
+    {
+        id: 250084,
+        name: "UI_Npc_Name_250084",
+    },
+    {
+        id: 250085,
+        name: "UI_Npc_Name_250085",
+    },
+    {
+        id: 250086,
+        name: "UI_Npc_Name_250086",
+    },
+    {
+        id: 250087,
+        name: "UI_Npc_Name_250087",
+    },
+    {
+        id: 250088,
+        name: "UI_Npc_Name_250088",
+    },
+    {
+        id: 250089,
+        name: "UI_Npc_Name_250089",
+    },
+    {
+        id: 250090,
+        name: "UI_Npc_Name_250090",
+    },
+    {
+        id: 250091,
+        name: "UI_Npc_Name_250091",
+    },
+    {
+        id: 250092,
+        name: "UI_Npc_Name_250092",
+    },
+    {
+        id: 250093,
+        name: "UI_Npc_Name_250093",
+    },
+    {
+        id: 250094,
+        name: "UI_Npc_Name_250094",
+    },
+    {
+        id: 250095,
+        name: "UI_Npc_Name_250095",
+    },
+    {
+        id: 250096,
+        name: "UI_Npc_Name_250096",
+    },
+    {
+        id: 250097,
+        name: "UI_Npc_Name_250097",
+    },
+    {
+        id: 250098,
+        name: "UI_Npc_Name_250098",
+    },
+    {
+        id: 250099,
+        name: "UI_Npc_Name_250099",
+    },
+    {
+        id: 250100,
+        name: "UI_Npc_Name_250100",
+    },
+    {
+        id: 250101,
+        name: "UI_Npc_Name_250101",
+    },
+    {
+        id: 250102,
+        name: "UI_Npc_Name_250102",
+    },
+    {
+        id: 250103,
+        name: "UI_Npc_Name_250103",
+    },
+    {
+        id: 250104,
+        name: "UI_Npc_Name_250104",
+    },
+    {
+        id: 250105,
+        name: "UI_Npc_Name_250105",
     },
     {
         id: 260001,
@@ -16246,6 +16700,24 @@ export const npcData: NPC[] = [
     {
         id: 270015,
         name: "卡嘉",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 270016,
+        name: "卡诺",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 270017,
+        name: "卡诺",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 270018,
+        name: "克拉拉",
         camp: "NPC",
         type: "Normal",
     },

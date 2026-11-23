@@ -39,6 +39,10 @@ const DATA_PACK_MODULES = [
     "effect.data",
     "event.data",
     "abyss.data",
+    "dnaseason.data",
+    "dnaseasonequip.data",
+    "dnaseasonprogress.data",
+    "dnaseasonrift.data",
     "forge.data",
     "ironsurvival.data",
     "achievement.data",
@@ -87,6 +91,7 @@ const DATA_PACK_MODULES = [
     "region.data",
     "dynquest.data",
     "hardboss.data",
+    "transcendbuff.data",
 ] as const
 
 export { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest }

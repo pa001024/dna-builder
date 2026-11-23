@@ -94,6 +94,13 @@
     /* 等宽中文回退指向 is-app-font 簇，避免中文字符落到系统 monospace */
     --font-mono: "CaskaydiaCove", Consolas, var(--app-user-font, "HarmonyOS Sans SC", var(--app-font-fallback)), monospace;
 
+    /* 升华词缀富文本：官方 Season_Tips_RichText_T15 样式表色值（specs 见 RESEARCH-PREVIEW-ALIGN §1.3） */
+    --color-affix-highlight: #e8a75b;
+    --color-affix-warning: #da2a4a;
+    --color-affix-title: #c6bdac;
+    --color-affix-blue: #63b8ed;
+    --color-affix-green: #34a981;
+
     /* 尘埃粒子自下而上缓慢上浮 */
     @keyframes mote-rise {
         0% {

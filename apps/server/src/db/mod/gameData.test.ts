@@ -280,6 +280,10 @@ describe("GraphQL 数据接口", () => {
         expect(data.gameDataModules.length).toBeGreaterThan(70)
         const char = data.gameDataModules.find((item: any) => item.id === "char")
         expect(char).toEqual({ id: "char", label: "角色", baseId: "char", locale: "zh", variants: ["char"] })
+
+        for (const id of ["dnaseason", "dnaseasonequip", "dnaseasonprogress", "dnaseasonrift"]) {
+            expect(data.gameDataModules.some((item: any) => item.id === id)).toBe(true)
+        }
     })
 
     it("列出数据集（含记录数与导出形态）", async () => {

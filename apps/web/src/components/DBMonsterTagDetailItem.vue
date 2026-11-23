@@ -3,6 +3,7 @@ import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import type { MonsterTag } from "@/data/d/monstertag.data"
+import { MaxMonsterLevelLimit } from "@/data/game-const"
 import { getMonsterTagGroupByTagId, getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 
 const props = defineProps<{
@@ -248,16 +249,8 @@ function formatBonusValue(value: number): string {
         <!-- 关联怪物 -->
         <section v-if="relatedMonsters.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="RELATED" :title="$t('monster-tag-detail.relatedMonsters')" />
-            <div class="mb-3 flex items-center gap-4">
-                <span class="w-12 shrink-0 font-mono text-[11px] tabular-nums text-base-content/60">Lv. {{ relatedMonsterLevel }}</span>
-                <input
-                    v-model.number="relatedMonsterLevel"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    min="1"
-                    max="240"
-                    step="1"
-                />
+            <div class="mb-3">
+                <LevelSlider v-model="relatedMonsterLevel" :max="MaxMonsterLevelLimit" />
             </div>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                 <DBMonsterCompactCard

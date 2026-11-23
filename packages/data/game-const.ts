@@ -6,8 +6,9 @@ export enum Faction {
     艾利西安传颂会 = 4,
     华胥 = 5,
 }
-
-export const MaxMonsterLevelLimit = 240
+// 1.4 change to 240 from 180
+// 1.8 change to 1000 from 240
+export const MaxMonsterLevelLimit = 1000
 export const AbyssMonsterLevelLimit = 220
 export const IronSurvivalMonsterLevelLimit = 240
 export const MonsterLevelUpperLimit = 180

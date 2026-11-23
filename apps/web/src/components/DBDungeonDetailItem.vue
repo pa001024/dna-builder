@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
@@ -14,15 +15,58 @@ import {
 } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
+import type { JourneyCommissionRow, SeasonTierRow } from "@/utils/transcendence-journey"
+import type { NestRow } from "@/utils/transcendence-nest"
+import type { RiftFloorRow } from "@/utils/transcendence-rift"
+
+/** 螺旋楼层挑战行：文案与掉率由螺旋页预解析（组件不引 500 层数据包） */
+interface RiftFloorChallengeRow {
+    id: number
+    title: string
+    detailTitle: string
+    detailDesc: string
+    rates: number[]
+}
+
+/** 螺旋楼层解锁档位：难度名文案键 + 档内罗马序号（§90 不显示档位 ID / 「N 档」） */
+interface RiftFloorTierRow {
+    id: number
+    nameKey: string
+    nameTier: string
+}
+
+/** 螺旋副本候选：楼层副本引用缺失时由页面提供（24001 / 24002） */
+interface RiftDungeonOption {
+    id: number
+    name: string
+}
 
 const props = defineProps<{
     dungeon: Dungeon
     /** 初始展示等级（默认取 dungeon.lv；爬塔楼层等场景按楼层怪物等级传入） */
     initialLevel?: number
+    /** 梦魇迷境赛季字段：钥匙 / 首领 / 档位奖励（不传时组件行为与原来一致） */
+    nest?: NestRow
+    /** 委托赛季字段：规则 id / 档位奖励；怪物已由副本「怪物」页签展示，不重复 */
+    commission?: JourneyCommissionRow
+    /** 螺旋迷境楼层：时限 / 计分 / 怪组 / 通关奖励等赛季字段（不传时组件行为与原来一致） */
+    riftFloor?: RiftFloorRow
+    /** 楼层挑战（文案已清洗）；缺省时不渲染挑战区块 */
+    riftChallenges?: RiftFloorChallengeRow[]
+    /** 楼层解锁档位（难度名）；缺省时不渲染档位区块 */
+    riftTiers?: RiftFloorTierRow[]
+    /** 螺旋副本候选：副本数据同构且无 floorType 对应证据，由详情头部切换 */
+    riftDungeonOptions?: RiftDungeonOption[]
+}>()
+
+const emit = defineEmits<{
+    (event: "select-rift-dungeon", id: number): void
 }>()
 
 const { gt } = useGameText()
+const { t } = useTranslation()
 
 const currentLevel = ref(props.initialLevel ?? props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
@@ -593,6 +637,123 @@ const mergedDungeonRewards = computed(() => {
     return Array.from(groupedRewards.values())
 })
 
+/** 赛季拓展档位奖励（梦魇 / 委托共用同一份行结构） */
+const seasonTierRows = computed<SeasonTierRow[]>(() => props.nest?.tiers ?? props.commission?.tiers ?? [])
+
+/** 螺旋楼层精英池预览上限：完整列表在「精英池」子页 */
+const RIFT_ELITE_PREVIEW_LIMIT = 24
+
+/** 楼层通关奖励：交给共享 RewardItem 渲染（§90 不自造奖励 chip） */
+const riftFloorReward = computed(() => (props.riftFloor?.rewardId !== undefined ? getRewardDetails(props.riftFloor.rewardId) : null))
+
+const riftEliteHiddenCount = computed(() => Math.max((props.riftFloor?.eliteGroups.length ?? 0) - RIFT_ELITE_PREVIEW_LIMIT, 0))
+
+/** 精英页签卡片：前 24 组展开后按 UnitId 去重（与「种类」口径一致） */
+const riftElitePreviewUnits = computed(() => {
+    const unitIds = new Set<number>()
+
+    for (const group of props.riftFloor?.eliteGroups.slice(0, RIFT_ELITE_PREVIEW_LIMIT) ?? []) {
+        for (const unitId of group.unitIds) {
+            unitIds.add(unitId)
+        }
+    }
+
+    return [...unitIds]
+})
+
+/** 螺旋入口副本（24001 / 24002）：本体没有奖励/怪物/波次，详情由赛季页与楼层字段承担 */
+const isRiftDungeon = computed(() => props.dungeon.t === "Rift")
+/** 螺旋副本入口的两种迷境类型（1 丰饶 / 2 荣耀） */
+const RIFT_FLOOR_TYPES = [1, 2] as const
+
+/** 怪物页子页签中代表「首领」的固定值，其余为 `group:<spawnId>` */
+const RIFT_MONSTER_BOSS_TAB = "boss"
+
+/** 楼层详情顶层页签（§99）：`reward | monster | elite`，首次进入/深链默认奖励；切楼层保留 */
+const riftTab = ref<string>("reward")
+/** 怪物页子页签：切楼层时重置回首领 */
+const riftMonsterSubTab = ref<string>(RIFT_MONSTER_BOSS_TAB)
+
+/** 奖励页签计数：通关奖励组 0 / 1 */
+const riftRewardTabCount = computed(() => (props.riftFloor?.rewardId !== undefined ? 1 : 0))
+/** 怪物页签计数：首领数 + 普通怪组数 */
+const riftMonsterTabCount = computed(() => (props.riftFloor?.bosses.length ?? 0) + (props.riftFloor?.normalGroups.length ?? 0))
+/** 精英页签计数：精英池种类数 */
+const riftEliteTabCount = computed(() => props.riftFloor?.eliteKinds ?? 0)
+
+const riftTabs = computed(() => [
+    { label: `${t("db-transcendence.journey.rewards")} (${riftRewardTabCount.value})`, value: "reward" },
+    { label: `${t("database.monster")} (${riftMonsterTabCount.value})`, value: "monster" },
+    { label: `${t("db-transcendence.rift.score_elite")} (${riftEliteTabCount.value})`, value: "elite" },
+])
+
+/** 怪物页子页签：首领 + 每个普通刷怪组；组名重名时追加组序号，避免标签重复 */
+const riftMonsterTabs = computed(() => {
+    const floor = props.riftFloor
+
+    if (!floor) {
+        return []
+    }
+
+    const groupLabels = floor.normalGroups.map(group => {
+        const firstId = group.unitIds[0]
+
+        return firstId === undefined ? "" : gt(group.names[0]) || t("db-transcendence.unknown_entity", { id: firstId })
+    })
+    const labelCounts = new Map<string, number>()
+
+    for (const label of groupLabels) {
+        labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1)
+    }
+
+    return [
+        { label: t("db-transcendence.rift.bosses"), value: RIFT_MONSTER_BOSS_TAB, unitIds: floor.bosses.map(boss => boss.id) },
+        ...floor.normalGroups.map((group, index) => {
+            const label = groupLabels[index]
+            const uniqueLabel = label && (labelCounts.get(label) ?? 0) > 1 ? `${label} (${index + 1})` : label
+
+            return { label: uniqueLabel || `#${group.spawnId}`, value: `group:${group.spawnId}`, unitIds: group.unitIds }
+        }),
+    ]
+})
+
+/** 当前子页签（组被替换/移除时回落到首领） */
+const activeRiftMonsterTab = computed(() =>
+    riftMonsterTabs.value.some(tab => tab.value === riftMonsterSubTab.value) ? riftMonsterSubTab.value : RIFT_MONSTER_BOSS_TAB
+)
+
+/** 当前子页签展示的怪物 UnitId 列表 */
+const activeRiftMonsterUnits = computed(() => riftMonsterTabs.value.find(tab => tab.value === activeRiftMonsterTab.value)?.unitIds ?? [])
+
+/** 切楼层：保留顶层页签，怪物子页签重置回首领 */
+watch(
+    () => props.riftFloor?.id,
+    () => {
+        riftMonsterSubTab.value = RIFT_MONSTER_BOSS_TAB
+    }
+)
+
+/**
+ * 楼层类型 → 文案键（与 utils/transcendence-rift 同口径）。
+ * 组件不引用 500 层螺旋数据包，避免把赛季数据带进其他副本详情页。
+ * @param floorType 楼层类型
+ * @returns i18n 文案键
+ */
+function getRiftTypeLabelKey(floorType: number): string {
+    return floorType === 1 || floorType === 2 ? `db-transcendence.rift.floor_type_${floorType}` : "db-transcendence.rift.floor_type_unknown"
+}
+
+/**
+ * 秒数格式化：与螺旋层表时限同口径（`分:秒`）。
+ * @param seconds 秒数
+ * @returns 时长文本
+ */
+function formatRiftSeconds(seconds: number): string {
+    const safe = Math.max(0, Math.round(seconds))
+
+    return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`
+}
+
 watch(
     () => [props.dungeon.id, props.initialLevel] as const,
     () => {
@@ -680,9 +841,10 @@ watch(
             </div>
         </header>
 
-        <!-- 页签切换 -->
-        <AniTabs
-            v-model="activeTab"
+        <!-- 页签切换：螺旋入口副本本体没有奖励/怪物/波次数据，整块隐藏（其他副本行为不变） -->
+        <template v-if="!isRiftDungeon">
+            <AniTabs
+                v-model="activeTab"
             :tabs="[
                 { label: `奖励 (${(dungeon.ac?.length || dungeon.r?.length || 0) + (dungeon.sr?.length || 0)})`, value: 'reward' },
                 { label: `怪物 (${(dungeon.m?.length || 0) + (dungeon.sm?.length || 0)})`, value: 'monster' },
@@ -1304,6 +1466,263 @@ watch(
                 >
                     {{ $t("db-dungeon-detail.no_reward_data") }}
                 </div>
+            </template>
+        </template>
+        </template>
+
+        <!-- 螺旋副本入口（/db/dungeon/24001|24002 等无楼层上下文的场景）：给出迷境类型入口，避免空页 -->
+        <section
+            v-if="isRiftDungeon && !riftFloor"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="RIFT" :title="$t('db-transcendence.tab.rift')" />
+            <p class="text-[11px] leading-relaxed text-base-content/45">{{ $t("db-transcendence.rift.type_hint") }}</p>
+            <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                <SRouterLink
+                    v-for="type in RIFT_FLOOR_TYPES"
+                    :key="type"
+                    :to="{ path: '/db/transcendence/rift', query: { ft: `${type}` } }"
+                    class="group rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 transition-colors duration-150 hover:border-primary/50"
+                >
+                    <span class="block text-[12px] font-semibold text-base-content/80 group-hover:text-primary">
+                        {{ $t(getRiftTypeLabelKey(type)) }}
+                    </span>
+                    <span class="mt-1 block text-[10px] text-base-content/40">{{ $t("db-transcendence.rift.view_floors") }}</span>
+                </SRouterLink>
+            </div>
+        </section>
+
+        <!-- 赛季扩展字段：梦魇 / 委托（未传对应 props 时不渲染，既有调用点零回归） -->
+        <template v-if="nest || commission">
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader
+                    no-animate
+                    compact
+                    kicker="SEASON"
+                    :title="nest ? $t('db-transcendence.nest.title') : $t('db-transcendence.overview.commissions')"
+                />
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <template v-if="nest">
+                        <span v-if="nest.type" class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/60">{{ nest.type }}</span>
+                        <span
+                            v-if="nest.level !== undefined"
+                            class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] text-primary"
+                        >
+                            {{ $t("db-transcendence.common.lv", { level: nest.level }) }}
+                        </span>
+                        <CopyID :id="nest.difficulty" />
+                        <SRouterLink
+                            v-if="nest.hardBossId"
+                            :to="`/db/hardboss/${nest.hardBossId}`"
+                            class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        >
+                            {{ $t("database.hard_boss") }}
+                        </SRouterLink>
+                        <span v-else class="rounded-xs border border-warning/40 px-1.5 py-0.5 text-[11px] text-warning">
+                            {{ $t("db-transcendence.nest.hardboss_unmapped") }}
+                        </span>
+                    </template>
+                    <template v-else-if="commission">
+                        <span v-if="commission.typeKey" class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/60">
+                            {{ $t(commission.typeKey) }}
+                        </span>
+                        <CopyID :id="commission.ruleId" />
+                    </template>
+                </div>
+                <div v-if="nest" class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="shrink-0 text-[11px] text-base-content/45">{{ $t("db-transcendence.nest.key") }}</span>
+                    <SRouterLink
+                        :to="`/db/resource/${nest.key.id}`"
+                        class="inline-flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-[12px] text-base-content/75 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                    >
+                        <ImageFallback :src="nest.key.iconUrl" :alt="nest.key.name" class="size-7 shrink-0 overflow-hidden rounded-xs">
+                            <span class="size-7 shrink-0 rounded-xs" :class="getRarityGradientClass(nest.key.rarity)" />
+                        </ImageFallback>
+                        <span class="max-w-52 truncate">{{ nest.key.name }}</span>
+                        <CopyID compact :id="nest.key.id" />
+                    </SRouterLink>
+                </div>
+                <p v-if="nest && nest.key.desc" class="mt-2 text-[11px] leading-relaxed text-base-content/45">{{ nest.key.desc }}</p>
+            </section>
+
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader
+                    no-animate
+                    compact
+                    kicker="SEASON REWARD"
+                    :title="$t('db-transcendence.nest.tiers')"
+                    :count="seasonTierRows.length"
+                />
+                <div v-if="seasonTierRows.length" class="mt-2 space-y-2">
+                    <div
+                        v-for="tier in seasonTierRows"
+                        :key="tier.tierId"
+                        :data-season-tier="tier.tierId"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
+                    >
+                        <RewardItem
+                            :reward="tier.reward"
+                            :reward-id="tier.rewardId"
+                            hide-id
+                            :header="tier.nameKey ? `${$t(tier.nameKey)} ${tier.nameTier}` : '—'"
+                        />
+                    </div>
+                </div>
+                <p v-else class="text-[11px] text-base-content/40">{{ $t("common.no_data") }}</p>
+                <p v-if="nest" class="mt-2 text-[10px] leading-relaxed text-base-content/35">{{ $t("db-transcendence.nest.chest_missing") }}</p>
+            </section>
+        </template>
+
+        <!-- 螺旋迷境楼层字段：楼层身份 / 副本切换 / 基础信息（未传 riftFloor 时不渲染） -->
+        <template v-if="riftFloor">
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="RIFT FLOOR" :title="$t('db-transcendence.rift.floor_title', { n: riftFloor.floor })">
+                    <template #trailing>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="rounded-xs border border-primary/40 px-1.5 text-[10px] leading-4 text-primary">
+                                {{ $t(getRiftTypeLabelKey(riftFloor.floorType)) }}
+                            </span>
+                            <CopyID :id="riftFloor.id" />
+                        </span>
+                    </template>
+                </SectionHeader>
+                <div v-if="(riftDungeonOptions?.length ?? 0) > 1" class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-base-content/8 pb-2.5">
+                    <span class="shrink-0 text-[11px] text-base-content/45">{{ $t("db-transcendence.rift.dungeons") }}</span>
+                    <button
+                        v-for="option in riftDungeonOptions"
+                        :key="option.id"
+                        type="button"
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        :class="option.id === dungeon.id ? 'border-primary bg-primary font-semibold text-primary-content' : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'"
+                        @click="emit('select-rift-dungeon', option.id)"
+                    >
+                        {{ gt(option.name) || $t("db-transcendence.unknown_entity", { id: option.id }) }}
+                        <span class="font-orbitron text-[10px] tabular-nums opacity-70">#{{ option.id }}</span>
+                    </button>
+                </div>
+                <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-[11px] text-base-content/50">{{ $t("db-transcendence.rift.monster_level") }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ riftFloor.monsterLevel }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-[11px] text-base-content/50">{{ $t("db-transcendence.rift.time_limit") }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ formatRiftSeconds(riftFloor.completeTime) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-[11px] text-base-content/50">{{ $t("db-transcendence.rift.normal_kinds") }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ riftFloor.normalKinds }}</span>
+                    </div>
+                </div>
+                <div v-if="riftFloor.scoreRuleIds.length" class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="text-[11px] text-base-content/50">{{ $t("db-transcendence.rift.score_rules") }}</span>
+                    <CopyID v-for="scoreRuleId in riftFloor.scoreRuleIds" :key="scoreRuleId" :id="scoreRuleId" />
+                </div>
+                <div v-if="riftTiers?.length" class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="text-[11px] text-base-content/50">{{ $t("db-transcendence.rift.unlock_tiers") }}</span>
+                    <span
+                        v-for="tier in riftTiers"
+                        :key="tier.id"
+                        class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 text-[10px] leading-4 text-primary"
+                    >
+                        {{ $t(tier.nameKey) }} {{ tier.nameTier }}
+                    </span>
+                </div>
+            </section>
+
+            <!-- §99：楼层详情三页签（奖励默认 / 怪物 / 精英） -->
+            <div data-rift-tabs>
+                <AniTabs v-model="riftTab" :tabs="riftTabs" />
+            </div>
+
+            <!-- 奖励：通关奖励 + 挑战与掉落加成 + 跳层 -->
+            <template v-if="riftTab === 'reward'">
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-transcendence.rift.rewards')" />
+                    <div v-if="riftFloor.rewardId !== undefined" class="mt-2">
+                        <RewardItem :reward="riftFloorReward" :reward-id="riftFloor.rewardId" hide-id :header="$t('db-transcendence.rift.rewards')" />
+                    </div>
+                    <p v-else class="text-[11px] text-base-content/40">{{ $t("common.no_data") }}</p>
+                </section>
+
+                <section v-if="riftChallenges?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="CHALLENGE" :title="$t('db-transcendence.rift.challenges')" :count="riftChallenges.length" />
+                    <div class="space-y-2">
+                        <div v-for="challenge in riftChallenges" :key="challenge.id" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[12px] font-semibold text-base-content/80">
+                                    {{ challenge.title || $t("db-transcendence.unknown_entity", { id: challenge.id }) }}
+                                </span>
+                                <CopyID :id="challenge.id" />
+                            </div>
+                            <p v-if="challenge.detailTitle" class="mt-1 text-[11px] text-base-content/60">{{ challenge.detailTitle }}</p>
+                            <p v-if="challenge.detailDesc" class="mt-1 text-[11px] text-base-content/45">{{ challenge.detailDesc }}</p>
+                            <p v-if="challenge.rates.length" class="mt-1 text-[11px] text-primary">
+                                {{ challenge.rates.map(rate => $t("db-transcendence.rift.drop_rate", { rate })).join(" · ") }}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section v-if="riftFloor.jumps.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SKIP" :title="$t('db-transcendence.rift.jumps')" :count="riftFloor.jumps.length" />
+                    <div class="flex flex-wrap gap-1.5">
+                        <span
+                            v-for="jump in riftFloor.jumps"
+                            :key="`${jump.floor}-${jump.time}`"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1 text-[11px] tabular-nums text-base-content/60"
+                        >
+                            {{ $t("db-transcendence.rift.jump_row", { time: formatRiftSeconds(jump.time), floor: jump.floor }) }}
+                        </span>
+                    </div>
+                </section>
+            </template>
+
+            <!-- 怪物：首领 + 每个普通刷怪组一个子页签，只显示该组卡片 -->
+            <template v-else-if="riftTab === 'monster'">
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <div data-rift-monster-tabs>
+                        <AniTabs v-model="riftMonsterSubTab" :tabs="riftMonsterTabs" />
+                    </div>
+                    <div
+                        v-if="activeRiftMonsterUnits.length"
+                        data-rift-monster-grid
+                        class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2"
+                    >
+                        <DBMonsterCompactCard
+                            v-for="unitId in activeRiftMonsterUnits"
+                            :key="unitId"
+                            :monster="LeveledMonsterHelper.fromId(unitId, riftFloor.monsterLevel, false, getDungeonMonsterHpMultiplier())"
+                        />
+                    </div>
+                    <p v-else class="mt-2 text-sm text-base-content/70">{{ $t("db-dungeon-detail.no_monster_data") }}</p>
+                </section>
+            </template>
+
+            <!-- 精英：来源提示 + 种类数 + 精英池卡片（前 24 组） -->
+            <template v-else>
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="ELITE" :title="$t('db-transcendence.rift.elite_pool')" :count="riftFloor.eliteGroups.length" />
+                    <p class="text-[11px] leading-relaxed text-base-content/45">
+                        {{ $t(riftFloor.eliteFromFloor ? "db-transcendence.rift.elite_pool_from_floor" : "db-transcendence.rift.elite_pool_top") }}
+                    </p>
+                    <p class="mt-1 text-[11px] text-base-content/50">{{ $t("common.count_kinds", { count: riftFloor.eliteKinds }) }}</p>
+                    <div
+                        v-if="riftElitePreviewUnits.length"
+                        data-rift-monster-grid
+                        class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2"
+                    >
+                        <DBMonsterCompactCard
+                            v-for="unitId in riftElitePreviewUnits"
+                            :key="unitId"
+                            :monster="LeveledMonsterHelper.fromId(unitId, riftFloor.monsterLevel, false, getDungeonMonsterHpMultiplier())"
+                        />
+                    </div>
+                    <p v-else class="mt-2 text-[11px] text-base-content/35">{{ $t("common.no_data") }}</p>
+                    <p v-if="riftEliteHiddenCount > 0" class="mt-2 text-[11px] text-base-content/40">
+                        {{ $t("db-transcendence.rift.elite_pool_more", { count: riftEliteHiddenCount }) }}
+                    </p>
+                </section>
             </template>
         </template>
     </div>
