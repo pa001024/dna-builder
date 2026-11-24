@@ -389,8 +389,22 @@ const physicalConvertKeywords = ["转切割", "转贯穿", "转震荡", "转灾�
 /** 阵营增伤口径：泛化 `歧视`（旧口径兜底）+ 具体阵营（mod.data 已从 `歧视` 迁移至此） */
 const factionBonusKeys = ["歧视", "秽兽增伤", "军团增伤", "神弃者增伤", "神使增伤", "华胥增伤"] as const
 
+/** 敌方生命类型 → 触发系数（供伤害页等展示口径复用） */
+export const HP_TYPE_COEFFICIENTS: Record<keyof typeof HpType, number> = {
+    生命: 0.5,
+    护盾: 1,
+    战姿: 1,
+}
+
+/** 敌方生命类型 → 匹配的伤害类型（供伤害页等展示口径复用） */
+export const HP_TYPE_DAMAGE: Record<keyof typeof HpType, keyof typeof DmgType> = {
+    生命: "贯穿",
+    护盾: "切割",
+    战姿: "震荡",
+}
+
 /** 敌方阵营（monster.f，见 game-const Faction）→ 阵营增伤属性键 */
-function factionBonusKeyForEnemy(faction?: number): string | undefined {
+export function factionBonusKeyForEnemy(faction?: number): string | undefined {
     switch (faction) {
         case 1:
             return "秽兽增伤"
@@ -947,17 +961,9 @@ export class CharBuild {
         return mods.filter(v => v !== null)
     }
 
-    // 血量类型系数表
-    hpTypeCoefficients: Record<string, number> = {
-        生命: 0.5,
-        护盾: 1,
-        战姿: 1,
-    }
-    hpTypeDMG: Record<keyof typeof HpType, keyof typeof DmgType> = {
-        生命: "贯穿",
-        护盾: "切割",
-        战姿: "震荡",
-    }
+    // 血量类型系数表（实例副本，避免外部改写污染共享常量）
+    hpTypeCoefficients: Record<string, number> = { ...HP_TYPE_COEFFICIENTS }
+    hpTypeDMG: Record<keyof typeof HpType, keyof typeof DmgType> = { ...HP_TYPE_DAMAGE }
 
     /**
      * 从 `teamWeapons` 的数值项派生队友武器类别（页面与工厂共用同一构造口径）。

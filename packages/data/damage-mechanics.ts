@@ -32,11 +32,19 @@ export interface DamageToggleDoc {
     label: string
 }
 
+/** 页面上的一个下拉参数 */
+export interface DamageSelectDoc {
+    key: string
+    label: string
+    options: string[]
+}
+
 /** 输入参数分组（对应页面上的一张参数卡） */
 export interface DamageGroupDoc {
     title: string
     fields: DamageFieldDoc[]
     toggles?: DamageToggleDoc[]
+    selects?: DamageSelectDoc[]
 }
 
 /** 一个结算步骤 */
@@ -99,9 +107,28 @@ const DEFENSE_FIELDS: DamageFieldDoc[] = [
 
 /** 抗性相关参数 */
 const RESISTANCE_FIELDS: DamageFieldDoc[] = [
-    { key: "enemyResistance", label: "敌人抗性", note: "抗性为负（弱点）时 (1 - 抗性 + 弱点) 大于 1，反过来放大伤害" },
-    { key: "enemyWeakness", label: "敌人弱点", note: "与敌人抗性同区加算（正值放大受到的该元素伤害），不吃物理分量" },
-    { key: "penetrationBonus", label: "属性穿透", note: "与抗性同一个乘区，按 (1 + 属性穿透) 放大抗性因子" },
+    { key: "enemyResistance", label: "敌人抗性", note: "抗性为负时 (1 - 抗性 + 弱点) 大于 1，反过来放大伤害" },
+    {
+        key: "elementWeakness",
+        label: "元素弱点(角色元素)",
+        note: "角色元素的属性弱点，与敌人抗性同区加算（正值放大受到的该元素伤害），只作用于角色元素分量",
+    },
+    {
+        key: "allElementWeakness",
+        label: "全属性弱点",
+        note: "与敌人抗性同区加算，对六元素分量生效；物理分量不吃弱点",
+    },
+    { key: "penetrationBonus", label: "属性穿透", note: "对全部伤害分量整体相乘，按 max(0, 1 + 属性穿透)" },
+]
+
+/** 转换相关参数：属克/属逆与转物理共享比例池，合计超过 100% 时等比重压缩 */
+const CONVERT_FIELDS: DamageFieldDoc[] = [
+    { key: "convertRestraint", label: "转属克", note: "敌人正抗时生效：该比例伤害转为克制元素并按翻转抗性 -4 结算" },
+    { key: "convertReverse", label: "转属逆", note: "敌人负抗时生效：该比例伤害转为逆属元素并按翻转抗性 0.5 结算" },
+    { key: "convertCut", label: "转切割", note: "把物理 + 元素按比例转为切割分量，按物理增伤与切割触发规则结算" },
+    { key: "convertPierce", label: "转贯穿", note: "把物理 + 元素按比例转为贯穿分量，按物理增伤与贯穿触发规则结算" },
+    { key: "convertShock", label: "转震荡", note: "把物理 + 元素按比例转为震荡分量，按物理增伤与震荡触发规则结算" },
+    { key: "convertCalamity", label: "转灾厄", note: "把物理 + 元素按比例转为灾厄分量；敌方存在抗性时才结算灾厄触发" },
 ]
 
 /** 失衡参数 */
@@ -124,9 +151,10 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
         id: "weapon",
         label: "武器伤害",
         summary:
-            "以角色攻击与武器攻击之和为基数，先算抗性与暴击/触发档位，再乘血量、增伤、充盈乘区，最后过防御乘区；" +
-            "物理分量按触发规则单独结算，元素分量不吃触发。额外造成一段可触发额外效果的属性伤害。" +
-            "核心结果取「最终期望伤害」，乘上防御乘区得到防御后最终伤害。",
+            "以角色攻击与武器攻击之和为基数，先按抗性/弱点、属性与物理转换拆出伤害分量，再按暴击/触发档位折算，" +
+            "乘血量、元素/物理增伤、独立增伤、追加伤害、穿透与赛季乘区，最后过防御乘区。" +
+            "物理分量按触发规则单独结算，元素分量不吃触发；属克/属逆与转物理共享转换比例池。" +
+            "核心结果取「最终期望伤害」，乘上技能倍率系数与防御乘区得到防御后最终伤害。",
         resultStepId: "expectedDamage",
         groups: [
             {
@@ -153,8 +181,15 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 fields: [
                     { key: "baseDamageBonus", label: "增伤" },
                     { key: "weaponDamageBonus", label: "武器伤害", note: "与增伤同池加算" },
+                    { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", note: "与增伤同池加算" },
+                    { key: "attackTypeDamageBonus", label: "攻击类型增伤", note: "普攻/蓄力/下落/滑行，与增伤同池加算" },
+                    { key: "elementDamageIncrease", label: "元素增伤", note: "只对元素结算分量加算，与增伤同池" },
+                    { key: "physicalDamageIncrease", label: "物理增伤", note: "只对物理结算分量加算，与增伤同池" },
+                    { key: "seasonBonus", label: "赛季增伤", note: "赛季专属伤害率分区，独立乘区" },
                     { key: "independentBonus", label: "独立增伤", note: "与增伤不同池，独立相乘" },
                     { key: "weaponIndependentBonus", label: "武器独立增伤" },
+                    { key: "weaponIndependentPenalty", label: "武器独立增伤惩罚", note: "如箭雨降伤，只作用于武器池" },
+                    { key: "attackTypeIndependentBonus", label: "攻击类型独立增伤" },
                     ...ADDITIONAL_DAMAGE_FIELDS,
                 ],
             },
@@ -169,13 +204,19 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             },
             {
                 title: "触发",
+                selects: [
+                    { key: "damageType", label: "武器伤害类型", options: ["切割", "贯穿", "震荡", "灾厄"] },
+                    { key: "enemyHpType", label: "敌方生命类型", options: ["生命", "护盾", "战姿"] },
+                ],
                 fields: [
                     { key: "baseTriggerRate", label: "基础触发" },
                     { key: "triggerRateBonus", label: "触发加成" },
                     { key: "triggerBonus", label: "触发倍率加成" },
-                    { key: "hpTypeCoefficient", label: "生命类型系数", note: "命中敌方当前生命类型时才计入触发倍率" },
                 ],
-                toggles: [{ key: "sameDamageType", label: "伤害类型匹配(触发生效)" }],
+            },
+            {
+                title: "转换",
+                fields: [...CONVERT_FIELDS],
             },
             {
                 title: "充盈",
@@ -212,22 +253,103 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 formula: "武器攻击 = (武器基础攻击 * (1 + 武器攻击加成) * 武器精通倍率 * (1 + 物理))保留2位",
                 group: "攻击",
             },
-            { id: "totalWeaponDamage", title: "总攻击", formula: "总攻击 = 角色攻击 + 武器攻击", group: "攻击" },
+            {
+                id: "totalWeaponDamage",
+                title: "总攻击",
+                formula: "总攻击 = 角色攻击 + 武器攻击",
+                group: "攻击",
+            },
+            {
+                id: "weaponPhysicalRatio",
+                title: "武器物理占比",
+                formula: "武器物理占比 = 灾厄伤害时取 1，否则 武器攻击 / 总攻击",
+                group: "攻击",
+            },
+            {
+                id: "weaponElementalRatio",
+                title: "武器元素占比",
+                formula: "武器元素占比 = 灾厄伤害时取 0，否则 角色攻击 / 总攻击",
+                group: "攻击",
+            },
             {
                 id: "triggerDamageMultiplier",
                 title: "触发倍率",
-                formula: "触发倍率 = 伤害类型匹配时(1 + 生命类型系数 + 触发倍率加成)，否则为 1",
+                formula:
+                    "触发倍率 = 灾厄伤害时(敌人抗性不为 0 则 1 + 触发倍率加成，否则为 1)，其余类型匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
                 group: "触发",
             },
-            { id: "finalTriggerRate", title: "最终触发率", formula: "最终触发率 = 基础触发 * (1 + 触发加成)", group: "触发" },
+            {
+                id: "finalTriggerRate",
+                title: "最终触发率",
+                formula: "最终触发率 = 基础触发 * (1 + 触发加成)，触发效果按 100% 封顶",
+                group: "触发",
+            },
             {
                 id: "triggerExpectedDamageAdd",
                 title: "触发期望倍率",
-                formula: "触发期望倍率 = 1 + (触发倍率 - 1) * 最终触发率",
+                formula: "触发期望倍率 = 1 + (触发倍率 - 1) * min(1, 最终触发率)",
                 group: "触发",
             },
-            { id: "finalCritRate", title: "最终暴击率", formula: "最终暴击率 = 基础暴击 * (1 + 暴击加成)", group: "暴击" },
-            { id: "finalCritDamage", title: "最终暴伤", formula: "最终暴伤 = 基础暴伤 * (1 + 暴伤加成)", group: "暴击" },
+            {
+                id: "cutTriggerMultiplier",
+                title: "转切割触发倍率",
+                formula: "转切割触发倍率 = 切割匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+                group: "触发",
+            },
+            {
+                id: "pierceTriggerMultiplier",
+                title: "转贯穿触发倍率",
+                formula: "转贯穿触发倍率 = 贯穿匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+                group: "触发",
+            },
+            {
+                id: "shockTriggerMultiplier",
+                title: "转震荡触发倍率",
+                formula: "转震荡触发倍率 = 震荡匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+                group: "触发",
+            },
+            {
+                id: "calamityTriggerMultiplier",
+                title: "转灾厄触发倍率",
+                formula: "转灾厄触发倍率 = 敌人抗性不为 0 时 1 + 触发倍率加成，否则为 1",
+                group: "触发",
+            },
+            {
+                id: "cutTriggerExpected",
+                title: "转切割触发期望",
+                formula: "转切割触发期望 = 1 + (转切割触发倍率 - 1) * min(1, 最终触发率)",
+                group: "触发",
+            },
+            {
+                id: "pierceTriggerExpected",
+                title: "转贯穿触发期望",
+                formula: "转贯穿触发期望 = 1 + (转贯穿触发倍率 - 1) * min(1, 最终触发率)",
+                group: "触发",
+            },
+            {
+                id: "shockTriggerExpected",
+                title: "转震荡触发期望",
+                formula: "转震荡触发期望 = 1 + (转震荡触发倍率 - 1) * min(1, 最终触发率)",
+                group: "触发",
+            },
+            {
+                id: "calamityTriggerExpected",
+                title: "转灾厄触发期望",
+                formula: "转灾厄触发期望 = 1 + (转灾厄触发倍率 - 1) * min(1, 最终触发率)",
+                group: "触发",
+            },
+            {
+                id: "finalCritRate",
+                title: "最终暴击率",
+                formula: "最终暴击率 = 基础暴击 * (1 + 暴击加成)",
+                group: "暴击",
+            },
+            {
+                id: "finalCritDamage",
+                title: "最终暴伤",
+                formula: "最终暴伤 = 基础暴伤 * (1 + 暴伤加成)",
+                group: "暴击",
+            },
             {
                 id: "lowerCritDamage",
                 title: "低暴击倍率",
@@ -247,10 +369,154 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 group: "暴击",
             },
             {
-                id: "resistance",
-                title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+                id: "activeElementConvert",
+                title: "生效属转比例",
+                formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0",
+                group: "转换",
+            },
+            {
+                id: "convertPoolTotal",
+                title: "转换池合计",
+                formula: "转换池合计 = 生效属转比例 + 转切割 + 转贯穿 + 转震荡 + 转灾厄",
+                group: "转换",
+            },
+            {
+                id: "convertScale",
+                title: "转换压缩系数",
+                formula: "转换压缩系数 = 转换池合计 > 1 时为 1 / 转换池合计，否则为 1",
+                group: "转换",
+            },
+            {
+                id: "unconvertedRatio",
+                title: "未转换比例",
+                formula: "未转换比例 = max(0, 1 - min(1, 转换池合计))",
+                group: "转换",
+            },
+            {
+                id: "elementConvertRatio",
+                title: "属转有效比例",
+                formula: "属转有效比例 = min(1, 生效属转比例) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "weaknessTotal",
+                title: "属性弱点合计",
+                formula: "属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
                 group: "环境",
+            },
+            {
+                id: "baseResistanceFactor",
+                title: "基础抗性因子",
+                formula: "基础抗性因子 = max(0, 1 - 敌人抗性 + 弱点合计)",
+                group: "环境",
+            },
+            {
+                id: "flippedResistanceFactor",
+                title: "翻转抗性因子",
+                formula: "翻转抗性因子 = max(0, 1 - 翻转抗性 + 弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+                group: "环境",
+            },
+            {
+                id: "elementalResistanceFactor",
+                title: "元素抗性因子",
+                formula: "元素抗性因子 = (1 - 属转有效比例) * 基础抗性因子 + 属转有效比例 * 翻转抗性因子",
+                group: "环境",
+            },
+            {
+                id: "physicalBasePart",
+                title: "未转换物理分量",
+                formula: "未转换物理分量 = 武器物理占比 * 未转换比例",
+                group: "转换",
+            },
+            {
+                id: "elementalBasePart",
+                title: "未转换元素分量",
+                formula: "未转换元素分量 = 武器元素占比 * 元素抗性因子 * 未转换比例",
+                group: "转换",
+            },
+            {
+                id: "convertedElementPhysicalPart",
+                title: "属转物理分量",
+                formula: "属转物理分量 = 武器物理占比 * 属转有效比例 * 翻转抗性因子",
+                group: "转换",
+            },
+            {
+                id: "convertedElementElementalPart",
+                title: "属转元素分量",
+                formula: "属转元素分量 = 武器元素占比 * 元素抗性因子 * 属转有效比例",
+                group: "转换",
+            },
+            {
+                id: "convertCutPart",
+                title: "转切割分量",
+                formula: "转切割分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转切割) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "convertPiercePart",
+                title: "转贯穿分量",
+                formula: "转贯穿分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转贯穿) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "convertShockPart",
+                title: "转震荡分量",
+                formula: "转震荡分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转震荡) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "convertCalamityPart",
+                title: "转灾厄分量",
+                formula: "转灾厄分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转灾厄) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "damageIncrease",
+                title: "增伤池",
+                formula: "增伤池 = 1 + 增伤 + 武器伤害 + 阵营增伤 + 攻击类型增伤",
+                group: "增伤",
+            },
+            {
+                id: "elementDamageIncrease",
+                title: "元素增伤乘区",
+                formula: "元素增伤乘区 = 增伤池 + 元素增伤（只作用于元素结算分量）",
+                group: "增伤",
+            },
+            {
+                id: "physicalDamageIncrease",
+                title: "物理增伤乘区",
+                formula: "物理增伤乘区 = 增伤池 + 物理增伤（只作用于物理结算分量）",
+                group: "增伤",
+            },
+            {
+                id: "independentDamageIncrease",
+                title: "独立增伤乘区",
+                formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 武器独立增伤) / (1 + 武器独立增伤惩罚) * (1 + 攻击类型独立增伤)",
+                group: "增伤",
+            },
+            {
+                id: "additionalDamage",
+                title: "追加伤害乘区",
+                formula: "追加伤害乘区 = max(0, 1 + Σ 七分量)",
+                group: "增伤",
+            },
+            {
+                id: "imbalanceDamageMultiplier",
+                title: "失衡乘区",
+                formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
+                group: "环境",
+            },
+            {
+                id: "penetrationMultiplier",
+                title: "属性穿透乘区",
+                formula: "属性穿透乘区 = max(0, 1 + 属性穿透)（对全部伤害分量整体生效）",
+                group: "环境",
+            },
+            {
+                id: "seasonDamageMultiplier",
+                title: "赛季增伤乘区",
+                formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+                group: "增伤",
             },
             {
                 id: "boostMultiplier",
@@ -264,25 +530,6 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 formula: "背水乘区 = 1 + 4 * 背水 * (1 - 生命比例(限制在 0.25~1)) * (1.5 - 生命比例(限制在 0.25~1))",
                 group: "血量",
             },
-            { id: "damageIncrease", title: "增伤乘区", formula: "增伤乘区 = 1 + 增伤 + 武器伤害", group: "增伤" },
-            {
-                id: "independentDamageIncrease",
-                title: "独立增伤乘区",
-                formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 武器独立增伤)",
-                group: "增伤",
-            },
-            {
-                id: "additionalDamage",
-                title: "追加伤害乘区",
-                formula: "追加伤害乘区 = 1 + Σ 七分量",
-                group: "增伤",
-            },
-            {
-                id: "imbalanceDamageMultiplier",
-                title: "失衡乘区",
-                formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
-                group: "环境",
-            },
             {
                 id: "hpMore",
                 title: "血量相关乘区",
@@ -292,68 +539,111 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "otherMore",
                 title: "通用乘区",
-                formula: "通用乘区 = 增伤乘区 * 独立增伤乘区 * 追加伤害乘区 * 失衡乘区",
+                formula: "通用乘区 = 独立增伤乘区 * 追加伤害乘区 * 失衡乘区 * 属性穿透乘区 * 赛季增伤乘区",
                 group: "增伤",
             },
-            { id: "commonMore", title: "总乘区", formula: "总乘区 = 血量相关乘区 * 通用乘区", group: "增伤" },
             {
-                id: "elementalPart",
-                title: "属性部分(含抗性)",
-                formula: "属性部分(含抗性) = 角色攻击 * 抗性乘区",
-                group: "环境",
+                id: "commonMore",
+                title: "总乘区",
+                formula: "总乘区 = 血量相关乘区 * 通用乘区",
+                group: "增伤",
+            },
+            {
+                id: "elementRatioTotal",
+                title: "元素结算分量合计",
+                formula: "元素结算分量合计 = 未转换元素分量 + 属转物理分量 + 属转元素分量",
+                group: "转换",
+            },
+            {
+                id: "physicalRatioTotal",
+                title: "物理结算分量合计",
+                formula: "物理结算分量合计 = 未转换物理分量 + 转切割分量 + 转贯穿分量 + 转震荡分量 + 转灾厄分量",
+                group: "转换",
+            },
+            {
+                id: "physicalTriggerRatio",
+                title: "物理分量触发满倍率",
+                formula:
+                    "物理分量触发满倍率 = 未转换物理分量 * 触发倍率 + 转切割分量 * 转切割触发倍率 + 转贯穿分量 * 转贯穿触发倍率 + 转震荡分量 * 转震荡触发倍率 + 转灾厄分量 * 转灾厄触发倍率",
+                group: "转换",
+            },
+            {
+                id: "physicalExpectedTriggerRatio",
+                title: "物理分量触发期望",
+                formula:
+                    "物理分量触发期望 = 未转换物理分量 * 触发期望倍率 + 转切割分量 * 转切割触发期望 + 转贯穿分量 * 转贯穿触发期望 + 转震荡分量 * 转震荡触发期望 + 转灾厄分量 * 转灾厄触发期望",
+                group: "转换",
+            },
+            {
+                id: "noTriggerWeightedRatio",
+                title: "未触发加权分量",
+                formula: "未触发加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理结算分量合计 * 物理增伤乘区",
+                group: "转换",
+            },
+            {
+                id: "fullTriggerWeightedRatio",
+                title: "满触发加权分量",
+                formula: "满触发加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理分量触发满倍率 * 物理增伤乘区",
+                group: "转换",
+            },
+            {
+                id: "expectedTriggerWeightedRatio",
+                title: "触发期望加权分量",
+                formula: "触发期望加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理分量触发期望 * 物理增伤乘区",
+                group: "转换",
             },
             {
                 id: "lowerCritNoTrigger",
                 title: "未触发低暴击",
-                formula: "未触发低暴击 = (武器攻击 + 属性部分(含抗性)) * 低暴击倍率 * 总乘区",
+                formula: "未触发低暴击 = 未触发加权分量 * 低暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "higherCritNoTrigger",
                 title: "未触发高暴击",
-                formula: "未触发高暴击 = (武器攻击 + 属性部分(含抗性)) * 高暴击倍率 * 总乘区",
+                formula: "未触发高暴击 = 未触发加权分量 * 高暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "lowerCritTrigger",
                 title: "触发低暴击",
-                formula: "触发低暴击 = (武器攻击 * (低暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
+                formula: "触发低暴击 = 满触发加权分量 * 低暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "higherCritTrigger",
                 title: "触发高暴击",
-                formula: "触发高暴击 = (武器攻击 * (高暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
+                formula: "触发高暴击 = 满触发加权分量 * 高暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "lowerCritExpectedTrigger",
                 title: "期望触发低暴击",
-                formula: "期望触发低暴击 = (武器攻击 * (低暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
+                formula: "期望触发低暴击 = 触发期望加权分量 * 低暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "higherCritExpectedTrigger",
                 title: "期望触发高暴击",
-                formula: "期望触发高暴击 = (武器攻击 * (高暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
+                formula: "期望触发高暴击 = 触发期望加权分量 * 高暴击倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "expectedCritTrigger",
                 title: "触发期望暴击",
-                formula: "触发期望暴击 = (武器攻击 + 属性部分(含抗性)) * 暴击期望倍率 * 总乘区",
+                formula: "触发期望暴击 = 满触发加权分量 * 暴击期望倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "expectedCritNoTrigger",
                 title: "未触发期望暴击",
-                formula: "未触发期望暴击 = (武器攻击 * (暴击期望倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
+                formula: "未触发期望暴击 = 未触发加权分量 * 暴击期望倍率 * 总乘区",
                 group: "暴击",
             },
             {
                 id: "expectedDamage",
                 title: "最终期望伤害",
-                formula: "最终期望伤害 = (武器攻击 * (暴击期望倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
+                formula: "最终期望伤害 = 触发期望加权分量 * 暴击期望倍率 * 总乘区",
                 group: "暴击",
             },
             {
@@ -384,7 +674,7 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 id: "fullnessOverflowTrigger",
                 title: "触发溢出率",
                 formula: "触发溢出率 = max(0, 最终触发率 - 1)",
-                group: "触发",
+                group: "充盈",
             },
             {
                 id: "weaponFullnessPower",
@@ -452,8 +742,9 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
         id: "skill",
         label: "技能伤害",
         summary:
-            "以角色攻击为基数（不含武器攻击），乘技能倍率得到技能倍率伤害，再依次乘抗性、增伤、独立增伤、失衡、血量、充盈乘区，最后过防御乘区。" +
-            "技能模式没有暴击与触发档位，暴击/触发收益已在上游属性里体现。",
+            "以角色攻击为基数（不含武器攻击），乘技能倍率得到技能倍率伤害；抗性/弱点与转属克/逆、转物理先拆分量，" +
+            "元素分量吃元素增伤、物理分量吃物理增伤，再乘独立增伤、技能追伤、召唤物独立增伤、失衡、穿透与赛季乘区，" +
+            "最后过防御乘区。角色技能无武器归属，不结算暴击与触发档位。",
         resultStepId: "expectedDamage",
         groups: [
             { title: "攻击", fields: ATTACK_FIELDS },
@@ -470,9 +761,21 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 fields: [
                     { key: "baseDamageBonus", label: "增伤" },
                     { key: "skillDamageBonus", label: "技能伤害", note: "与增伤同池加算" },
+                    { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", note: "与增伤同池加算" },
+                    { key: "attackTypeDamageBonus", label: "攻击类型增伤", note: "与增伤同池加算" },
+                    { key: "elementDamageIncrease", label: "元素增伤", note: "只对元素结算分量加算" },
+                    { key: "physicalDamageIncrease", label: "物理增伤", note: "只对物理结算分量加算" },
+                    { key: "seasonBonus", label: "赛季增伤", note: "独立乘区" },
                     { key: "independentBonus", label: "独立增伤", note: "与增伤不同池，独立相乘" },
+                    { key: "skillIndependentBonus", label: "技能独立增伤", note: "只作用于技能伤害池" },
+                    { key: "skillAdditionalDamage", label: "技能追伤", note: "技能池的追加伤害独立乘区" },
+                    { key: "attackTypeIndependentBonus", label: "攻击类型独立增伤" },
+                    { key: "summonDamageBonus", label: "召唤物伤害", note: "字段 tag 含召唤物时并入增伤池" },
+                    { key: "summonIndependentBonus", label: "召唤物独立增伤", note: "字段 tag 含召唤物时生效" },
                 ],
+                toggles: [{ key: "summonEnabled", label: "当前字段为召唤物伤害" }],
             },
+            { title: "转换", fields: [...CONVERT_FIELDS] },
             { title: "血量", fields: HP_FIELDS },
             {
                 title: "充盈",
@@ -491,10 +794,142 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
         ],
         steps: [
             {
-                id: "resistancePenetration",
-                title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+                id: "weaknessTotal",
+                title: "属性弱点合计",
+                formula: "属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
                 group: "环境",
+            },
+            {
+                id: "baseResistanceFactor",
+                title: "基础抗性因子",
+                formula: "基础抗性因子 = max(0, 1 - 敌人抗性 + 弱点合计)",
+                group: "环境",
+            },
+            {
+                id: "flippedResistanceFactor",
+                title: "翻转抗性因子",
+                formula: "翻转抗性因子 = max(0, 1 - 翻转抗性 + 弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+                group: "环境",
+            },
+            {
+                id: "activeElementConvert",
+                title: "生效属转比例",
+                formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0",
+                group: "转换",
+            },
+            {
+                id: "convertPoolTotal",
+                title: "转换池合计",
+                formula: "转换池合计 = 生效属转比例 + 转切割 + 转贯穿 + 转震荡 + 转灾厄",
+                group: "转换",
+            },
+            {
+                id: "convertScale",
+                title: "转换压缩系数",
+                formula: "转换压缩系数 = 转换池合计 > 1 时为 1 / 转换池合计，否则为 1",
+                group: "转换",
+            },
+            {
+                id: "unconvertedRatio",
+                title: "未转换比例",
+                formula: "未转换比例 = max(0, 1 - min(1, 转换池合计))",
+                group: "转换",
+            },
+            {
+                id: "elementConvertRatio",
+                title: "属转有效比例",
+                formula: "属转有效比例 = min(1, 生效属转比例) * 转换压缩系数",
+                group: "转换",
+            },
+            {
+                id: "unconvertedElementPart",
+                title: "未转换元素分量",
+                formula: "未转换元素分量 = 未转换比例 * 基础抗性因子",
+                group: "转换",
+            },
+            {
+                id: "convertedElementPart",
+                title: "属转元素分量",
+                formula: "属转元素分量 = 属转有效比例 * 翻转抗性因子",
+                group: "转换",
+            },
+            {
+                id: "convertCutPart",
+                title: "转切割分量",
+                formula: "转切割分量 = max(0, 转切割) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+                group: "转换",
+            },
+            {
+                id: "convertPiercePart",
+                title: "转贯穿分量",
+                formula: "转贯穿分量 = max(0, 转贯穿) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+                group: "转换",
+            },
+            {
+                id: "convertShockPart",
+                title: "转震荡分量",
+                formula: "转震荡分量 = max(0, 转震荡) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+                group: "转换",
+            },
+            {
+                id: "convertCalamityPart",
+                title: "转灾厄分量",
+                formula: "转灾厄分量 = max(0, 转灾厄) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+                group: "转换",
+            },
+            {
+                id: "damageIncrease",
+                title: "增伤池",
+                formula: "增伤池 = 1 + 增伤 + 技能伤害 + 召唤物伤害(召唤物字段时) + 阵营增伤 + 攻击类型增伤",
+                group: "增伤",
+            },
+            {
+                id: "elementDamageIncrease",
+                title: "元素增伤乘区",
+                formula: "元素增伤乘区 = 增伤池 + 元素增伤（只作用于元素结算分量）",
+                group: "增伤",
+            },
+            {
+                id: "physicalDamageIncrease",
+                title: "物理增伤乘区",
+                formula: "物理增伤乘区 = 增伤池 + 物理增伤（只作用于物理结算分量）",
+                group: "增伤",
+            },
+            {
+                id: "independentDamageIncrease",
+                title: "独立增伤乘区",
+                formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 技能独立增伤) * (1 + 攻击类型独立增伤)",
+                group: "增伤",
+            },
+            {
+                id: "skillAdditionalDamageZone",
+                title: "技能追伤乘区",
+                formula: "技能追伤乘区 = max(0, 1 + 技能追伤)",
+                group: "增伤",
+            },
+            {
+                id: "summonIndependentMultiplier",
+                title: "召唤物独立增伤乘区",
+                formula: "召唤物独立增伤乘区 = 召唤物字段时(1 + 召唤物独立增伤)，否则为 1",
+                group: "增伤",
+            },
+            {
+                id: "imbalanceDamageMultiplier",
+                title: "失衡乘区",
+                formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
+                group: "环境",
+            },
+            {
+                id: "penetrationMultiplier",
+                title: "属性穿透乘区",
+                formula: "属性穿透乘区 = max(0, 1 + 属性穿透)（对全部伤害分量整体生效）",
+                group: "环境",
+            },
+            {
+                id: "seasonDamageMultiplier",
+                title: "赛季增伤乘区",
+                formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+                group: "增伤",
             },
             {
                 id: "boostMultiplier",
@@ -508,19 +943,6 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 formula: "背水乘区 = 1 + 4 * 背水 * (1 - 生命比例(限制在 0.25~1)) * (1.5 - 生命比例(限制在 0.25~1))",
                 group: "血量",
             },
-            { id: "damageIncrease", title: "增伤乘区", formula: "增伤乘区 = 1 + 增伤 + 技能伤害", group: "增伤" },
-            {
-                id: "independentDamageIncrease",
-                title: "独立增伤乘区",
-                formula: "独立增伤乘区 = 1 + 独立增伤",
-                group: "增伤",
-            },
-            {
-                id: "imbalanceDamageMultiplier",
-                title: "失衡乘区",
-                formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
-                group: "环境",
-            },
             {
                 id: "hpMore",
                 title: "血量相关乘区",
@@ -528,12 +950,35 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 group: "血量",
             },
             {
+                id: "elementRatioTotal",
+                title: "元素结算分量合计",
+                formula: "元素结算分量合计 = 未转换元素分量 + 属转元素分量",
+                group: "转换",
+            },
+            {
+                id: "physicalRatioTotal",
+                title: "物理结算分量合计",
+                formula: "物理结算分量合计 = 转切割分量 + 转贯穿分量 + 转震荡分量 + 转灾厄分量",
+                group: "转换",
+            },
+            {
+                id: "weightedDamageRatio",
+                title: "加权伤害系数",
+                formula: "加权伤害系数 = 元素结算分量合计 * 元素增伤乘区 + 物理结算分量合计 * 物理增伤乘区",
+                group: "转换",
+            },
+            {
                 id: "charAttack",
                 title: "角色攻击",
                 formula: "角色攻击 = (角色基础攻击 * (1 + 角色攻击加成 + 和鸣增益) * (1 + 属性攻击) + 固定攻击)保留2位",
                 group: "攻击",
             },
-            { id: "skillAttackPool", title: "总攻击", formula: "总攻击 = 角色攻击", group: "攻击" },
+            {
+                id: "skillAttackPool",
+                title: "总攻击",
+                formula: "总攻击 = 角色攻击",
+                group: "攻击",
+            },
             {
                 id: "skillRawDamage",
                 title: "技能原始倍率伤害",
@@ -549,7 +994,8 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
             {
                 id: "finalDamage",
                 title: "技能基础伤害",
-                formula: "技能基础伤害 = 技能倍率伤害 * 抗性乘区 * 增伤乘区 * 独立增伤乘区 * 失衡乘区",
+                formula:
+                    "技能基础伤害 = 技能倍率伤害 * 加权伤害系数 * 独立增伤乘区 * 技能追伤乘区 * 召唤物独立增伤乘区 * 失衡乘区 * 属性穿透乘区 * 赛季增伤乘区",
                 group: "技能",
             },
             {
@@ -630,8 +1076,9 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
         id: "dot",
         label: "DOT 伤害",
         summary:
-            "先按来源拆单跳基础伤害（技能来源只吃角色攻击，武器来源吃角色攻击 + 武器攻击），按各来源频率加权求和，" +
-            "再乘充盈、增伤、血量、抗性乘区，得到每秒 DOT 伤害。DOT 不吃暴击、触发与防御乘区。",
+            "先按来源拆单跳基础伤害（技能来源只吃角色攻击，武器来源吃角色攻击 + 武器攻击），按各来源频率加权求和；" +
+            "自身属性分量吃元素弱点 + 全属性弱点并按转属克/逆混合抗性，其余属性分量只吃全属性弱点并按元素种数做抗性反转等效；" +
+            "再乘充盈、增伤、血量与赛季乘区，得到每秒 DOT 伤害。DOT 不吃暴击、触发与防御乘区。",
         resultStepId: "dotDamage",
         groups: [
             {
@@ -646,6 +1093,8 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 fields: [
                     { key: "fullnessPower", label: "充盈威力" },
                     { key: "baseDamageBonus", label: "增伤" },
+                    { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", note: "与增伤同池加算" },
+                    { key: "seasonBonus", label: "赛季增伤", note: "独立乘区" },
                 ],
             },
             {
@@ -653,11 +1102,22 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 fields: [
                     { key: "skillFreq", label: "技能来源频率", note: "次/秒，仅角色攻击" },
                     { key: "weaponOwnFreq", label: "武器来源自身属性频率", note: "次/秒，角色攻击 + 武器攻击" },
-                    { key: "otherFreq", label: "其余属性频率", note: "次/秒，角色攻击 + 武器攻击；元素种数由追伤分量推导" },
+                    { key: "otherFreq", label: "其余属性频率", note: "次/秒，角色攻击 + 武器攻击" },
+                    { key: "otherElementCount", label: "其余属性元素种数", note: "用于其余属性抗性反转区的等效因子" },
                 ],
             },
             { title: "血量", fields: HP_FIELDS },
-            { title: "环境", fields: RESISTANCE_FIELDS },
+            {
+                title: "环境",
+                fields: [
+                    { key: "enemyResistance", label: "敌人抗性" },
+                    { key: "elementWeakness", label: "元素弱点(角色元素)", note: "只作用于自身属性分量" },
+                    { key: "allElementWeakness", label: "全属性弱点", note: "自身属性与其余属性分量都吃" },
+                    { key: "penetrationBonus", label: "属性穿透", note: "对两个抗性区整体相乘" },
+                    { key: "convertRestraint", label: "转属克", note: "敌人正抗时混合翻转抗性" },
+                    { key: "convertReverse", label: "转属逆", note: "敌人负抗时混合翻转抗性" },
+                ],
+            },
         ],
         steps: [
             {
@@ -672,8 +1132,24 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 formula: "单跳基础伤害(武器来源) = (角色攻击 + 武器攻击) * 0.2 * 6 * 4（武器来源按此结算）",
                 group: "攻击",
             },
-            { id: "fullnessMultiplier", title: "充盈乘区", formula: "充盈乘区 = 充盈威力（1 起始总倍率）", group: "充盈与增伤" },
-            { id: "damageIncrease", title: "增伤乘区", formula: "增伤乘区 = 1 + 增伤", group: "充盈与增伤" },
+            {
+                id: "fullnessMultiplier",
+                title: "充盈乘区",
+                formula: "充盈乘区 = 充盈威力（1 起始总倍率）",
+                group: "充盈与增伤",
+            },
+            {
+                id: "damageIncrease",
+                title: "增伤乘区",
+                formula: "增伤乘区 = 1 + 增伤 + 阵营增伤",
+                group: "充盈与增伤",
+            },
+            {
+                id: "seasonDamageMultiplier",
+                title: "赛季增伤乘区",
+                formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+                group: "充盈与增伤",
+            },
             {
                 id: "boostMultiplier",
                 title: "昂扬乘区",
@@ -705,21 +1181,90 @@ export const DAMAGE_MODES: DamageModeDoc[] = [
                 group: "DOT频率",
             },
             {
-                id: "weightedBaseDamage",
-                title: "频率加权基础伤害",
-                formula: "频率加权基础伤害 = 单跳基础伤害(角色攻击) * (DOT频率合计 - 武器来源频率) + 单跳基础伤害(武器来源) * 武器来源频率",
+                id: "weightedOwnBaseDamage",
+                title: "自身属性频率加权基础伤害",
+                formula:
+                    "自身属性频率加权基础伤害 = 单跳基础伤害(角色攻击) * (DOT频率合计 - 武器来源频率) + 单跳基础伤害(武器来源) * 武器来源自身属性频率",
                 group: "DOT频率",
             },
             {
-                id: "resistancePenetration",
-                title: "抗性乘区",
-                formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
+                id: "weightedOtherBaseDamage",
+                title: "其余属性频率加权基础伤害",
+                formula: "其余属性频率加权基础伤害 = 单跳基础伤害(武器来源) * 其余属性频率",
+                group: "DOT频率",
+            },
+            {
+                id: "weightedBaseDamage",
+                title: "频率加权基础伤害",
+                formula: "频率加权基础伤害 = 自身属性频率加权基础伤害 + 其余属性频率加权基础伤害",
+                group: "DOT频率",
+            },
+            {
+                id: "ownWeaknessTotal",
+                title: "自身属性弱点合计",
+                formula: "自身属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
+                group: "环境",
+            },
+            {
+                id: "baseOwnResistanceFactor",
+                title: "自身属性基础抗性因子",
+                formula: "自身属性基础抗性因子 = max(0, 1 - 敌人抗性 + 自身属性弱点合计)",
+                group: "环境",
+            },
+            {
+                id: "flippedOwnResistanceFactor",
+                title: "自身属性翻转抗性因子",
+                formula: "自身属性翻转抗性因子 = max(0, 1 - 翻转抗性 + 自身属性弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+                group: "环境",
+            },
+            {
+                id: "activeElementConvert",
+                title: "生效属转比例",
+                formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0，并限制在 0~1",
+                group: "环境",
+            },
+            {
+                id: "ownResistanceFactor",
+                title: "自身属性抗性因子",
+                formula: "自身属性抗性因子 = (1 - 生效属转比例) * 自身属性基础抗性因子 + 生效属转比例 * 自身属性翻转抗性因子",
+                group: "环境",
+            },
+            {
+                id: "penetrationMultiplier",
+                title: "属性穿透乘区",
+                formula: "属性穿透乘区 = 1 + 属性穿透",
+                group: "环境",
+            },
+            {
+                id: "ownZone",
+                title: "自身属性抗性区",
+                formula: "自身属性抗性区 = max(0, 自身属性抗性因子 * 属性穿透乘区)",
+                group: "环境",
+            },
+            {
+                id: "otherNormalResistanceFactor",
+                title: "其余属性基础抗性因子",
+                formula: "其余属性基础抗性因子 = max(0, 1 - 敌人抗性 + 全属性弱点)",
+                group: "环境",
+            },
+            {
+                id: "otherResistanceFactor",
+                title: "其余属性抗性因子",
+                formula:
+                    "其余属性抗性因子 = 敌人抗性为 0 或元素种数为 0 时取基础因子；敌人抗性 < 0 时取 max(0, 1 - 0.5 + 全属性弱点)；否则 (max(0, 1 - (-4) + 全属性弱点) + 基础因子 * (元素种数 - 1)) / 元素种数",
+                group: "环境",
+            },
+            {
+                id: "otherZone",
+                title: "其余属性抗性区",
+                formula: "其余属性抗性区 = 其余属性抗性因子 * 属性穿透乘区",
                 group: "环境",
             },
             {
                 id: "dotDamage",
                 title: "每秒DOT伤害",
-                formula: "每秒DOT伤害 = 频率加权基础伤害 * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 抗性乘区",
+                formula:
+                    "每秒DOT伤害 = (自身属性频率加权基础伤害 * 自身属性抗性区 + 其余属性频率加权基础伤害 * 其余属性抗性区) * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 赛季增伤乘区",
                 group: "DOT频率",
             },
         ],
@@ -739,7 +1284,8 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
     {
         term: "增伤池",
         aliases: ["增伤", "同池加算"],
-        description: "「增伤」「武器伤害」「技能伤害」在同一个乘区内相加，因此这几项彼此之间是加算而非相乘，堆同一种收益递减。",
+        description:
+            "「增伤」「武器伤害」「技能伤害」「阵营增伤」「攻击类型增伤」在同一个乘区内相加，因此这几项彼此之间是加算而非相乘，堆同一种收益递减；元素增伤与物理增伤也叠在这个基座上，但只作用于对应的伤害分量。",
     },
     {
         term: "追加伤害",
@@ -760,7 +1306,7 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
         term: "触发",
         aliases: ["触发率", "触发倍率"],
         description:
-            "只有伤害类型与敌方当前生命类型匹配时才生效的额外倍率：触发倍率按 (1 + 生命类型系数 + 触发倍率加成)，实际收益按触发率折算成触发期望倍率。",
+            "只有伤害类型与敌方当前生命类型匹配时才生效的额外倍率：触发倍率按 (1 + 生命类型系数 + 触发倍率加成)，实际收益按触发率（封顶 100%）折算成触发期望倍率。灾厄伤害不看生命类型，改为敌人存在抗性时按 (1 + 触发倍率加成) 生效。",
     },
     {
         term: "触发溢出",
@@ -795,9 +1341,48 @@ export const DAMAGE_TERMS: DamageTermDoc[] = [
     },
     {
         term: "抗性乘区",
-        aliases: ["敌人抗性", "敌人弱点", "属性穿透", "抗性穿透"],
+        aliases: ["敌人抗性", "属性弱点", "属性穿透", "抗性穿透"],
         description:
-            "按 (1 - 敌人抗性 + 敌人弱点) × (1 + 属性穿透) 计算并下限为 0；弱点与抗性同区加算，抗性为负（弱点）时该因子大于 1，穿透与抗性同乘区。",
+            "抗性因子按 max(0, 1 - 敌人抗性 + 弱点合计) 计算，弱点合计 = 角色元素弱点 + 全属性弱点，与抗性同区加算；物理分量不吃弱点。属性穿透按 max(0, 1 + 属性穿透) 对全部分量整体相乘。",
+    },
+    {
+        term: "属性弱点",
+        aliases: ["元素弱点", "全属性弱点", "受到属性伤害提升"],
+        description:
+            "与敌人抗性同区加算的弱点项：元素弱点只作用于角色元素分量，全属性弱点对六元素分量都生效；物理分量不吃弱点。敌人抗性 0.5、火属性弱点 0.54 时抗性因子为 1 - 0.5 + 0.54 = 1.04，即弱点放大了该元素伤害。",
+    },
+    {
+        term: "转属克/转属逆",
+        aliases: ["属克", "属逆", "抗性翻转"],
+        description:
+            "敌人正抗时只有转属克生效，把该比例伤害按翻转抗性 -4 结算；敌人负抗时只有转属逆生效，按翻转抗性 0.5 结算。二者与转切割/转贯穿/转震荡/转灾厄共享同一比例池，合计超过 100% 时等比重压缩，剩余部分按原始分量结算。",
+    },
+    {
+        term: "转物理",
+        aliases: ["转切割", "转贯穿", "转震荡", "转灾厄"],
+        description:
+            "把物理与元素分量按比例转成对应物理子类，按物理增伤与对应类型的触发规则结算；转灾厄需要敌方存在抗性才结算触发。转换比例与转属克/转属逆共享比例池。",
+    },
+    {
+        term: "元素增伤与物理增伤",
+        aliases: ["元素增伤", "物理增伤", "分池增伤"],
+        description:
+            "在增伤池基座上额外加算的分池增伤：元素分量只吃元素增伤（含角色元素的属性增伤），物理分量只吃物理增伤。两者不交叉，也不会加算到另一种分量上。",
+    },
+    {
+        term: "赛季增伤",
+        aliases: ["赛季伤害率", "S0DamageRate"],
+        description: "赛季专属伤害率分区，自身累加后作为独立乘区，按 max(0, 1 + 赛季增伤) 参与结算。",
+    },
+    {
+        term: "阵营增伤",
+        aliases: ["歧视", "秽兽增伤", "军团增伤", "神弃者增伤", "神使增伤", "华胥增伤"],
+        description: "按敌方阵营取对应增伤属性（泛化「歧视」为旧口径兜底），与普通增伤同池加算。武器槽 MOD 的阵营增伤只作用于该武器池。",
+    },
+    {
+        term: "技能追伤",
+        aliases: ["技能追伤乘区"],
+        description: "技能伤害池的追加伤害独立乘区，按 max(0, 1 + 技能追伤) 计算；与武器面板的追伤七分量互不交叉。",
     },
     {
         term: "防御乘区",
@@ -959,6 +1544,9 @@ export function getDamageFields(modeId: string, keyword = ""): DamageGroupDoc[] 
                 `${field.key} ${field.label} ${field.note ?? ""} ${group.title}`.toLowerCase().includes(word)
             ),
             toggles: group.toggles?.filter(toggle => `${toggle.key} ${toggle.label}`.toLowerCase().includes(word)),
+            selects: group.selects?.filter(select =>
+                `${select.key} ${select.label} ${select.options.join(" ")} ${group.title}`.toLowerCase().includes(word)
+            ),
         }))
-        .filter(group => group.fields.length > 0 || (group.toggles?.length ?? 0) > 0)
+        .filter(group => group.fields.length > 0 || (group.toggles?.length ?? 0) > 0 || (group.selects?.length ?? 0) > 0)
 }

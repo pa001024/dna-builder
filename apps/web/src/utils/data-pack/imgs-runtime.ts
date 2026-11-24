@@ -421,50 +421,41 @@ async function collectCachedImgPaths(desiredPaths: Set<string>): Promise<Set<str
 }
 
 /**
- * 尝试通过图片包写入资源。
- * @param options 挂载配置
+ * 选出与待下载路径有交集的图片包（按版本号升序）。
+ * @param packs 远端图片包列表
  * @param desiredPaths 目标路径集合
- * @param completedPaths 已完成路径集合
+ * @returns 需要下载的图片包列表
  */
-function buildPackPlan(
-    packs: ImgsPackVersionInfo[],
-    desiredPaths: Set<string>
-): { packs: ImgsPackVersionInfo[]; missingPaths: Set<string> } {
-    const selectedPacks: ImgsPackVersionInfo[] = []
-    const coveredPaths = new Set<string>()
+function buildPackPlan(packs: ImgsPackVersionInfo[], desiredPaths: Set<string>): ImgsPackVersionInfo[] {
     const sortedPacks = [...packs].sort((a, b) => compareVersion(a.version, b.version))
 
-    for (const pack of sortedPacks) {
+    return sortedPacks.filter(pack => {
         const packPaths = new Set(pack.files.map(file => normalizeImgPath(file)))
-        let intersects = false
         for (const path of desiredPaths) {
             if (packPaths.has(path)) {
-                intersects = true
-                break
+                return true
             }
         }
 
-        if (!intersects) {
-            continue
-        }
+        return false
+    })
+}
 
-        selectedPacks.push(pack)
-        for (const file of pack.files) {
-            const normalizedPath = normalizeImgPath(file)
-            if (desiredPaths.has(normalizedPath)) {
-                coveredPaths.add(normalizedPath)
-            }
-        }
-    }
-
-    const missingPaths = new Set<string>()
+/**
+ * 收集尚未完成的图片路径。
+ * @param desiredPaths 目标路径集合
+ * @param completedPaths 已完成路径集合
+ * @returns 未完成路径集合
+ */
+function collectPendingPaths(desiredPaths: Set<string>, completedPaths: Set<string>): Set<string> {
+    const pendingPaths = new Set<string>()
     for (const path of desiredPaths) {
-        if (!coveredPaths.has(path)) {
-            missingPaths.add(path)
+        if (!completedPaths.has(path)) {
+            pendingPaths.add(path)
         }
     }
 
-    return { packs: selectedPacks, missingPaths }
+    return pendingPaths
 }
 
 /**
@@ -477,26 +468,24 @@ function buildPackPlan(
 async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<string>, completedPaths: Set<string>): Promise<Set<string>> {
     const packs = await fetchRemoteImgsPackVersions(options.baseUrl)
     if (!packs.length) {
-        return desiredPaths
+        return collectPendingPaths(desiredPaths, completedPaths)
     }
 
     const cachedPaths = await collectCachedImgPaths(desiredPaths)
-    const pendingPaths = new Set<string>()
     for (const path of desiredPaths) {
-        if (!cachedPaths.has(path)) {
-            pendingPaths.add(path)
-        } else {
+        if (cachedPaths.has(path)) {
             completedPaths.add(path)
         }
     }
 
+    const pendingPaths = collectPendingPaths(desiredPaths, completedPaths)
     if (!pendingPaths.size) {
         return pendingPaths
     }
 
-    const { packs: selectedPacks, missingPaths } = buildPackPlan(packs, pendingPaths)
+    const selectedPacks = buildPackPlan(packs, pendingPaths)
     if (!selectedPacks.length) {
-        return missingPaths
+        return pendingPaths
     }
 
     const baseUrl = getImgsPackBaseUrl(options.baseUrl)
@@ -516,26 +505,31 @@ async function tryMountImgsPacks(options: ImgsMountOptions, desiredPaths: Set<st
             speedBps: 0,
         })
 
-        const entries = await loadImgsPack(pack, baseUrl)
-        const packFiles = pack.files.length ? pack.files : Object.keys(entries).filter(name => name !== "manifest.json")
+        try {
+            const entries = await loadImgsPack(pack, baseUrl)
+            const packFiles = pack.files.length ? pack.files : Object.keys(entries).filter(name => name !== "manifest.json")
 
-        for (const relPath of packFiles) {
-            const normalizedPath = normalizeImgPath(relPath)
-            if (!pendingPaths.has(normalizedPath) || completedPaths.has(normalizedPath)) {
-                continue
+            for (const relPath of packFiles) {
+                const normalizedPath = normalizeImgPath(relPath)
+                if (!pendingPaths.has(normalizedPath) || completedPaths.has(normalizedPath)) {
+                    continue
+                }
+
+                const bytes = entries[normalizedPath]
+                if (!bytes) {
+                    continue
+                }
+
+                await cacheImg(normalizedPath, bytes, true)
+                completedPaths.add(normalizedPath)
             }
-
-            const bytes = entries[normalizedPath]
-            if (!bytes) {
-                continue
-            }
-
-            await cacheImg(normalizedPath, bytes, true)
-            completedPaths.add(normalizedPath)
+        } catch (error) {
+            // 单个包失败（CDN 缺包 / 写入失败）不阻断其余包，该包的路径交给单文件回退
+            console.error(`下载图片包失败: ${pack.version}`, error)
         }
     }
 
-    return missingPaths
+    return collectPendingPaths(desiredPaths, completedPaths)
 }
 
 /**

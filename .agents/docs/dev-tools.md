@@ -191,7 +191,10 @@ bun tools/webp-import.ts --source "F:/test/uasset-1.8/EM/Content/UI/Texture" \
   `DATA_PACK_FORMAT_MAJOR`，改动包格式、老读包侧会崩时加一；抓取侧只收 `major <= 当前值` 的包）。
   `bun tools/data-pack.ts backfill` 给本地版本列表回填缺失的 major；缺 major 的老条目按
   `1.6.208.7` 分割线推断（之前为 1，自 MOD 数值挪进 `加成` 起为 2）；
-- `pnpm ip`（`bun tools/imgs-pack.ts build`）— 图片包；
+- `pnpm ip`（`bun tools/imgs-pack.ts upload`）— 图片包：打包与上传必须同步完成。
+  不带 `upload` 只产本地 zip、不改 `versions.json` 并以失败退出（防止本地清单领先 CDN
+  引用不存在的包）；`bun tools/imgs-pack.ts repack <版本…> upload` 用当前 `public/imgs`
+  重新打包指定历史版本后再上传（源文件缺失直接报错）。
 - `pnpm mp`（`bun tools/models-pack.ts`）— 3D 皮肤模型，参数 `[--force] [--only <id>] [--src <dir>] [--max-size <MiB>] [--texture cutout=0.45:lossless,…] [--check] [upload]`。
   上传看远端清单（`--upload` 时先拉 `models/manifest.json` 再决定传哪些），本地清单只管跳过重压；
   先 build 后 upload 的两段式跑法不会漏传。`--check` 只对比本地与远端、不构建不上传。

@@ -4,7 +4,17 @@ import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, reactive, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { CharBuild, CharBuildTimeline, charMap, LeveledCharHelper } from "@/data"
+import {
+    CharBuild,
+    CharBuildTimeline,
+    charMap,
+    DmgType,
+    factionBonusKeyForEnemy,
+    HP_TYPE_COEFFICIENTS,
+    HP_TYPE_DAMAGE,
+    HpType,
+    LeveledCharHelper,
+} from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { ADDITIONAL_DAMAGE_KEYS } from "@/data/leveled/additionalDamage"
 import { useInvStore } from "@/store/inv"
@@ -22,6 +32,12 @@ import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
 type CalcMode = "weapon" | "skill" | "dot"
 type StepOperator = "+" | "-" | "*" | "/"
+type DamageTypeKey = keyof typeof DmgType
+type HpTypeKey = keyof typeof HpType
+
+const WEAPON_DAMAGE_TYPES = Object.values(DmgType) as DamageTypeKey[]
+const ENEMY_HP_TYPES = Object.values(HpType) as HpTypeKey[]
+const HP_TYPE_OPTIONS = ENEMY_HP_TYPES.map(value => ({ value, label: value }))
 
 type WeaponNumberFieldKey =
     | "charBaseAttack"
@@ -40,12 +56,26 @@ type WeaponNumberFieldKey =
     | "triggerRateBonus"
     | "baseDamageBonus"
     | "weaponDamageBonus"
+    | "factionBonus"
+    | "elementDamageIncrease"
+    | "physicalDamageIncrease"
+    | "attackTypeDamageBonus"
+    | "attackTypeIndependentBonus"
+    | "weaponIndependentPenalty"
+    | "seasonBonus"
     | "independentBonus"
     | "weaponIndependentBonus"
     | AdditionalDamageComponentKey
     | "enemyResistance"
-    | "enemyWeakness"
+    | "elementWeakness"
+    | "allElementWeakness"
     | "penetrationBonus"
+    | "convertRestraint"
+    | "convertReverse"
+    | "convertCut"
+    | "convertPierce"
+    | "convertShock"
+    | "convertCalamity"
     | "enemyDefense"
     | "ignoreDefense"
     | "attackerLevel"
@@ -54,7 +84,6 @@ type WeaponNumberFieldKey =
     | "desperateBonus"
     | "hpPercent"
     | "imbalanceBonus"
-    | "hpTypeCoefficient"
     | "triggerBonus"
     | "skillRate"
     | "skillFlatDamage"
@@ -64,8 +93,15 @@ type WeaponNumberFieldKey =
 
 type SkillNumberFieldKey =
     | "enemyResistance"
-    | "enemyWeakness"
+    | "elementWeakness"
+    | "allElementWeakness"
     | "penetrationBonus"
+    | "convertRestraint"
+    | "convertReverse"
+    | "convertCut"
+    | "convertPierce"
+    | "convertShock"
+    | "convertCalamity"
     | "enemyDefense"
     | "ignoreDefense"
     | "skillIgnoreDefense"
@@ -73,7 +109,17 @@ type SkillNumberFieldKey =
     | "enemyLevel"
     | "baseDamageBonus"
     | "skillDamageBonus"
+    | "factionBonus"
+    | "elementDamageIncrease"
+    | "physicalDamageIncrease"
+    | "attackTypeDamageBonus"
+    | "attackTypeIndependentBonus"
+    | "seasonBonus"
     | "independentBonus"
+    | "skillIndependentBonus"
+    | "skillAdditionalDamage"
+    | "summonDamageBonus"
+    | "summonIndependentBonus"
     | "boostBonus"
     | "desperateBonus"
     | "hpPercent"
@@ -88,23 +134,30 @@ type SkillNumberFieldKey =
     | "skillPowerMultiplier"
     | "fullnessPower"
 
-type WeaponToggleFieldKey = "weaponMasteryEnabled" | "skillWeaponEnabled" | "sameDamageType" | "imbalanceEnabled" | "fullnessFieldEnabled"
-type SkillToggleFieldKey = "imbalanceEnabled" | "fullnessFieldEnabled"
+type WeaponToggleFieldKey = "weaponMasteryEnabled" | "skillWeaponEnabled" | "imbalanceEnabled" | "fullnessFieldEnabled"
+type SkillToggleFieldKey = "imbalanceEnabled" | "fullnessFieldEnabled" | "summonEnabled"
+type WeaponSelectFieldKey = "damageType" | "enemyHpType"
 
 type DotNumberFieldKey =
     | "charAttack"
     | "weaponAttack"
     | "fullnessPower"
     | "baseDamageBonus"
+    | "factionBonus"
+    | "seasonBonus"
     | "skillFreq"
     | "weaponOwnFreq"
     | "otherFreq"
+    | "otherElementCount"
     | "boostBonus"
     | "desperateBonus"
     | "hpPercent"
     | "enemyResistance"
-    | "enemyWeakness"
+    | "elementWeakness"
+    | "allElementWeakness"
     | "penetrationBonus"
+    | "convertRestraint"
+    | "convertReverse"
 
 /** 武器模式输入：追伤七分量由 AdditionalDamageComponents 提供（六元素 + 自属性） */
 type WeaponDamageInput = AdditionalDamageComponents & {
@@ -124,12 +177,36 @@ type WeaponDamageInput = AdditionalDamageComponents & {
     triggerRateBonus: number
     baseDamageBonus: number
     weaponDamageBonus: number
+    /** 阵营增伤：歧视 + 敌方阵营对应增伤，与增伤同池加算 */
+    factionBonus: number
+    /** 元素增伤：只对元素结算分量加算（与增伤同池） */
+    elementDamageIncrease: number
+    /** 物理增伤：只对物理结算分量加算（与增伤同池） */
+    physicalDamageIncrease: number
+    /** 攻击类型增伤（普攻/蓄力/下落/滑行），与增伤同池加算 */
+    attackTypeDamageBonus: number
+    /** 攻击类型独立增伤，与独立增伤相乘 */
+    attackTypeIndependentBonus: number
+    /** 武器独立增伤惩罚（如箭雨），只作用于武器池独立增伤 */
+    weaponIndependentPenalty: number
+    /** 赛季增伤：赛季专属伤害率分区，独立乘区 */
+    seasonBonus: number
     independentBonus: number
     weaponIndependentBonus: number
     enemyResistance: number
-    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
-    enemyWeakness: number
+    /** 角色元素弱点：与敌人抗性同区加算，正值放大受到的元素伤害 */
+    elementWeakness: number
+    /** 全属性弱点：与敌人抗性同区加算，对六元素分量生效 */
+    allElementWeakness: number
     penetrationBonus: number
+    /** 转属克：敌人正抗时把该比例伤害转为克制元素并翻转抗性 */
+    convertRestraint: number
+    /** 转属逆：敌人负抗时把该比例伤害转为逆属元素并翻转抗性 */
+    convertReverse: number
+    convertCut: number
+    convertPierce: number
+    convertShock: number
+    convertCalamity: number
     enemyDefense: number
     ignoreDefense: number
     attackerLevel: number
@@ -138,7 +215,6 @@ type WeaponDamageInput = AdditionalDamageComponents & {
     desperateBonus: number
     hpPercent: number
     imbalanceBonus: number
-    hpTypeCoefficient: number
     triggerBonus: number
     skillRate: number
     skillFlatDamage: number
@@ -146,8 +222,11 @@ type WeaponDamageInput = AdditionalDamageComponents & {
     weaponMasteryEnabled: boolean
     weaponMasteryMultiplier: number
     skillWeaponEnabled: boolean
-    sameDamageType: boolean
     imbalanceEnabled: boolean
+    /** 武器自身伤害类型：决定物理/元素分量占比、灾厄转化与触发匹配 */
+    damageType: DamageTypeKey
+    /** 敌方当前生命类型：决定触发生效的伤害类型与生命类型系数 */
+    enemyHpType: HpTypeKey
     // 充盈：武器充盈转化（该武器作用域），充盈威力基础（角色MOD加成 + 其他武器转化）
     fullnessConversion: number
     fullnessModBonus: number
@@ -157,9 +236,17 @@ type WeaponDamageInput = AdditionalDamageComponents & {
 
 interface SkillDamageInput {
     enemyResistance: number
-    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
-    enemyWeakness: number
+    /** 角色元素弱点：与敌人抗性同区加算，正值放大受到的元素伤害 */
+    elementWeakness: number
+    /** 全属性弱点：与敌人抗性同区加算，对六元素分量生效 */
+    allElementWeakness: number
     penetrationBonus: number
+    convertRestraint: number
+    convertReverse: number
+    convertCut: number
+    convertPierce: number
+    convertShock: number
+    convertCalamity: number
     enemyDefense: number
     ignoreDefense: number
     skillIgnoreDefense: number
@@ -167,7 +254,24 @@ interface SkillDamageInput {
     enemyLevel: number
     baseDamageBonus: number
     skillDamageBonus: number
+    /** 阵营增伤：歧视 + 敌方阵营对应增伤，与增伤同池加算 */
+    factionBonus: number
+    /** 元素增伤：只对元素结算分量加算（与增伤同池） */
+    elementDamageIncrease: number
+    /** 物理增伤：只对物理结算分量加算（与增伤同池） */
+    physicalDamageIncrease: number
+    attackTypeDamageBonus: number
+    attackTypeIndependentBonus: number
+    seasonBonus: number
     independentBonus: number
+    /** 技能独立增伤：只作用于技能伤害池的独立乘区 */
+    skillIndependentBonus: number
+    /** 技能追伤：技能池的追加伤害独立乘区 */
+    skillAdditionalDamage: number
+    /** 召唤物伤害：字段 tag 含召唤物时并入增伤池 */
+    summonDamageBonus: number
+    /** 召唤物独立增伤：字段 tag 含召唤物时生效 */
+    summonIndependentBonus: number
     boostBonus: number
     desperateBonus: number
     hpPercent: number
@@ -181,6 +285,7 @@ interface SkillDamageInput {
     skillFlatDamage: number
     skillPowerMultiplier: number
     imbalanceEnabled: boolean
+    summonEnabled: boolean
     // 充盈：充盈威力（角色属性汇总）；当前伤害字段是否为充盈伤害（tag 含“充盈”）
     fullnessPower: number
     fullnessFieldEnabled: boolean
@@ -193,19 +298,28 @@ interface DotDamageInput {
     weaponAttack: number
     fullnessPower: number
     baseDamageBonus: number
+    /** 阵营增伤：歧视 + 敌方阵营对应增伤，与增伤同池加算 */
+    factionBonus: number
+    seasonBonus: number
     /** 技能来源自身属性频率（次/秒，仅角色攻击） */
     skillFreq: number
     /** 武器来源自身属性频率（次/秒，角色攻击 + 武器攻击） */
     weaponOwnFreq: number
     /** 其余属性频率（次/秒，角色攻击 + 武器攻击） */
     otherFreq: number
+    /** 其余属性元素种数（只用于其余属性抗性反转区的等效因子） */
+    otherElementCount: number
     boostBonus: number
     desperateBonus: number
     hpPercent: number
     enemyResistance: number
-    /** 敌人弱点（U95）：与抗性同区加算，正值放大受到的该元素伤害 */
-    enemyWeakness: number
+    /** 角色元素弱点：只作用于自身属性分量 */
+    elementWeakness: number
+    /** 全属性弱点：自身属性与其余属性分量都吃 */
+    allElementWeakness: number
     penetrationBonus: number
+    convertRestraint: number
+    convertReverse: number
 }
 
 interface DamageStepContext<TInput> {
@@ -332,6 +446,48 @@ function roundByDigits(value: number, digits = 2): number {
 }
 
 /**
+ * 按伤害类型取触发倍率（与 CharBuild.getTriggerMultiplier 同口径）：
+ * 灾厄只要求敌方存在抗性；其余类型需匹配敌方当前生命类型。
+ * @param input 武器模式输入
+ * @param type 伤害类型
+ * @returns 触发倍率（已含 1 基准，可直接按 1 + (倍率 - 1) * 触发率 折算）
+ */
+function triggerMultiplierForType(
+    input: Pick<WeaponDamageInput, "enemyResistance" | "enemyHpType" | "triggerBonus">,
+    type: DamageTypeKey
+): number {
+    if (type === "灾厄") {
+        return input.enemyResistance !== 0 ? 1 + input.triggerBonus : 1
+    }
+    return HP_TYPE_DAMAGE[input.enemyHpType] === type ? 1 + HP_TYPE_COEFFICIENTS[input.enemyHpType] + input.triggerBonus : 1
+}
+
+/**
+ * 取当前抗性方向下生效的属转比例：正抗只看转属克，负抗只看转属逆，0 抗不转换。
+ * @param input 含抗性与属转比例的输入
+ * @returns 生效属转比例（未钳制）
+ */
+function resolveActiveElementConvert(input: { enemyResistance: number; convertRestraint: number; convertReverse: number }): number {
+    if (input.enemyResistance > 0) return Math.max(0, input.convertRestraint)
+    if (input.enemyResistance < 0) return Math.max(0, input.convertReverse)
+    return 0
+}
+
+/**
+ * 其余属性 DOT 的抗性反转等效因子（与 CharBuild.getOtherDotResistanceFactor 同口径）。
+ * @param enemyResistance 敌人抗性
+ * @param allElementWeakness 全属性弱点
+ * @param otherElementCount 其余属性元素种数
+ * @returns 每单位其余属性频率的等效抗性因子
+ */
+function resolveOtherDotResistanceFactor(enemyResistance: number, allElementWeakness: number, otherElementCount: number): number {
+    const normal = Math.max(0, 1 - enemyResistance + allElementWeakness)
+    if (enemyResistance === 0 || otherElementCount <= 0) return normal
+    if (enemyResistance < 0) return Math.max(0, 1 - 0.5 + allElementWeakness)
+    return (Math.max(0, 1 - -4 + allElementWeakness) + normal * (otherElementCount - 1)) / otherElementCount
+}
+
+/**
  * 创建武器伤害默认输入，便于快速进入调试。
  * @returns 默认武器输入
  */
@@ -355,11 +511,25 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         triggerRateBonus: 0,
         baseDamageBonus: 0.25,
         weaponDamageBonus: 0.22,
+        factionBonus: 0,
+        elementDamageIncrease: 0,
+        physicalDamageIncrease: 0,
+        attackTypeDamageBonus: 0,
+        attackTypeIndependentBonus: 0,
+        weaponIndependentPenalty: 0,
+        seasonBonus: 0,
         independentBonus: 0.15,
         weaponIndependentBonus: 0.1,
         enemyResistance: 0.2,
-        enemyWeakness: 0,
+        elementWeakness: 0,
+        allElementWeakness: 0,
         penetrationBonus: 0.5,
+        convertRestraint: 0,
+        convertReverse: 0,
+        convertCut: 0,
+        convertPierce: 0,
+        convertShock: 0,
+        convertCalamity: 0,
         enemyDefense: 300,
         ignoreDefense: 0,
         attackerLevel: 80,
@@ -368,7 +538,6 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         desperateBonus: 0.1,
         hpPercent: 0.7,
         imbalanceBonus: 0.3,
-        hpTypeCoefficient: 0.5,
         triggerBonus: 0,
         skillRate: 2,
         skillFlatDamage: 0,
@@ -376,8 +545,9 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         weaponMasteryEnabled: true,
         weaponMasteryMultiplier: 1.2,
         skillWeaponEnabled: false,
-        sameDamageType: true,
         imbalanceEnabled: false,
+        damageType: "切割",
+        enemyHpType: "生命",
         fullnessConversion: 0,
         // 充盈威力 1 起始：无加成时为 1（100% 基准）
         fullnessModBonus: 1,
@@ -392,8 +562,15 @@ function createDefaultWeaponInput(): WeaponDamageInput {
 function createDefaultSkillInput(): SkillDamageInput {
     return {
         enemyResistance: 0.2,
-        enemyWeakness: 0,
+        elementWeakness: 0,
+        allElementWeakness: 0,
         penetrationBonus: 0.15,
+        convertRestraint: 0,
+        convertReverse: 0,
+        convertCut: 0,
+        convertPierce: 0,
+        convertShock: 0,
+        convertCalamity: 0,
         enemyDefense: 300,
         ignoreDefense: 0,
         skillIgnoreDefense: 0,
@@ -401,7 +578,17 @@ function createDefaultSkillInput(): SkillDamageInput {
         enemyLevel: 80,
         baseDamageBonus: 0.25,
         skillDamageBonus: 0.3,
+        factionBonus: 0,
+        elementDamageIncrease: 0,
+        physicalDamageIncrease: 0,
+        attackTypeDamageBonus: 0,
+        attackTypeIndependentBonus: 0,
+        seasonBonus: 0,
         independentBonus: 0.15,
+        skillIndependentBonus: 0,
+        skillAdditionalDamage: 0,
+        summonDamageBonus: 0,
+        summonIndependentBonus: 0,
         boostBonus: 0.2,
         desperateBonus: 0.1,
         hpPercent: 0.7,
@@ -415,6 +602,7 @@ function createDefaultSkillInput(): SkillDamageInput {
         skillFlatDamage: 0,
         skillPowerMultiplier: 1,
         imbalanceEnabled: false,
+        summonEnabled: false,
         fullnessPower: 1,
         fullnessFieldEnabled: false,
     }
@@ -430,15 +618,21 @@ function createDefaultDotInput(): DotDamageInput {
         weaponAttack: 800,
         fullnessPower: 6.5,
         baseDamageBonus: 0.25,
+        factionBonus: 0,
+        seasonBonus: 0,
         skillFreq: 0,
         weaponOwnFreq: 2.5,
         otherFreq: 0,
+        otherElementCount: 1,
         boostBonus: 0,
         desperateBonus: 0,
         hpPercent: 0.7,
         enemyResistance: 0.2,
-        enemyWeakness: 0,
+        elementWeakness: 0,
+        allElementWeakness: 0,
         penetrationBonus: 0.15,
+        convertRestraint: 0,
+        convertReverse: 0,
     }
 }
 
@@ -455,6 +649,7 @@ interface ImportSkillField {
     名称: string
     safeName: string
     影响?: string
+    tag?: string[]
     值: number
     值2?: number
 }
@@ -587,26 +782,32 @@ function extractSkillRateAndFlat(
 }
 
 /**
- * 判断当前构筑的目标伤害字段是否为充盈伤害（tag 含“充盈”）。
- * 与 extractSkillRateAndFlat 使用同一套字段解析优先级：先 targetFunction 命中，其次兜底伤害字段。
+ * 解析当前构筑实际结算的伤害字段（优先 targetFunction 命中，其次兜底伤害字段）。
+ * 返回对象来自 `selectedSkill.字段`，可读取原始 tag。
  * @param build 当前构筑
- * @returns 是否为充盈伤害字段
+ * @returns 结算字段；无技能或字段时返回 undefined
  */
-function isResolvedFieldFullness(build: CharBuild): boolean {
+function resolveResolvedDamageField(build: CharBuild): ImportSkillField | undefined {
     const selectedSkill = build.selectedSkill
-    if (!selectedSkill) return false
+    if (!selectedSkill) return undefined
 
     const fallbackDamageField =
         selectedSkill.字段.find(field => field.名称.endsWith("伤害") && !field.名称.includes("召唤物")) ||
         selectedSkill.字段.find(field => field.名称.endsWith("伤害"))
-    // 优先采用 targetFunction 命中的字段（对象来自 selectedSkill.字段，可反查原始字段以读取 tag）
     const targetField = resolveSkillFieldFromTargetFunction(build)
-    const damageField = targetField
-        ? selectedSkill.字段.find(field => field.safeName === targetField.safeName && field.名称 === targetField.名称) ||
-          fallbackDamageField
+    return targetField
+        ? selectedSkill.字段.find(field => field.safeName === targetField.safeName && field.名称 === targetField.名称) || fallbackDamageField
         : fallbackDamageField
+}
 
-    return !!damageField?.tag?.includes("充盈")
+/**
+ * 判断当前结算字段的 tag 是否包含指定关键字。
+ * @param build 当前构筑
+ * @param tag 关键字（如「充盈」「召唤物」）
+ * @returns 是否命中
+ */
+function isResolvedFieldTagged(build: CharBuild, tag: string): boolean {
+    return !!resolveResolvedDamageField(build)?.tag?.includes(tag)
 }
 
 /**
@@ -654,13 +855,45 @@ function createBuildFromCurrentCharView(): CharBuild {
 }
 
 /**
- * 导入构筑时的元素弱点：角色元素弱点 + 全属性弱点（U95，与敌人抗性同区加算）。
+ * 读取对象上的有限数值属性，缺失或非数字时按 0。
+ * @param attrs 属性对象
+ * @param key 属性键
+ * @returns 数值
+ */
+function readNumericAttribute(attrs: object | null | undefined, key: string): number {
+    const value = (attrs as Record<string, unknown> | null | undefined)?.[key]
+    return typeof value === "number" && Number.isFinite(value) ? value : 0
+}
+
+/**
+ * 导入构筑时的角色元素弱点（只作用于角色元素分量）。
  * @param build 当前构筑
  * @param attrs 已算好的角色/武器属性
- * @returns 弱点合计
+ * @returns 角色元素弱点
  */
-function resolveCharElementWeakness(build: CharBuild, attrs: ReturnType<CharBuild["calculateWeaponAttributes"]>): number {
-    return ((attrs[`${build.char.属性}属性弱点` as keyof typeof attrs] as number | undefined) || 0) + (attrs.全属性弱点 || 0)
+function resolveCharElementWeakness(build: CharBuild, attrs: object): number {
+    return readNumericAttribute(attrs, `${build.char.属性}属性弱点`)
+}
+
+/**
+ * 导入构筑时的阵营增伤：歧视 + 敌方阵营对应增伤（与增伤同池加算）。
+ * @param build 当前构筑
+ * @param attrs 已算好的角色/武器属性
+ * @returns 阵营增伤
+ */
+function resolveFactionBonus(build: CharBuild, attrs: object | null | undefined): number {
+    const factionKey = factionBonusKeyForEnemy(build.enemy?.f)
+    return readNumericAttribute(attrs, "歧视") + (factionKey ? readNumericAttribute(attrs, factionKey) : 0)
+}
+
+/**
+ * 导入构筑时的元素增伤：泛化 `元素增伤` + 角色元素的 `<元素>属性增伤`。
+ * @param build 当前构筑
+ * @param attrs 已算好的角色/武器属性
+ * @returns 元素增伤
+ */
+function resolveElementDamageIncrease(build: CharBuild, attrs: object): number {
+    return readNumericAttribute(attrs, "元素增伤") + readNumericAttribute(attrs, `${build.char.属性}属性增伤`)
 }
 
 /**
@@ -688,10 +921,7 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     const critRateSplit = splitBaseAndBonus(selectedWeapon?.基础暴击 || 0, weaponAttrs?.暴击 || 0)
     const critDamageSplit = splitBaseAndBonus(selectedWeapon?.基础暴伤 || 0, weaponAttrs?.暴伤 || 0)
     const triggerSplit = splitBaseAndBonus(selectedWeapon?.基础触发 || 0, weaponAttrs?.触发 || 0)
-    const currentHpType = `${build.enemy.currentHPType || "生命"}`
-    const damageTypeByHpType = (build.hpTypeDMG as Record<string, string>)[currentHpType]
-    const hpTypeCoefficient = (build.hpTypeCoefficients as Record<string, number>)[currentHpType] ?? 0
-    const sameDamageType = !!(selectedWeapon && damageTypeByHpType && selectedWeapon.伤害类型 === damageTypeByHpType)
+    const currentHpType = (build.enemy.currentHPType || "生命") as HpTypeKey
     const {
         rate: skillRate,
         flat: skillFlatDamage,
@@ -720,13 +950,29 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.triggerRateBonus = toFiniteNumber(triggerSplit.bonus)
     result.baseDamageBonus = attrs.增伤 + (weaponAttrs?.增伤 || 0)
     result.weaponDamageBonus = attrs.武器伤害
+    // 阵营增伤与普通增伤同池：角色侧 + 该武器槽 MOD（面板）
+    result.factionBonus = resolveFactionBonus(build, attrs) + resolveFactionBonus(build, weaponAttrs)
+    result.elementDamageIncrease = resolveElementDamageIncrease(build, attrs)
+    result.physicalDamageIncrease = readNumericAttribute(attrs, "物理增伤")
+    // 攻击类型增伤 / 武器独立增伤惩罚由字段级 tag 与 MOD 决定，页面不做构筑级回填
+    result.attackTypeDamageBonus = 0
+    result.attackTypeIndependentBonus = 0
+    result.weaponIndependentPenalty = 0
+    result.seasonBonus = readNumericAttribute(attrs, "赛季增伤")
     result.independentBonus = attrs.独立增伤
     result.weaponIndependentBonus = weaponAttrs?.独立增伤 || 0
     // 追伤按引擎口径回填七分量；聚合「追加伤害」是只读 Σ，不进入因子，也不回填为输入。
     Object.assign(result, resolveAdditionalDamageComponents(weaponAttrs))
     result.enemyResistance = build.enemyResistance
-    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
+    result.elementWeakness = resolveCharElementWeakness(build, attrs)
+    result.allElementWeakness = readNumericAttribute(attrs, "全属性弱点")
     result.penetrationBonus = attrs.属性穿透
+    result.convertRestraint = readNumericAttribute(attrs, "转属克")
+    result.convertReverse = readNumericAttribute(attrs, "转属逆")
+    result.convertCut = readNumericAttribute(attrs, "转切割")
+    result.convertPierce = readNumericAttribute(attrs, "转贯穿")
+    result.convertShock = readNumericAttribute(attrs, "转震荡")
+    result.convertCalamity = readNumericAttribute(attrs, "转灾厄")
     result.enemyDefense = build.enemy.def || 300
     result.ignoreDefense = attrs.无视防御
     result.attackerLevel = build.char.等级 || 80
@@ -735,7 +981,6 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.desperateBonus = attrs.背水
     result.hpPercent = build.hpPercent
     result.imbalanceBonus = attrs.失衡易伤
-    result.hpTypeCoefficient = hpTypeCoefficient
     result.triggerBonus = build.getTotalBonus("触发倍率")
     result.skillRate = skillRate
     result.skillFlatDamage = skillFlatDamage
@@ -743,7 +988,8 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.skillWeaponEnabled = affectedByPower
     result.weaponMasteryEnabled = masteryEnabled
     result.weaponMasteryMultiplier = masteryMultiplier
-    result.sameDamageType = sameDamageType
+    result.damageType = (selectedWeapon?.伤害类型 as DamageTypeKey) || "切割"
+    result.enemyHpType = currentHpType
     result.imbalanceEnabled = build.imbalance
     /**
      * 充盈：充盈威力（角色属性，1 起始总倍率）= 100% 基础 + 角色MOD充盈威力加成 + Σ各武器溢出触发 × 该武器充盈转化。
@@ -753,7 +999,7 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     const selectedWeaponOverflow = Math.max(0, (weaponAttrs?.触发 || 0) - 1)
     result.fullnessConversion = weaponFullnessConversion
     result.fullnessModBonus = Math.max(0, attrs.充盈威力 - selectedWeaponOverflow * weaponFullnessConversion)
-    result.fullnessFieldEnabled = isResolvedFieldFullness(build)
+    result.fullnessFieldEnabled = isResolvedFieldTagged(build, "充盈")
     return result
 }
 
@@ -765,7 +1011,11 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
 function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     const result = createDefaultSkillInput()
     const attrs = build.calculateAttributes()
-    const { rate: skillRate, flat: skillFlatDamage } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
+    const {
+        rate: skillRate,
+        flat: skillFlatDamage,
+        affectedByPower,
+    } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
     const charBaseAttack = build.char.基础攻击
     const resonanceGain = build.resonanceGain
     // 属性攻击乘区：泛化 `属性攻击`（旧口径兜底）+ 本角色元素的具体口径（新数据）
@@ -774,8 +1024,15 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 
     result.enemyResistance = build.enemyResistance
-    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
+    result.elementWeakness = resolveCharElementWeakness(build, attrs)
+    result.allElementWeakness = readNumericAttribute(attrs, "全属性弱点")
     result.penetrationBonus = attrs.属性穿透
+    result.convertRestraint = readNumericAttribute(attrs, "转属克")
+    result.convertReverse = readNumericAttribute(attrs, "转属逆")
+    result.convertCut = readNumericAttribute(attrs, "转切割")
+    result.convertPierce = readNumericAttribute(attrs, "转贯穿")
+    result.convertShock = readNumericAttribute(attrs, "转震荡")
+    result.convertCalamity = readNumericAttribute(attrs, "转灾厄")
     result.enemyDefense = build.enemy.def || 300
     result.ignoreDefense = attrs.无视防御
     result.skillIgnoreDefense = attrs.技能无视防御
@@ -783,7 +1040,18 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     result.enemyLevel = build.enemy.等级 || 80
     result.baseDamageBonus = attrs.增伤
     result.skillDamageBonus = attrs.技能伤害
+    result.factionBonus = resolveFactionBonus(build, attrs)
+    result.elementDamageIncrease = resolveElementDamageIncrease(build, attrs)
+    result.physicalDamageIncrease = readNumericAttribute(attrs, "物理增伤")
+    result.attackTypeDamageBonus = 0
+    result.attackTypeIndependentBonus = 0
+    result.seasonBonus = readNumericAttribute(attrs, "赛季增伤")
     result.independentBonus = attrs.独立增伤
+    result.skillIndependentBonus = readNumericAttribute(attrs, "技能独立增伤")
+    result.skillAdditionalDamage = readNumericAttribute(attrs, "技能追伤")
+    result.summonDamageBonus = readNumericAttribute(attrs, "召唤物伤害")
+    result.summonIndependentBonus = readNumericAttribute(attrs, "召唤物独立增伤")
+    result.summonEnabled = isResolvedFieldTagged(build, "召唤物")
     result.boostBonus = attrs.昂扬
     result.desperateBonus = attrs.背水
     result.hpPercent = build.hpPercent
@@ -795,13 +1063,14 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     result.fixedAttackAdd = fixedAttackAdd
     result.skillRate = skillRate
     result.skillFlatDamage = skillFlatDamage
-    result.skillPowerMultiplier = attrs.技能威力
+    // 技能威力只对影响列表含「技能威力」的字段生效（与 LeveledSkill 字段求值同口径）
+    result.skillPowerMultiplier = affectedByPower ? attrs.技能威力 : 1
     result.imbalanceEnabled = build.imbalance
     // 充盈：充盈威力为角色属性（MOD加成 + 武器溢出转化汇总），技能模式直接取汇总结果。
     // 注意：calculateAttributes 只含角色MOD加成，武器溢出转化需经 calculateWeaponAttributes 汇总。
     const weaponAttrsForFullness = build.calculateWeaponAttributes()
     result.fullnessPower = weaponAttrsForFullness.充盈威力 ?? 1
-    result.fullnessFieldEnabled = isResolvedFieldFullness(build)
+    result.fullnessFieldEnabled = isResolvedFieldTagged(build, "充盈")
     return result
 }
 
@@ -826,15 +1095,21 @@ function buildDotInputFromCharBuild(build: CharBuild): DotDamageInput {
     result.weaponAttack = weaponFreq > Number.EPSILON ? weightedWeaponAttack / weaponFreq : 0
     result.fullnessPower = attrs.充盈威力 ?? 1
     result.baseDamageBonus = attrs.增伤
+    result.factionBonus = resolveFactionBonus(build, attrs)
+    result.seasonBonus = readNumericAttribute(attrs, "赛季增伤")
     result.skillFreq = skillFreq
     result.weaponOwnFreq = freqs.ownFreq - skillFreq
     result.otherFreq = freqs.otherFreq
+    result.otherElementCount = Math.max(...freqs.sources.filter(source => source.type !== "skill").map(source => source.otherElementCount), 0)
     result.boostBonus = attrs.昂扬
     result.desperateBonus = attrs.背水
     result.hpPercent = build.hpPercent
     result.enemyResistance = build.enemyResistance
-    result.enemyWeakness = resolveCharElementWeakness(build, attrs)
+    result.elementWeakness = resolveCharElementWeakness(build, attrs)
+    result.allElementWeakness = readNumericAttribute(attrs, "全属性弱点")
     result.penetrationBonus = attrs.属性穿透
+    result.convertRestraint = readNumericAttribute(attrs, "转属克")
+    result.convertReverse = readNumericAttribute(attrs, "转属逆")
     return result
 }
 
@@ -868,7 +1143,7 @@ function replaceReactiveObject<T extends object>(target: T, source: T): void {
 }
 
 /**
- * 构建武器伤害拆解步骤，公式与 CharBuild.calculateWeaponDamage 保持一致。
+ * 构建武器伤害拆解步骤，公式与 CharBuild.calculateDamage 武器池口径保持一致。
  * @returns 武器步骤定义
  */
 function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[] {
@@ -922,28 +1197,122 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
                 `${formatNumber(get("charAttack"))} + ${formatNumber(get("weaponAttack"))} = ${formatNumber(value)}`,
         },
         {
+            id: "weaponPhysicalRatio",
+            title: "武器物理占比",
+            formula: "武器物理占比 = 灾厄伤害时取 1，否则 武器攻击 / 总攻击",
+            compute: ({ input, get }) => (input.damageType === "灾厄" ? 1 : safeDivide(get("weaponAttack"), get("totalWeaponDamage"))),
+            explain: ({ input, get }, value) =>
+                input.damageType === "灾厄"
+                    ? `灾厄伤害 => ${formatNumber(value)}`
+                    : `${formatNumber(get("weaponAttack"))} / ${formatNumber(get("totalWeaponDamage"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weaponElementalRatio",
+            title: "武器元素占比",
+            formula: "武器元素占比 = 灾厄伤害时取 0，否则 角色攻击 / 总攻击",
+            compute: ({ input, get }) => (input.damageType === "灾厄" ? 0 : safeDivide(get("charAttack"), get("totalWeaponDamage"))),
+            explain: ({ input, get }, value) =>
+                input.damageType === "灾厄"
+                    ? `灾厄伤害 => ${formatNumber(value)}`
+                    : `${formatNumber(get("charAttack"))} / ${formatNumber(get("totalWeaponDamage"))} = ${formatNumber(value)}`,
+        },
+        {
             id: "triggerDamageMultiplier",
             title: "触发倍率",
-            formula: "触发倍率 = 伤害类型匹配时(1 + 生命类型系数 + 触发倍率加成)，否则为 1",
-            compute: ({ input }) => (input.sameDamageType ? 1 + input.hpTypeCoefficient + input.triggerBonus : 1),
-            explain: ({ input }, value) =>
-                `${input.sameDamageType ? `1 + ${formatNumber(input.hpTypeCoefficient)} + ${formatNumber(input.triggerBonus)}` : "1"} = ${formatNumber(value)}`,
+            formula:
+                "触发倍率 = 灾厄伤害时(敌人抗性不为 0 则 1 + 触发倍率加成，否则为 1)，其余类型匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+            compute: ({ input }) => triggerMultiplierForType(input, input.damageType),
+            explain: ({ input }, value) => {
+                if (input.damageType === "灾厄") {
+                    return input.enemyResistance !== 0
+                        ? `1 + ${formatNumber(input.triggerBonus)} = ${formatNumber(value)}`
+                        : `敌人抗性为 0 => ${formatNumber(value)}`
+                }
+                const matchedType = HP_TYPE_DAMAGE[input.enemyHpType]
+                return input.damageType === matchedType
+                    ? `1 + ${formatNumber(HP_TYPE_COEFFICIENTS[input.enemyHpType])} + ${formatNumber(input.triggerBonus)} = ${formatNumber(value)}`
+                    : `${input.damageType} 不匹配 ${input.enemyHpType}(${matchedType}) => ${formatNumber(value)}`
+            },
         },
         {
             id: "finalTriggerRate",
             title: "最终触发率",
-            formula: "最终触发率 = 基础触发 * (1 + 触发加成)",
+            formula: "最终触发率 = 基础触发 * (1 + 触发加成)，触发效果按 100% 封顶",
             compute: ({ input }) => input.baseTriggerRate * (1 + input.triggerRateBonus),
             explain: ({ input }, value) =>
-                `${formatNumber(input.baseTriggerRate)} * (1 + ${formatNumber(input.triggerRateBonus)}) = ${formatNumber(value)}`,
+                `${formatNumber(input.baseTriggerRate)} * (1 + ${formatNumber(input.triggerRateBonus)}) = ${formatNumber(value)}（触发效果按 ${formatNumber(clampNumber(value, 0, 1))} 结算）`,
         },
         {
             id: "triggerExpectedDamageAdd",
             title: "触发期望倍率",
-            formula: "触发期望倍率 = 1 + (触发倍率 - 1) * 最终触发率",
-            compute: ({ get }) => 1 + (get("triggerDamageMultiplier") - 1) * get("finalTriggerRate"),
+            formula: "触发期望倍率 = 1 + (触发倍率 - 1) * min(1, 最终触发率)",
+            compute: ({ get }) => 1 + (get("triggerDamageMultiplier") - 1) * clampNumber(get("finalTriggerRate"), 0, 1),
             explain: ({ get }, value) =>
-                `1 + (${formatNumber(get("triggerDamageMultiplier"))} - 1) * ${formatNumber(get("finalTriggerRate"))} = ${formatNumber(value)}`,
+                `1 + (${formatNumber(get("triggerDamageMultiplier"))} - 1) * ${formatNumber(clampNumber(get("finalTriggerRate"), 0, 1))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "cutTriggerMultiplier",
+            title: "转切割触发倍率",
+            formula: "转切割触发倍率 = 切割匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+            compute: ({ input }) => triggerMultiplierForType(input, "切割"),
+            explain: ({ input }, value) =>
+                `${HP_TYPE_DAMAGE[input.enemyHpType] === "切割" ? "匹配" : "不匹配"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "pierceTriggerMultiplier",
+            title: "转贯穿触发倍率",
+            formula: "转贯穿触发倍率 = 贯穿匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+            compute: ({ input }) => triggerMultiplierForType(input, "贯穿"),
+            explain: ({ input }, value) =>
+                `${HP_TYPE_DAMAGE[input.enemyHpType] === "贯穿" ? "匹配" : "不匹配"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "shockTriggerMultiplier",
+            title: "转震荡触发倍率",
+            formula: "转震荡触发倍率 = 震荡匹配敌方生命类型时 1 + 生命类型系数 + 触发倍率加成，否则为 1",
+            compute: ({ input }) => triggerMultiplierForType(input, "震荡"),
+            explain: ({ input }, value) =>
+                `${HP_TYPE_DAMAGE[input.enemyHpType] === "震荡" ? "匹配" : "不匹配"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "calamityTriggerMultiplier",
+            title: "转灾厄触发倍率",
+            formula: "转灾厄触发倍率 = 敌人抗性不为 0 时 1 + 触发倍率加成，否则为 1",
+            compute: ({ input }) => triggerMultiplierForType(input, "灾厄"),
+            explain: ({ input }, value) =>
+                `${input.enemyResistance !== 0 ? "敌人存在抗性" : "敌人抗性为 0"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "cutTriggerExpected",
+            title: "转切割触发期望",
+            formula: "转切割触发期望 = 1 + (转切割触发倍率 - 1) * min(1, 最终触发率)",
+            compute: ({ get }) => 1 + (get("cutTriggerMultiplier") - 1) * clampNumber(get("finalTriggerRate"), 0, 1),
+            explain: ({ get }, value) =>
+                `1 + (${formatNumber(get("cutTriggerMultiplier"))} - 1) * ${formatNumber(clampNumber(get("finalTriggerRate"), 0, 1))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "pierceTriggerExpected",
+            title: "转贯穿触发期望",
+            formula: "转贯穿触发期望 = 1 + (转贯穿触发倍率 - 1) * min(1, 最终触发率)",
+            compute: ({ get }) => 1 + (get("pierceTriggerMultiplier") - 1) * clampNumber(get("finalTriggerRate"), 0, 1),
+            explain: ({ get }, value) =>
+                `1 + (${formatNumber(get("pierceTriggerMultiplier"))} - 1) * ${formatNumber(clampNumber(get("finalTriggerRate"), 0, 1))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "shockTriggerExpected",
+            title: "转震荡触发期望",
+            formula: "转震荡触发期望 = 1 + (转震荡触发倍率 - 1) * min(1, 最终触发率)",
+            compute: ({ get }) => 1 + (get("shockTriggerMultiplier") - 1) * clampNumber(get("finalTriggerRate"), 0, 1),
+            explain: ({ get }, value) =>
+                `1 + (${formatNumber(get("shockTriggerMultiplier"))} - 1) * ${formatNumber(clampNumber(get("finalTriggerRate"), 0, 1))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "calamityTriggerExpected",
+            title: "转灾厄触发期望",
+            formula: "转灾厄触发期望 = 1 + (转灾厄触发倍率 - 1) * min(1, 最终触发率)",
+            compute: ({ get }) => 1 + (get("calamityTriggerMultiplier") - 1) * clampNumber(get("finalTriggerRate"), 0, 1),
+            explain: ({ get }, value) =>
+                `1 + (${formatNumber(get("calamityTriggerMultiplier"))} - 1) * ${formatNumber(clampNumber(get("finalTriggerRate"), 0, 1))} = ${formatNumber(value)}`,
         },
         {
             id: "finalCritRate",
@@ -990,14 +1359,226 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
                 `1 + ${formatNumber(get("finalCritRate"))} * (${formatNumber(get("finalCritDamage"))} - 1) = ${formatNumber(value)}`,
         },
         {
-            id: "resistance",
-            title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
-            explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+            id: "activeElementConvert",
+            title: "生效属转比例",
+            formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0",
+            compute: ({ input }) => resolveActiveElementConvert(input),
+            explain: ({ input }, value) =>
+                `抗性 ${formatNumber(input.enemyResistance)} 取${input.enemyResistance > 0 ? "转属克" : input.enemyResistance < 0 ? "转属逆" : "无"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "convertPoolTotal",
+            title: "转换池合计",
+            formula: "转换池合计 = 生效属转比例 + 转切割 + 转贯穿 + 转震荡 + 转灾厄",
+            compute: ({ input, get }) =>
+                get("activeElementConvert") +
+                Math.max(0, input.convertCut) +
+                Math.max(0, input.convertPierce) +
+                Math.max(0, input.convertShock) +
+                Math.max(0, input.convertCalamity),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("activeElementConvert"))} + ${formatNumber(Math.max(0, input.convertCut))} + ${formatNumber(Math.max(0, input.convertPierce))} + ${formatNumber(Math.max(0, input.convertShock))} + ${formatNumber(Math.max(0, input.convertCalamity))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertScale",
+            title: "转换压缩系数",
+            formula: "转换压缩系数 = 转换池合计 > 1 时为 1 / 转换池合计，否则为 1",
+            compute: ({ get }) => (get("convertPoolTotal") > 1 ? 1 / get("convertPoolTotal") : 1),
+            explain: ({ get }, value) =>
+                get("convertPoolTotal") > 1
+                    ? `1 / ${formatNumber(get("convertPoolTotal"))} = ${formatNumber(value)}`
+                    : `转换池未超 100% => ${formatNumber(value)}`,
+        },
+        {
+            id: "unconvertedRatio",
+            title: "未转换比例",
+            formula: "未转换比例 = max(0, 1 - min(1, 转换池合计))",
+            compute: ({ get }) => Math.max(0, 1 - Math.min(1, get("convertPoolTotal"))),
+            explain: ({ get }, value) => `max(0, 1 - min(1, ${formatNumber(get("convertPoolTotal"))})) = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementConvertRatio",
+            title: "属转有效比例",
+            formula: "属转有效比例 = min(1, 生效属转比例) * 转换压缩系数",
+            compute: ({ get }) => Math.min(1, get("activeElementConvert")) * get("convertScale"),
+            explain: ({ get }, value) =>
+                `min(1, ${formatNumber(get("activeElementConvert"))}) * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weaknessTotal",
+            title: "属性弱点合计",
+            formula: "属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
+            compute: ({ input }) => input.elementWeakness + input.allElementWeakness,
+            explain: ({ input }, value) =>
+                `${formatNumber(input.elementWeakness)} + ${formatNumber(input.allElementWeakness)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "baseResistanceFactor",
+            title: "基础抗性因子",
+            formula: "基础抗性因子 = max(0, 1 - 敌人抗性 + 弱点合计)",
+            compute: ({ input, get }) => Math.max(0, 1 - input.enemyResistance + get("weaknessTotal")),
+            explain: ({ input, get }, value) =>
+                `max(0, 1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(get("weaknessTotal"))}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "flippedResistanceFactor",
+            title: "翻转抗性因子",
+            formula: "翻转抗性因子 = max(0, 1 - 翻转抗性 + 弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+            compute: ({ input, get }) => Math.max(0, 1 - (input.enemyResistance > 0 ? -4 : 0.5) + get("weaknessTotal")),
+            explain: ({ input, get }, value) => {
+                const flipped = input.enemyResistance > 0 ? -4 : 0.5
+                return `max(0, 1 - ${formatNumber(flipped)} + ${formatNumber(get("weaknessTotal"))}) = ${formatNumber(value)}`
             },
+        },
+        {
+            id: "elementalResistanceFactor",
+            title: "元素抗性因子",
+            formula: "元素抗性因子 = (1 - 属转有效比例) * 基础抗性因子 + 属转有效比例 * 翻转抗性因子",
+            compute: ({ get }) =>
+                (1 - get("elementConvertRatio")) * get("baseResistanceFactor") + get("elementConvertRatio") * get("flippedResistanceFactor"),
+            explain: ({ get }, value) =>
+                `(1 - ${formatNumber(get("elementConvertRatio"))}) * ${formatNumber(get("baseResistanceFactor"))} + ${formatNumber(get("elementConvertRatio"))} * ${formatNumber(get("flippedResistanceFactor"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalBasePart",
+            title: "未转换物理分量",
+            formula: "未转换物理分量 = 武器物理占比 * 未转换比例",
+            compute: ({ get }) => get("weaponPhysicalRatio") * get("unconvertedRatio"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weaponPhysicalRatio"))} * ${formatNumber(get("unconvertedRatio"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementalBasePart",
+            title: "未转换元素分量",
+            formula: "未转换元素分量 = 武器元素占比 * 元素抗性因子 * 未转换比例",
+            compute: ({ get }) => get("weaponElementalRatio") * get("elementalResistanceFactor") * get("unconvertedRatio"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))} * ${formatNumber(get("unconvertedRatio"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertedElementPhysicalPart",
+            title: "属转物理分量",
+            formula: "属转物理分量 = 武器物理占比 * 属转有效比例 * 翻转抗性因子",
+            compute: ({ get }) => get("weaponPhysicalRatio") * get("elementConvertRatio") * get("flippedResistanceFactor"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weaponPhysicalRatio"))} * ${formatNumber(get("elementConvertRatio"))} * ${formatNumber(get("flippedResistanceFactor"))} = ${formatNumber(value)}（转为属克/属逆元素结算）`,
+        },
+        {
+            id: "convertedElementElementalPart",
+            title: "属转元素分量",
+            formula: "属转元素分量 = 武器元素占比 * 元素抗性因子 * 属转有效比例",
+            compute: ({ get }) => get("weaponElementalRatio") * get("elementalResistanceFactor") * get("elementConvertRatio"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))} * ${formatNumber(get("elementConvertRatio"))} = ${formatNumber(value)}（抗性已翻转，不重复翻转）`,
+        },
+        {
+            id: "convertCutPart",
+            title: "转切割分量",
+            formula: "转切割分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转切割) * 转换压缩系数",
+            compute: ({ input, get }) =>
+                (get("weaponPhysicalRatio") + get("weaponElementalRatio") * get("elementalResistanceFactor")) *
+                Math.max(0, input.convertCut) *
+                get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `(${formatNumber(get("weaponPhysicalRatio"))} + ${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))}) * ${formatNumber(Math.max(0, input.convertCut))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertPiercePart",
+            title: "转贯穿分量",
+            formula: "转贯穿分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转贯穿) * 转换压缩系数",
+            compute: ({ input, get }) =>
+                (get("weaponPhysicalRatio") + get("weaponElementalRatio") * get("elementalResistanceFactor")) *
+                Math.max(0, input.convertPierce) *
+                get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `(${formatNumber(get("weaponPhysicalRatio"))} + ${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))}) * ${formatNumber(Math.max(0, input.convertPierce))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertShockPart",
+            title: "转震荡分量",
+            formula: "转震荡分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转震荡) * 转换压缩系数",
+            compute: ({ input, get }) =>
+                (get("weaponPhysicalRatio") + get("weaponElementalRatio") * get("elementalResistanceFactor")) *
+                Math.max(0, input.convertShock) *
+                get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `(${formatNumber(get("weaponPhysicalRatio"))} + ${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))}) * ${formatNumber(Math.max(0, input.convertShock))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertCalamityPart",
+            title: "转灾厄分量",
+            formula: "转灾厄分量 = (武器物理占比 + 武器元素占比 * 元素抗性因子) * max(0, 转灾厄) * 转换压缩系数",
+            compute: ({ input, get }) =>
+                (get("weaponPhysicalRatio") + get("weaponElementalRatio") * get("elementalResistanceFactor")) *
+                Math.max(0, input.convertCalamity) *
+                get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `(${formatNumber(get("weaponPhysicalRatio"))} + ${formatNumber(get("weaponElementalRatio"))} * ${formatNumber(get("elementalResistanceFactor"))}) * ${formatNumber(Math.max(0, input.convertCalamity))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "damageIncrease",
+            title: "增伤池",
+            formula: "增伤池 = 1 + 增伤 + 武器伤害 + 阵营增伤 + 攻击类型增伤",
+            compute: ({ input }) => 1 + input.baseDamageBonus + input.weaponDamageBonus + input.factionBonus + input.attackTypeDamageBonus,
+            explain: ({ input }, value) =>
+                `1 + ${formatNumber(input.baseDamageBonus)} + ${formatNumber(input.weaponDamageBonus)} + ${formatNumber(input.factionBonus)} + ${formatNumber(input.attackTypeDamageBonus)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementDamageIncrease",
+            title: "元素增伤乘区",
+            formula: "元素增伤乘区 = 增伤池 + 元素增伤（只作用于元素结算分量）",
+            compute: ({ input, get }) => get("damageIncrease") + input.elementDamageIncrease,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("damageIncrease"))} + ${formatNumber(input.elementDamageIncrease)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalDamageIncrease",
+            title: "物理增伤乘区",
+            formula: "物理增伤乘区 = 增伤池 + 物理增伤（只作用于物理结算分量）",
+            compute: ({ input, get }) => get("damageIncrease") + input.physicalDamageIncrease,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("damageIncrease"))} + ${formatNumber(input.physicalDamageIncrease)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "independentDamageIncrease",
+            title: "独立增伤乘区",
+            formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 武器独立增伤) / (1 + 武器独立增伤惩罚) * (1 + 攻击类型独立增伤)",
+            compute: ({ input }) =>
+                ((1 + input.independentBonus) * (1 + input.weaponIndependentBonus)) /
+                (1 + input.weaponIndependentPenalty) *
+                (1 + input.attackTypeIndependentBonus),
+            explain: ({ input }, value) =>
+                `(1 + ${formatNumber(input.independentBonus)}) * (1 + ${formatNumber(input.weaponIndependentBonus)}) / (1 + ${formatNumber(input.weaponIndependentPenalty)}) * (1 + ${formatNumber(input.attackTypeIndependentBonus)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "additionalDamage",
+            title: "追加伤害乘区",
+            formula: "追加伤害乘区 = max(0, 1 + Σ 七分量)",
+            compute: ({ input }) => Math.max(0, additionalDamageZone(input)),
+            explain: ({ input }, value) =>
+                `max(0, 1 + ${formatNumber(additionalDamageZone(input) - 1)}) = ${formatNumber(value)}（额外造成一段可触发额外效果的属性伤害）`,
+        },
+        {
+            id: "imbalanceDamageMultiplier",
+            title: "失衡乘区",
+            formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
+            compute: ({ input }) => (input.imbalanceEnabled ? input.imbalanceBonus + 1.5 : 1),
+            explain: ({ input }, value) =>
+                `${input.imbalanceEnabled ? `${formatNumber(input.imbalanceBonus)} + 1.5` : "1"} = ${formatNumber(value)}`,
+        },
+        {
+            id: "penetrationMultiplier",
+            title: "属性穿透乘区",
+            formula: "属性穿透乘区 = max(0, 1 + 属性穿透)（对全部伤害分量整体生效）",
+            compute: ({ input }) => Math.max(0, 1 + input.penetrationBonus),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "seasonDamageMultiplier",
+            title: "赛季增伤乘区",
+            formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+            compute: ({ input }) => Math.max(0, 1 + input.seasonBonus),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.seasonBonus)}) = ${formatNumber(value)}`,
         },
         {
             id: "boostMultiplier",
@@ -1023,38 +1604,6 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
             },
         },
         {
-            id: "damageIncrease",
-            title: "增伤乘区",
-            formula: "增伤乘区 = 1 + 增伤 + 武器伤害",
-            compute: ({ input }) => 1 + input.baseDamageBonus + input.weaponDamageBonus,
-            explain: ({ input }, value) =>
-                `1 + ${formatNumber(input.baseDamageBonus)} + ${formatNumber(input.weaponDamageBonus)} = ${formatNumber(value)}`,
-        },
-        {
-            id: "independentDamageIncrease",
-            title: "独立增伤乘区",
-            formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 武器独立增伤)",
-            compute: ({ input }) => (1 + input.independentBonus) * (1 + input.weaponIndependentBonus),
-            explain: ({ input }, value) =>
-                `(1 + ${formatNumber(input.independentBonus)}) * (1 + ${formatNumber(input.weaponIndependentBonus)}) = ${formatNumber(value)}`,
-        },
-        {
-            id: "additionalDamage",
-            title: "追加伤害乘区",
-            formula: "追加伤害乘区 = 1 + Σ 七分量",
-            compute: ({ input }) => additionalDamageZone(input),
-            explain: ({ input }, value) =>
-                `1 + ${formatNumber(additionalDamageZone(input) - 1)} = ${formatNumber(value)}（额外造成一段可触发额外效果的属性伤害）`,
-        },
-        {
-            id: "imbalanceDamageMultiplier",
-            title: "失衡乘区",
-            formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
-            compute: ({ input }) => (input.imbalanceEnabled ? input.imbalanceBonus + 1.5 : 1),
-            explain: ({ input }, value) =>
-                `${input.imbalanceEnabled ? `${formatNumber(input.imbalanceBonus)} + 1.5` : "1"} = ${formatNumber(value)}`,
-        },
-        {
             id: "hpMore",
             title: "血量相关乘区",
             formula: "血量相关乘区 = 昂扬乘区 * 背水乘区",
@@ -1065,11 +1614,15 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "otherMore",
             title: "通用乘区",
-            formula: "通用乘区 = 增伤乘区 * 独立增伤乘区 * 追加伤害乘区 * 失衡乘区",
+            formula: "通用乘区 = 独立增伤乘区 * 追加伤害乘区 * 失衡乘区 * 属性穿透乘区 * 赛季增伤乘区",
             compute: ({ get }) =>
-                get("damageIncrease") * get("independentDamageIncrease") * get("additionalDamage") * get("imbalanceDamageMultiplier"),
+                get("independentDamageIncrease") *
+                get("additionalDamage") *
+                get("imbalanceDamageMultiplier") *
+                get("penetrationMultiplier") *
+                get("seasonDamageMultiplier"),
             explain: ({ get }, value) =>
-                `${formatNumber(get("damageIncrease"))} * ${formatNumber(get("independentDamageIncrease"))} * ${formatNumber(get("additionalDamage"))} * ${formatNumber(get("imbalanceDamageMultiplier"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("independentDamageIncrease"))} * ${formatNumber(get("additionalDamage"))} * ${formatNumber(get("imbalanceDamageMultiplier"))} * ${formatNumber(get("penetrationMultiplier"))} * ${formatNumber(get("seasonDamageMultiplier"))} = ${formatNumber(value)}`,
         },
         {
             id: "commonMore",
@@ -1079,101 +1632,148 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
             explain: ({ get }, value) => `${formatNumber(get("hpMore"))} * ${formatNumber(get("otherMore"))} = ${formatNumber(value)}`,
         },
         {
-            id: "elementalPart",
-            title: "属性部分(含抗性)",
-            formula: "属性部分(含抗性) = 角色攻击 * 抗性乘区",
-            compute: ({ get }) => get("charAttack") * get("resistance"),
-            explain: ({ get }, value) => `${formatNumber(get("charAttack"))} * ${formatNumber(get("resistance"))} = ${formatNumber(value)}`,
+            id: "elementRatioTotal",
+            title: "元素结算分量合计",
+            formula: "元素结算分量合计 = 未转换元素分量 + 属转物理分量 + 属转元素分量",
+            compute: ({ get }) => get("elementalBasePart") + get("convertedElementPhysicalPart") + get("convertedElementElementalPart"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementalBasePart"))} + ${formatNumber(get("convertedElementPhysicalPart"))} + ${formatNumber(get("convertedElementElementalPart"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalRatioTotal",
+            title: "物理结算分量合计",
+            formula: "物理结算分量合计 = 未转换物理分量 + 转切割分量 + 转贯穿分量 + 转震荡分量 + 转灾厄分量",
+            compute: ({ get }) =>
+                get("physicalBasePart") + get("convertCutPart") + get("convertPiercePart") + get("convertShockPart") + get("convertCalamityPart"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("physicalBasePart"))} + ${formatNumber(get("convertCutPart"))} + ${formatNumber(get("convertPiercePart"))} + ${formatNumber(get("convertShockPart"))} + ${formatNumber(get("convertCalamityPart"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalTriggerRatio",
+            title: "物理分量触发满倍率",
+            formula:
+                "物理分量触发满倍率 = 未转换物理分量 * 触发倍率 + 转切割分量 * 转切割触发倍率 + 转贯穿分量 * 转贯穿触发倍率 + 转震荡分量 * 转震荡触发倍率 + 转灾厄分量 * 转灾厄触发倍率",
+            compute: ({ get }) =>
+                get("physicalBasePart") * get("triggerDamageMultiplier") +
+                get("convertCutPart") * get("cutTriggerMultiplier") +
+                get("convertPiercePart") * get("pierceTriggerMultiplier") +
+                get("convertShockPart") * get("shockTriggerMultiplier") +
+                get("convertCalamityPart") * get("calamityTriggerMultiplier"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("physicalBasePart"))} * ${formatNumber(get("triggerDamageMultiplier"))} + ${formatNumber(get("convertCutPart"))} * ${formatNumber(get("cutTriggerMultiplier"))} + ${formatNumber(get("convertPiercePart"))} * ${formatNumber(get("pierceTriggerMultiplier"))} + ${formatNumber(get("convertShockPart"))} * ${formatNumber(get("shockTriggerMultiplier"))} + ${formatNumber(get("convertCalamityPart"))} * ${formatNumber(get("calamityTriggerMultiplier"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalExpectedTriggerRatio",
+            title: "物理分量触发期望",
+            formula:
+                "物理分量触发期望 = 未转换物理分量 * 触发期望倍率 + 转切割分量 * 转切割触发期望 + 转贯穿分量 * 转贯穿触发期望 + 转震荡分量 * 转震荡触发期望 + 转灾厄分量 * 转灾厄触发期望",
+            compute: ({ get }) =>
+                get("physicalBasePart") * get("triggerExpectedDamageAdd") +
+                get("convertCutPart") * get("cutTriggerExpected") +
+                get("convertPiercePart") * get("pierceTriggerExpected") +
+                get("convertShockPart") * get("shockTriggerExpected") +
+                get("convertCalamityPart") * get("calamityTriggerExpected"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("physicalBasePart"))} * ${formatNumber(get("triggerExpectedDamageAdd"))} + ${formatNumber(get("convertCutPart"))} * ${formatNumber(get("cutTriggerExpected"))} + ${formatNumber(get("convertPiercePart"))} * ${formatNumber(get("pierceTriggerExpected"))} + ${formatNumber(get("convertShockPart"))} * ${formatNumber(get("shockTriggerExpected"))} + ${formatNumber(get("convertCalamityPart"))} * ${formatNumber(get("calamityTriggerExpected"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "noTriggerWeightedRatio",
+            title: "未触发加权分量",
+            formula: "未触发加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理结算分量合计 * 物理增伤乘区",
+            compute: ({ get }) =>
+                get("elementRatioTotal") * get("elementDamageIncrease") + get("physicalRatioTotal") * get("physicalDamageIncrease"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementRatioTotal"))} * ${formatNumber(get("elementDamageIncrease"))} + ${formatNumber(get("physicalRatioTotal"))} * ${formatNumber(get("physicalDamageIncrease"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "fullTriggerWeightedRatio",
+            title: "满触发加权分量",
+            formula: "满触发加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理分量触发满倍率 * 物理增伤乘区",
+            compute: ({ get }) =>
+                get("elementRatioTotal") * get("elementDamageIncrease") + get("physicalTriggerRatio") * get("physicalDamageIncrease"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementRatioTotal"))} * ${formatNumber(get("elementDamageIncrease"))} + ${formatNumber(get("physicalTriggerRatio"))} * ${formatNumber(get("physicalDamageIncrease"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "expectedTriggerWeightedRatio",
+            title: "触发期望加权分量",
+            formula: "触发期望加权分量 = 元素结算分量合计 * 元素增伤乘区 + 物理分量触发期望 * 物理增伤乘区",
+            compute: ({ get }) =>
+                get("elementRatioTotal") * get("elementDamageIncrease") + get("physicalExpectedTriggerRatio") * get("physicalDamageIncrease"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementRatioTotal"))} * ${formatNumber(get("elementDamageIncrease"))} + ${formatNumber(get("physicalExpectedTriggerRatio"))} * ${formatNumber(get("physicalDamageIncrease"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritNoTrigger",
             title: "未触发低暴击",
-            formula: "未触发低暴击 = (武器攻击 + 属性部分(含抗性)) * 低暴击倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("lowerCritDamage") * get("commonMore"),
+            formula: "未触发低暴击 = 未触发加权分量 * 低暴击倍率 * 总乘区",
+            compute: ({ get }) => get("noTriggerWeightedRatio") * get("lowerCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("noTriggerWeightedRatio"))} * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritNoTrigger",
             title: "未触发高暴击",
-            formula: "未触发高暴击 = (武器攻击 + 属性部分(含抗性)) * 高暴击倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("higherCritDamage") * get("commonMore"),
+            formula: "未触发高暴击 = 未触发加权分量 * 高暴击倍率 * 总乘区",
+            compute: ({ get }) => get("noTriggerWeightedRatio") * get("higherCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("noTriggerWeightedRatio"))} * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritTrigger",
             title: "触发低暴击",
-            formula: "触发低暴击 = (武器攻击 * (低暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("lowerCritDamage") + get("triggerDamageMultiplier") - 1) +
-                    get("elementalPart") * get("lowerCritDamage")) *
-                get("commonMore"),
+            formula: "触发低暴击 = 满触发加权分量 * 低暴击倍率 * 总乘区",
+            compute: ({ get }) => get("fullTriggerWeightedRatio") * get("lowerCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("fullTriggerWeightedRatio"))} * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritTrigger",
             title: "触发高暴击",
-            formula: "触发高暴击 = (武器攻击 * (高暴击倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("higherCritDamage") + get("triggerDamageMultiplier") - 1) +
-                    get("elementalPart") * get("higherCritDamage")) *
-                get("commonMore"),
+            formula: "触发高暴击 = 满触发加权分量 * 高暴击倍率 * 总乘区",
+            compute: ({ get }) => get("fullTriggerWeightedRatio") * get("higherCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("fullTriggerWeightedRatio"))} * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "lowerCritExpectedTrigger",
             title: "期望触发低暴击",
-            formula: "期望触发低暴击 = (武器攻击 * (低暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 低暴击倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("lowerCritDamage") + get("triggerExpectedDamageAdd") - 1) +
-                    get("elementalPart") * get("lowerCritDamage")) *
-                get("commonMore"),
+            formula: "期望触发低暴击 = 触发期望加权分量 * 低暴击倍率 * 总乘区",
+            compute: ({ get }) => get("expectedTriggerWeightedRatio") * get("lowerCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("lowerCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("lowerCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("expectedTriggerWeightedRatio"))} * ${formatNumber(get("lowerCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "higherCritExpectedTrigger",
             title: "期望触发高暴击",
-            formula: "期望触发高暴击 = (武器攻击 * (高暴击倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 高暴击倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("higherCritDamage") + get("triggerExpectedDamageAdd") - 1) +
-                    get("elementalPart") * get("higherCritDamage")) *
-                get("commonMore"),
+            formula: "期望触发高暴击 = 触发期望加权分量 * 高暴击倍率 * 总乘区",
+            compute: ({ get }) => get("expectedTriggerWeightedRatio") * get("higherCritDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("higherCritDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("higherCritDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("expectedTriggerWeightedRatio"))} * ${formatNumber(get("higherCritDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedCritTrigger",
             title: "触发期望暴击",
-            formula: "触发期望暴击 = (武器攻击 + 属性部分(含抗性)) * 暴击期望倍率 * 总乘区",
-            compute: ({ get }) => (get("weaponAttack") + get("elementalPart")) * get("critExpectedDamage") * get("commonMore"),
+            formula: "触发期望暴击 = 满触发加权分量 * 暴击期望倍率 * 总乘区",
+            compute: ({ get }) => get("fullTriggerWeightedRatio") * get("critExpectedDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} + ${formatNumber(get("elementalPart"))}) * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("fullTriggerWeightedRatio"))} * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedCritNoTrigger",
             title: "未触发期望暴击",
-            formula: "未触发期望暴击 = (武器攻击 * (暴击期望倍率 + 触发倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("critExpectedDamage") + get("triggerDamageMultiplier") - 1) +
-                    get("elementalPart") * get("critExpectedDamage")) *
-                get("commonMore"),
+            formula: "未触发期望暴击 = 未触发加权分量 * 暴击期望倍率 * 总乘区",
+            compute: ({ get }) => get("noTriggerWeightedRatio") * get("critExpectedDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerDamageMultiplier"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("noTriggerWeightedRatio"))} * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedDamage",
             title: "最终期望伤害",
-            formula: "最终期望伤害 = (武器攻击 * (暴击期望倍率 + 触发期望倍率 - 1) + 属性部分(含抗性) * 暴击期望倍率) * 总乘区",
-            compute: ({ get }) =>
-                (get("weaponAttack") * (get("critExpectedDamage") + get("triggerExpectedDamageAdd") - 1) +
-                    get("elementalPart") * get("critExpectedDamage")) *
-                get("commonMore"),
+            formula: "最终期望伤害 = 触发期望加权分量 * 暴击期望倍率 * 总乘区",
+            compute: ({ get }) => get("expectedTriggerWeightedRatio") * get("critExpectedDamage") * get("commonMore"),
             explain: ({ get }, value) =>
-                `(${formatNumber(get("weaponAttack"))} * (${formatNumber(get("critExpectedDamage"))} + ${formatNumber(get("triggerExpectedDamageAdd"))} - 1) + ${formatNumber(get("elementalPart"))} * ${formatNumber(get("critExpectedDamage"))}) * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("expectedTriggerWeightedRatio"))} * ${formatNumber(get("critExpectedDamage"))} * ${formatNumber(get("commonMore"))} = ${formatNumber(value)}`,
         },
         {
             id: "skillRawDamage",
@@ -1311,20 +1911,205 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
 }
 
 /**
- * 构建技能伤害拆解步骤，公式与 CharBuild.calculateSkillDamage 保持一致。
+ * 构建技能伤害拆解步骤，公式与 CharBuild.calculateDamage 技能池口径保持一致。
  * @returns 技能步骤定义
  */
 function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
     return [
         {
-            id: "resistancePenetration",
-            title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
-            explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+            id: "weaknessTotal",
+            title: "属性弱点合计",
+            formula: "属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
+            compute: ({ input }) => input.elementWeakness + input.allElementWeakness,
+            explain: ({ input }, value) =>
+                `${formatNumber(input.elementWeakness)} + ${formatNumber(input.allElementWeakness)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "baseResistanceFactor",
+            title: "基础抗性因子",
+            formula: "基础抗性因子 = max(0, 1 - 敌人抗性 + 弱点合计)",
+            compute: ({ input, get }) => Math.max(0, 1 - input.enemyResistance + get("weaknessTotal")),
+            explain: ({ input, get }, value) =>
+                `max(0, 1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(get("weaknessTotal"))}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "flippedResistanceFactor",
+            title: "翻转抗性因子",
+            formula: "翻转抗性因子 = max(0, 1 - 翻转抗性 + 弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+            compute: ({ input, get }) => Math.max(0, 1 - (input.enemyResistance > 0 ? -4 : 0.5) + get("weaknessTotal")),
+            explain: ({ input, get }, value) => {
+                const flipped = input.enemyResistance > 0 ? -4 : 0.5
+                return `max(0, 1 - ${formatNumber(flipped)} + ${formatNumber(get("weaknessTotal"))}) = ${formatNumber(value)}`
             },
+        },
+        {
+            id: "activeElementConvert",
+            title: "生效属转比例",
+            formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0",
+            compute: ({ input }) => resolveActiveElementConvert(input),
+            explain: ({ input }, value) =>
+                `抗性 ${formatNumber(input.enemyResistance)} 取${input.enemyResistance > 0 ? "转属克" : input.enemyResistance < 0 ? "转属逆" : "无"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "convertPoolTotal",
+            title: "转换池合计",
+            formula: "转换池合计 = 生效属转比例 + 转切割 + 转贯穿 + 转震荡 + 转灾厄",
+            compute: ({ input, get }) =>
+                get("activeElementConvert") +
+                Math.max(0, input.convertCut) +
+                Math.max(0, input.convertPierce) +
+                Math.max(0, input.convertShock) +
+                Math.max(0, input.convertCalamity),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("activeElementConvert"))} + ${formatNumber(Math.max(0, input.convertCut))} + ${formatNumber(Math.max(0, input.convertPierce))} + ${formatNumber(Math.max(0, input.convertShock))} + ${formatNumber(Math.max(0, input.convertCalamity))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertScale",
+            title: "转换压缩系数",
+            formula: "转换压缩系数 = 转换池合计 > 1 时为 1 / 转换池合计，否则为 1",
+            compute: ({ get }) => (get("convertPoolTotal") > 1 ? 1 / get("convertPoolTotal") : 1),
+            explain: ({ get }, value) =>
+                get("convertPoolTotal") > 1
+                    ? `1 / ${formatNumber(get("convertPoolTotal"))} = ${formatNumber(value)}`
+                    : `转换池未超 100% => ${formatNumber(value)}`,
+        },
+        {
+            id: "unconvertedRatio",
+            title: "未转换比例",
+            formula: "未转换比例 = max(0, 1 - min(1, 转换池合计))",
+            compute: ({ get }) => Math.max(0, 1 - Math.min(1, get("convertPoolTotal"))),
+            explain: ({ get }, value) => `max(0, 1 - min(1, ${formatNumber(get("convertPoolTotal"))})) = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementConvertRatio",
+            title: "属转有效比例",
+            formula: "属转有效比例 = min(1, 生效属转比例) * 转换压缩系数",
+            compute: ({ get }) => Math.min(1, get("activeElementConvert")) * get("convertScale"),
+            explain: ({ get }, value) =>
+                `min(1, ${formatNumber(get("activeElementConvert"))}) * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "unconvertedElementPart",
+            title: "未转换元素分量",
+            formula: "未转换元素分量 = 未转换比例 * 基础抗性因子",
+            compute: ({ get }) => get("unconvertedRatio") * get("baseResistanceFactor"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("unconvertedRatio"))} * ${formatNumber(get("baseResistanceFactor"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertedElementPart",
+            title: "属转元素分量",
+            formula: "属转元素分量 = 属转有效比例 * 翻转抗性因子",
+            compute: ({ get }) => get("elementConvertRatio") * get("flippedResistanceFactor"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementConvertRatio"))} * ${formatNumber(get("flippedResistanceFactor"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertCutPart",
+            title: "转切割分量",
+            formula: "转切割分量 = max(0, 转切割) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+            compute: ({ input, get }) => Math.max(0, input.convertCut) * get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(Math.max(0, input.convertCut))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertPiercePart",
+            title: "转贯穿分量",
+            formula: "转贯穿分量 = max(0, 转贯穿) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+            compute: ({ input, get }) => Math.max(0, input.convertPierce) * get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(Math.max(0, input.convertPierce))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertShockPart",
+            title: "转震荡分量",
+            formula: "转震荡分量 = max(0, 转震荡) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+            compute: ({ input, get }) => Math.max(0, input.convertShock) * get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(Math.max(0, input.convertShock))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "convertCalamityPart",
+            title: "转灾厄分量",
+            formula: "转灾厄分量 = max(0, 转灾厄) * 转换压缩系数（按物理分量结算，不吃元素抗性）",
+            compute: ({ input, get }) => Math.max(0, input.convertCalamity) * get("convertScale"),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(Math.max(0, input.convertCalamity))} * ${formatNumber(get("convertScale"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "damageIncrease",
+            title: "增伤池",
+            formula: "增伤池 = 1 + 增伤 + 技能伤害 + 召唤物伤害(召唤物字段时) + 阵营增伤 + 攻击类型增伤",
+            compute: ({ input }) =>
+                1 +
+                input.baseDamageBonus +
+                input.skillDamageBonus +
+                (input.summonEnabled ? input.summonDamageBonus : 0) +
+                input.factionBonus +
+                input.attackTypeDamageBonus,
+            explain: ({ input }, value) =>
+                `1 + ${formatNumber(input.baseDamageBonus)} + ${formatNumber(input.skillDamageBonus)} + ${formatNumber(input.summonEnabled ? input.summonDamageBonus : 0)} + ${formatNumber(input.factionBonus)} + ${formatNumber(input.attackTypeDamageBonus)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementDamageIncrease",
+            title: "元素增伤乘区",
+            formula: "元素增伤乘区 = 增伤池 + 元素增伤（只作用于元素结算分量）",
+            compute: ({ input, get }) => get("damageIncrease") + input.elementDamageIncrease,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("damageIncrease"))} + ${formatNumber(input.elementDamageIncrease)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalDamageIncrease",
+            title: "物理增伤乘区",
+            formula: "物理增伤乘区 = 增伤池 + 物理增伤（只作用于物理结算分量）",
+            compute: ({ input, get }) => get("damageIncrease") + input.physicalDamageIncrease,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("damageIncrease"))} + ${formatNumber(input.physicalDamageIncrease)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "independentDamageIncrease",
+            title: "独立增伤乘区",
+            formula: "独立增伤乘区 = (1 + 独立增伤) * (1 + 技能独立增伤) * (1 + 攻击类型独立增伤)",
+            compute: ({ input }) => (1 + input.independentBonus) * (1 + input.skillIndependentBonus) * (1 + input.attackTypeIndependentBonus),
+            explain: ({ input }, value) =>
+                `(1 + ${formatNumber(input.independentBonus)}) * (1 + ${formatNumber(input.skillIndependentBonus)}) * (1 + ${formatNumber(input.attackTypeIndependentBonus)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "skillAdditionalDamageZone",
+            title: "技能追伤乘区",
+            formula: "技能追伤乘区 = max(0, 1 + 技能追伤)",
+            compute: ({ input }) => Math.max(0, 1 + input.skillAdditionalDamage),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.skillAdditionalDamage)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "summonIndependentMultiplier",
+            title: "召唤物独立增伤乘区",
+            formula: "召唤物独立增伤乘区 = 召唤物字段时(1 + 召唤物独立增伤)，否则为 1",
+            compute: ({ input }) => (input.summonEnabled ? 1 + input.summonIndependentBonus : 1),
+            explain: ({ input }, value) =>
+                `${input.summonEnabled ? `1 + ${formatNumber(input.summonIndependentBonus)}` : "1"} = ${formatNumber(value)}`,
+        },
+        {
+            id: "imbalanceDamageMultiplier",
+            title: "失衡乘区",
+            formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
+            compute: ({ input }) => (input.imbalanceEnabled ? input.imbalanceBonus + 1.5 : 1),
+            explain: ({ input }, value) =>
+                `${input.imbalanceEnabled ? `${formatNumber(input.imbalanceBonus)} + 1.5` : "1"} = ${formatNumber(value)}`,
+        },
+        {
+            id: "penetrationMultiplier",
+            title: "属性穿透乘区",
+            formula: "属性穿透乘区 = max(0, 1 + 属性穿透)（对全部伤害分量整体生效）",
+            compute: ({ input }) => Math.max(0, 1 + input.penetrationBonus),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "seasonDamageMultiplier",
+            title: "赛季增伤乘区",
+            formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+            compute: ({ input }) => Math.max(0, 1 + input.seasonBonus),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.seasonBonus)}) = ${formatNumber(value)}`,
         },
         {
             id: "boostMultiplier",
@@ -1350,35 +2135,37 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
             },
         },
         {
-            id: "damageIncrease",
-            title: "增伤乘区",
-            formula: "增伤乘区 = 1 + 增伤 + 技能伤害",
-            compute: ({ input }) => 1 + input.baseDamageBonus + input.skillDamageBonus,
-            explain: ({ input }, value) =>
-                `1 + ${formatNumber(input.baseDamageBonus)} + ${formatNumber(input.skillDamageBonus)} = ${formatNumber(value)}`,
-        },
-        {
-            id: "independentDamageIncrease",
-            title: "独立增伤乘区",
-            formula: "独立增伤乘区 = 1 + 独立增伤",
-            compute: ({ input }) => 1 + input.independentBonus,
-            explain: ({ input }, value) => `1 + ${formatNumber(input.independentBonus)} = ${formatNumber(value)}`,
-        },
-        {
-            id: "imbalanceDamageMultiplier",
-            title: "失衡乘区",
-            formula: "失衡乘区 = 处于失衡状态时(失衡易伤 + 1.5)，否则为 1",
-            compute: ({ input }) => (input.imbalanceEnabled ? input.imbalanceBonus + 1.5 : 1),
-            explain: ({ input }, value) =>
-                `${input.imbalanceEnabled ? `${formatNumber(input.imbalanceBonus)} + 1.5` : "1"} = ${formatNumber(value)}`,
-        },
-        {
             id: "hpMore",
             title: "血量相关乘区",
             formula: "血量相关乘区 = 昂扬乘区 * 背水乘区",
             compute: ({ get }) => get("boostMultiplier") * get("desperateMultiplier"),
             explain: ({ get }, value) =>
                 `${formatNumber(get("boostMultiplier"))} * ${formatNumber(get("desperateMultiplier"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "elementRatioTotal",
+            title: "元素结算分量合计",
+            formula: "元素结算分量合计 = 未转换元素分量 + 属转元素分量",
+            compute: ({ get }) => get("unconvertedElementPart") + get("convertedElementPart"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("unconvertedElementPart"))} + ${formatNumber(get("convertedElementPart"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "physicalRatioTotal",
+            title: "物理结算分量合计",
+            formula: "物理结算分量合计 = 转切割分量 + 转贯穿分量 + 转震荡分量 + 转灾厄分量",
+            compute: ({ get }) => get("convertCutPart") + get("convertPiercePart") + get("convertShockPart") + get("convertCalamityPart"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("convertCutPart"))} + ${formatNumber(get("convertPiercePart"))} + ${formatNumber(get("convertShockPart"))} + ${formatNumber(get("convertCalamityPart"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weightedDamageRatio",
+            title: "加权伤害系数",
+            formula: "加权伤害系数 = 元素结算分量合计 * 元素增伤乘区 + 物理结算分量合计 * 物理增伤乘区",
+            compute: ({ get }) =>
+                get("elementRatioTotal") * get("elementDamageIncrease") + get("physicalRatioTotal") * get("physicalDamageIncrease"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("elementRatioTotal"))} * ${formatNumber(get("elementDamageIncrease"))} + ${formatNumber(get("physicalRatioTotal"))} * ${formatNumber(get("physicalDamageIncrease"))} = ${formatNumber(value)}`,
         },
         {
             id: "charAttack",
@@ -1423,15 +2210,19 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "finalDamage",
             title: "技能基础伤害",
-            formula: "技能基础伤害 = 技能倍率伤害 * 抗性乘区 * 增伤乘区 * 独立增伤乘区 * 失衡乘区",
+            formula:
+                "技能基础伤害 = 技能倍率伤害 * 加权伤害系数 * 独立增伤乘区 * 技能追伤乘区 * 召唤物独立增伤乘区 * 失衡乘区 * 属性穿透乘区 * 赛季增伤乘区",
             compute: ({ get }) =>
                 get("skillBaseDamage") *
-                get("resistancePenetration") *
-                get("damageIncrease") *
+                get("weightedDamageRatio") *
                 get("independentDamageIncrease") *
-                get("imbalanceDamageMultiplier"),
+                get("skillAdditionalDamageZone") *
+                get("summonIndependentMultiplier") *
+                get("imbalanceDamageMultiplier") *
+                get("penetrationMultiplier") *
+                get("seasonDamageMultiplier"),
             explain: ({ get }, value) =>
-                `${formatNumber(get("skillBaseDamage"))} * ${formatNumber(get("resistancePenetration"))} * ${formatNumber(get("damageIncrease"))} * ${formatNumber(get("independentDamageIncrease"))} * ${formatNumber(get("imbalanceDamageMultiplier"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("skillBaseDamage"))} * ${formatNumber(get("weightedDamageRatio"))} * ${formatNumber(get("independentDamageIncrease"))} * ${formatNumber(get("skillAdditionalDamageZone"))} * ${formatNumber(get("summonIndependentMultiplier"))} * ${formatNumber(get("imbalanceDamageMultiplier"))} * ${formatNumber(get("penetrationMultiplier"))} * ${formatNumber(get("seasonDamageMultiplier"))} = ${formatNumber(value)}`,
         },
         {
             id: "expectedDamage",
@@ -1571,9 +2362,17 @@ function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
         {
             id: "damageIncrease",
             title: "增伤乘区",
-            formula: "增伤乘区 = 1 + 增伤",
-            compute: ({ input }) => 1 + input.baseDamageBonus,
-            explain: ({ input }, value) => `1 + ${formatNumber(input.baseDamageBonus)} = ${formatNumber(value)}`,
+            formula: "增伤乘区 = 1 + 增伤 + 阵营增伤",
+            compute: ({ input }) => 1 + input.baseDamageBonus + input.factionBonus,
+            explain: ({ input }, value) =>
+                `1 + ${formatNumber(input.baseDamageBonus)} + ${formatNumber(input.factionBonus)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "seasonDamageMultiplier",
+            title: "赛季增伤乘区",
+            formula: "赛季增伤乘区 = max(0, 1 + 赛季增伤)",
+            compute: ({ input }) => Math.max(0, 1 + input.seasonBonus),
+            explain: ({ input }, value) => `max(0, 1 + ${formatNumber(input.seasonBonus)}) = ${formatNumber(value)}`,
         },
         {
             id: "boostMultiplier",
@@ -1623,36 +2422,137 @@ function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
                 `${formatNumber(input.weaponOwnFreq)} + ${formatNumber(input.otherFreq)} = ${formatNumber(value)}`,
         },
         {
-            id: "weightedBaseDamage",
-            title: "频率加权基础伤害",
-            formula: "频率加权基础伤害 = 单跳基础伤害(角色攻击) * (DOT频率合计 - 武器来源频率) + 单跳基础伤害(武器来源) * 武器来源频率",
-            compute: ({ get }) =>
-                get("dotBaseDamage") * (get("totalFrequency") - get("weaponFrequency")) + get("weaponBaseDamage") * get("weaponFrequency"),
-            explain: ({ get }, value) =>
-                `${formatNumber(get("dotBaseDamage"))} * ${formatNumber(get("totalFrequency") - get("weaponFrequency"))} + ${formatNumber(get("weaponBaseDamage"))} * ${formatNumber(get("weaponFrequency"))} = ${formatNumber(value)}`,
+            id: "weightedOwnBaseDamage",
+            title: "自身属性频率加权基础伤害",
+            formula:
+                "自身属性频率加权基础伤害 = 单跳基础伤害(角色攻击) * (DOT频率合计 - 武器来源频率) + 单跳基础伤害(武器来源) * 武器来源自身属性频率",
+            compute: ({ input, get }) =>
+                get("dotBaseDamage") * (get("totalFrequency") - get("weaponFrequency")) +
+                get("weaponBaseDamage") * input.weaponOwnFreq,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("dotBaseDamage"))} * ${formatNumber(get("totalFrequency") - get("weaponFrequency"))} + ${formatNumber(get("weaponBaseDamage"))} * ${formatNumber(input.weaponOwnFreq)} = ${formatNumber(value)}`,
         },
         {
-            id: "resistancePenetration",
-            title: "抗性乘区",
-            formula: "抗性乘区 = (1 - 敌人抗性 + 敌人弱点) * (1 + 属性穿透)，最小为 0",
-            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)),
-            explain: ({ input }, value) => {
-                const raw = (1 - input.enemyResistance + input.enemyWeakness) * (1 + input.penetrationBonus)
-                return `(1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.enemyWeakness)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+            id: "weightedOtherBaseDamage",
+            title: "其余属性频率加权基础伤害",
+            formula: "其余属性频率加权基础伤害 = 单跳基础伤害(武器来源) * 其余属性频率",
+            compute: ({ input, get }) => get("weaponBaseDamage") * input.otherFreq,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("weaponBaseDamage"))} * ${formatNumber(input.otherFreq)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weightedBaseDamage",
+            title: "频率加权基础伤害",
+            formula: "频率加权基础伤害 = 自身属性频率加权基础伤害 + 其余属性频率加权基础伤害",
+            compute: ({ get }) => get("weightedOwnBaseDamage") + get("weightedOtherBaseDamage"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weightedOwnBaseDamage"))} + ${formatNumber(get("weightedOtherBaseDamage"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "ownWeaknessTotal",
+            title: "自身属性弱点合计",
+            formula: "自身属性弱点合计 = 元素弱点 + 全属性弱点（与敌人抗性同区加算）",
+            compute: ({ input }) => input.elementWeakness + input.allElementWeakness,
+            explain: ({ input }, value) =>
+                `${formatNumber(input.elementWeakness)} + ${formatNumber(input.allElementWeakness)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "baseOwnResistanceFactor",
+            title: "自身属性基础抗性因子",
+            formula: "自身属性基础抗性因子 = max(0, 1 - 敌人抗性 + 自身属性弱点合计)",
+            compute: ({ input, get }) => Math.max(0, 1 - input.enemyResistance + get("ownWeaknessTotal")),
+            explain: ({ input, get }, value) =>
+                `max(0, 1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(get("ownWeaknessTotal"))}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "flippedOwnResistanceFactor",
+            title: "自身属性翻转抗性因子",
+            formula: "自身属性翻转抗性因子 = max(0, 1 - 翻转抗性 + 自身属性弱点合计)，敌人抗性大于 0 时翻转抗性为 -4，否则为 0.5",
+            compute: ({ input, get }) => Math.max(0, 1 - (input.enemyResistance > 0 ? -4 : 0.5) + get("ownWeaknessTotal")),
+            explain: ({ input, get }, value) => {
+                const flipped = input.enemyResistance > 0 ? -4 : 0.5
+                return `max(0, 1 - ${formatNumber(flipped)} + ${formatNumber(get("ownWeaknessTotal"))}) = ${formatNumber(value)}`
             },
+        },
+        {
+            id: "activeElementConvert",
+            title: "生效属转比例",
+            formula: "生效属转比例 = 敌人抗性 > 0 时取转属克，敌人抗性 < 0 时取转属逆，0 抗为 0，并限制在 0~1",
+            compute: ({ input }) => clampNumber(resolveActiveElementConvert(input), 0, 1),
+            explain: ({ input }, value) =>
+                `抗性 ${formatNumber(input.enemyResistance)} 取${input.enemyResistance > 0 ? "转属克" : input.enemyResistance < 0 ? "转属逆" : "无"} => ${formatNumber(value)}`,
+        },
+        {
+            id: "ownResistanceFactor",
+            title: "自身属性抗性因子",
+            formula: "自身属性抗性因子 = (1 - 生效属转比例) * 自身属性基础抗性因子 + 生效属转比例 * 自身属性翻转抗性因子",
+            compute: ({ get }) =>
+                (1 - get("activeElementConvert")) * get("baseOwnResistanceFactor") +
+                get("activeElementConvert") * get("flippedOwnResistanceFactor"),
+            explain: ({ get }, value) =>
+                `(1 - ${formatNumber(get("activeElementConvert"))}) * ${formatNumber(get("baseOwnResistanceFactor"))} + ${formatNumber(get("activeElementConvert"))} * ${formatNumber(get("flippedOwnResistanceFactor"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "penetrationMultiplier",
+            title: "属性穿透乘区",
+            formula: "属性穿透乘区 = 1 + 属性穿透",
+            compute: ({ input }) => 1 + input.penetrationBonus,
+            explain: ({ input }, value) => `1 + ${formatNumber(input.penetrationBonus)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "ownZone",
+            title: "自身属性抗性区",
+            formula: "自身属性抗性区 = max(0, 自身属性抗性因子 * 属性穿透乘区)",
+            compute: ({ get }) => Math.max(0, get("ownResistanceFactor") * get("penetrationMultiplier")),
+            explain: ({ get }, value) =>
+                `max(0, ${formatNumber(get("ownResistanceFactor"))} * ${formatNumber(get("penetrationMultiplier"))}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "otherNormalResistanceFactor",
+            title: "其余属性基础抗性因子",
+            formula: "其余属性基础抗性因子 = max(0, 1 - 敌人抗性 + 全属性弱点)",
+            compute: ({ input }) => Math.max(0, 1 - input.enemyResistance + input.allElementWeakness),
+            explain: ({ input }, value) =>
+                `max(0, 1 - ${formatNumber(input.enemyResistance)} + ${formatNumber(input.allElementWeakness)}) = ${formatNumber(value)}`,
+        },
+        {
+            id: "otherResistanceFactor",
+            title: "其余属性抗性因子",
+            formula:
+                "其余属性抗性因子 = 敌人抗性为 0 或元素种数为 0 时取基础因子；敌人抗性 < 0 时取 max(0, 1 - 0.5 + 全属性弱点)；否则 (max(0, 1 - (-4) + 全属性弱点) + 基础因子 * (元素种数 - 1)) / 元素种数",
+            compute: ({ input }) =>
+                resolveOtherDotResistanceFactor(input.enemyResistance, input.allElementWeakness, input.otherElementCount),
+            explain: ({ input, get }, value) => {
+                if (input.enemyResistance === 0 || input.otherElementCount <= 0) {
+                    return `敌人抗性为 0 或元素种数为 0 => ${formatNumber(get("otherNormalResistanceFactor"))}`
+                }
+                if (input.enemyResistance < 0) {
+                    return `max(0, 1 - 0.5 + ${formatNumber(input.allElementWeakness)}) = ${formatNumber(value)}`
+                }
+                return `(max(0, 1 - (-4) + ${formatNumber(input.allElementWeakness)}) + ${formatNumber(get("otherNormalResistanceFactor"))} * (${formatNumber(input.otherElementCount)} - 1)) / ${formatNumber(input.otherElementCount)} = ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "otherZone",
+            title: "其余属性抗性区",
+            formula: "其余属性抗性区 = 其余属性抗性因子 * 属性穿透乘区",
+            compute: ({ get }) => get("otherResistanceFactor") * get("penetrationMultiplier"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("otherResistanceFactor"))} * ${formatNumber(get("penetrationMultiplier"))} = ${formatNumber(value)}`,
         },
         {
             id: "dotDamage",
             title: "每秒DOT伤害",
-            formula: "每秒DOT伤害 = 频率加权基础伤害 * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 抗性乘区",
+            formula:
+                "每秒DOT伤害 = (自身属性频率加权基础伤害 * 自身属性抗性区 + 其余属性频率加权基础伤害 * 其余属性抗性区) * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 赛季增伤乘区",
             compute: ({ get }) =>
-                get("weightedBaseDamage") *
+                (get("weightedOwnBaseDamage") * get("ownZone") + get("weightedOtherBaseDamage") * get("otherZone")) *
                 get("fullnessMultiplier") *
                 get("damageIncrease") *
                 get("hpMore") *
-                get("resistancePenetration"),
+                get("seasonDamageMultiplier"),
             explain: ({ get }, value) =>
-                `${formatNumber(get("weightedBaseDamage"))} * ${formatNumber(get("fullnessMultiplier"))} * ${formatNumber(get("damageIncrease"))} * ${formatNumber(get("hpMore"))} * ${formatNumber(get("resistancePenetration"))} = ${formatNumber(value)}`,
+                `(${formatNumber(get("weightedOwnBaseDamage"))} * ${formatNumber(get("ownZone"))} + ${formatNumber(get("weightedOtherBaseDamage"))} * ${formatNumber(get("otherZone"))}) * ${formatNumber(get("fullnessMultiplier"))} * ${formatNumber(get("damageIncrease"))} * ${formatNumber(get("hpMore"))} * ${formatNumber(get("seasonDamageMultiplier"))} = ${formatNumber(value)}`,
         },
     ]
 }
@@ -1688,22 +2588,29 @@ interface ToggleFieldConfig<TField extends string> {
     label: string
 }
 
+interface SelectFieldConfig<TField extends string> {
+    key: TField
+    label: string
+    options: Array<{ value: string; label: string }>
+}
+
 interface GroupOutputConfig {
     label: string
     stepId: string
 }
 
-interface NumberFieldGroup<TNumberField extends string, TToggleField extends string> {
+interface NumberFieldGroup<TNumberField extends string, TToggleField extends string, TSelectField extends string = never> {
     title: string
     /** 是否在该分组顶部显示追伤乘区说明 */
     chaseNote?: boolean
     fields: NumberFieldConfig<TNumberField>[]
     toggles?: ToggleFieldConfig<TToggleField>[]
+    selects?: SelectFieldConfig<TSelectField>[]
     outputs?: GroupOutputConfig[]
     emptyTip?: string
 }
 
-const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFieldKey>[] = [
+const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFieldKey, WeaponSelectFieldKey>[] = [
     {
         title: "攻击",
         fields: [
@@ -1738,11 +2645,25 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         fields: [
             { key: "baseDamageBonus", label: "增伤", step: "0.01" },
             { key: "weaponDamageBonus", label: "武器伤害", step: "0.01" },
+            { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", step: "0.01" },
+            { key: "attackTypeDamageBonus", label: "攻击类型增伤", step: "0.01" },
+            { key: "elementDamageIncrease", label: "元素增伤", step: "0.01" },
+            { key: "physicalDamageIncrease", label: "物理增伤", step: "0.01" },
+            { key: "seasonBonus", label: "赛季增伤", step: "0.01" },
             { key: "independentBonus", label: "独立增伤", step: "0.01" },
             { key: "weaponIndependentBonus", label: "武器独立增伤", step: "0.01" },
+            { key: "weaponIndependentPenalty", label: "武器独立增伤惩罚", step: "0.01" },
+            { key: "attackTypeIndependentBonus", label: "攻击类型独立增伤", step: "0.01" },
             ...ADDITIONAL_DAMAGE_KEYS.map(key => ({ key, step: "0.01" })),
         ],
-        outputs: [{ label: "增伤乘区", stepId: "damageIncrease" }],
+        outputs: [
+            { label: "增伤池", stepId: "damageIncrease" },
+            { label: "元素增伤乘区", stepId: "elementDamageIncrease" },
+            { label: "物理增伤乘区", stepId: "physicalDamageIncrease" },
+            { label: "独立增伤乘区", stepId: "independentDamageIncrease" },
+            { label: "追加伤害乘区", stepId: "additionalDamage" },
+            { label: "赛季增伤乘区", stepId: "seasonDamageMultiplier" },
+        ],
     },
     {
         title: "暴击",
@@ -1756,14 +2677,40 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
     },
     {
         title: "触发",
+        selects: [
+            {
+                key: "damageType",
+                label: "武器伤害类型",
+                options: WEAPON_DAMAGE_TYPES.map(value => ({ value, label: value })),
+            },
+            { key: "enemyHpType", label: "敌方生命类型", options: HP_TYPE_OPTIONS },
+        ],
         fields: [
             { key: "baseTriggerRate", label: "基础触发", step: "0.01" },
             { key: "triggerRateBonus", label: "触发加成", step: "0.01" },
             { key: "triggerBonus", label: "触发倍率加成", step: "0.01" },
-            { key: "hpTypeCoefficient", label: "生命类型系数", step: "0.01" },
         ],
-        toggles: [{ key: "sameDamageType", label: "伤害类型匹配(触发生效)" }],
-        outputs: [{ label: "触发期望倍率", stepId: "triggerExpectedDamageAdd" }],
+        outputs: [
+            { label: "触发倍率", stepId: "triggerDamageMultiplier" },
+            { label: "触发期望倍率", stepId: "triggerExpectedDamageAdd" },
+        ],
+    },
+    {
+        title: "转换",
+        fields: [
+            { key: "convertRestraint", label: "转属克", step: "0.01" },
+            { key: "convertReverse", label: "转属逆", step: "0.01" },
+            { key: "convertCut", label: "转切割", step: "0.01" },
+            { key: "convertPierce", label: "转贯穿", step: "0.01" },
+            { key: "convertShock", label: "转震荡", step: "0.01" },
+            { key: "convertCalamity", label: "转灾厄", step: "0.01" },
+        ],
+        outputs: [
+            { label: "生效属转比例", stepId: "activeElementConvert" },
+            { label: "转换池合计", stepId: "convertPoolTotal" },
+            { label: "未转换比例", stepId: "unconvertedRatio" },
+            { label: "属转有效比例", stepId: "elementConvertRatio" },
+        ],
     },
     {
         title: "充盈",
@@ -1805,13 +2752,18 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
-            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
+            { key: "elementWeakness", label: "元素弱点(角色元素)", step: "0.01" },
+            { key: "allElementWeakness", label: "全属性弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
             { key: "imbalanceBonus", label: "失衡易伤", step: "0.01" },
         ],
         toggles: [{ key: "imbalanceEnabled", label: "处于失衡状态" }],
         outputs: [
-            { label: "抗性乘区", stepId: "resistance" },
+            { label: "属性弱点合计", stepId: "weaknessTotal" },
+            { label: "基础抗性因子", stepId: "baseResistanceFactor" },
+            { label: "翻转抗性因子", stepId: "flippedResistanceFactor" },
+            { label: "元素抗性因子", stepId: "elementalResistanceFactor" },
+            { label: "属性穿透乘区", stepId: "penetrationMultiplier" },
             { label: "失衡易伤乘区", stepId: "imbalanceDamageMultiplier" },
         ],
     },
@@ -1843,9 +2795,45 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
         fields: [
             { key: "baseDamageBonus", label: "增伤", step: "0.01" },
             { key: "skillDamageBonus", label: "技能伤害", step: "0.01" },
+            { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", step: "0.01" },
+            { key: "attackTypeDamageBonus", label: "攻击类型增伤", step: "0.01" },
+            { key: "elementDamageIncrease", label: "元素增伤", step: "0.01" },
+            { key: "physicalDamageIncrease", label: "物理增伤", step: "0.01" },
+            { key: "seasonBonus", label: "赛季增伤", step: "0.01" },
             { key: "independentBonus", label: "独立增伤", step: "0.01" },
+            { key: "skillIndependentBonus", label: "技能独立增伤", step: "0.01" },
+            { key: "skillAdditionalDamage", label: "技能追伤", step: "0.01" },
+            { key: "attackTypeIndependentBonus", label: "攻击类型独立增伤", step: "0.01" },
+            { key: "summonDamageBonus", label: "召唤物伤害", step: "0.01" },
+            { key: "summonIndependentBonus", label: "召唤物独立增伤", step: "0.01" },
         ],
-        outputs: [{ label: "增伤乘区", stepId: "damageIncrease" }],
+        toggles: [{ key: "summonEnabled", label: "当前字段为召唤物伤害" }],
+        outputs: [
+            { label: "增伤池", stepId: "damageIncrease" },
+            { label: "元素增伤乘区", stepId: "elementDamageIncrease" },
+            { label: "物理增伤乘区", stepId: "physicalDamageIncrease" },
+            { label: "独立增伤乘区", stepId: "independentDamageIncrease" },
+            { label: "技能追伤乘区", stepId: "skillAdditionalDamageZone" },
+            { label: "召唤物独立增伤乘区", stepId: "summonIndependentMultiplier" },
+            { label: "赛季增伤乘区", stepId: "seasonDamageMultiplier" },
+        ],
+    },
+    {
+        title: "转换",
+        fields: [
+            { key: "convertRestraint", label: "转属克", step: "0.01" },
+            { key: "convertReverse", label: "转属逆", step: "0.01" },
+            { key: "convertCut", label: "转切割", step: "0.01" },
+            { key: "convertPierce", label: "转贯穿", step: "0.01" },
+            { key: "convertShock", label: "转震荡", step: "0.01" },
+            { key: "convertCalamity", label: "转灾厄", step: "0.01" },
+        ],
+        outputs: [
+            { label: "生效属转比例", stepId: "activeElementConvert" },
+            { label: "转换池合计", stepId: "convertPoolTotal" },
+            { label: "未转换比例", stepId: "unconvertedRatio" },
+            { label: "属转有效比例", stepId: "elementConvertRatio" },
+        ],
     },
     {
         title: "血量",
@@ -1884,13 +2872,17 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
-            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
+            { key: "elementWeakness", label: "元素弱点(角色元素)", step: "0.01" },
+            { key: "allElementWeakness", label: "全属性弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
             { key: "imbalanceBonus", label: "失衡易伤", step: "0.01" },
         ],
         toggles: [{ key: "imbalanceEnabled", label: "处于失衡状态" }],
         outputs: [
-            { label: "抗性乘区", stepId: "resistancePenetration" },
+            { label: "属性弱点合计", stepId: "weaknessTotal" },
+            { label: "基础抗性因子", stepId: "baseResistanceFactor" },
+            { label: "翻转抗性因子", stepId: "flippedResistanceFactor" },
+            { label: "属性穿透乘区", stepId: "penetrationMultiplier" },
             { label: "失衡易伤乘区", stepId: "imbalanceDamageMultiplier" },
         ],
     },
@@ -1932,10 +2924,13 @@ const dotNumberGroups: NumberFieldGroup<DotNumberFieldKey, never>[] = [
         fields: [
             { key: "fullnessPower", label: "充盈威力", step: "0.01" },
             { key: "baseDamageBonus", label: "增伤", step: "0.01" },
+            { key: "factionBonus", label: "阵营增伤(歧视/敌方阵营)", step: "0.01" },
+            { key: "seasonBonus", label: "赛季增伤", step: "0.01" },
         ],
         outputs: [
             { label: "充盈乘区", stepId: "fullnessMultiplier" },
             { label: "增伤乘区", stepId: "damageIncrease" },
+            { label: "赛季增伤乘区", stepId: "seasonDamageMultiplier" },
         ],
     },
     {
@@ -1944,10 +2939,13 @@ const dotNumberGroups: NumberFieldGroup<DotNumberFieldKey, never>[] = [
             { key: "skillFreq", label: "技能来源频率", step: "0.1" },
             { key: "weaponOwnFreq", label: "武器来源自身属性频率", step: "0.1" },
             { key: "otherFreq", label: "其余属性频率", step: "0.1" },
+            { key: "otherElementCount", label: "其余属性元素种数", step: "1" },
         ],
         outputs: [
             { label: "DOT频率合计", stepId: "totalFrequency" },
             { label: "武器来源频率", stepId: "weaponFrequency" },
+            { label: "自身属性频率加权基础伤害", stepId: "weightedOwnBaseDamage" },
+            { label: "其余属性频率加权基础伤害", stepId: "weightedOtherBaseDamage" },
             { label: "频率加权基础伤害", stepId: "weightedBaseDamage" },
         ],
     },
@@ -1964,14 +2962,27 @@ const dotNumberGroups: NumberFieldGroup<DotNumberFieldKey, never>[] = [
         title: "环境",
         fields: [
             { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
-            { key: "enemyWeakness", label: "敌人弱点", step: "0.01" },
+            { key: "elementWeakness", label: "元素弱点(角色元素)", step: "0.01" },
+            { key: "allElementWeakness", label: "全属性弱点", step: "0.01" },
             { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
+            { key: "convertRestraint", label: "转属克", step: "0.01" },
+            { key: "convertReverse", label: "转属逆", step: "0.01" },
         ],
-        outputs: [{ label: "抗性乘区", stepId: "resistancePenetration" }],
+        outputs: [
+            { label: "自身属性抗性区", stepId: "ownZone" },
+            { label: "其余属性抗性区", stepId: "otherZone" },
+        ],
     },
 ]
 
-const dotNonPercentFields = new Set<DotNumberFieldKey>(["charAttack", "weaponAttack", "skillFreq", "weaponOwnFreq", "otherFreq"])
+const dotNonPercentFields = new Set<DotNumberFieldKey>([
+    "charAttack",
+    "weaponAttack",
+    "skillFreq",
+    "weaponOwnFreq",
+    "otherFreq",
+    "otherElementCount",
+])
 
 const resultLabelMap: Record<string, string> = {
     expectedDamage: "期望伤害",
@@ -1996,13 +3007,28 @@ const resultLabelMap: Record<string, string> = {
     dotBaseDamage: "单跳基础伤害(角色攻击)",
     weaponBaseDamage: "单跳基础伤害(武器来源)",
     weightedBaseDamage: "频率加权基础伤害",
+    weightedOwnBaseDamage: "自身属性频率加权基础伤害",
+    weightedOtherBaseDamage: "其余属性频率加权基础伤害",
     totalFrequency: "DOT频率合计",
     weaponFrequency: "武器来源频率",
     damageIncrease: "增伤乘区",
+    elementDamageIncrease: "元素增伤乘区",
+    physicalDamageIncrease: "物理增伤乘区",
+    independentDamageIncrease: "独立增伤乘区",
+    additionalDamage: "追加伤害乘区",
+    skillAdditionalDamageZone: "技能追伤乘区",
+    summonIndependentMultiplier: "召唤物独立增伤乘区",
+    seasonDamageMultiplier: "赛季增伤乘区",
+    penetrationMultiplier: "属性穿透乘区",
+    weaknessTotal: "属性弱点合计",
+    baseResistanceFactor: "基础抗性因子",
+    flippedResistanceFactor: "翻转抗性因子",
+    elementalResistanceFactor: "元素抗性因子",
+    ownZone: "自身属性抗性区",
+    otherZone: "其余属性抗性区",
     hpMore: "血量相关乘区",
     boostMultiplier: "昂扬乘区",
     desperateMultiplier: "背水乘区",
-    resistancePenetration: "抗性乘区",
 }
 
 /**
@@ -2128,6 +3154,8 @@ const summaryItems = computed(() => {
             "expectedCritNoTrigger",
             "lowerCritExpectedTrigger",
             "higherCritExpectedTrigger",
+            "weaknessTotal",
+            "elementalResistanceFactor",
             "fullnessPower",
             "fullnessMultiplier",
         ]
@@ -2139,8 +3167,11 @@ const summaryItems = computed(() => {
             "weaponBaseDamage",
             "totalFrequency",
             "weaponFrequency",
+            "ownZone",
+            "otherZone",
             "fullnessMultiplier",
             "damageIncrease",
+            "seasonDamageMultiplier",
             "hpMore",
         ]
     } else {
@@ -2150,6 +3181,7 @@ const summaryItems = computed(() => {
             "calculateExpectedDamage",
             "skillBaseDamage",
             "finalDamage",
+            "weaknessTotal",
             "fullnessPower",
             "fullnessMultiplier",
         ]
@@ -2244,6 +3276,28 @@ function getWeaponToggleLabel(toggleField: ToggleFieldConfig<WeaponToggleFieldKe
  */
 function setWeaponToggleValue(key: WeaponToggleFieldKey, checked: boolean): void {
     weaponInput[key] = checked
+}
+
+/**
+ * 读取武器模式下拉字段。
+ * @param key 字段键
+ * @returns 当前值
+ */
+function getWeaponSelectValue(key: WeaponSelectFieldKey): string {
+    return weaponInput[key]
+}
+
+/**
+ * 写入武器模式下拉字段。
+ * @param key 字段键
+ * @param value 选项值
+ */
+function setWeaponSelectValue(key: WeaponSelectFieldKey, value: string): void {
+    if (key === "damageType") {
+        weaponInput.damageType = value as DamageTypeKey
+        return
+    }
+    weaponInput.enemyHpType = value as HpTypeKey
 }
 
 /**
@@ -2715,6 +3769,20 @@ onBeforeUnmount(() => {
                             <p v-if="group.chaseNote" class="mb-2 text-[11px] text-base-content/50">
                                 {{ $t("db-damage.chase_approximation_note") }}
                             </p>
+                            <div v-if="group.selects && group.selects.length > 0" class="mb-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                <label v-for="selectField in group.selects" :key="selectField.key" class="form-control">
+                                    <div class="mb-1 text-xs text-base-content/70">{{ selectField.label }}</div>
+                                    <select
+                                        class="w-full cursor-pointer appearance-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 focus:border-primary"
+                                        :value="getWeaponSelectValue(selectField.key)"
+                                        @change="setWeaponSelectValue(selectField.key, ($event.target as HTMLSelectElement).value)"
+                                    >
+                                        <option v-for="option in selectField.options" :key="option.value" :value="option.value">
+                                            {{ option.label }}
+                                        </option>
+                                    </select>
+                                </label>
+                            </div>
                             <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getWeaponFieldLabel(field.key, field.label) }}</div>
@@ -2815,7 +3883,7 @@ onBeforeUnmount(() => {
                                 <div class="mt-1 text-[11px] text-base-content/55">支持块输出覆盖；按住并拖到右侧合并区，或点击 + 添加</div>
                             </div>
                             <div
-                                v-if="group.fields.length === 0 && (!group.toggles || group.toggles.length === 0)"
+                                v-if="group.fields.length === 0 && (!group.toggles || group.toggles.length === 0) && (!group.selects || group.selects.length === 0)"
                                 class="text-xs text-base-content/60"
                             >
                                 {{ group.emptyTip || "当前模式暂无该类参数" }}
@@ -3024,7 +4092,7 @@ onBeforeUnmount(() => {
                                 <div class="mt-1 text-[11px] text-base-content/55">支持块输出覆盖；按住并拖到右侧合并区，或点击 + 添加</div>
                             </div>
                             <div
-                                v-if="group.fields.length === 0 && (!group.toggles || group.toggles.length === 0)"
+                                v-if="group.fields.length === 0 && (!group.toggles || group.toggles.length === 0) && (!group.selects || group.selects.length === 0)"
                                 class="text-xs text-base-content/60"
                             >
                                 {{ group.emptyTip || "当前模式暂无该类参数" }}

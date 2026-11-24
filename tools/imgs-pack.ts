@@ -20,6 +20,8 @@ const webDir = path.resolve(rootDir, "apps", "web")
 const publicImgsRoot = path.resolve(webDir, "public", "imgs")
 const outDir = path.resolve(webDir, "mock", "imgs-pack")
 const versionsPath = path.resolve(outDir, "versions.json")
+/** 待发布的版本列表：上传成功后才替换 `versions.json`，避免本地清单领先 CDN */
+const pendingVersionsPath = path.resolve(outDir, "versions.pending.json")
 
 /**
  * 确保目录存在。
@@ -92,18 +94,26 @@ export function collectNewFiles(currentFiles: string[], versions: Pick<ImgsPackV
  * 构建单个图片包。
  * @param version 版本标签
  * @param files 文件列表
+ * @param strict 为 true 时任一源文件缺失即抛错（重新打包旧版本用）
  * @returns 输出条目
  */
-function buildPack(version: string, files: string[]): ImgsPackVersionEntry {
+function buildPack(version: string, files: string[], strict = false): ImgsPackVersionEntry {
     const zipEntries: Record<string, Uint8Array> = {
         "manifest.json": new TextEncoder().encode(JSON.stringify({ version, files }, null, 2)),
     }
+    const missingFiles: string[] = []
 
     for (const file of files) {
         const absPath = path.join(publicImgsRoot, file)
         if (fs.existsSync(absPath)) {
             zipEntries[file] = fs.readFileSync(absPath)
+        } else {
+            missingFiles.push(file)
         }
+    }
+
+    if (strict && missingFiles.length) {
+        throw new Error(`图片源文件缺失，无法重新打包 ${version}：${missingFiles.join(", ")}`)
     }
 
     fs.writeFileSync(path.join(outDir, `${version}.zip`), zipSync(zipEntries, { level: 9 }))
@@ -117,16 +127,12 @@ function buildPack(version: string, files: string[]): ImgsPackVersionEntry {
 }
 
 /**
- * 上传图片包与版本列表到对象存储（OSS 与 R2 双写，发布内容固定覆盖写）。
+ * 上传单个图片包 zip（OSS 主、R2 从）。
  * @param entry 版本条目
  */
-async function uploadImgsPack(entry: ImgsPackVersionEntry): Promise<void> {
-    assertStorageConfig()
-
+async function uploadImgsZip(entry: ImgsPackVersionEntry): Promise<void> {
     const localZipPath = path.join(outDir, `${entry.version}.zip`)
-    const prefix = "imgs-pack"
-    const zipKey = `${prefix}/${entry.version}.zip`
-    const versionsKey = `${prefix}/versions.json`
+    const zipKey = `imgs-pack/${entry.version}.zip`
 
     if (!fs.existsSync(localZipPath)) {
         throw new Error(`图片包文件不存在: ${localZipPath}`)
@@ -135,22 +141,113 @@ async function uploadImgsPack(entry: ImgsPackVersionEntry): Promise<void> {
     console.log(`📤 上传图片包文件到对象存储: ${zipKey}`)
     await putFile(zipKey, localZipPath)
     console.log(`✅ 上传成功: ${zipKey}`)
-
-    console.log(`📤 上传版本列表到对象存储: ${versionsKey}`)
-    await putFile(versionsKey, versionsPath)
-    console.log(`✅ 上传成功: ${versionsKey}`)
-
     console.log(`已上传 ${entry.version}.zip -> ${getPublicUrl(zipKey)}`)
+}
+
+/**
+ * 上传版本列表：先写临时文件上传，成功后才替换本地 `versions.json`。
+ *
+ * zip 上传失败时本地清单保持不变，重跑会重新生成同一个版本号，不会出现
+ * 「本地清单已有该版本、CDN 上没有对应 zip」的错位。
+ * @param entries 版本列表
+ */
+async function uploadImgsVersions(entries: ImgsPackVersionEntry[]): Promise<void> {
+    const versionsKey = "imgs-pack/versions.json"
+
+    fs.writeFileSync(pendingVersionsPath, JSON.stringify(entries, null, 2))
+    console.log(`📤 上传版本列表到对象存储: ${versionsKey}`)
+    try {
+        await putFile(versionsKey, pendingVersionsPath)
+    } catch (error) {
+        fs.rmSync(pendingVersionsPath, { force: true })
+        throw error
+    }
+
+    fs.renameSync(pendingVersionsPath, versionsPath)
+    console.log(`✅ 上传成功: ${versionsKey}`)
     console.log(`已上传 versions.json -> ${getPublicUrl(versionsKey)}`)
 }
 
 /**
- * 生成图片包版本列表。
+ * 提示「已打包但未上传」并让命令以失败退出。
+ * @param action 已完成的本地动作
+ */
+function reportMissingUpload(action: string): void {
+    console.error(
+        `❌ ${action}，但没有上传：缺少 upload 参数，versions.json 未修改。\n` +
+            "   发布必须带 upload 参数（打包与上传同步完成），否则 CDN 上的版本列表会引用不存在的包。\n" +
+            "   重新执行：bun tools/imgs-pack.ts <相同参数> upload"
+    )
+    process.exitCode = 1
+}
+
+/**
+ * 解析命令行参数。
+ * @param argv 命令行参数（不含 node/bun 与脚本路径）
+ * @returns 是否上传与需要重新打包的版本列表
+ */
+function parseArgs(argv: string[]): { upload: boolean; repackVersions: string[] } {
+    const repackIndex = argv.indexOf("repack")
+    const repackVersions = repackIndex < 0 ? [] : argv.slice(repackIndex + 1).filter(arg => arg !== "upload" && arg !== "build")
+
+    return { upload: argv.includes("upload"), repackVersions }
+}
+
+/**
+ * 用当前图片重新打包指定版本（历史 zip 里的图片可能已被覆盖修改）。
+ * @param versions 历史版本列表
+ * @param targets 需要重新打包的版本
+ * @param upload 是否上传
+ * @throws 版本不存在、源文件缺失或上传失败时抛错
+ */
+async function repackPacks(versions: ImgsPackVersionEntry[], targets: string[], upload: boolean): Promise<void> {
+    const missingVersions = targets.filter(version => !versions.some(entry => entry.version === version))
+    if (missingVersions.length) {
+        throw new Error(`版本不存在: ${missingVersions.join(", ")}`)
+    }
+
+    for (const version of targets) {
+        const entry = versions.find(item => item.version === version)
+        if (!entry) {
+            continue
+        }
+
+        const rebuilt = buildPack(entry.version, entry.files, true)
+        console.log(`已重新打包 ${rebuilt.packageFile}（${rebuilt.files.length} 张）`)
+    }
+
+    if (!upload) {
+        reportMissingUpload("已重新生成本地图片包")
+        return
+    }
+
+    assertStorageConfig()
+    for (const version of targets) {
+        const entry = versions.find(item => item.version === version)
+        if (entry) {
+            await uploadImgsZip(entry)
+        }
+    }
+    await uploadImgsVersions(versions)
+}
+
+/**
+ * 生成图片包并同步发布。
+ *
+ * 不带 `upload` 时只产本地 zip、不修改 `versions.json`，并以失败退出——
+ * 版本列表一旦领先于已上传的 zip，客户端就会引用 404 的包。
  */
 async function main(): Promise<void> {
     ensureDir(outDir)
-    const files = collectCurrentFiles()
+    const { upload, repackVersions } = parseArgs(process.argv.slice(2))
     const versions = readVersions()
+
+    if (repackVersions.length) {
+        await repackPacks(versions, repackVersions, upload)
+        return
+    }
+
+    const files = collectCurrentFiles()
     const newFiles = collectNewFiles(files, versions)
     if (!newFiles.length) {
         console.log("没有新增图片，跳过打包")
@@ -159,14 +256,14 @@ async function main(): Promise<void> {
 
     const version = String(versions.length + 1)
     const entry = buildPack(version, newFiles)
-    const entries: ImgsPackVersionEntry[] = [...versions, entry]
-
-    fs.writeFileSync(versionsPath, JSON.stringify(entries, null, 2))
-    console.log(`已生成图片包: ${entries.length} 个版本`)
-
-    if (process.argv.includes("upload")) {
-        await uploadImgsPack(entry)
+    if (!upload) {
+        reportMissingUpload(`已生成本地图片包 ${entry.packageFile}`)
+        return
     }
+
+    assertStorageConfig()
+    await uploadImgsZip(entry)
+    await uploadImgsVersions([...versions, entry])
 }
 
 if (import.meta.main) {
