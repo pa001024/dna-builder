@@ -96,7 +96,7 @@ describe("createAffixIncomeCandidates：逐条移除普通词条", () => {
         expect(candidates.map(candidate => candidate.key)).toEqual([
             getAffixIncomeKey(0, 1001),
             getUniqueAffixIncomeKey(2001),
-            `unique-component:2001:modeled:0:下落独立增伤`,
+            `unique-component:2001:modeled:0:下落增伤`,
         ])
         const overall = candidates.find(candidate => candidate.key === getUniqueAffixIncomeKey(2001))!
         expect(overall.item.uniqueAffix).toBeUndefined()
@@ -105,7 +105,7 @@ describe("createAffixIncomeCandidates：逐条移除普通词条", () => {
         const component = candidates.find(candidate => candidate.key.startsWith("unique-component:"))!
         // 组件候选不改物品，抑制只随请求生效
         expect(component.item).toBe(uniqueItem)
-        expect(component.suppress).toEqual({ affixId: 2001, attrs: ["下落独立增伤"] })
+        expect(component.suppress).toEqual({ affixId: 2001, attrs: ["下落增伤"] })
     })
 })
 
@@ -395,9 +395,9 @@ describe("requestAffixIncomes：去掉一条的收益差分", () => {
         installRuntimeStubs()
         const buildSnapshot = vi.fn((_side: string, _gear?: unknown, _options?: unknown) => ({}) as CharBuildWorkerSnapshot)
         const candidate = {
-            key: "unique-component:2001:modeled:0:下落独立增伤",
+            key: "unique-component:2001:modeled:0:下落增伤",
             item,
-            suppress: { affixId: 2001, attrs: ["下落独立增伤"] },
+            suppress: { affixId: 2001, attrs: ["下落增伤"] },
         }
 
         const result = await requestAffixIncomes({
@@ -411,7 +411,7 @@ describe("requestAffixIncomes：去掉一条的收益差分", () => {
         expect(result.incomes[candidate.key]).toBe(0)
         // U137-fix：suppress 自动收敛到 owner 侧 + 当前装备位
         expect(buildSnapshot.mock.calls[1][2]).toEqual({
-            suppress: { affixId: 2001, attrs: ["下落独立增伤"], ownerSide: "main", slotId: 1 },
+            suppress: { affixId: 2001, attrs: ["下落增伤"], ownerSide: "main", slotId: 1 },
         })
         expect(candidate.item).toBe(item)
     })

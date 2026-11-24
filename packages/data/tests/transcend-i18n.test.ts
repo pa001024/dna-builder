@@ -20,11 +20,10 @@ const PACK_LOCALE_TO_UI: Record<PackLocale, string> = { tc: "zh-TW", en: "en", j
 /**
  * 全部手写词缀规范名 → 5 门语言的精确译文（回归锁；改数据时必须同步本表）。
  *
- * 2001 使用引擎裸键 `下落独立增伤`、2009 使用 `近战独立增伤` / `远程独立增伤`：三条都是本地构词、
- * 数据包无对照，译文由界面文案表承担（见 `UI_COINED_ATTR_NAMES`）。
- * U95 的元素弱点七键同理走界面文案表（官方短语「受到X属性伤害提升」）；2008 已从 `火属性增伤` 迁出。
- * 2002 的「近战普攻独立增伤」按 `RLBlessing_SimpleDesc_103`「近战武器普通攻击伤害提高。」
- * 与既有「独立增伤」条目组合——远程半边在游戏里不存在，已从数据表删除。
+ * 2001 / 2009 已迁回引擎键 `下落增伤` / `武器伤害`（上游 S1_C01 / S1_C07 均写 Normal 增伤区、文案无「独立」），
+ * 不再占用本地构词；`UI_COINED_ATTR_NAMES` 现只收 U95 元素弱点七键（官方短语「受到X属性伤害提升」），
+ * 2008 已从 `火属性增伤` 迁出。2002 的「近战普攻独立增伤」按 `RLBlessing_SimpleDesc_103`
+ * 「近战武器普通攻击伤害提高。」与既有「独立增伤」条目组合——远程半边在游戏里不存在，已从数据表删除。
  */
 const EXPECTED_ATTR_NAMES: Record<string, Record<PackLocale, string>> = {
     增伤: {
@@ -89,6 +88,13 @@ const EXPECTED_ATTR_NAMES: Record<string, Record<PackLocale, string>> = {
         jp: "武器ダメージ",
         kr: "무기 대미지",
         fr: "DGT d’arme",
+    },
+    下落增伤: {
+        tc: "下落攻擊傷害",
+        en: "Plunge DMG",
+        jp: "落下攻撃ダメージ",
+        kr: "낙하 공격 대미지",
+        fr: "Dégâts d’attaque plongeante",
     },
     独立增伤: {
         tc: "獨立增傷",
@@ -167,30 +173,6 @@ const EXPECTED_ATTR_NAMES: Record<string, Record<PackLocale, string>> = {
  * 上游 AttrConfig 没有这些键，数据包对照表不收录，展示走 `public/i18n/*` 顶层键。
  */
 const UI_COINED_ATTR_NAMES: Record<string, Record<string, string>> = {
-    下落独立增伤: {
-        "zh-CN": "下落独立增伤",
-        "zh-TW": "下落攻擊獨立增傷",
-        en: "Plunge independent damage increase",
-        ja: "落下攻撃独立ダメージ増加",
-        ko: "낙하 공격 독립 피해 증가",
-        fr: "Augmentation de dégâts indépendante des attaques plongeantes",
-    },
-    近战独立增伤: {
-        "zh-CN": "近战独立增伤",
-        "zh-TW": "近戰獨立增傷",
-        en: "Melee Weapon Independent DMG",
-        ja: "近接武器独立ダメージ増加",
-        ko: "근접 무기 독립 피해 증가",
-        fr: "DGT indépendants des armes de mêlée",
-    },
-    远程独立增伤: {
-        "zh-CN": "远程独立增伤",
-        "zh-TW": "遠程獨立增傷",
-        en: "Ranged Weapon Independent DMG",
-        ja: "遠隔武器独立ダメージ増加",
-        ko: "원거리 무기 독립 피해 증가",
-        fr: "DGT indépendants des armes à distance",
-    },
     // 元素弱点七键（U95）：本地按键名展示，界面文案用官方「受到X属性伤害提升」短语
     火属性弱点: {
         "zh-CN": "受到火属性伤害提升",
@@ -269,7 +251,7 @@ const REMOVED_COMPOSED_NAMES = ["近战下落增伤", "远程下落增伤", "远
 
 /** 手写词缀摘要的精确分段 */
 const SUMMARY_CASES: Array<[number, string[]]> = [
-    [2001, ["下落独立增伤"]],
+    [2001, ["下落增伤"]],
     [2002, ["近战普攻独立增伤"]],
     [2015, ["昂扬", "技能速度"]],
     [2004, ["独立增伤"]],
@@ -654,12 +636,13 @@ describe("手写词缀规范名 6 语言解析", () => {
         }
     })
 
-    it("规范名逐语言定值（21 个手写 attr + 2 个追伤 / 6 个元素弱点补充）", () => {
+    it("规范名逐语言定值（19 个手写 attr + 2 个追伤 / 6 个元素弱点补充）", () => {
         const handwritten = new Set(handwrittenAttrNames())
         const expected = new Set([...Object.keys(EXPECTED_ATTR_NAMES), ...Object.keys(UI_COINED_ATTR_NAMES)])
 
-        // 手写 buff 实际引用的 21 个名字必须是期望表的子集；期望表额外锁两个核心分量与六个未被手写引用的元素弱点键
-        expect(handwritten.size).toBe(21)
+        // 手写 buff 实际引用的 19 个名字必须是期望表的子集；期望表额外锁两个核心分量与六个未被手写引用的元素弱点键
+        // （2009 由 `近战/远程独立增伤` 迁回引擎键 `武器伤害` 后，本地构词少 2、引擎键多 1，净 21 → 19）
+        expect(handwritten.size).toBe(19)
         expect(expected.size).toBe(handwritten.size + 8)
         for (const name of handwritten) {
             expect([...expected], `未登记期望值：${name}`).toContain(name)

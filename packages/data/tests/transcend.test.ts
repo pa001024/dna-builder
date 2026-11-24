@@ -1032,7 +1032,7 @@ describe("Plan 4 手写词条", () => {
         const mapped = resolveGearEffects([gear({ slotId: 4, affixId: 2001 })], "main")
         expect(mapped.buffs.map(item => item.buff.名称)).toEqual(["升华·螺旋跃击"])
         expect(mapped.buffs[0]).toMatchObject({ id: 2001, buff: { id: 2001, source: { kind: "gear", id: 2001, slotId: 4 } } })
-        expect(mapped.buffs[0].buff.attr).toMatchObject({ 下落独立增伤: 9 })
+        expect(mapped.buffs[0].buff.attr).toMatchObject({ 下落增伤: 9 })
 
         const speed = resolveGearEffects([gear({ slotId: 4, affixId: 2013 })], "main")
         expect(speed.buffs.map(item => item.buff.名称)).toEqual(["升华·闪避移速"])

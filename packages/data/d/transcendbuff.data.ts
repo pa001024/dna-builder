@@ -17,9 +17,9 @@ import type { TranscendAffixMapping } from "../transcendBuffs"
 export const TRANSCEND_BUFFS: Buff[] = [
     {
         名称: "升华·螺旋跃击",
-        描述: "螺旋飞跃后的下一次下落攻击伤害提高（官方为 ×10 独立倍率）。",
+        描述: "螺旋飞跃后的下一次下落攻击伤害提高。",
         attr: {
-            下落独立增伤: 9,
+            下落增伤: 9,
         },
     },
     {
@@ -74,13 +74,12 @@ export const TRANSCEND_BUFFS: Buff[] = [
     },
     {
         名称: "升华·充盈转武伤",
-        描述: "风属性角色充盈威力超过 100% 的部分按 11.1% 转化为武器独立增伤。",
+        描述: "风属性角色充盈威力超过 100% 的部分按 11.1% 转化为武器伤害。",
         限定: "风",
         attr: {
-            // 上游 PassiveEffect[9009] Vars：BaseSubtract = 1、BonusCoefficient = 0.111，
-            // 即 (充盈威力 - 1) × 11.1%；官方 AddGlobalDamageRate 是武器伤害独立倍率
-            近战独立增伤: "0.111*max(0,充盈威力-1)",
-            远程独立增伤: "0.111*max(0,充盈威力-1)",
+            // 上游 LuaPassive S1_C07_WindWeaponOverload：Bonus=(HyperTriggerRate-BaseSubtract 1)×BonusCoefficient 0.111，
+            // 仅 Weapon tag 命中时 AddGlobalDamageRate(1+Bonus, RateZone="Normal") —— Normal 区即普通增伤池，非独立倍率
+            武器伤害: "0.111*max(0,充盈威力-1)",
         },
     },
     {
@@ -258,10 +257,10 @@ export const UNIQUE_AFFIX_MAP: Record<number, TranscendAffixMapping> = {
     2001: {
         buffs: ["升华·螺旋跃击"],
         status: "handwritten",
-        values: [{ name: "下落独立增伤", value: 9 }],
+        values: [{ name: "下落增伤", value: 9 }],
         effect: { target: "self", trigger: "spiral-leap", duration: 20 },
-        included: ["下落攻击增伤", "独立增伤"],
-        note: "官方 FallAttackRateAdd=9 即 ×10 独立倍率；裸键只对近战下落生效，远程下落需另键",
+        included: ["下落攻击增伤"],
+        note: "Zone Normal 仅 FallAttack tag",
     },
     2002: {
         buffs: ["升华·连击暴击"],
@@ -324,13 +323,9 @@ export const UNIQUE_AFFIX_MAP: Record<number, TranscendAffixMapping> = {
     2009: {
         buffs: ["升华·充盈转武伤"],
         status: "handwritten",
-        values: [
-            { name: "近战独立增伤", value: "0.111*max(0,充盈威力-1)" },
-            { name: "远程独立增伤", value: "0.111*max(0,充盈威力-1)" },
-        ],
+        values: [{ name: "武器伤害", value: "0.111*max(0,充盈威力-1)" }],
         effect: { target: "self", trigger: "passive" },
-        included: ["近战独立增伤", "远程独立增伤"],
-        note: "官方 AddGlobalDamageRate 是武器伤害独立倍率；按近战/远程面板独立增伤各自成因子计入",
+        included: ["武器伤害"],
     },
     2010: {
         buffs: ["升华·雷鸣重复"],

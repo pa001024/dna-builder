@@ -182,11 +182,11 @@ describe("getUniqueAffixDetailRows：手写建模专属", () => {
         expect(rows[0].value).toBe("+54%")
     })
 
-    it("2001：建模值 9（×10 独立倍率口径）按既有格式化输出", () => {
+    it("2001：建模值 9（Normal 增伤池口径）按既有格式化输出", () => {
         const modeled = getAffixModeledValues(2001)
         const rows = getUniqueAffixDetailRows(affixById(2001), roll(2001, { rollLevel: 1 }), 1, translate, gameText)
 
-        expect(rows[0]).toMatchObject({ name: "下落独立增伤", value: formatModeledAffixValue(modeled[0]) })
+        expect(rows[0]).toMatchObject({ name: "下落增伤", value: formatModeledAffixValue(modeled[0]) })
     })
 })
 

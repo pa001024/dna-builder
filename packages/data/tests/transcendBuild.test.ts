@@ -81,15 +81,15 @@ describe("U43 手写词条数值零影响", () => {
     /** 真正的远程目标（20201 射击 → 子弹伤害） */
     const rangedShot: DpsOptions = { charName: "赛琪", baseName: "射击", targetFunction: "子弹伤害" }
 
-    it("2001：下落攻击按 ×10 独立乘区计入（官方 FallAttackRateAdd=9）", () => {
+    it("2001：下落攻击按 Normal 增伤池计入（上游 FallAttackRateAdd=9 写 Normal 区）", () => {
         const current = attrOf("升华·螺旋跃击")
 
-        expect(current).toEqual({ 下落独立增伤: 9 })
-        // 独立乘区：(1 + 9) = 10 倍，不受增伤池基数影响
+        expect(current).toEqual({ 下落增伤: 9 })
+        // 增伤池加算：池基数 1 时 +9 → ×10；与既有增伤同池稀释，不是独立因子
         expect(dps(current, meleePlunge) / dps({}, meleePlunge)).toBeCloseTo(10, 6)
-        // 加算键会被既有增伤池稀释（{增伤: 1} 下 +900% 只有 5.5 倍），独立键不受池基数影响
         expect(dps({ 增伤: 1, 近战下落增伤: 9 }, meleePlunge) / dps({ 增伤: 1 }, meleePlunge)).toBeCloseTo(5.5, 6)
-        expect(dps({ 增伤: 1, 下落独立增伤: 9 }, meleePlunge) / dps({ 增伤: 1 }, meleePlunge)).toBeCloseTo(10, 6)
+        // 稀释校验：{增伤:1} 下 下落增伤:9 同样只有 (1+1+9)/(1+1) = 5.5 倍
+        expect(dps({ 增伤: 1, 下落增伤: 9 }, meleePlunge) / dps({ 增伤: 1 }, meleePlunge)).toBeCloseTo(5.5, 6)
     })
 
     it("2001：同律近战/继承型同律面板不翻倍（裸键只计一次）", () => {
@@ -160,12 +160,17 @@ describe("U43 手写词条数值零影响", () => {
         expect(dps(current, rangedShot) / dps({}, rangedShot)).toBeCloseTo(1, 9)
     })
 
-    it("2009：充盈威力溢出的 11.1% 按武器独立乘区计入", () => {
+    it("2009：充盈威力溢出的 11.1% 按增伤池武器伤害计入（非独立乘区）", () => {
         const expression = "0.111*max(0,充盈威力-1)"
-        const attrs = { 充盈威力: 1, 近战独立增伤: expression, 远程独立增伤: expression }
+        const attrs = { 充盈威力: 1, 武器伤害: expression }
 
+        // 增伤池加算：池基数为 1 时 +0.111 → ×1.111；与既有增伤同池稀释，不按独立因子相乘
         expect(dps(attrs, meleePlunge) / dps({ 充盈威力: 1 }, meleePlunge)).toBeCloseTo(1.111, 6)
         expect(dps(attrs, rangedShot) / dps({ 充盈威力: 1 }, rangedShot)).toBeCloseTo(1.111, 6)
+        // 同池稀释校验：预置 {增伤:1,武器伤害:0.5} 时再叠 +0.111，比例是 (2.611/2.5) 而非 ×1.111
+        const stacked = { 充盈威力: 1, 增伤: 1, 武器伤害: 0.5 }
+        const stackedWith = { ...stacked, 武器伤害: `0.5+${expression}` }
+        expect(dps(stackedWith, meleePlunge) / dps(stacked, meleePlunge)).toBeCloseTo(2.611 / 2.5, 6)
     })
 })
 
@@ -173,12 +178,11 @@ describe("U83c 手写 BUFF 语义修复", () => {
     const attrOf = (name: string) => TRANSCEND_BUFFS.find(buff => buff.名称 === name)!.attr ?? {}
 
     it("P0 键位与量纲对齐上游", () => {
-        expect(attrOf("升华·螺旋跃击")).toEqual({ 下落独立增伤: 9 })
+        expect(attrOf("升华·螺旋跃击")).toEqual({ 下落增伤: 9 })
         expect(attrOf("升华·连击暴击")).toEqual({ 近战普攻独立增伤: 0.32 })
         expect(attrOf("升华·火属性弱点")).toEqual({ 火属性弱点: 0.54 })
         expect(attrOf("升华·充盈转武伤")).toEqual({
-            近战独立增伤: "0.111*max(0,充盈威力-1)",
-            远程独立增伤: "0.111*max(0,充盈威力-1)",
+            武器伤害: "0.111*max(0,充盈威力-1)",
         })
         expect(attrOf("升华·四属追伤")).toEqual({ 水属性追伤: 1, 火属性追伤: 1, 风属性追伤: 1, 雷属性追伤: 1 })
         expect(attrOf("升华·形神穿透")).toEqual({ 属性穿透: "0.0336*技能威力" })
