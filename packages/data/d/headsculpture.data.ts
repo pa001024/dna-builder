@@ -205,6 +205,12 @@ export const headSculptureData: HeadSculpture[] = [
         icon: "T_Head_Kajia",
     },
     {
+        id: 10035,
+        name: "逐灯者的肖像·浴火",
+        desc: "可将头像更换为黎瑟·浴火的形象。",
+        icon: "T_Head_SPLise",
+    },
+    {
         id: 20001,
         name: "播种之人的肖像·仲夏",
         desc: '可将头像更换为"梦中的舞会"的形象。',

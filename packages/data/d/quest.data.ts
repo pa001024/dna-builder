@@ -111251,6 +111251,14 @@ export const questData: QuestStory[] = [
                 desc: "利诱收买卡诺的行动受挫后，卡嘉似乎信心十足，表示一切都在掌握之中。\n现在，她要带着哈洛吉穿越地下锻铁厂，去看一场“好戏”。",
                 nodes: [
                     {
+                        id: "17954167804323462165",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_4/0166_story_danger",
+                        srId: 106301,
+                        pos: [-11815, 8232],
+                    },
+                    {
                         id: "17897233236675741076",
                         type: "TalkNode",
                         name: "对话节点",
@@ -111305,6 +111313,14 @@ export const questData: QuestStory[] = [
                 name: "“好戏”开演",
                 desc: "利诱收买卡诺的行动受挫后，卡嘉似乎信心十足，表示一切都在掌握之中。\n卡嘉带着哈洛吉从地下锻铁厂潜入到百花车站中，按照她的说法，主演已经就位，好戏即将上演。",
                 nodes: [
+                    {
+                        id: "17954176240398649271",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_4/0166_story_danger",
+                        srId: 106001,
+                        pos: [-38435, -6345],
+                    },
                     {
                         id: "17898953346311161422",
                         type: "TalkNode",
@@ -111537,7 +111553,22 @@ export const questData: QuestStory[] = [
                         srId: 106001,
                         pos: [-87937, -11559],
                     },
+                    {
+                        id: "179541772354210377516",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_4/0168_boss_haluoji",
+                        srId: 106001,
+                        pos: [-87937, -11559],
+                    },
+                    {
+                        id: "1795435204139525",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_4/0168_boss_haluoji",
+                    },
                 ],
+                startIds: ["17899755686476918515", "179541772354210377516"],
             },
             {
                 id: 12080107,
@@ -111545,9 +111576,22 @@ export const questData: QuestStory[] = [
                 desc: "执行一场处决，清除蛀虫。",
                 nodes: [
                     {
+                        id: "179541790601215561753",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/1_4/0166_story_danger",
+                    },
+                    {
                         id: "17899903178253459256",
                         type: "TalkNode",
                         name: "SQ_Task_12082200",
+                        next: ["17954181832821935"],
+                    },
+                    {
+                        id: "17954181832821935",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "bgm/cbt03/0080_story_the_abandoned_theme",
                         next: ["17899909664583461994"],
                     },
                     {

@@ -13896,6 +13896,48 @@ const t: Reward[] = [
         ],
     },
     {
+        id: 12092,
+        m: "Fixed",
+        child: [
+            {
+                id: 320301,
+                t: "Skin",
+                c: 1,
+                n: "恶作剧天使",
+            },
+            {
+                id: 3011104,
+                t: "WeaponSkin",
+                c: 1,
+                n: "德古喵",
+            },
+            {
+                id: 20113,
+                t: "CharAccessory",
+                c: 1,
+                n: "恶作剧脉动·白樱",
+            },
+            {
+                id: 40101,
+                t: "CharAccessory",
+                c: 1,
+                n: "恶作剧手杖·白樱",
+            },
+            {
+                id: 70088,
+                t: "CharAccessory",
+                c: 1,
+                n: "邪魅足迹·白樱",
+            },
+            {
+                id: 80074,
+                t: "CharAccessory",
+                c: 1,
+                n: "邪恶同伙·白樱",
+            },
+        ],
+    },
+    {
         id: 12093,
         m: "Fixed",
         child: [
