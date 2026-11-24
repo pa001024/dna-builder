@@ -1,5 +1,5 @@
 import { CharBuild, type CharBuildOptions, type DotFrequencySettings } from "./CharBuild"
-import { type CharSettings, type CharSkillLevels, normalizeCharSkillLevels } from "./charSettings"
+import { type CharSettings, type CharSkillLevels, normalizeCharSkillLevels, normalizeEffectiveSkillLevels } from "./charSettings"
 import type { Buff, Char, Mod, Weapon } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { LeveledChar } from "./leveled/LeveledChar"
@@ -210,7 +210,7 @@ function migrateLegacySkillLevel(snapshot: CharBuildWorkerSnapshot): {
     baseSkillLevel: CharSkillLevels
     buffs: CharBuildWorkerSnapshot["buffs"]
 } {
-    const final = normalizeCharSkillLevels(snapshot.skillLevel ?? 10)
+    const final = normalizeEffectiveSkillLevels(snapshot.skillLevel ?? 10)
     const bonus = normalizeSkillLevelBonus(snapshot.skillLevelBonus)
     if (!bonus.some(Boolean)) return { baseSkillLevel: final, buffs: snapshot.buffs }
     const base = final.map((value, index) => value - bonus[index]) as CharSkillLevels

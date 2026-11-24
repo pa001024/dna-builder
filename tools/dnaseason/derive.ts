@@ -592,6 +592,15 @@ const SKILL_LEVEL_SLOT_TYPES: Record<string, { main?: readonly number[]; assist?
     Passive: { main: [6], assist: [10] },
 }
 
+/**
+ * 已知的无池随机词条部位映射（用户实证）：1030 赛季增伤可在靴子(4) / 项链(6) / 戒指(7) 出现，
+ * 1031 属性穿透只在戒指(7)；未确认部位不输出，待现场证据补齐，不臆造。
+ */
+const NO_POOL_RANDOM_AFFIX_SLOT_TYPES: Record<number, readonly number[]> = {
+    1030: [4, 6, 7],
+    1031: [7],
+}
+
 function deriveEquipModule(source: Json, warnings: string[]): Record<string, unknown> {
     const pools = new Map<number, string>(source.affixPools.map((pool: Json) => [pool.id, pool.name]))
 
@@ -634,6 +643,12 @@ function deriveEquipModule(source: Json, warnings: string[]): Record<string, unk
             if (slotTypes.length) {
                 next.slotTypes = slotTypes
             }
+        }
+        // 无池 Plan 2 随机词条（1030/1031）同样没有 AffixPoolId，部位适用性只能本地手写；
+        // 目前只确认靴子 / 项链 / 戒指，未确认部位不输出。
+        const randomSlotTypes = affix.plan === 2 && affix.pool === undefined ? NO_POOL_RANDOM_AFFIX_SLOT_TYPES[affix.id] : undefined
+        if (randomSlotTypes) {
+            next.slotTypes = [...new Set(randomSlotTypes)].sort((left, right) => left - right)
         }
         const exclusionAffixIds = uniqSorted(affix.exclusionAffixIds)
         if (exclusionAffixIds) {

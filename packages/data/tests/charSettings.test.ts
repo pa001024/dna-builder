@@ -204,7 +204,7 @@ describe("normalizeCharSettings 协战补齐（U88a）", () => {
         const settings = normalizeCharSettings(dirty)
 
         expect(settings.assist1.charLevel).toBe(80)
-        expect(settings.assist1.charSkillLevel).toEqual([12, 12, 12])
+        expect(settings.assist1.charSkillLevel).toEqual([10, 10, 10])
         expect(settings.assist1.weaponLevel).toBe(80)
         expect(settings.assist1.weaponRefine).toBe(0)
         expect(settings.assist1.auraMod).toBe(0)

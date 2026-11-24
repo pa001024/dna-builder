@@ -1201,24 +1201,26 @@ fn optional_id(value: Option<&Value>) -> Option<i64> {
 
 /// 技能等级下限；对应上游 `CHAR_SKILL_LEVEL_MIN`。
 pub const CHAR_SKILL_LEVEL_MIN: f64 = 1.0;
-/// 技能等级上限；对应上游 `CHAR_SKILL_LEVEL_MAX`（源数据 `DataConst.MaxSkillLevel`）。
+/// 基础技能等级上限（游戏内升级 1–10）；对应上游 `CHAR_SKILL_LEVEL_BASE_MAX`。
+pub const CHAR_SKILL_LEVEL_BASE_MAX: f64 = 10.0;
+/// 有效技能等级上限；对应上游 `CHAR_SKILL_LEVEL_MAX`（源数据 `DataConst.MaxSkillLevel`）。
 pub const CHAR_SKILL_LEVEL_MAX: f64 = 30.0;
 /// 技能等级默认值（E/Q/被动均为 10 级）；对应上游 `CHAR_SKILL_LEVEL_DEFAULT`。
 pub const CHAR_SKILL_LEVEL_DEFAULT: f64 = 10.0;
 
-/// 钳制到 1-30 并取整；对应上游 `normalizeCharSkillLevels` 内的 `clamp`。
+/// 基础等级钳制到 1-10 并取整；对应上游 `normalizeCharSkillLevels` 内的 `clamp`。
 fn clamp_skill_level(value: f64, fallback: f64) -> f64 {
     if !value.is_finite() {
         return fallback;
     }
     value
         .round()
-        .clamp(CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
+        .clamp(CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_BASE_MAX)
 }
 
-/// 归一化技能等级为 `[E, Q, 被动]` 三元组；对应上游 `normalizeCharSkillLevels`。
+/// 归一化基础技能等级为 `[E, Q, 被动]` 三元组；对应上游 `normalizeCharSkillLevels`。
 ///
-/// 兼容老格式：单个数字视为三项相同；数组缺项用首项补齐，各项钳制到 1-30
+/// 兼容老格式：单个数字视为三项相同；数组缺项用首项补齐，各项钳制到 1-10
 /// 并取整（非有限值同样回落首项，首项非法时回落默认值）。
 pub fn normalize_skill_levels(value: &Value) -> [f64; 3] {
     if let Some(number) = value.as_f64() {
@@ -1399,31 +1401,31 @@ mod tests {
 
     #[test]
     fn skill_levels_normalize_number_and_array() {
-        // 老格式单个数字 → 三项相同
-        assert_eq!(normalize_skill_levels(&json!(12)), [12.0, 12.0, 12.0]);
+        // 老格式单个数字 → 三项相同；基础等级上限 10（旧档 12 = 10 基础 + 2 溯源）
+        assert_eq!(normalize_skill_levels(&json!(12)), [10.0, 10.0, 10.0]);
         assert_eq!(normalize_skill_levels(&json!(10)), [10.0, 10.0, 10.0]);
         // 数组缺项用首项补齐
-        assert_eq!(normalize_skill_levels(&json!([12])), [12.0, 12.0, 12.0]);
-        assert_eq!(normalize_skill_levels(&json!([12, 10])), [12.0, 10.0, 12.0]);
-        // 钳制到 1-30 并取整（13.6 → 14，不再被 12 截断）
+        assert_eq!(normalize_skill_levels(&json!([12])), [10.0, 10.0, 10.0]);
+        assert_eq!(normalize_skill_levels(&json!([12, 10])), [10.0, 10.0, 10.0]);
+        // 钳制到 1-10 并取整
         assert_eq!(
             normalize_skill_levels(&json!([0, 13.6, 5.4])),
-            [1.0, 14.0, 5.0]
+            [1.0, 10.0, 5.0]
         );
-        // 上限 30：31 截断到 30
+        // 上限 10：31 / 29.4 截断到 10
         assert_eq!(
             normalize_skill_levels(&json!([0, 31, 29.4])),
-            [1.0, 30.0, 29.0]
+            [1.0, 10.0, 10.0]
         );
         // 非法值回落（首项非法 → 默认值，其余 → 首项）
         assert_eq!(normalize_skill_levels(&json!(null)), [10.0, 10.0, 10.0]);
         assert_eq!(
             normalize_skill_levels(&json!([12, "x", null])),
-            [12.0, 12.0, 12.0]
+            [10.0, 10.0, 10.0]
         );
         // JSON 解析入口同样归一化
         let settings = CharSettings::from_json(&json!({"charSkillLevel": [12, 10]}));
-        assert_eq!(settings.char_skill_level, [12.0, 10.0, 12.0]);
+        assert_eq!(settings.char_skill_level, [10.0, 10.0, 10.0]);
         let settings = CharSettings::from_json(&json!({"charSkillLevel": 9}));
         assert_eq!(settings.char_skill_level, [9.0, 9.0, 9.0]);
     }

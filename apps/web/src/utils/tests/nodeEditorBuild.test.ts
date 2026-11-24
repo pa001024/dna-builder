@@ -905,7 +905,7 @@ describe("nodeEditorBuild 协战 loadout 往返（U88a-fix）", () => {
 
         const firstSkill = charMap.get(CHAR_ID)?.技能?.[0]?.名称 ?? ""
         expect(firstSkill).not.toBe("")
-        expect(settings.assist1.charSkillLevel).toEqual([12, 12, 12])
+        expect(settings.assist1.charSkillLevel).toEqual([10, 10, 10])
         expect(settings.assist1.charMods).toEqual(Array(8).fill(null))
         expect(settings.assist1.baseName).toBe(firstSkill)
         expect(settings.assist2.enabled).toBe(false)

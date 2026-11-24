@@ -4910,6 +4910,7 @@ const rawAffixes: DnaSeasonAffix[] = [
         maxAffixUpdateFunc: {
             Multi: 1.1,
         },
+        slotTypes: [4, 6, 7],
         planName: "随机词缀",
     },
     {
@@ -4935,6 +4936,7 @@ const rawAffixes: DnaSeasonAffix[] = [
         maxAffixUpdateFunc: {
             Multi: 1.1,
         },
+        slotTypes: [7],
         planName: "随机词缀",
     },
     {

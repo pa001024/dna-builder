@@ -1,9 +1,10 @@
 //! 自动配装对齐回归：与 TS `benchmark-autobuild.ts` 同输入同结果。
 //!
 //! 起始 lise_fire 推荐构筑 + 全量 514 候选 + 三槽全搜 + 武器固定。
-//! TS 基线（同输入复刻 TS autoBuild，U112 追伤分池后重采）：`target=7763062382.357427 slots=8/0/8`。
+//! TS 基线（同输入复刻 TS autoBuild，U112 追伤分池后重采）：`target=7889096288.612461 slots=8/0/8`。
 //! 夹具 request 已按 `normalizeCharSettings` 刷新（补齐 assist1/assist2 默认 loadout，
-//! 跨角色技能字段 `拂玄穹::造成伤害提高` 才能按 peer 求值）。
+//! 跨角色技能字段 `拂玄穹::造成伤害提高` 才能按 peer 求值）；2026-11-24 基础等级上限修正为 10
+//! 后用 `withWasmTranscendPayload` 重新生成（基础 10 + 溯源 E/Q/P +2），与 TS 基准同输入。
 //! 求索改按角色面板结算后，旧 8 件近战楔（经武器面板喂求索的收益）全部归零，近战槽置空。
 //! Rust 曾因条件预热/排序逻辑与上游失配给出 8556M（错误结果），此处锁定：
 //! 1. 目标值逐位一致；2. 三槽 id 集合一致（顺序是收益序，允许不同）。
@@ -74,7 +75,7 @@ fn autobuild_matches_ts_baseline() {
     let target = evaluated.target_value;
     assert_eq!(
         target.to_bits(),
-        7763062382.357427f64.to_bits(),
+        7889096288.612461f64.to_bits(),
         "autobuild 目标值与 TS 基线逐位一致"
     );
     assert_eq!(

@@ -104,6 +104,17 @@ describe("升华槽位口径", () => {
         expect(getAffixSlotTypes(1514)).toEqual([8, 9, 10, 11])
         expect(isAffixCompatibleWithSlot(1514, 9)).toBe(true)
         expect(isAffixCompatibleWithSlot(1514, 3)).toBe(false)
+        // 无池 Plan 2 随机词条按导入期手写映射：1030 赛季增伤 = 靴子 / 项链 / 戒指，1031 属性穿透 = 戒指
+        expect(affixes.find(item => item.id === 1030)?.slotTypes).toEqual([4, 6, 7])
+        expect(affixes.find(item => item.id === 1031)?.slotTypes).toEqual([7])
+        expect(getAffixSlotTypes(1030)).toEqual([4, 6, 7])
+        expect(getAffixSlotTypes(1031)).toEqual([7])
+        // 装备位 4/6/7 为靴子 / 项链 / 戒指
+        expect(isAffixCompatibleWithSlot(1030, 4)).toBe(true)
+        expect(isAffixCompatibleWithSlot(1031, 7)).toBe(true)
+        expect(isAffixCompatibleWithSlot(1030, 1)).toBe(false)
+        expect(isAffixCompatibleWithSlot(1031, 4)).toBe(false)
+        expect(isAffixCompatibleWithSlot(1031, 9)).toBe(false)
     })
 
     it("不能装备到槽型的词条被丢弃并给出警告", () => {
@@ -678,8 +689,8 @@ describe("规范属性名（U14 上游导出）", () => {
         expect(mapTranscendAttr("增伤")).toEqual({ key: "增伤", status: "exact" })
         // Almighty 分区归 属性穿透
         expect(mapTranscendAttr("属性穿透", { rateZone: "Almighty" })).toEqual({ key: "属性穿透", status: "exact" })
-        // 真实词缀 1030
-        const result = resolveGearEffects([gear({ slotId: 1, affixId: 1030, rollLevel: 1 })], "main")
+        // 真实词缀 1030（导入期部位映射：靴子 / 项链 / 戒指）
+        const result = resolveGearEffects([gear({ slotId: 4, affixId: 1030, rollLevel: 1 })], "main")
         expect(result.entries[0].status).toBe("exact")
         expect(result.attrs.赛季增伤).toBeCloseTo(0.0625, 9)
         // 不再进普通增伤池

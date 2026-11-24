@@ -26,9 +26,25 @@ fn full_tables() -> Option<BuildTables> {
 
 fn fixture_request() -> BuildRequest {
     let fixture = load_fixture("dobapp_lieseBathfire1");
+    // 收益锚点按旧夹具口径（基础 12 = 基础 10 + 三层 +2）录制；用合成载荷把有效等级补回 12，
+    // 不引入溯源属性，保持锚点不变（夹具主设置已带溯源载荷，见 golden_bits 注释）。
+    let mut settings = fixture["request"]["originalSettings"].clone();
+    settings["transcendEffects"] = serde_json::json!({
+        "main": {
+            "buffs": [{
+                "data": {
+                    "名称": "测试技能等级",
+                    "attr": {"E技能等级": 2, "Q技能等级": 2, "P技能等级": 2}
+                },
+                "level": 1
+            }],
+            "skillReplacements": {}
+        }
+    });
+    settings["transcendSide"] = serde_json::Value::String("main".to_string());
     BuildRequest::from_json(&serde_json::json!({
         "charId": fixture["request"]["charId"],
-        "settings": fixture["request"]["settings"],
+        "settings": settings,
     }))
     .expect("夹具 request 形状非法")
 }

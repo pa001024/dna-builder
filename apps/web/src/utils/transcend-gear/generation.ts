@@ -132,7 +132,7 @@ export function getUniqueAffixIds(): Set<number> {
 
 /**
  * 某槽型可用于新建的随机词缀池：仅 Plan 2、有池且池在槽位淬炼池内；
- * 排除宝石、专属、Plan 1/3 与无池词缀（1030/1031 等）。
+ * 排除宝石、专属、Plan 1/3 与无池词缀（1030/1031 等，按显式 `slotTypes` 另走候选）。
  * @param slotType 槽型 id
  * @returns 按池 / id 排序的词缀
  */
@@ -153,17 +153,21 @@ export function getRandomAffixPool(slotType: number): DnaSeasonAffix[] {
 }
 
 /**
- * 某槽型的随机词缀候选（做装 / OCR 用）：Plan 2 槽位池内词条 + 带 `slotTypes` 且命中该槽型的 Plan 3 词条
- * （导入期本地建模：技能等级词条 1038-1040 / 1510-1512 按已知部位映射）。`getRandomAffixPool` 保持 Plan 2 语义，
- * 附魔候选与洗练池展示仍用它。
+ * 某槽型的随机词缀候选（做装 / OCR 用）：`getRandomAffixPool` 的 Plan 2 池 + 带 `slotTypes` 且命中该槽型的
+ * Plan 2/3 词条（导入期本地建模：1030/1031 靴子 / 项链 / 戒指，技能等级 1038-1040 / 1510-1512 按已知部位）。
+ * 附魔候选与洗练池展示复用 `getRandomAffixPool`。
  * @param slotType 槽型 id
  * @returns 池内词缀（按池 / id）+ 显式槽型词条（按 id）
  */
 export function getGearRandomAffixPool(slotType: number): DnaSeasonAffix[] {
     const slot = Math.round(slotType)
-    const explicit = affixes.filter(affix => affix.plan === 3 && affix.slotTypes?.includes(slot)).sort((left, right) => left.id - right.id)
-    if (!explicit.length) return getRandomAffixPool(slot)
-    return [...getRandomAffixPool(slot), ...explicit]
+    const pool = getRandomAffixPool(slot)
+    const poolIds = new Set(pool.map(affix => affix.id))
+    const explicit = affixes
+        .filter(affix => (affix.plan === 2 || affix.plan === 3) && affix.slotTypes?.includes(slot) && !poolIds.has(affix.id))
+        .sort((left, right) => left.id - right.id)
+    if (!explicit.length) return pool
+    return [...pool, ...explicit]
 }
 
 /**
@@ -514,13 +518,13 @@ export function isAffixAllowedForChar(affix: DnaSeasonAffix, charId: number): bo
 }
 
 /**
- * 判断随机词缀是否合法：条数不超过品质上限、Plan 2 且在槽位池内（或带 `slotTypes` 命中该槽型的 Plan 3）、
+ * 判断随机词缀是否合法：条数不超过品质上限、Plan 2 且在槽位池内（或带 `slotTypes` 命中该槽型的 Plan 2/3）、
  * 角色专属词缀匹配当前角色、无重复、无排斥。淬炼不占随机条数；附魔替换随机词条，因此占用随机名额并计入总词条上限
  * （基础 + 其它 + 淬炼 ≤ `TRANSCEND_MAX_ITEM_AFFIXES`，与归一化裁剪口径一致）。
  * 「其它」词条另受数据层单件 4 条硬上限约束，不依赖品质 `minAffixCount`，避免归一化静默截断。
  * 数据表缺失的未知词条允许保留（编辑旧物品），但仍占用随机条数。
  * `allowOutOfPool` 只放宽 Plan 2 的「必须在槽位池」一条（OCR 导入的池外词缀按截图保留），
- * 不放宽 Plan 3 的 `slotTypes` 归属（未命中 `slotTypes` 的 Plan 3 仍被拒），其余规则不变。
+ * 不放宽显式 `slotTypes` 归属（未命中 `slotTypes` 的 Plan 2/3 仍被拒），其余规则不变。
  * @param slotType 槽型 id
  * @param rolls 随机词缀
  * @param maxRandom 条数上限
@@ -551,7 +555,8 @@ function isValidRandomAffixes(
     for (const id of ids) {
         const affix = affixes.find(item => item.id === id)
         if (!affix) continue
-        if (affix.plan === 3 && affix.slotTypes?.length) {
+        if (affix.slotTypes?.length) {
+            if (affix.plan !== 2 && affix.plan !== 3) return false
             if (!affix.slotTypes.includes(slot)) return false
         } else {
             if (affix.plan !== 2) return false

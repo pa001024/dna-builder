@@ -6,6 +6,7 @@ import {
     decodeTranscendGearCode,
     encodeTranscendGearCode,
     getGearCraftState,
+    getGearTemperingAffixPool,
     getSlotMaxInlayCount,
     inlays,
     normalizeGearItem,
@@ -103,6 +104,41 @@ describe("品质与生成规则", () => {
         const pool = getRandomAffixPool(8)
         expect(pool.length).toBeGreaterThan(0)
         expect(pool.every(affix => affix.pool === 211)).toBe(true)
+    })
+
+    it("无池随机词条按显式 slotTypes 进入候选：1030 靴子 / 项链 / 戒指，1031 只戒指，且不进淬炼池", () => {
+        const seasonSlots = [4, 6, 7]
+        for (const slot of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+            const ids = getGearRandomAffixPool(slot).map(affix => affix.id)
+            expect(ids.includes(1030), `槽型 ${slot}`).toBe(seasonSlots.includes(slot))
+            expect(ids.includes(1031), `槽型 ${slot}`).toBe(slot === 7)
+            const temperIds = getGearTemperingAffixPool(slot).map(affix => affix.id)
+            expect(temperIds, `槽型 ${slot}`).not.toContain(1030)
+            expect(temperIds, `槽型 ${slot}`).not.toContain(1031)
+            // Plan 2 语义的旧池（附魔 / 洗练池展示）仍不含无池词条
+            expect(
+                getRandomAffixPool(slot).some(affix => affix.id === 1030 || affix.id === 1031),
+                `槽型 ${slot}`
+            ).toBe(false)
+        }
+        const byId = (id: number) => affixes.find(affix => affix.id === id)!
+        const draft = (slotType: number, ids: number[]) => ({
+            rarityId: 5,
+            equipBaseScore: 50,
+            iconId: getBaseNameOptions(slotType)[0].id,
+            randomAffixes: ids.map(affixId => createAffixRoll(byId(affixId), "random", 50)),
+        })
+        for (const slot of seasonSlots) expect(isGearDraftValid(slot, draft(slot, [1030]))).toBe(true)
+        expect(isGearDraftValid(7, draft(7, [1031]))).toBe(true)
+        for (const slot of [4, 6]) {
+            expect(isGearDraftValid(slot, draft(slot, [1031]))).toBe(false)
+            expect(isGearDraftValid(slot, draft(slot, [1031]), 0, { allowOutOfPool: true })).toBe(false)
+        }
+        for (const slot of [1, 3, 9, 11]) {
+            expect(isGearDraftValid(slot, draft(slot, [1030]))).toBe(false)
+            expect(isGearDraftValid(slot, draft(slot, [1031]))).toBe(false)
+            expect(isGearDraftValid(slot, draft(slot, [1031]), 0, { allowOutOfPool: true })).toBe(false)
+        }
     })
 
     it("随机候选池按 slotTypes 追加技能等级词条：只进各自部位", () => {

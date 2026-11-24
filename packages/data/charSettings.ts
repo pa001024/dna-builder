@@ -39,22 +39,26 @@ export type CharSkillLevels = [number, number, number]
 
 /** 技能等级下限 */
 export const CHAR_SKILL_LEVEL_MIN = 1
-/** 技能等级上限（源数据 `DataConst.MaxSkillLevel`） */
+/**
+ * 基础技能等级上限：游戏内技能升级只有 1–10 级（每个技能 9 档升级）。
+ * 构筑设置里的 `charSkillLevel` 只存基础等级；溯源 / 升华等加成在装配期叠加。
+ */
+export const CHAR_SKILL_LEVEL_BASE_MAX = 10
+/** 有效技能等级上限（源数据 `DataConst.MaxSkillLevel`，技能数值曲线 1–30） */
 export const CHAR_SKILL_LEVEL_MAX = 30
 /** 技能等级默认值（E/Q/被动均为 10 级） */
 export const CHAR_SKILL_LEVEL_DEFAULT = 10
 
 /**
- * 归一化技能等级为 `[E, Q, 被动]` 三元组（原地返回新数组，不修改入参）。
- * 兼容老格式：单个数字视为三项相同（如 `12` → `[12, 12, 12]`）。
- * 数组缺项时用首项（无首项则用默认值）补齐，各项钳制到 1-30 并取整。
+ * 技能等级归一化的公共实现：兼容数字与稀疏数组，按给定上限钳制并取整。
  * @param value 原始技能等级（数字 | 数组 | 其他）
+ * @param max 上限（基础等级 10 / 有效等级 30）
  * @returns 归一化后的三元组
  */
-export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
+function normalizeSkillLevelsWithMax(value: unknown, max: number): CharSkillLevels {
     const clamp = (level: unknown, fallback: number): number => {
         if (!Number.isFinite(level)) return fallback
-        return Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(CHAR_SKILL_LEVEL_MAX, Math.round(level as number)))
+        return Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(max, Math.round(level as number)))
     }
     if (Number.isFinite(value)) {
         const level = clamp(value, CHAR_SKILL_LEVEL_DEFAULT)
@@ -62,8 +66,8 @@ export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
     }
     if (Array.isArray(value)) {
         const first = clamp((value as unknown[])[0], CHAR_SKILL_LEVEL_DEFAULT)
-        const levels = [0, 1, 2].map(index => clamp((value as unknown[])[index], index === 0 ? first : first)) as CharSkillLevels
-        // 缺项回填：缺失项沿用首项（首项本身已是合法值），保证 `[12]` → `[12, 12, 12]`
+        const levels = [0, 1, 2].map(index => clamp((value as unknown[])[index], first)) as CharSkillLevels
+        // 缺项回填：缺失项沿用首项（首项本身已是合法值），保证 `[10]` → `[10, 10, 10]`
         for (let index = 0; index < 3; index++) {
             if (!Number.isFinite((value as unknown[])[index])) {
                 levels[index] = index === 0 ? first : levels[0]
@@ -75,6 +79,28 @@ export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
 }
 
 /**
+ * 归一化基础技能等级为 `[E, Q, 被动]` 三元组（原地返回新数组，不修改入参）。
+ * 兼容老格式：单个数字视为三项相同（如 `10` → `[10, 10, 10]`）。
+ * 数组缺项时用首项（无首项则用默认值）补齐，各项钳制到 1-10 并取整；
+ * 旧档里把溯源加成算进基础等级的超限值（如 12）会回落到 10，再由溯源重新叠加。
+ * @param value 原始技能等级（数字 | 数组 | 其他）
+ * @returns 归一化后的三元组
+ */
+export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
+    return normalizeSkillLevelsWithMax(value, CHAR_SKILL_LEVEL_BASE_MAX)
+}
+
+/**
+ * 归一化有效技能等级为 `[E, Q, 被动]` 三元组：基础等级 + 溯源 / 升华加成后的读数，钳制到 1-30。
+ * 仅供读取已装配的最终等级（快照迁移 / 展示），不要用于设置输入。
+ * @param value 原始有效等级（数字 | 数组 | 其他）
+ * @returns 归一化后的三元组
+ */
+export function normalizeEffectiveSkillLevels(value: unknown): CharSkillLevels {
+    return normalizeSkillLevelsWithMax(value, CHAR_SKILL_LEVEL_MAX)
+}
+
+/**
  * 按角色技能索引取对应的技能等级：0→E，1→Q，2 及之后→被动。
  * 索引越界（角色技能多于 3 个，如第二被动/协战）时沿用被动等级，保证计算不丢等级。
  * @param levels 归一化后的技能等级三元组（兼容老格式数字）
@@ -82,7 +108,8 @@ export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
  * @returns 该技能的等级
  */
 export function resolveCharSkillLevel(levels: CharSkillLevels | number | readonly number[] | unknown, index: number): number {
-    const normalized = normalizeCharSkillLevels(levels)
+    // 读的是已装配的有效等级（基础 + 溯源 / 升华加成），按 1-30 归一化；基础输入上限在 normalizeCharSkillLevels 里
+    const normalized = normalizeEffectiveSkillLevels(levels)
     if (!Number.isInteger(index) || index <= 0) return normalized[0]
     if (index === 1) return normalized[1]
     return normalized[2]

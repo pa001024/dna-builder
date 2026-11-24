@@ -25,6 +25,7 @@ export type {
 } from "@/data/charSettings"
 export {
     addModVariant,
+    CHAR_SKILL_LEVEL_BASE_MAX,
     CHAR_SKILL_LEVEL_DEFAULT,
     CHAR_SKILL_LEVEL_MAX,
     CHAR_SKILL_LEVEL_MIN,

@@ -40,9 +40,16 @@ function createSettings(patch: Partial<CharSettings> = {}): CharSettings {
     })
 }
 
-/** 菲娜主控配置：Q 等级可调，带一条菲娜Q */
+/** 菲娜主控配置：Q 有效等级可调，带一条菲娜Q；超过基础上限 10 的部分用三键自定义 BUFF 补 */
 function feinaSettings(qLevel: number, patch: Partial<CharSettings> = {}): CharSettings {
-    return createSettings({ charSkillLevel: [10, qLevel, 10], buffs: [["菲娜Q", 12]], ...patch })
+    const base = Math.min(qLevel, 10)
+    const extra: [string, number][] = qLevel > base ? [["自定义BUFF", 1]] : []
+    return createSettings({
+        charSkillLevel: [10, base, 10],
+        customBuff: qLevel > base ? [["Q技能等级", qLevel - base]] : [],
+        buffs: [["菲娜Q", 12], ...extra],
+        ...patch,
+    })
 }
 
 const CHASE_KEYS = ["水属性追伤", "火属性追伤", "雷属性追伤", "风属性追伤"] as const
@@ -103,7 +110,15 @@ describe("等级来源联动（主控 / 协战）", () => {
         expect(q10.calculateWeaponAttributes(q10.meleeWeapon).weapon!.水属性追伤).toBeCloseTo(0.15, 9)
         expect(q10.buffs.find(buff => buff.名称 === "菲娜Q")!.等级).toBe(10)
 
-        const raised = normalizeCharSettings({ ...settings, assist1: { ...settings.assist1, charSkillLevel: [10, 20, 10] } })
+        const raised = normalizeCharSettings({
+            ...settings,
+            assist1: {
+                ...settings.assist1,
+                charSkillLevel: [10, 10, 10],
+                customBuff: [["Q技能等级", 10]],
+                buffs: [["自定义BUFF", 1]],
+            },
+        })
         const q20 = createCharBuildFromSettings(1501, raised)
         expect(q20.calculateWeaponAttributes(q20.meleeWeapon).weapon!.水属性追伤).toBeCloseTo(0.26, 9)
         expect(q20.buffs.find(buff => buff.名称 === "菲娜Q")!.等级).toBe(20)
@@ -162,7 +177,16 @@ describe("wasm 请求副本", () => {
             buffs: [["菲娜Q", 12]],
             team1: 1801,
             team1Weapon: 20509,
-            assist1: { ...createDefaultAssistSideSettings(), traceLevel: 0, charSkillLevel: [10, 20, 10], buffs: [["菲娜被动(自身)", 1]] },
+            assist1: {
+                ...createDefaultAssistSideSettings(),
+                traceLevel: 0,
+                charSkillLevel: [10, 10, 10],
+                customBuff: [["Q技能等级", 10]],
+                buffs: [
+                    ["菲娜被动(自身)", 1],
+                    ["自定义BUFF", 1],
+                ],
+            },
         })
         const assistRequest = withWasmTranscendPayload(1501, assistSettings)
         expect(assistRequest.buffs[0]?.slice(0, 2)).toEqual(["菲娜Q", 20])

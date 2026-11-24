@@ -4881,7 +4881,8 @@ describe("赛季增伤独立乘区（词条 1030）", () => {
     })
 
     it("1030 装备属性进 赛季增伤，不并入普通增伤池", () => {
-        const result = resolveGearEffects([gear({ slotId: 1, affixId: 1030, rollLevel: 1 })], "main")
+        // 1030 的导入期部位映射为靴子 / 项链 / 戒指，装备位 4 = 靴子
+        const result = resolveGearEffects([gear({ slotId: 4, affixId: 1030, rollLevel: 1 })], "main")
         const attrs = result.attrs as Record<string, number>
         expect(attrs.赛季增伤).toBeCloseTo(0.0625, 9)
         expect(attrs.增伤).toBeUndefined()
@@ -5106,10 +5107,14 @@ describe("追伤分池（U112 §135：武器池 / 技能池不交叉）", () => 
         ] as const) {
             const build = new CharBuild({
                 char: new LeveledChar("菲娜"),
-                skillLevel: [10, qLevel, 10],
+                skillLevel: [10, 10, 10],
                 hpPercent: 1,
                 resonanceGain: 0,
-                buffs: [new LeveledBuff("菲娜Q")],
+                buffs: [
+                    new LeveledBuff("菲娜Q"),
+                    // 基础等级上限 10；Q>10 的部分用三键属性补成有效等级
+                    ...(qLevel > 10 ? [new LeveledBuff({ 名称: "测试技能等级", attr: { Q技能等级: qLevel - 10 } }, 1)] : []),
+                ],
                 melee: plainWeapon("测试近战"),
                 ranged: plainWeapon("测试远程"),
                 baseName: "测试",

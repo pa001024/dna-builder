@@ -521,7 +521,7 @@ export interface TranscendEffects {
 let affixSlotTypeCache: { source: unknown; map: Map<number, number[]>; explicit: Map<number, number[]> } | null = null
 
 /**
- * 读取词条可出现的槽型：显式 `slotTypes`（导入期本地建模，技能等级词条按已知部位映射）优先；
+ * 读取词条可出现的槽型：显式 `slotTypes`（导入期本地建模，技能等级 / 无池随机词条按已知部位映射）优先；
  * 其余按 Plan 1 槽位基础词条、Plan 2/3 淬炼池、Plan 4 唯一装与镶嵌引用推导。
  * @param affixId 词条 id
  * @returns 升序槽型列表；无推导依据时为空数组

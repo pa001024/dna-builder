@@ -3,8 +3,8 @@ import { type CharBuild, type DotFrequencySettings, defaultDotFrequencySettings 
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import {
     type AssistCharSettings,
+    CHAR_SKILL_LEVEL_BASE_MAX,
     CHAR_SKILL_LEVEL_DEFAULT,
-    CHAR_SKILL_LEVEL_MAX,
     CHAR_SKILL_LEVEL_MIN,
     type CharSettings,
     type CharSkillLevels,
@@ -1428,7 +1428,7 @@ export function normalizeNumericParamValue(paramId: string, value: number): numb
         case "skillE":
         case "skillQ":
         case "skillPassive":
-            return Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(CHAR_SKILL_LEVEL_MAX, Math.round(value)))
+            return Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(CHAR_SKILL_LEVEL_BASE_MAX, Math.round(value)))
         case "level":
             return Math.max(1, Math.min(90, Math.round(value)))
         case "refine":

@@ -39,6 +39,12 @@
 //!   （追伤分量由逐元素 part 变为整段因子）；
 //! - `lise_fire` 夹具 request 同步刷新为 `normalizeCharSettings` 全量（补齐 assist 默认 loadout）；
 //! - 全部 attributes 哈希更新（追伤七键 + 聚合键删除）。
+//!
+//! 2026-11-24（基础技能等级上限修正为 10）：设置里的 `charSkillLevel` 只存基础等级，
+//! 游戏内升级为 1–10；旧档把溯源 3/5 根源的 +2 算进基础的 12 回落到 10（溯源加成由
+//! 装配期重新叠加）。5 个 e2e 夹具与 `e2e_shard` 的 request 同步刷新为
+//! `withWasmTranscendPayload` 全量（补齐溯源 BUFF / 技能等级增量，与 app wasm 请求同形），
+//! `target_value` 与 attributes / weapon 面板哈希按新口径重采。
 
 mod common;
 
@@ -78,32 +84,32 @@ fn tables() -> BuildTables {
 const CASES: &[(&str, u64, u64, u64)] = &[
     (
         "dobapp_shardBuild1",
-        0x41f4fe4a71a82390,
-        0x81d927374dd35c3a,
-        0xe8f1db900384435a,
+        0x41f5b25a5d8c37a0,
+        0x016440a4dada5ade,
+        0x65c81ca58caf4507,
     ),
     (
         "lise_fire",
-        0x41f877755aac63e4,
-        0x6dc5310a3d052186,
+        0x41f8dd2e555bf74c,
+        0x89a39e92781c67d7,
         0xafd70e4afecca1e2,
     ),
     (
         "dobapp_vy",
-        0x41d97c02588a2291,
-        0xef9bfe4360e86e02,
+        0x41c1e4bfe276df63,
+        0xf1874eab2b31b8c8,
         0x9e3779b97f4a7c15,
     ),
     (
         "dobapp_lieseBathfire1",
         0x41f7824ad8313977,
-        0xda8e8c25be9c3e52,
-        0x7b9ad4b0ecb17d94,
+        0x31b9783f22530c92,
+        0xfc6d465298e3aa48,
     ),
     (
         "dobapp_OkdnBN3OlC",
-        0x41d078171dabc2fa,
-        0xda6543f5fe9eb541,
+        0x41d0beb998b3c2cd,
+        0x54ed9f9e996a79c1,
         0x9e3779b97f4a7c15,
     ),
 ];

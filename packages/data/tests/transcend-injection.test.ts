@@ -86,7 +86,7 @@ describe("升华效果注入（U91a）", () => {
         expect(build.calculateAttributes()).toEqual(base.calculateAttributes())
     })
 
-    it("主控注入天赋 + 主控装备；技能等级增量叠加并钳制 1-30", () => {
+    it("主控注入天赋 + 主控装备；基础等级钳 10 后叠加词条增量", () => {
         const plain = createTeamSettings()
         const settings = enableTranscend(createTeamSettings(), {
             talentLevels: [[100001, 1]],
@@ -98,10 +98,10 @@ describe("升华效果注入（U91a）", () => {
         expect(build.calculateAttributes().攻击).toBeGreaterThan(base.calculateAttributes().攻击)
         expect(build.skillLevel).toEqual([11, 10, 10])
 
-        // 满级后增量被钳制，不会超过 30
+        // 设置里的基础等级被钳到 10，词条 +1 后有效等级 11
         const capped = enableTranscend(createTeamSettings(), { mainGear: [gear({ slotId: 3, affixId: 1038 })] })
         capped.charSkillLevel = [30, 30, 30]
-        expect(createCharBuildFromSettings(MAIN_ID, capped).skillLevel).toEqual([30, 30, 30])
+        expect(createCharBuildFromSettings(MAIN_ID, capped).skillLevel).toEqual([11, 10, 10])
     })
 
     it("协战只吃自己组装备：不吃天赋，也不吃主控 / 另一协战的装备", () => {

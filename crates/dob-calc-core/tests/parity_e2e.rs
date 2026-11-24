@@ -36,14 +36,14 @@ fn dobapp_second_corpus_archived() {
     // U112（追伤分池）：`菲娜Q` 四元素追伤只进武器池 Σ 因子（不再按元素结算），
     // shardBuild1 target 由 10472549917.063034 变为 5635352346.508682。
     let cases = [
-        ("dobapp_shardBuild1", 5823675267.58358, 5635352346.508682),
-        ("dobapp_vy", 1767082952.0447142, 1710229858.1583598),
+        ("dobapp_shardBuild1", 5823675267.58358, 5824161240.76358),
+        ("dobapp_vy", 1767082952.0447142, 600408004.9286922),
         (
             "dobapp_lieseBathfire1",
             27281810428.826473,
             6310636931.0765295,
         ),
-        ("dobapp_OkdnBN3OlC", 1123660945.245696, 1105222774.6837754),
+        ("dobapp_OkdnBN3OlC", 1123660945.245696, 1123739234.8087647),
     ];
     for (name, dob_total, ts_calculate) in cases {
         let fixture = load_fixture(name);

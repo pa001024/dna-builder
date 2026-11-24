@@ -179,8 +179,8 @@ describe("char-assist", () => {
             expect(mapAssistPatch(settings, "assist1", { charLevel: Number.NaN }).assist.charLevel).toBe(55)
             expect(mapAssistPatch(settings, "assist1", { meleeWeaponLevel: Number.NaN }).assist.weaponLevel).toBe(80)
             // 运行时脏值（旧存档 / 外部写入）：单数字应按三项展开
-            const dirtyLevels = 12 as unknown as [number, number, number]
-            expect(mapAssistPatch(settings, "assist1", { charSkillLevel: dirtyLevels }).assist.charSkillLevel).toEqual([12, 12, 12])
+            const dirtyLevels = 8 as unknown as [number, number, number]
+            expect(mapAssistPatch(settings, "assist1", { charSkillLevel: dirtyLevels }).assist.charSkillLevel).toEqual([8, 8, 8])
             expect(getAssistCharSkills(settings, "assist1").map(skill => skill.等级)).toEqual([10, 10, 10])
             expect(resetAssistForChar(settings, "assist1")).toEqual({ baseName: "快速出击", extraMastery: "", enabled: true })
         })
@@ -215,7 +215,7 @@ describe("char-assist", () => {
         it("整体搬运 MOD / BUFF / 特效 / 目标等字段，且与来源相互独立", () => {
             const top = createTop({
                 charLevel: 70,
-                charSkillLevel: [11, 12, 13],
+                charSkillLevel: [9, 10, 8],
                 baseName: "涡旋电场",
                 extraMastery: "长柄",
                 meleeWeaponLevel: 80,
@@ -249,7 +249,7 @@ describe("char-assist", () => {
             expect(baseNameFallback).toBe(false)
             expect(weaponId).toBe(MELEE_WEAPON)
             expect(assist.charLevel).toBe(70)
-            expect(assist.charSkillLevel).toEqual([11, 12, 13])
+            expect(assist.charSkillLevel).toEqual([9, 10, 8])
             expect(assist.baseName).toBe("涡旋电场")
             expect(assist.extraMastery).toBe("长柄")
             expect(assist.weaponLevel).toBe(80)

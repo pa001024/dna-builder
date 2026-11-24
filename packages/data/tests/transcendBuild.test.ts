@@ -328,7 +328,7 @@ describe("归一化", () => {
         })
         expect(settings.main.charId).toBe(0)
         expect(settings.main.charLevel).toBe(80)
-        expect(settings.main.charSkillLevel).toEqual([30, 1, 4])
+        expect(settings.main.charSkillLevel).toEqual([10, 1, 4])
         expect(settings.main.meleeWeapon).toBe(0)
         expect(settings.main.meleeWeaponLevel).toBe(80)
         expect(settings.main.meleeWeaponRefine).toBe(5)
@@ -396,7 +396,7 @@ describe("归一化", () => {
             expect(() => normalizeTranscendBuildSettings(input), JSON.stringify(input)).not.toThrow()
         }
         const normalized = normalizeTranscendBuildSettings({ main: { charSkillLevel: 12 }, transcend: "broken" })
-        expect(normalized.main.charSkillLevel).toEqual([12, 12, 12])
+        expect(normalized.main.charSkillLevel).toEqual([10, 10, 10])
         expect(normalized.transcend).toEqual(createDefaultTranscendBuildSettings(0).transcend)
     })
 

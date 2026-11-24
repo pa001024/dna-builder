@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
 import { createBuffFromSettings, createCharBuildFromSettings, resolveSideEffectiveSkillLevels } from "../CharBuildHelper"
 import {
+    CHAR_SKILL_LEVEL_BASE_MAX,
     CHAR_SKILL_LEVEL_MAX,
     CHAR_SKILL_LEVEL_MIN,
     type CharSkillLevels,
     createDefaultAssistSideSettings,
     createDefaultCharSettings,
     normalizeCharSkillLevels,
+    normalizeEffectiveSkillLevels,
 } from "../charSettings"
 import { charMap } from "../d"
 import type { DnaSeasonAffix } from "../d/dnaseasonequip.data"
@@ -85,13 +87,18 @@ describe("技能等级规范名（U123）", () => {
     })
 })
 
-describe("技能等级上限 30", () => {
-    it("归一化接受 13–30，越界钳制到 30", () => {
+describe("技能等级：基础 1–10 / 有效 1–30", () => {
+    it("基础等级归一化钳制到 10；有效等级归一化钳制到 30", () => {
         expect(CHAR_SKILL_LEVEL_MIN).toBe(1)
+        expect(CHAR_SKILL_LEVEL_BASE_MAX).toBe(10)
         expect(CHAR_SKILL_LEVEL_MAX).toBe(30)
-        expect(normalizeCharSkillLevels(18)).toEqual([18, 18, 18])
-        expect(normalizeCharSkillLevels([10, 31, 0])).toEqual([10, 30, 1])
-        expect(normalizeCharSkillLevels([13, 14, 30])).toEqual([13, 14, 30])
+        // 设置里的 charSkillLevel 只存基础等级：旧档把溯源加成算进来的 12/18 一律回落到 10
+        expect(normalizeCharSkillLevels(18)).toEqual([10, 10, 10])
+        expect(normalizeCharSkillLevels([10, 31, 0])).toEqual([10, 10, 1])
+        expect(normalizeCharSkillLevels([13, 14, 30])).toEqual([10, 10, 10])
+        // 有效等级（基础 + 溯源 / 升华加成）仍支持 1–30
+        expect(normalizeEffectiveSkillLevels(18)).toEqual([18, 18, 18])
+        expect(normalizeEffectiveSkillLevels([10, 31, 0])).toEqual([10, 30, 1])
     })
 
     it("LeveledSkill 按真实曲线取 13–30 级值，11/12 级不变", () => {
@@ -169,7 +176,7 @@ describe("技能等级词条叠加", () => {
         expect(fieldValue(30)).toBe(155.76)
     })
 
-    it("升华构筑使用叠加后的 30 级真实值并可计算", () => {
+    it("升华构筑：基础 10 + 溯源 +2 + 词条 +8 = 20 级真实值并可计算", () => {
         const settings = createDefaultTranscendBuildSettings(1504)
         settings.assist1 = { ...settings.main, charId: 1504, charSkillLevel: [22, 22, 22], baseName: "蓄势待发", enabled: true }
         settings.transcend.enabled = true
@@ -177,9 +184,10 @@ describe("技能等级词条叠加", () => {
 
         const side = createTranscendBuild(settings, "assist1")!
         expect(side).not.toBeNull()
-        expect(side.build.getSkillLevel(2)).toBe(30)
-        expect(side.build.skills[2].等级).toBe(30)
-        expect(side.build.selectedSkill!.字段.find(field => field.名称 === "伤害")!.值).toBe(155.76)
+        // 基础等级被钳到 10，再叠加溯源 P+2 与词条 +8
+        expect(side.build.getSkillLevel(2)).toBe(20)
+        expect(side.build.skills[2].等级).toBe(20)
+        expect(side.build.selectedSkill!.字段.find(field => field.名称 === "伤害")!.值).toBe(109.26)
         expect(Number.isFinite(side.build.calculate())).toBe(true)
     })
 })
@@ -203,13 +211,14 @@ describe("E/Q/P 技能等级加成属性（标准 attr）", () => {
 
     it("无升华来源时三键加成 = 0，最终等级仍按基础三元组装配", () => {
         const build = createCharBuildFromSettings(1504, createSettings([12, 9, 7]))!
-        expect(build.baseSkillLevel).toEqual([12, 9, 7])
-        expect(build.skillLevel).toEqual([12, 9, 7])
+        // 12 是旧档把溯源 +2 算进基础的值，归一化后回落到 10
+        expect(build.baseSkillLevel).toEqual([10, 9, 7])
+        expect(build.skillLevel).toEqual([10, 9, 7])
         const attrs = build.calculateAttributes()
         expect(attrs.E技能等级).toBe(0)
         expect(attrs.Q技能等级).toBe(0)
         expect(attrs.P技能等级).toBe(0)
-        expect(build.getSkillLevel(0)).toBe(12)
+        expect(build.getSkillLevel(0)).toBe(10)
         expect(build.getSkillLevel(1)).toBe(9)
         expect(build.getSkillLevel(2)).toBe(7)
     })
@@ -228,7 +237,7 @@ describe("E/Q/P 技能等级加成属性（标准 attr）", () => {
         expect(build.getSkillLevel(2)).toBe(18)
     })
 
-    it("最终等级钳 30 时加成仍保留原值（+8）", () => {
+    it("基础等级钳 10 后加成仍保留原值（+8）", () => {
         const settings = createSettings([22, 22, 22])
         settings.transcend = {
             ...settings.transcend,
@@ -236,7 +245,7 @@ describe("E/Q/P 技能等级加成属性（标准 attr）", () => {
             mainGear: [maxMainSkillLevelAffix(6)],
         }
         const build = createCharBuildFromSettings(1504, settings)!
-        expect(build.skillLevel).toEqual([22, 22, 30])
+        expect(build.skillLevel).toEqual([10, 10, 18])
         expect(build.calculateAttributes().P技能等级).toBe(8)
     })
 

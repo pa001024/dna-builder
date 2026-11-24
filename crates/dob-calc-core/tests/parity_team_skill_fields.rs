@@ -56,7 +56,13 @@ fn tables_with_skill_buff() -> BuildTables {
 
 fn settings(q: f64) -> Value {
     let mut value: Value = serde_json::from_str(SETTINGS).expect("SETTINGS 应为合法 JSON");
-    value["assist1"]["charSkillLevel"] = serde_json::json!([10, q, 10]);
+    // 基础技能等级上限 10：超过 10 的部分用该侧自定义 BUFF 的三键加成补，
+    // 保持锚点里的有效 Q 等级（10 / 12 / 30）不变。
+    value["assist1"]["charSkillLevel"] = serde_json::json!([10, 10, 10]);
+    if q > 10.0 {
+        value["assist1"]["customBuff"] = serde_json::json!([["Q技能等级", q - 10.0]]);
+        value["assist1"]["buffs"] = serde_json::json!([["自定义BUFF", 1]]);
+    }
     value["buffs"] = serde_json::json!([[BUFF, 10]]);
     value
 }
@@ -240,9 +246,9 @@ fn peer_context_team_namespaces_stay_zero() {
     // TS 实跑：带隔离 BUFF 与不带时「持续伤害」同为 9386.531162790698（Q=12），
     // 说明 peer 内 `黎瑟::技能威力` 求值为 0。
     let mut with_isolation = settings(12.0);
-    with_isolation["assist1"]["buffs"] = serde_json::json!([[ISOLATION_BUFF, 1]]);
+    with_isolation["assist1"]["buffs"] = serde_json::json!([[ISOLATION_BUFF, 1], ["自定义BUFF", 1]]);
     let mut without = settings(12.0);
-    without["assist1"]["buffs"] = serde_json::json!([]);
+    without["assist1"]["buffs"] = serde_json::json!([["自定义BUFF", 1]]);
 
     let expression = format!("{SKILL}::持续伤害");
     let (hit, error) = eval(&tables, &make_request(&with_isolation, ""), &expression);

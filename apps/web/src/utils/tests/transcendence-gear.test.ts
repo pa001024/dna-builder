@@ -318,9 +318,7 @@ describe("U139 列表数值提示补属性名（key + value）", () => {
     })
 
     it("双维 scope：属性名带字段名 + 字段标签限定（420101）", () => {
-        expect(getAffixValueHint(byId(420101), translate, gameText)).toBe(
-            "无视防御（字段名限定：星河寥落 + 字段标签限定：下落攻击） +100%"
-        )
+        expect(getAffixValueHint(byId(420101), translate, gameText)).toBe("无视防御（字段名限定：星河寥落 + 字段标签限定：下落攻击） +100%")
     })
 
     it("多项仍用 ` · ` 连接（2015）", () => {
@@ -335,9 +333,7 @@ describe("U139 列表数值提示补属性名（key + value）", () => {
                 "db-transcendence.gear.mode_bombard": "轰炸模式",
             })[key] ?? key
 
-        expect(getAffixValueHint(byId(320301), labelTranslate, gameText)).toBe(
-            "速射模式 +319.3% · 贯穿模式 +408.9% · 轰炸模式 +508.2%"
-        )
+        expect(getAffixValueHint(byId(320301), labelTranslate, gameText)).toBe("速射模式 +319.3% · 贯穿模式 +408.9% · 轰炸模式 +508.2%")
     })
 
     it("无翻译函数保持旧纯数值口径", () => {
@@ -607,6 +603,11 @@ describe("唯一装所属反查（1.8 前遗留行已过滤）", () => {
     it("词缀 2001 的唯一装只有 140002，适用槽型只有 4", () => {
         expect(getAffixUniqueEquips(2001).map(equip => equip.id)).toEqual([140002])
         expect(getAffixSlotIds(affixes.find(affix => affix.id === 2001)!)).toEqual([4])
+    })
+
+    it("无池随机词条显示已确认部位（1030 靴子 / 项链 / 戒指，1031 戒指）", () => {
+        expect(getAffixSlotIds(affixes.find(affix => affix.id === 1030)!)).toEqual([4, 6, 7])
+        expect(getAffixSlotIds(affixes.find(affix => affix.id === 1031)!)).toEqual([7])
     })
 
     it("技能等级词条按显式 slotTypes 显示已知部位", () => {

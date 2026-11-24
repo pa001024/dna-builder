@@ -54,7 +54,10 @@
                 ],
                 ["[灾厄值]每秒阈值", "ceil(100*2.21/1.61)"]
             ],
-            "charSkillLevel": [12, 12, 12],
+            "charSkillLevel": [10, 10, 10],
+            "traceLevel": 7,
+            "traceOffRoots": [],
+            "traceStacks": [],
             "extraMastery": "",
             "meleeWeapon": 10199,
             "meleeWeaponLevel": 80,
@@ -81,8 +84,6 @@
             "buffs": [
                 ["黎瑟·浴火Q", 30],
                 ["黎瑟·浴火2溯", 1],
-                ["黎瑟·浴火4溯", 30],
-                ["黎瑟·浴火6溯", 1],
                 ["扶疏助战", 1],
                 ["扶疏Q", 120],
                 ["扶疏1溯", 1],
@@ -119,6 +120,8 @@
             "assist1": {
                 "charLevel": 80,
                 "charSkillLevel": [10, 10, 10],
+                "traceLevel": 6,
+                "traceOffRoots": [],
                 "baseName": "提挈浮沉",
                 "extraMastery": "",
                 "weaponLevel": 80,
@@ -148,6 +151,8 @@
             "assist2": {
                 "charLevel": 80,
                 "charSkillLevel": [10, 10, 10],
+                "traceLevel": 7,
+                "traceOffRoots": [],
                 "baseName": "玉山崩",
                 "extraMastery": "",
                 "weaponLevel": 80,
@@ -206,7 +211,210 @@
                 "b": [],
                 "hp": [],
                 "bgs": []
-            }
+            },
+            "transcendEffects": {
+                "main": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "黎瑟·浴火4溯",
+                                "描述": "[狙击模式]期间，每0.2秒额外获得1层[专注]，每层[专注]额外提供昂扬提高3%。",
+                                "attr": {
+                                    "昂扬": 0.8999999999999999
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "grade": 4,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:4"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "黎瑟·浴火6溯",
+                                "描述": "半径50米以内的敌人可被穿过场景透视，且[迸发射击]可以穿过场景造成伤害；[狙击模式]期间，自身获得全属性穿透提高60%。",
+                                "attr": {
+                                    "属性穿透": 0.6
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "grade": 6,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:6"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                },
+                "assist1": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 2401,
+                                "名称": "扶疏1溯",
+                                "描述": "带有[九针治未]的目标，造成技能伤害时无视目标30%防御。",
+                                "attr": {
+                                    "技能无视防御": 0.3
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 2401,
+                                    "grade": 1,
+                                    "ownerSide": "assist1",
+                                    "stackKey": "trace:assist1:2401:1"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 2401,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 2401,
+                                    "ownerSide": "assist1",
+                                    "stackKey": "trace:assist1:2401:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                },
+                "assist2": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 4201,
+                                "名称": "煜明1溯",
+                                "描述": "[玄蛟附身]状态中，每次释放[玉山崩]时，额外获得1枚[逆鳞]。释放[星河寥落]时额外为自身和队友附加武器攻击范围提高0.6和技能范围提高30%的效果，持续8秒。",
+                                "attr": {
+                                    "攻击范围": 0.6,
+                                    "技能范围": 0.3
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4201,
+                                    "grade": 1,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:4201:1"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4201,
+                                "名称": "煜明2溯",
+                                "描述": "[酣战]伤害倍率提高至原本的160%。",
+                                "attr": {
+                                    "技能倍率乘数": 0.6
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4201,
+                                    "grade": 2,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:4201:2"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4201,
+                                "名称": "煜明6溯",
+                                "描述": "[玄蛟附身]状态中，全属性穿透提高25%。累计触发6次[酣战]伤害效果后，对所有带有[酣战]的目标额外造成1次原本倍率130%的[酣战]伤害，效果每6秒最多触发1次。",
+                                "attr": {
+                                    "属性穿透": 0.25
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4201,
+                                    "grade": 6,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:4201:6"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4201,
+                                "名称": "煜明7溯",
+                                "描述": "释放[星河寥落]时基于队内雷属性角色数量，为自身和队友附加相等层数的[玄蛟庇佑]，持续10秒，最多叠加3层，每次附加时重置层数。\n每层[玄蛟庇佑]使昂扬提高30%，造成雷属性伤害提高12.5%；\n2层或以上时，全属性穿透提高20%；\n3层时，[煜明]以外的友方角色受到的生命值伤害时，玄蛟能吸收该次伤害。",
+                                "attr": {
+                                    "昂扬": 0.8999999999999999,
+                                    "雷属性增伤": 0.375
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4201,
+                                    "grade": 7,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:4201:7"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4201,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4201,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:4201:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                }
+            },
+            "transcendSide": "main"
         }
     },
     "expected": {

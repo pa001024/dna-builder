@@ -74,9 +74,10 @@ fn e2e_shard_anchors() {
     let expected = &fixture["expected"];
     // 黄金构筑总量：U112 追伤分池后 `菲娜Q` 四元素追伤只进武器池 Σ 因子
     // （旧逐元素结算 10472063943.883034 → 5634866373.328682）。
+    // U114 溯源 / 2026-11-24 基础等级 10 + 溯源 +2：当前 TS 重算 5823675267.58358。
     assert_close(
         expected["calculate"].as_f64().unwrap_or(-1.0),
-        5634866373.328682,
+        5823675267.58358,
         "shard总量",
     );
     // 全链路输出有限。
@@ -98,6 +99,35 @@ fn e2e_shard_anchors() {
 
 /// 以 `dobapp_OkdnBN3OlC` 的 settings 为底，叠加角色 / 自定义 BUFF / 目标函数 / DOT 配置。
 /// `extra_custom_buffs` 追加同名的「自定义BUFF」实例（多个来源共享同一份 customBuff 属性表）。
+/// 夹具按「基础 12 + 无溯源载荷」录制；基础上限修正为 10 后注入一条三键 +2 的合成 BUFF，
+/// 保持有效等级 12 与原有 TS 锚点不变。用载荷而不是 `customBuff`：后者会被多份
+/// `自定义BUFF` 重复应用，把等级加成也叠多次。
+fn inject_skill_level_payload(settings: &mut serde_json::Value) {
+    let object = settings.as_object_mut().expect("settings 对象");
+    if object.contains_key("transcendEffects") {
+        return;
+    }
+    object.insert(
+        "transcendEffects".to_string(),
+        serde_json::json!({
+            "main": {
+                "buffs": [{
+                    "data": {
+                        "名称": "测试技能等级",
+                        "attr": {"E技能等级": 2, "Q技能等级": 2, "P技能等级": 2}
+                    },
+                    "level": 1
+                }],
+                "skillReplacements": {}
+            }
+        }),
+    );
+    object.insert(
+        "transcendSide".to_string(),
+        serde_json::Value::String("main".to_string()),
+    );
+}
+
 fn custom_request(
     fixture: &serde_json::Value,
     char_id: serde_json::Value,
@@ -106,7 +136,11 @@ fn custom_request(
     extra_custom_buffs: usize,
     dot_settings: Option<&str>,
 ) -> BuildRequest {
-    let mut settings = fixture["request"]["settings"].clone();
+    let mut settings = fixture["request"]["originalSettings"]
+        .as_object()
+        .map(|_| fixture["request"]["originalSettings"].clone())
+        .unwrap_or_else(|| fixture["request"]["settings"].clone());
+    inject_skill_level_payload(&mut settings);
     let object = settings.as_object_mut().expect("settings 对象");
     object.insert("customBuff".to_string(), custom_buff);
     object.insert(
@@ -594,7 +628,11 @@ fn u62_request(
     target: &str,
     dot_settings: Option<&str>,
 ) -> BuildRequest {
-    let mut settings = fixture["request"]["settings"].clone();
+    let mut settings = fixture["request"]["originalSettings"]
+        .as_object()
+        .map(|_| fixture["request"]["originalSettings"].clone())
+        .unwrap_or_else(|| fixture["request"]["settings"].clone());
+    inject_skill_level_payload(&mut settings);
     let object = settings.as_object_mut().expect("settings 对象");
     object.insert(
         "charMods".to_string(),

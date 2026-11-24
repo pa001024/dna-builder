@@ -1338,6 +1338,33 @@ describe("升华派生：最小源端到端（不依赖上游仓库）", () => {
         expect(slotTypesOf(1530)).toBeUndefined()
     })
 
+    it("无池 Plan 2 随机词条按手写部位表派生 slotTypes（1030 靴子 / 项链 / 戒指，1031 戒指）", () => {
+        const base = minimalSource()
+        const randomAffix = (id: number, patch: Record<string, unknown> = {}) => ({
+            id,
+            plan: 2,
+            minValue: 0,
+            maxValue: 1,
+            totalValueLevel: 500,
+            ...patch,
+        })
+        const source = {
+            ...base,
+            equip: {
+                ...base.equip,
+                affixPools: [{ id: 204, name: "技巧" }],
+                affixes: [randomAffix(1030), randomAffix(1031), randomAffix(1032, { pool: 204 }), randomAffix(1033)],
+            },
+        }
+        const rows = deriveDnaSeasonModules(source as any).dnaseasonequip.rawAffixes as any[]
+        const slotTypesOf = (id: number) => rows.find(row => row.id === id)?.slotTypes
+        expect(slotTypesOf(1030)).toEqual([4, 6, 7])
+        expect(slotTypesOf(1031)).toEqual([7])
+        // 有池词条仍按池推导，未登记的无池词条不臆造
+        expect(slotTypesOf(1032)).toBeUndefined()
+        expect(slotTypesOf(1033)).toBeUndefined()
+    })
+
     it("非法 charIds 不落盘并告警", () => {
         const base = minimalSource()
         const source = { ...base, equip: { ...base.equip, affixes: [plan4Affix({ id: 150401, charIds: [] })] } }

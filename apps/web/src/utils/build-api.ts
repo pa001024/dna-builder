@@ -3,7 +3,7 @@ import type { Ref } from "vue"
 import type { CharSettings, ModSlot, ModSlotType } from "@/composables/useCharSettings"
 import {
     addModVariant,
-    CHAR_SKILL_LEVEL_MAX,
+    CHAR_SKILL_LEVEL_BASE_MAX,
     CHAR_SKILL_LEVEL_MIN,
     createDefaultCharSettings,
     getModVariantIndex,
@@ -672,9 +672,9 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             if (input.skill !== undefined || input.e !== undefined || input.q !== undefined || input.passive !== undefined) {
                 const current = normalizeCharSkillLevels(settings.charSkillLevel)
                 const next = normalizeCharSkillLevels(input.skill !== undefined ? input.skill : current)
-                if (input.e !== undefined) next[0] = clamp(Math.round(input.e), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
-                if (input.q !== undefined) next[1] = clamp(Math.round(input.q), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
-                if (input.passive !== undefined) next[2] = clamp(Math.round(input.passive), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_MAX)
+                if (input.e !== undefined) next[0] = clamp(Math.round(input.e), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_BASE_MAX)
+                if (input.q !== undefined) next[1] = clamp(Math.round(input.q), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_BASE_MAX)
+                if (input.passive !== undefined) next[2] = clamp(Math.round(input.passive), CHAR_SKILL_LEVEL_MIN, CHAR_SKILL_LEVEL_BASE_MAX)
                 settings.charSkillLevel = next
             }
             record(`等级设为 角色${settings.charLevel} 技能${settings.charSkillLevel}`)

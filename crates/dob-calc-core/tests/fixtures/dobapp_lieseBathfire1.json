@@ -57,6 +57,400 @@
                 ],
                 ["[灾厄值]每秒阈值", "ceil(100*2.21/1.61)"]
             ],
+            "charSkillLevel": [10, 10, 10],
+            "traceLevel": 7,
+            "traceOffRoots": [],
+            "traceStacks": [],
+            "extraMastery": "",
+            "meleeWeapon": 10199,
+            "meleeWeaponLevel": 80,
+            "meleeWeaponRefine": 5,
+            "rangedWeapon": 20306,
+            "rangedWeaponLevel": 80,
+            "rangedWeaponRefine": 5,
+            "auraMod": 51746,
+            "imbalance": false,
+            "charMods": [[51441, 10], [51334, 10], [51748, 10], [51748, 10], [51942, 10], [56144, 10], [51748, 10], [51748, 10]],
+            "meleeMods": [[52011, 10], [52008, 10], [52013, 10], [42003, 10], [52010, 10], [52007, 10], [52012, 10], [42002, 10]],
+            "rangedMods": [[53009, 10], [53010, 10], [43002, 10], [43003, 10], [53007, 10], [53008, 10], [53011, 10], [53005, 10]],
+            "skillWeaponMods": [null, null, null, null],
+            "modVariantIndex": 0,
+            "modVariants": [],
+            "buffs": [
+                ["黎瑟·浴火Q", 30],
+                ["黎瑟·浴火2溯", 1],
+                ["扶疏Q", 120],
+                ["扶疏1溯", 1],
+                ["扶疏被动", 12],
+                ["扶疏被动(4溯)", 12],
+                ["羽翼·鼓舞·昂扬(水)", 10],
+                ["无解谜题5熔", 1],
+                ["黎瑟·浴火E", 1],
+                ["自定义BUFF", 1],
+                ["黎瑟·浴火被动", 6],
+                ["泽世的慈雨(队友)", 5],
+                ["菲娜助战", 1],
+                ["菲娜Q", 12],
+                ["织梦的白羽(队友)", 5],
+                ["羽翼·鼓舞·专注(光)", 10],
+                ["色散成霓", 10],
+                ["黎瑟·浴火被动2", 1]
+            ],
+            "customBuff": [],
+            "petId": 4241,
+            "petLevel": 3,
+            "petCoverage": 1,
+            "petAutoCoverage": true,
+            "traits": [[1030, 3], [1026, 3], [1025, 3], [1023, 3]],
+            "team1": 2401,
+            "team1Weapon": 10502,
+            "team1Build": "h8YeFTULlY",
+            "team1BuildVariant": "A",
+            "team2": 1801,
+            "team2Weapon": 20509,
+            "team2Build": "aFefJHSzOl",
+            "team2BuildVariant": "A",
+            "assist1": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "traceLevel": 6,
+                "traceOffRoots": [],
+                "baseName": "提挈浮沉",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
+            "assist2": {
+                "charLevel": 80,
+                "charSkillLevel": [10, 10, 10],
+                "traceLevel": 6,
+                "traceOffRoots": [],
+                "baseName": "“在一个暖和的午后”",
+                "extraMastery": "",
+                "weaponLevel": 80,
+                "weaponRefine": 5,
+                "targetFunction": "",
+                "customVariables": [],
+                "dotSettings": {
+                    "skill": 0,
+                    "melee": 0,
+                    "ranged": 0,
+                    "skillweapon": 0,
+                    "forceOwnAdditionalDamage": false
+                },
+                "enabled": true,
+                "auraMod": 0,
+                "charMods": [null, null, null, null, null, null, null, null],
+                "meleeMods": [null, null, null, null, null, null, null, null],
+                "rangedMods": [null, null, null, null, null, null, null, null],
+                "skillWeaponMods": [null, null, null, null],
+                "modVariantIndex": 0,
+                "modVariants": [],
+                "buffs": [],
+                "customBuff": [],
+                "useGlobal": false,
+                "effectConfig": {}
+            },
+            "timelineDPS": false,
+            "transcend": {
+                "enabled": false,
+                "talentLevels": [],
+                "mainGear": [],
+                "assist1Gear": [],
+                "assist2Gear": [],
+                "gearVariants": [
+                    {
+                        "id": "A",
+                        "mainGear": [],
+                        "assist1Gear": [],
+                        "assist2Gear": []
+                    }
+                ],
+                "activeGearVariant": "A"
+            },
+            "useGlobal": false,
+            "effectConfig": {},
+            "dotSettings": {
+                "skill": 1,
+                "melee": 0,
+                "ranged": 0,
+                "skillweapon": 0,
+                "forceOwnAdditionalDamage": false
+            },
+            "actions": {
+                "enable": false,
+                "i": [],
+                "b": [],
+                "hp": [],
+                "bgs": []
+            },
+            "transcendEffects": {
+                "main": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "黎瑟·浴火4溯",
+                                "描述": "[狙击模式]期间，每0.2秒额外获得1层[专注]，每层[专注]额外提供昂扬提高3%。",
+                                "attr": {
+                                    "昂扬": 0.8999999999999999
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "grade": 4,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:4"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "黎瑟·浴火6溯",
+                                "描述": "半径50米以内的敌人可被穿过场景透视，且[迸发射击]可以穿过场景造成伤害；[狙击模式]期间，自身获得全属性穿透提高60%。",
+                                "attr": {
+                                    "属性穿透": 0.6
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "grade": 6,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:6"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 1801,
+                                "名称": "菲娜1溯",
+                                "描述": "带有[喧闹下午茶]附加的追加伤害的目标，每带有1种属性的追加伤害效果，全属性穿透提高6%。",
+                                "attr": {
+                                    "属性穿透": 0.24
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 1801,
+                                    "grade": 1,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:1801:1"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 4103,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 4103,
+                                    "ownerSide": "main",
+                                    "stackKey": "trace:main:4103:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 1801,
+                                "名称": "菲娜被动(团队)",
+                                "描述": "为自身和队友附加伤害提高效果（[梦笔生花] 30 层 ×1%，2 溯源 45 层 ×1%）。",
+                                "attr": {
+                                    "增伤": 0.45
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                },
+                "assist1": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 2401,
+                                "名称": "扶疏1溯",
+                                "描述": "带有[九针治未]的目标，造成技能伤害时无视目标30%防御。",
+                                "attr": {
+                                    "技能无视防御": 0.3
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 2401,
+                                    "grade": 1,
+                                    "ownerSide": "assist1",
+                                    "stackKey": "trace:assist1:2401:1"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 2401,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 2401,
+                                    "ownerSide": "assist1",
+                                    "stackKey": "trace:assist1:2401:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                },
+                "assist2": {
+                    "buffs": [
+                        {
+                            "data": {
+                                "id": 1801,
+                                "名称": "菲娜4溯",
+                                "描述": "每层[梦笔生花]令自身技能威力提高2%、技能范围提高1%。",
+                                "attr": {
+                                    "技能威力": 0.9,
+                                    "技能范围": 0.45
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 1801,
+                                    "grade": 4,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:1801:4"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 1801,
+                                "名称": "菲娜6溯",
+                                "描述": "[喧闹下午茶]领域持续期间，自身造成武器伤害时，目标每带有1个属性额外触发效果，此次伤害的暴击率提高24%，并将其中元素属性伤害转换为目标的弱点属性伤害。",
+                                "attr": {
+                                    "暴击": 1.2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 1801,
+                                    "grade": 6,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:1801:6"
+                                }
+                            },
+                            "level": 1
+                        },
+                        {
+                            "data": {
+                                "id": 1801,
+                                "名称": "溯源技能等级",
+                                "描述": "",
+                                "attr": {
+                                    "E技能等级": 2,
+                                    "Q技能等级": 2,
+                                    "P技能等级": 2
+                                },
+                                "source": {
+                                    "kind": "trace",
+                                    "id": 1801,
+                                    "ownerSide": "assist2",
+                                    "stackKey": "trace:assist2:1801:skillLevel"
+                                }
+                            },
+                            "level": 1
+                        }
+                    ],
+                    "skillReplacements": {}
+                }
+            },
+            "transcendSide": "main"
+        },
+        "originalSettings": {
+            "charLevel": 80,
+            "baseName": "求索",
+            "hpPercent": 1,
+            "resonanceGain": 3,
+            "enemyId": 300,
+            "enemyLevel": 80,
+            "enemyResistance": -4,
+            "isRouge": false,
+            "targetFunction": "综合DPS",
+            "mainTargetEnabled": true,
+            "customVariables": [
+                ["[迸发射击]初始用时", "1.2"],
+                ["[校准]初始用时", "3"],
+                ["[狙击]初始用时", "0.5"],
+                ["[迸发射击]用时", "[迸发射击]初始用时/角色::技能速度!"],
+                ["[校准]用时", "[校准]初始用时/角色::技能速度!"],
+                ["[狙击]用时", "[狙击]初始用时/角色::技能速度!"],
+                ["[真相]周期", "max(1, [校准]用时)"],
+                ["[强化狙击]周期", "[真相]周期//[校准]用时"],
+                ["[强化狙击及1溯]伤害", "(涡流狙击::[强化狙击子弹]伤害+迸发射击::伤害)*[电能协同]多重系数"],
+                ["[电能协同]多重系数", "min(2, 1+远程::多重!*0.3)"],
+                ["[电流步枪]数量", "2"],
+                ["[电流步枪]循环用时", "6*角色::技能耐久!+[迸发射击]用时"],
+                [
+                    "[电流步枪]循环伤害",
+                    "[电流步枪]数量*(迸发射击::伤害+ ([电流步枪]循环用时-[迸发射击]用时)/[狙击]用时*涡流狙击::[狙击子弹]伤害)*[电能协同]多重系数"
+                ],
+                ["[狙击及1溯]循环伤害", "[电流步枪]循环用时/[强化狙击]周期*[强化狙击及1溯]伤害"],
+                [
+                    "[真相]伤害",
+                    "35*角色::技能威力!*(角色::攻击!+近战::攻击!)*角色::[攻击]{转震荡:1}/角色::攻击!*角色::[攻击]{转灾厄:1}/角色::[攻击]{转震荡:1}*(角色::技能速度)*(1+近战::暴击!*(近战::暴伤!-1))"
+                ],
+                ["[技能]DPS", "([电流步枪]循环伤害+[狙击及1溯]循环伤害)/[电流步枪]循环用时"],
+                ["[灾厄]DPS", "求索::[求索]伤害/[真相]周期"],
+                ["[DOT]DPS", "角色::DOT伤害+近战::DOT伤害+远程::DOT伤害"],
+                ["综合DPS", "[技能]DPS+[灾厄]DPS+[DOT]DPS"],
+                ["灾厄伤害占比", "[灾厄]DPS/综合DPS"],
+                [
+                    "[乘区验证]近战总攻击",
+                    "求索::[求索]伤害/35/(1+角色::属性穿透)/角色::技能威力!/(1+角色::增伤+角色::技能伤害)/(1+角色::昂扬)/(1+(近战::暴击)*(近战::暴伤-1))*(2-角色::技能无视防御)/(1+角色::技能追伤)/(1+角色::技能独立增伤)/(角色::技能速度)*角色::[攻击]{转震荡:1}/角色::[攻击]{转灾厄:1}"
+                ],
+                ["[灾厄值]紊乱获取", "ceil(12*角色::技能速度!)"],
+                ["[灾厄值]触发获取", "ceil(2*角色::技能速度!)"],
+                [
+                    "[灾厄值]每秒",
+                    "(([灾厄值]紊乱获取+2*[灾厄值]触发获取)/[强化狙击]周期+[电流步枪]数量*[灾厄值]触发获取/[狙击]用时)*[电能协同]多重系数"
+                ],
+                ["[灾厄值]每秒阈值", "ceil(100*2.21/1.61)"]
+            ],
             "charSkillLevel": [12, 12, 12],
             "extraMastery": "",
             "meleeWeapon": 10199,
@@ -274,9 +668,9 @@
             "魔灵CD": 40,
             "魔灵CD缩减": 0,
             "神智回复": 4,
-            "E技能等级": 0,
-            "Q技能等级": 0,
-            "P技能等级": 0
+            "E技能等级": 2,
+            "Q技能等级": 2,
+            "P技能等级": 2
         },
         "weapon": {
             "攻击": 1024.24,
@@ -287,14 +681,14 @@
             "多重": 1,
             "增伤": 0,
             "独立增伤": 0,
-            "火属性追伤": 0.15,
-            "水属性追伤": 0.15,
-            "雷属性追伤": 0.15,
-            "风属性追伤": 0.15,
+            "火属性追伤": 0.172,
+            "水属性追伤": 0.172,
+            "雷属性追伤": 0.172,
+            "风属性追伤": 0.172,
             "光属性追伤": 0,
             "暗属性追伤": 0,
             "自属性追伤": 0,
-            "追加伤害": 0.6,
+            "追加伤害": 0.688,
             "装填": 0,
             "弹匣": 0,
             "弹药": 0,
@@ -757,8 +1151,8 @@
                 },
                 "level": 80
             },
+            "baseSkillLevel": [10, 10, 10],
             "skillLevel": [12, 12, 12],
-            "skillLevelBonus": [0, 0, 0],
             "hpPercent": 1,
             "resonanceGain": 3,
             "auraMod": {
@@ -1314,31 +1708,6 @@
                 },
                 {
                     "data": {
-                        "id": 4103,
-                        "名称": "黎瑟·浴火4溯",
-                        "限定": 4103,
-                        "描述": "[狙击模式]期间，每0.2秒额外获得1层[专注]，每层[专注]额外提供昂扬提高3%。",
-                        "mx": 30,
-                        "attr": {
-                            "昂扬": 0.03
-                        }
-                    },
-                    "level": 30
-                },
-                {
-                    "data": {
-                        "id": 4103,
-                        "名称": "黎瑟·浴火6溯",
-                        "限定": 4103,
-                        "描述": "[狙击模式]期间，自身获得全属性穿透提高60%。",
-                        "attr": {
-                            "属性穿透": 0.6
-                        }
-                    },
-                    "level": 1
-                },
-                {
-                    "data": {
                         "id": 2401,
                         "名称": "扶疏Q",
                         "描述": "技能威力提高。数值为[扶疏]技能威力的一定比例。",
@@ -1371,7 +1740,7 @@
                             "技能速度": "神归心舍::每层技能速度提高 * 2"
                         }
                     },
-                    "level": 10
+                    "level": 12
                 },
                 {
                     "data": {
@@ -1385,7 +1754,7 @@
                             "昂扬": [0.36]
                         }
                     },
-                    "level": 10
+                    "level": 12
                 },
                 {
                     "data": {
@@ -1476,18 +1845,6 @@
                 {
                     "data": {
                         "id": 1801,
-                        "名称": "菲娜被动+1溯",
-                        "描述": "根据[梦笔生花]层数为自身和队友附加伤害提高效果",
-                        "attr": {
-                            "增伤": 0.45,
-                            "属性穿透": 0.24
-                        }
-                    },
-                    "level": 1
-                },
-                {
-                    "data": {
-                        "id": 1801,
                         "名称": "菲娜Q",
                         "描述": "额外附加水、火、雷、风追加伤害",
                         "mx": 30,
@@ -1499,7 +1856,7 @@
                             "风属性追伤": "下午茶开始了::追加伤害倍率"
                         }
                     },
-                    "level": 10
+                    "level": 12
                 },
                 {
                     "data": {
@@ -1554,6 +1911,17 @@
                         "tag": ["SPliseGun01"],
                         "attr": {
                             "技能独立增伤": "max(0,远程::暴击!*(远程::暴伤!-1))"
+                        }
+                    },
+                    "level": 1
+                },
+                {
+                    "data": {
+                        "id": 1801,
+                        "名称": "菲娜被动(团队)",
+                        "描述": "为自身和队友附加伤害提高效果（[梦笔生花] 30 层 ×1%，2 溯源 45 层 ×1%）。",
+                        "attr": {
+                            "增伤": 0.45
                         }
                     },
                     "level": 1
@@ -1628,6 +1996,79 @@
                     },
                     "level": 4,
                     "coverage": 0.3
+                },
+                {
+                    "data": {
+                        "id": 4103,
+                        "名称": "黎瑟·浴火4溯",
+                        "描述": "[狙击模式]期间，每0.2秒额外获得1层[专注]，每层[专注]额外提供昂扬提高3%。",
+                        "attr": {
+                            "昂扬": 0.8999999999999999
+                        },
+                        "source": {
+                            "kind": "trace",
+                            "id": 4103,
+                            "grade": 4,
+                            "ownerSide": "main",
+                            "stackKey": "trace:main:4103:4"
+                        }
+                    },
+                    "level": 1
+                },
+                {
+                    "data": {
+                        "id": 4103,
+                        "名称": "黎瑟·浴火6溯",
+                        "描述": "半径50米以内的敌人可被穿过场景透视，且[迸发射击]可以穿过场景造成伤害；[狙击模式]期间，自身获得全属性穿透提高60%。",
+                        "attr": {
+                            "属性穿透": 0.6
+                        },
+                        "source": {
+                            "kind": "trace",
+                            "id": 4103,
+                            "grade": 6,
+                            "ownerSide": "main",
+                            "stackKey": "trace:main:4103:6"
+                        }
+                    },
+                    "level": 1
+                },
+                {
+                    "data": {
+                        "id": 1801,
+                        "名称": "菲娜1溯",
+                        "描述": "带有[喧闹下午茶]附加的追加伤害的目标，每带有1种属性的追加伤害效果，全属性穿透提高6%。",
+                        "attr": {
+                            "属性穿透": 0.24
+                        },
+                        "source": {
+                            "kind": "trace",
+                            "id": 1801,
+                            "grade": 1,
+                            "ownerSide": "assist2",
+                            "stackKey": "trace:assist2:1801:1"
+                        }
+                    },
+                    "level": 1
+                },
+                {
+                    "data": {
+                        "id": 4103,
+                        "名称": "溯源技能等级",
+                        "描述": "",
+                        "attr": {
+                            "E技能等级": 2,
+                            "Q技能等级": 2,
+                            "P技能等级": 2
+                        },
+                        "source": {
+                            "kind": "trace",
+                            "id": 4103,
+                            "ownerSide": "main",
+                            "stackKey": "trace:main:4103:skillLevel"
+                        }
+                    },
+                    "level": 1
                 },
                 {
                     "data": {
@@ -2259,7 +2700,10 @@
                     ],
                     ["[灾厄值]每秒阈值", "ceil(100*2.21/1.61)"]
                 ],
-                "charSkillLevel": [12, 12, 12],
+                "charSkillLevel": [10, 10, 10],
+                "traceLevel": 6,
+                "traceOffRoots": [],
+                "traceStacks": [],
                 "extraMastery": "",
                 "meleeWeapon": 10199,
                 "meleeWeaponLevel": 80,
@@ -2291,12 +2735,12 @@
                     ["黎瑟·浴火被动", 6],
                     ["泽世的慈雨(队友)", 5],
                     ["菲娜助战", 1],
-                    ["菲娜被动+1溯", 1],
                     ["菲娜Q", 12],
                     ["织梦的白羽(队友)", 5],
                     ["羽翼·鼓舞·专注(光)", 10],
                     ["色散成霓", 10],
-                    ["黎瑟·浴火被动2", 1]
+                    ["黎瑟·浴火被动2", 1],
+                    ["菲娜被动(团队)", 1]
                 ],
                 "customBuff": [],
                 "petId": 4241,
@@ -2315,6 +2759,8 @@
                 "assist1": {
                     "charLevel": 80,
                     "charSkillLevel": [10, 10, 10],
+                    "traceLevel": 6,
+                    "traceOffRoots": [],
                     "baseName": "提挈浮沉",
                     "extraMastery": "",
                     "weaponLevel": 80,
@@ -2344,6 +2790,8 @@
                 "assist2": {
                     "charLevel": 80,
                     "charSkillLevel": [10, 10, 10],
+                    "traceLevel": 6,
+                    "traceOffRoots": [],
                     "baseName": "“在一个暖和的午后”",
                     "extraMastery": "",
                     "weaponLevel": 80,

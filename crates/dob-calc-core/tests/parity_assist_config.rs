@@ -112,7 +112,7 @@ fn parses_full_assist_loadout() {
     let assist = settings.assist1.as_ref().expect("assist1 应解析成功");
 
     assert_eq!(assist.char_level, 62.0);
-    assert_eq!(assist.char_skill_level, [12.0, 10.0, 8.0]);
+    assert_eq!(assist.char_skill_level, [10.0, 10.0, 8.0]);
     assert_eq!(assist.base_name, "扶疏Q");
     assert_eq!(assist.extra_mastery, "长柄");
     assert_eq!(assist.weapon_level, 70.0);
@@ -298,7 +298,7 @@ fn clamps_levels_refine_and_variant_index() {
     assert_eq!(assist.char_level, 80.0, "charLevel 上限 80");
     assert_eq!(assist.weapon_level, 1.0, "weaponLevel 下限 1");
     assert_eq!(assist.weapon_refine, 5.0, "weaponRefine 上限 5");
-    assert_eq!(assist.char_skill_level, [1.0, 30.0, 1.0]);
+    assert_eq!(assist.char_skill_level, [1.0, 10.0, 1.0]);
     assert_eq!(assist.aura_mod, 13);
     assert_eq!(assist.dot_settings.skill, 0.0, "DOT 负值归零");
     assert_eq!(assist.mod_variants.len(), 2, "只保留 B/C 两份变体");
@@ -309,7 +309,7 @@ fn clamps_levels_refine_and_variant_index() {
     }));
     let assist = settings.assist1.as_ref().expect("assist1 应解析成功");
     assert_eq!(assist.mod_variant_index, 0, "负索引归零");
-    assert_eq!(assist.char_skill_level, [12.0; 3], "老格式单数字展开");
+    assert_eq!(assist.char_skill_level, [10.0; 3], "老格式单数字展开并钳制基础上限 10");
 }
 
 #[test]
@@ -420,7 +420,7 @@ fn to_json_value_exact_shape() {
     }
 
     assert_eq!(assist.get("charLevel"), Some(&json!(62.0)));
-    assert_eq!(assist.get("charSkillLevel"), Some(&json!([12.0, 10.0, 8.0])));
+    assert_eq!(assist.get("charSkillLevel"), Some(&json!([10.0, 10.0, 8.0])));
     assert_eq!(assist.get("baseName"), Some(&json!("扶疏Q")));
     assert_eq!(assist.get("extraMastery"), Some(&json!("长柄")));
     assert_eq!(assist.get("weaponLevel"), Some(&json!(70.0)));

@@ -553,13 +553,13 @@ describe("U99b E/Q/P 技能等级加成属性", () => {
 
     it("主控表达式读取的是等级加成（属性值），不是最终等级", () => {
         const settings = withoutTrace(createTeamSettings())
-        settings.charSkillLevel = [12, 9, 7]
+        settings.charSkillLevel = [10, 9, 7]
         settings.targetFunction = "E技能等级+Q技能等级+P技能等级"
         const main = createCharBuildFromSettings(MAIN_ID, settings)
         // 无升华来源：加成池为 0，最终等级仍按基础三元组装配
         expect(main.calculate()).toBe(0)
         expect(main.evaluateAST("角色::E技能等级!")).toBe(0)
-        expect(main.getSkillLevel(0)).toBe(12)
+        expect(main.getSkillLevel(0)).toBe(10)
     })
 
     it("升华装备加成进入属性池，表达式读取 +8", () => {
@@ -621,7 +621,7 @@ describe("旧 fixture 回归", () => {
         const lise = createCharBuildFromSettings(liseFireBuildCharId, liseFireBuildSettings)
         expect(lise.calculateAttributes().技能威力).toBeCloseTo(8.77376, 6)
         // U99c：扶疏被动 / 煜明被动 改为技能字段表达式，按来源侧有效等级取值
-        // U114：3/5 根源原文解析出 E/Q/P +2，目标值随技能等级上调
-        expect(lise.calculate()).toBeCloseTo(7449394790.81838, 3)
+        // U114：3/5 根源原文解析出 E/Q/P +2；基础等级上限修正为 10（旧 fixture 的 12 = 10 基础 + 2 溯源）
+        expect(lise.calculate()).toBeCloseTo(6674376021.747875, 3)
     })
 })

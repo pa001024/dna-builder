@@ -1236,6 +1236,15 @@ const buffData: Buff[] = [
         },
     },
     {
+        名称: "狩月人之阶8",
+        描述: "远程武器多重射击大于100%时，每超过40%，全属性穿透提高5%，最多提高50%。\n角色附加自属性紊乱时，获得造成技能伤害时无视目标5%防御效果，持续6秒，最多叠加6层。",
+        code: "if(rangedWeaponAttr&&rangedWeaponAttr.多重>1)属性穿透+=Math.min(0.5,0.05*Math.floor((Math.round(rangedWeaponAttr.多重*100)-100)/40))",
+        mx: 6,
+        attr: {
+            技能无视防御: 0.05,
+        },
+    },
+    {
         id: 5301,
         名称: "赛琪被动",
         限定: 5301,

@@ -7,7 +7,7 @@ import { createSSRApp, defineComponent, h } from "vue"
 import { renderToString } from "vue/server-renderer"
 import CharSkillShow from "@/components/CharSkillShow.vue"
 import type { LeveledChar } from "@/data"
-import { CHAR_SKILL_LEVEL_MAX, CHAR_SKILL_LEVEL_MIN } from "@/data/charSettings"
+import { CHAR_SKILL_LEVEL_BASE_MAX, CHAR_SKILL_LEVEL_MAX, CHAR_SKILL_LEVEL_MIN } from "@/data/charSettings"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { clampCharSkillLevelView, SKILL_LEVEL_UI_MAX } from "@/utils/skill-level-ui"
 
@@ -68,9 +68,10 @@ function renderSkillShow(options: { modelValue?: number; max?: number } = {}): P
     return renderToString(app)
 }
 
-describe("U132 角色详情技能等级滑杆恢复 1–30", () => {
-    it("数据层上限 30；构筑页界面上限仍为 10", () => {
+describe("U132 角色详情技能等级滑杆（数据预览 1–30 / 构筑基础 1–10）", () => {
+    it("有效等级上限 30；构筑设置基础等级上限 10；构筑页界面上限 10", () => {
         expect(CHAR_SKILL_LEVEL_MIN).toBe(1)
+        expect(CHAR_SKILL_LEVEL_BASE_MAX).toBe(10)
         expect(CHAR_SKILL_LEVEL_MAX).toBe(30)
         expect(SKILL_LEVEL_UI_MAX).toBe(10)
     })
